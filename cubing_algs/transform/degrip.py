@@ -15,7 +15,7 @@ from cubing_algs.transform.size import compress_moves
 
 
 def has_grip(
-        old_moves: list[str],
+        old_moves: list[Move],
         config: dict[str, Callable[[list[Move]], list[Move]]],
 ) -> tuple[bool, Any, Any, Any]:
     i = 0
@@ -39,7 +39,7 @@ def has_grip(
 
 
 def degrip(
-        old_moves: list[str],
+        old_moves: list[Move],
         config: dict[str, Callable[[list[Move]], list[Move]]],
 ) -> list[Move]:
     _gripped, prefix, suffix, gripper = has_grip(old_moves, config)

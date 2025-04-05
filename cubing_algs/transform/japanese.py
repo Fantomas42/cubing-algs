@@ -9,7 +9,7 @@ def japanese_moves(old_moves: list[Move]) -> list[Move]:
     return moves
 
 
-def unjapanese_moves(old_moves: list[str]) -> list[str]:
+def unjapanese_moves(old_moves: list[Move]) -> list[Move]:
     moves = []
     for move in old_moves:
         moves.append(move.unjapanesed)

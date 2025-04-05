@@ -30,13 +30,13 @@ class Move(UserString):
         return False
 
     @cached_property
-    def base_move(self):
+    def base_move(self) -> str:
         if self.is_japanese_move:
             return self[0].lower()
         return self[0]
 
     @cached_property
-    def modifier(self):
+    def modifier(self) -> str:
         if self.is_japanese_move:
             return self[2:]
         return self[1:]
@@ -44,7 +44,7 @@ class Move(UserString):
     # Validation
 
     @cached_property
-    def is_valid_move(self):
+    def is_valid_move(self) -> bool:
         if self.is_japanese_move:
             return self[0] in OUTER_BASIC_MOVES
 
@@ -67,37 +67,37 @@ class Move(UserString):
     # Move
 
     @cached_property
-    def is_rotation_move(self):
+    def is_rotation_move(self) -> bool:
         return self.base_move in ROTATIONS
 
     @cached_property
-    def is_face_move(self):
+    def is_face_move(self) -> bool:
         return not self.is_rotation_move
 
     @cached_property
-    def is_inner_move(self):
+    def is_inner_move(self) -> bool:
         return self.base_move in INNER_MOVES
 
     @cached_property
-    def is_outer_move(self):
+    def is_outer_move(self) -> bool:
         return self.base_move in OUTER_MOVES
 
     @cached_property
-    def is_wide_move(self):
+    def is_wide_move(self) -> bool:
         return self.base_move in OUTER_WIDE_MOVES
 
     # Modifiers
 
     @cached_property
-    def is_double(self):
+    def is_double(self) -> bool:
         return self.modifier == DOUBLE_CHAR
 
     @cached_property
-    def is_clockwise(self):
+    def is_clockwise(self) -> bool:
         return self.modifier != INVERT_CHAR
 
     @cached_property
-    def is_counter_clockwise(self):
+    def is_counter_clockwise(self) -> bool:
         return not self.is_clockwise
 
     # Transformations

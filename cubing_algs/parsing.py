@@ -75,15 +75,14 @@ def check_moves(moves: list[Move]) -> bool:
     return valid
 
 
-def parse_moves(moves: str) -> Algorythm:
+def parse_moves(raw_moves: str) -> Algorythm:
     """
     Clean string moves and return list of Move
     """
-    moves = clean_moves(moves)
-    moves = split_moves(moves)
+    moves = split_moves(clean_moves(raw_moves))
 
     if not check_moves(moves):
-        error = f'{ moves } contains invalid move'
+        error = f'{ raw_moves } contains invalid move'
         raise InvalidMoveError(error)
 
     return Algorythm(moves)

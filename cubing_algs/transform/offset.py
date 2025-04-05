@@ -3,7 +3,7 @@ from cubing_algs.constants import OFFSET_TABLE
 from cubing_algs.move import Move
 
 
-def unrotate(old_moves: list[Move], rotation: str) -> list[str]:
+def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
     moves = []
     rotation_table = OFFSET_TABLE[rotation]
 

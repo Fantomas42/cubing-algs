@@ -10,13 +10,13 @@ class Algorythm:
     def __len__(self) -> int:
         return len(self.moves)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ' '.join([str(m) for m in self.moves])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Algorythm("{ "".join([str(m) for m in self.moves]) }")'
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.moves == other.moves
 
     def transform(

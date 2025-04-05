@@ -29,7 +29,7 @@ def compress_moves(old_moves: list[Move]) -> list[Move]:
 
 
 def expand_moves(old_moves: list[Move]) -> list[Move]:
-    moves: list[str] = []
+    moves: list[Move] = []
 
     for move in old_moves:
         if move.is_double:
