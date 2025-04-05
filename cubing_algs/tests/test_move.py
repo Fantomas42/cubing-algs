@@ -91,7 +91,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('R').inverted, Move("R'"))
         self.assertEqual(Move("R'").inverted, Move('R'))
         self.assertEqual(Move("x'").inverted, Move('x'))
-        self.assertEqual(Move('R2').inverted, Move('R'))
+        self.assertEqual(Move('R2').inverted, Move('R2'))
 
     def test_doubled(self):
         self.assertEqual(Move('R').doubled, Move('R2'))

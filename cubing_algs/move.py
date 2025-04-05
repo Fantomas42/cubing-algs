@@ -90,11 +90,11 @@ class Move(UserString):
 
     @cached_property
     def is_double(self):
-        return DOUBLE_CHAR in self.modifier
+        return self.modifier == DOUBLE_CHAR
 
     @cached_property
     def is_clockwise(self):
-        return INVERT_CHAR not in self.modifier
+        return self.modifier != INVERT_CHAR
 
     @cached_property
     def is_counter_clockwise(self):
@@ -104,7 +104,9 @@ class Move(UserString):
 
     @cached_property
     def inverted(self) -> 'Move':
-        if self.is_counter_clockwise or self.is_double:
+        if self.is_double:
+            return self
+        if self.is_counter_clockwise:
             return Move(self.base_move)
         return Move(f'{ self.base_move }{ INVERT_CHAR }')
 

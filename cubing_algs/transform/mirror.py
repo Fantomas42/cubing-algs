@@ -1,11 +1,9 @@
-def mirror_moves(old_moves: list[str]) -> list[str]:
+from cubing_algs.move import Move
+
+
+def mirror_moves(old_moves: list[Move]) -> list[Move]:
     moves = []
     for move in reversed(old_moves):
-        if move.endswith("'"):
-            moves.append(move.replace("'", ''))
-        elif move.endswith('2'):
-            moves.append(move)
-        else:
-            moves.append("%s'" % move)
+        moves.append(move.inverted)
 
     return moves
