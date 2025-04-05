@@ -20,6 +20,8 @@ class InvalidMoveError(Exception):
 
 class Move(UserString):
 
+    # Properties
+
     @cached_property
     def base_move(self):
         return self[0]
@@ -60,12 +62,19 @@ class Move(UserString):
     def is_wide_move(self):
         return self.base_move in OUTER_WIDE_MOVES
 
-    #### TODO
+    # Modifiers
 
-    def invert(self) -> 'Move':
-        if self.endswith(INVERT_CHAR):
-            return Move(self[:1])
-        return Move(f'{ self }{ INVERT_CHAR }')
+    @cached_property
+    def inverted(self) -> 'Move':
+        if self.is_counter_clockwise or self.is_double:
+            return Move(self.base_move)
+        return Move(f'{ self.base_move }{ INVERT_CHAR }')
+
+    @cached_property
+    def doubled(self) -> 'Move':
+        if self.is_double:
+            return Move(self.base_move)
+        return Move(f'{ self.base_move }{ DOUBLE_CHAR }')
 
     # Japanisation
 

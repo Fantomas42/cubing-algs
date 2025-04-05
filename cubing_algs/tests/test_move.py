@@ -48,3 +48,15 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('x').is_wide_move)
         self.assertFalse(Move('R').is_wide_move)
         self.assertTrue(Move('r2').is_wide_move)
+
+    def test_inverted(self):
+        self.assertEqual(Move('R').inverted, Move("R'"))
+        self.assertEqual(Move("R'").inverted, Move('R'))
+        self.assertEqual(Move("x'").inverted, Move('x'))
+        self.assertEqual(Move('R2').inverted, Move('R'))
+
+    def test_doubled(self):
+        self.assertEqual(Move('R').doubled, Move('R2'))
+        self.assertEqual(Move("R'").doubled, Move('R2'))
+        self.assertEqual(Move("x'").doubled, Move('x2'))
+        self.assertEqual(Move('R2').doubled, Move('R'))
