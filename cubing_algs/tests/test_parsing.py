@@ -58,7 +58,7 @@ class ParseMovesTestCase(unittest.TestCase):
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
-            parse_moves(moves),
+            parse_moves(moves).moves,
             expect,
         )
 
@@ -66,7 +66,7 @@ class ParseMovesTestCase(unittest.TestCase):
         moves = 'R2 L3'
         expect = ['R2', "L'"]
         self.assertEqual(
-            parse_moves(moves),
+            parse_moves(moves).moves,
             expect,
         )
 
@@ -84,7 +84,7 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
-            parse_moves_cfop(moves),
+            parse_moves_cfop(moves).moves,
             expect,
         )
 
@@ -92,6 +92,6 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
         moves = 'U R2 L2 y'
         expect = ['R2', 'L2']
         self.assertEqual(
-            parse_moves_cfop(moves),
+            parse_moves_cfop(moves).moves,
             expect,
         )

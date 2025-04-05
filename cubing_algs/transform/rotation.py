@@ -1,9 +1,12 @@
-def remove_final_rotations(old_moves: list[str]) -> list[str]:
+from cubing_algs.move import Move
+
+
+def remove_final_rotations(old_moves: list[Move]) -> list[str]:
     moves = []
 
     rotations = True
     for move in reversed(old_moves):
-        if rotations and move[0] in ROTATIONS:
+        if rotations and move.is_rotation:
             continue
         rotations = False
         moves.append(move)
