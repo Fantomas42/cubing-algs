@@ -124,3 +124,11 @@ class Move(UserString):
                 f'{ self.modifier }',
             )
         return self
+
+    @cached_property
+    def unjapanesed(self) -> 'Move':
+        if self.is_japanese_move:
+            return Move(
+                f'{ self.base_move.lower() }{ self.modifier }',
+            )
+        return self
