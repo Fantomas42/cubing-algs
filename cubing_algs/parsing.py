@@ -59,38 +59,18 @@ def check_moves(moves: list[Move]) -> bool:
     move_string = ''.join([str(m) for m in moves])
 
     for move in moves:
-        if not move.is_valid:
+        if not move.is_valid_move:
             valid = False
-            logger.error('"%s" -> %s is not known', move_string, move)
-        elif len(move) > 1:
-            if move.is_japanese_move:
-                if len(move) > 2 and (
-                        not move.is_double
-                        and not move.is_counter_clockwise
-                ):
-                    valid = False
-                    logger.error(
-                        '"%s" -> %s is an invalid modificator',
-                        move_string, move,
-                    )
-                elif len(move) > 3:
-                    valid = False
-                    logger.error(
-                        '"%s" -> %s is an invalid move',
-                        move_string, move,
-                    )
-            elif not move.is_double and not move.is_counter_clockwise:
-                valid = False
-                logger.error(
-                    '"%s" -> %s is an invalid modificator',
-                    move_string, move,
-                )
-            elif len(move) > 2:
-                valid = False
-                logger.error(
-                    '"%s" -> %s is an invalid move',
-                    move_string, move,
-                )
+            logger.error(
+                '"%s" -> %s is not a valid move',
+                move_string, move,
+            )
+        elif not move.is_valid_modifier:
+            valid = False
+            logger.error(
+                '"%s" -> %s has an invalid modifier',
+                move_string, move,
+            )
 
     return valid
 

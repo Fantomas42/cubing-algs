@@ -8,16 +8,39 @@ class MoveTestCase(unittest.TestCase):
     def test_base_move(self):
         self.assertEqual(Move('U').base_move, 'U')
         self.assertEqual(Move('x2').base_move, 'x')
+        self.assertEqual(Move('Uw').base_move, 'u')
 
-    def test_modifiers(self):
-        self.assertEqual(Move('U').modifiers, '')
-        self.assertEqual(Move('x2').modifiers, '2')
-        self.assertEqual(Move('Uw').modifiers, '')
-        self.assertEqual(Move('Uw2').modifiers, '2')
+    def test_modifier(self):
+        self.assertEqual(Move('U').modifier, '')
+        self.assertEqual(Move('x2').modifier, '2')
+        self.assertEqual(Move('Uw').modifier, '')
+        self.assertEqual(Move('Uw2').modifier, '2')
 
     def test_is_valid(self):
         self.assertTrue(Move('U').is_valid)
+        self.assertTrue(Move('u').is_valid)
+        self.assertTrue(Move('u2').is_valid)
+        self.assertTrue(Move('Uw').is_valid)
         self.assertFalse(Move('T').is_valid)
+        self.assertFalse(Move('uw').is_valid)
+        self.assertFalse(Move('Ux').is_valid)
+        self.assertFalse(Move("U2'").is_valid)
+
+    def test_is_valid_move(self):
+        self.assertTrue(Move('U').is_valid_move)
+        self.assertTrue(Move('u').is_valid_move)
+        self.assertTrue(Move('Uw').is_valid_move)
+        self.assertFalse(Move('T').is_valid_move)
+        self.assertFalse(Move('uw').is_valid_move)
+
+    def test_is_valid_modifier(self):
+        self.assertTrue(Move('U').is_valid_modifier)
+        self.assertTrue(Move('U2').is_valid_modifier)
+        self.assertTrue(Move("U'").is_valid_modifier)
+        self.assertTrue(Move('Uw2').is_valid_modifier)
+        self.assertTrue(Move("Uw'").is_valid_modifier)
+        self.assertFalse(Move("U2'").is_valid_modifier)
+        self.assertFalse(Move("Uw2'").is_valid_modifier)
 
     def test_is_double(self):
         self.assertFalse(Move('U').is_double)
@@ -58,6 +81,9 @@ class MoveTestCase(unittest.TestCase):
     def test_is_japanese_move(self):
         self.assertFalse(Move('x').is_japanese_move)
         self.assertFalse(Move('R').is_japanese_move)
+        self.assertTrue(Move('uw').is_japanese_move)
+        self.assertTrue(Move('xw').is_japanese_move)
+        self.assertTrue(Move('xw2').is_japanese_move)
         self.assertTrue(Move('Rw').is_japanese_move)
         self.assertTrue(Move('Rw2').is_japanese_move)
 

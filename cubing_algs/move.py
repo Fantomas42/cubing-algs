@@ -9,6 +9,7 @@ from cubing_algs.constants import DOUBLE_CHAR
 from cubing_algs.constants import INNER_MOVES
 from cubing_algs.constants import INVERT_CHAR
 from cubing_algs.constants import JAPANESE_CHAR
+from cubing_algs.constants import OUTER_BASIC_MOVES
 from cubing_algs.constants import OUTER_MOVES
 from cubing_algs.constants import OUTER_WIDE_MOVES
 from cubing_algs.constants import ROTATIONS
@@ -20,37 +21,50 @@ class InvalidMoveError(Exception):
 
 class Move(UserString):
 
-    # Properties
+    # Parsing
 
     @cached_property
     def is_japanese_move(self) -> bool:
-        return JAPANESE_CHAR in self.lower()
+        if len(self) > 1:
+            return JAPANESE_CHAR in self[1].lower()
+        return False
 
     @cached_property
     def base_move(self):
+        if self.is_japanese_move:
+            return self[0].lower()
         return self[0]
 
     @cached_property
-    def modifiers(self):
+    def modifier(self):
         if self.is_japanese_move:
             return self[2:]
         return self[1:]
 
+    # Validation
+
     @cached_property
-    def is_valid(self):
+    def is_valid_move(self):
+        if self.is_japanese_move:
+            return self[0] in OUTER_BASIC_MOVES
+
         return self.base_move in ALL_BASIC_MOVES
 
     @cached_property
-    def is_double(self):
-        return DOUBLE_CHAR in self.modifiers
+    def is_valid_modifier(self) -> bool:
+        if not self.modifier:
+            return True
+
+        if len(self.modifier) > 1:
+            return False
+
+        return self.is_double or self.is_counter_clockwise
 
     @cached_property
-    def is_clockwise(self):
-        return INVERT_CHAR not in self.modifiers
+    def is_valid(self) -> bool:
+        return self.is_valid_move and self.is_valid_modifier
 
-    @cached_property
-    def is_counter_clockwise(self):
-        return not self.is_clockwise
+    # Move
 
     @cached_property
     def is_rotation_move(self):
@@ -75,6 +89,20 @@ class Move(UserString):
     # Modifiers
 
     @cached_property
+    def is_double(self):
+        return DOUBLE_CHAR in self.modifier
+
+    @cached_property
+    def is_clockwise(self):
+        return INVERT_CHAR not in self.modifier
+
+    @cached_property
+    def is_counter_clockwise(self):
+        return not self.is_clockwise
+
+    # Transformations
+
+    @cached_property
     def inverted(self) -> 'Move':
         if self.is_counter_clockwise or self.is_double:
             return Move(self.base_move)
@@ -91,6 +119,6 @@ class Move(UserString):
         if self.is_wide_move and not self.is_japanese_move:
             return Move(
                 f'{ self.base_move.upper() }{ JAPANESE_CHAR }'
-                f'{ self.modifiers }',
+                f'{ self.modifier }',
             )
         return self
