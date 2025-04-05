@@ -36,6 +36,12 @@ def clean_moves(moves: str) -> str:
         's', 'S',
     ).replace(
         'e', 'E',
+    ).replace(
+        'X', 'x',
+    ).replace(
+        'Y', 'y',
+    ).replace(
+        'Z', 'z',
     )
 
 
