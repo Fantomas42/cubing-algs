@@ -8,7 +8,7 @@ class TransformMirrorTestCase(unittest.TestCase):
 
     def test_mirror_moves(self):
         provide = parse_moves(
-            "F R U2 F'"
+            "F R U2 F'",
         )
         expect = parse_moves("F U2 R' F'")
 
