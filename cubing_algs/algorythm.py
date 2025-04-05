@@ -16,6 +16,9 @@ class Algorythm:
     def __repr__(self):
         return f'Algorythm("{ "".join([str(m) for m in self.moves]) }")'
 
+    def __eq__(self, other):
+        return self.moves == other.moves
+
     def transform(
             self,
             *processes: Callable[[list[Move]], list[Move]],

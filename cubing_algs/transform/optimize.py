@@ -65,7 +65,10 @@ def optimize_double_moves(old_moves: list[Move]) -> list[Move]:
 
 
 def optimize_triple_moves(old_moves: list[Move]) -> list[Move]:
-    """ R, R2 --> R' """
+    """ R, R2 --> R'
+        R2, R --> R'
+        R', R2 --> R
+    """
     i = 0
     changed = False
     moves = list(old_moves)

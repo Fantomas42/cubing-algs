@@ -1,6 +1,8 @@
 import unittest
 
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.optimize import optimize_do_undo_moves
+from cubing_algs.transform.optimize import optimize_double_moves
 
 
 class AlgorythmTestCase(unittest.TestCase):
@@ -19,3 +21,15 @@ class AlgorythmTestCase(unittest.TestCase):
         algo = parse_moves('R2 U')
 
         self.assertEqual(repr(algo), 'Algorythm("R2U")')
+
+    def test_transform(self):
+        algo = parse_moves('R R U F2 F2')
+        expected = parse_moves('R2 U')
+
+        self.assertEqual(
+            algo.transform(
+                optimize_do_undo_moves,
+                optimize_double_moves,
+            ),
+            expected,
+        )
