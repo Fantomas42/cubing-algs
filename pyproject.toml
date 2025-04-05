@@ -1,0 +1,114 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cubing-algs"
+version = "1.0"
+description = "Python module providing tools manipulating cubing algorythms."
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools]
+packages = ["cubing_algs"]
+
+[tool.ruff]
+line-length = 80
+indent-width = 4
+target-version = "py312"
+show-fixes = true
+
+[tool.ruff.lint]
+preview = true
+fixable = ["ALL"]
+select = [
+       "A",
+       "ARG",
+       "B",
+       "BLE",
+       "C4",
+       #"C90",
+       "COM",
+       #"D",
+       "DJ",
+       "DTZ",
+       "E",
+       "EM",
+       "ERA",
+       "EXE",
+       "F",
+       "FBT",
+       "FIX",
+       "FLY",
+       "FURB",
+       "G",
+       "I",
+       "ICN",
+       "INP",
+       "INT",
+       "ISC",
+       "LOG",
+       "N",
+       "PIE",
+       "PL",
+       "PTH",
+       "Q",
+       "RET",
+       "RSE",
+       "RUF",
+       "S",
+       "SIM",
+       "SLF",
+       "T10",
+       "T20",
+       "TD",
+       "TRY",
+       "UP",
+       "W",
+]
+ignore = [
+       "S311",
+       "TD003",
+       "T201",
+]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "single"
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.lint.pylint]
+allow-magic-value-types = ["str", "int"]
+
+[tool.mypy]
+disable_error_code = ["import-untyped"]
+exclude = ["tests"]
+python_version = 3.12
+
+[tool.pytest.ini_options]
+addopts = "--cov=cubing_algs"
+
+[tool.coverage.run]
+branch = true
+omit = ["cubing_algs/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
