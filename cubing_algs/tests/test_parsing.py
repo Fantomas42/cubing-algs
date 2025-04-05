@@ -1,51 +1,97 @@
 import unittest
 
+from cubing_algs.move import InvalidMoveError
+from cubing_algs.move import Move
+from cubing_algs.parsing import check_moves
 from cubing_algs.parsing import clean_moves
+from cubing_algs.parsing import parse_moves
+from cubing_algs.parsing import parse_moves_cfop
+from cubing_algs.parsing import split_moves
 
 
-class Clean(unittest.TestCase):
+class CleanMovesTestCase(unittest.TestCase):
 
-    def test_clean(self):
-        provide = clean_moves('R', keep_rotations=True)
-        expect = ['R']
+    def test_clean_moves(self):
+        moves = "R2 L2  (y):F B2' e U3 R` U’  "  # noqa RUF001
+        expect = "R2L2yFB2EU'R'U'"
+        self.assertEqual(clean_moves(moves), expect)
 
+
+class SplitMovesTestCase(unittest.TestCase):
+
+    def test_split_moves(self):
+        moves = "R2L2yFB2EU'R'U'"
+        expect = ['R2', 'L2', 'y', 'F', 'B2', 'E', "U'", "R'", "U'"]
+        self.assertEqual(split_moves(moves), expect)
+
+
+class CheckMovesTestCase(unittest.TestCase):
+
+    def test_check_moves(self):
+        moves = split_moves('R2 L2')
+        self.assertTrue(check_moves(moves))
+
+    def test_check_moves_invalid_move(self):
+        moves = [Move('T2'), Move('R')]
+        self.assertFalse(check_moves(moves))
+
+    def test_check_moves_invalid_japanese_move(self):
+        moves = [Move('Rw')]
+        self.assertTrue(check_moves(moves))
+        moves = [Move('Rw3')]
+        self.assertFalse(check_moves(moves))
+        moves = [Move("Rw2'")]
+        self.assertFalse(check_moves(moves))
+
+    def test_check_moves_invalid_modifier(self):
+        moves = [Move('R5')]
+        self.assertFalse(check_moves(moves))
+
+    def test_check_moves_invalid_too_long(self):
+        moves = [Move("R2'")]
+        self.assertFalse(check_moves(moves))
+
+
+class ParseMovesTestCase(unittest.TestCase):
+
+    def test_parse_moves(self):
+        moves = 'R2 L2'
+        expect = ['R2', 'L2']
         self.assertEqual(
-            provide,
+            parse_moves(moves),
             expect,
         )
 
-        provide = clean_moves("R'", keep_rotations=True)
-        expect = ["R'"]
-
+    def test_parse_moves_corrected(self):
+        moves = 'R2 L3'
+        expect = ['R2', "L'"]
         self.assertEqual(
-            provide,
+            parse_moves(moves),
             expect,
         )
 
-        provide = clean_moves("R' U", keep_rotations=True)
-        expect = ["R'", 'U']
-
-        self.assertEqual(
-            provide,
-            expect,
-        )
-
-        provide = clean_moves('R R R', keep_rotations=True)
-        expect = ['R', 'R', 'R']
-
-        self.assertEqual(
-            provide,
-            expect,
-        )
-
-        provide = clean_moves("R' R' U", keep_rotations=True)
-        expect = ["R'", "R'", 'U']
-
-        self.assertEqual(
-            provide,
-            expect,
+    def test_parse_moves_invalid(self):
+        moves = 'R2 T2'
+        self.assertRaises(
+            InvalidMoveError,
+            parse_moves, moves,
         )
 
 
-if __name__ == '__main__':
-    unittest.main()
+class ParseMovesCFOPTestCase(unittest.TestCase):
+
+    def test_parse_moves_cfop(self):
+        moves = 'R2 L2'
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves_cfop(moves),
+            expect,
+        )
+
+    def test_parse_moves_cfop_cleaned(self):
+        moves = 'U R2 L2 y'
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves_cfop(moves),
+            expect,
+        )

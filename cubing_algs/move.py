@@ -11,6 +11,10 @@ from cubing_algs.constants import JAPANESE_CHAR
 from cubing_algs.constants import ROTATIONS
 
 
+class InvalidMoveError(Exception):
+    pass
+
+
 class Move(UserString):
 
     @cached_property
@@ -29,8 +33,7 @@ class Move(UserString):
     def is_counter_clockwise(self):
         return not self.is_clockwise
 
-
-    ####
+    #### TODO
 
     def invert(self) -> 'Move':
         if self.endswith(INVERT_CHAR):
