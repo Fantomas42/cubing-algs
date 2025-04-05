@@ -63,7 +63,7 @@ def check_moves(moves: list[Move]) -> bool:
             valid = False
             logger.error('"%s" -> %s is not known', move_string, move)
         elif len(move) > 1:
-            if move.is_japanese:
+            if move.is_japanese_move:
                 if len(move) > 2 and (
                         not move.is_double
                         and not move.is_counter_clockwise

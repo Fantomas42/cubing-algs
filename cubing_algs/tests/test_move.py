@@ -9,6 +9,12 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('U').base_move, 'U')
         self.assertEqual(Move('x2').base_move, 'x')
 
+    def test_modifiers(self):
+        self.assertEqual(Move('U').modifiers, '')
+        self.assertEqual(Move('x2').modifiers, '2')
+        self.assertEqual(Move('Uw').modifiers, '')
+        self.assertEqual(Move('Uw2').modifiers, '2')
+
     def test_is_valid(self):
         self.assertTrue(Move('U').is_valid)
         self.assertFalse(Move('T').is_valid)
@@ -49,6 +55,12 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('R').is_wide_move)
         self.assertTrue(Move('r2').is_wide_move)
 
+    def test_is_japanese_move(self):
+        self.assertFalse(Move('x').is_japanese_move)
+        self.assertFalse(Move('R').is_japanese_move)
+        self.assertTrue(Move('Rw').is_japanese_move)
+        self.assertTrue(Move('Rw2').is_japanese_move)
+
     def test_inverted(self):
         self.assertEqual(Move('R').inverted, Move("R'"))
         self.assertEqual(Move("R'").inverted, Move('R'))
@@ -60,3 +72,9 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move("R'").doubled, Move('R2'))
         self.assertEqual(Move("x'").doubled, Move('x2'))
         self.assertEqual(Move('R2').doubled, Move('R'))
+
+    def test_japanesed(self):
+        self.assertEqual(Move('R').japanesed, Move('R'))
+        self.assertEqual(Move('x').japanesed, Move('x'))
+        self.assertEqual(Move('r').japanesed, Move('Rw'))
+        self.assertEqual(Move('r2').japanesed, Move('Rw2'))

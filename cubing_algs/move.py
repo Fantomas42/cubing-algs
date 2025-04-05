@@ -23,8 +23,18 @@ class Move(UserString):
     # Properties
 
     @cached_property
+    def is_japanese_move(self) -> bool:
+        return JAPANESE_CHAR in self.lower()
+
+    @cached_property
     def base_move(self):
         return self[0]
+
+    @cached_property
+    def modifiers(self):
+        if self.is_japanese_move:
+            return self[2:]
+        return self[1:]
 
     @cached_property
     def is_valid(self):
@@ -32,11 +42,11 @@ class Move(UserString):
 
     @cached_property
     def is_double(self):
-        return DOUBLE_CHAR in self
+        return DOUBLE_CHAR in self.modifiers
 
     @cached_property
     def is_clockwise(self):
-        return INVERT_CHAR not in self
+        return INVERT_CHAR not in self.modifiers
 
     @cached_property
     def is_counter_clockwise(self):
@@ -76,26 +86,11 @@ class Move(UserString):
             return Move(self.base_move)
         return Move(f'{ self.base_move }{ DOUBLE_CHAR }')
 
-    # Japanisation
-
     @cached_property
-    def is_japanese(self) -> bool:
-        return JAPANESE_CHAR in self.lower()
-
-    @cached_property
-    def is_japanesable(self) -> bool:
-        return (
-            self[0].islower()
-            and self[0] not in ROTATIONS
-            and not self.is_japanese
-        )
-
-    def japanese(self) -> 'Move':
-        return Move(
-            f'{ self[0].upper() }{ JAPANESE_CHAR }{ self[1:] }',
-        )
-
-    def unjapanese(self) -> 'Move':
-        return Move(
-            f'{ self[0].lower() }{ self[2:] }',
-        )
+    def japanesed(self) -> 'Move':
+        if self.is_wide_move and not self.is_japanese_move:
+            return Move(
+                f'{ self.base_move.upper() }{ JAPANESE_CHAR }'
+                f'{ self.modifiers }',
+            )
+        return self
