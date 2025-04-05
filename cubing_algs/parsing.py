@@ -1,29 +1,36 @@
 import logging
 
-from cubing_algs.constants import ALL_BASIC_MOVES
 from cubing_algs.constants import MOVE_SPLIT
+from cubing_algs.move import Move
 
 logger = logging.getLogger(__name__)
 
 
-def split_moves(move_string: str) -> list[str]:
-    moves = [x.strip() for x in MOVE_SPLIT.split(move_string) if x.strip()]
+def split_moves(move_string: str) -> list[Move]:
+    moves = [
+        Move(x.strip())
+        for x in MOVE_SPLIT.split(move_string)
+        if x.strip()
+    ]
 
     check_moves(moves)
 
     return moves
 
 
-def check_moves(moves: list[str]) -> None:
+def check_moves(moves: list[Move]) -> bool:
     move_string = ''.join(moves)
 
     for move in moves:
-        if move[0] not in ALL_BASIC_MOVES:
+        if not move.is_valid:
             logger.error('"%s" -> %s is not known', move_string, move)
 
         elif len(move) > 1:
-            if move[1] == 'w':
-                if len(move) > 2 and move[2] not in {'2', "'"}:
+            if move.is_japanese:
+                if len(move) > 2 and (
+                        not move.is_double
+                        and not move.is_counter_clockwise
+                ):
                     logger.error(
                         '"%s" -> %s is an invalid modificator',
                         move_string, move,
@@ -33,7 +40,7 @@ def check_moves(moves: list[str]) -> None:
                         '"%s" -> %s is an invalid move',
                         move_string, move,
                     )
-            elif move[1] not in {'2', "'"}:
+            elif not move.is_double and not move.is_counter_clockwise:
                 logger.error(
                     '"%s" -> %s is an invalid modificator',
                     move_string, move,
@@ -45,13 +52,16 @@ def check_moves(moves: list[str]) -> None:
                 )
 
 
-def clean_moves(algo: str, keep_rotations: bool) -> list[str]:
+def clean_moves(algo: str) -> list[Move]:
+    """
+    Clean string moves and return list of Move
+    """
     algo = algo.strip()
 
     algo = algo.replace(
         '’', "'",  # noqa RUF001
     ).replace(
-        '[', '',
+        '`', "'",
     ).replace(
         ']', '',
     ).replace(
@@ -74,16 +84,19 @@ def clean_moves(algo: str, keep_rotations: bool) -> list[str]:
         'e', 'E',
     )
 
-    for face in ['F', 'R', 'U', 'B', 'L', 'D']:
-        algo = algo.replace('%sw' % face, face.lower())
+    return split_moves(algo)
 
-    clean_algo = split_moves(algo)
 
-    if not keep_rotations:
-        if clean_algo[0][0] in {'y', 'U'}:
-            clean_algo = clean_algo[1:]
+def full_clean_moves(algo: str) -> list[Move]:
+    """
+    Clean string moves and remove final head/tail orientations.
+    """
+    clean_algo = clean_moves(algo)
 
-        if clean_algo[-1][0] in {'y', 'U'}:
-            clean_algo = clean_algo[:-1]
+    if clean_algo[0][0] in {'y', 'U'}:
+        clean_algo = clean_algo[1:]
+
+    if clean_algo[-1][0] in {'y', 'U'}:
+        clean_algo = clean_algo[:-1]
 
     return clean_algo

@@ -1,5 +1,7 @@
 import re
 
+DOUBLE_CHAR = '2'
+
 INVERT_CHAR = "'"
 
 JAPANESE_CHAR = 'w'
