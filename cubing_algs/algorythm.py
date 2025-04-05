@@ -7,3 +7,9 @@ class Algorythm:
 
     def __len__(self) -> int:
         return len(self.moves)
+
+    def __str__(self):
+        return ' '.join([str(m) for m in self.moves])
+
+    def __repr__(self):
+        return f'Algorythm("{ "".join([str(m) for m in self.moves]) }")'
