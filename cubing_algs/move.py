@@ -6,8 +6,11 @@ from functools import cached_property
 
 from cubing_algs.constants import ALL_BASIC_MOVES
 from cubing_algs.constants import DOUBLE_CHAR
+from cubing_algs.constants import INNER_MOVES
 from cubing_algs.constants import INVERT_CHAR
 from cubing_algs.constants import JAPANESE_CHAR
+from cubing_algs.constants import OUTER_MOVES
+from cubing_algs.constants import OUTER_WIDE_MOVES
 from cubing_algs.constants import ROTATIONS
 
 
@@ -32,6 +35,26 @@ class Move(UserString):
     @cached_property
     def is_counter_clockwise(self):
         return not self.is_clockwise
+
+    @cached_property
+    def is_rotation_move(self):
+        return self[0] in ROTATIONS
+
+    @cached_property
+    def is_face_move(self):
+        return not self.is_rotation_move
+
+    @cached_property
+    def is_inner_move(self):
+        return self[0] in INNER_MOVES
+
+    @cached_property
+    def is_outer_move(self):
+        return self[0] in OUTER_MOVES
+
+    @cached_property
+    def is_wide_move(self):
+        return self[0] in OUTER_WIDE_MOVES
 
     #### TODO
 
