@@ -5,6 +5,10 @@ from cubing_algs.move import Move
 
 class MoveTestCase(unittest.TestCase):
 
+    def test_base_move(self):
+        self.assertEqual(Move('U').base_move, 'U')
+        self.assertEqual(Move('x2').base_move, 'x')
+
     def test_is_valid(self):
         self.assertTrue(Move('U').is_valid)
         self.assertFalse(Move('T').is_valid)

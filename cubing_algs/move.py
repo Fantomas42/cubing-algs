@@ -21,8 +21,12 @@ class InvalidMoveError(Exception):
 class Move(UserString):
 
     @cached_property
+    def base_move(self):
+        return self[0]
+
+    @cached_property
     def is_valid(self):
-        return self[0] in ALL_BASIC_MOVES
+        return self.base_move in ALL_BASIC_MOVES
 
     @cached_property
     def is_double(self):
@@ -38,7 +42,7 @@ class Move(UserString):
 
     @cached_property
     def is_rotation_move(self):
-        return self[0] in ROTATIONS
+        return self.base_move in ROTATIONS
 
     @cached_property
     def is_face_move(self):
@@ -46,15 +50,15 @@ class Move(UserString):
 
     @cached_property
     def is_inner_move(self):
-        return self[0] in INNER_MOVES
+        return self.base_move in INNER_MOVES
 
     @cached_property
     def is_outer_move(self):
-        return self[0] in OUTER_MOVES
+        return self.base_move in OUTER_MOVES
 
     @cached_property
     def is_wide_move(self):
-        return self[0] in OUTER_WIDE_MOVES
+        return self.base_move in OUTER_WIDE_MOVES
 
     #### TODO
 
