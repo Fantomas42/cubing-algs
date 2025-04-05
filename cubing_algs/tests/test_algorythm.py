@@ -33,3 +33,14 @@ class AlgorythmTestCase(unittest.TestCase):
             ),
             expected,
         )
+
+        algo = parse_moves('R U F2')
+        expected = parse_moves('R U F2')
+
+        self.assertEqual(
+            algo.transform(
+                optimize_do_undo_moves,
+                optimize_double_moves,
+            ),
+            expected,
+        )
