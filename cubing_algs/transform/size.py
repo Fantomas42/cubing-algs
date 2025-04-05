@@ -1,4 +1,11 @@
-def compress_moves(old_moves: list[str]) -> list[str]:
+from cubing_algs.move import Move
+from cubing_algs.transform.optimize import optimize_do_undo_moves
+from cubing_algs.transform.optimize import optimize_double_moves
+from cubing_algs.transform.optimize import optimize_repeat_three_moves
+from cubing_algs.transform.optimize import optimize_triple_moves
+
+
+def compress_moves(old_moves: list[Move]) -> list[Move]:
     moves = list(old_moves)
 
     compressing = True
@@ -21,11 +28,12 @@ def compress_moves(old_moves: list[str]) -> list[str]:
     return moves
 
 
-def expand_moves(old_moves: list[str]) -> list[str]:
+def expand_moves(old_moves: list[Move]) -> list[Move]:
     moves: list[str] = []
+
     for move in old_moves:
-        if move.endswith('2'):
-            moves.extend((move[:-1], move[:-1]))
+        if move.is_double:
+            moves.extend((move.doubled, move.doubled))
         else:
             moves.append(move)
 

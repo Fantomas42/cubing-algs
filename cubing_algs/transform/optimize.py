@@ -90,26 +90,3 @@ def optimize_triple_moves(old_moves: list[Move]) -> list[Move]:
         return optimize_triple_moves(moves)
 
     return moves
-
-
-def compress_moves(old_moves: list[Move]) -> list[Move]:
-    moves = list(old_moves)
-
-    compressing = True
-    while compressing:
-        changed = False
-        for optimizer in (
-                optimize_do_undo_moves,
-                optimize_repeat_three_moves,
-                optimize_double_moves,
-                optimize_triple_moves,
-        ):
-            new_moves = optimizer(moves)
-            if new_moves != moves:
-                moves = new_moves
-                changed = True
-
-        if not changed:
-            compressing = False
-
-    return moves

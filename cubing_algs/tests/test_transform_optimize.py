@@ -1,14 +1,13 @@
 import unittest
 
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.optimize import compress_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
 from cubing_algs.transform.optimize import optimize_repeat_three_moves
 from cubing_algs.transform.optimize import optimize_triple_moves
 
 
-class OptimizeTestCase(unittest.TestCase):
+class TransformOptimizeTestCase(unittest.TestCase):
 
     def test_optimize_repeat_three_moves(self):
         provide = parse_moves('R R R')
@@ -267,18 +266,5 @@ class OptimizeTestCase(unittest.TestCase):
 
         self.assertEqual(
             optimize_triple_moves(provide.moves),
-            expect.moves,
-        )
-
-    def test_compress_moves(self):
-        provide = parse_moves(
-            "U (R U2 R' U' R U' R') "
-            "(R U2 R' U' R U' R') "
-            "(R U2 R' U' R U' R')",
-        )
-        expect = parse_moves("U R U2 R' U' R U R' U' R U R' U' R U' R'")
-
-        self.assertEqual(
-            compress_moves(provide.moves),
             expect.moves,
         )
