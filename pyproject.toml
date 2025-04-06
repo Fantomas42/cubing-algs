@@ -18,7 +18,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["canon*"]
+include = ["cubing_algs*"]
 namespaces = false
 
 [tool.ruff]
