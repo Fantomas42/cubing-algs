@@ -1,6 +1,8 @@
 from collections.abc import Callable
+from functools import cached_property
 from typing import Any
 
+from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
 
@@ -22,6 +24,10 @@ class Algorythm:
 
     def __hash__(self) -> int:
         return hash(self.__str__())
+
+    @cached_property
+    def metrics(self) -> dict[str, int | list[str]]:
+        return compute_metrics(self.moves)
 
     def transform(
             self,

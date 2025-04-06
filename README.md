@@ -1,6 +1,6 @@
 # Cubing Algs
 
-Python module providing tools manipulating cubing algorythms.
+Python module providing tools for cubing algorythm manipulations.
 
 ## Example
 
