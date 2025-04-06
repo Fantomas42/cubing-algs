@@ -17,9 +17,9 @@ class TransformDegripTestCase(unittest.TestCase):
     def check_basic_grip_degrip(self, provide, expect, dimension,
                                 function, invert):
         if invert:
-            provide = split_moves("%s'%s%s" % (dimension, provide, dimension))
+            provide = split_moves(f"{ dimension }'{ provide }{ dimension }")
         else:
-            provide = split_moves("%s%s%s'" % (dimension, provide, dimension))
+            provide = split_moves(f"{ dimension }{ provide }{ dimension }'")
 
         expect = [expect]
 
@@ -252,7 +252,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 ('Rx', "x'FRUxFRU",    'R2FUDRFx',           'Triple'),
                 ("Rx'", "x'FRUx'FRU",  'R2BD2RFx',           'Triple Bis'),
         ]: # noqa E241
-            algo = '%s%s%s' % (prefix, base_algo, suffix)
+            algo = f'{ prefix }{ base_algo }{ suffix }'
             self.check_degrip(
                 algo,
                 expect,
@@ -281,7 +281,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 ("FRUy'", "y'F'R'U'",  "FRUFUF'U'B'L'U'y2",  'Enclosed Bis Double'),
                 ('Ry', "y'FRUyFRU",    "RBUB'U'FRURBUy",     'Triple'),
         ]:
-            algo = '%s%s%s' % (prefix, base_algo, suffix)
+            algo = f'{ prefix }{ base_algo }{ suffix }'
             self.check_degrip(
                 algo,
                 expect,
@@ -310,7 +310,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 ("FRUz'", "z'F'R'U'",  "FRUDRD'R'F'L'D'z2",  'Enclosed Bis Double'),
                 ('Rz', "z'FRUzFRU",    "RULU'L'FRUFULz",     'Triple'),
         ]:
-            algo = '%s%s%s' % (prefix, base_algo, suffix)
+            algo = f'{ prefix }{ base_algo }{ suffix }'
             self.check_degrip(
                 algo,
                 expect,
