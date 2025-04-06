@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Any
 
 from cubing_algs.move import Move
 
@@ -16,10 +17,10 @@ class Algorythm:
     def __repr__(self) -> str:
         return f'Algorythm("{ "".join([str(m) for m in self.moves]) }")'
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, Algorythm) and other.moves == self.moves
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.__str__())
 
     def transform(

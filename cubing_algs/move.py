@@ -26,27 +26,27 @@ class Move(UserString):
     @cached_property
     def is_japanese_move(self) -> bool:
         if len(self) > 1:
-            return JAPANESE_CHAR in self[1].lower()
+            return JAPANESE_CHAR in self.data[1].lower()
         return False
 
     @cached_property
     def base_move(self) -> str:
         if self.is_japanese_move:
-            return self[0].lower()
-        return self[0]
+            return self.data[0].lower()
+        return self.data[0]
 
     @cached_property
     def modifier(self) -> str:
         if self.is_japanese_move:
-            return self[2:]
-        return self[1:]
+            return self.data[2:]
+        return self.data[1:]
 
     # Validation
 
     @cached_property
     def is_valid_move(self) -> bool:
         if self.is_japanese_move:
-            return self[0] in OUTER_BASIC_MOVES
+            return self.data[0] in OUTER_BASIC_MOVES
 
         return self.base_move in ALL_BASIC_MOVES
 
