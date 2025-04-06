@@ -22,6 +22,16 @@ class AlgorythmTestCase(unittest.TestCase):
 
         self.assertEqual(repr(algo), 'Algorythm("R2U")')
 
+    def test_eq(self):
+        algo = parse_moves('R2 U')
+        algo_bis = parse_moves('R2 U')
+
+        self.assertEqual(algo, algo_bis)
+
+    def test_hash(self):
+        algo = parse_moves('R2 U')
+        self.assertTrue(hash(algo))
+
     def test_transform(self):
         algo = parse_moves('R R U F2 F2')
         expected = parse_moves('R2 U')

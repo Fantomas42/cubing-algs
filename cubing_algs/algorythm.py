@@ -17,7 +17,10 @@ class Algorythm:
         return f'Algorythm("{ "".join([str(m) for m in self.moves]) }")'
 
     def __eq__(self, other) -> bool:
-        return self.moves == other.moves
+        return isinstance(other, Algorythm) and other.moves == self.moves
+
+    def __hash__(self):
+        return hash(self.__str__())
 
     def transform(
             self,
