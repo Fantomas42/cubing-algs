@@ -17,8 +17,9 @@ dev = [
     "pytest-cov",
 ]
 
-[tool.setuptools]
-packages = ["cubing_algs"]
+[tool.setuptools.packages.find]
+include = ["canon*"]
+namespaces = false
 
 [tool.ruff]
 line-length = 80
