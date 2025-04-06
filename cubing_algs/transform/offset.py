@@ -3,8 +3,8 @@ from cubing_algs.move import Move
 
 
 def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
-    moves = []
-    rotation_table = OFFSET_TABLE[rotation]
+    moves: list[Move] = []
+    rotation_table: dict[Move | str, str] = OFFSET_TABLE[rotation]
 
     for move in old_moves:
         if move in rotation_table:
