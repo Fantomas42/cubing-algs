@@ -62,6 +62,14 @@ class ParseMovesTestCase(unittest.TestCase):
             expect,
         )
 
+    def test_parse_list(self):
+        moves = ['R2 L2']
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(moves).moves,
+            expect,
+        )
+
     def test_parse_moves_corrected(self):
         moves = 'R2 L3'
         expect = ['R2', "L'"]
