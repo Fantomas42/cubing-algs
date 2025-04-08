@@ -8,6 +8,7 @@ MOVE_COUNTS = {
     'qtm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 2]},
     'stm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [1, 0]},
     'etm': {'rotation': [1, 0], 'outer': [1, 0], 'inner': [1, 0]},
+    'qstm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 1]},
 }
 
 
@@ -86,5 +87,6 @@ def compute_metrics(moves: list[Move]) -> dict[str, Any]:
         'qtm': compute_score('qtm', rotations, outer_moves, inner_moves),
         'stm': compute_score('stm', rotations, outer_moves, inner_moves),
         'etm': compute_score('etm', rotations, outer_moves, inner_moves),
+        'qstm': compute_score('qstm', rotations, outer_moves, inner_moves),
         'generators': compute_generators(moves),
     }

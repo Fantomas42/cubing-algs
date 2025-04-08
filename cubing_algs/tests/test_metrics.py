@@ -18,5 +18,41 @@ class MetricsTestCase(unittest.TestCase):
                 'qtm': 16,
                 'stm': 7,
                 'etm': 8,
+                'qstm': 10,
             },
         )
+
+    def test_htm(self):
+        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
+        scores = [1, 1, 2, 2, 0, 1]
+
+        for move, score in zip(moves, scores, strict=True):
+            self.assertEqual(parse_moves(move).metrics['htm'], score)
+
+    def test_qtm(self):
+        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
+        scores = [1, 2, 2, 4, 0, 1]
+
+        for move, score in zip(moves, scores, strict=True):
+            self.assertEqual(parse_moves(move).metrics['qtm'], score)
+
+    def test_stm(self):
+        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
+        scores = [1, 1, 1, 1, 0, 1]
+
+        for move, score in zip(moves, scores, strict=True):
+            self.assertEqual(parse_moves(move).metrics['stm'], score)
+
+    def test_etm(self):
+        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
+        scores = [1, 1, 1, 1, 1, 1]
+
+        for move, score in zip(moves, scores, strict=True):
+            self.assertEqual(parse_moves(move).metrics['etm'], score)
+
+    def test_qstm(self):
+        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
+        scores = [1, 2, 1, 2, 0, 1]
+
+        for move, score in zip(moves, scores, strict=True):
+            self.assertEqual(parse_moves(move).metrics['qstm'], score)
