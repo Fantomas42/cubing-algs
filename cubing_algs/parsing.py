@@ -75,12 +75,15 @@ def check_moves(moves: list[Move]) -> bool:
     return valid
 
 
-def parse_moves(raw_moves: str | list[str]) -> Algorythm:
+def parse_moves(raw_moves: str | list[str] | Algorythm) -> Algorythm:
     """
     Clean string moves and return Algorythm
     """
+    if isinstance(raw_moves, Algorythm):
+        return raw_moves
+
     if isinstance(raw_moves, list):
-        raw_moves = ''.join(raw_moves)
+        raw_moves = ''.join(str(m) for m in raw_moves)
 
     moves = split_moves(clean_moves(raw_moves))
 

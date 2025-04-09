@@ -70,6 +70,13 @@ class ParseMovesTestCase(unittest.TestCase):
             expect,
         )
 
+        moves = ['R2', 'L2']
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(moves).moves,
+            expect,
+        )
+
     def test_parse_moves_corrected(self):
         moves = 'R2 L3'
         expect = ['R2', "L'"]
@@ -83,6 +90,22 @@ class ParseMovesTestCase(unittest.TestCase):
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
+        )
+
+    def test_parse_moves_list_moves(self):
+        moves = 'R2 L2'
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(parse_moves(moves).moves).moves,
+            expect,
+        )
+
+    def test_parse_moves_algorythm(self):
+        moves = 'R2 L2'
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(parse_moves(moves)).moves,
+            expect,
         )
 
 
