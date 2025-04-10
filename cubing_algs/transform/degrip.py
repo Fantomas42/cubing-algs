@@ -11,7 +11,6 @@ from cubing_algs.transform.offset import offset_yprime_moves
 from cubing_algs.transform.offset import offset_z2_moves
 from cubing_algs.transform.offset import offset_z_moves
 from cubing_algs.transform.offset import offset_zprime_moves
-from cubing_algs.transform.size import compress_moves
 
 
 def has_grip(
@@ -50,9 +49,9 @@ def degrip(
         if has_grip(degripped, config)[0]:
             return degrip(prefix + degripped, config)
 
-        return compress_moves(prefix + degripped)
+        return prefix + degripped
 
-    return compress_moves(old_moves)
+    return old_moves
 
 
 def degrip_x_moves(old_moves: list[Move]) -> list[Move]:

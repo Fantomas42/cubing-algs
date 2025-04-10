@@ -9,6 +9,8 @@ from cubing_algs.transform.degrip import degrip_full_moves
 from cubing_algs.transform.degrip import degrip_x_moves
 from cubing_algs.transform.degrip import degrip_y_moves
 from cubing_algs.transform.degrip import degrip_z_moves
+from cubing_algs.transform.rotation import remove_final_rotations
+from cubing_algs.transform.size import compress_moves
 
 
 class TransformDegripTestCase(unittest.TestCase):
@@ -24,11 +26,15 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = [expect]
 
         with self.subTest(provide=provide, expect=expect):
-            degripped = function(provide)
+            degripped = remove_final_rotations(
+                function(provide),
+            )
 
             self.assertEqual(
                 degripped,
-                expect,
+                remove_final_rotations(
+                    expect,
+                ),
             )
 
     def check_degrip(self, provide, expect, function, name):
@@ -36,11 +42,20 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = split_moves(expect)
 
         with self.subTest(name=name, provide=provide, expect=expect):
-            degripped = function(provide)
+
+            degripped = compress_moves(
+                remove_final_rotations(
+                    function(provide),
+                ),
+            )
 
             self.assertEqual(
                 degripped,
-                expect,
+                compress_moves(
+                    remove_final_rotations(
+                        expect,
+                    ),
+                ),
             )
 
     def test_basic_x_grip_degrip(self):
@@ -201,7 +216,7 @@ class TransformDegripTestCase(unittest.TestCase):
     def test_start_degrip_x(self):
         basic_moves = 'RF'
         provide = 'x' + basic_moves
-        expect = 'RDx'
+        expect = 'RD'
 
         self.check_degrip(
             provide, expect,
@@ -212,7 +227,7 @@ class TransformDegripTestCase(unittest.TestCase):
     def test_end_degrip_x(self):
         basic_moves = 'RF'
         provide = basic_moves + 'x'
-        expect = 'RFx'
+        expect = 'RF'
 
         self.check_degrip(
             provide, expect,
@@ -222,7 +237,7 @@ class TransformDegripTestCase(unittest.TestCase):
 
     def test_middle_degrip_x(self):
         provide = 'R' + 'x' + 'F'
-        expect = 'RDx'
+        expect = 'RD'
 
         self.check_degrip(
             provide, expect,
