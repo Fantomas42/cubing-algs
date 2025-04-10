@@ -1,15 +1,25 @@
-from cubing_algs.constants import UNSLICE
+from cubing_algs.constants import UNSLICE_ROTATION_MOVES
+from cubing_algs.constants import UNSLICE_WIDE_MOVES
 
 
-def unslice_moves(old_moves: list[str]) -> list[str]:
+def unslice(old_moves: list[str], config: dict[str, list[str]]) -> list[str]:
     moves = []
     for move in old_moves:
-        if move in UNSLICE:
-            moves.extend(UNSLICE[move])
+        if move in config:
+            moves.extend(config[move])
         else:
             moves.append(move)
 
     return moves
+
+
+def unslice_wide_moves(old_moves: list[str]) -> list[str]:
+    return unslice(old_moves, UNSLICE_WIDE_MOVES)
+
+
+def unslice_rotation_moves(old_moves: list[str]) -> list[str]:
+    return unslice(old_moves, UNSLICE_ROTATION_MOVES)
+
 
 def reslice_moves(old_moves: list[str]) -> list[str]:
     i = 0
