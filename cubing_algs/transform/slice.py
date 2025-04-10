@@ -6,11 +6,13 @@ from cubing_algs.move import Move
 
 def unslice(old_moves: list[Move], config: dict[str, list[str]]) -> list[Move]:
     moves = []
-    for move in old_moves:
+    for _move in old_moves:
+        move = str(_move)
         if move in config:
-            moves.extend(config[move])
+            for m in config[move]:
+                moves.append(Move(m))
         else:
-            moves.append(move)
+            moves.append(_move)
 
     return moves
 
