@@ -1,6 +1,7 @@
 import unittest
 
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.slice import reslice_moves
 from cubing_algs.transform.slice import unslice_rotation_moves
 from cubing_algs.transform.slice import unslice_wide_moves
 
@@ -22,5 +23,14 @@ class TransformSliceTestCase(unittest.TestCase):
 
         self.assertEqual(
             unslice_wide_moves(provide.moves),
+            expect.moves,
+        )
+
+    def test_reslice_moves(self):
+        provide = parse_moves("U' D")
+        expect = parse_moves("E'y'")
+
+        self.assertEqual(
+            reslice_moves(provide.moves),
             expect.moves,
         )
