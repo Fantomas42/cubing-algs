@@ -4,17 +4,17 @@ from cubing_algs.move import Move
 
 def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
     moves: list[Move] = []
-    rotation_table: dict[Move | str, str] = OFFSET_TABLE[rotation]
+    rotation_table: dict[str, str] = OFFSET_TABLE[rotation]
 
     for move in old_moves:
         if move in rotation_table:
-            moves.append(Move(rotation_table[move]))
+            moves.append(Move(rotation_table[str(move)]))
         elif move.base_move in rotation_table and move.is_double:
             moves.append(Move(rotation_table[move.base_move]).doubled)
         elif Move(move.base_move).inverted in rotation_table and move.is_double:
-            moves.append(Move(rotation_table[Move(move.base_move).inverted]).doubled)
+            moves.append(Move(rotation_table[str(Move(move.base_move).inverted)]).doubled)
         elif move.inverted in rotation_table:
-            moves.append(Move(rotation_table[move.inverted]).inverted)
+            moves.append(Move(rotation_table[str(move.inverted)]).inverted)
         else:
             moves.append(move)
 
