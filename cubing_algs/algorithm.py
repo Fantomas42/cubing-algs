@@ -6,7 +6,7 @@ from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
 
-class Algorythm:
+class Algorithm:
     def __init__(self, moves: list[Move]):
         self.moves = moves
 
@@ -17,10 +17,10 @@ class Algorythm:
         return ' '.join([str(m) for m in self.moves])
 
     def __repr__(self) -> str:
-        return f'Algorythm("{ "".join([str(m) for m in self.moves]) }")'
+        return f'Algorithm("{ "".join([str(m) for m in self.moves]) }")'
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, Algorythm) and other.moves == self.moves
+        return isinstance(other, Algorithm) and other.moves == self.moves
 
     def __hash__(self) -> int:
         return hash(self.__str__())
@@ -32,7 +32,7 @@ class Algorythm:
     def transform(
             self,
             *processes: Callable[[list[Move]], list[Move]],
-    ) -> 'Algorythm':
+    ) -> 'Algorithm':
 
         new_moves = list(self.moves)
         for process in processes:
@@ -41,4 +41,4 @@ class Algorythm:
         if new_moves == self.moves:
             return self
 
-        return Algorythm(new_moves)
+        return Algorithm(new_moves)

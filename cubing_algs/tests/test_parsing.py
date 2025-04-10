@@ -100,7 +100,7 @@ class ParseMovesTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_parse_moves_algorythm(self):
+    def test_parse_moves_algorithm(self):
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(

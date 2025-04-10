@@ -5,7 +5,7 @@ from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
 
 
-class AlgorythmTestCase(unittest.TestCase):
+class AlgorithmTestCase(unittest.TestCase):
 
     def test_length(self):
         algo = parse_moves('R2 U')
@@ -20,7 +20,7 @@ class AlgorythmTestCase(unittest.TestCase):
     def test_repr(self):
         algo = parse_moves('R2 U')
 
-        self.assertEqual(repr(algo), 'Algorythm("R2U")')
+        self.assertEqual(repr(algo), 'Algorithm("R2U")')
 
     def test_eq(self):
         algo = parse_moves('R2 U')

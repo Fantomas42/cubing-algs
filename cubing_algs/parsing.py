@@ -1,6 +1,6 @@
 import logging
 
-from cubing_algs.algorythm import Algorythm
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MOVE_SPLIT
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
@@ -75,11 +75,11 @@ def check_moves(moves: list[Move]) -> bool:
     return valid
 
 
-def parse_moves(raw_moves: str | list[str] | Algorythm) -> Algorythm:
+def parse_moves(raw_moves: str | list[str] | Algorithm) -> Algorithm:
     """
-    Clean string moves and return Algorythm
+    Clean string moves and return Algorithm
     """
-    if isinstance(raw_moves, Algorythm):
+    if isinstance(raw_moves, Algorithm):
         return raw_moves
 
     if isinstance(raw_moves, list):
@@ -91,10 +91,10 @@ def parse_moves(raw_moves: str | list[str] | Algorythm) -> Algorythm:
         error = f'{ raw_moves } contains invalid move'
         raise InvalidMoveError(error)
 
-    return Algorythm(moves)
+    return Algorithm(moves)
 
 
-def parse_moves_cfop(moves: str) -> Algorythm:
+def parse_moves_cfop(moves: str) -> Algorithm:
     """
     Same as parse_moves, but remove head/tail re-orientations
     """
