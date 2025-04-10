@@ -1,3 +1,11 @@
+"""
+Utilities for parsing and normalizing Rubik's cube algorithm notations.
+
+This module provides functions to clean, validate, and convert
+string representations of Rubik's cube algorithms into structured
+Algorithm objects.
+"""
+
 import logging
 
 from cubing_algs.algorithm import Algorithm
@@ -9,6 +17,14 @@ logger = logging.getLogger(__name__)
 
 
 def clean_moves(moves: str) -> str:
+    """
+    Normalize and clean a string representation of moves.
+
+    This function standardizes move notation by:
+    - Removing whitespace and unnecessary characters
+    - Converting alternative notations to standard ones
+    - Standardizing the casing of slice moves
+    """
     moves = moves.strip()
 
     return moves.replace(
@@ -47,6 +63,12 @@ def clean_moves(moves: str) -> str:
 
 
 def split_moves(moves: str) -> list[Move]:
+    """
+    Split a string of moves into individual Move objects.
+
+    Uses the MOVE_SPLIT pattern from constants to identify boundaries
+    between individual moves in the string.
+    """
     return [
         Move(x.strip())
         for x in MOVE_SPLIT.split(moves)
@@ -55,6 +77,12 @@ def split_moves(moves: str) -> list[Move]:
 
 
 def check_moves(moves: list[Move]) -> bool:
+    """
+    Validate a list of Move objects.
+
+    Checks that each move has a valid base move and modifier.
+    Logs errors for invalid moves.
+    """
     valid = True
     move_string = ''.join([str(m) for m in moves])
 
@@ -77,7 +105,14 @@ def check_moves(moves: list[Move]) -> bool:
 
 def parse_moves(raw_moves: str | list[str] | Algorithm) -> Algorithm:
     """
-    Clean string moves and return Algorithm
+    Parse raw move data into an Algorithm object.
+
+    This function handles different input types and performs
+    cleaning and validation:
+    - If raw_moves is already an Algorithm, it's returned as-is
+    - If raw_moves is a list, it's joined into a string
+    - Strings are cleaned, split into moves, validated, and converted
+      to an Algorithm
     """
     if isinstance(raw_moves, Algorithm):
         return raw_moves
@@ -96,7 +131,12 @@ def parse_moves(raw_moves: str | list[str] | Algorithm) -> Algorithm:
 
 def parse_moves_cfop(moves: str) -> Algorithm:
     """
-    Same as parse_moves, but remove head/tail re-orientations
+    Parse moves specifically for CFOP method algorithms.
+
+    Similar to parse_moves, but also removes typical setup and restoration
+    moves (y and U rotations) from the beginning and end of the algorithm.
+    This is useful for standardizing CFOP algorithms, which often include
+    such moves for convenience.
     """
     algo = parse_moves(moves)
 
