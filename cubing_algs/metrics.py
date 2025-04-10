@@ -70,7 +70,7 @@ def regroup_moves(
             outer_moves.append(move)
         elif move.is_inner_move:
             inner_moves.append(move)
-        elif move.is_rotation_move:
+        else:
             rotations.append(move)
 
     return rotations, outer_moves, inner_moves
