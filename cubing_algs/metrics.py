@@ -39,7 +39,7 @@ def compute_score(mode: str,
     )
 
 
-def compute_generators(moves: list[Move]) -> list[Move]:
+def compute_generators(moves: list[Move]) -> list[str]:
     count: dict[str, int] = {}
     for move in moves:
         if move.is_rotation_move:
