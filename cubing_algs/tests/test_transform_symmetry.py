@@ -1,5 +1,6 @@
 import unittest
 
+from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.symmetry import symmetry_c_moves
 from cubing_algs.transform.symmetry import symmetry_e_moves
@@ -11,12 +12,17 @@ class TransformSymmetryTestCase(unittest.TestCase):
 
     def test_symmetry_c_moves(self):
         provide = parse_moves("U R U' R'")
-        expect = parse_moves("U' R' U R")
+        expect = parse_moves("U L U' L'")
+
+        result = symmetry_c_moves(provide.moves)
 
         self.assertEqual(
-            symmetry_s_moves(provide.moves),
+            result,
             expect.moves,
         )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
         provide = parse_moves("F R' U2")
         expect = parse_moves("B L' U2")

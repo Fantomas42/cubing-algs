@@ -57,6 +57,8 @@ class TransformDegripTestCase(unittest.TestCase):
                     ),
                 ),
             )
+            for m in degripped:
+                self.assertTrue(isinstance(m, Move))
 
     def test_basic_x_grip_degrip(self):
         for _move, _expected in zip(
