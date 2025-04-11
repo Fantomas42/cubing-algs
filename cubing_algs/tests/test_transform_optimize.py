@@ -50,6 +50,11 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect.moves,
         )
 
+        self.assertEqual(
+            optimize_repeat_three_moves(provide.moves, 0),
+            provide.moves,
+        )
+
     def test_optimize_do_undo_moves(self):
         provide = parse_moves("R R'")
         expect = []
@@ -88,6 +93,11 @@ class TransformOptimizeTestCase(unittest.TestCase):
         self.assertEqual(
             optimize_do_undo_moves(provide.moves),
             expect.moves,
+        )
+
+        self.assertEqual(
+            optimize_do_undo_moves(provide.moves, 0),
+            provide.moves,
         )
 
     def test_optimize_do_undo_double_moves(self):
@@ -204,6 +214,11 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect.moves,
         )
 
+        self.assertEqual(
+            optimize_double_moves(provide.moves, 0),
+            provide.moves,
+        )
+
     def test_optimize_triple_moves(self):
         provide = parse_moves('R R2')
         expect = parse_moves("R'")
@@ -267,4 +282,9 @@ class TransformOptimizeTestCase(unittest.TestCase):
         self.assertEqual(
             optimize_triple_moves(provide.moves),
             expect.moves,
+        )
+
+        self.assertEqual(
+            optimize_triple_moves(provide.moves, 0),
+            provide.moves,
         )

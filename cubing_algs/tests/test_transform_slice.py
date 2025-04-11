@@ -50,3 +50,11 @@ class TransformSliceTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_reslice_moves_max(self):
+        provide = parse_moves("U' D")
+
+        self.assertEqual(
+            reslice_moves(provide.moves, 0),
+            provide.moves,
+        )

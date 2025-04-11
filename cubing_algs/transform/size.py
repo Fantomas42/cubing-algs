@@ -1,3 +1,4 @@
+from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.move import Move
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
@@ -7,7 +8,7 @@ from cubing_algs.transform.optimize import optimize_triple_moves
 
 def compress_moves(
         old_moves: list[Move],
-        max_iterations: int = 100,
+        max_iterations: int = MAX_ITERATIONS,
 ) -> list[Move]:
     moves = old_moves.copy()
 
