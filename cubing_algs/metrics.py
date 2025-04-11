@@ -1,8 +1,17 @@
+"""
+Metrics and analysis tools for Rubik's cube algorithms.
+
+This module provides functions to calculate various metrics
+for evaluating and comparing Rubik's cube algorithms,
+including different move counting systems (HTM, QTM, STM, etc.)
+and algorithm composition analysis.
+"""
 import operator
 from typing import Any
 
 from cubing_algs.move import Move
 
+# Dictionary mapping metric names to scoring rules for different move types
 MOVE_COUNTS = {
     'htm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [2, 0]},
     'qtm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 2]},
@@ -13,6 +22,12 @@ MOVE_COUNTS = {
 
 
 def amount(move: Move) -> int:
+    """
+    Determine the quantity factor for a move.
+
+    Double moves (like U2) count as 2, while single moves count as 1.
+    This is used for quarter-turn metrics.
+    """
     if move.is_double:
         return 2
     return 1
@@ -20,6 +35,12 @@ def amount(move: Move) -> int:
 
 def move_score(mode: str, field: str,
                moves: list[Move]) -> int:
+    """
+    Calculate the score for a specific group of moves under a given metric.
+
+    Uses the MOVE_COUNTS dictionary to determine how to score each move
+    based on the metric mode and move type.
+    """
     datas = MOVE_COUNTS[mode][field]
 
     return sum(
@@ -32,6 +53,12 @@ def compute_score(mode: str,
                   rotations: list[Move],
                   outer: list[Move],
                   inner: list[Move]) -> int:
+    """
+    Compute the total score for an algorithm under a specific metric.
+
+    Combines scores from all move types (rotations, outer, and inner moves)
+    according to the rules of the specified metric.
+    """
     return (
         move_score(mode, 'rotation', rotations)
         + move_score(mode, 'outer', outer)
@@ -40,6 +67,14 @@ def compute_score(mode: str,
 
 
 def compute_generators(moves: list[Move]) -> list[str]:
+    """
+    Identify the most frequently used move faces in an algorithm.
+
+    This function counts how many times each face is turned (ignoring
+    direction and whether it's a single or double turn) and returns them in
+    order of frequency.
+    Rotations are excluded from this analysis.
+    """
     count: dict[str, int] = {}
     for move in moves:
         if move.is_rotation_move:
@@ -61,6 +96,12 @@ def compute_generators(moves: list[Move]) -> list[str]:
 def regroup_moves(
         moves: list[Move],
 ) -> tuple[list[Move], list[Move], list[Move]]:
+    """
+    Categorize moves into rotation, outer, and inner move types.
+
+    This separation is necessary for accurate metric calculations, as different
+    move types are counted differently depending on the metric.
+    """
     rotations = []
     outer_moves = []
     inner_moves = []
@@ -77,6 +118,27 @@ def regroup_moves(
 
 
 def compute_metrics(moves: list[Move]) -> dict[str, Any]:
+    """
+    Calculate a comprehensive set of metrics for an algorithm.
+
+    This function computes various metrics including:
+    - Move counts by type (rotations, outer moves, inner moves)
+    - Standard metrics (HTM, QTM, STM, ETM, QSTM)
+    - Generator analysis (most used faces)
+
+    Returns:
+        dict[str, Any]: A dictionary containing all calculated metrics.
+        Keys include:
+            - rotations: Number of rotation moves
+            - outer_moves: Number of outer face moves
+            - inner_moves: Number of inner slice moves
+            - htm: Half Turn Metric score
+            - qtm: Quarter Turn Metric score
+            - stm: Slice Turn Metric score
+            - etm: Execution Turn Metric score
+            - qstm: Quarter Slice Turn Metric score
+            - generators: List of most frequently used faces
+    """
     rotations, outer_moves, inner_moves = regroup_moves(moves)
 
     return {
