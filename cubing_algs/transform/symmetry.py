@@ -3,6 +3,12 @@ from cubing_algs.constants import SYMMETRY_M
 from cubing_algs.constants import SYMMETRY_S
 from cubing_algs.move import Move
 
+SYMMETRY_CONFIGS = {
+    'M': ({'x', 'M'}, SYMMETRY_M),
+    'S': ({'z', 'S'}, SYMMETRY_S),
+    'E': ({'y', 'E'}, SYMMETRY_E),
+}
+
 
 def symmetry_moves(
         old_moves: list[Move],
@@ -27,16 +33,24 @@ def symmetry_moves(
     return moves
 
 
+def symmetry_type_moves(
+        old_moves: list[Move],
+        symmetry_type: str,
+) -> list[Move]:
+    ignore_moves, symmetry_table = SYMMETRY_CONFIGS[symmetry_type]
+    return symmetry_moves(old_moves, ignore_moves, symmetry_table)
+
+
 def symmetry_m_moves(old_moves: list[Move]) -> list[Move]:
-    return symmetry_moves(old_moves, {'x', 'M'}, SYMMETRY_M)
+    return symmetry_type_moves(old_moves, 'M')
 
 
 def symmetry_s_moves(old_moves: list[Move]) -> list[Move]:
-    return symmetry_moves(old_moves, {'z', 'S'}, SYMMETRY_S)
+    return symmetry_type_moves(old_moves, 'S')
 
 
 def symmetry_e_moves(old_moves: list[Move]) -> list[Move]:
-    return symmetry_moves(old_moves, {'y', 'E'}, SYMMETRY_E)
+    return symmetry_type_moves(old_moves, 'E')
 
 
 def symmetry_c_moves(old_moves: list[Move]) -> list[Move]:
