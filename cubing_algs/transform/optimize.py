@@ -12,7 +12,7 @@ def optimize_repeat_three_moves(
 
     i = 0
     changed = False
-    moves = list(old_moves)
+    moves = old_moves.copy()
 
     while i < len(moves) - 2:
         if moves[i] == moves[i + 1] == moves[i + 2]:
@@ -40,7 +40,7 @@ def optimize_do_undo_moves(
 
     i = 0
     changed = False
-    moves = list(old_moves)
+    moves = old_moves.copy()
 
     while i < len(moves) - 1:
         if moves[i].inverted == moves[i + 1] or (
@@ -68,7 +68,7 @@ def optimize_double_moves(
 
     i = 0
     changed = False
-    moves = list(old_moves)
+    moves = old_moves.copy()
 
     while i < len(moves) - 1:
         if moves[i] == moves[i + 1]:
@@ -96,7 +96,7 @@ def optimize_triple_moves(
 
     i = 0
     changed = False
-    moves = list(old_moves)
+    moves = old_moves.copy()
 
     while i < len(moves) - 1:
         if moves[i].base_move == moves[i + 1].base_move:

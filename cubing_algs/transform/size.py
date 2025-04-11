@@ -9,7 +9,7 @@ def compress_moves(
         old_moves: list[Move],
         max_iterations: int = 100,
 ) -> list[Move]:
-    moves = list(old_moves)
+    moves = old_moves.copy()
 
     for _ in range(max_iterations):
         start_length = len(moves)
