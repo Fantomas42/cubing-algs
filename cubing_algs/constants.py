@@ -168,3 +168,12 @@ SYMMETRY_E = {
     'L': 'L', 'l': 'l', 'M': 'M',
     'D': 'U', 'd': 'u', 'E': 'E',
 }
+
+OPPOSITE_FACES = {
+    'F': 'B',
+    'R': 'L',
+    'U': 'D',
+    'B': 'F',
+    'L': 'R',
+    'D': 'U',
+}
