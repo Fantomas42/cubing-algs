@@ -1,5 +1,7 @@
 import re
 
+MAX_ITERATIONS = 50
+
 DOUBLE_CHAR = '2'
 
 INVERT_CHAR = "'"

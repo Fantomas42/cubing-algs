@@ -1,3 +1,4 @@
+from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.constants import RESLICE_MOVES
 from cubing_algs.constants import UNSLICE_ROTATION_MOVES
 from cubing_algs.constants import UNSLICE_WIDE_MOVES
@@ -25,7 +26,13 @@ def unslice_rotation_moves(old_moves: list[Move]) -> list[Move]:
     return unslice(old_moves, UNSLICE_ROTATION_MOVES)
 
 
-def reslice_moves(old_moves: list[Move]) -> list[Move]:
+def reslice_moves(
+        old_moves: list[Move],
+        max_depth: int = MAX_ITERATIONS,
+) -> list[Move]:
+    if max_depth <= 0:
+        return old_moves
+
     i = 0
     moves = []
     changed = False
@@ -45,6 +52,6 @@ def reslice_moves(old_moves: list[Move]) -> list[Move]:
         moves.append(old_moves[i])
 
     if changed:
-        return reslice_moves(moves)
+        return reslice_moves(moves, max_depth - 1)
 
     return moves

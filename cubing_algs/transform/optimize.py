@@ -1,6 +1,5 @@
+from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.move import Move
-
-MAX_ITERATIONS = 50
 
 
 def optimize_repeat_three_moves(
