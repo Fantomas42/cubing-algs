@@ -1,8 +1,16 @@
 from cubing_algs.move import Move
 
+MAX_ITERATIONS = 50
 
-def optimize_repeat_three_moves(old_moves: list[Move]) -> list[Move]:
+
+def optimize_repeat_three_moves(
+        old_moves: list[Move],
+        max_depth: int = MAX_ITERATIONS,
+) -> list[Move]:
     """ R, R, R --> R' """
+    if max_depth <= 0:
+        return old_moves
+
     i = 0
     changed = False
     moves = list(old_moves)
@@ -15,16 +23,22 @@ def optimize_repeat_three_moves(old_moves: list[Move]) -> list[Move]:
             i += 1
 
     if changed:
-        return optimize_repeat_three_moves(moves)
+        return optimize_repeat_three_moves(moves, max_depth - 1)
 
     return moves
 
 
-def optimize_do_undo_moves(old_moves: list[Move]) -> list[Move]:
+def optimize_do_undo_moves(
+        old_moves: list[Move],
+        max_depth: int = MAX_ITERATIONS,
+) -> list[Move]:
     """ R R' --> <nothing>,
         R2 R2 --> <nothing>
         R R R' R' --> <nothing>
     """
+    if max_depth <= 0:
+        return old_moves
+
     i = 0
     changed = False
     moves = list(old_moves)
@@ -40,13 +54,19 @@ def optimize_do_undo_moves(old_moves: list[Move]) -> list[Move]:
             i += 1
 
     if changed:
-        return optimize_do_undo_moves(moves)
+        return optimize_do_undo_moves(moves, max_depth - 1)
 
     return moves
 
 
-def optimize_double_moves(old_moves: list[Move]) -> list[Move]:
+def optimize_double_moves(
+        old_moves: list[Move],
+        max_depth: int = MAX_ITERATIONS,
+) -> list[Move]:
     """ R, R --> R2 """
+    if max_depth <= 0:
+        return old_moves
+
     i = 0
     changed = False
     moves = list(old_moves)
@@ -59,16 +79,22 @@ def optimize_double_moves(old_moves: list[Move]) -> list[Move]:
             i += 1
 
     if changed:
-        return optimize_double_moves(moves)
+        return optimize_double_moves(moves, max_depth - 1)
 
     return moves
 
 
-def optimize_triple_moves(old_moves: list[Move]) -> list[Move]:
+def optimize_triple_moves(
+        old_moves: list[Move],
+        max_depth: int = MAX_ITERATIONS,
+) -> list[Move]:
     """ R, R2 --> R'
         R2, R --> R'
         R', R2 --> R
     """
+    if max_depth <= 0:
+        return old_moves
+
     i = 0
     changed = False
     moves = list(old_moves)
@@ -87,6 +113,6 @@ def optimize_triple_moves(old_moves: list[Move]) -> list[Move]:
             i += 1
 
     if changed:
-        return optimize_triple_moves(moves)
+        return optimize_triple_moves(moves, max_depth - 1)
 
     return moves
