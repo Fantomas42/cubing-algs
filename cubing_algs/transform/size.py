@@ -5,25 +5,25 @@ from cubing_algs.transform.optimize import optimize_repeat_three_moves
 from cubing_algs.transform.optimize import optimize_triple_moves
 
 
-def compress_moves(old_moves: list[Move]) -> list[Move]:
+def compress_moves(
+        old_moves: list[Move],
+        max_iterations: int = 100,
+) -> list[Move]:
     moves = list(old_moves)
 
-    compressing = True
-    while compressing:
-        changed = False
-        for optimizer in (
-                optimize_do_undo_moves,
-                optimize_repeat_three_moves,
-                optimize_double_moves,
-                optimize_triple_moves,
-        ):
-            new_moves = optimizer(moves)
-            if new_moves != moves:
-                moves = new_moves
-                changed = True
+    for _ in range(max_iterations):
+        start_length = len(moves)
 
-        if not changed:
-            compressing = False
+        for optimizer in (
+            optimize_do_undo_moves,
+            optimize_repeat_three_moves,
+            optimize_double_moves,
+            optimize_triple_moves,
+        ):
+            moves = optimizer(moves)
+
+        if len(moves) == start_length:
+            break
 
     return moves
 
