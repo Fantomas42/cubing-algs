@@ -7,13 +7,17 @@ from cubing_algs.move import Move
 
 def unslice(old_moves: list[Move], config: dict[str, list[str]]) -> list[Move]:
     moves = []
-    for _move in old_moves:
-        move = str(_move)
-        if move in config:
-            for m in config[move]:
-                moves.append(Move(m))
+
+    move_cache = {}
+    for move_str, replacements in config.items():
+        move_cache[move_str] = [Move(m) for m in replacements]
+
+    for move in old_moves:
+        move_str = str(move)
+        if move_str in config:
+            moves.extend(move_cache[move_str])
         else:
-            moves.append(_move)
+            moves.append(move)
 
     return moves
 

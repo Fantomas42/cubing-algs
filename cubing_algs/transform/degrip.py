@@ -31,7 +31,8 @@ def has_grip(
 
         i += 1
 
-    if suffix and set(suffix) - set(config.keys()):
+    config_keys = set(config.keys())
+    if suffix and any(move not in config_keys for move in suffix):
         return True, prefix, suffix, move
 
     return False, False, False, False
