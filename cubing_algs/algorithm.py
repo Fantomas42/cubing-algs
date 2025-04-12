@@ -75,8 +75,8 @@ class Algorithm:
         This method enables chaining multiple transformations together, such as
         simplification, optimization, or conversion between notations.
         """
+        new_moves = self.moves.copy()
 
-        new_moves = list(self.moves)
         for process in processes:
             new_moves = process(new_moves)
 
