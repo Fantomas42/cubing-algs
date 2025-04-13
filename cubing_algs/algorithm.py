@@ -41,6 +41,18 @@ class Algorithm:
     def copy(self):
         return Algorithm(self.moves.copy())
 
+    def __iter__(self):
+        yield from self.moves
+
+    def __getitem__(self, index):
+        return self.moves[index]
+
+    def __setitem__(self, index, value):
+        self.moves[index] = value
+
+    def __delitem__(self, index):
+        del self.moves[index]
+
     def __len__(self) -> int:
         """
         Return the number of moves in the algorithm.

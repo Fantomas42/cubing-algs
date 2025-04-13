@@ -55,6 +55,25 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2')
         self.assertEqual(str(copy), 'R2 U')
 
+    def test_iter(self):
+        algo = parse_moves('R2 U')
+        for m, n in zip(algo, ['R2', 'U'], strict=True):
+            self.assertEqual(m, n)
+
+    def test_getitem(self):
+        algo = parse_moves('R2 U')
+        self.assertEqual(algo[1], 'U')
+
+    def test_setitem(self):
+        algo = parse_moves('R2 U')
+        algo[1] = 'B'
+        self.assertEqual(str(algo), 'R2 B')
+
+    def test_delitem(self):
+        algo = parse_moves('R2 U')
+        del algo[1]
+        self.assertEqual(str(algo), 'R2')
+
     def test_length(self):
         algo = parse_moves('R2 U')
 
