@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from functools import cached_property
 from typing import Any
 
 from cubing_algs.metrics import compute_metrics
