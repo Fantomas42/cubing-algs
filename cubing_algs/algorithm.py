@@ -36,7 +36,7 @@ class Algorithm:
         self.moves.remove(move)
 
     def pop(self, *arg):
-        self.moves.pop(*arg)
+        return self.moves.pop(*arg)
 
     def copy(self):
         return Algorithm(self.moves.copy())

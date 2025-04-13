@@ -7,6 +7,54 @@ from cubing_algs.transform.optimize import optimize_double_moves
 
 class AlgorithmTestCase(unittest.TestCase):
 
+    def test_append(self):
+        algo = parse_moves('R2 U')
+        self.assertEqual(str(algo), 'R2 U')
+        algo.append('F2')
+        self.assertEqual(str(algo), 'R2 U F2')
+
+    def test_extend(self):
+        algo = parse_moves('R2 U')
+        self.assertEqual(str(algo), 'R2 U')
+        algo.extend(['F2', 'B'])
+        self.assertEqual(str(algo), 'R2 U F2 B')
+
+    def test_extend_with_algorithm(self):
+        algo = parse_moves('R2 U')
+        self.assertEqual(str(algo), 'R2 U')
+        algo.extend(parse_moves('F2 B'))
+        self.assertEqual(str(algo), 'R2 U F2 B')
+
+    def test_insert(self):
+        algo = parse_moves('R2 U')
+        self.assertEqual(str(algo), 'R2 U')
+        algo.insert(0, 'F2')
+        self.assertEqual(str(algo), 'F2 R2 U')
+
+    def test_remove(self):
+        algo = parse_moves('R2 U R2')
+        self.assertEqual(str(algo), 'R2 U R2')
+        algo.remove('R2')
+        self.assertEqual(str(algo), 'U R2')
+
+    def test_pop(self):
+        algo = parse_moves('R2 U')
+        self.assertEqual(str(algo), 'R2 U')
+        popped = algo.pop()
+        self.assertEqual(str(algo), 'R2')
+        self.assertEqual(popped, 'U')
+
+    def test_copy(self):
+        algo = parse_moves('R2 U')
+        self.assertEqual(str(algo), 'R2 U')
+
+        copy = algo.copy()
+        self.assertEqual(str(copy), 'R2 U')
+
+        algo.pop()
+        self.assertEqual(str(algo), 'R2')
+        self.assertEqual(str(copy), 'R2 U')
+
     def test_length(self):
         algo = parse_moves('R2 U')
 
