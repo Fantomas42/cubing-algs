@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from collections.abc import Iterator
 from typing import Any
 
 from cubing_algs.metrics import compute_metrics
@@ -34,22 +35,22 @@ class Algorithm:
     def remove(self, move: Move) -> None:
         self.moves.remove(move)
 
-    def pop(self, *arg):
+    def pop(self, *arg: int) -> Move:
         return self.moves.pop(*arg)
 
-    def copy(self):
+    def copy(self) -> 'Algorithm':
         return Algorithm(self.moves.copy())
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Move]:
         yield from self.moves
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Move:
         return self.moves[index]
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index: int, value: Move) -> None:
         self.moves[index] = value
 
-    def __delitem__(self, index):
+    def __delitem__(self, index: int) -> None:
         del self.moves[index]
 
     def __len__(self) -> int:
