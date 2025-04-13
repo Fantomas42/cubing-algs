@@ -88,7 +88,7 @@ class Algorithm:
         """
         return hash(self.__str__())
 
-    @cached_property
+    @property
     def metrics(self) -> dict[str, int | list[str]]:
         """
         Calculate various metrics for this algorithm.
