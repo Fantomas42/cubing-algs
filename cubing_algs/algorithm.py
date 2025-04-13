@@ -20,6 +20,27 @@ class Algorithm:
         """
         self.moves = moves
 
+    def append(self, move: Move) -> None:
+        self.moves.append(move)
+
+    def extend(self, moves: list[Move]) -> None:  # | Algorithm
+        if isinstance(moves, Algorithm):
+            self.moves.extend(moves.moves)
+        else:
+            self.moves.extend(moves)
+
+    def insert(self, i: int, move: Move) -> None:
+        self.moves.insert(i, move)
+
+    def remove(self, move: Move) -> None:
+        self.moves.remove(move)
+
+    def pop(self, *arg):
+        self.moves.pop(*arg)
+
+    def copy(self):
+        return Algorithm(self.moves.copy())
+
     def __len__(self) -> int:
         """
         Return the number of moves in the algorithm.
