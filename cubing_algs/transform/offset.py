@@ -14,8 +14,6 @@ def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
             moves.append(Move(rotation_table[move_str]))
         elif move.is_double and base_str in rotation_table:
             moves.append(Move(rotation_table[base_str]).doubled)
-        elif move.is_double and str(Move(base_str).inverted) in rotation_table:
-            moves.append(Move(rotation_table[str(Move(base_str).inverted)]).doubled)
         elif str(move.inverted) in rotation_table:
             moves.append(Move(rotation_table[str(move.inverted)]).inverted)
         else:
