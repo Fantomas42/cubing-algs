@@ -233,6 +233,23 @@ result = algo.transform(mirror_moves, compress_moves, symmetry_m_moves)
 # result = result.transform(symmetry_m_moves)
 ```
 
+## Transform until fixed point
+
+Chained transformations can be run until a fixed point:
+
+```python
+from cubing_algs.transform.optimize import optimize_do_undo_moves
+from cubing_algs.transform.optimize import optimize_double_moves
+
+algo = parse_moves("R R F F' R2 U F2")
+result = algo.transform(optimize_do_undo_moves, optimize_double_moves)
+# R2 R2 U F2
+
+algo = parse_moves("R R F F' R2 U F2")
+result = algo.transform(optimize_do_undo_moves, optimize_double_moves, to_fixpoint=True)
+# U F2
+```
+
 ## Understanding Metrics
 
 The module calculates the following metrics:
