@@ -1,6 +1,7 @@
 from collections import UserList
 from collections.abc import Callable
 
+from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
@@ -47,6 +48,7 @@ class Algorithm(UserList[Move]):
     def transform(
             self,
             *processes: Callable[[list[Move]], list[Move]],
+            to_fixpoint: bool = False,
     ) -> 'Algorithm':
         """
         Apply a series of transformation functions to the algorithm's moves.
@@ -56,10 +58,15 @@ class Algorithm(UserList[Move]):
         """
         new_moves = self.copy()
 
-        for process in processes:
-            new_moves = process(new_moves)
+        max_iterations = 1
+        if to_fixpoint:
+            max_iterations = MAX_ITERATIONS
 
-        if new_moves == self:
-            return self
+        for _ in range(max_iterations):
+            for process in processes:
+                new_moves = process(new_moves)
+
+            if new_moves == self:
+                return self
 
         return Algorithm(new_moves)
