@@ -5,7 +5,7 @@ from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
 
-class Algorithm(UserList):
+class Algorithm(UserList[Move]):
     """
     Represents a sequence of Rubik's cube moves.
 
