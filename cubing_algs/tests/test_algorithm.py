@@ -123,3 +123,27 @@ class AlgorithmTestCase(unittest.TestCase):
             ),
             expected,
         )
+
+    def test_transform_to_fixpoint(self):
+        algo = parse_moves("R R F F' R2 U F2")
+        expected = parse_moves('R2 R2 U F2')
+
+        self.assertEqual(
+            algo.transform(
+                optimize_do_undo_moves,
+                optimize_double_moves,
+            ),
+            expected,
+        )
+
+        algo = parse_moves("R R F F' R2 U F2")
+        expected = parse_moves('U F2')
+
+        self.assertEqual(
+            algo.transform(
+                optimize_do_undo_moves,
+                optimize_double_moves,
+                to_fixpoint=True,
+            ),
+            expected,
+        )
