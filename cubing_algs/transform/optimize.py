@@ -71,7 +71,7 @@ def optimize_double_moves(
     moves = old_moves.copy()
 
     while i < len(moves) - 1:
-        if moves[i] == moves[i + 1]:
+        if moves[i] == moves[i + 1] and not moves[i].is_double:
             moves[i:i + 2] = [moves[i].doubled]
             changed = True
         else:

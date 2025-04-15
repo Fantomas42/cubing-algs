@@ -219,6 +219,15 @@ class TransformOptimizeTestCase(unittest.TestCase):
             provide,
         )
 
+    def test_optimize_double_moves_issue_1(self):
+        provide = parse_moves('R R R2 F')
+        expect = parse_moves('R2 R2 F')
+
+        self.assertEqual(
+            optimize_double_moves(provide),
+            expect,
+        )
+
     def test_optimize_triple_moves(self):
         provide = parse_moves('R R2')
         expect = parse_moves("R'")
