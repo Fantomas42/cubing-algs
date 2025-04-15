@@ -1,12 +1,11 @@
+from collections import UserList
 from collections.abc import Callable
-from collections.abc import Iterator
-from typing import Any
 
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
 
-class Algorithm:
+class Algorithm(UserList):
     """
     Represents a sequence of Rubik's cube moves.
 
@@ -14,71 +13,18 @@ class Algorithm:
     providing methods to manipulate and analyze the algorithm.
     """
 
-    def __init__(self, moves: list[Move]):
-        """
-        Initialize an Algorithm with a list of Move objects.
-        """
-        self.moves = moves
-
-    def append(self, move: Move) -> None:
-        self.moves.append(move)
-
-    def extend(self, moves: list[Move]) -> None:  # | Algorithm
-        if isinstance(moves, Algorithm):
-            self.moves.extend(moves.moves)
-        else:
-            self.moves.extend(moves)
-
-    def insert(self, i: int, move: Move) -> None:
-        self.moves.insert(i, move)
-
-    def remove(self, move: Move) -> None:
-        self.moves.remove(move)
-
-    def pop(self, *arg: int) -> Move:
-        return self.moves.pop(*arg)
-
-    def copy(self) -> 'Algorithm':
-        return Algorithm(self.moves.copy())
-
-    def __iter__(self) -> Iterator[Move]:
-        yield from self.moves
-
-    def __getitem__(self, index: int) -> Move:
-        return self.moves[index]
-
-    def __setitem__(self, index: int, value: Move) -> None:
-        self.moves[index] = value
-
-    def __delitem__(self, index: int) -> None:
-        del self.moves[index]
-
-    def __len__(self) -> int:
-        """
-        Return the number of moves in the algorithm.
-        """
-        return len(self.moves)
-
     def __str__(self) -> str:
         """
         Convert the algorithm to a human-readable string.
         """
-        return ' '.join([str(m) for m in self.moves])
+        return ' '.join([str(m) for m in self])
 
     def __repr__(self) -> str:
         """
         Return a string representation that can be used
         to recreate the algorithm.
         """
-        return f'Algorithm("{ "".join([str(m) for m in self.moves]) }")'
-
-    def __eq__(self, other: Any) -> bool:
-        """
-        Compare this algorithm with another for equality.
-
-        Two algorithms are equal if they have identical move sequences.
-        """
-        return isinstance(other, Algorithm) and other.moves == self.moves
+        return f'Algorithm("{ "".join([str(m) for m in self]) }")'
 
     def __hash__(self) -> int:
         """
@@ -96,7 +42,7 @@ class Algorithm:
         Uses the compute_metrics function to analyze the algorithm's efficiency,
         move types, and other characteristics.
         """
-        return compute_metrics(self.moves)
+        return compute_metrics(self)
 
     def transform(
             self,
@@ -108,12 +54,12 @@ class Algorithm:
         This method enables chaining multiple transformations together, such as
         simplification, optimization, or conversion between notations.
         """
-        new_moves = self.moves.copy()
+        new_moves = self.copy()
 
         for process in processes:
             new_moves = process(new_moves)
 
-        if new_moves == self.moves:
+        if new_moves == self:
             return self
 
         return Algorithm(new_moves)

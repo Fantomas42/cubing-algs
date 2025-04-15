@@ -19,11 +19,11 @@ class TransformOffsetTestCase(unittest.TestCase):
         provide = parse_moves("R U R' U'")
         expect = parse_moves("R B R' B'")
 
-        result = offset_x_moves(provide.moves)
+        result = offset_x_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:
@@ -34,8 +34,8 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("R D R' D'")
 
         self.assertEqual(
-            offset_x2_moves(provide.moves),
-            expect.moves,
+            offset_x2_moves(provide),
+            expect,
         )
 
     def test_offset_xprime_moves(self):
@@ -43,8 +43,8 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("R F R' F'")
 
         self.assertEqual(
-            offset_xprime_moves(provide.moves),
-            expect.moves,
+            offset_xprime_moves(provide),
+            expect,
         )
 
     def test_offset_y_moves(self):
@@ -52,8 +52,8 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("F U F' U'")
 
         self.assertEqual(
-            offset_y_moves(provide.moves),
-            expect.moves,
+            offset_y_moves(provide),
+            expect,
         )
 
     def test_offset_y2_moves(self):
@@ -61,8 +61,8 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("L U L' U'")
 
         self.assertEqual(
-            offset_y2_moves(provide.moves),
-            expect.moves,
+            offset_y2_moves(provide),
+            expect,
         )
 
     def test_offset_yprime_moves(self):
@@ -70,8 +70,8 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("B U B' U'")
 
         self.assertEqual(
-            offset_yprime_moves(provide.moves),
-            expect.moves,
+            offset_yprime_moves(provide),
+            expect,
         )
 
     def test_offset_z_moves(self):
@@ -79,8 +79,8 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("D R D' R'")
 
         self.assertEqual(
-            offset_z_moves(provide.moves),
-            expect.moves,
+            offset_z_moves(provide),
+            expect,
         )
 
     def test_offset_z2_moves(self):
@@ -88,8 +88,8 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("L D L' D'")
 
         self.assertEqual(
-            offset_z2_moves(provide.moves),
-            expect.moves,
+            offset_z2_moves(provide),
+            expect,
         )
 
     def test_offset_zprime_moves(self):
@@ -97,6 +97,6 @@ class TransformOffsetTestCase(unittest.TestCase):
         expect = parse_moves("U L U' L'")
 
         self.assertEqual(
-            offset_zprime_moves(provide.moves),
-            expect.moves,
+            offset_zprime_moves(provide),
+            expect,
         )

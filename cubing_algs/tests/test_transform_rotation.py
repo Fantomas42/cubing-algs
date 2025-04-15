@@ -11,11 +11,11 @@ class TransformRotationTestCase(unittest.TestCase):
         provide = parse_moves('R2 F U x y2')
         expect = parse_moves('R2 F U')
 
-        result = remove_final_rotations(provide.moves)
+        result = remove_final_rotations(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:

@@ -1,5 +1,6 @@
 import unittest
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
@@ -49,6 +50,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U')
 
         copy = algo.copy()
+        self.assertTrue(isinstance(copy, Algorithm))
         self.assertEqual(str(copy), 'R2 U')
 
         algo.pop()

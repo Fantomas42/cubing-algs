@@ -13,11 +13,11 @@ class TransformMirrorTestCase(unittest.TestCase):
         )
         expect = parse_moves("F U2 R' F'")
 
-        result = mirror_moves(provide.moves)
+        result = mirror_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:

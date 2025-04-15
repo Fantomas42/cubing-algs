@@ -12,11 +12,11 @@ class TransformJapaneseTestCase(unittest.TestCase):
         provide = parse_moves("R' F u' B r")
         expect = parse_moves("R' F Uw' B Rw")
 
-        result = japanese_moves(provide.moves)
+        result = japanese_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:
@@ -26,11 +26,11 @@ class TransformJapaneseTestCase(unittest.TestCase):
         provide = parse_moves("R' F Uw' B Rw")
         expect = parse_moves("R' F u' B r")
 
-        result = unjapanese_moves(provide.moves)
+        result = unjapanese_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:

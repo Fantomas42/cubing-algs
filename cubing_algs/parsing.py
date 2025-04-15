@@ -140,10 +140,10 @@ def parse_moves_cfop(moves: str) -> Algorithm:
     """
     algo = parse_moves(moves)
 
-    if algo.moves[0].base_move in {'y', 'U'}:
-        algo.moves = algo.moves[1:]
+    if algo[0].base_move in {'y', 'U'}:
+        algo = algo[1:]
 
-    if algo.moves[-1].base_move in {'y', 'U'}:
-        algo.moves = algo.moves[:-1]
+    if algo[-1].base_move in {'y', 'U'}:
+        algo = algo[:-1]
 
     return algo

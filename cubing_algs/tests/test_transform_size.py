@@ -16,11 +16,11 @@ class TransformSizeTestCase(unittest.TestCase):
         )
         expect = parse_moves("U R U2 R' U' R U R' U' R U R' U' R U' R'")
 
-        result = compress_moves(provide.moves)
+        result = compress_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:
@@ -33,22 +33,22 @@ class TransformSizeTestCase(unittest.TestCase):
             "(R U2 R' U' R U' R')",
         )
 
-        result = compress_moves(provide.moves, 0)
+        result = compress_moves(provide, 0)
 
         self.assertEqual(
             result,
-            provide.moves,
+            provide,
         )
 
     def test_expand_moves(self):
         provide = parse_moves('R2 F U')
         expect = parse_moves('R R F U')
 
-        result = expand_moves(provide.moves)
+        result = expand_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:

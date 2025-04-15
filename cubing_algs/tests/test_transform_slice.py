@@ -13,11 +13,11 @@ class TransformSliceTestCase(unittest.TestCase):
         provide = parse_moves('M2 U S E')
         expect = parse_moves("L2R2x2UF'BzD'Uy'")
 
-        result = unslice_rotation_moves(provide.moves)
+        result = unslice_rotation_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:
@@ -27,11 +27,11 @@ class TransformSliceTestCase(unittest.TestCase):
         provide = parse_moves('M2 U S E')
         expect = parse_moves("r2R2UfF'u'U")
 
-        result = unslice_wide_moves(provide.moves)
+        result = unslice_wide_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:
@@ -41,11 +41,11 @@ class TransformSliceTestCase(unittest.TestCase):
         provide = parse_moves("U' D")
         expect = parse_moves("E'y'")
 
-        result = reslice_moves(provide.moves)
+        result = reslice_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:
@@ -55,6 +55,6 @@ class TransformSliceTestCase(unittest.TestCase):
         provide = parse_moves("U' D")
 
         self.assertEqual(
-            reslice_moves(provide.moves, 0),
-            provide.moves,
+            reslice_moves(provide, 0),
+            provide,
         )

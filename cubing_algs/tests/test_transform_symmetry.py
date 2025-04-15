@@ -14,11 +14,11 @@ class TransformSymmetryTestCase(unittest.TestCase):
         provide = parse_moves("U R U' R'")
         expect = parse_moves("U L U' L'")
 
-        result = symmetry_c_moves(provide.moves)
+        result = symmetry_c_moves(provide)
 
         self.assertEqual(
             result,
-            expect.moves,
+            expect,
         )
 
         for m in result:
@@ -28,8 +28,8 @@ class TransformSymmetryTestCase(unittest.TestCase):
         expect = parse_moves("B L' U2")
 
         self.assertEqual(
-            symmetry_c_moves(provide.moves),
-            expect.moves,
+            symmetry_c_moves(provide),
+            expect,
         )
 
     def test_symmetry_e_moves(self):
@@ -37,16 +37,16 @@ class TransformSymmetryTestCase(unittest.TestCase):
         expect = parse_moves("D' R' D R")
 
         self.assertEqual(
-            symmetry_e_moves(provide.moves),
-            expect.moves,
+            symmetry_e_moves(provide),
+            expect,
         )
 
         provide = parse_moves("F R' U2")
         expect = parse_moves("F' R D2")
 
         self.assertEqual(
-            symmetry_e_moves(provide.moves),
-            expect.moves,
+            symmetry_e_moves(provide),
+            expect,
         )
 
     def test_symmetry_m_moves(self):
@@ -54,24 +54,24 @@ class TransformSymmetryTestCase(unittest.TestCase):
         expect = parse_moves("U' L' U L")
 
         self.assertEqual(
-            symmetry_m_moves(provide.moves),
-            expect.moves,
+            symmetry_m_moves(provide),
+            expect,
         )
 
         provide = parse_moves("F R' U2")
         expect = parse_moves("F' L U2")
 
         self.assertEqual(
-            symmetry_m_moves(provide.moves),
-            expect.moves,
+            symmetry_m_moves(provide),
+            expect,
         )
 
         provide = parse_moves("F R' U2 M'")
         expect = parse_moves("F' L U2 M'")
 
         self.assertEqual(
-            symmetry_m_moves(provide.moves),
-            expect.moves,
+            symmetry_m_moves(provide),
+            expect,
         )
 
     def test_symmetry_s_moves(self):
@@ -79,14 +79,14 @@ class TransformSymmetryTestCase(unittest.TestCase):
         expect = parse_moves("U' R' U R")
 
         self.assertEqual(
-            symmetry_s_moves(provide.moves),
-            expect.moves,
+            symmetry_s_moves(provide),
+            expect,
         )
 
         provide = parse_moves("F R' U2")
         expect = parse_moves("B' R U2")
 
         self.assertEqual(
-            symmetry_s_moves(provide.moves),
-            expect.moves,
+            symmetry_s_moves(provide),
+            expect,
         )
