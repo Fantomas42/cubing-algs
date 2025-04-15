@@ -122,22 +122,31 @@ UNSLICE_ROTATION_MOVES = {
     'E2': ['D2', 'U2', 'y2'],
 }
 
-RESLICE_MOVES = {
+RESLICE_M_MOVES = {
     "L' R": ['M', 'x'],
     "R L'": ['M', 'x'],
     "L R'": ["M'", "x'"],
     "R' L": ["M'", "x'"],
+}
 
+RESLICE_S_MOVES = {
     "F' B": ['S', "z'"],
     "B F'": ['S', "z'"],
     "F B'": ["S'", 'z'],
     "B' F": ["S'", 'z'],
+}
 
+RESLICE_E_MOVES = {
     "U D'": ['E', 'y'],
     "D' U": ['E', 'y'],
     "U' D": ["E'", "y'"],
     "D U'": ["E'", "y'"],
 }
+
+RESLICE_MOVES = {}
+RESLICE_MOVES.update(RESLICE_M_MOVES)
+RESLICE_MOVES.update(RESLICE_S_MOVES)
+RESLICE_MOVES.update(RESLICE_E_MOVES)
 
 
 MOVE_SPLIT = re.compile(r"([LlRrUuDdFfBbMSExyz][w]?[2']?)")
