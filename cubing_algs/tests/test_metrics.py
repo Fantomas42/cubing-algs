@@ -1,6 +1,7 @@
 import unittest
 
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.optimize import optimize_double_moves
 
 
 class MetricsTestCase(unittest.TestCase):
@@ -56,3 +57,39 @@ class MetricsTestCase(unittest.TestCase):
 
         for move, score in zip(moves, scores, strict=True):
             self.assertEqual(parse_moves(move).metrics['qstm'], score)
+
+    def test_issue_11(self):
+        moves = "R U F' B R' U F' U' F D F' D' F' D' F D' L D L' R D' R' D' B D' B' D' D' R D' D' R' D B' D' B D' D' F D' F' D F D F' D' D D' D' L D B D' B' L' D R F D F' D' R' R F D' F' D' F D F' R' F D F' D' F' R F R' D"  # noqa: E501
+
+        algo = parse_moves(moves)
+        self.assertEqual(
+            algo.metrics,
+            {
+                'generators': ['D', 'F', 'R', 'B', 'L', 'U'],
+                'inner_moves': 0,
+                'outer_moves': 80,
+                'rotations': 0,
+                'htm': 80,
+                'qtm': 80,
+                'stm': 80,
+                'etm': 80,
+                'qstm': 80,
+            },
+        )
+
+        compress = algo.transform(optimize_double_moves)
+
+        self.assertEqual(
+            compress.metrics,
+            {
+                'generators': ['D', 'F', 'R', 'B', 'L', 'U'],
+                'inner_moves': 0,
+                'outer_moves': 76,
+                'rotations': 0,
+                'htm': 76,
+                'qtm': 80,
+                'stm': 76,
+                'etm': 76,
+                'qstm': 80,
+            },
+        )
