@@ -80,8 +80,8 @@ def compute_generators(moves: list[Move]) -> list[str]:
         if move.is_rotation_move:
             continue
 
-        count.setdefault(move.base_move, 0)
-        count[move.base_move] += 1
+        count.setdefault(move.raw_base_move, 0)
+        count[move.raw_base_move] += 1
 
     return [
         k

@@ -67,6 +67,19 @@ class Move(UserString):
         return self.data[0]
 
     @cached_property
+    def raw_base_move(self) -> str:
+        """
+        Extract the base letter of the move without modifiers
+        keeping original notation.
+
+        For standard notation, returns the first character.
+        For Japanese notation, returns the two first characters..
+        """
+        if self.is_japanese_move:
+            return self.data[:2]
+        return self.data[0]
+
+    @cached_property
     def modifier(self) -> str:
         """
         Extract the modifier part of the move.

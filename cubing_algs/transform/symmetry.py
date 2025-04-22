@@ -23,6 +23,9 @@ def symmetry_moves(
         else:
             new_move = Move(symmetry_table[move.base_move])
 
+            if move.is_japanese_move:
+                new_move = new_move.japanesed
+
             if move.is_double:
                 moves.append(new_move.doubled)
             elif move.is_clockwise:

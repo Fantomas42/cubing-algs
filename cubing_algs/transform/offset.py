@@ -10,14 +10,19 @@ def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
         move_str = str(move)
         base_str = move.base_move
 
+        new_move = move
+
         if move_str in rotation_table:
-            moves.append(Move(rotation_table[move_str]))
+            new_move = Move(rotation_table[move_str])
         elif move.is_double and base_str in rotation_table:
-            moves.append(Move(rotation_table[base_str]).doubled)
+            new_move = Move(rotation_table[base_str]).doubled
         elif str(move.inverted) in rotation_table:
-            moves.append(Move(rotation_table[str(move.inverted)]).inverted)
-        else:
-            moves.append(move)
+            new_move = Move(rotation_table[str(move.inverted)]).inverted
+
+        if move.is_japanese_move and not new_move.is_japanese_move:
+            new_move = new_move.japanesed
+
+        moves.append(new_move)
 
     return moves
 

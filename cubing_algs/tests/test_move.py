@@ -10,6 +10,11 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('x2').base_move, 'x')
         self.assertEqual(Move('Uw').base_move, 'u')
 
+    def test_raw_base_move(self):
+        self.assertEqual(Move('U').raw_base_move, 'U')
+        self.assertEqual(Move('x2').raw_base_move, 'x')
+        self.assertEqual(Move('Uw').raw_base_move, 'Uw')
+
     def test_modifier(self):
         self.assertEqual(Move('U').modifier, '')
         self.assertEqual(Move('x2').modifier, '2')

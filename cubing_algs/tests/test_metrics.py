@@ -5,6 +5,7 @@ from cubing_algs.transform.optimize import optimize_double_moves
 
 
 class MetricsTestCase(unittest.TestCase):
+    maxDiff = None
 
     def test_metrics(self):
         algo = parse_moves("yM2UMU2M'UM2")
@@ -91,5 +92,39 @@ class MetricsTestCase(unittest.TestCase):
                 'stm': 76,
                 'etm': 76,
                 'qstm': 80,
+            },
+        )
+
+    def test_metrics_wide(self):
+        algo = parse_moves('RFu')
+        self.assertEqual(
+            algo.metrics,
+            {
+                'generators': ['R', 'F', 'u'],
+                'inner_moves': 0,
+                'outer_moves': 3,
+                'rotations': 0,
+                'htm': 3,
+                'qtm': 3,
+                'stm': 3,
+                'etm': 3,
+                'qstm': 3,
+            },
+        )
+
+    def test_metrics_wide_japanese(self):
+        algo = parse_moves('RFUw')
+        self.assertEqual(
+            algo.metrics,
+            {
+                'generators': ['R', 'F', 'Uw'],
+                'inner_moves': 0,
+                'outer_moves': 3,
+                'rotations': 0,
+                'htm': 3,
+                'qtm': 3,
+                'stm': 3,
+                'etm': 3,
+                'qstm': 3,
             },
         )
