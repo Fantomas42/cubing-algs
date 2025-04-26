@@ -64,7 +64,11 @@ class VCube:
                     self.state[12:15],
                     self.state[15:18],
                 ]
-                rotated_r = r_face[2][0] + r_face[1][0] + r_face[0][0] + r_face[2][1] + r_face[1][1] + r_face[0][1] + r_face[2][2] + r_face[1][2] + r_face[0][2]
+                rotated_r = (
+                    r_face[2][0] + r_face[1][0] + r_face[0][0] +
+                    r_face[2][1] + r_face[1][1] + r_face[0][1] +
+                    r_face[2][2] + r_face[1][2] + r_face[0][2]
+                )
 
                 # Extract columns from U, F, D, B that will be affected
                 u_right_col = [self.state[2], self.state[5], self.state[8]]
@@ -99,7 +103,11 @@ class VCube:
                     self.state[21:24],
                     self.state[24:27],
                 ]
-                rotated_f = f_face[2][0] + f_face[1][0] + f_face[0][0] + f_face[2][1] + f_face[1][1] + f_face[0][1] + f_face[2][2] + f_face[1][2] + f_face[0][2]
+                rotated_f = (
+                    f_face[2][0] + f_face[1][0] + f_face[0][0] +
+                    f_face[2][1] + f_face[1][1] + f_face[0][1] +
+                    f_face[2][2] + f_face[1][2] + f_face[0][2]
+                )
 
                 # Extract affected parts
                 u_bottom_row = self.state[6:9]
@@ -131,7 +139,11 @@ class VCube:
                     self.state[30:33],
                     self.state[33:36],
                 ]
-                rotated_d = d_face[2][0] + d_face[1][0] + d_face[0][0] + d_face[2][1] + d_face[1][1] + d_face[0][1] + d_face[2][2] + d_face[1][2] + d_face[0][2]
+                rotated_d = (
+                    d_face[2][0] + d_face[1][0] + d_face[0][0] +
+                    d_face[2][1] + d_face[1][1] + d_face[0][1] +
+                    d_face[2][2] + d_face[1][2] + d_face[0][2]
+                )
 
                 # Extract bottom rows
                 f_bottom = self.state[24:27]
@@ -193,9 +205,13 @@ class VCube:
                 b_face = [
                     self.state[45:48],
                     self.state[48:51],
-                    self.state[51:54]
+                    self.state[51:54],
                 ]
-                rotated_b = b_face[2][0] + b_face[1][0] + b_face[0][0] + b_face[2][1] + b_face[1][1] + b_face[0][1] + b_face[2][2] + b_face[1][2] + b_face[0][2]
+                rotated_b = (
+                    b_face[2][0] + b_face[1][0] + b_face[0][0] +
+                    b_face[2][1] + b_face[1][1] + b_face[0][1] +
+                    b_face[2][2] + b_face[1][2] + b_face[0][2]
+                )
 
                 # Extract affected parts
                 u_top_row = self.state[0:3]
@@ -228,10 +244,18 @@ class VCube:
                 b_middle_col = [self.state[46], self.state[49], self.state[52]]
 
                 # Rotate (like L)
-                new_u_middle = [b_middle_col[2], b_middle_col[1], b_middle_col[0]]
+                new_u_middle = [
+                    b_middle_col[2],
+                    b_middle_col[1],
+                    b_middle_col[0],
+                ]
                 new_f_middle = u_middle_col
                 new_d_middle = f_middle_col
-                new_b_middle = [d_middle_col[2], d_middle_col[1], d_middle_col[0]]
+                new_b_middle = [
+                    d_middle_col[2],
+                    d_middle_col[1],
+                    d_middle_col[0],
+                ]
 
                 # Update state
                 self.state = (
@@ -300,9 +324,8 @@ class VCube:
                 )
 
             elif face == 'x':
-                # x is the rotation of the entire cube around the x axis (same as R, with M' and L' together)
-                # We can implement this as a sequence of moves: R + M' + L'
-                # But we'll implement it directly for efficiency
+                # x is the rotation of the entire cube around the x axis
+                # (same as R, with M' and L' together)
 
                 # Extract all faces
                 u_face = self.state[0:9]
@@ -313,10 +336,18 @@ class VCube:
                 b_face = self.state[45:54]
 
                 # Rotate R face
-                r_rotated = r_face[6] + r_face[3] + r_face[0] + r_face[7] + r_face[4] + r_face[1] + r_face[8] + r_face[5] + r_face[2]
+                r_rotated = (
+                    r_face[6] + r_face[3] + r_face[0] +
+                    r_face[7] + r_face[4] + r_face[1] +
+                    r_face[8] + r_face[5] + r_face[2]
+                )
 
                 # Rotate L face (counterclockwise)
-                l_rotated = l_face[2] + l_face[5] + l_face[8] + l_face[1] + l_face[4] + l_face[7] + l_face[0] + l_face[3] + l_face[6]
+                l_rotated = (
+                    l_face[2] + l_face[5] + l_face[8] +
+                    l_face[1] + l_face[4] + l_face[7] +
+                    l_face[0] + l_face[3] + l_face[6]
+                )
 
                 # Update state - this is a full cube rotation, so faces move to new positions
                 self.state = (
@@ -329,7 +360,8 @@ class VCube:
                 )
 
             elif face == 'y':
-                # y is the rotation of the entire cube around the y axis (same as U, with E' and D' together)
+                # y is the rotation of the entire cube around the y axis
+                # (same as U, with E' and D' together)
 
                 # Extract all faces
                 u_face = self.state[0:9]
@@ -340,10 +372,18 @@ class VCube:
                 b_face = self.state[45:54]
 
                 # Rotate U face
-                u_rotated = u_face[6] + u_face[3] + u_face[0] + u_face[7] + u_face[4] + u_face[1] + u_face[8] + u_face[5] + u_face[2]
+                u_rotated = (
+                    u_face[6] + u_face[3] + u_face[0] +
+                    u_face[7] + u_face[4] + u_face[1] +
+                    u_face[8] + u_face[5] + u_face[2]
+                )
 
                 # Rotate D face (counterclockwise)
-                d_rotated = d_face[2] + d_face[5] + d_face[8] + d_face[1] + d_face[4] + d_face[7] + d_face[0] + d_face[3] + d_face[6]
+                d_rotated = (
+                    d_face[2] + d_face[5] + d_face[8] +
+                    d_face[1] + d_face[4] + d_face[7] +
+                    d_face[0] + d_face[3] + d_face[6]
+                )
 
                 # Update state
                 self.state = (
@@ -356,7 +396,8 @@ class VCube:
                 )
 
             elif face == 'z':
-                # z is the rotation of the entire cube around the z axis (same as F, with S and B' together)
+                # z is the rotation of the entire cube around the z axis
+                # (same as F, with S and B' together)
 
                 # Extract all faces
                 u_face = self.state[0:9]
@@ -367,17 +408,41 @@ class VCube:
                 b_face = self.state[45:54]
 
                 # Rotate F face
-                f_rotated = f_face[6] + f_face[3] + f_face[0] + f_face[7] + f_face[4] + f_face[1] + f_face[8] + f_face[5] + f_face[2]
+                f_rotated = (
+                    f_face[6] + f_face[3] + f_face[0] +
+                    f_face[7] + f_face[4] + f_face[1] +
+                    f_face[8] + f_face[5] + f_face[2]
+                )
 
                 # Rotate B face (counterclockwise)
-                b_rotated = b_face[2] + b_face[5] + b_face[8] + b_face[1] + b_face[4] + b_face[7] + b_face[0] + b_face[3] + b_face[6]
+                b_rotated = (
+                    b_face[2] + b_face[5] + b_face[8] +
+                    b_face[1] + b_face[4] + b_face[7] +
+                    b_face[0] + b_face[3] + b_face[6]
+                )
 
                 # The other faces need to be rotated as they move to new positions
                 # For example, when U becomes L, it also needs to be rotated 90° clockwise
-                u_transformed = u_face[6] + u_face[3] + u_face[0] + u_face[7] + u_face[4] + u_face[1] + u_face[8] + u_face[5] + u_face[2]
-                r_transformed = r_face[6] + r_face[3] + r_face[0] + r_face[7] + r_face[4] + r_face[1] + r_face[8] + r_face[5] + r_face[2]
-                d_transformed = d_face[6] + d_face[3] + d_face[0] + d_face[7] + d_face[4] + d_face[1] + d_face[8] + d_face[5] + d_face[2]
-                l_transformed = l_face[6] + l_face[3] + l_face[0] + l_face[7] + l_face[4] + l_face[1] + l_face[8] + l_face[5] + l_face[2]
+                u_transformed = (
+                    u_face[6] + u_face[3] + u_face[0] +
+                    u_face[7] + u_face[4] + u_face[1] +
+                    u_face[8] + u_face[5] + u_face[2]
+                )
+                r_transformed = (
+                    r_face[6] + r_face[3] + r_face[0] +
+                    r_face[7] + r_face[4] + r_face[1] +
+                    r_face[8] + r_face[5] + r_face[2]
+                )
+                d_transformed = (
+                    d_face[6] + d_face[3] + d_face[0] +
+                    d_face[7] + d_face[4] + d_face[1] +
+                    d_face[8] + d_face[5] + d_face[2]
+                )
+                l_transformed = (
+                    l_face[6] + l_face[3] + l_face[0] +
+                    l_face[7] + l_face[4] + l_face[1] +
+                    l_face[8] + l_face[5] + l_face[2]
+                )
 
                 # Update state
                 self.state = (
