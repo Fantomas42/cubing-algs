@@ -1,22 +1,7 @@
 import unittest
 
-
-
-INITIAL = ''
-for face in ['U', 'R', 'F', 'D', 'L', 'B']:
-    INITIAL += face * 9
-
-
-class VCube:
-    def __init__(self):
-        self.state = INITIAL
-        self.history = []
-
-
-
-    def rotate(self, move: str):
-
-        return self.state
+from cubing_algs.vcube import INITIAL
+from cubing_algs.vcube import VCube
 
 
 class VCubeTestCase(unittest.TestCase):
