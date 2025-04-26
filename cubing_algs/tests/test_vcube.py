@@ -1,6 +1,7 @@
 import unittest
 
 
+
 INITIAL = ''
 for face in ['U', 'R', 'F', 'D', 'L', 'B']:
     INITIAL += face * 9
@@ -126,4 +127,112 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(
             cube.rotate('B2'),
             'DDDUUUUUURRLRRLRRLFFFFFFFFFDDDDDDUUURLLRLLRLLBBBBBBBBB',
+        )
+
+    def test_rotate_m(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('M'),
+            'UBUUBUUBURRRRRRRRRFUFFUFFUFDFDDFDDFDLLLLLLLLLBDBBDBBDB',
+        )
+
+        self.assertEqual(
+            cube.rotate("M'"),
+            INITIAL,
+        )
+
+        self.assertEqual(
+            cube.rotate('M2'),
+            'UDUUDUUDURRRRRRRRRFBFFBFFBFDUDDUDDUDLLLLLLLLLBFBBFBBFB',
+        )
+
+    def test_rotate_s(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('S'),
+            'UUULLLUUURURRURRURFFFFFFFFFDDDRRRDDDLDLLDLLDLBBBBBBBBB',
+        )
+
+        self.assertEqual(
+            cube.rotate("S'"),
+            INITIAL,
+        )
+
+        self.assertEqual(
+            cube.rotate('S2'),
+            'UUUDDDUUURLRRLRRLRFFFFFFFFFDDDUUUDDDLRLLRLLRLBBBBBBBBB',
+        )
+
+    def test_rotate_e(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('E'),
+            'UUUUUUUUURRRFFFRRRFFFLLLFFFDDDDDDDDDLLLBBBLLLBBBRRRBBB',
+        )
+
+        self.assertEqual(
+            cube.rotate("E'"),
+            INITIAL,
+        )
+
+        self.assertEqual(
+            cube.rotate('E2'),
+            'UUUUUUUUURRRLLLRRRFFFBBBFFFDDDDDDDDDLLLRRRLLLBBBFFFBBB',
+        )
+
+    def test_rotate_x(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('x'),
+            'FFFFFFFFFRRRRRRRRRDDDDDDDDDBBBBBBBBBLLLLLLLLLUUUUUUUUU',
+        )
+
+        self.assertEqual(
+            cube.rotate("x'"),
+            INITIAL,
+        )
+
+        self.assertEqual(
+            cube.rotate('x2'),
+            'DDDDDDDDDRRRRRRRRRBBBBBBBBBUUUUUUUUULLLLLLLLLFFFFFFFFF',
+        )
+
+    def test_rotate_y(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('y'),
+            'UUUUUUUUUBBBBBBBBBRRRRRRRRRDDDDDDDDDFFFFFFFFFLLLLLLLLL',
+        )
+
+        self.assertEqual(
+            cube.rotate("y'"),
+            INITIAL,
+        )
+
+        self.assertEqual(
+            cube.rotate('y2'),
+            'UUUUUUUUULLLLLLLLLBBBBBBBBBDDDDDDDDDRRRRRRRRRFFFFFFFFF',
+        )
+
+    def test_rotate_z(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('z'),
+            'LLLLLLLLLUUUUUUUUUFFFFFFFFFRRRRRRRRRDDDDDDDDDBBBBBBBBB',
+        )
+
+        self.assertEqual(
+            cube.rotate("z'"),
+            INITIAL,
+        )
+
+        self.assertEqual(
+            cube.rotate('z2'),
+            'DDDDDDDDDLLLLLLLLLFFFFFFFFFUUUUUUUUURRRRRRRRRBBBBBBBBB',
         )
