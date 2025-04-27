@@ -8,6 +8,10 @@ class VCube:
         self.state = INITIAL
         self.history = []
 
+    @property
+    def is_solved(self):
+        return self.state == INITIAL
+
     def rotate(self, moves):
         for m in moves.split(' '):
             self.rotate_move(m)
