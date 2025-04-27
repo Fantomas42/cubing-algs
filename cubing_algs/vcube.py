@@ -91,12 +91,20 @@ class VCube:
 
                 # Update state
                 self.state = (
-                    self.state[0:2] + new_u_right[0] + self.state[3:5] + new_u_right[1] + self.state[6:8] + new_u_right[2] +  # U face
-                    rotated_r +  # R face
-                    self.state[18:20] + new_f_right[0] + self.state[21:23] + new_f_right[1] + self.state[24:26] + new_f_right[2] +  # F face
-                    self.state[27:29] + new_d_right[0] + self.state[30:32] + new_d_right[1] + self.state[33:35] + new_d_right[2] +  # D face
-                    self.state[36:45] +  # L face
-                    new_b_left[0] + self.state[46:48] + new_b_left[1] + self.state[49:51] + new_b_left[2] + self.state[52:54]  # B face
+                    self.state[0:2] + new_u_right[0] +
+                    self.state[3:5] + new_u_right[1] +
+                    self.state[6:8] + new_u_right[2] +    # U face
+                    rotated_r +                           # R face
+                    self.state[18:20] + new_f_right[0] +
+                    self.state[21:23] + new_f_right[1] +
+                    self.state[24:26] + new_f_right[2] +  # F face
+                    self.state[27:29] + new_d_right[0] +
+                    self.state[30:32] + new_d_right[1] +
+                    self.state[33:35] + new_d_right[2] +  # D face
+                    self.state[36:45] +                   # L face
+                    new_b_left[0] + self.state[46:48] +
+                    new_b_left[1] + self.state[49:51] +
+                    new_b_left[2] + self.state[52:54]     # B face
                 )
 
             elif face == 'F':
@@ -127,12 +135,18 @@ class VCube:
 
                 # Update state
                 self.state = (
-                    self.state[0:6] + new_u_bottom[0] + new_u_bottom[1] + new_u_bottom[2] +  # U face
-                    new_r_left[0] + self.state[10:12] + new_r_left[1] + self.state[13:15] + new_r_left[2] + self.state[16:18] +  # R face
-                    rotated_f +  # F face
-                    new_d_top[0] + new_d_top[1] + new_d_top[2] + self.state[30:36] +  # D face
-                    self.state[36:38] + new_l_right[0] + self.state[39:41] + new_l_right[1] + self.state[42:44] + new_l_right[2] +  # L face
-                    self.state[45:54]  # B face
+                    self.state[0:6] + new_u_bottom[0] +
+                    new_u_bottom[1] + new_u_bottom[2] +   # U face
+                    new_r_left[0] + self.state[10:12] +
+                    new_r_left[1] + self.state[13:15] +
+                    new_r_left[2] + self.state[16:18] +   # R face
+                    rotated_f +                           # F face
+                    new_d_top[0] + new_d_top[1] +
+                    new_d_top[2] + self.state[30:36] +    # D face
+                    self.state[36:38] + new_l_right[0] +
+                    self.state[39:41] + new_l_right[1] +
+                    self.state[42:44] + new_l_right[2] +  # L face
+                    self.state[45:54]                     # B face
                 )
 
             elif face == 'D':
@@ -179,7 +193,11 @@ class VCube:
                     self.state[39:42],
                     self.state[42:45],
                 ]
-                rotated_l = l_face[2][0] + l_face[1][0] + l_face[0][0] + l_face[2][1] + l_face[1][1] + l_face[0][1] + l_face[2][2] + l_face[1][2] + l_face[0][2]
+                rotated_l = (
+                    l_face[2][0] + l_face[1][0] + l_face[0][0] +
+                    l_face[2][1] + l_face[1][1] + l_face[0][1] +
+                    l_face[2][2] + l_face[1][2] + l_face[0][2]
+                )
 
                 # Extract columns
                 u_left_col = [self.state[0], self.state[3], self.state[6]]
@@ -195,12 +213,20 @@ class VCube:
 
                 # Update state
                 self.state = (
-                    new_u_left[0] + self.state[1:3] + new_u_left[1] + self.state[4:6] + new_u_left[2] + self.state[7:9] +  # U face
-                    self.state[9:18] +  # R face
-                    new_f_left[0] + self.state[19:21] + new_f_left[1] + self.state[22:24] + new_f_left[2] + self.state[25:27] +  # F face
-                    new_d_left[0] + self.state[28:30] + new_d_left[1] + self.state[31:33] + new_d_left[2] + self.state[34:36] +  # D face
-                    rotated_l +  # L face
-                    self.state[45:47] + new_b_right[0] + self.state[48:50] + new_b_right[1] + self.state[51:53] + new_b_right[2]   # B face
+                    new_u_left[0] + self.state[1:3] +
+                    new_u_left[1] + self.state[4:6] +
+                    new_u_left[2] + self.state[7:9] +    # U face
+                    self.state[9:18] +                   # R face
+                    new_f_left[0] + self.state[19:21] +
+                    new_f_left[1] + self.state[22:24] +
+                    new_f_left[2] + self.state[25:27] +  # F face
+                    new_d_left[0] + self.state[28:30] +
+                    new_d_left[1] + self.state[31:33] +
+                    new_d_left[2] + self.state[34:36] +  # D face
+                    rotated_l +                          # L face
+                    self.state[45:47] + new_b_right[0] +
+                    self.state[48:50] + new_b_right[1] +
+                    self.state[51:53] + new_b_right[2]   # B face
                 )
 
             elif face == 'B':
@@ -225,18 +251,28 @@ class VCube:
 
                 # Rotate
                 new_u_top = r_right_col
-                new_r_right = [d_bottom_row[2], d_bottom_row[1], d_bottom_row[0]]
+                new_r_right = [
+                    d_bottom_row[2],
+                    d_bottom_row[1],
+                    d_bottom_row[0],
+                ]
                 new_d_bottom = l_left_col
                 new_l_left = [u_top_row[2], u_top_row[1], u_top_row[0]]
 
                 # Update state
                 self.state = (
-                    new_u_top[0] + new_u_top[1] + new_u_top[2] + self.state[3:9] +  # U face
-                    self.state[9:11] + new_r_right[0] + self.state[12:14] + new_r_right[1] + self.state[15:17] + new_r_right[2] +  # R face
-                    self.state[18:27] +  # F face
-                    self.state[27:33] + new_d_bottom[0] + new_d_bottom[1] + new_d_bottom[2] +  # D face
-                    new_l_left[0] + self.state[37:39] + new_l_left[1] + self.state[40:42] + new_l_left[2] + self.state[43:45] +  # L face
-                    rotated_b  # B face
+                    new_u_top[0] + new_u_top[1] +
+                    new_u_top[2] + self.state[3:9] +       # U face
+                    self.state[9:11] + new_r_right[0] +
+                    self.state[12:14] + new_r_right[1] +
+                    self.state[15:17] + new_r_right[2] +   # R face
+                    self.state[18:27] +                    # F face
+                    self.state[27:33] + new_d_bottom[0]
+                    + new_d_bottom[1] + new_d_bottom[2] +  # D face
+                    new_l_left[0] + self.state[37:39] +
+                    new_l_left[1] + self.state[40:42] +
+                    new_l_left[2] + self.state[43:45] +    # L face
+                    rotated_b                              # B face
                 )
 
             elif face == 'M':
@@ -263,12 +299,24 @@ class VCube:
 
                 # Update state
                 self.state = (
-                    self.state[0] + new_u_middle[0] + self.state[2:4] + new_u_middle[1] + self.state[5:7] + new_u_middle[2] + self.state[8:9] +  # U face
-                    self.state[9:18] +  # R face
-                    self.state[18] + new_f_middle[0] + self.state[20:22] + new_f_middle[1] + self.state[23:25] + new_f_middle[2] + self.state[26:27] +  # F face
-                    self.state[27] + new_d_middle[0] + self.state[29:31] + new_d_middle[1] + self.state[32:34] + new_d_middle[2] + self.state[35:36] +  # D face
+                    self.state[0] + new_u_middle[0] +
+                    self.state[2:4] + new_u_middle[1] +
+                    self.state[5:7] + new_u_middle[2] +
+                    self.state[8:9] +    # U face
+                    self.state[9:18] +   # R face
+                    self.state[18] + new_f_middle[0] +
+                    self.state[20:22] + new_f_middle[1] +
+                    self.state[23:25] + new_f_middle[2] +
+                    self.state[26:27] +  # F face
+                    self.state[27] + new_d_middle[0] +
+                    self.state[29:31] + new_d_middle[1] +
+                    self.state[32:34] + new_d_middle[2] +
+                    self.state[35:36] +  # D face
                     self.state[36:45] +  # L face
-                    self.state[45:46] + new_b_middle[0] + self.state[47:49] + new_b_middle[1] + self.state[50:52] + new_b_middle[2] + self.state[53:54]  # B face
+                    self.state[45:46] + new_b_middle[0] +
+                    self.state[47:49] + new_b_middle[1] +
+                    self.state[50:52] + new_b_middle[2] +
+                    self.state[53:54]    # B face
                 )
 
             elif face == 'S':
@@ -295,12 +343,22 @@ class VCube:
 
                 # Update state
                 self.state = (
-                    self.state[0:3] + new_u_middle[0] + new_u_middle[1] + new_u_middle[2] + self.state[6:9] +  # U face
-                    self.state[9:10] + new_r_middle[0] + self.state[11:13] + new_r_middle[1] + self.state[14:16] + new_r_middle[2] + self.state[17:18] +  # R face
+                    self.state[0:3] + new_u_middle[0] +
+                    new_u_middle[1] + new_u_middle[2] +
+                    self.state[6:9] +    # U face
+                    self.state[9:10] + new_r_middle[0] +
+                    self.state[11:13] + new_r_middle[1] +
+                    self.state[14:16] + new_r_middle[2] +
+                    self.state[17:18] +  # R face
                     self.state[18:27] +  # F face
-                    self.state[27:30] + new_d_middle[0] + new_d_middle[1] + new_d_middle[2] + self.state[33:36] +  # D face
-                    self.state[36:37] + new_l_middle[0] + self.state[38:40] + new_l_middle[1] + self.state[41:43] + new_l_middle[2] + self.state[44:45] +  # L face
-                    self.state[45:54]  # B face
+                    self.state[27:30] + new_d_middle[0] +
+                    new_d_middle[1] + new_d_middle[2] +
+                    self.state[33:36] +  # D face
+                    self.state[36:37] + new_l_middle[0] +
+                    self.state[38:40] + new_l_middle[1] +
+                    self.state[41:43] + new_l_middle[2] +
+                    self.state[44:45] +  # L face
+                    self.state[45:54]    # B face
                 )
 
             elif face == 'E':
@@ -319,12 +377,20 @@ class VCube:
 
                 # Update state
                 self.state = (
-                    self.state[0:9] +                                       # U face
-                    self.state[9:12] + new_r_middle + self.state[15:18] +   # R face
-                    self.state[18:21] + new_f_middle + self.state[24:27] +  # F face
-                    self.state[27:36] +                                     # D face
-                    self.state[36:39] + new_l_middle + self.state[42:45] +  # L face
-                    self.state[45:48] + new_b_middle + self.state[51:54]    # B face
+                    self.state[0:9] +    # U face
+                    self.state[9:12] +
+                    new_r_middle +
+                    self.state[15:18] +  # R face
+                    self.state[18:21] +
+                    new_f_middle +
+                    self.state[24:27] +  # F face
+                    self.state[27:36] +  # D face
+                    self.state[36:39] +
+                    new_l_middle +
+                    self.state[42:45] +  # L face
+                    self.state[45:48] +
+                    new_b_middle +
+                    self.state[51:54]    # B face
                 )
 
             elif face == 'x':
@@ -353,7 +419,8 @@ class VCube:
                     l_face[0] + l_face[3] + l_face[6]
                 )
 
-                # Update state - this is a full cube rotation, so faces move to new positions
+                # Update state - this is a full cube rotation,
+                # so faces move to new positions
                 self.state = (
                     f_face +        # U becomes F
                     r_rotated +     # R stays R but rotates
@@ -425,8 +492,10 @@ class VCube:
                     b_face[0] + b_face[3] + b_face[6]
                 )
 
-                # The other faces need to be rotated as they move to new positions
-                # For example, when U becomes L, it also needs to be rotated 90° clockwise
+                # The other faces need to be rotated
+                # as they move to new positions
+                # For example, when U becomes L,
+                # it also needs to be rotated 90° clockwise
                 u_transformed = (
                     u_face[6] + u_face[3] + u_face[0] +
                     u_face[7] + u_face[4] + u_face[1] +
