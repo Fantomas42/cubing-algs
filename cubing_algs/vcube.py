@@ -4,8 +4,16 @@ for face in ['U', 'R', 'F', 'D', 'L', 'B']:
 
 
 class VCube:
-    def __init__(self):
-        self._state = INITIAL
+    """
+    Virtual 3x3 cube for tracking moves on facelets
+    """
+
+    def __init__(self, initial=None):
+        if initial:
+            self._state = initial
+        else:
+            self._state = INITIAL
+
         self.history = []
 
     @property
