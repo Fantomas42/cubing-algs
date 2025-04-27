@@ -230,3 +230,22 @@ class VCubeTestCase(unittest.TestCase):
             cube.rotate(scramble),
             'FBFUUDUUDBFUFRLRRRLRLLFRRDBFBUBDBFUDRFBRLFLLULUDDBDBLD',
         )
+
+    def test_state(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.state,
+            INITIAL,
+        )
+
+        result = cube.rotate('R2 U2')
+        self.assertEqual(
+            result,
+            'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB',
+        )
+
+        self.assertEqual(
+            result,
+            cube.state,
+        )
