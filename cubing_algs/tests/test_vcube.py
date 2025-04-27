@@ -221,3 +221,12 @@ class VCubeTestCase(unittest.TestCase):
             cube.rotate('z2'),
             'DDDDDDDDDLLLLLLLLLFFFFFFFFFUUUUUUUUURRRRRRRRRBBBBBBBBB',
         )
+
+    def test_real_case(self):
+        cube = VCube()
+        scramble = "U2 D2 F U2 F2 U R' L U2 R2 U' B2 D R2 L2 F2 U' L2 D F2 U'"
+
+        self.assertEqual(
+            cube.rotate(scramble),
+            'FBFUUDUUDBFUFRLRRRLRLLFRRDBFBUBDBFUDRFBRLFLLULUDDBDBLD',
+        )
