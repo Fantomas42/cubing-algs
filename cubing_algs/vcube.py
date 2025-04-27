@@ -79,9 +79,21 @@ class VCube:
                 )
 
                 # Extract columns from U, F, D, B that will be affected
-                u_right_col = [self._state[2], self._state[5], self._state[8]]
-                f_right_col = [self._state[20], self._state[23], self._state[26]]
-                d_right_col = [self._state[29], self._state[32], self._state[35]]
+                u_right_col = [
+                    self._state[2],
+                    self._state[5],
+                    self._state[8],
+                ]
+                f_right_col = [
+                    self._state[20],
+                    self._state[23],
+                    self._state[26],
+                ]
+                d_right_col = [
+                    self._state[29],
+                    self._state[32],
+                    self._state[35],
+                ]
                 # Note: B's left column as seen from B's perspective
                 b_left_col = [self._state[45], self._state[48], self._state[51]]
 
@@ -129,7 +141,11 @@ class VCube:
                 u_bottom_row = self._state[6:9]
                 r_left_col = [self._state[9], self._state[12], self._state[15]]
                 d_top_row = self._state[27:30]
-                l_right_col = [self._state[38], self._state[41], self._state[44]]
+                l_right_col = [
+                    self._state[38],
+                    self._state[41],
+                    self._state[44],
+                ]
 
                 # Rotate
                 new_u_bottom = [l_right_col[2], l_right_col[1], l_right_col[0]]
@@ -204,10 +220,26 @@ class VCube:
                 )
 
                 # Extract columns
-                u_left_col = [self._state[0], self._state[3], self._state[6]]
-                f_left_col = [self._state[18], self._state[21], self._state[24]]
-                d_left_col = [self._state[27], self._state[30], self._state[33]]
-                b_right_col = [self._state[47], self._state[50], self._state[53]]
+                u_left_col = [
+                    self._state[0],
+                    self._state[3],
+                    self._state[6],
+                ]
+                f_left_col = [
+                    self._state[18],
+                    self._state[21],
+                    self._state[24],
+                ]
+                d_left_col = [
+                    self._state[27],
+                    self._state[30],
+                    self._state[33],
+                ]
+                b_right_col = [
+                    self._state[47],
+                    self._state[50],
+                    self._state[53],
+                ]
 
                 # Rotate
                 new_u_left = [b_right_col[2], b_right_col[1], b_right_col[0]]
@@ -249,9 +281,17 @@ class VCube:
 
                 # Extract affected parts
                 u_top_row = self._state[0:3]
-                r_right_col = [self._state[11], self._state[14], self._state[17]]
+                r_right_col = [
+                    self._state[11],
+                    self._state[14],
+                    self._state[17],
+                ]
                 d_bottom_row = self._state[33:36]
-                l_left_col = [self._state[36], self._state[39], self._state[42]]
+                l_left_col = [
+                    self._state[36],
+                    self._state[39],
+                    self._state[42],
+                ]
 
                 # Rotate
                 new_u_top = r_right_col
@@ -282,10 +322,26 @@ class VCube:
             elif face == 'M':
                 # M is the middle slice between L and R (same direction as L)
                 # Extract columns
-                u_middle_col = [self._state[1], self._state[4], self._state[7]]
-                f_middle_col = [self._state[19], self._state[22], self._state[25]]
-                d_middle_col = [self._state[28], self._state[31], self._state[34]]
-                b_middle_col = [self._state[46], self._state[49], self._state[52]]
+                u_middle_col = [
+                    self._state[1],
+                    self._state[4],
+                    self._state[7],
+                ]
+                f_middle_col = [
+                    self._state[19],
+                    self._state[22],
+                    self._state[25],
+                ]
+                d_middle_col = [
+                    self._state[28],
+                    self._state[31],
+                    self._state[34],
+                ]
+                b_middle_col = [
+                    self._state[46],
+                    self._state[49],
+                    self._state[52],
+                ]
 
                 # Rotate (like L)
                 new_u_middle = [
@@ -327,9 +383,17 @@ class VCube:
                 # S is the middle slice between F and B (same direction as F)
                 # Extract affected parts
                 u_middle_row = self._state[3:6]
-                r_middle_col = [self._state[10], self._state[13], self._state[16]]
+                r_middle_col = [
+                    self._state[10],
+                    self._state[13],
+                    self._state[16],
+                ]
                 d_middle_row = self._state[30:33]
-                l_middle_col = [self._state[37], self._state[40], self._state[43]]
+                l_middle_col = [
+                    self._state[37],
+                    self._state[40],
+                    self._state[43],
+                ]
 
                 # Rotate (like F)
                 new_u_middle = [
