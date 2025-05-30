@@ -148,6 +148,33 @@ RESLICE_MOVES.update(RESLICE_M_MOVES)
 RESLICE_MOVES.update(RESLICE_S_MOVES)
 RESLICE_MOVES.update(RESLICE_E_MOVES)
 
+UNFAT_MOVES = {
+    'r': ['L', 'x'],
+    "r'": ["L'", "x'"],
+    'r2': ['L2', 'x2'],
+
+    'l': ['R', "x'"],
+    "l'": ["R'", 'x'],
+    'l2': ['R2', 'x2'],
+
+    'f': ['B', 'z'],
+    "f'": ["B'", "z'"],
+    'f2': ['B2', 'z2'],
+
+    'b': ['F', "z'"],
+    "b'": ["F'", 'z'],
+    'b2': ['F2', 'z2'],
+
+    'u': ['D', 'y'],
+    "u'": ["D'", "y'"],
+    'u2': ['D2', 'y2'],
+
+    'd': ['U', "y'"],
+    "d'": ["U'", 'y'],
+    'd2': ['U2', 'y2'],
+}
+
+REFAT_MOVES = {' '.join(v): k for k, v in UNFAT_MOVES.items()}
 
 MOVE_SPLIT = re.compile(r"([LlRrUuDdFfBbMSExyz][w]?[2']?)")
 
