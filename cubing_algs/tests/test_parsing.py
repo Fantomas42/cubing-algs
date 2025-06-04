@@ -24,6 +24,15 @@ class SplitMovesTestCase(unittest.TestCase):
         expect = ['R2', 'L2', 'y', 'F', 'B2', 'E', "U'", "R'", "U'"]
         self.assertEqual(split_moves(moves), expect)
 
+    def test_split_big_moves(self):
+        moves = "3R 3Uw' 3b 2-3Dw 3-4d"
+        expect = ['3R', "3Uw'", '3b', '2-3Dw', '3-4d']
+        self.assertEqual(split_moves(moves), expect)
+
+        moves = "3R3Uw'3b2-3Dw3-4d"
+        expect = ['3R', "3Uw'", '3b', '2-3Dw', '3-4d']
+        self.assertEqual(split_moves(moves), expect)
+
 
 class CheckMovesTestCase(unittest.TestCase):
 

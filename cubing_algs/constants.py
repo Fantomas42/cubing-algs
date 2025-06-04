@@ -176,7 +176,7 @@ UNFAT_MOVES = {
 
 REFAT_MOVES = {' '.join(v): k for k, v in UNFAT_MOVES.items()}
 
-MOVE_SPLIT = re.compile(r"([LlRrUuDdFfBbMSExyz][w]?[2']?)")
+MOVE_SPLIT = re.compile(r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-))")
 
 SYMMETRY_M = {
     'U': 'U', 'u': 'u',                     'y': 'y',  # noqa: E241
