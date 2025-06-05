@@ -158,7 +158,7 @@ class Move(UserString):
         Validates that the move letter is one of the recognized basic moves.
         """
         if self.is_japanese_move:
-            return self.data[0] in OUTER_BASIC_MOVES
+            return self.raw_base_move[0] in OUTER_BASIC_MOVES
 
         return self.base_move in ALL_BASIC_MOVES
 

@@ -31,6 +31,8 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('Ux').is_valid)
         self.assertFalse(Move("U2'").is_valid)
         self.assertFalse(Move('3-4R').is_valid)
+        self.assertTrue(Move('3-4Rw').is_valid)
+        self.assertTrue(Move('2Dw2').is_valid)
 
     def test_is_valid_move(self):
         self.assertTrue(Move('U').is_valid_move)
@@ -55,6 +57,8 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('3-4r').is_valid_layer)
         self.assertFalse(Move('3-4R').is_valid_layer)
         self.assertFalse(Move('2-3-4R').is_valid_layer)
+        self.assertTrue(Move('2Dw2').is_valid_layer)
+        self.assertTrue(Move('3-4Rw').is_valid_layer)
 
     def test_is_double(self):
         self.assertFalse(Move('U').is_double)
@@ -135,6 +139,8 @@ class MoveTestCase(unittest.TestCase):
 
         self.assertEqual(Move('1-3-4r').layer, '1-3-4')
 
+        self.assertEqual(Move('2Dw2').layer, '2')
+
     def test_big_moves_japanese(self):
         move = Move('3Rw')
 
@@ -194,3 +200,5 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('3-4r').layers, [2, 3])
 
         self.assertEqual(Move('2-4r').layers, [1, 2, 3])
+
+        self.assertEqual(Move('2Dw2').layers, [0, 1])
