@@ -13,6 +13,7 @@ from cubing_algs.constants import DOUBLE_CHAR
 from cubing_algs.constants import INNER_MOVES
 from cubing_algs.constants import INVERT_CHAR
 from cubing_algs.constants import JAPANESE_CHAR
+from cubing_algs.constants import LAYER_SPLIT
 from cubing_algs.constants import OUTER_BASIC_MOVES
 from cubing_algs.constants import OUTER_MOVES
 from cubing_algs.constants import OUTER_WIDE_MOVES
@@ -34,13 +35,33 @@ class Move(UserString):
 
     Extends UserString to provide string-like behavior while adding properties
     for move validation and transformation.
-    A move consists of a base move (letter) and
-    optional modifiers (such as ', 2, w).
+    A move consists of an optional layer impacted (such as 2, 3-4),
+    a base move (letter) and optional modifiers (such as ', 2, w).
 
-    Examples of valid moves: U, R', F2, Rw, M, x
+    Examples of valid moves: U, R', F2, Rw, M, x, 3-4Rw, 2F
     """
 
     # Parsing
+
+    @cached_property
+    def layer_move_modifier(self) -> list[str]:
+        layer = ''
+        move = ''
+        modifier = ''
+
+        layer_match = LAYER_SPLIT.match(self.data)
+        if layer_match:
+            layer = layer_match.groups()[1]
+
+        kept = self.data[len(layer):]
+        if self.is_japanese_move:
+            move, modifier = kept.split(JAPANESE_CHAR)
+            move += JAPANESE_CHAR
+        else:
+            move = kept[0]
+            modifier = kept[1:]
+
+        return layer, move, modifier
 
     @cached_property
     def is_japanese_move(self) -> bool:
@@ -51,8 +72,33 @@ class Move(UserString):
         followed by a lowercase 'w' (e.g., Rw instead of r).
         """
         if len(self) > 1:
-            return JAPANESE_CHAR in self.data[1].lower()
+            return JAPANESE_CHAR in self.data.lower()
         return False
+
+    @cached_property
+    def layer(self) -> str:
+        """
+        Extract the layers impacted.
+        """
+        return self.layer_move_modifier[0]
+
+    @cached_property
+    def layers(self) -> list[int]:
+        """
+        List of impacted layers, 0-indexed.
+        """
+        if not self.layer:
+            if self.is_wide_move:
+                return [0, 1]
+            return [0]
+        if '-' not in self.layer:
+            if self.is_wide_move:
+                return list(range(int(self.layer)))
+            return [int(self.layer) - 1]
+
+        start, end = self.layer.split('-', 1)
+
+        return list(range(int(start) - 1, int(end)))
 
     @cached_property
     def base_move(self) -> str:
@@ -63,8 +109,8 @@ class Move(UserString):
         For Japanese notation, returns the lowercase of the first character.
         """
         if self.is_japanese_move:
-            return self.data[0].lower()
-        return self.data[0]
+            return self.raw_base_move[0].lower()
+        return self.raw_base_move
 
     @cached_property
     def raw_base_move(self) -> str:
@@ -75,9 +121,7 @@ class Move(UserString):
         For standard notation, returns the first character.
         For Japanese notation, returns the two first characters..
         """
-        if self.is_japanese_move:
-            return self.data[:2]
-        return self.data[0]
+        return self.layer_move_modifier[1]
 
     @cached_property
     def modifier(self) -> str:
@@ -87,11 +131,24 @@ class Move(UserString):
         This includes rotation direction (' for counterclockwise) or
         repetition (2 for double moves).
         """
-        if self.is_japanese_move:
-            return self.data[2:]
-        return self.data[1:]
+        return self.layer_move_modifier[2]
 
     # Validation
+
+    @cached_property
+    def is_valid_layer(self) -> bool:
+        """
+        Check if the layer is valid.
+
+        Validates that the layer is effective and valid.
+        """
+        if not self.layer:
+            return True
+
+        if '-' in self.layer and not self.is_wide_move:
+            return False
+
+        return not len(self.layer.split('-')) > 2
 
     @cached_property
     def is_valid_move(self) -> bool:
@@ -128,7 +185,11 @@ class Move(UserString):
 
         A move is valid if both its base move and modifier are valid.
         """
-        return self.is_valid_move and self.is_valid_modifier
+        return (
+            self.is_valid_layer
+            and self.is_valid_move
+            and self.is_valid_modifier
+        )
 
     # Move
 
@@ -222,8 +283,8 @@ class Move(UserString):
         if self.is_double:
             return self
         if self.is_counter_clockwise:
-            return Move(self.base_move)
-        return Move(f'{ self.base_move }{ INVERT_CHAR }')
+            return Move(f'{ self.layer }{ self.base_move }')
+        return Move(f'{ self.layer }{ self.base_move }{ INVERT_CHAR }')
 
     @cached_property
     def doubled(self) -> 'Move':
@@ -234,8 +295,8 @@ class Move(UserString):
         For a double move, returns the single version.
         """
         if self.is_double:
-            return Move(self.base_move)
-        return Move(f'{ self.base_move }{ DOUBLE_CHAR }')
+            return Move(f'{ self.layer }{ self.base_move }')
+        return Move(f'{ self.layer }{ self.base_move }{ DOUBLE_CHAR }')
 
     @cached_property
     def japanesed(self) -> 'Move':
@@ -248,6 +309,7 @@ class Move(UserString):
         """
         if self.is_wide_move and not self.is_japanese_move:
             return Move(
+                f'{ self.layer }'
                 f'{ self.base_move.upper() }{ JAPANESE_CHAR }'
                 f'{ self.modifier }',
             )
@@ -262,6 +324,6 @@ class Move(UserString):
         """
         if self.is_japanese_move:
             return Move(
-                f'{ self.base_move.lower() }{ self.modifier }',
+                f'{ self.layer }{ self.base_move.lower() }{ self.modifier }',
             )
         return self

@@ -60,6 +60,10 @@ class CheckMovesTestCase(unittest.TestCase):
         moves = [Move("R2'")]
         self.assertFalse(check_moves(moves))
 
+    def test_check_moves_invalid_layer(self):
+        moves = [Move('2-4R')]
+        self.assertFalse(check_moves(moves))
+
 
 class ParseMovesTestCase(unittest.TestCase):
 

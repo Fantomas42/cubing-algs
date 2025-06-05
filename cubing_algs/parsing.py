@@ -80,7 +80,7 @@ def check_moves(moves: list[Move]) -> bool:
     """
     Validate a list of Move objects.
 
-    Checks that each move has a valid base move and modifier.
+    Checks that each move has a valid base move, layer and modifier.
     Logs errors for invalid moves.
     """
     valid = True
@@ -97,6 +97,12 @@ def check_moves(moves: list[Move]) -> bool:
             valid = False
             logger.error(
                 '"%s" -> %s has an invalid modifier',
+                move_string, move,
+            )
+        elif not move.is_valid_layer:
+            valid = False
+            logger.error(
+                '"%s" -> %s has an invalid layer',
                 move_string, move,
             )
 

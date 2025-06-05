@@ -30,6 +30,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('uw').is_valid)
         self.assertFalse(Move('Ux').is_valid)
         self.assertFalse(Move("U2'").is_valid)
+        self.assertFalse(Move('3-4R').is_valid)
 
     def test_is_valid_move(self):
         self.assertTrue(Move('U').is_valid_move)
@@ -46,6 +47,14 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move("Uw'").is_valid_modifier)
         self.assertFalse(Move("U2'").is_valid_modifier)
         self.assertFalse(Move("Uw2'").is_valid_modifier)
+
+    def test_is_valid_layer(self):
+        self.assertTrue(Move('3Rw').is_valid_layer)
+        self.assertTrue(Move('3R').is_valid_layer)
+        self.assertTrue(Move('3-4Rw').is_valid_layer)
+        self.assertTrue(Move('3-4r').is_valid_layer)
+        self.assertFalse(Move('3-4R').is_valid_layer)
+        self.assertFalse(Move('2-3-4R').is_valid_layer)
 
     def test_is_double(self):
         self.assertFalse(Move('U').is_double)
@@ -109,3 +118,79 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('x').japanesed, Move('x'))
         self.assertEqual(Move('r').japanesed, Move('Rw'))
         self.assertEqual(Move('r2').japanesed, Move('Rw2'))
+
+    def test_layer(self):
+        self.assertEqual(Move('R').layer, '')
+
+        self.assertEqual(Move('2R').layer, '2')
+
+        self.assertEqual(Move('2Rw').layer, '2')
+        self.assertEqual(Move('2r').layer, '2')
+
+        self.assertEqual(Move('3Rw').layer, '3')
+        self.assertEqual(Move('3r').layer, '3')
+
+        self.assertEqual(Move('3-4Rw').layer, '3-4')
+        self.assertEqual(Move('3-4r').layer, '3-4')
+
+        self.assertEqual(Move('1-3-4r').layer, '1-3-4')
+
+    def test_big_moves_japanese(self):
+        move = Move('3Rw')
+
+        self.assertEqual(move.layer, '3')
+        self.assertEqual(move.japanesed, Move('3Rw'))
+        self.assertEqual(move.unjapanesed, Move('3r'))
+        self.assertEqual(move.doubled, Move('3r2'))
+        self.assertEqual(move.inverted, Move("3r'"))
+        self.assertEqual(move.raw_base_move, 'Rw')
+        self.assertEqual(move.base_move, 'r')
+        self.assertEqual(move.modifier, '')
+        self.assertTrue(move.is_japanese_move)
+        self.assertTrue(move.is_wide_move)
+        self.assertTrue(move.is_outer_move)
+        self.assertFalse(move.is_inner_move)
+        self.assertTrue(move.is_face_move)
+        self.assertFalse(move.is_rotation_move)
+        self.assertTrue(move.is_clockwise)
+        self.assertFalse(move.is_counter_clockwise)
+        self.assertFalse(move.is_double)
+
+    def test_big_moves_non_japanese(self):
+        move = Move('3r')
+
+        self.assertEqual(move.layer, '3')
+        self.assertEqual(move.japanesed, Move('3Rw'))
+        self.assertEqual(move.unjapanesed, Move('3r'))
+        self.assertEqual(move.doubled, Move('3r2'))
+        self.assertEqual(move.inverted, Move("3r'"))
+        self.assertEqual(move.raw_base_move, 'r')
+        self.assertEqual(move.base_move, 'r')
+        self.assertEqual(move.modifier, '')
+        self.assertFalse(move.is_japanese_move)
+        self.assertTrue(move.is_wide_move)
+        self.assertTrue(move.is_outer_move)
+        self.assertFalse(move.is_inner_move)
+        self.assertTrue(move.is_face_move)
+        self.assertFalse(move.is_rotation_move)
+        self.assertTrue(move.is_clockwise)
+        self.assertFalse(move.is_counter_clockwise)
+        self.assertFalse(move.is_double)
+
+    def test_layers(self):
+        self.assertEqual(Move('R').layers, [0])
+        self.assertEqual(Move('2R').layers, [1])
+
+        self.assertEqual(Move('Rw').layers, [0, 1])
+        self.assertEqual(Move('r').layers, [0, 1])
+
+        self.assertEqual(Move('2Rw').layers, [0, 1])
+        self.assertEqual(Move('2r').layers, [0, 1])
+
+        self.assertEqual(Move('3Rw').layers, [0, 1, 2])
+        self.assertEqual(Move('3r').layers, [0, 1, 2])
+
+        self.assertEqual(Move('3-4Rw').layers, [2, 3])
+        self.assertEqual(Move('3-4r').layers, [2, 3])
+
+        self.assertEqual(Move('2-4r').layers, [1, 2, 3])

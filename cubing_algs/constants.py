@@ -178,6 +178,8 @@ REFAT_MOVES = {' '.join(v): k for k, v in UNFAT_MOVES.items()}
 
 MOVE_SPLIT = re.compile(r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-))")
 
+LAYER_SPLIT = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
+
 SYMMETRY_M = {
     'U': 'U', 'u': 'u',                     'y': 'y',  # noqa: E241
     'F': 'F', 'f': 'f', 'S': 'S',           'z': 'z',  # noqa: E241
