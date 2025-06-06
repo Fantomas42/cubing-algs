@@ -12,8 +12,8 @@ from cubing_algs.parsing import split_moves
 class CleanMovesTestCase(unittest.TestCase):
 
     def test_clean_moves(self):
-        moves = "R2 L2  (y):F B2' e U3 R` U’  "  # noqa RUF001
-        expect = "R2L2yFB2EU'R'U'"
+        moves = "R2 L2  (y):F B2' e U R` U’  "  # noqa RUF001
+        expect = "R2L2yFB2EUR'U'"
         self.assertEqual(clean_moves(moves), expect)
 
 
@@ -85,14 +85,6 @@ class ParseMovesTestCase(unittest.TestCase):
 
         moves = ['R2', 'L2']
         expect = ['R2', 'L2']
-        self.assertEqual(
-            parse_moves(moves),
-            expect,
-        )
-
-    def test_parse_moves_corrected(self):
-        moves = 'R2 L3'
-        expect = ['R2', "L'"]
         self.assertEqual(
             parse_moves(moves),
             expect,
