@@ -1,12 +1,13 @@
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.constants import REFAT_MOVES
-from cubing_algs.constants import UNFAT_MOVES
+from cubing_algs.constants import UNFAT_ROTATION_MOVES
+from cubing_algs.constants import UNFAT_SLICE_MOVES
 from cubing_algs.move import Move
 
 
-def unfat_moves(
+def unfat(
         old_moves: list[Move],
-        config: dict[str, list[str]] = UNFAT_MOVES,
+        config: dict[str, list[str]],
 ) -> list[Move]:
     moves = []
 
@@ -24,9 +25,17 @@ def unfat_moves(
     return moves
 
 
-def refat_moves(
+def unfat_slice_moves(old_moves: list[Move]) -> list[Move]:
+    return unfat(old_moves, UNFAT_SLICE_MOVES)
+
+
+def unfat_rotation_moves(old_moves: list[Move]) -> list[Move]:
+    return unfat(old_moves, UNFAT_ROTATION_MOVES)
+
+
+def refat(
         old_moves: list[Move],
-        config: dict[str, str] = REFAT_MOVES,
+        config: dict[str, str],
         max_depth: int = MAX_ITERATIONS,
 ) -> list[Move]:
     if max_depth <= 0:
@@ -51,6 +60,10 @@ def refat_moves(
         moves.append(old_moves[i])
 
     if changed:
-        return refat_moves(moves, config, max_depth - 1)
+        return refat(moves, config, max_depth - 1)
 
     return moves
+
+
+def refat_moves(old_moves: list[Move]) -> list[Move]:
+    return refat(old_moves, REFAT_MOVES)

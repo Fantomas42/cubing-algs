@@ -178,7 +178,7 @@ RESLICE_MOVES.update(RESLICE_M_MOVES)
 RESLICE_MOVES.update(RESLICE_S_MOVES)
 RESLICE_MOVES.update(RESLICE_E_MOVES)
 
-UNFAT_MOVES = {
+UNFAT_ROTATION_MOVES = {
     'r': ['L', 'x'],
     "r'": ["L'", "x'"],
     'r2': ['L2', 'x2'],
@@ -204,8 +204,55 @@ UNFAT_MOVES = {
     'd2': ['U2', 'y2'],
 }
 
-REFAT_MOVES = {' '.join(v): k for k, v in UNFAT_MOVES.items()}
-REFAT_MOVES.update({' '.join(reversed(v)): k for k, v in UNFAT_MOVES.items()})
+UNFAT_SLICE_MOVES = {
+    'r': ['R', "M'"],
+    "r'": ["R'", 'M'],
+    'r2': ['R2', 'M2'],
+
+    'l': ['L', 'M'],
+    "l'": ["L'", "M'"],
+    'l2': ['L2', 'M2'],
+
+    'f': ['F', 'S'],
+    "f'": ["F'", "S'"],
+    'f2': ['F2', 'S2'],
+
+    'b': ['B', "S'"],
+    "b'": ["B'", 'S'],
+    'b2': ['B2', 'S2'],
+
+    'u': ['U', "E'"],
+    "u'": ["U'", 'E'],
+    'u2': ['U2', 'E2'],
+
+    'd': ['D', 'E'],
+    "d'": ["D'", "E'"],
+    'd2': ['D2', 'E2'],
+}
+
+REFAT_MOVES = {
+    ' '.join(v): k
+    for k, v in UNFAT_ROTATION_MOVES.items()
+}
+REFAT_MOVES.update(
+    {
+        ' '.join(reversed(v)): k
+        for k, v in UNFAT_ROTATION_MOVES.items()
+    },
+)
+REFAT_MOVES.update(
+    {
+        ' '.join(v): k
+        for k, v in UNFAT_SLICE_MOVES.items()
+    },
+)
+REFAT_MOVES.update(
+    {
+        ' '.join(reversed(v)): k
+        for k, v in UNFAT_SLICE_MOVES.items()
+    },
+)
+
 
 MOVE_SPLIT = re.compile(r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-))")
 

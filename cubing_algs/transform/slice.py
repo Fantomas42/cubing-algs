@@ -35,7 +35,7 @@ def unslice_rotation_moves(old_moves: list[Move]) -> list[Move]:
 
 def reslice(
         old_moves: list[Move],
-        mapping: dict[str, list[str]],
+        config: dict[str, list[str]],
         max_depth: int = MAX_ITERATIONS,
 ) -> list[Move]:
     if max_depth <= 0:
@@ -47,8 +47,8 @@ def reslice(
 
     while i < len(old_moves) - 1:
         sliced = f'{ old_moves[i] } { old_moves[i + 1] }'
-        if sliced in mapping:
-            for move in mapping[sliced]:
+        if sliced in config:
+            for move in config[sliced]:
                 moves.append(Move(move))
             changed = True
             i += 2
@@ -60,7 +60,7 @@ def reslice(
         moves.append(old_moves[i])
 
     if changed:
-        return reslice(moves, mapping, max_depth - 1)
+        return reslice(moves, config, max_depth - 1)
 
     return moves
 
