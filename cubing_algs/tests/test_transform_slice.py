@@ -55,6 +55,20 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_reslice_moves_alt(self):
+        provide = parse_moves("D U'")
+        expect = parse_moves("E'y'")
+
+        result = reslice_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_reslice_e_moves(self):
         provide = parse_moves("U' D F")
         expect = parse_moves("E'y' F")

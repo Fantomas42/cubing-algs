@@ -175,6 +175,7 @@ UNFAT_MOVES = {
 }
 
 REFAT_MOVES = {' '.join(v): k for k, v in UNFAT_MOVES.items()}
+REFAT_MOVES.update({' '.join(reversed(v)): k for k, v in UNFAT_MOVES.items()})
 
 MOVE_SPLIT = re.compile(r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-))")
 
