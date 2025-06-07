@@ -128,3 +128,12 @@ class TransformOffsetTestCase(unittest.TestCase):
             offset_zprime_moves(provide),
             expect,
         )
+
+    def test_offset_big_moves(self):
+        provide = parse_moves('3R')
+        expect = parse_moves('3L')
+
+        self.assertEqual(
+            offset_y2_moves(provide),
+            expect,
+        )

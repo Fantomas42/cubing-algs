@@ -7,17 +7,18 @@ def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
     rotation_table: dict[str, str] = OFFSET_TABLE[rotation]
 
     for move in old_moves:
-        move_str = str(move)
+        layer = move.layer
+        move_str = move.base_move + move.modifier
         base_str = move.base_move
 
         new_move = move
 
         if move_str in rotation_table:
-            new_move = Move(rotation_table[move_str])
+            new_move = Move(layer + rotation_table[move_str])
         elif move.is_double and base_str in rotation_table:
-            new_move = Move(rotation_table[base_str]).doubled
+            new_move = Move(layer + rotation_table[base_str]).doubled
         elif str(move.inverted) in rotation_table:
-            new_move = Move(rotation_table[str(move.inverted)]).inverted
+            new_move = Move(layer + rotation_table[str(move.inverted)]).inverted
 
         if move.is_japanese_move and not new_move.is_japanese_move:
             new_move = new_move.japanesed

@@ -362,3 +362,14 @@ class TransformDegripTestCase(unittest.TestCase):
                 degrip_full_moves,
                 name,
             )
+
+    def test_degrip_big_moves(self):
+        provide = split_moves('z2 3R')
+        expect = split_moves('3L')
+
+        self.assertEqual(
+            remove_final_rotations(
+                degrip_full_moves(provide),
+            ),
+            expect,
+        )
