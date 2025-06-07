@@ -22,3 +22,19 @@ class TransformMirrorTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_mirror_big_moves(self):
+        provide = parse_moves(
+            "2Fw R 3U2 3f'",
+        )
+        expect = parse_moves("3f 3U2 R' 2f'")
+
+        result = mirror_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
