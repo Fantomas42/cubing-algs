@@ -137,3 +137,19 @@ class TransformOffsetTestCase(unittest.TestCase):
             offset_y2_moves(provide),
             expect,
         )
+
+        provide = parse_moves('3R2')
+        expect = parse_moves('3L2')
+
+        self.assertEqual(
+            offset_y2_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("3R'")
+        expect = parse_moves("3L'")
+
+        self.assertEqual(
+            offset_y2_moves(provide),
+            expect,
+        )
