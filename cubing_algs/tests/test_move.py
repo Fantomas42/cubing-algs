@@ -96,6 +96,16 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('R').is_wide_move)
         self.assertTrue(Move('r2').is_wide_move)
 
+    def test_is_layered(self):
+        self.assertFalse(Move('x').is_layered)
+        self.assertFalse(Move('R').is_layered)
+        self.assertTrue(Move('2R').is_layered)
+        self.assertTrue(Move('2Rw').is_layered)
+        self.assertTrue(Move('2r').is_layered)
+        self.assertTrue(Move('4Rw').is_layered)
+        self.assertTrue(Move('3-4Rw').is_layered)
+        self.assertTrue(Move('r2').is_layered)
+
     def test_is_japanese_move(self):
         self.assertFalse(Move('x').is_japanese_move)
         self.assertFalse(Move('R').is_japanese_move)
@@ -126,8 +136,10 @@ class MoveTestCase(unittest.TestCase):
     def test_unlayered(self):
         self.assertEqual(Move('2R').unlayered, Move('R'))
         self.assertEqual(Move('2-4Rw').unlayered, Move('r'))
-        self.assertEqual(Move('Rw').unlayered, Move('Rw'))
+        self.assertEqual(Move('Rw').unlayered, Move('r'))
+        self.assertEqual(Move('4Rw').unlayered, Move('r'))
         self.assertEqual(Move('u').unlayered, Move('u'))
+        self.assertEqual(Move('2u').unlayered, Move('u'))
 
     def test_layer(self):
         self.assertEqual(Move('R').layer, '')

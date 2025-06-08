@@ -87,7 +87,7 @@ class Move(UserString):
         """
         List of impacted layers, 0-indexed.
         """
-        if not self.is_layered:
+        if not self.layer:
             if self.is_wide_move:
                 return [0, 1]
             return [0]
@@ -245,9 +245,9 @@ class Move(UserString):
         """
         Check if this is a layered move.
 
-        Layered moves are moves with layer information, such as 3-4Rw, 2U', 3Fw2
+        Layered moves are moves with layer information, such as 3-4Rw, 3Fw2, u.
         """
-        return bool(self.layer)
+        return bool(self.layer) or self.is_wide_move
 
     # Modifiers
 

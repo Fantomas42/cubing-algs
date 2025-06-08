@@ -1,6 +1,7 @@
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
+from functools import cached_property
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.metrics import compute_metrics
@@ -125,3 +126,24 @@ class Algorithm(UserList[Move]):
                 return self
 
         return Algorithm(new_moves)
+
+    @cached_property
+    def min_cube_size(self) -> int:
+        """
+        Compute the minimum cube size required to apply the algorithm.
+
+        This allows validation of the algorithm against a cube.
+        """
+        min_cube = 2
+
+        for m in self:
+            if m.is_layered:
+                cube = 3
+
+                max_layers = max(m.layers)
+                if max_layers > 1:
+                    cube = (max_layers + 1) * 2
+
+                min_cube = max(cube, min_cube)
+
+        return min_cube

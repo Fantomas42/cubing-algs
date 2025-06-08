@@ -336,3 +336,60 @@ class AlgorithmTestCase(unittest.TestCase):
             ),
             expected,
         )
+
+    def test_min_cube_size(self):
+        algo = parse_moves("B' R2 U F2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            2,
+        )
+
+        algo = parse_moves("B' r2 U F2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            3,
+        )
+
+        algo = parse_moves("B' R2 U Fw2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            3,
+        )
+
+        algo = parse_moves("B' R2 U 2Fw2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            3,
+        )
+
+        algo = parse_moves("B' R2 U 3Fw2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            6,
+        )
+
+        algo = parse_moves("B' R2 U 2-3Fw2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            6,
+        )
+
+        algo = parse_moves("B' R2 U 4Fw2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            8,
+        )
+
+        algo = parse_moves("B' R2 U 2-4Fw2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            8,
+        )
