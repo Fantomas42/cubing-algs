@@ -87,7 +87,7 @@ class Move(UserString):
         """
         List of impacted layers, 0-indexed.
         """
-        if not self.layer:
+        if not self.is_layered:
             if self.is_wide_move:
                 return [0, 1]
             return [0]
@@ -142,7 +142,7 @@ class Move(UserString):
 
         Validates that the layer is effective and valid.
         """
-        if not self.layer:
+        if not self.is_layered:
             return True
 
         if '-' in self.layer and not self.is_wide_move:
@@ -240,6 +240,15 @@ class Move(UserString):
         """
         return self.base_move in OUTER_WIDE_MOVES
 
+    @cached_property
+    def is_layered(self) -> bool:
+        """
+        Check if this is a layered move.
+
+        Layered moves are moves with layer information, such as 3-4Rw, 2U', 3Fw2
+        """
+        return bool(self.layer)
+
     # Modifiers
 
     @cached_property
@@ -325,5 +334,18 @@ class Move(UserString):
         if self.is_japanese_move:
             return Move(
                 f'{ self.layer }{ self.base_move.lower() }{ self.modifier }',
+            )
+        return self
+
+    @cached_property
+    def unlayered(self) -> 'Move':
+        """
+        Convert this move without layer information.
+
+        This converts moves like 3Rw to Rw.
+        """
+        if self.is_layered:
+            return Move(
+                f'{ self.base_move }{ self.modifier }',
             )
         return self
