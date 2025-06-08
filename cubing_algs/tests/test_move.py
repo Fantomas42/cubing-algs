@@ -134,6 +134,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('r2').japanesed, Move('Rw2'))
 
     def test_unlayered(self):
+        self.assertEqual(Move('R').unlayered, Move('R'))
         self.assertEqual(Move('2R').unlayered, Move('R'))
         self.assertEqual(Move('2-4Rw').unlayered, Move('r'))
         self.assertEqual(Move('Rw').unlayered, Move('r'))
