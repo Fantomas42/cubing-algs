@@ -8,17 +8,24 @@ def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
 
     for move in old_moves:
         layer = move.layer
-        move_str = move.base_move + move.modifier
-        base_str = move.base_move
+
+        unlayered_move = move.unlayered
+        base_move = move.base_move
 
         new_move = move
 
-        if move_str in rotation_table:
-            new_move = Move(layer + rotation_table[move_str])
-        elif move.is_double and base_str in rotation_table:
-            new_move = Move(layer + rotation_table[base_str]).doubled
-        elif str(move.inverted) in rotation_table:
-            new_move = Move(layer + rotation_table[str(move.inverted)]).inverted
+        if unlayered_move in rotation_table:
+            new_move = Move(
+                layer + rotation_table[unlayered_move],
+            )
+        elif move.is_double and base_move in rotation_table:
+            new_move = Move(
+                layer + rotation_table[base_move],
+            ).doubled
+        elif unlayered_move.inverted in rotation_table:
+            new_move = Move(
+                layer + rotation_table[unlayered_move.inverted],
+            ).inverted
 
         if move.is_japanese_move and not new_move.is_japanese_move:
             new_move = new_move.japanesed
