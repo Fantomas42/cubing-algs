@@ -14,6 +14,7 @@ pip install cubing-algs
 - Transform algorithms (mirror, compress, rotate, etc.)
 - Calculate metrics (HTM, QTM, STM, ETM, QSTM)
 - Support for wide moves, slice moves, and rotations
+- Big cubes notation support
 - Japanese notation support
 
 ## Basic Usage
@@ -39,11 +40,10 @@ from cubing_algs.parsing import parse_moves
 algo = parse_moves("R U R' U'")
 
 # Parsing multiple formats
-algo = parse_moves("R U R` U`")  # Backtick notation
-algo = parse_moves("R U R3 U3")  # 3 for inverse
-algo = parse_moves("R1 U1 R3 U3")  # 1 for single moves
-algo = parse_moves("R:U:R':U'")  # With colons
-algo = parse_moves("R(U)R'[U']")  # With brackets/parentheses
+algo = parse_moves("R U R` U`")       # Backtick notation
+algo = parse_moves("R:U:R':U'")       # With colons
+algo = parse_moves("R(U)R'[U']")      # With brackets/parentheses
+algo = parse_moves("3Rw 3-4u' 2R2")   # For big cubes
 
 # Parse CFOP style (removes starting/ending U/y rotations)
 from cubing_algs.parsing import parse_moves_cfop
@@ -64,6 +64,8 @@ from cubing_algs.transform.japanese import unjapanese_moves
 from cubing_algs.transform.rotation import remove_final_rotations
 from cubing_algs.transform.slice import reslice_moves
 from cubing_algs.transform.slice import unslice_wide_moves
+from cubing_algs.transform.fat import refat_moves
+from cubing_algs.transform.fat import unfat_rotation_moves
 from cubing_algs.transform.symmetry import (
     symmetry_m_moves,
     symmetry_s_moves,
@@ -101,6 +103,10 @@ clean = algo.transform(remove_final_rotations)  # Remove trailing x, y, z moves
 # Slice moves
 wide = algo.transform(unslice_wide_moves)  # M -> r' R, S -> f F', E -> u' U
 resliced = algo.transform(reslice_moves)  # L' R -> M x, etc.
+
+# Fat moves
+rotation = algo.transform(unfat_rotation_moves)  # f r u -> B z L x D y
+refated = algo.transform(refat_moves)  # L x -> r, etc.
 
 # Symmetry
 m_sym = algo.transform(symmetry_m_moves)  # M-slice symmetry (L<->R)
