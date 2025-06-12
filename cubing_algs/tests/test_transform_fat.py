@@ -178,6 +178,33 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_refat_moves_mixed_big_moves(self):
+        provide = parse_moves('L x 2F')
+        expect = parse_moves('r 2F')
+
+        result = refat_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves('2L x 2F')
+        expect = parse_moves('2L x 2F')
+
+        result = refat_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_refat_max(self):
         provide = parse_moves('L x')
 
