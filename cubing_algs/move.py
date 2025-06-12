@@ -44,16 +44,20 @@ class Move(UserString):
     # Parsing
 
     @cached_property
-    def layer_move_modifier(self) -> list[str]:
+    def layer_move_modifier_time(self) -> list[str]:
         layer = ''
         move = ''
         modifier = ''
+        time = ''
 
         layer_match = LAYER_SPLIT.match(self.data)
         if layer_match:
             layer = layer_match.groups()[1]
 
         kept = self.data[len(layer):]
+        if '@' in self.data:
+            kept, time = self.data.split('@')
+
         if self.is_japanese_move:
             move, modifier = kept.split(JAPANESE_CHAR)
             move += JAPANESE_CHAR
@@ -61,7 +65,7 @@ class Move(UserString):
             move = kept[0]
             modifier = kept[1:]
 
-        return layer, move, modifier
+        return layer, move, modifier, time
 
     @cached_property
     def is_japanese_move(self) -> bool:
@@ -80,7 +84,7 @@ class Move(UserString):
         """
         Extract the layers impacted.
         """
-        return self.layer_move_modifier[0]
+        return self.layer_move_modifier_time[0]
 
     @cached_property
     def layers(self) -> list[int]:
@@ -121,7 +125,7 @@ class Move(UserString):
         For standard notation, returns the first character.
         For Japanese notation, returns the two first characters..
         """
-        return self.layer_move_modifier[1]
+        return self.layer_move_modifier_time[1]
 
     @cached_property
     def modifier(self) -> str:
@@ -131,7 +135,23 @@ class Move(UserString):
         This includes rotation direction (' for counterclockwise) or
         repetition (2 for double moves).
         """
-        return self.layer_move_modifier[2]
+        return self.layer_move_modifier_time[2]
+
+    @cached_property
+    def time(self) -> str:
+        """
+        Extract the time part of the move.
+        """
+        return self.layer_move_modifier_time[3]
+
+    @cached_property
+    def timed(self) -> int | None:
+        """
+        Integer version of the timed move
+        """
+        if self.time:
+            return int(self.time)
+        return None
 
     # Validation
 
@@ -248,6 +268,15 @@ class Move(UserString):
         Layered moves are moves with layer information, such as 3-4Rw, 3Fw2, u.
         """
         return bool(self.layer) or self.is_wide_move
+
+    @cached_property
+    def is_timed(self) -> bool:
+        """
+        Check if this is a timed move.
+
+        Timed moves are moves with time information, separated by an @.
+        """
+        return bool(self.time)
 
     # Modifiers
 

@@ -106,6 +106,18 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('3-4Rw').is_layered)
         self.assertTrue(Move('r2').is_layered)
 
+    def test_is_timed(self):
+        self.assertFalse(Move('x').is_timed)
+        self.assertFalse(Move('R').is_timed)
+        self.assertTrue(Move('x@500').is_timed)
+        self.assertTrue(Move('R@500').is_timed)
+        self.assertTrue(Move('2R@500').is_timed)
+        self.assertTrue(Move('2Rw@500').is_timed)
+        self.assertTrue(Move('2r@500').is_timed)
+        self.assertTrue(Move('4Rw@500').is_timed)
+        self.assertTrue(Move('3-4Rw@500').is_timed)
+        self.assertTrue(Move('r2@500').is_timed)
+
     def test_is_japanese_move(self):
         self.assertFalse(Move('x').is_japanese_move)
         self.assertFalse(Move('R').is_japanese_move)
@@ -173,6 +185,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(move.base_move, 'r')
         self.assertEqual(move.modifier, '')
         self.assertTrue(move.is_japanese_move)
+        self.assertFalse(move.is_timed)
         self.assertTrue(move.is_layered)
         self.assertTrue(move.is_wide_move)
         self.assertTrue(move.is_outer_move)
@@ -196,6 +209,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(move.base_move, 'r')
         self.assertEqual(move.modifier, '')
         self.assertFalse(move.is_japanese_move)
+        self.assertFalse(move.is_timed)
         self.assertTrue(move.is_layered)
         self.assertTrue(move.is_wide_move)
         self.assertTrue(move.is_outer_move)
@@ -225,3 +239,13 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('2-4r').layers, [1, 2, 3])
 
         self.assertEqual(Move('2Dw2').layers, [0, 1])
+
+    def test_timed(self):
+        self.assertEqual(Move('R').time, '')
+        self.assertEqual(Move('R').timed, None)
+
+        self.assertEqual(Move('R@1500').time, '1500')
+        self.assertEqual(Move('R@1500').timed, 1500)
+
+        self.assertEqual(Move('2-4r@200').time, '200')
+        self.assertEqual(Move('2-4r@200').timed, 200)
