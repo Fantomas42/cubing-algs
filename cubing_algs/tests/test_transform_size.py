@@ -44,6 +44,29 @@ class TransformSizeTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_compress_moves_timed(self):
+        provide = parse_moves(
+            "U@1 (R@2 U2@3 R'@4 U'@5 R@6 U'@7 R'@8) "
+            "(R@9 U2@10 R'@11 U'@12 R@13 U'@14 R'@15) "
+            "(R@16 U2@17 R'@18 U'@19 R@20 U'@21 R'@22)",
+        )
+
+        expect = parse_moves(
+            "U@1 R@2 U2@3 R'@4 U'@5 R@6 U@7 "
+            "R'@11 U'@12 R@13 U@14 "
+            "R'@18 U'@19 R@20 U'@21 R'@22",
+        )
+
+        result = compress_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_compress_moves_max(self):
         provide = parse_moves(
             "U (R U2 R' U' R U' R') "
@@ -75,6 +98,20 @@ class TransformSizeTestCase(unittest.TestCase):
     def test_expand_big_moves(self):
         provide = parse_moves('2R2 F U')
         expect = parse_moves('2R 2R F U')
+
+        result = expand_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_expand_timed_moves(self):
+        provide = parse_moves('2R2@1 F@2 U@3')
+        expect = parse_moves('2R@1 2R@1 F@2 U@3')
 
         result = expand_moves(provide)
 
