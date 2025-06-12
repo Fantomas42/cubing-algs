@@ -27,6 +27,20 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_unslice_timed_moves(self):
+        provide = parse_moves('M2@1 U@2 S@3 E@4')
+        expect = parse_moves("L2@1R2@1x2@1U@2F'@3B@3z@3D'@4U@4y'@4")
+
+        result = unslice_rotation_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_unslice_wide_moves(self):
         provide = parse_moves('M2 U S E')
         expect = parse_moves("r2R2UfF'u'U")
@@ -125,6 +139,20 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_reslice_m_moves_timed(self):
+        provide = parse_moves("L'@100 R@200 F@300")
+        expect = parse_moves('M@200 x@200 F@300')
+
+        result = reslice_m_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_reslice_m_moves_big(self):
         provide = parse_moves("L' R 2F")
         expect = parse_moves('M x 2F')
@@ -141,6 +169,33 @@ class TransformSliceTestCase(unittest.TestCase):
 
         provide = parse_moves("2L' R 2F")
         expect = parse_moves("2L' R 2F")
+
+        result = reslice_m_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_reslice_m_moves_big_timed(self):
+        provide = parse_moves("L' R 2F@200")
+        expect = parse_moves('M x 2F@200')
+
+        result = reslice_m_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("2L'@100 R@200 2F@300")
+        expect = parse_moves("2L'@100 R@200 2F@300")
 
         result = reslice_m_moves(provide)
 

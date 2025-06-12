@@ -16,9 +16,18 @@ def unslice(old_moves: list[Move], config: dict[str, list[str]]) -> list[Move]:
         move_cache[move_str] = [Move(m) for m in replacements]
 
     for move in old_moves:
-        move_str = str(move)
-        if move_str in config:
-            moves.extend(move_cache[move_str])
+        move_untimed = move.untimed
+
+        if move_untimed in config:
+            if move.is_timed:
+                moves.extend(
+                    [
+                        Move(x + move.time)
+                        for x in move_cache[move_untimed]
+                    ],
+                )
+            else:
+                moves.extend(move_cache[move_untimed])
         else:
             moves.append(move)
 
@@ -46,10 +55,10 @@ def reslice(
     changed = False
 
     while i < len(old_moves) - 1:
-        sliced = f'{ old_moves[i] } { old_moves[i + 1] }'
+        sliced = f'{ old_moves[i].untimed } { old_moves[i + 1].untimed }'
         if sliced in config:
             for move in config[sliced]:
-                moves.append(Move(move))
+                moves.append(Move(move + old_moves[i + 1].time))
             changed = True
             i += 2
         else:
