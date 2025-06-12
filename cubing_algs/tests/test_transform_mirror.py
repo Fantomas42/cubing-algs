@@ -38,3 +38,19 @@ class TransformMirrorTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_timed_moves(self):
+        provide = parse_moves(
+            "F@1 R@2 U2@3 F'@4",
+        )
+        expect = parse_moves("F@4 U2@3 R'@2 F'@1")
+
+        result = mirror_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
