@@ -22,7 +22,7 @@ def has_grip(
     suffix = []
 
     while i < len(old_moves) - 1:
-        move = old_moves[i]
+        move = old_moves[i].untimed
 
         if move in config:
             suffix = old_moves[i + 1:]

@@ -153,3 +153,28 @@ class TransformOffsetTestCase(unittest.TestCase):
             offset_y2_moves(provide),
             expect,
         )
+
+    def test_offset_big_moves_timed(self):
+        provide = parse_moves('3R@100')
+        expect = parse_moves('3L@100')
+
+        self.assertEqual(
+            offset_y2_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('3R2@100')
+        expect = parse_moves('3L2@100')
+
+        self.assertEqual(
+            offset_y2_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("3R'@100")
+        expect = parse_moves("3L'@100")
+
+        self.assertEqual(
+            offset_y2_moves(provide),
+            expect,
+        )
