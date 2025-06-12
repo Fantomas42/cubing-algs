@@ -161,6 +161,14 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('2u').unlayered, Move('u'))
         self.assertEqual(Move('4u@200').unlayered, Move('u@200'))
 
+    def test_untimed(self):
+        self.assertEqual(Move('R').untimed, Move('R'))
+        self.assertEqual(Move('2R').untimed, Move('2R'))
+        self.assertEqual(Move('2-4Rw').untimed, Move('2-4Rw'))
+        self.assertEqual(Move('R@100').untimed, Move('R'))
+        self.assertEqual(Move('2R@100').untimed, Move('2R'))
+        self.assertEqual(Move('2-4Rw@100').untimed, Move('2-4r'))
+
     def test_layer(self):
         self.assertEqual(Move('R').layer, '')
 

@@ -403,3 +403,18 @@ class Move(UserString):
                 f'{ self.time }',
             )
         return self
+
+    @cached_property
+    def untimed(self) -> 'Move':
+        """
+        Convert this move without time information.
+
+        This converts moves like 3Rw@200 to 3Rw.
+        """
+        if self.is_timed:
+            return Move(
+                f'{ self.layer }'
+                f'{ self.base_move }'
+                f'{ self.modifier }',
+            )
+        return self
