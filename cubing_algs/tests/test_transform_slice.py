@@ -125,6 +125,33 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_reslice_m_moves_big(self):
+        provide = parse_moves("L' R 2F")
+        expect = parse_moves('M x 2F')
+
+        result = reslice_m_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("2L' R 2F")
+        expect = parse_moves("2L' R 2F")
+
+        result = reslice_m_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_reslice_s_moves(self):
         provide = parse_moves("B' F F")
         expect = parse_moves("S' z F")
