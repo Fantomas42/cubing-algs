@@ -42,6 +42,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
+        provide = parse_moves("2R' 2R' 2R' U F")
+        expect = parse_moves('2R U F')
+
+        self.assertEqual(
+            optimize_repeat_three_moves(provide),
+            expect,
+        )
+
         provide = parse_moves("U F R' R' R' U F")
         expect = parse_moves('U F R U F')
 
@@ -80,6 +88,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
         provide = parse_moves("R' R U F")
+        expect = parse_moves('U F')
+
+        self.assertEqual(
+            optimize_do_undo_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("2R' 2R U F")
         expect = parse_moves('U F')
 
         self.assertEqual(
@@ -132,6 +148,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
+        provide = parse_moves("2R' 2R' 2R 2R U F")
+        expect = parse_moves('U F')
+
+        self.assertEqual(
+            optimize_do_undo_moves(provide),
+            expect,
+        )
+
         provide = parse_moves("U F R' R' R R U F")
         expect = parse_moves('U F U F')
 
@@ -158,6 +182,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
         provide = parse_moves('R2 R2 U F')
+        expect = parse_moves('U F')
+
+        self.assertEqual(
+            optimize_do_undo_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('2R2 2R2 U F')
         expect = parse_moves('U F')
 
         self.assertEqual(
@@ -200,6 +232,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
         provide = parse_moves("R' R' U F")
         expect = parse_moves('R2 U F')
+
+        self.assertEqual(
+            optimize_double_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("2R' 2R' U F")
+        expect = parse_moves('2R2 U F')
 
         self.assertEqual(
             optimize_double_moves(provide),
@@ -279,6 +319,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
         provide = parse_moves("R2 R' U F F")
         expect = parse_moves('R U F F')
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("2R2 2R' U F F")
+        expect = parse_moves('2R U F F')
 
         self.assertEqual(
             optimize_triple_moves(provide),
