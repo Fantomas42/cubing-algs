@@ -21,7 +21,9 @@ def symmetry_moves(
         if move.base_move in ignore_moves:
             moves.append(move)
         else:
-            new_move = Move(move.layer + symmetry_table[move.base_move] + move.time)
+            new_move = Move(
+                move.layer + symmetry_table[move.base_move] + move.time,
+            )
 
             if move.is_japanese_move:
                 new_move = new_move.japanesed

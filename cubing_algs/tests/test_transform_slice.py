@@ -27,11 +27,11 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unslice_timed_moves(self):
-        provide = parse_moves('M2@1 U@2 S@3 E@4')
-        expect = parse_moves("L2@1R2@1x2@1U@2F'@3B@3z@3D'@4U@4y'@4")
+    def test_unslice_wide_moves(self):
+        provide = parse_moves('M2 U S E')
+        expect = parse_moves("r2R2UfF'u'U")
 
-        result = unslice_rotation_moves(provide)
+        result = unslice_wide_moves(provide)
 
         self.assertEqual(
             result,
@@ -41,11 +41,11 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unslice_wide_moves(self):
-        provide = parse_moves('M2 U S E')
-        expect = parse_moves("r2R2UfF'u'U")
+    def test_unslice_timed_moves(self):
+        provide = parse_moves('M2@1 U@2 S@3 E@4')
+        expect = parse_moves("L2@1R2@1x2@1U@2F'@3B@3z@3D'@4U@4y'@4")
 
-        result = unslice_wide_moves(provide)
+        result = unslice_rotation_moves(provide)
 
         self.assertEqual(
             result,
