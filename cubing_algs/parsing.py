@@ -38,9 +38,9 @@ def clean_moves(moves: str) -> str:
     ).replace(
         ')', '',
     ).replace(
-        ':', '',
+        ':', ' ',
     ).replace(
-        ' ', '',
+        '  ', ' ',
     ).replace(
         "2'", '2',
     ).replace(

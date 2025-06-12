@@ -108,3 +108,12 @@ class TransformSymmetryTestCase(unittest.TestCase):
             symmetry_s_moves(provide),
             expect,
         )
+
+    def test_symmetry_m_moves_big_moves(self):
+        provide = parse_moves("U R 2Uw' 3Rw'")
+        expect = parse_moves("U' L' 2Uw 3Lw")
+
+        self.assertEqual(
+            symmetry_m_moves(provide),
+            expect,
+        )
