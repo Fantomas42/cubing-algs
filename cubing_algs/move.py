@@ -56,7 +56,8 @@ class Move(UserString):
 
         kept = self.data[len(layer):]
         if '@' in self.data:
-            kept, time = self.data.split('@')
+            kept, time = kept.split('@')
+            time = f'@{ time }'
 
         if self.is_japanese_move:
             move, modifier = kept.split(JAPANESE_CHAR)
@@ -150,7 +151,7 @@ class Move(UserString):
         Integer version of the timed move
         """
         if self.time:
-            return int(self.time)
+            return int(self.time[1:])
         return None
 
     # Validation
@@ -321,8 +322,17 @@ class Move(UserString):
         if self.is_double:
             return self
         if self.is_counter_clockwise:
-            return Move(f'{ self.layer }{ self.base_move }')
-        return Move(f'{ self.layer }{ self.base_move }{ INVERT_CHAR }')
+            return Move(
+                f'{ self.layer }'
+                f'{ self.base_move }'
+                f'{ self.time }',
+            )
+        return Move(
+            f'{ self.layer }'
+            f'{ self.base_move }'
+            f'{ INVERT_CHAR }'
+            f'{ self.time }',
+        )
 
     @cached_property
     def doubled(self) -> 'Move':
@@ -333,8 +343,17 @@ class Move(UserString):
         For a double move, returns the single version.
         """
         if self.is_double:
-            return Move(f'{ self.layer }{ self.base_move }')
-        return Move(f'{ self.layer }{ self.base_move }{ DOUBLE_CHAR }')
+            return Move(
+                f'{ self.layer }'
+                f'{ self.base_move }'
+                f'{ self.time }',
+            )
+        return Move(
+            f'{ self.layer }'
+            f'{ self.base_move }'
+            f'{ DOUBLE_CHAR }'
+            f'{ self.time }',
+        )
 
     @cached_property
     def japanesed(self) -> 'Move':
@@ -349,7 +368,8 @@ class Move(UserString):
             return Move(
                 f'{ self.layer }'
                 f'{ self.base_move.upper() }{ JAPANESE_CHAR }'
-                f'{ self.modifier }',
+                f'{ self.modifier }'
+                f'{ self.time }',
             )
         return self
 
@@ -362,7 +382,10 @@ class Move(UserString):
         """
         if self.is_japanese_move:
             return Move(
-                f'{ self.layer }{ self.base_move.lower() }{ self.modifier }',
+                f'{ self.layer }'
+                f'{ self.base_move.lower() }'
+                f'{ self.modifier }'
+                f'{ self.time }',
             )
         return self
 
@@ -375,6 +398,8 @@ class Move(UserString):
         """
         if self.is_layered:
             return Move(
-                f'{ self.base_move }{ self.modifier }',
+                f'{ self.base_move }'
+                f'{ self.modifier }'
+                f'{ self.time }',
             )
         return self

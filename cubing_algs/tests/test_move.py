@@ -33,6 +33,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('3-4R').is_valid)
         self.assertTrue(Move('3-4Rw').is_valid)
         self.assertTrue(Move('2Dw2').is_valid)
+        self.assertTrue(Move('2Dw2@200').is_valid)
 
     def test_is_valid_move(self):
         self.assertTrue(Move('U').is_valid_move)
@@ -132,18 +133,23 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move("R'").inverted, Move('R'))
         self.assertEqual(Move("x'").inverted, Move('x'))
         self.assertEqual(Move('R2').inverted, Move('R2'))
+        self.assertEqual(Move('3R2').inverted, Move('3R2'))
+        self.assertEqual(Move('3R@200').inverted, Move("3R'@200"))
 
     def test_doubled(self):
         self.assertEqual(Move('R').doubled, Move('R2'))
         self.assertEqual(Move("R'").doubled, Move('R2'))
         self.assertEqual(Move("x'").doubled, Move('x2'))
         self.assertEqual(Move('R2').doubled, Move('R'))
+        self.assertEqual(Move('3R2').doubled, Move('3R'))
+        self.assertEqual(Move('3R2@200').doubled, Move('3R@200'))
 
     def test_japanesed(self):
         self.assertEqual(Move('R').japanesed, Move('R'))
         self.assertEqual(Move('x').japanesed, Move('x'))
         self.assertEqual(Move('r').japanesed, Move('Rw'))
         self.assertEqual(Move('r2').japanesed, Move('Rw2'))
+        self.assertEqual(Move('r@200').japanesed, Move('Rw@200'))
 
     def test_unlayered(self):
         self.assertEqual(Move('R').unlayered, Move('R'))
@@ -153,6 +159,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('4Rw').unlayered, Move('r'))
         self.assertEqual(Move('u').unlayered, Move('u'))
         self.assertEqual(Move('2u').unlayered, Move('u'))
+        self.assertEqual(Move('4u@200').unlayered, Move('u@200'))
 
     def test_layer(self):
         self.assertEqual(Move('R').layer, '')
@@ -244,8 +251,8 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('R').time, '')
         self.assertEqual(Move('R').timed, None)
 
-        self.assertEqual(Move('R@1500').time, '1500')
+        self.assertEqual(Move('R@1500').time, '@1500')
         self.assertEqual(Move('R@1500').timed, 1500)
 
-        self.assertEqual(Move('2-4r@200').time, '200')
+        self.assertEqual(Move('2-4r@200').time, '@200')
         self.assertEqual(Move('2-4r@200').timed, 200)
