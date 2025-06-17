@@ -38,6 +38,16 @@ class SplitMovesTestCase(unittest.TestCase):
         expect = ['3R', "3Uw'@1500", '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
 
+    def test_split_timed_pauses(self):
+        moves = "3R 3Uw'@1500 .@2000 3b 2-3Dw 3-4d"
+        expect = ['3R', "3Uw'@1500", '.@2000', '3b', '2-3Dw', '3-4d']
+        self.assertEqual(split_moves(moves), expect)
+
+    def test_split_timed_moves_with_pauses(self):
+        moves = "3R 3Uw'@1500 . 3b 2-3Dw 3-4d"
+        expect = ['3R', "3Uw'@1500", '.', '3b', '2-3Dw', '3-4d']
+        self.assertEqual(split_moves(moves), expect)
+
 
 class CheckMovesTestCase(unittest.TestCase):
 
