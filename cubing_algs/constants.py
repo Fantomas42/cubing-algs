@@ -256,7 +256,9 @@ REFAT_MOVES.update(
 )
 
 
-MOVE_SPLIT = re.compile(r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-)(?:@\d+)?|\.(?:@\d+)?)")
+MOVE_SPLIT = re.compile(
+    r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-)(?:@\d+)?|\.(?:@\d+)?)",
+)
 
 LAYER_SPLIT = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
 
