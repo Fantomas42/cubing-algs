@@ -179,7 +179,7 @@ class Move(UserString):
 
         Validates that the move letter is one of the recognized basic moves.
         """
-        if self == PAUSE_CHAR:
+        if self.is_pause:
             return True
 
         if self.is_japanese_move:

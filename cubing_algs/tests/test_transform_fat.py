@@ -150,6 +150,20 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_unfat_timed_pauses(self):
+        provide = parse_moves('f@1 .@2 r@3 u@4')
+        expect = parse_moves('B@1 z@1 .@2 L@3 x@3 D@4 y@4')
+
+        result = unfat_rotation_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_refat_moves(self):
         provide = parse_moves('L x')
         expect = parse_moves('r')
@@ -222,6 +236,33 @@ class TransformFatTestCase(unittest.TestCase):
     def test_refat_moves_mixed_timed_moves(self):
         provide = parse_moves('L@1 x@2 F@3')
         expect = parse_moves('r@2 F@3')
+
+        result = refat_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_refat_moves_mixed_timed_moves_timed_pauses(self):
+        provide = parse_moves('L@1 x@2 .@3 F@4')
+        expect = parse_moves('r@2 .@3 F@4')
+
+        result = refat_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves('L@1 x@2 F@3 .@4')
+        expect = parse_moves('r@2 F@3 .@4')
 
         result = refat_moves(provide)
 
