@@ -10,7 +10,8 @@ def unpause_moves(old_moves: list[Move]) -> list[Move]:
     return moves
 
 
-def pause_moves(speed: int = 200, factor: int = 2):
+def pause_moves(speed: int = 200, factor: int = 2,
+                *, multiple: bool = False):
     """
     Create a configurable pause_moves function.
 
@@ -34,12 +35,23 @@ def pause_moves(speed: int = 200, factor: int = 2):
             time = move.timed
 
             if time - previous_time > threshold:
-                moves.extend(
-                    [
-                        Move(f'.@{ time - speed }'),
-                        move,
-                    ],
-                )
+                if multiple:
+                    delta = time - previous_time
+                    occurences = int(delta / threshold)
+                    for i in range(occurences):
+                        moves.append(
+                            Move(
+                                f'.@{ previous_time + ((i + 1) * threshold) }',
+                            ),
+                        )
+                    moves.append(move)
+                else:
+                    moves.extend(
+                        [
+                            Move(f'.@{ time - speed }'),
+                            move,
+                        ],
+                    )
             else:
                 moves.append(move)
             previous_time = time

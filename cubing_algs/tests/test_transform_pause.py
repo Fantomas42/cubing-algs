@@ -135,3 +135,21 @@ class TransformPauseConfigTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_pause_moves_configured_multiple(self):
+        provide = parse_moves(
+            "F@0 R@300 U2@1300 F'@1450",
+        )
+        expect = parse_moves(
+            "F@0 R@300 .@700 .@1100 U2@1300 F'@1450",
+        )
+
+        result = provide.transform(pause_moves(200, 2, multiple=True))
+        print(str(result))
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
