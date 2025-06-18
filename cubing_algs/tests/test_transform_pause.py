@@ -96,3 +96,44 @@ class TransformPauseTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+
+class TransformPauseConfigTestCase(unittest.TestCase):
+
+    def test_pause_moves(self):
+        provide = parse_moves(
+            "F@0 R@300 U2@1300 F'@1450",
+        )
+        expect = parse_moves(
+            "F@0 R@300 .@1100 U2@1300 F'@1450",
+        )
+
+        result = pause_moves(provide)
+
+        self.assertEqual(
+            provide.transform(pause_moves),
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_pause_moves_configured(self):
+        provide = parse_moves(
+            "F@0 R@300 U2@1300 F'@1450",
+        )
+        expect = parse_moves(
+            "F@0 R@300 .@1100 U2@1300 F'@1450",
+        )
+
+        result = pause_moves(provide)
+
+        self.assertEqual(
+            provide.transform(
+                pause_moves(300, 2),
+            ),
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))

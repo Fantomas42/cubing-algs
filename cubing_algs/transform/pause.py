@@ -10,10 +10,10 @@ def unpause_moves(old_moves: list[Move]) -> list[Move]:
     return moves
 
 
-def pause_moves(old_moves: list[Move]) -> list[Move]:
+def pause_moves(old_moves: list[Move], speed=200, factor=2) -> list[Move]:
     moves = []
     speed = 200  # Milliseconds
-    threshold = speed * 2
+    threshold = speed * factor
 
     for m in old_moves:
         if not m.is_timed:
