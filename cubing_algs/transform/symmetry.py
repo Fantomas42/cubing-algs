@@ -18,7 +18,7 @@ def symmetry_moves(
     moves = []
 
     for move in old_moves:
-        if move.base_move in ignore_moves:
+        if move.is_pause or move.base_move in ignore_moves:
             moves.append(move)
         else:
             new_move = Move(
