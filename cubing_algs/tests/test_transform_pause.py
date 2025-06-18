@@ -51,7 +51,7 @@ class TransformPauseTestCase(unittest.TestCase):
             "F@0 R@300 .@1100 U2@1300 F'@1450",
         )
 
-        result = pause_moves(provide)
+        result = pause_moves()(provide)
 
         self.assertEqual(
             result,
@@ -69,7 +69,7 @@ class TransformPauseTestCase(unittest.TestCase):
             "F R U2 F'",
         )
 
-        result = pause_moves(provide)
+        result = pause_moves()(provide)
 
         self.assertEqual(
             result,
@@ -87,7 +87,7 @@ class TransformPauseTestCase(unittest.TestCase):
             "F@0 R@300 U2@1300 F'",
         )
 
-        result = pause_moves(provide)
+        result = pause_moves()(provide)
 
         self.assertEqual(
             result,
@@ -108,10 +108,10 @@ class TransformPauseConfigTestCase(unittest.TestCase):
             "F@0 R@300 .@1100 U2@1300 F'@1450",
         )
 
-        result = pause_moves(provide)
+        result = provide.transform(pause_moves())
 
         self.assertEqual(
-            provide.transform(pause_moves),
+            result,
             expect,
         )
 
@@ -123,15 +123,13 @@ class TransformPauseConfigTestCase(unittest.TestCase):
             "F@0 R@300 U2@1300 F'@1450",
         )
         expect = parse_moves(
-            "F@0 R@300 .@1100 U2@1300 F'@1450",
+            "F@0 R@300 .@1000 U2@1300 F'@1450",
         )
 
-        result = pause_moves(provide)
+        result = provide.transform(pause_moves(300, 2))
 
         self.assertEqual(
-            provide.transform(
-                pause_moves(300, 2),
-            ),
+            result,
             expect,
         )
 

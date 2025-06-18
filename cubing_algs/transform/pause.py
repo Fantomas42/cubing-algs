@@ -10,28 +10,40 @@ def unpause_moves(old_moves: list[Move]) -> list[Move]:
     return moves
 
 
-def pause_moves(old_moves: list[Move], speed=200, factor=2) -> list[Move]:
-    moves = []
-    speed = 200  # Milliseconds
-    threshold = speed * factor
+def pause_moves(speed: int = 200, factor: int = 2):
+    """
+    Create a configurable pause_moves function.
 
-    for m in old_moves:
-        if not m.is_timed:
-            return old_moves
+    Args:
+        speed: Base speed in milliseconds (default: 200)
+        factor: Multiplier for threshold calculation (default: 2)
 
-    previous_time = old_moves[0].timed
-    for move in old_moves:
-        time = move.timed
+    Returns:
+        A function that can be used with transform() or called directly.
+    """
+    def _pause_moves(old_moves: list[Move]) -> list[Move]:
+        moves = []
+        threshold = speed * factor
 
-        if time - previous_time > threshold:
-            moves.extend(
-                [
-                    Move(f'.@{ time - speed }'),
-                    move,
-                ],
-            )
-        else:
-            moves.append(move)
-        previous_time = time
+        for m in old_moves:
+            if not m.is_timed:
+                return old_moves
 
-    return moves
+        previous_time = old_moves[0].timed
+        for move in old_moves:
+            time = move.timed
+
+            if time - previous_time > threshold:
+                moves.extend(
+                    [
+                        Move(f'.@{ time - speed }'),
+                        move,
+                    ],
+                )
+            else:
+                moves.append(move)
+            previous_time = time
+
+        return moves
+
+    return _pause_moves
