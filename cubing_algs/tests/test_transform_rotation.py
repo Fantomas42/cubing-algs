@@ -34,3 +34,30 @@ class TransformRotationTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_remove_final_rotations_timed_paused(self):
+        provide = parse_moves('R2@1 F@2 U@3 x@4 .@5 y2@6')
+        expect = parse_moves('R2@1 F@2 U@3')
+
+        result = remove_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves('R2@1 F@2 U@3 .@4 x@5 .@6 y2@7')
+        expect = parse_moves('R2@1 F@2 U@3')
+
+        result = remove_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))

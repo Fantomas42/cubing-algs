@@ -55,6 +55,21 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_unslice_timed_moves_pauses(self):
+
+        provide = parse_moves('M2@1 .@2 U@3 S@4 E@5')
+        expect = parse_moves("L2@1R2@1x2@1.@2U@3F'@4B@4z@4D'@5U@5y'@5")
+
+        result = unslice_rotation_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_reslice_moves(self):
         provide = parse_moves("U' D")
         expect = parse_moves("E'y'")
@@ -196,6 +211,20 @@ class TransformSliceTestCase(unittest.TestCase):
 
         provide = parse_moves("2L'@100 R@200 2F@300")
         expect = parse_moves("2L'@100 R@200 2F@300")
+
+        result = reslice_m_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_reslice_m_moves_big_timed_pauses(self):
+        provide = parse_moves("L' . R 2F@200")
+        expect = parse_moves("L' . R 2F@200")
 
         result = reslice_m_moves(provide)
 

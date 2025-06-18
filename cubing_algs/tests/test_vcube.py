@@ -1,5 +1,6 @@
 import unittest
 
+from cubing_algs.move import InvalidMoveError
 from cubing_algs.vcube import INITIAL
 from cubing_algs.vcube import VCube
 
@@ -222,6 +223,18 @@ class VCubeTestCase(unittest.TestCase):
             'DDDDDDDDDLLLLLLLLLFFFFFFFFFUUUUUUUUURRRRRRRRRBBBBBBBBB',
         )
 
+    def test_rotate_invalid_modifier(self):
+        cube = VCube()
+
+        with self.assertRaises(InvalidMoveError):
+            cube.rotate('z3')
+
+    def test_rotate_invalid_move(self):
+        cube = VCube()
+
+        with self.assertRaises(InvalidMoveError):
+            cube.rotate('T2')
+
     def test_real_case(self):
         cube = VCube()
         scramble = "U2 D2 F U2 F2 U R' L U2 R2 U' B2 D R2 L2 F2 U' L2 D F2 U'"
@@ -248,4 +261,25 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(
             result,
             cube.state,
+        )
+
+    def test_initial(self):
+        initial = reversed(INITIAL)
+        cube = VCube(initial)
+
+        self.assertEqual(
+            cube.state,
+            initial,
+        )
+
+    def test_is_solved(self):
+        cube = VCube()
+
+        self.assertTrue(
+            cube.is_solved,
+        )
+
+        cube.rotate('R2 U2')
+        self.assertFalse(
+            cube.is_solved,
         )

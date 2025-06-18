@@ -17,6 +17,7 @@ from cubing_algs.constants import LAYER_SPLIT
 from cubing_algs.constants import OUTER_BASIC_MOVES
 from cubing_algs.constants import OUTER_MOVES
 from cubing_algs.constants import OUTER_WIDE_MOVES
+from cubing_algs.constants import PAUSE_CHAR
 from cubing_algs.constants import ROTATIONS
 
 
@@ -178,6 +179,9 @@ class Move(UserString):
 
         Validates that the move letter is one of the recognized basic moves.
         """
+        if self.is_pause:
+            return True
+
         if self.is_japanese_move:
             return self.raw_base_move[0] in OUTER_BASIC_MOVES
 
@@ -215,6 +219,15 @@ class Move(UserString):
     # Move
 
     @cached_property
+    def is_pause(self) -> bool:
+        """
+        Determine if this is a Pause.
+
+        Pause is a dot (.).
+        """
+        return self.base_move == PAUSE_CHAR
+
+    @cached_property
     def is_rotation_move(self) -> bool:
         """
         Check if this is a cube rotation move.
@@ -231,7 +244,7 @@ class Move(UserString):
         Face moves are moves that turn a face or slice of the cube,
         as opposed to rotating the entire cube.
         """
-        return not self.is_rotation_move
+        return not self.is_pause and not self.is_rotation_move
 
     @cached_property
     def is_inner_move(self) -> bool:
@@ -297,7 +310,7 @@ class Move(UserString):
 
         Moves without the invert character (') are clockwise.
         """
-        return self.modifier != INVERT_CHAR
+        return not self.is_pause and self.modifier != INVERT_CHAR
 
     @cached_property
     def is_counter_clockwise(self) -> bool:
@@ -306,7 +319,7 @@ class Move(UserString):
 
         Moves with the invert character (') are counter-clockwise.
         """
-        return not self.is_clockwise
+        return not self.is_pause and not self.is_clockwise
 
     # Transformations
 
@@ -319,8 +332,9 @@ class Move(UserString):
         For a counter-clockwise move, returns the clockwise version.
         Double moves remain unchanged when inverted.
         """
-        if self.is_double:
+        if self.is_double or self.is_pause:
             return self
+
         if self.is_counter_clockwise:
             return Move(
                 f'{ self.layer }'
@@ -342,6 +356,9 @@ class Move(UserString):
         For a single move, returns the double version (180° turn).
         For a double move, returns the single version.
         """
+        if self.is_pause:
+            return self
+
         if self.is_double:
             return Move(
                 f'{ self.layer }'

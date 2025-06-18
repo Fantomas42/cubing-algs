@@ -1,3 +1,5 @@
+from cubing_algs.move import InvalidMoveError
+
 INITIAL = ''
 for face in ['U', 'R', 'F', 'D', 'L', 'B']:
     INITIAL += face * 9
@@ -41,6 +43,9 @@ class VCube:
             elif move[1] == '2':
                 # 180 degrees (equivalent to 2 clockwise rotations)
                 direction = 2
+            else:
+                msg = 'Invalid modifier'
+                raise InvalidMoveError(msg)
 
         for _ in range(direction):
             if face == 'U':
@@ -602,6 +607,9 @@ class VCube:
                     d_transformed +  # L becomes D
                     b_rotated        # B stays B but rotates counterclockwise
                 )
+            else:
+                msg = 'Invalid move'
+                raise InvalidMoveError(msg)
 
         self.history.append(move)
 

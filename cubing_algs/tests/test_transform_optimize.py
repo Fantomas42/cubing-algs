@@ -58,6 +58,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
+        provide = parse_moves("2R'@100 .@150 2R'@200 2R'@300 U@400 F@500")
+        expect = parse_moves("2R'@100 .@150 2R'@200 2R'@300 U@400 F@500")
+
+        self.assertEqual(
+            optimize_repeat_three_moves(provide),
+            expect,
+        )
+
         provide = parse_moves("U F R' R' R' U F")
         expect = parse_moves('U F R U F')
 
@@ -113,6 +121,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
         provide = parse_moves("2R'@100 2R@200 U@300 F@400")
         expect = parse_moves('U@300 F@400')
+
+        self.assertEqual(
+            optimize_do_undo_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("2R'@100 .@150 2R@200 U@300 F@400")
+        expect = parse_moves("2R'@100 .@150 2R@200 U@300 F@400")
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
@@ -180,6 +196,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
+        provide = parse_moves("2R'@100 2R'@200 .@250 2R@300 2R@400 U@500 F@600")
+        expect = parse_moves("2R'@100 2R'@200 .@250 2R@300 2R@400 U@500 F@600")
+
+        self.assertEqual(
+            optimize_do_undo_moves(provide),
+            expect,
+        )
+
         provide = parse_moves("U F R' R' R R U F")
         expect = parse_moves('U F U F')
 
@@ -223,6 +247,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
         provide = parse_moves('2R2@100 2R2@200 U@300 F@400')
         expect = parse_moves('U@300 F@400')
+
+        self.assertEqual(
+            optimize_do_undo_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('2R2@100 .@150 2R2@200 U@300 F@400')
+        expect = parse_moves('2R2@100 .@150 2R2@200 U@300 F@400')
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
@@ -280,6 +312,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
         provide = parse_moves("2R'@100 2R'@200 U@300 F@400")
         expect = parse_moves('2R2@200 U@300 F@400')
+
+        self.assertEqual(
+            optimize_double_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("2R'@100 .@150 2R'@200 U@300 F@400")
+        expect = parse_moves("2R'@100 .@150 2R'@200 U@300 F@400")
 
         self.assertEqual(
             optimize_double_moves(provide),
@@ -383,6 +423,14 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
         provide = parse_moves("2R'@100 2R2@200 U@300 F@400 F@500")
         expect = parse_moves('2R@100 U@300 F@400 F@500')
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves("2R'@100 .@150 2R2@200 U@300 F@400 F@500")
+        expect = parse_moves("2R'@100 .@150 2R2@200 U@300 F@400 F@500")
 
         self.assertEqual(
             optimize_triple_moves(provide),

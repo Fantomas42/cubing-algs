@@ -6,7 +6,7 @@ def remove_final_rotations(old_moves: list[Move]) -> list[Move]:
 
     rotations = True
     for move in reversed(old_moves):
-        if rotations and move.is_rotation_move:
+        if rotations and (move.is_rotation_move or move.is_pause):
             continue
         rotations = False
         moves.append(move)
