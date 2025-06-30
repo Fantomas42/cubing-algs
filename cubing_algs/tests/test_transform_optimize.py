@@ -326,6 +326,22 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
+        provide = parse_moves("2R'@100 .@150 .@175 2R'@200 U@300 F@400")
+        expect = parse_moves("2R'@100 .@175 2R'@200 U@300 F@400")
+
+        self.assertEqual(
+            optimize_double_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('U . . U')
+        expect = parse_moves('U . U')
+
+        self.assertEqual(
+            optimize_double_moves(provide),
+            expect,
+        )
+
         provide = parse_moves('U F R R U F')
         expect = parse_moves('U F R2 U F')
 
