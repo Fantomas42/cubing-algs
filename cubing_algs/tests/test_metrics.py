@@ -20,6 +20,7 @@ class MetricsTestCase(unittest.TestCase):
                 'qtm': 16,
                 'stm': 7,
                 'etm': 8,
+                'rtm': 1,
                 'qstm': 10,
             },
         )
@@ -59,6 +60,14 @@ class MetricsTestCase(unittest.TestCase):
         for move, score in zip(moves, scores, strict=True):
             self.assertEqual(parse_moves(move).metrics['qstm'], score)
 
+    def test_rtm(self):
+        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'x y2']
+        scores = [0, 0, 0, 0, 2, 0, 3]
+
+        for move, score in zip(moves, scores, strict=True):
+            self.assertEqual(parse_moves(move).metrics['rtm'], score)
+
+
     def test_issue_11(self):
         moves = "R U F' B R' U F' U' F D F' D' F' D' F D' L D L' R D' R' D' B D' B' D' D' R D' D' R' D B' D' B D' D' F D' F' D F D F' D' D D' D' L D B D' B' L' D R F D F' D' R' R F D' F' D' F D F' R' F D F' D' F' R F R' D"  # noqa: E501
 
@@ -74,6 +83,7 @@ class MetricsTestCase(unittest.TestCase):
                 'qtm': 80,
                 'stm': 80,
                 'etm': 80,
+                'rtm': 0,
                 'qstm': 80,
             },
         )
@@ -91,6 +101,7 @@ class MetricsTestCase(unittest.TestCase):
                 'qtm': 80,
                 'stm': 76,
                 'etm': 76,
+                'rtm': 0,
                 'qstm': 80,
             },
         )
@@ -108,6 +119,7 @@ class MetricsTestCase(unittest.TestCase):
                 'qtm': 3,
                 'stm': 3,
                 'etm': 3,
+                'rtm': 0,
                 'qstm': 3,
             },
         )
@@ -125,6 +137,7 @@ class MetricsTestCase(unittest.TestCase):
                 'qtm': 3,
                 'stm': 3,
                 'etm': 3,
+                'rtm': 0,
                 'qstm': 3,
             },
         )
