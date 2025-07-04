@@ -15,7 +15,10 @@ def optimize_repeat_three_moves(
     moves = old_moves.copy()
 
     while i < len(moves) - 2:
-        if moves[i].untimed == moves[i + 1].untimed == moves[i + 2].untimed:
+        if (
+            not moves[i].is_pause
+            and moves[i].untimed == moves[i + 1].untimed == moves[i + 2].untimed
+        ):
             moves[i:i + 3] = [moves[i + 2].inverted]
             changed = True
         else:
@@ -43,9 +46,13 @@ def optimize_do_undo_moves(
     moves = old_moves.copy()
 
     while i < len(moves) - 1:
-        if moves[i].inverted.untimed == moves[i + 1].untimed or (
-                moves[i].untimed == moves[i + 1].untimed
-                and moves[i].is_double
+        if (
+            (not moves[i].is_pause
+             and moves[i].inverted.untimed == moves[i + 1].untimed) or (
+                 moves[i].untimed == moves[i + 1].untimed
+                 and moves[i].is_double
+                 and not moves[i].is_pause
+             )
         ):
             moves[i:i + 2] = []
             changed = True
@@ -71,7 +78,11 @@ def optimize_double_moves(
     moves = old_moves.copy()
 
     while i < len(moves) - 1:
-        if moves[i].untimed == moves[i + 1].untimed and not moves[i].is_double:
+        if (
+            not moves[i].is_pause
+            and not moves[i].is_double
+            and moves[i].untimed == moves[i + 1].untimed
+        ):
             moves[i:i + 2] = [moves[i + 1].doubled]
             changed = True
         else:

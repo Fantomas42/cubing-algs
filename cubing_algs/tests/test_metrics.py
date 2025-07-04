@@ -67,7 +67,6 @@ class MetricsTestCase(unittest.TestCase):
         for move, score in zip(moves, scores, strict=True):
             self.assertEqual(parse_moves(move).metrics['rtm'], score)
 
-
     def test_issue_11(self):
         moves = "R U F' B R' U F' U' F D F' D' F' D' F D' L D L' R D' R' D' B D' B' D' D' R D' D' R' D B' D' B D' D' F D' F' D F D F' D' D D' D' L D B D' B' L' D R F D F' D' R' R F D' F' D' F D F' R' F D F' D' F' R F R' D"  # noqa: E501
 

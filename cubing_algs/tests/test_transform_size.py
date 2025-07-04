@@ -113,6 +113,44 @@ class TransformCompressTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_compress_pauses(self):
+        provide = parse_moves(
+            'U . . . U',
+        )
+
+        expect = parse_moves(
+            'U . . . U',
+        )
+
+        result = compress_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_compress_pauses_timed(self):
+        provide = parse_moves(
+            'U@1 .@2 .@3 .@4 U@5',
+        )
+
+        expect = parse_moves(
+            'U@1 .@2 .@3 .@4 U@5',
+        )
+
+        result = compress_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_compress_moves_max(self):
         provide = parse_moves(
             "U (R U2 R' U' R U' R') "
