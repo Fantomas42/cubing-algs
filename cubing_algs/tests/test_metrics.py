@@ -15,6 +15,7 @@ class MetricsTestCase(unittest.TestCase):
                 'generators': ['M', 'U'],
                 'inner_moves': 4,
                 'outer_moves': 3,
+                'pauses': 0,
                 'rotations': 1,
                 'htm': 11,
                 'qtm': 16,
@@ -77,6 +78,7 @@ class MetricsTestCase(unittest.TestCase):
                 'generators': ['D', 'F', 'R', 'B', 'L', 'U'],
                 'inner_moves': 0,
                 'outer_moves': 80,
+                'pauses': 0,
                 'rotations': 0,
                 'htm': 80,
                 'qtm': 80,
@@ -95,6 +97,7 @@ class MetricsTestCase(unittest.TestCase):
                 'generators': ['D', 'F', 'R', 'B', 'L', 'U'],
                 'inner_moves': 0,
                 'outer_moves': 76,
+                'pauses': 0,
                 'rotations': 0,
                 'htm': 76,
                 'qtm': 80,
@@ -113,6 +116,7 @@ class MetricsTestCase(unittest.TestCase):
                 'generators': ['R', 'F', 'u'],
                 'inner_moves': 0,
                 'outer_moves': 3,
+                'pauses': 0,
                 'rotations': 0,
                 'htm': 3,
                 'qtm': 3,
@@ -131,6 +135,26 @@ class MetricsTestCase(unittest.TestCase):
                 'generators': ['R', 'F', 'Uw'],
                 'inner_moves': 0,
                 'outer_moves': 3,
+                'pauses': 0,
+                'rotations': 0,
+                'htm': 3,
+                'qtm': 3,
+                'stm': 3,
+                'etm': 3,
+                'rtm': 0,
+                'qstm': 3,
+            },
+        )
+
+    def test_metrics_pauses(self):
+        algo = parse_moves('R..Fu.')
+        self.assertEqual(
+            algo.metrics,
+            {
+                'generators': ['R', 'F', 'u'],
+                'inner_moves': 0,
+                'outer_moves': 3,
+                'pauses': 3,
                 'rotations': 0,
                 'htm': 3,
                 'qtm': 3,

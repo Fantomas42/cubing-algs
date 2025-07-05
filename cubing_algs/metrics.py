@@ -78,7 +78,7 @@ def compute_generators(moves: list[Move]) -> list[str]:
     """
     count: dict[str, int] = {}
     for move in moves:
-        if move.is_rotation_move:
+        if move.is_rotation_move or move.is_pause:
             continue
 
         count.setdefault(move.raw_base_move, 0)
@@ -98,24 +98,27 @@ def regroup_moves(
         moves: list[Move],
 ) -> tuple[list[Move], list[Move], list[Move]]:
     """
-    Categorize moves into rotation, outer, and inner move types.
+    Categorize moves into pause, rotation, outer, and inner move types.
 
     This separation is necessary for accurate metric calculations, as different
     move types are counted differently depending on the metric.
     """
+    pauses = []
     rotations = []
     outer_moves = []
     inner_moves = []
 
     for move in moves:
-        if move.is_outer_move:
+        if move.is_pause:
+            pauses.append(move)
+        elif move.is_outer_move:
             outer_moves.append(move)
         elif move.is_inner_move:
             inner_moves.append(move)
         else:
             rotations.append(move)
 
-    return rotations, outer_moves, inner_moves
+    return pauses, rotations, outer_moves, inner_moves
 
 
 def compute_metrics(moves: list[Move]) -> dict[str, Any]:
@@ -141,9 +144,10 @@ def compute_metrics(moves: list[Move]) -> dict[str, Any]:
             - qstm: Quarter Slice Turn Metric score
             - generators: List of most frequently used faces
     """
-    rotations, outer_moves, inner_moves = regroup_moves(moves)
+    pauses, rotations, outer_moves, inner_moves = regroup_moves(moves)
 
     return {
+        'pauses': len(pauses),
         'rotations': len(rotations),
         'outer_moves': len(outer_moves),
         'inner_moves': len(inner_moves),
