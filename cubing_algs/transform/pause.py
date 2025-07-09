@@ -1,3 +1,4 @@
+from cubing_algs.constants import PAUSE_CHAR
 from cubing_algs.move import Move
 
 
@@ -23,6 +24,9 @@ def pause_moves(speed: int = 200, factor: int = 2,
         A function that can be used with transform() or called directly.
     """
     def _pause_moves(old_moves: list[Move]) -> list[Move]:
+        if not old_moves:
+            return old_moves
+
         moves = []
         threshold = speed * factor
 
@@ -39,16 +43,17 @@ def pause_moves(speed: int = 200, factor: int = 2,
                     delta = time - previous_time
                     occurences = int(delta / threshold)
                     for i in range(occurences):
+                        new_time = previous_time + ((i + 1) * threshold)
                         moves.append(
                             Move(
-                                f'.@{ previous_time + ((i + 1) * threshold) }',
+                                f'{ PAUSE_CHAR }@{ new_time }',
                             ),
                         )
                     moves.append(move)
                 else:
                     moves.extend(
                         [
-                            Move(f'.@{ time - speed }'),
+                            Move(f'{ PAUSE_CHAR }@{ time - speed }'),
                             move,
                         ],
                     )

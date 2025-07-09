@@ -61,6 +61,19 @@ class TransformPauseTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_pause_moves_empty(self):
+        provide = parse_moves('')
+
+        result = pause_moves()(provide)
+
+        self.assertEqual(
+            result,
+            provide
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_pause_moves_untimed(self):
         provide = parse_moves(
             "F R U2 F'",
