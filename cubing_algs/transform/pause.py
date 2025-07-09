@@ -37,13 +37,20 @@ def pause_moves(speed: int = 200, factor: int = 2,
         previous_time = old_moves[0].timed
         for move in old_moves:
             time = move.timed
+            delta = time - previous_time
 
-            if time - previous_time > threshold:
+            if delta > threshold:
                 if multiple:
                     delta = time - previous_time
                     occurences = int(delta / threshold)
+                    offset = (delta - (threshold * occurences)) / 2
+
                     for i in range(occurences):
-                        new_time = previous_time + ((i + 1) * threshold)
+                        new_time = int(
+                            previous_time + offset + (
+                                (i + 1) * threshold
+                            ),
+                        )
                         moves.append(
                             Move(
                                 f'{ PAUSE_CHAR }@{ new_time }',
@@ -51,9 +58,11 @@ def pause_moves(speed: int = 200, factor: int = 2,
                         )
                     moves.append(move)
                 else:
+                    offset = int(delta / 2)
+
                     moves.extend(
                         [
-                            Move(f'{ PAUSE_CHAR }@{ time - speed }'),
+                            Move(f'{ PAUSE_CHAR }@{ time - offset }'),
                             move,
                         ],
                     )

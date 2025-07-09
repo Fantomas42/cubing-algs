@@ -48,7 +48,7 @@ class TransformPauseTestCase(unittest.TestCase):
             "F@0 R@300 U2@1300 F'@1450",
         )
         expect = parse_moves(
-            "F@0 R@300 .@1100 U2@1300 F'@1450",
+            "F@0 R@300 .@800 U2@1300 F'@1450",
         )
 
         result = pause_moves()(provide)
@@ -68,7 +68,7 @@ class TransformPauseTestCase(unittest.TestCase):
 
         self.assertEqual(
             result,
-            provide
+            provide,
         )
 
         for m in result:
@@ -118,7 +118,7 @@ class TransformPauseConfigTestCase(unittest.TestCase):
             "F@0 R@300 U2@1300 F'@1450",
         )
         expect = parse_moves(
-            "F@0 R@300 .@1100 U2@1300 F'@1450",
+            "F@0 R@300 .@800 U2@1300 F'@1450",
         )
 
         result = provide.transform(pause_moves())
@@ -136,7 +136,7 @@ class TransformPauseConfigTestCase(unittest.TestCase):
             "F@0 R@300 U2@1300 F'@1450",
         )
         expect = parse_moves(
-            "F@0 R@300 .@1000 U2@1300 F'@1450",
+            "F@0 R@300 .@800 U2@1300 F'@1450",
         )
 
         result = provide.transform(pause_moves(300, 2))
@@ -154,11 +154,11 @@ class TransformPauseConfigTestCase(unittest.TestCase):
             "F@0 R@300 U2@1300 F'@1450",
         )
         expect = parse_moves(
-            "F@0 R@300 .@700 .@1100 U2@1300 F'@1450",
+            "F@0 R@300 .@800 .@1200 U2@1300 F'@1450",
         )
 
         result = provide.transform(pause_moves(200, 2, multiple=True))
-        print(str(result))
+
         self.assertEqual(
             result,
             expect,
