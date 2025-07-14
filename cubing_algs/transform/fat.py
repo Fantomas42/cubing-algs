@@ -57,8 +57,7 @@ def refat(
     while i < len(old_moves) - 1:
         fatted = f'{ old_moves[i].untimed } { old_moves[i + 1].untimed }'
         if fatted in config:
-            for move in config[fatted]:
-                moves.append(Move(move + old_moves[i + 1].time))
+            moves.append(Move(f'{ config[fatted] }{ old_moves[i].time }'))
             changed = True
             i += 2
         else:

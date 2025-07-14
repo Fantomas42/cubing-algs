@@ -235,7 +235,20 @@ class TransformFatTestCase(unittest.TestCase):
 
     def test_refat_moves_mixed_timed_moves(self):
         provide = parse_moves('L@1 x@2 F@3')
-        expect = parse_moves('r@2 F@3')
+        expect = parse_moves('r@1 F@3')
+
+        result = refat_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("L'@1 x'@2 F@3")
+        expect = parse_moves("r'@1 F@3")
 
         result = refat_moves(provide)
 
@@ -249,7 +262,7 @@ class TransformFatTestCase(unittest.TestCase):
 
     def test_refat_moves_mixed_timed_moves_timed_pauses(self):
         provide = parse_moves('L@1 x@2 .@3 F@4')
-        expect = parse_moves('r@2 .@3 F@4')
+        expect = parse_moves('r@1 .@3 F@4')
 
         result = refat_moves(provide)
 
@@ -262,7 +275,7 @@ class TransformFatTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
         provide = parse_moves('L@1 x@2 F@3 .@4')
-        expect = parse_moves('r@2 F@3 .@4')
+        expect = parse_moves('r@1 F@3 .@4')
 
         result = refat_moves(provide)
 
