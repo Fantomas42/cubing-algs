@@ -10,6 +10,8 @@ JAPANESE_CHAR = 'w'
 
 PAUSE_CHAR = '.'
 
+AUF_CHAR = 'U'
+
 ROTATIONS = (
     'x', 'y', 'z',
 )
