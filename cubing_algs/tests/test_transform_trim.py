@@ -84,7 +84,7 @@ class TransformTrimTestCase(unittest.TestCase):
 
         self.assertEqual(
             result,
-            result,
+            provide,
         )
 
         for m in result:
