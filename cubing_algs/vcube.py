@@ -1,3 +1,4 @@
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import InvalidMoveError
 
 INITIAL = ''
@@ -26,9 +27,13 @@ class VCube:
     def is_solved(self) -> bool:
         return self.state == INITIAL
 
-    def rotate(self, moves):
-        for m in moves.split(' '):
-            self.rotate_move(m)
+    def rotate(self, moves: str | Algorithm) -> str:
+        if isinstance(moves, Algorithm):
+            for m in moves:
+                self.rotate_move(m)
+        else:
+            for m in moves.split(' '):
+                self.rotate_move(m)
         return self._state
 
     def rotate_move(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
