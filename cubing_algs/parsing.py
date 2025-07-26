@@ -105,7 +105,8 @@ def check_moves(moves: list[Move]) -> bool:
     return valid
 
 
-def parse_moves(raw_moves: str | list[str] | Algorithm) -> Algorithm:
+def parse_moves(raw_moves: str | list[str] | Algorithm,
+                secure: bool = True) -> Algorithm:  # noqa: FBT001, FBT002
     """
     Parse raw move data into an Algorithm object.
 
@@ -122,9 +123,12 @@ def parse_moves(raw_moves: str | list[str] | Algorithm) -> Algorithm:
     if isinstance(raw_moves, list):
         raw_moves = ''.join(str(m) for m in raw_moves)
 
-    moves = split_moves(clean_moves(raw_moves))
+    if not secure:
+        moves = split_moves(clean_moves(raw_moves))
+    else:
+        moves = split_moves(raw_moves)
 
-    if not check_moves(moves):
+    if not secure and not check_moves(moves):
         error = f'{ raw_moves } contains invalid move'
         raise InvalidMoveError(error)
 
@@ -140,7 +144,7 @@ def parse_moves_cfop(moves: str) -> Algorithm:
     This is useful for standardizing CFOP algorithms, which often include
     such moves for convenience.
     """
-    algo = parse_moves(moves)
+    algo = parse_moves(moves, secure=False)
 
     if algo[0].base_move in {'y', 'U'}:
         algo = algo[1:]
