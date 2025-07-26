@@ -7,6 +7,7 @@ Algorithm objects.
 """
 
 import logging
+import re
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MOVE_SPLIT
@@ -14,6 +15,15 @@ from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 
 logger = logging.getLogger(__name__)
+
+CLEAN_PATTERNS = [
+    (re.compile(r"['`]"), "'"),
+    (re.compile(r'[():\]]'), ''),
+    (re.compile(r'\s+'), ' '),
+    (re.compile(r"2'"), '2'),
+]
+
+CASE_FIXES = str.maketrans('mseXYZ', 'MSExyz')
 
 
 def clean_moves(moves: str) -> str:
@@ -27,35 +37,10 @@ def clean_moves(moves: str) -> str:
     """
     moves = moves.strip()
 
-    return moves.replace(
-        '’', "'",  # noqa RUF001
-    ).replace(
-        '`', "'",
-    ).replace(
-        ']', '',
-    ).replace(
-        '(', '',
-    ).replace(
-        ')', '',
-    ).replace(
-        ':', ' ',
-    ).replace(
-        '  ', ' ',
-    ).replace(
-        "2'", '2',
-    ).replace(
-        'm', 'M',
-    ).replace(
-        's', 'S',
-    ).replace(
-        'e', 'E',
-    ).replace(
-        'X', 'x',
-    ).replace(
-        'Y', 'y',
-    ).replace(
-        'Z', 'z',
-    )
+    for pattern, replacement in CLEAN_PATTERNS:
+        moves = pattern.sub(replacement, moves)
+
+    return moves.translate(CASE_FIXES)
 
 
 def split_moves(moves: str) -> list[Move]:
