@@ -7,6 +7,7 @@ Algorithm objects.
 """
 
 import logging
+import re
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MOVE_SPLIT
@@ -14,6 +15,15 @@ from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 
 logger = logging.getLogger(__name__)
+
+CLEAN_PATTERNS = [
+    (re.compile(r'[`’]'), "'"),  # # noqa RUF001
+    (re.compile(r'[():\[\]]'), ' '),
+    (re.compile(r'\s+'), ' '),
+    (re.compile(r"2'"), '2'),
+]
+
+CASE_FIXES = str.maketrans('mseXYZ', 'MSExyz')
 
 
 def clean_moves(moves: str) -> str:
@@ -27,35 +37,10 @@ def clean_moves(moves: str) -> str:
     """
     moves = moves.strip()
 
-    return moves.replace(
-        '’', "'",  # noqa RUF001
-    ).replace(
-        '`', "'",
-    ).replace(
-        ']', '',
-    ).replace(
-        '(', '',
-    ).replace(
-        ')', '',
-    ).replace(
-        ':', ' ',
-    ).replace(
-        '  ', ' ',
-    ).replace(
-        "2'", '2',
-    ).replace(
-        'm', 'M',
-    ).replace(
-        's', 'S',
-    ).replace(
-        'e', 'E',
-    ).replace(
-        'X', 'x',
-    ).replace(
-        'Y', 'y',
-    ).replace(
-        'Z', 'z',
-    )
+    for pattern, replacement in CLEAN_PATTERNS:
+        moves = pattern.sub(replacement, moves)
+
+    return moves.translate(CASE_FIXES)
 
 
 def split_moves(moves: str) -> list[Move]:
@@ -79,33 +64,34 @@ def check_moves(moves: list[Move]) -> bool:
     Checks that each move has a valid base move, layer and modifier.
     Logs errors for invalid moves.
     """
-    valid = True
-    move_string = ''.join([str(m) for m in moves])
-
     for move in moves:
-        if not move.is_valid_move:
-            valid = False
-            logger.error(
-                '"%s" -> %s is not a valid move',
-                move_string, move,
-            )
-        elif not move.is_valid_modifier:
-            valid = False
-            logger.error(
-                '"%s" -> %s has an invalid modifier',
-                move_string, move,
-            )
-        elif not move.is_valid_layer:
-            valid = False
-            logger.error(
-                '"%s" -> %s has an invalid layer',
-                move_string, move,
-            )
+        if not (move.is_valid_move
+                and move.is_valid_modifier
+                and move.is_valid_layer):
+            if logger.isEnabledFor(logging.ERROR):
+                move_string = ''.join(str(m) for m in moves)
+                if not move.is_valid_move:
+                    logger.error(
+                        '"%s" -> %s is not a valid move',
+                        move_string, move,
+                    )
+                elif not move.is_valid_modifier:
+                    logger.error(
+                        '"%s" -> %s has an invalid modifier',
+                        move_string, move,
+                    )
+                else:
+                    logger.error(
+                        '"%s" -> %s has an invalid layer',
+                        move_string, move,
+                    )
+            return False
 
-    return valid
+    return True
 
 
-def parse_moves(raw_moves: str | list[str] | Algorithm) -> Algorithm:
+def parse_moves(raw_moves: str | list[str] | Algorithm,
+                secure: bool = True) -> Algorithm:  # noqa: FBT001, FBT002
     """
     Parse raw move data into an Algorithm object.
 
@@ -122,9 +108,12 @@ def parse_moves(raw_moves: str | list[str] | Algorithm) -> Algorithm:
     if isinstance(raw_moves, list):
         raw_moves = ''.join(str(m) for m in raw_moves)
 
-    moves = split_moves(clean_moves(raw_moves))
+    if not secure:
+        moves = split_moves(clean_moves(raw_moves))
+    else:
+        moves = split_moves(raw_moves)
 
-    if not check_moves(moves):
+    if not secure and not check_moves(moves):
         error = f'{ raw_moves } contains invalid move'
         raise InvalidMoveError(error)
 
@@ -140,7 +129,7 @@ def parse_moves_cfop(moves: str) -> Algorithm:
     This is useful for standardizing CFOP algorithms, which often include
     such moves for convenience.
     """
-    algo = parse_moves(moves)
+    algo = parse_moves(moves, secure=False)
 
     if algo[0].base_move in {'y', 'U'}:
         algo = algo[1:]

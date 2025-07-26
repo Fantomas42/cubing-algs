@@ -27,7 +27,7 @@ class Algorithm(UserList[Move]):
     def parse_moves(items: str | list[str]) -> 'Algorithm':
         from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
-        return parse_moves(items)
+        return parse_moves(items, secure=False)
 
     @staticmethod
     def parse_move(item: str) -> Move:

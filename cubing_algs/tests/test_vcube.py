@@ -1,7 +1,7 @@
 import unittest
 
-from cubing_algs.parsing import parse_moves
 from cubing_algs.move import InvalidMoveError
+from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import INITIAL
 from cubing_algs.vcube import VCube
 
