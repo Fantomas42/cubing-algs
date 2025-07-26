@@ -13,6 +13,7 @@ class TransformCompressTestCase(unittest.TestCase):
             "U (R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R')",
+            secure=False,
         )
         expect = parse_moves("U R U2 R' U' R U R' U' R U R' U' R U' R'")
 
@@ -31,6 +32,7 @@ class TransformCompressTestCase(unittest.TestCase):
             "3-4Uw (R U2 R' U' R U' 2R') "
             "(2R U2 R' U' R U' R') "
             "(R U2 R' U' R U' 4R')",
+            secure=False,
         )
         expect = parse_moves("3-4Uw R U2 R' U' R U R' U' R U R' U' R U' 4R'")
 
@@ -49,6 +51,7 @@ class TransformCompressTestCase(unittest.TestCase):
             "U@1 (R@2 U2@3 R'@4 U'@5 R@6 U'@7 R'@8) "
             "(R@9 U2@10 R'@11 U'@12 R@13 U'@14 R'@15) "
             "(R@16 U2@17 R'@18 U'@19 R@20 U'@21 R'@22)",
+            secure=False,
         )
 
         expect = parse_moves(
@@ -72,6 +75,7 @@ class TransformCompressTestCase(unittest.TestCase):
             "U@0 .@1 (R@2 U2@3 R'@4 U'@5 R@6 U'@7 R'@8) "
             "(R@9 U2@10 R'@11 U'@12 R@13 U'@14 R'@15) "
             "(R@16 U2@17 R'@18 U'@19 R@20 U'@21 R'@22)",
+            secure=False,
         )
 
         expect = parse_moves(
@@ -95,6 +99,7 @@ class TransformCompressTestCase(unittest.TestCase):
             "U@1 (R@2 U2@3 R'@4 U'@5 R@6 U'@7 R'@8) "
             "(R@9 .@9 U2@10 R'@11 U'@12 R@13 U'@14 R'@15) "
             "(R@16 U2@17 R'@18 U'@19 R@20 U'@21 R'@22)",
+            secure=False,
         )
 
         expect = parse_moves(
@@ -156,6 +161,7 @@ class TransformCompressTestCase(unittest.TestCase):
             "U (R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R')",
+            secure=False,
         )
 
         result = compress_moves(provide, 0)
