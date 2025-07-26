@@ -8,25 +8,12 @@ static void rotate_face_clockwise(char* face, char* result) {
     result[6] = face[8]; result[7] = face[5]; result[8] = face[2];
 }
 
-// Fonction utilitaire pour rotation d'une face 3x3 dans le sens anti-horaire
-static void rotate_face_counterclockwise(char* face, char* result) {
-    result[0] = face[2]; result[1] = face[5]; result[2] = face[8];
-    result[3] = face[1]; result[4] = face[4]; result[5] = face[7];
-    result[6] = face[0]; result[7] = face[3]; result[8] = face[6];
-}
-
 // Fonction principale de rotation d'un mouvement
 static PyObject* rotate_move(PyObject* self, PyObject* args) {
     const char* state;
     const char* move;
 
     if (!PyArg_ParseTuple(args, "ss", &state, &move)) {
-        return NULL;
-    }
-
-    // Vérifier que l'état fait 54 caractères
-    if (strlen(state) != 54) {
-        PyErr_SetString(PyExc_ValueError, "State must be 54 characters long");
         return NULL;
     }
 

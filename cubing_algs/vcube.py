@@ -46,20 +46,11 @@ class VCube:
         return self._state
 
     def rotate_move(self, move: str):
-        # Utiliser l'extension C si disponible, sinon fallback vers Python
         if FAST_ROTATE_AVAILABLE and move[0] in 'URFDLB':
-            # try:
-            print('C')
             self._state = vcube_rotate.rotate_move(self._state, move)
             self.history.append(move)
             return self._state
-            # except Exception as e:
-            #     # Si l'extension C échoue, utiliser la version Python
-            #     print(f"C extension failed for move {move}: {e}")
-            #     return self._rotate_move_python(move)
         else:
-            # Utiliser la version Python pour les mouvements non supportés par C
-            print('PY')
             return self._rotate_move_python(move)
 
     def _rotate_move_python(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
