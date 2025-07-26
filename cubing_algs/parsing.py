@@ -79,30 +79,30 @@ def check_moves(moves: list[Move]) -> bool:
     Checks that each move has a valid base move, layer and modifier.
     Logs errors for invalid moves.
     """
-    valid = True
-    move_string = ''.join([str(m) for m in moves])
-
     for move in moves:
-        if not move.is_valid_move:
-            valid = False
-            logger.error(
-                '"%s" -> %s is not a valid move',
-                move_string, move,
-            )
-        elif not move.is_valid_modifier:
-            valid = False
-            logger.error(
-                '"%s" -> %s has an invalid modifier',
-                move_string, move,
-            )
-        elif not move.is_valid_layer:
-            valid = False
-            logger.error(
-                '"%s" -> %s has an invalid layer',
-                move_string, move,
-            )
+        if not (move.is_valid_move
+                and move.is_valid_modifier
+                and move.is_valid_layer):
+            if logger.isEnabledFor(logging.ERROR):
+                move_string = ''.join(str(m) for m in moves)
+                if not move.is_valid_move:
+                    logger.error(
+                        '"%s" -> %s is not a valid move',
+                        move_string, move,
+                    )
+                elif not move.is_valid_modifier:
+                    logger.error(
+                        '"%s" -> %s has an invalid modifier',
+                        move_string, move,
+                    )
+                else:
+                    logger.error(
+                        '"%s" -> %s has an invalid layer',
+                        move_string, move,
+                    )
+            return False
 
-    return valid
+    return True
 
 
 def parse_moves(raw_moves: str | list[str] | Algorithm,
