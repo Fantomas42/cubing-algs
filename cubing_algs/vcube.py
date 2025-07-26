@@ -1,14 +1,20 @@
+import logging
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import InvalidMoveError
+
+logger = logging.getLogger(__name__)
 
 try:
     from cubing_algs import vcube_rotate
     FAST_ROTATE_AVAILABLE = True
 except ImportError:
     FAST_ROTATE_AVAILABLE = False
-    print("Warning: cube_rotate C extension not available, falling back to Python implementation")
+    logger.info(
+        'VCube_rotate C extension not available, '
+        'falling back to Python implementation',
+    )
 
-FAST_ROTATE_AVAILABLE = False
 
 INITIAL = ''
 for face in ['U', 'R', 'F', 'D', 'L', 'B']:
@@ -36,22 +42,22 @@ class VCube:
     def is_solved(self) -> bool:
         return self.state == INITIAL
 
-    def rotate(self, moves: str | Algorithm) -> str:
+    def rotate(self, moves: str | Algorithm, allow_fast: bool = True) -> str:
         if isinstance(moves, Algorithm):
             for m in moves:
-                self.rotate_move(str(m))
+                self.rotate_move(str(m), allow_fast)
         else:
             for m in moves.split(' '):
-                self.rotate_move(m)
+                self.rotate_move(m, allow_fast)
         return self._state
 
-    def rotate_move(self, move: str):
-        if FAST_ROTATE_AVAILABLE and move[0] in 'URFDLB':
+    def rotate_move(self, move: str, allow_fast: bool = True):
+        if allow_fast and FAST_ROTATE_AVAILABLE and move[0] in 'URFDLB':
             self._state = vcube_rotate.rotate_move(self._state, move)
             self.history.append(move)
             return self._state
-        else:
-            return self._rotate_move_python(move)
+
+        return self._rotate_move_python(move)
 
     def _rotate_move_python(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
         # Parse the move
