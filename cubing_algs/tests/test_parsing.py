@@ -125,6 +125,7 @@ class ParseMovesTestCase(unittest.TestCase):
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
+            secure=False,
         )
 
     def test_parse_moves_list_moves(self):
