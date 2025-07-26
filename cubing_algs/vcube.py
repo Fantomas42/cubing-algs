@@ -1,6 +1,15 @@
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import InvalidMoveError
 
+try:
+    from cubing_algs import vcube_rotate
+    FAST_ROTATE_AVAILABLE = True
+except ImportError:
+    FAST_ROTATE_AVAILABLE = False
+    print("Warning: cube_rotate C extension not available, falling back to Python implementation")
+
+FAST_ROTATE_AVAILABLE = False
+
 INITIAL = ''
 for face in ['U', 'R', 'F', 'D', 'L', 'B']:
     INITIAL += face * 9
@@ -30,13 +39,30 @@ class VCube:
     def rotate(self, moves: str | Algorithm) -> str:
         if isinstance(moves, Algorithm):
             for m in moves:
-                self.rotate_move(m)
+                self.rotate_move(str(m))
         else:
             for m in moves.split(' '):
                 self.rotate_move(m)
         return self._state
 
-    def rotate_move(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
+    def rotate_move(self, move: str):
+        # Utiliser l'extension C si disponible, sinon fallback vers Python
+        if FAST_ROTATE_AVAILABLE and move[0] in 'URFDLB':
+            # try:
+            print('C')
+            self._state = vcube_rotate.rotate_move(self._state, move)
+            self.history.append(move)
+            return self._state
+            # except Exception as e:
+            #     # Si l'extension C échoue, utiliser la version Python
+            #     print(f"C extension failed for move {move}: {e}")
+            #     return self._rotate_move_python(move)
+        else:
+            # Utiliser la version Python pour les mouvements non supportés par C
+            print('PY')
+            return self._rotate_move_python(move)
+
+    def _rotate_move_python(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
         # Parse the move
         face = move[0]
         direction = 1  # Default: clockwise
