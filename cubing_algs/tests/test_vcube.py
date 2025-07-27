@@ -333,12 +333,16 @@ class RegressionVCubeTestCase(unittest.TestCase):
                 c_cube.rotate(move, allow_fast=True),
             )
 
+        p_cube = VCube(self.initial)
+        c_cube = VCube(self.initial)
         with self.subTest('Anti-Clockwise', move=move):
             self.assertEqual(
                 p_cube.rotate(f"{ move }'", allow_fast=False),
                 c_cube.rotate(f"{ move }'", allow_fast=True),
             )
 
+        p_cube = VCube(self.initial)
+        c_cube = VCube(self.initial)
         with self.subTest('Double', move=move):
             self.assertEqual(
                 p_cube.rotate(f'{ move }2', allow_fast=False),
