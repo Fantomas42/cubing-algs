@@ -31,7 +31,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
         } else if (move[1] == '2') {
             direction = 2; // 180° = 2 rotations horaires
         } else {
-            PyErr_SetString(PyExc_ValueError, "Invalid move modifier");
+          PyErr_SetString(PyExc_ValueError, "Invalid move modifier");
             return NULL;
         }
     }
@@ -173,8 +173,177 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 break;
             }
 
-            // Pour les mouvements M, S, E, x, y, z, on peut les ajouter si nécessaire
-            // Ici je me concentre sur les mouvements de base U, R, F, D, L, B
+            case 'M': {
+                // M est la tranche du milieu entre L et R (même direction que L)
+                char u_middle[3] = {new_state[1], new_state[4], new_state[7]};
+                char f_middle[3] = {new_state[19], new_state[22], new_state[25]};
+                char d_middle[3] = {new_state[28], new_state[31], new_state[34]};
+                char b_middle[3] = {new_state[46], new_state[49], new_state[52]};
+
+                // Rotation (comme L)
+                new_state[1] = b_middle[2]; new_state[4] = b_middle[1]; new_state[7] = b_middle[0];
+                new_state[19] = u_middle[0]; new_state[22] = u_middle[1]; new_state[25] = u_middle[2];
+                new_state[28] = f_middle[0]; new_state[31] = f_middle[1]; new_state[34] = f_middle[2];
+                new_state[46] = d_middle[2]; new_state[49] = d_middle[1]; new_state[52] = d_middle[0];
+                break;
+            }
+
+            case 'S': {
+                // S est la tranche du milieu entre F et B (même direction que F)
+                char u_middle[3] = {new_state[3], new_state[4], new_state[5]};
+                char r_middle[3] = {new_state[10], new_state[13], new_state[16]};
+                char d_middle[3] = {new_state[30], new_state[31], new_state[32]};
+                char l_middle[3] = {new_state[37], new_state[40], new_state[43]};
+
+                // Rotation (comme F)
+                new_state[3] = l_middle[2]; new_state[4] = l_middle[1]; new_state[5] = l_middle[0];
+                new_state[10] = u_middle[0]; new_state[13] = u_middle[1]; new_state[16] = u_middle[2];
+                new_state[30] = r_middle[2]; new_state[31] = r_middle[1]; new_state[32] = r_middle[0];
+                new_state[37] = d_middle[0]; new_state[40] = d_middle[1]; new_state[43] = d_middle[2];
+                break;
+            }
+
+            case 'E': {
+                // E est la tranche du milieu entre U et D (même direction que D)
+                char f_middle[3] = {new_state[21], new_state[22], new_state[23]};
+                char r_middle[3] = {new_state[12], new_state[13], new_state[14]};
+                char b_middle[3] = {new_state[48], new_state[49], new_state[50]};
+                char l_middle[3] = {new_state[39], new_state[40], new_state[41]};
+
+                // Rotation (comme D)
+                new_state[21] = l_middle[0]; new_state[22] = l_middle[1]; new_state[23] = l_middle[2];
+                new_state[12] = f_middle[0]; new_state[13] = f_middle[1]; new_state[14] = f_middle[2];
+                new_state[48] = r_middle[0]; new_state[49] = r_middle[1]; new_state[50] = r_middle[2];
+                new_state[39] = b_middle[0]; new_state[40] = b_middle[1]; new_state[41] = b_middle[2];
+                break;
+            }
+
+            case 'x': {
+                // x est la rotation de tout le cube autour de l'axe x
+                // (même que R, avec M' et L' ensemble)
+                char temp_state[55];
+                strcpy(temp_state, new_state);
+
+                // Extraire toutes les faces
+                char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
+                for (int j = 0; j < 9; j++) {
+                    u_face[j] = temp_state[j];
+                    r_face[j] = temp_state[9 + j];
+                    f_face[j] = temp_state[18 + j];
+                    d_face[j] = temp_state[27 + j];
+                    l_face[j] = temp_state[36 + j];
+                    b_face[j] = temp_state[45 + j];
+                }
+
+                // Rotation de la face R
+                char r_rotated[9];
+                rotate_face_clockwise(r_face, r_rotated);
+
+                // Rotation de la face L (anti-horaire)
+                char l_rotated[9];
+                l_rotated[0] = l_face[2]; l_rotated[1] = l_face[5]; l_rotated[2] = l_face[8];
+                l_rotated[3] = l_face[1]; l_rotated[4] = l_face[4]; l_rotated[5] = l_face[7];
+                l_rotated[6] = l_face[0]; l_rotated[7] = l_face[3]; l_rotated[8] = l_face[6];
+
+                // Mise à jour de l'état
+                for (int j = 0; j < 9; j++) {
+                    new_state[j] = f_face[j];        // U devient F
+                    new_state[9 + j] = r_rotated[j]; // R reste R mais tourne
+                    new_state[18 + j] = d_face[j];   // F devient D
+                    new_state[27 + j] = b_face[8-j]; // D devient B inversé
+                    new_state[36 + j] = l_rotated[j]; // L reste L mais tourne
+                    new_state[45 + j] = u_face[8-j]; // B devient U inversé
+                }
+                break;
+            }
+
+            case 'y': {
+                // y est la rotation de tout le cube autour de l'axe y
+                // (même que U, avec E' et D' ensemble)
+                char temp_state[55];
+                strcpy(temp_state, new_state);
+
+                // Extraire toutes les faces
+                char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
+                for (int j = 0; j < 9; j++) {
+                    u_face[j] = temp_state[j];
+                    r_face[j] = temp_state[9 + j];
+                    f_face[j] = temp_state[18 + j];
+                    d_face[j] = temp_state[27 + j];
+                    l_face[j] = temp_state[36 + j];
+                    b_face[j] = temp_state[45 + j];
+                }
+
+                // Rotation de la face U
+                char u_rotated[9];
+                rotate_face_clockwise(u_face, u_rotated);
+
+                // Rotation de la face D (anti-horaire)
+                char d_rotated[9];
+                d_rotated[0] = d_face[2]; d_rotated[1] = d_face[5]; d_rotated[2] = d_face[8];
+                d_rotated[3] = d_face[1]; d_rotated[4] = d_face[4]; d_rotated[5] = d_face[7];
+                d_rotated[6] = d_face[0]; d_rotated[7] = d_face[3]; d_rotated[8] = d_face[6];
+
+                // Mise à jour de l'état
+                for (int j = 0; j < 9; j++) {
+                    new_state[j] = u_rotated[j];     // U reste U mais tourne
+                    new_state[9 + j] = b_face[j];    // R devient B
+                    new_state[18 + j] = r_face[j];   // F devient R
+                    new_state[27 + j] = d_rotated[j]; // D reste D mais tourne
+                    new_state[36 + j] = f_face[j];   // L devient F
+                    new_state[45 + j] = l_face[j];   // B devient L
+                }
+                break;
+            }
+
+            case 'z': {
+                // z est la rotation de tout le cube autour de l'axe z
+                // (même que F, avec S et B' ensemble)
+                char temp_state[55];
+                strcpy(temp_state, new_state);
+
+                // Extraire toutes les faces
+                char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
+                for (int j = 0; j < 9; j++) {
+                    u_face[j] = temp_state[j];
+                    r_face[j] = temp_state[9 + j];
+                    f_face[j] = temp_state[18 + j];
+                    d_face[j] = temp_state[27 + j];
+                    l_face[j] = temp_state[36 + j];
+                    b_face[j] = temp_state[45 + j];
+                }
+
+                // Rotation de la face F
+                char f_rotated[9];
+                rotate_face_clockwise(f_face, f_rotated);
+
+                // Rotation de la face B (anti-horaire)
+                char b_rotated[9];
+                b_rotated[0] = b_face[2]; b_rotated[1] = b_face[5]; b_rotated[2] = b_face[8];
+                b_rotated[3] = b_face[1]; b_rotated[4] = b_face[4]; b_rotated[5] = b_face[7];
+                b_rotated[6] = b_face[0]; b_rotated[7] = b_face[3]; b_rotated[8] = b_face[6];
+
+                // Transformation des autres faces (elles tournent en changeant de position)
+                char u_transformed[9], r_transformed[9], d_transformed[9], l_transformed[9];
+                for (int j = 0; j < 9; j++) {
+                    // Chaque face tourne de 90° en sens horaire quand elle change de position
+                    u_transformed[j] = u_face[6 - 3*(j%3) + j/3];
+                    r_transformed[j] = r_face[6 - 3*(j%3) + j/3];
+                    d_transformed[j] = d_face[6 - 3*(j%3) + j/3];
+                    l_transformed[j] = l_face[6 - 3*(j%3) + j/3];
+                }
+
+                // Mise à jour de l'état
+                for (int j = 0; j < 9; j++) {
+                    new_state[j] = l_transformed[j];     // U devient L
+                    new_state[9 + j] = u_transformed[j]; // R devient U
+                    new_state[18 + j] = f_rotated[j];    // F reste F mais tourne
+                    new_state[27 + j] = r_transformed[j]; // D devient R
+                    new_state[36 + j] = d_transformed[j]; // L devient D
+                    new_state[45 + j] = b_rotated[j];    // B reste B mais tourne anti-horaire
+                }
+                break;
+            }
 
             default:
                 PyErr_SetString(PyExc_ValueError, "Invalid move face");

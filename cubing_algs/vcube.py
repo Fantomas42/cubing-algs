@@ -52,10 +52,14 @@ class VCube:
         return self._state
 
     def rotate_move(self, move: str, allow_fast: bool = True):
-        if allow_fast and FAST_ROTATE_AVAILABLE and move[0] in 'URFDLB':
-            self._state = vcube_rotate.rotate_move(self._state, move)
-            self.history.append(move)
-            return self._state
+        if allow_fast and FAST_ROTATE_AVAILABLE:
+            try:
+                self._state = vcube_rotate.rotate_move(self._state, move)
+            except ValueError as e:
+                raise InvalidMoveError(str(e)) from e
+            else:
+                self.history.append(move)
+                return self._state
 
         return self._rotate_move_python(move)
 
@@ -72,7 +76,7 @@ class VCube:
                 # 180 degrees (equivalent to 2 clockwise rotations)
                 direction = 2
             else:
-                msg = 'Invalid modifier'
+                msg = 'Invalid move modifier'
                 raise InvalidMoveError(msg)
 
         for _ in range(direction):
@@ -636,7 +640,7 @@ class VCube:
                     b_rotated        # B stays B but rotates counterclockwise
                 )
             else:
-                msg = 'Invalid move'
+                msg = 'Invalid move face'
                 raise InvalidMoveError(msg)
 
         self.history.append(move)
