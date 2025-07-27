@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=74.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -15,6 +15,7 @@ dev = [
     "mypy",
     "pytest",
     "pytest-cov",
+    "pytest-subtests",
 ]
 
 [tool.setuptools.packages.find]
@@ -23,6 +24,10 @@ namespaces = false
 
 [tool.setuptools.dynamic]
 version = {attr = "cubing_algs.__version__"}
+
+
+[tool.setuptools]
+ext-modules = [{name = "cubing_algs.vcube_rotate", sources = ["cubing_algs/vcube_rotate.c"], extra-compile-args = ["-O3", "-Wall"]}]
 
 [tool.ruff]
 line-length = 80

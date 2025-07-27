@@ -1,5 +1,12 @@
+from importlib.util import find_spec
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import InvalidMoveError
+
+FAST_ROTATE_AVAILABLE = False
+if find_spec('cubing_algs.vcube_rotate') is not None:
+    from cubing_algs import vcube_rotate
+    FAST_ROTATE_AVAILABLE = True
 
 INITIAL = ''
 for face in ['U', 'R', 'F', 'D', 'L', 'B']:
@@ -27,16 +34,28 @@ class VCube:
     def is_solved(self) -> bool:
         return self.state == INITIAL
 
-    def rotate(self, moves: str | Algorithm) -> str:
+    def rotate(self, moves: str | Algorithm, allow_fast: bool = True) -> str:  # noqa: FBT001, FBT002
         if isinstance(moves, Algorithm):
             for m in moves:
-                self.rotate_move(m)
+                self.rotate_move(str(m), allow_fast=allow_fast)
         else:
             for m in moves.split(' '):
-                self.rotate_move(m)
+                self.rotate_move(m, allow_fast=allow_fast)
         return self._state
 
-    def rotate_move(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
+    def rotate_move(self, move: str, *, allow_fast: bool = True):
+        if allow_fast and FAST_ROTATE_AVAILABLE:
+            try:
+                self._state = vcube_rotate.rotate_move(self._state, move)
+            except ValueError as e:
+                raise InvalidMoveError(str(e)) from e
+            else:
+                self.history.append(move)
+                return self._state
+
+        return self._rotate_move_python(move)
+
+    def _rotate_move_python(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
         # Parse the move
         face = move[0]
         direction = 1  # Default: clockwise
@@ -49,7 +68,7 @@ class VCube:
                 # 180 degrees (equivalent to 2 clockwise rotations)
                 direction = 2
             else:
-                msg = 'Invalid modifier'
+                msg = 'Invalid move modifier'
                 raise InvalidMoveError(msg)
 
         for _ in range(direction):
@@ -613,7 +632,7 @@ class VCube:
                     b_rotated        # B stays B but rotates counterclockwise
                 )
             else:
-                msg = 'Invalid move'
+                msg = 'Invalid move face'
                 raise InvalidMoveError(msg)
 
         self.history.append(move)
