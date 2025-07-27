@@ -246,6 +246,15 @@ class VCubeTestCase(unittest.TestCase):
             'FBFUUDUUDBFUFRLRRRLRLLFRRDBFBUBDBFUDRFBRLFLLULUDDBDBLD',
         )
 
+    def test_real_case_2(self):
+        cube = VCube()
+        scramble = "F R' F' U' D2 B' L F U' F L' U F2 U' F2 B2 L2 D2 B2 D' L2"
+
+        self.assertEqual(
+            cube.rotate(scramble, self.c_version),
+            'LDBRUUBBDFLUFRLBDDLURLFDFRLLFUFDRFDBFUDBLBRUURBDFBRRLU',
+        )
+
     def test_real_case_with_algorithm(self):
         cube = VCube()
         scramble = parse_moves(
@@ -298,5 +307,5 @@ class VCubeTestCase(unittest.TestCase):
         )
 
 
-class CVCubeTestCase(unittest.TestCase):
+class CVCubeTestCase(VCubeTestCase):
     c_version = True
