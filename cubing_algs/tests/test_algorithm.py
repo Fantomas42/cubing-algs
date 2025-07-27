@@ -1,4 +1,4 @@
-# ruff: noqa: PLR0904 PLR6104 RUF005
+# ruff: noqa: PLR6104 RUF005
 import unittest
 
 from cubing_algs.algorithm import Algorithm
