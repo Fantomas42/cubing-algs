@@ -255,6 +255,15 @@ class VCubeTestCase(unittest.TestCase):
             'LDBRUUBBDFLUFRLBDDLURLFDFRLLFUFDRFDBFUDBLBRUURBDFBRRLU',
         )
 
+    def test_real_case_3(self):
+        cube = VCube()
+        scramble = "F R F' U' D2 B' L F U' F L' U F2 U' F2 B2 L2 D2 B2 D' L2 B'"
+
+        self.assertEqual(
+            cube.rotate(scramble, self.c_version),
+            'UFFRUUBBDFLLFRDBUFLURLFDBRLDFUBDRLLRBDDDLBFRRDURBBLUFU',
+        )
+
     def test_real_case_with_algorithm(self):
         cube = VCube()
         scramble = parse_moves(
@@ -309,3 +318,62 @@ class VCubeTestCase(unittest.TestCase):
 
 class CVCubeTestCase(VCubeTestCase):
     c_version = True
+
+
+class RegressionVCubeTestCase(unittest.TestCase):
+    initial = 'UDBRUUDBDFLUFRLBDRLUDRFDBRLLFULDRFDURBFULUBBDRBFFBFRLL'
+
+    def check_rotate(self, move):
+        p_cube = VCube(self.initial)
+        c_cube = VCube(self.initial)
+
+        self.assertEqual(
+            p_cube.rotate(move, allow_fast=False),
+            c_cube.rotate(move, allow_fast=True),
+        )
+
+        self.assertEqual(
+            p_cube.rotate(f"{ move }'", allow_fast=False),
+            c_cube.rotate(f"{ move }'", allow_fast=True),
+        )
+
+        self.assertEqual(
+            p_cube.rotate(f'{ move }2', allow_fast=False),
+            c_cube.rotate(f'{ move }2', allow_fast=True),
+        )
+
+    def test_rotate_u(self):
+        self.check_rotate('U')
+
+    def test_rotate_r(self):
+        self.check_rotate('R')
+
+    def test_rotate_f(self):
+        self.check_rotate('F')
+
+    def test_rotate_d(self):
+        self.check_rotate('D')
+
+    def test_rotate_l(self):
+        self.check_rotate('L')
+
+    def test_rotate_b(self):
+        self.check_rotate('B')
+
+    def test_rotate_m(self):
+        self.check_rotate('M')
+
+    def test_rotate_s(self):
+        self.check_rotate('S')
+
+    def test_rotate_e(self):
+        self.check_rotate('E')
+
+    def test_rotate_x(self):
+        self.check_rotate('x')
+
+    def test_rotate_y(self):
+        self.check_rotate('y')
+
+    def test_rotate_z(self):
+        self.check_rotate('z')
