@@ -253,8 +253,8 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 rotate_face_counterclockwise(b_face, rotated_b);
                 new_state[0] = l_left[2]; new_state[1] = l_left[1]; new_state[2] = l_left[0];
                 new_state[11] = u_top[0]; new_state[14] = u_top[1]; new_state[17] = u_top[2];
-                new_state[33] = r_right[0]; new_state[34] = r_right[1]; new_state[35] = r_right[2];
-                new_state[36] = d_bottom[2]; new_state[39] = d_bottom[1]; new_state[42] = d_bottom[0];
+                new_state[33] = r_right[2]; new_state[34] = r_right[1]; new_state[35] = r_right[0];
+                new_state[36] = d_bottom[0]; new_state[39] = d_bottom[1]; new_state[42] = d_bottom[2];
             }
 
             for (int j = 0; j < 9; j++) new_state[45 + j] = rotated_b[j];
