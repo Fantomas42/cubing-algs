@@ -42,7 +42,7 @@ class VCube:
     def is_solved(self) -> bool:
         return self.state == INITIAL
 
-    def rotate(self, moves: str | Algorithm, allow_fast: bool = True) -> str:
+    def rotate(self, moves: str | Algorithm, allow_fast: bool = True) -> str:  # noqa: FBT001, FBT002
         if isinstance(moves, Algorithm):
             for m in moves:
                 self.rotate_move(str(m), allow_fast)
@@ -51,7 +51,7 @@ class VCube:
                 self.rotate_move(m, allow_fast)
         return self._state
 
-    def rotate_move(self, move: str, allow_fast: bool = True):
+    def rotate_move(self, move: str, *, allow_fast: bool = True):
         if allow_fast and FAST_ROTATE_AVAILABLE:
             try:
                 self._state = vcube_rotate.rotate_move(self._state, move)
