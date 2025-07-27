@@ -1,20 +1,12 @@
-import logging
+from importlib.util import find_spec
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import InvalidMoveError
 
-logger = logging.getLogger(__name__)
-
-try:
+FAST_ROTATE_AVAILABLE = False
+if find_spec('cubing_algs.vcube_rotate') is not None:
     from cubing_algs import vcube_rotate
     FAST_ROTATE_AVAILABLE = True
-except ImportError:
-    FAST_ROTATE_AVAILABLE = False
-    logger.info(
-        'VCube_rotate C extension not available, '
-        'falling back to Python implementation',
-    )
-
 
 INITIAL = ''
 for face in ['U', 'R', 'F', 'D', 'L', 'B']:
@@ -45,10 +37,10 @@ class VCube:
     def rotate(self, moves: str | Algorithm, allow_fast: bool = True) -> str:  # noqa: FBT001, FBT002
         if isinstance(moves, Algorithm):
             for m in moves:
-                self.rotate_move(str(m), allow_fast)
+                self.rotate_move(str(m), allow_fast=allow_fast)
         else:
             for m in moves.split(' '):
-                self.rotate_move(m, allow_fast)
+                self.rotate_move(m, allow_fast=allow_fast)
         return self._state
 
     def rotate_move(self, move: str, *, allow_fast: bool = True):
