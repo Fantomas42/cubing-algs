@@ -2,6 +2,8 @@ import re
 
 MAX_ITERATIONS = 50
 
+RESLICE_THRESHOLD = 20
+
 DOUBLE_CHAR = '2'
 
 INVERT_CHAR = "'"

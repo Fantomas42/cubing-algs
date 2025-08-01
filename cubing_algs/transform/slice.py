@@ -3,6 +3,7 @@ from cubing_algs.constants import RESLICE_E_MOVES
 from cubing_algs.constants import RESLICE_M_MOVES
 from cubing_algs.constants import RESLICE_MOVES
 from cubing_algs.constants import RESLICE_S_MOVES
+from cubing_algs.constants import RESLICE_THRESHOLD
 from cubing_algs.constants import UNSLICE_ROTATION_MOVES
 from cubing_algs.constants import UNSLICE_WIDE_MOVES
 from cubing_algs.move import Move
@@ -46,6 +47,7 @@ def reslice(
         old_moves: list[Move],
         config: dict[str, list[str]],
         max_depth: int = MAX_ITERATIONS,
+        threshold: int = 0,
 ) -> list[Move]:
     if max_depth <= 0:
         return old_moves
@@ -55,10 +57,22 @@ def reslice(
     changed = False
 
     while i < len(old_moves) - 1:
-        sliced = f'{ old_moves[i].untimed } { old_moves[i + 1].untimed }'
-        if sliced in config:
+        current_move = old_moves[i]
+        next_move = old_moves[i + 1]
+
+        sliced = f'{ current_move.untimed } { next_move.untimed }'
+        valid_threshold = True
+        if (
+                threshold
+                and current_move.timed
+                and next_move.timed and
+                next_move.timed - current_move.timed > threshold
+        ):
+            valid_threshold = False
+
+        if valid_threshold and sliced in config:
             for move in config[sliced]:
-                moves.append(Move(move + old_moves[i + 1].time))
+                moves.append(Move(move + old_moves[i].time))
             changed = True
             i += 2
         else:
@@ -88,3 +102,35 @@ def reslice_e_moves(old_moves: list[Move]) -> list[Move]:
 
 def reslice_moves(old_moves: list[Move]) -> list[Move]:
     return reslice(old_moves, RESLICE_MOVES)
+
+
+def reslice_m_timed_moves(threshold: int = RESLICE_THRESHOLD):
+
+    def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
+        return reslice(old_moves, RESLICE_M_MOVES, threshold=threshold)
+
+    return _reslice_timed_moves
+
+
+def reslice_s_timed_moves(threshold: int = RESLICE_THRESHOLD):
+
+    def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
+        return reslice(old_moves, RESLICE_S_MOVES, threshold=threshold)
+
+    return _reslice_timed_moves
+
+
+def reslice_e_timed_moves(threshold: int = RESLICE_THRESHOLD):
+
+    def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
+        return reslice(old_moves, RESLICE_E_MOVES, threshold=threshold)
+
+    return _reslice_timed_moves
+
+
+def reslice_timed_moves(threshold: int = RESLICE_THRESHOLD):
+
+    def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
+        return reslice(old_moves, RESLICE_MOVES, threshold=threshold)
+
+    return _reslice_timed_moves
