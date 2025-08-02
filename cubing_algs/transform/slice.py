@@ -65,8 +65,8 @@ def reslice(
         if (
                 threshold
                 and current_move.timed
-                and next_move.timed and
-                next_move.timed - current_move.timed > threshold
+                and next_move.timed
+                and next_move.timed - current_move.timed > threshold
         ):
             valid_threshold = False
 
@@ -83,7 +83,7 @@ def reslice(
         moves.append(old_moves[i])
 
     if changed:
-        return reslice(moves, config, max_depth - 1)
+        return reslice(moves, config, max_depth - 1, threshold)
 
     return moves
 

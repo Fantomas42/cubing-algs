@@ -296,6 +296,68 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_reslice_timed_moves_chained(self):
+        provide = parse_moves(
+            "F@21031 "
+            "B'@23249 F@23279 "
+            "B'@23520 F@23520 "
+            "D@23789 "
+            "R@24060 L'@24060 "
+            "L'@24300 R@24301 "
+            "U'@24809 R'@25499 "
+            "L@25529 D@26309 "
+            "U'@26311 U'@26639 "
+            "D@26640 L@27089 "
+            "R'@27090 D@27780",
+        )
+        expect = parse_moves(
+            "F@21031 "
+            "B'@23249 F@23279 "
+            "S'@23520 z@23520 "
+            "D@23789 "
+            "M@24060 x@24060 "
+            "M@24300 x@24300 "
+            "U'@24809 R'@25499 "
+            "L@25529 "
+            "E'@26309 y'@26309 "
+            "E'@26639 y'@26639 "
+            "M'@27089 x'@27089 "
+            "D@27780",
+        )
+
+        result = reslice_timed_moves(20)(provide)
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        expect = parse_moves(
+            "F@21031 "
+            "S'@23249 z@23249 "
+            "S'@23520 z@23520 "
+            "D@23789 "
+            "M@24060 x@24060 "
+            "M@24300 x@24300 "
+            "U'@24809 "
+            "M'@25499 x'@25499 "
+            "E'@26309 y'@26309 "
+            "E'@26639 y'@26639 "
+            "M'@27089 x'@27089 "
+            "D@27780",
+        )
+
+        result = reslice_timed_moves(50)(provide)
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_reslice_timed_moves_without_time(self):
         provide = parse_moves("U' D")
         expect = parse_moves("E'y'")
