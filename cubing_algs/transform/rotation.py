@@ -179,6 +179,7 @@ def compress_rotations(
 def compress_final_rotations(old_moves: list[Move]) -> list[Move]:
     moves, rotations = split_moves_final_rotations(old_moves)
 
-    rotations = compress_rotations(rotations)
+    if len(rotations) > 1:
+        rotations = compress_rotations(rotations)
 
     return moves + rotations
