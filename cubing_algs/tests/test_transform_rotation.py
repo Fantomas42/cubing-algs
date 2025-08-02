@@ -139,6 +139,17 @@ class TransformOptimizeTripleRotationsTestCase(unittest.TestCase):
             expect,
         )
 
+    def test_optimize_triple_rotations_timed(self):
+        provide = parse_moves('x2@0 y2@50 z2@100')
+        expect = []
+
+        result = optimize_triple_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
     def test_optimize_triple_rotations_start(self):
         provide = parse_moves('x2 x2 y2 z2')
         expect = parse_moves('x2')
@@ -209,6 +220,20 @@ class TransformOptimizeDoubleRotationsTestCase(unittest.TestCase):
 
         provide = parse_moves('z2 y2')
         expect = parse_moves('x2')
+
+        result = optimize_double_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_optimize_double_rotations_timed(self):
+        provide = parse_moves('x2@50 y2@100')
+        expect = parse_moves('z2')
 
         result = optimize_double_rotations(provide)
 
@@ -328,6 +353,20 @@ class TransformOptimizeConjugateRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_optimize_conjugate_rotations_timed(self):
+        provide = parse_moves("y@0 x2@50 y'@100")
+        expect = parse_moves('z2')
+
+        result = optimize_conjugate_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_optimize_conjugate_rotations_start(self):
         provide = parse_moves("x x y2 x'")
         expect = parse_moves('x z2')
@@ -386,6 +425,20 @@ class TransformCompressRotationsTestCase(unittest.TestCase):
     def test_compress_rotations(self):
         provide = parse_moves("x' z2 x y x2 y'")
         expect = parse_moves('x2')
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_compress_rotations_issues_01(self):
+        provide = parse_moves("z@27089 y y z' z' z x x")
+        expect = []
 
         result = compress_rotations(provide)
 

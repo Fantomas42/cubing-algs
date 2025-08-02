@@ -38,7 +38,7 @@ def optimize_triple_rotations(
     moves = old_moves.copy()
 
     while i < len(moves) - 2:
-        triplet = {moves[i], moves[i + 1], moves[i + 2]}
+        triplet = {moves[i].untimed, moves[i + 1].untimed, moves[i + 2].untimed}
         if triplet == CANCEL_TRIPLET:
             moves[i:i + 3] = []
             changed = True
@@ -68,8 +68,8 @@ def optimize_double_rotations(
     moves = old_moves.copy()
 
     while i < len(moves) - 1:
-        one = moves[i]
-        two = moves[i + 1]
+        one = moves[i].untimed
+        two = moves[i + 1].untimed
         if (
             one != two
             and one.is_double
@@ -105,9 +105,9 @@ def optimize_conjugate_rotations(
     moves = old_moves.copy()
 
     while i < len(moves) - 2:
-        one = moves[i]
-        two = moves[i + 1]
-        three = moves[i + 2]
+        one = moves[i].untimed
+        two = moves[i + 1].untimed
+        three = moves[i + 2].untimed
         if (
                 two.is_double
                 and one.base_move == three.base_move
