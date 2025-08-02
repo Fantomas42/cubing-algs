@@ -113,6 +113,7 @@ class Algorithm(UserList[Move]):
         simplification, optimization, or conversion between notations.
         """
         new_moves = self.copy()
+        mod_moves = self.copy()
 
         max_iterations = 1
         if to_fixpoint:
@@ -120,12 +121,13 @@ class Algorithm(UserList[Move]):
 
         for _ in range(max_iterations):
             for process in processes:
-                new_moves = process(new_moves)
+                mod_moves = process(mod_moves)
 
-            if new_moves == self:
-                return self
+            if new_moves == mod_moves:
+                break
+            new_moves = mod_moves
 
-        return Algorithm(new_moves)
+        return Algorithm(mod_moves)
 
     @cached_property
     def min_cube_size(self) -> int:

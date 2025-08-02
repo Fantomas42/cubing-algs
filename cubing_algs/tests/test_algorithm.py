@@ -286,6 +286,18 @@ class AlgorithmTestCase(unittest.TestCase):
 
         self.assertEqual(algo, algo_bis)
 
+    def test_eq_copy(self):
+        algo = parse_moves('R2 U')
+        algo_copy = algo.copy()
+
+        self.assertEqual(algo, algo_copy)
+
+    def test_eq_list(self):
+        algo = parse_moves('R2 U')
+        algo_list = [Move('R2'), Move('U')]
+
+        self.assertEqual(algo, algo_list)
+
     def test_hash(self):
         algo = parse_moves('R2 U')
         self.assertTrue(hash(algo))
