@@ -12,6 +12,30 @@ from cubing_algs.transform.offset import offset_z2_moves
 from cubing_algs.transform.offset import offset_z_moves
 from cubing_algs.transform.offset import offset_zprime_moves
 
+DEGRIP_X = {
+    'x': offset_xprime_moves,
+    'x2': offset_x2_moves,
+    "x'": offset_x_moves,
+}
+
+DEGRIP_Y = {
+    'y': offset_yprime_moves,
+    'y2': offset_y2_moves,
+    "y'": offset_y_moves,
+}
+
+DEGRIP_Z = {
+    'z': offset_zprime_moves,
+    'z2': offset_z2_moves,
+    "z'": offset_z_moves,
+}
+
+
+DEGRIP_FULL = {}
+DEGRIP_FULL.update(DEGRIP_X)
+DEGRIP_FULL.update(DEGRIP_Y)
+DEGRIP_FULL.update(DEGRIP_Z)
+
 
 def has_grip(
         old_moves: list[Move],
@@ -57,45 +81,23 @@ def degrip(
 
 def degrip_x_moves(old_moves: list[Move]) -> list[Move]:
     return degrip(
-        old_moves, {
-            'x': offset_xprime_moves,
-            'x2': offset_x2_moves,
-            "x'": offset_x_moves,
-        },
+        old_moves, DEGRIP_X,
     )
 
 
 def degrip_y_moves(old_moves: list[Move]) -> list[Move]:
     return degrip(
-        old_moves, {
-            'y': offset_yprime_moves,
-            'y2': offset_y2_moves,
-            "y'": offset_y_moves,
-        },
+        old_moves, DEGRIP_Y,
     )
 
 
 def degrip_z_moves(old_moves: list[Move]) -> list[Move]:
     return degrip(
-        old_moves, {
-            'z': offset_zprime_moves,
-            'z2': offset_z2_moves,
-            "z'": offset_z_moves,
-        },
+        old_moves, DEGRIP_Z,
     )
 
 
 def degrip_full_moves(old_moves: list[Move]) -> list[Move]:
     return degrip(
-        old_moves, {
-            'x': offset_xprime_moves,
-            'x2': offset_x2_moves,
-            "x'": offset_x_moves,
-            'y': offset_yprime_moves,
-            'y2': offset_y2_moves,
-            "y'": offset_y_moves,
-            'z': offset_zprime_moves,
-            'z2': offset_z2_moves,
-            "z'": offset_z_moves,
-        },
+        old_moves, DEGRIP_FULL,
     )
