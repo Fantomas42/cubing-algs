@@ -233,6 +233,30 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_refat_moves_double(self):
+        provide = parse_moves('L x2')
+        expect = parse_moves('r x')
+
+        result = refat_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves('x2 L')
+        expect = parse_moves('x r')
+
+        result = refat_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
     def test_refat_moves_mixed_timed_moves(self):
         provide = parse_moves('L@1 x@2 F@3')
         expect = parse_moves('r@1 F@3')
