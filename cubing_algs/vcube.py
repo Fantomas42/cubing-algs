@@ -35,6 +35,10 @@ class VCube:
 
         self.history = []
 
+    @property
+    def state(self) -> str:
+        return self._state
+
     @staticmethod
     def from_cubies(cp, co, ep, eo):
         return VCube(cubies_to_facelets(cp, co, ep, eo))
@@ -42,10 +46,6 @@ class VCube:
     @property
     def to_cubies(self):
         return facelets_to_cubies(self._state)
-
-    @property
-    def state(self) -> str:
-        return self._state
 
     @property
     def is_solved(self) -> bool:
