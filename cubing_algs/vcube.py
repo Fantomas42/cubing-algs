@@ -3,6 +3,7 @@ from importlib.util import find_spec
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.move import InvalidMoveError
 
 FAST_ROTATE_AVAILABLE = False
@@ -13,6 +14,10 @@ if find_spec('cubing_algs.vcube_rotate') is not None:
 INITIAL = ''
 for face in FACE_ORDER:
     INITIAL += face * 9
+
+
+class InvalidCubeStateError(Exception):
+    ...
 
 
 class VCube:
@@ -28,6 +33,10 @@ class VCube:
             self._state = INITIAL
 
         self.history = []
+
+    @staticmethod
+    def from_cubies(self, cp, co, ep, eo):
+        return VCube(cubies_to_facelets(cp, co, ep, eo))
 
     @property
     def state(self) -> str:
