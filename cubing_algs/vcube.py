@@ -35,7 +35,7 @@ class VCube:
         self.history = []
 
     @staticmethod
-    def from_cubies(self, cp, co, ep, eo):
+    def from_cubies(cp, co, ep, eo):
         return VCube(cubies_to_facelets(cp, co, ep, eo))
 
     @property
