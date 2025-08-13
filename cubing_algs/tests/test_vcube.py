@@ -295,7 +295,8 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_initial(self):
-        initial = reversed(INITIAL)
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB'
+
         cube = VCube(initial)
 
         self.assertEqual(

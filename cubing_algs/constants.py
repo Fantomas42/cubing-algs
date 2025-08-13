@@ -322,3 +322,5 @@ OPPOSITE_FACES = {
     'L': 'R',
     'D': 'U',
 }
+
+FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']

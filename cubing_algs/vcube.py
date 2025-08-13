@@ -1,6 +1,8 @@
+# ruff: noqa: TRY003
 from importlib.util import find_spec
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import FACE_ORDER
 from cubing_algs.move import InvalidMoveError
 
 FAST_ROTATE_AVAILABLE = False
@@ -9,7 +11,7 @@ if find_spec('cubing_algs.vcube_rotate') is not None:
     FAST_ROTATE_AVAILABLE = True
 
 INITIAL = ''
-for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+for face in FACE_ORDER:
     INITIAL += face * 9
 
 
@@ -21,6 +23,7 @@ class VCube:
     def __init__(self, initial=None):
         if initial:
             self._state = initial
+            self.check_state()
         else:
             self._state = INITIAL
 
@@ -33,6 +36,37 @@ class VCube:
     @property
     def is_solved(self) -> bool:
         return self.state == INITIAL
+
+    def check_state(self):
+        # TODO(me): Check corners, edges stickers # noqa: FIX002
+
+        if len(self._state) != 54:
+            msg = 'State string must be 54 characters long'
+            raise InvalidCubeStateError(msg)
+
+        color_counts = {}
+        for i in self._state:
+            color_counts.setdefault(i, 0)
+            color_counts[i] += 1
+
+        if set(color_counts.keys()) - set(FACE_ORDER):
+            msg = (
+                'State string can only '
+                f'contains { " ".join(FACE_ORDER) } characters'
+            )
+            raise InvalidCubeStateError(msg)
+
+        if not all(count == 9 for count in color_counts.values()):
+            msg = 'State string must have nine of each color'
+            raise InvalidCubeStateError(msg)
+
+        center_indexes = [4 + i * 9 for i in range(6)]
+
+        if [self._state[i] for i in center_indexes] != FACE_ORDER:
+            msg = 'Center pieces have incorrect color'
+            raise InvalidCubeStateError(msg)
+
+        return True
 
     def rotate(self, moves: str | Algorithm, allow_fast: bool = True) -> str:  # noqa: FBT001, FBT002
         if isinstance(moves, Algorithm):
