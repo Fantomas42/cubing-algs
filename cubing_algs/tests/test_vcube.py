@@ -331,6 +331,21 @@ class VCubeTestCase(unittest.TestCase):
 
         self.assertEqual(cube.state, facelets)
 
+    def test_to_cubies(self):
+        cp = [0, 5, 2, 1, 7, 4, 6, 3]
+        co = [1, 2, 0, 2, 1, 1, 0, 2]
+        ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
+        eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
+
+        self.assertEqual(
+            VCube(facelets).to_cubies,
+            (
+                cp, co,
+                ep, eo,
+            ),
+        )
+
 
 class CVCubeTestCase(VCubeTestCase):
     c_version = True

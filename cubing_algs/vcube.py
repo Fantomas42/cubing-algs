@@ -4,6 +4,7 @@ from importlib.util import find_spec
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.facelets import cubies_to_facelets
+from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.move import InvalidMoveError
 
 FAST_ROTATE_AVAILABLE = False
@@ -37,6 +38,10 @@ class VCube:
     @staticmethod
     def from_cubies(cp, co, ep, eo):
         return VCube(cubies_to_facelets(cp, co, ep, eo))
+
+    @property
+    def to_cubies(self):
+        return facelets_to_cubies(self._state)
 
     @property
     def state(self) -> str:
