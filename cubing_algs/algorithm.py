@@ -149,3 +149,32 @@ class Algorithm(UserList[Move]):
                 min_cube = max(cube, min_cube)
 
         return min_cube
+
+    @cached_property
+    def is_standard(self) -> bool:
+        """
+        Check if algorithm is in standard notations
+        """
+        return not self.is_sign
+
+    @cached_property
+    def is_sign(self) -> bool:
+        """
+        Check if algorithm contains SiGN notations
+        """
+        return any(m.is_sign_move for m in self)
+
+    @cached_property
+    def has_rotations(self) -> bool:
+        """
+        Check if algorithm contains rotations
+        """
+        return any(m.is_wide_move or m.is_rotation_move for m in self)
+
+    @cached_property
+    def has_internal_rotations(self) -> bool:
+        """
+        Check if algorithm contains internal rotations
+        inducted by the moves.
+        """
+        return any(m.is_wide_move for m in self)

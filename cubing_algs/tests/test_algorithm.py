@@ -405,3 +405,41 @@ class AlgorithmTestCase(unittest.TestCase):
             algo.min_cube_size,
             8,
         )
+
+    def test_is_standard(self):
+        algo = parse_moves("B' R2 U 2-4Fw2")
+
+        self.assertTrue(algo.is_standard)
+        self.assertFalse(algo.is_sign)
+
+    def test_is_sign(self):
+        algo = parse_moves("B' R2 U 2-4f2")
+
+        self.assertTrue(algo.is_sign)
+        self.assertFalse(algo.is_standard)
+
+    def test_has_rotations(self):
+        algo = parse_moves("B' R2 U 2-4Fw2")
+
+        self.assertTrue(algo.has_rotations)
+
+        algo = parse_moves("B' R2 U 2-4f2")
+
+        self.assertTrue(algo.has_rotations)
+
+        algo = parse_moves("B' R2 U x")
+
+        self.assertTrue(algo.has_rotations)
+
+    def test_has_internal_rotations(self):
+        algo = parse_moves("B' R2 U 2-4Fw2")
+
+        self.assertTrue(algo.has_internal_rotations)
+
+        algo = parse_moves("B' R2 U 2-4f2")
+
+        self.assertTrue(algo.has_internal_rotations)
+
+        algo = parse_moves("B' R2 U x")
+
+        self.assertFalse(algo.has_internal_rotations)
