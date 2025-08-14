@@ -3,6 +3,7 @@ import unittest
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import INITIAL
+from cubing_algs.vcube import InvalidCubeStateError
 from cubing_algs.vcube import VCube
 
 
@@ -36,6 +37,24 @@ class VCubeTestCase(unittest.TestCase):
             cube.state,
             initial,
         )
+
+    def test_initial_bad_size(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
+
+        with self.assertRaises(InvalidCubeStateError):
+            VCube(initial)
+
+    def test_initial_bad_char(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBT'
+
+        with self.assertRaises(InvalidCubeStateError):
+            VCube(initial)
+
+    def test_initial_bad_face(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBF'
+
+        with self.assertRaises(InvalidCubeStateError):
+            VCube(initial)
 
     def test_is_solved(self):
         cube = VCube()

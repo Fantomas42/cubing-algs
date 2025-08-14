@@ -8,7 +8,7 @@ from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.move import InvalidMoveError
 
 FAST_ROTATE_AVAILABLE = False
-if find_spec('cubing_algs.vcube_rotate') is not None:
+if find_spec('cubing_algs.vcube_rotate') is not None:  # pragma: no cover
     from cubing_algs import vcube_rotate
     FAST_ROTATE_AVAILABLE = True
 
@@ -72,12 +72,6 @@ class VCube:
 
         if not all(count == 9 for count in color_counts.values()):
             msg = 'State string must have nine of each color'
-            raise InvalidCubeStateError(msg)
-
-        center_indexes = [4 + i * 9 for i in range(6)]
-
-        if [self._state[i] for i in center_indexes] != FACE_ORDER:
-            msg = 'Center pieces have incorrect color'
             raise InvalidCubeStateError(msg)
 
         return True

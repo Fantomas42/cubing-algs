@@ -68,7 +68,7 @@ def check_moves(moves: list[Move]) -> bool:
         if not (move.is_valid_move
                 and move.is_valid_modifier
                 and move.is_valid_layer):
-            if logger.isEnabledFor(logging.ERROR):
+            if logger.isEnabledFor(logging.ERROR):  # pragma: no cover
                 move_string = ''.join(str(m) for m in moves)
                 if not move.is_valid_move:
                     logger.error(
