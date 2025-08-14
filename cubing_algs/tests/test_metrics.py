@@ -108,7 +108,7 @@ class MetricsTestCase(unittest.TestCase):
             },
         )
 
-    def test_metrics_wide(self):
+    def test_metrics_wide_sign(self):
         algo = parse_moves('RFu')
         self.assertEqual(
             algo.metrics,
@@ -127,7 +127,7 @@ class MetricsTestCase(unittest.TestCase):
             },
         )
 
-    def test_metrics_wide_japanese(self):
+    def test_metrics_wide_standard(self):
         algo = parse_moves('RFUw')
         self.assertEqual(
             algo.metrics,

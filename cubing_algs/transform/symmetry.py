@@ -1,6 +1,7 @@
 from cubing_algs.constants import SYMMETRY_E
 from cubing_algs.constants import SYMMETRY_M
 from cubing_algs.constants import SYMMETRY_S
+from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.move import Move
 
 SYMMETRY_CONFIGS = {
@@ -21,12 +22,17 @@ def symmetry_moves(
         if move.is_pause or move.base_move in ignore_moves:
             moves.append(move)
         else:
+            symmetry_move = symmetry_table[move.base_move]
+
+            if move.is_wide_move:
+                symmetry_move += WIDE_CHAR
+
             new_move = Move(
-                move.layer + symmetry_table[move.base_move] + move.time,
+                move.layer + symmetry_move + move.time,
             )
 
-            if move.is_japanese_move:
-                new_move = new_move.japanesed
+            if move.is_sign_move:
+                new_move = new_move.to_sign
 
             if move.is_double:
                 moves.append(new_move.doubled)

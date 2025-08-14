@@ -1,4 +1,5 @@
 from cubing_algs.constants import OFFSET_TABLE
+from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.move import Move
 
 
@@ -14,22 +15,23 @@ def unrotate(old_moves: list[Move], rotation: str) -> list[Move]:
         base_move = move.base_move
 
         new_move = move
+        wide = WIDE_CHAR if move.is_wide_move else ''
 
         if cleaned_move in rotation_table:
             new_move = Move(
-                layer + rotation_table[cleaned_move] + time,
+                layer + rotation_table[cleaned_move] + wide + time,
             )
         elif move.is_double and base_move in rotation_table:
             new_move = Move(
-                layer + rotation_table[base_move] + time,
+                layer + rotation_table[base_move] + wide + time,
             ).doubled
         elif cleaned_move.inverted in rotation_table:
             new_move = Move(
-                layer + rotation_table[cleaned_move.inverted] + time,
+                layer + rotation_table[cleaned_move.inverted] + wide + time,
             ).inverted
 
-        if move.is_japanese_move and not new_move.is_japanese_move:
-            new_move = new_move.japanesed
+        if move.is_sign_move:
+            new_move = new_move.to_sign
 
         moves.append(new_move)
 

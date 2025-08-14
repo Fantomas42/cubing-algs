@@ -2,17 +2,17 @@ import unittest
 
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.japanese import japanese_moves
-from cubing_algs.transform.japanese import unjapanese_moves
+from cubing_algs.transform.sign import sign_moves
+from cubing_algs.transform.sign import unsign_moves
 
 
-class TransformJapaneseTestCase(unittest.TestCase):
+class TransformSignTestCase(unittest.TestCase):
 
-    def test_japanese_moves(self):
+    def test_unsign_moves(self):
         provide = parse_moves("R' F u' B r")
         expect = parse_moves("R' F Uw' B Rw")
 
-        result = japanese_moves(provide)
+        result = unsign_moves(provide)
 
         self.assertEqual(
             result,
@@ -22,11 +22,11 @@ class TransformJapaneseTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unjapanese_moves(self):
+    def test_sign_moves(self):
         provide = parse_moves("R' F Uw' B Rw")
         expect = parse_moves("R' F u' B r")
 
-        result = unjapanese_moves(provide)
+        result = sign_moves(provide)
 
         self.assertEqual(
             result,

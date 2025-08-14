@@ -12,13 +12,11 @@ from cubing_algs.constants import ALL_BASIC_MOVES
 from cubing_algs.constants import DOUBLE_CHAR
 from cubing_algs.constants import INNER_MOVES
 from cubing_algs.constants import INVERT_CHAR
-from cubing_algs.constants import JAPANESE_CHAR
 from cubing_algs.constants import LAYER_SPLIT
-from cubing_algs.constants import OUTER_BASIC_MOVES
 from cubing_algs.constants import OUTER_MOVES
-from cubing_algs.constants import OUTER_WIDE_MOVES
 from cubing_algs.constants import PAUSE_CHAR
 from cubing_algs.constants import ROTATIONS
+from cubing_algs.constants import WIDE_CHAR
 
 
 class InvalidMoveError(Exception):
@@ -45,7 +43,7 @@ class Move(UserString):
     # Parsing
 
     @cached_property
-    def layer_move_modifier_time(self) -> list[str]:
+    def layer_move_modifier_time(self) -> tuple[str, str, str, str]:
         layer = ''
         move = ''
         modifier = ''
@@ -60,9 +58,9 @@ class Move(UserString):
             kept, time = kept.split('@')
             time = f'@{ time }'
 
-        if self.is_japanese_move:
-            move, modifier = kept.split(JAPANESE_CHAR)
-            move += JAPANESE_CHAR
+        if WIDE_CHAR in kept:
+            move, modifier = kept.split(WIDE_CHAR, 1)
+            move += WIDE_CHAR
         else:
             move = kept[0]
             modifier = kept[1:]
@@ -70,16 +68,17 @@ class Move(UserString):
         return layer, move, modifier, time
 
     @cached_property
-    def is_japanese_move(self) -> bool:
+    def is_sign_move(self) -> bool:
         """
-        Determine if this move uses Japanese notation.
+        Determine if this move uses SiGN notation.
 
-        In Japanese notation, wide moves are written with a capital letter
-        followed by a lowercase 'w' (e.g., Rw instead of r).
+        In SiGN notation, wide moves are written with a lower letter
+        removing the 'w' (e.g., r instead of Rw).
         """
-        if len(self) > 1:
-            return JAPANESE_CHAR in self.data.lower()
-        return False
+        if not self.data.islower():
+            return False
+
+        return all(char not in self.data for char in [WIDE_CHAR, *ROTATIONS])
 
     @cached_property
     def layer(self) -> str:
@@ -112,11 +111,11 @@ class Move(UserString):
         Extract the base letter of the move without modifiers.
 
         For standard notation, returns the first character.
-        For Japanese notation, returns the lowercase of the first character.
+        For SiGN notation, returns the uppercase of the move.
         """
-        if self.is_japanese_move:
-            return self.raw_base_move[0].lower()
-        return self.raw_base_move
+        if self.is_sign_move:
+            return self.raw_base_move[0].upper()
+        return self.raw_base_move[0]
 
     @cached_property
     def raw_base_move(self) -> str:
@@ -124,8 +123,8 @@ class Move(UserString):
         Extract the base letter of the move without modifiers
         keeping original notation.
 
-        For standard notation, returns the first character.
-        For Japanese notation, returns the two first characters..
+        For standard notation, returns the two first character.
+        For SiGN notation, returns the first character.
         """
         return self.layer_move_modifier_time[1]
 
@@ -182,8 +181,8 @@ class Move(UserString):
         if self.is_pause:
             return True
 
-        if self.is_japanese_move:
-            return self.raw_base_move[0] in OUTER_BASIC_MOVES
+        if WIDE_CHAR in self.data and self.raw_base_move.islower():
+            return False
 
         return self.base_move in ALL_BASIC_MOVES
 
@@ -272,7 +271,7 @@ class Move(UserString):
 
         Wide moves turn two layers at once, such as r, l, u, d, f, and b.
         """
-        return self.base_move in OUTER_WIDE_MOVES
+        return self.is_sign_move or WIDE_CHAR in self.raw_base_move
 
     @cached_property
     def is_layered(self) -> bool:
@@ -338,12 +337,12 @@ class Move(UserString):
         if self.is_counter_clockwise:
             return Move(
                 f'{ self.layer }'
-                f'{ self.base_move }'
+                f'{ self.raw_base_move }'
                 f'{ self.time }',
             )
         return Move(
             f'{ self.layer }'
-            f'{ self.base_move }'
+            f'{ self.raw_base_move }'
             f'{ INVERT_CHAR }'
             f'{ self.time }',
         )
@@ -362,49 +361,15 @@ class Move(UserString):
         if self.is_double:
             return Move(
                 f'{ self.layer }'
-                f'{ self.base_move }'
+                f'{ self.raw_base_move }'
                 f'{ self.time }',
             )
         return Move(
             f'{ self.layer }'
-            f'{ self.base_move }'
+            f'{ self.raw_base_move }'
             f'{ DOUBLE_CHAR }'
             f'{ self.time }',
         )
-
-    @cached_property
-    def japanesed(self) -> 'Move':
-        """
-        Convert this move to Japanese notation.
-
-        In Japanese notation, wide moves use uppercase letters
-        with a 'w' suffix.
-        This only affects wide moves.
-        """
-        if self.is_wide_move and not self.is_japanese_move:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.base_move.upper() }{ JAPANESE_CHAR }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
-        return self
-
-    @cached_property
-    def unjapanesed(self) -> 'Move':
-        """
-        Convert this move from Japanese to standard notation.
-
-        This converts moves like Rw to r.
-        """
-        if self.is_japanese_move:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.base_move.lower() }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
-        return self
 
     @cached_property
     def unlayered(self) -> 'Move':
@@ -415,7 +380,7 @@ class Move(UserString):
         """
         if self.is_layered:
             return Move(
-                f'{ self.base_move }'
+                f'{ self.raw_base_move }'
                 f'{ self.modifier }'
                 f'{ self.time }',
             )
@@ -431,7 +396,45 @@ class Move(UserString):
         if self.is_timed:
             return Move(
                 f'{ self.layer }'
-                f'{ self.base_move }'
+                f'{ self.raw_base_move }'
                 f'{ self.modifier }',
+            )
+        return self
+
+    @cached_property
+    def to_sign(self) -> 'Move':
+        """
+        Convert this move to SiGN notation.
+
+        In SiGN notation, wide moves use lowercase letters.
+
+        This converts moves like Rw to r.
+
+        This only affects wide moves.
+        """
+        if self.is_wide_move and not self.is_sign_move:
+            return Move(
+                f'{ self.layer }'
+                f'{ self.base_move.lower() }'
+                f'{ self.modifier }'
+                f'{ self.time }',
+            )
+        return self
+
+    @cached_property
+    def to_standard(self) -> 'Move':
+        """
+        Convert this move from SiGN notation to standard notation.
+
+        This converts moves like r to Rw.
+
+        This only affects wide moves.
+        """
+        if self.is_sign_move:
+            return Move(
+                f'{ self.layer }'
+                f'{ self.base_move.upper() }{ WIDE_CHAR }'
+                f'{ self.modifier }'
+                f'{ self.time }',
             )
         return self

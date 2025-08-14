@@ -27,7 +27,7 @@ class TransformMirrorTestCase(unittest.TestCase):
         provide = parse_moves(
             "2Fw R 3U2 3f'",
         )
-        expect = parse_moves("3f 3U2 R' 2f'")
+        expect = parse_moves("3f 3U2 R' 2Fw'")
 
         result = mirror_moves(provide)
 

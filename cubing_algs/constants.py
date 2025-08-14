@@ -8,7 +8,7 @@ DOUBLE_CHAR = '2'
 
 INVERT_CHAR = "'"
 
-JAPANESE_CHAR = 'w'
+WIDE_CHAR = 'w'
 
 PAUSE_CHAR = '.'
 
@@ -41,10 +41,6 @@ OFFSET_X_CW = {
     'B': 'U',
     'D': 'B',
     'F': 'D',
-    'u': 'f',
-    'b': 'u',
-    'd': 'b',
-    'f': 'd',
 
     'E': "S'",
     'S': 'E',
@@ -58,10 +54,6 @@ OFFSET_Y_CW = {
     'R': 'B',
     'F': 'R',
     'L': 'F',
-    'b': 'l',
-    'r': 'b',
-    'f': 'r',
-    'l': 'f',
 
     'S': "M'",
     'M': 'S',
@@ -75,10 +67,6 @@ OFFSET_Z_CW = {
     'R': 'U',
     'D': 'R',
     'L': 'D',
-    'u': 'l',
-    'r': 'u',
-    'd': 'r',
-    'l': 'd',
 
     'E': "M'",
     'M': 'E',
@@ -288,30 +276,30 @@ MOVE_SPLIT = re.compile(
 LAYER_SPLIT = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
 
 SYMMETRY_M = {
-    'U': 'U', 'u': 'u',                     'y': 'y',  # noqa: E241
-    'F': 'F', 'f': 'f', 'S': 'S',           'z': 'z',  # noqa: E241
-    'R': 'L', 'r': 'l',                     'x': 'x',  # noqa: E241
-    'B': 'B', 'b': 'b',
-    'L': 'R', 'l': 'r', 'M': 'M',
-    'D': 'D', 'd': 'd', 'E': 'E',
+    'U': 'U',           'y': 'y',  # noqa: E241
+    'F': 'F', 'S': 'S', 'z': 'z',  # noqa: E241
+    'R': 'L',           'x': 'x',  # noqa: E241
+    'B': 'B',
+    'L': 'R', 'M': 'M',
+    'D': 'D', 'E': 'E',
 }
 
 SYMMETRY_S = {
-    'U': 'U', 'u': 'u',                     'y': 'y',  # noqa: E241
-    'F': 'B', 'f': 'b', 'S': 'S',           'z': 'z',  # noqa: E241
-    'R': 'R', 'r': 'r',                     'x': 'x',  # noqa: E241
-    'B': 'F', 'b': 'f',
-    'L': 'L', 'l': 'l', 'M': 'M',
-    'D': 'D', 'd': 'd', 'E': 'E',
+    'U': 'U',           'y': 'y',  # noqa: E241
+    'F': 'B', 'S': 'S', 'z': 'z',  # noqa: E241
+    'R': 'R',           'x': 'x',  # noqa: E241
+    'B': 'F',
+    'L': 'L', 'M': 'M',
+    'D': 'D', 'E': 'E',
 }
 
 SYMMETRY_E = {
-    'U': 'D', 'u': 'd',                     'y': 'y',  # noqa: E241
-    'F': 'F', 'f': 'f', 'S': 'S',           'z': 'z',  # noqa: E241
-    'R': 'R', 'r': 'r',                     'x': 'x',  # noqa: E241
-    'B': 'B', 'b': 'b',
-    'L': 'L', 'l': 'l', 'M': 'M',
-    'D': 'U', 'd': 'u', 'E': 'E',
+    'U': 'D',           'y': 'y',  # noqa: E241
+    'F': 'F', 'S': 'S', 'z': 'z',  # noqa: E241
+    'R': 'R',           'x': 'x',  # noqa: E241
+    'B': 'B',
+    'L': 'L', 'M': 'M',
+    'D': 'U', 'E': 'E',
 }
 
 OPPOSITE_FACES = {

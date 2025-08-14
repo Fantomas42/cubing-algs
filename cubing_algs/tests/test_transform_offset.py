@@ -43,9 +43,23 @@ class TransformOffsetTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_offset_x_moves_wide_japanese(self):
+    def test_offset_x_moves_wide_standard(self):
         provide = parse_moves("R U Rw' Uw'")
         expect = parse_moves("R B Rw' Bw'")
+
+        result = offset_x_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_offset_x_moves_wide_sign(self):
+        provide = parse_moves("R U r' u'")
+        expect = parse_moves("R B r' b'")
 
         result = offset_x_moves(provide)
 
