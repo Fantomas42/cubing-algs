@@ -276,8 +276,8 @@ MOVE_SPLIT = re.compile(
 LAYER_SPLIT = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
 
 SYMMETRY_M = {
+    'F': 'F', 'S': 'S', 'z': 'z',
     'U': 'U',           'y': 'y',  # noqa: E241
-    'F': 'F', 'S': 'S', 'z': 'z',  # noqa: E241
     'R': 'L',           'x': 'x',  # noqa: E241
     'B': 'B',
     'L': 'R', 'M': 'M',
@@ -285,8 +285,8 @@ SYMMETRY_M = {
 }
 
 SYMMETRY_S = {
+    'F': 'B', 'S': 'S', 'z': 'z',
     'U': 'U',           'y': 'y',  # noqa: E241
-    'F': 'B', 'S': 'S', 'z': 'z',  # noqa: E241
     'R': 'R',           'x': 'x',  # noqa: E241
     'B': 'F',
     'L': 'L', 'M': 'M',
@@ -294,8 +294,8 @@ SYMMETRY_S = {
 }
 
 SYMMETRY_E = {
+    'F': 'F', 'S': 'S', 'z': 'z',
     'U': 'D',           'y': 'y',  # noqa: E241
-    'F': 'F', 'S': 'S', 'z': 'z',  # noqa: E241
     'R': 'R',           'x': 'x',  # noqa: E241
     'B': 'B',
     'L': 'L', 'M': 'M',
