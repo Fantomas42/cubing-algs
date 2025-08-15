@@ -68,19 +68,6 @@ class Move(UserString):
         return layer, move, modifier, time
 
     @cached_property
-    def is_sign_move(self) -> bool:
-        """
-        Determine if this move uses SiGN notation.
-
-        In SiGN notation, wide moves are written with a lower letter
-        removing the 'w' (e.g., r instead of Rw).
-        """
-        if not self.data.islower():
-            return False
-
-        return all(char not in self.data for char in [WIDE_CHAR, *ROTATIONS])
-
-    @cached_property
     def layer(self) -> str:
         """
         Extract the layers impacted.
@@ -290,6 +277,28 @@ class Move(UserString):
         Timed moves are moves with time information, separated by an @.
         """
         return bool(self.time)
+
+    # Notation
+
+    @cached_property
+    def is_standard_move(self) -> bool:
+        """
+        Determine if this move uses Standard notation.
+        """
+        return not self.is_sign_move
+
+    @cached_property
+    def is_sign_move(self) -> bool:
+        """
+        Determine if this move uses SiGN notation.
+
+        In SiGN notation, wide moves are written with a lower letter
+        removing the 'w' (e.g., r instead of Rw).
+        """
+        if not self.data.islower():
+            return False
+
+        return all(char not in self.data for char in [WIDE_CHAR, *ROTATIONS])
 
     # Modifiers
 

@@ -152,6 +152,20 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('r2@500').is_timed)
         self.assertTrue(Move('.@500').is_timed)
 
+    def test_is_standard_move(self):
+        self.assertTrue(Move('x').is_standard_move)
+        self.assertTrue(Move('R').is_standard_move)
+        self.assertTrue(Move('.').is_standard_move)
+        self.assertTrue(Move('uw').is_standard_move)
+        self.assertTrue(Move('xw').is_standard_move)
+        self.assertTrue(Move('xw2').is_standard_move)
+        self.assertTrue(Move('Rw').is_standard_move)
+        self.assertTrue(Move('Rw2').is_standard_move)
+        self.assertFalse(Move('u2').is_standard_move)
+        self.assertFalse(Move("u'").is_standard_move)
+        self.assertFalse(Move("u'@100").is_standard_move)
+        self.assertFalse(Move("2-4u'@100").is_standard_move)
+
     def test_is_sign_move(self):
         self.assertFalse(Move('x').is_sign_move)
         self.assertFalse(Move('R').is_sign_move)
