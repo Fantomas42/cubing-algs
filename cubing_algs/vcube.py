@@ -9,7 +9,7 @@ from cubing_algs.move import InvalidMoveError
 
 FAST_ROTATE_AVAILABLE = False
 if find_spec('cubing_algs.vcube_rotate') is not None:  # pragma: no cover
-    from cubing_algs import vcube_rotate
+    from cubing_algs import vcube_rotate  # type: ignore[attr-defined]
     FAST_ROTATE_AVAILABLE = True
 
 INITIAL = ''
@@ -26,7 +26,7 @@ class VCube:
     Virtual 3x3 cube for tracking moves on facelets
     """
 
-    def __init__(self, initial=None):
+    def __init__(self, initial: str | None = None):
         if initial:
             self._state = initial
             self.check_state()
@@ -40,18 +40,19 @@ class VCube:
         return self._state
 
     @staticmethod
-    def from_cubies(cp, co, ep, eo):
+    def from_cubies(cp: list[int], co: list[int],
+                    ep: list[int], eo: list[int]) -> 'VCube':
         return VCube(cubies_to_facelets(cp, co, ep, eo))
 
     @property
-    def to_cubies(self):
+    def to_cubies(self) -> str:
         return facelets_to_cubies(self._state)
 
     @property
     def is_solved(self) -> bool:
         return self.state == INITIAL
 
-    def check_state(self):
+    def check_state(self) -> bool:
         # TODO(me): Check corners, edges stickers # noqa: FIX002
 
         if len(self._state) != 54:
@@ -85,7 +86,7 @@ class VCube:
                 self.rotate_move(m, allow_fast=allow_fast)
         return self._state
 
-    def rotate_move(self, move: str, *, allow_fast: bool = True):
+    def rotate_move(self, move: str, *, allow_fast: bool = True) -> str:
         if allow_fast and FAST_ROTATE_AVAILABLE:
             try:
                 self._state = vcube_rotate.rotate_move(self._state, move)
@@ -97,7 +98,7 @@ class VCube:
 
         return self._rotate_move_python(move)
 
-    def _rotate_move_python(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
+    def _rotate_move_python(self, move: str) -> str:  # noqa: PLR0912, PLR0914, PLR0915
         # Parse the move
         face = move[0]
         direction = 1  # Default: clockwise

@@ -96,7 +96,7 @@ def compute_generators(moves: list[Move]) -> list[str]:
 
 def regroup_moves(
         moves: list[Move],
-) -> tuple[list[Move], list[Move], list[Move]]:
+) -> tuple[list[Move], list[Move], list[Move], list[Move]]:
     """
     Categorize moves into pause, rotation, outer, and inner move types.
 

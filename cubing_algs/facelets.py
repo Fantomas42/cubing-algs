@@ -5,7 +5,8 @@ from cubing_algs.constants import FACE_ORDER
 FACES = ''.join(FACE_ORDER)
 
 
-def cubies_to_facelets(cp, co, ep, eo):
+def cubies_to_facelets(cp: list[int], co: list[int],
+                       ep: list[int], eo: list[int]) -> str:
     """
     Convert Corner/Edge Permutation/Orientation cube state
     to the Kociemba facelets representation string.
@@ -57,7 +58,9 @@ def cubies_to_facelets(cp, co, ep, eo):
     return ''.join(facelets)
 
 
-def facelets_to_cubies(facelets):
+def facelets_to_cubies(facelets: str) -> tuple[
+        list[int], list[int], list[int], list[int],
+]:
     """
     Convert Kociemba facelets representation string to
     Corner/Edge Permutation/Orientation cube state.

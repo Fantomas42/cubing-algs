@@ -3,6 +3,7 @@ Collection of cool patterns on 3x3x3
 
 https://ruwix.com/the-rubiks-cube/rubiks-cube-patterns-algorithms/more-rubiks-patterns/
 """
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
 
 PATTERNS = {
@@ -78,5 +79,5 @@ PATTERNS = {
 }
 
 
-def get_pattern(pattern_name):
+def get_pattern(pattern_name: str) -> Algorithm:
     return parse_moves(PATTERNS.get(pattern_name, ''))

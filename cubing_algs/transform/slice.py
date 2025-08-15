@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.constants import RESLICE_E_MOVES
 from cubing_algs.constants import RESLICE_M_MOVES
@@ -104,7 +106,9 @@ def reslice_moves(old_moves: list[Move]) -> list[Move]:
     return reslice(old_moves, RESLICE_MOVES)
 
 
-def reslice_m_timed_moves(threshold: int = RESLICE_THRESHOLD):
+def reslice_m_timed_moves(
+        threshold: int = RESLICE_THRESHOLD,
+) -> Callable[[list[Move]], list[Move]]:
 
     def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
         return reslice(old_moves, RESLICE_M_MOVES, threshold=threshold)
@@ -112,7 +116,9 @@ def reslice_m_timed_moves(threshold: int = RESLICE_THRESHOLD):
     return _reslice_timed_moves
 
 
-def reslice_s_timed_moves(threshold: int = RESLICE_THRESHOLD):
+def reslice_s_timed_moves(
+        threshold: int = RESLICE_THRESHOLD,
+) -> Callable[[list[Move]], list[Move]]:
 
     def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
         return reslice(old_moves, RESLICE_S_MOVES, threshold=threshold)
@@ -120,15 +126,18 @@ def reslice_s_timed_moves(threshold: int = RESLICE_THRESHOLD):
     return _reslice_timed_moves
 
 
-def reslice_e_timed_moves(threshold: int = RESLICE_THRESHOLD):
-
+def reslice_e_timed_moves(
+        threshold: int = RESLICE_THRESHOLD,
+) -> Callable[[list[Move]], list[Move]]:
     def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
         return reslice(old_moves, RESLICE_E_MOVES, threshold=threshold)
 
     return _reslice_timed_moves
 
 
-def reslice_timed_moves(threshold: int = RESLICE_THRESHOLD):
+def reslice_timed_moves(
+        threshold: int = RESLICE_THRESHOLD,
+) -> Callable[[list[Move]], list[Move]]:
 
     def _reslice_timed_moves(old_moves: list[Move]) -> list[Move]:
         return reslice(old_moves, RESLICE_MOVES, threshold=threshold)

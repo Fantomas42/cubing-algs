@@ -28,7 +28,7 @@ def is_auf_or_pause(move: Move) -> bool:
     return move.base_move == AUF_CHAR or move.is_pause
 
 
-def calculate_auf_score(moves):
+def calculate_auf_score(moves: list[Move]) -> int:
     return sum(
         get_move_score(move)
         for move in takewhile(is_auf_or_pause, moves)
