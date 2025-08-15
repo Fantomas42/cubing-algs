@@ -681,3 +681,20 @@ class VCube:
         self.history.append(move)
 
         return self._state
+
+    def __str__(self) -> str:
+        """
+        Return the facelets of the cube
+        """
+        faces = []
+        for i, face in enumerate(FACE_ORDER):
+            faces.append(f'{ face }: { self._state[i * 9: (i + 1) * 9]}')
+
+        return '\n'.join(faces)
+
+    def __repr__(self) -> str:
+        """
+        Return a string representation that can be used
+        to recreate the VCube.
+        """
+        return f"VCube('{ self._state }')"

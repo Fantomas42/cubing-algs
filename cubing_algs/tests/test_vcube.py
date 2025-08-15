@@ -98,6 +98,29 @@ class VCubeTestCase(unittest.TestCase):
             ),
         )
 
+    def test_str(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            str(cube),
+            'U: LUULUUFFF\n'
+            'R: LBBRRRRRR\n'
+            'F: UUUFFDFFD\n'
+            'D: RRBDDBDDB\n'
+            'L: FFRLLDLLD\n'
+            'B: LLDUBBUBB',
+        )
+
+    def test_repr(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            repr(cube),
+            "VCube('LUULUUFFFLBBRRRRRRUUUFFDFFDRRBDDBDDBFFRLLDLLDLLDUBBUBB')",
+        )
+
 
 class VCubeRotateTestCase(unittest.TestCase):
     c_version = False
