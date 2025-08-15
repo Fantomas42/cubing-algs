@@ -33,7 +33,7 @@ class VCube:
         else:
             self._state = INITIAL
 
-        self.history = []
+        self.history: list[str] = []
 
     @property
     def state(self) -> str:
@@ -45,7 +45,7 @@ class VCube:
         return VCube(cubies_to_facelets(cp, co, ep, eo))
 
     @property
-    def to_cubies(self) -> str:
+    def to_cubies(self) -> tuple[list[int], list[int], list[int], list[int]]:
         return facelets_to_cubies(self._state)
 
     @property
@@ -59,7 +59,7 @@ class VCube:
             msg = 'State string must be 54 characters long'
             raise InvalidCubeStateError(msg)
 
-        color_counts = {}
+        color_counts: dict[str, int] = {}
         for i in self._state:
             color_counts.setdefault(i, 0)
             color_counts[i] += 1
