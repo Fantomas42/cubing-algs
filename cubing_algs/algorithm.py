@@ -139,7 +139,7 @@ class Algorithm(UserList[Move]):
         min_cube = 2
 
         for m in self:
-            if m.is_layered:
+            if m.is_layered or m.is_inner_move:
                 cube = 3
 
                 max_layers = max(m.layers)

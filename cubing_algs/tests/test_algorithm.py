@@ -357,6 +357,13 @@ class AlgorithmTestCase(unittest.TestCase):
             2,
         )
 
+        algo = parse_moves("B' R2 M U F2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            3,
+        )
+
         algo = parse_moves("B' r2 U F2")
 
         self.assertEqual(
