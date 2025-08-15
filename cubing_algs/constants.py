@@ -38,46 +38,87 @@ ALL_BASIC_MOVES = OUTER_MOVES + INNER_MOVES + ROTATIONS
 
 OFFSET_X_CW = {
     'U': 'F',
-    'B': 'U',
     'D': 'B',
-    'F': 'D',
 
-    'E': "S'",
+    'F': 'D',
+    'B': 'U',
+
     'S': 'E',
+    'E': "S'",
 
     'y': 'z',
     'z': "y'",
 }
 
+OFFSET_X_CC = {
+    'U': 'B',
+    'D': 'F',
+
+    'F': 'U',
+    'B': 'D',
+
+    'S': "E'",
+    'E': 'S',
+
+    'y': "z'",
+    'z': 'y',
+}
+
 OFFSET_Y_CW = {
-    'B': 'L',
     'R': 'B',
-    'F': 'R',
     'L': 'F',
 
-    'S': "M'",
-    'M': 'S',
+    'F': 'R',
+    'B': 'L',
 
-    'z': 'x',
+    'M': 'S',
+    'S': "M'",
+
     'x': "z'",
+    'z': 'x',
+}
+
+OFFSET_Y_CC = {
+    'R': 'F',
+    'L': 'B',
+
+    'F': 'L',
+    'B': 'R',
+
+    'M': "S'",
+    'S': 'M',
+
+    'x': 'z',
+    'z': "x'",
 }
 
 OFFSET_Z_CW = {
     'U': 'L',
-    'R': 'U',
     'D': 'R',
+
+    'R': 'U',
     'L': 'D',
 
-    'E': "M'",
     'M': 'E',
+    'E': "M'",
 
     'x': 'y',
     'y': "x'",
 }
 
-OFFSET_X_CC = {v: k for k, v in OFFSET_X_CW.items()}
-OFFSET_Y_CC = {v: k for k, v in OFFSET_Y_CW.items()}
-OFFSET_Z_CC = {v: k for k, v in OFFSET_Z_CW.items()}
+OFFSET_Z_CC = {
+    'D': 'L',
+    'L': 'U',
+    'R': 'D',
+    'U': 'R',
+
+    'M': "E'",
+    'E': 'M',
+
+    'x': "y'",
+    'y': 'x',
+  }
+
 
 OFFSET_TABLE = {
     'x': OFFSET_X_CW,
