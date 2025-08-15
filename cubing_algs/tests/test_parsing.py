@@ -59,12 +59,20 @@ class CheckMovesTestCase(unittest.TestCase):
         moves = [Move('T2'), Move('R')]
         self.assertFalse(check_moves(moves))
 
-    def test_check_moves_invalid_japanese_move(self):
+    def test_check_moves_invalid_wide_standard_move(self):
         moves = [Move('Rw')]
         self.assertTrue(check_moves(moves))
         moves = [Move('Rw3')]
         self.assertFalse(check_moves(moves))
         moves = [Move("Rw2'")]
+        self.assertFalse(check_moves(moves))
+
+    def test_check_moves_invalid_wide_sign_move(self):
+        moves = [Move('r')]
+        self.assertTrue(check_moves(moves))
+        moves = [Move('r3')]
+        self.assertFalse(check_moves(moves))
+        moves = [Move("r2'")]
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_modifier(self):

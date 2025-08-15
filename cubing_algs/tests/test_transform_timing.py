@@ -27,7 +27,7 @@ class TransformUntimeTestCase(unittest.TestCase):
         provide = parse_moves(
             "2Fw@1 R@2 3U2@3 3f'@4",
         )
-        expect = parse_moves("2f R 3U2 3f'")
+        expect = parse_moves("2Fw R 3U2 3f'")
 
         result = untime_moves(provide)
 
