@@ -343,6 +343,12 @@ SYMMETRY_E = {
     'D': 'U', 'E': 'E',
 }
 
+SYMMETRY_TABLE = {
+    'M': ({'x', 'M'}, SYMMETRY_M),
+    'S': ({'z', 'S'}, SYMMETRY_S),
+    'E': ({'y', 'E'}, SYMMETRY_E),
+}
+
 OPPOSITE_FACES = {
     'F': 'B',
     'R': 'L',
