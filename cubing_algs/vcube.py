@@ -6,6 +6,7 @@ from cubing_algs.constants import FACE_ORDER
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.move import InvalidMoveError
+from cubing_algs.vcube_print import VCubePrinter
 
 FAST_ROTATE_AVAILABLE = False
 if find_spec('cubing_algs.vcube_rotate') is not None:  # pragma: no cover
@@ -25,6 +26,7 @@ class VCube:
     """
     Virtual 3x3 cube for tracking moves on facelets
     """
+    size = 3
 
     def __init__(self, initial: str | None = None):
         if initial:
@@ -681,6 +683,10 @@ class VCube:
         self.history.append(move)
 
         return self._state
+
+    def display(self, orientation: str = '',
+                colors: list[str] | None = None) -> None:
+        print(VCubePrinter(self, orientation, colors).print_cube(), end='')
 
     def __str__(self) -> str:
         """
