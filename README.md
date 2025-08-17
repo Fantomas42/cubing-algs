@@ -15,7 +15,7 @@ pip install cubing-algs
 - Calculate metrics (HTM, QTM, STM, ETM, QSTM)
 - Support for wide moves, slice moves, and rotations
 - Big cubes notation support
-- Japanese notation support
+- SiGN notation support
 
 ## Basic Usage
 
@@ -59,8 +59,8 @@ from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.transform.size import compress_moves
 from cubing_algs.transform.size import expand_moves
-from cubing_algs.transform.japanese import japanese_moves
-from cubing_algs.transform.japanese import unjapanese_moves
+from cubing_algs.transform.sign import sign_moves
+from cubing_algs.transform.sign import unsign_moves
 from cubing_algs.transform.rotation import remove_final_rotations
 from cubing_algs.transform.slice import reslice_moves
 from cubing_algs.transform.slice import unslice_wide_moves
@@ -93,9 +93,9 @@ mirrored = algo.transform(mirror_moves)  # U' R U' R'
 compressed = algo.transform(compress_moves)  # Optimize with cancellations
 expanded = algo.transform(expand_moves)  # Convert double moves to single pairs
 
-# Japanese notation
-japanese = algo.transform(japanese_moves)  # Convert to Rw notation
-unjapanese = algo.transform(unjapanese_moves)  # Convert to r notation
+# SiGN notation
+sign = algo.transform(sign_moves)  # Convert to r, u, f notation
+standard = algo.transform(unsign_moves)  # Convert to Rw, Uw, Fw notation
 
 # Remove final rotations
 clean = algo.transform(remove_final_rotations)  # Remove trailing x, y, z moves
@@ -168,8 +168,8 @@ from cubing_algs.move import Move
 move = Move("R")
 move2 = Move("R2")
 move3 = Move("R'")
-wide = Move("r")
-japanese = Move("Rw")
+wide = Move("Rw")
+wide_sign = Move("r")
 rotation = Move("x")
 
 # Properties
@@ -190,8 +190,8 @@ print(move.is_double)            # False
 # Transformations
 print(move.inverted)   # R'
 print(move.doubled)    # R2
-print(wide.japanesed)  # Rw
-print(japanese.unjapanesed)  # r
+print(wide.to_sign)    # r
+print(wide_sign.to_standard)  # Rw
 ```
 
 ## Optimization Functions
@@ -279,15 +279,15 @@ oll_mirror = oll.transform(mirror_moves)
 print(oll_mirror)  # F' R' F r U R U' r'
 ```
 
-### Converting a wide move algorithm to Japanese notation
+### Converting a wide move algorithm to SiGN notation
 
 ```python
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.japanese import japanese_moves
+from cubing_algs.transform.sign import sign_moves
 
-algo = parse_moves("r U R' U' r' F R F'")
-japanese = algo.transform(japanese_moves)
-print(japanese)  # Rw U R' U' Rw' F R F'
+algo = parse_moves("Rw U R' U' Rw' F R F'")
+sign = algo.transform(sign_moves)
+print(sign)  # r U R' U' r' F R F'
 ```
 
 ### Finding the shortest form of an algorithm

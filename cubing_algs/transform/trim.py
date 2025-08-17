@@ -1,9 +1,13 @@
+from collections.abc import Callable
 from itertools import dropwhile
 
 from cubing_algs.move import Move
 
 
-def trim_moves(trim_move: str, start: bool = True, end: bool = True):  # noqa: FBT001, FBT002
+def trim_moves(
+        trim_move: str,
+        start: bool = True, end: bool = True,  # noqa: FBT001, FBT002
+) -> Callable[[list[Move]], list[Move]]:
 
     def trimmer(old_moves: list[Move]) -> list[Move]:
         if not old_moves:
@@ -11,7 +15,7 @@ def trim_moves(trim_move: str, start: bool = True, end: bool = True):  # noqa: F
 
         moves = old_moves.copy()
 
-        def should_trim(m: Move):
+        def should_trim(m: Move) -> bool:
             return m.base_move == trim_move or m.is_pause
 
         if start:

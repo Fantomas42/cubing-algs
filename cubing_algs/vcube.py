@@ -1,38 +1,83 @@
+# ruff: noqa: TRY003
 from importlib.util import find_spec
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import FACE_ORDER
+from cubing_algs.facelets import cubies_to_facelets
+from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.move import InvalidMoveError
+from cubing_algs.vcube_print import VCubePrinter
 
 FAST_ROTATE_AVAILABLE = False
-if find_spec('cubing_algs.vcube_rotate') is not None:
-    from cubing_algs import vcube_rotate
+if find_spec('cubing_algs.vcube_rotate') is not None:  # pragma: no cover
+    from cubing_algs import vcube_rotate  # type: ignore[attr-defined]
     FAST_ROTATE_AVAILABLE = True
 
 INITIAL = ''
-for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+for face in FACE_ORDER:
     INITIAL += face * 9
+
+
+class InvalidCubeStateError(Exception):
+    ...
 
 
 class VCube:
     """
     Virtual 3x3 cube for tracking moves on facelets
     """
+    size = 3
 
-    def __init__(self, initial=None):
+    def __init__(self, initial: str | None = None):
         if initial:
             self._state = initial
+            self.check_state()
         else:
             self._state = INITIAL
 
-        self.history = []
+        self.history: list[str] = []
 
     @property
     def state(self) -> str:
         return self._state
 
+    @staticmethod
+    def from_cubies(cp: list[int], co: list[int],
+                    ep: list[int], eo: list[int]) -> 'VCube':
+        return VCube(cubies_to_facelets(cp, co, ep, eo))
+
+    @property
+    def to_cubies(self) -> tuple[list[int], list[int], list[int], list[int]]:
+        return facelets_to_cubies(self._state)
+
     @property
     def is_solved(self) -> bool:
         return self.state == INITIAL
+
+    def check_state(self) -> bool:
+        # TODO(me): Check corners, edges stickers # noqa: FIX002
+
+        if len(self._state) != 54:
+            msg = 'State string must be 54 characters long'
+            raise InvalidCubeStateError(msg)
+
+        color_counts: dict[str, int] = {}
+        for i in self._state:
+            color_counts.setdefault(i, 0)
+            color_counts[i] += 1
+
+        if set(color_counts.keys()) - set(FACE_ORDER):
+            msg = (
+                'State string can only '
+                f'contains { " ".join(FACE_ORDER) } characters'
+            )
+            raise InvalidCubeStateError(msg)
+
+        if not all(count == 9 for count in color_counts.values()):
+            msg = 'State string must have nine of each color'
+            raise InvalidCubeStateError(msg)
+
+        return True
 
     def rotate(self, moves: str | Algorithm, allow_fast: bool = True) -> str:  # noqa: FBT001, FBT002
         if isinstance(moves, Algorithm):
@@ -43,7 +88,7 @@ class VCube:
                 self.rotate_move(m, allow_fast=allow_fast)
         return self._state
 
-    def rotate_move(self, move: str, *, allow_fast: bool = True):
+    def rotate_move(self, move: str, *, allow_fast: bool = True) -> str:
         if allow_fast and FAST_ROTATE_AVAILABLE:
             try:
                 self._state = vcube_rotate.rotate_move(self._state, move)
@@ -55,7 +100,7 @@ class VCube:
 
         return self._rotate_move_python(move)
 
-    def _rotate_move_python(self, move: str):  # noqa: PLR0912, PLR0914, PLR0915
+    def _rotate_move_python(self, move: str) -> str:  # noqa: PLR0912, PLR0914, PLR0915
         # Parse the move
         face = move[0]
         direction = 1  # Default: clockwise
@@ -638,3 +683,28 @@ class VCube:
         self.history.append(move)
 
         return self._state
+
+    def display(self, orientation: str = '',
+                colors: list[str] | None = None) -> str:
+        display = VCubePrinter(self, orientation, colors).print_cube()
+
+        print(display, end='')
+
+        return display
+
+    def __str__(self) -> str:
+        """
+        Return the facelets of the cube
+        """
+        faces = []
+        for i, face in enumerate(FACE_ORDER):
+            faces.append(f'{ face }: { self._state[i * 9: (i + 1) * 9]}')
+
+        return '\n'.join(faces)
+
+    def __repr__(self) -> str:
+        """
+        Return a string representation that can be used
+        to recreate the VCube.
+        """
+        return f"VCube('{ self._state }')"

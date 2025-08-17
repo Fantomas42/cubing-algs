@@ -74,7 +74,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves_wide(self):
+    def test_symmetry_m_moves_sign(self):
         provide = parse_moves("U R u' r'")
         expect = parse_moves("U' L' u l")
 
@@ -83,7 +83,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves_wide_japanese(self):
+    def test_symmetry_m_moves_wide_standard(self):
         provide = parse_moves("U R Uw' Rw'")
         expect = parse_moves("U' L' Uw Lw")
 

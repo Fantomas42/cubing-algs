@@ -3,10 +3,160 @@ import unittest
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import INITIAL
+from cubing_algs.vcube import InvalidCubeStateError
 from cubing_algs.vcube import VCube
 
 
 class VCubeTestCase(unittest.TestCase):
+    maxDiff = None
+
+    def test_state(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.state,
+            INITIAL,
+        )
+
+        result = cube.rotate('R2 U2')
+        self.assertEqual(
+            result,
+            'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB',
+        )
+
+        self.assertEqual(
+            result,
+            cube.state,
+        )
+
+    def test_initial(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB'
+
+        cube = VCube(initial)
+
+        self.assertEqual(
+            cube.state,
+            initial,
+        )
+
+    def test_initial_bad_size(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
+
+        with self.assertRaises(InvalidCubeStateError):
+            VCube(initial)
+
+    def test_initial_bad_char(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBT'
+
+        with self.assertRaises(InvalidCubeStateError):
+            VCube(initial)
+
+    def test_initial_bad_face(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBF'
+
+        with self.assertRaises(InvalidCubeStateError):
+            VCube(initial)
+
+    def test_is_solved(self):
+        cube = VCube()
+
+        self.assertTrue(
+            cube.is_solved,
+        )
+
+        cube.rotate('R2 U2')
+        self.assertFalse(
+            cube.is_solved,
+        )
+
+    def test_from_cubies(self):
+        cp = [0, 5, 2, 1, 7, 4, 6, 3]
+        co = [1, 2, 0, 2, 1, 1, 0, 2]
+        ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
+        eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
+
+        cube = VCube.from_cubies(cp, co, ep, eo)
+        self.assertEqual(cube.state, facelets)
+
+        cube = VCube()
+        cube.rotate('F R')
+
+        self.assertEqual(cube.state, facelets)
+
+    def test_to_cubies(self):
+        cp = [0, 5, 2, 1, 7, 4, 6, 3]
+        co = [1, 2, 0, 2, 1, 1, 0, 2]
+        ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
+        eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
+
+        self.assertEqual(
+            VCube(facelets).to_cubies,
+            (
+                cp, co,
+                ep, eo,
+            ),
+        )
+
+    def test_display(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        result = cube.display()
+
+        lines = [line for line in result.split('\n') if line.strip()]
+
+        self.assertEqual(len(lines), 9)
+        self.assertEqual(len(cube.history), 3)
+
+    def test_display_orientation_restore(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(len(cube.history), 3)
+
+        state = cube.state
+
+        cube.display('z2')
+
+        self.assertEqual(len(cube.history), 3)
+        self.assertEqual(state, cube.state)
+
+    def test_display_orientation_different(self):
+        cube_1 = VCube()
+        cube_2 = VCube()
+
+        view_1 = cube_1.display()
+        view_2 = cube_2.display('z2')
+
+        self.assertNotEqual(view_1, view_2)
+
+    def test_str(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            str(cube),
+            'U: LUULUUFFF\n'
+            'R: LBBRRRRRR\n'
+            'F: UUUFFDFFD\n'
+            'D: RRBDDBDDB\n'
+            'L: FFRLLDLLD\n'
+            'B: LLDUBBUBB',
+        )
+
+    def test_repr(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            repr(cube),
+            "VCube('LUULUUFFFLBBRRRRRRUUUFFDFFDRRBDDBDDBFFRLLDLLDLLDUBBUBB')",
+        )
+
+
+class VCubeRotateTestCase(unittest.TestCase):
     c_version = False
 
     def test_rotate_u(self):
@@ -275,48 +425,8 @@ class VCubeTestCase(unittest.TestCase):
             'FBFUUDUUDBFUFRLRRRLRLLFRRDBFBUBDBFUDRFBRLFLLULUDDBDBLD',
         )
 
-    def test_state(self):
-        cube = VCube()
 
-        self.assertEqual(
-            cube.state,
-            INITIAL,
-        )
-
-        result = cube.rotate('R2 U2', self.c_version)
-        self.assertEqual(
-            result,
-            'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB',
-        )
-
-        self.assertEqual(
-            result,
-            cube.state,
-        )
-
-    def test_initial(self):
-        initial = reversed(INITIAL)
-        cube = VCube(initial)
-
-        self.assertEqual(
-            cube.state,
-            initial,
-        )
-
-    def test_is_solved(self):
-        cube = VCube()
-
-        self.assertTrue(
-            cube.is_solved,
-        )
-
-        cube.rotate('R2 U2', self.c_version)
-        self.assertFalse(
-            cube.is_solved,
-        )
-
-
-class CVCubeTestCase(VCubeTestCase):
+class CVCubeRotateTestCase(VCubeRotateTestCase):
     c_version = True
 
 
