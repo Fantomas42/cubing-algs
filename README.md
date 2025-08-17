@@ -16,6 +16,7 @@ pip install cubing-algs
 - Support for wide moves, slice moves, and rotations
 - Big cubes notation support
 - SiGN notation support
+- Display and tracks facelets on 3x3x3 cube
 
 ## Basic Usage
 

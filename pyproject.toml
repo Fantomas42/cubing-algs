@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cubing-algs"
 dynamic = ["version"]
-description = "Python module providing tools manipulating cubing algorythms."
+description = "Python module providing tools manipulating cubing algorithms."
 readme = "README.md"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
