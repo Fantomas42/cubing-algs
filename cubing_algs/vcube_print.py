@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from cubing_algs.constants import FACE_ORDER
 
 if TYPE_CHECKING:
-    from cubing_algs.vcube import VCube
+    from cubing_algs.vcube import VCube  # pragma: no cover
 
 DEFAULT_COLORS = [
     'white', 'red', 'green',
@@ -42,7 +42,7 @@ class VCubePrinter:
             zip(FACE_ORDER, self.colors, strict=True),
         )
 
-    def _format_color(self, facelet: str) -> str:
+    def format_color(self, facelet: str) -> str:
         if USE_COLORS:
             return (
                 f'{ TERM_COLORS[self.face_colors[facelet]]}'
@@ -51,14 +51,14 @@ class VCubePrinter:
             )
         return f' { facelet } '
 
-    def _print_top_down_face(self, face: str) -> str:
+    def print_top_down_face(self, face: str) -> str:
         result = ''
 
         for index, facelet in enumerate(face):
             if index % self.cube_size == 0:
                 result += (' ' * (self.facelet_size * self.cube_size))
 
-            result += self._format_color(facelet)
+            result += self.format_color(facelet)
 
             if index % self.cube_size == self.cube_size - 1:
                 result += '\n'
@@ -67,6 +67,9 @@ class VCubePrinter:
 
     def print_cube(self) -> str:
         cube = self.cube
+
+        original_cube_state = cube.state
+        original_cube_history = list(cube.history)
 
         if self.orientation:
             cube.rotate(self.orientation)
@@ -81,21 +84,22 @@ class VCubePrinter:
         middle = [faces[4], faces[2], faces[1], faces[5]]
 
         # Top
-        result = self._print_top_down_face(faces[0])
+        result = self.print_top_down_face(faces[0])
 
         # Middle
         for i in range(self.cube_size):
             for face in middle:
                 for j in range(self.cube_size):
-                    result += self._format_color(
+                    result += self.format_color(
                         face[i * self.cube_size + j],
                     )
             result += '\n'
 
         # Bottom
-        result += self._print_top_down_face(faces[3])
+        result += self.print_top_down_face(faces[3])
 
         if self.orientation:
-            cube._state = cube_state  # noqa: SLF001
+            cube._state = original_cube_state  # noqa: SLF001
+            cube.history = original_cube_history
 
         return result

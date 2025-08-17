@@ -8,6 +8,7 @@ from cubing_algs.vcube import VCube
 
 
 class VCubeTestCase(unittest.TestCase):
+    maxDiff = None
 
     def test_state(self):
         cube = VCube()
@@ -97,6 +98,39 @@ class VCubeTestCase(unittest.TestCase):
                 ep, eo,
             ),
         )
+
+    def test_display(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        result = cube.display()
+
+        lines = [line for line in result.split('\n') if line.strip()]
+
+        self.assertEqual(len(lines), 9)
+        self.assertEqual(len(cube.history), 3)
+
+    def test_display_orientation_restore(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(len(cube.history), 3)
+
+        state = cube.state
+
+        cube.display('z2')
+
+        self.assertEqual(len(cube.history), 3)
+        self.assertEqual(state, cube.state)
+
+    def test_display_orientation_different(self):
+        cube_1 = VCube()
+        cube_2 = VCube()
+
+        view_1 = cube_1.display()
+        view_2 = cube_2.display('z2')
+
+        self.assertNotEqual(view_1, view_2)
 
     def test_str(self):
         cube = VCube()

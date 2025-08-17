@@ -685,8 +685,12 @@ class VCube:
         return self._state
 
     def display(self, orientation: str = '',
-                colors: list[str] | None = None) -> None:
-        print(VCubePrinter(self, orientation, colors).print_cube(), end='')
+                colors: list[str] | None = None) -> str:
+        display = VCubePrinter(self, orientation, colors).print_cube()
+
+        print(display, end='')
+
+        return display
 
     def __str__(self) -> str:
         """
