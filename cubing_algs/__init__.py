@@ -4,7 +4,7 @@ from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.parsing import parse_moves_cfop
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 __all__ = [
     'Algorithm',
