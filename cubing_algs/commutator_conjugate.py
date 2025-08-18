@@ -1,5 +1,18 @@
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.move import InvalidMoveError
 from cubing_algs.transform.mirror import mirror_moves
+
+
+class InvalidBracketError(InvalidMoveError):
+    """
+    Exception raised when an invalid bracket formation is encountered.
+    """
+
+
+class InvalidOperatorError(InvalidMoveError):
+    """
+    Exception raised when an invalid bracket formation is encountered.
+    """
 
 
 def find_innermost_brackets(text: str) -> tuple[int, int] | None:
@@ -41,7 +54,7 @@ def split_on_separator(text: str, separator: str) -> tuple[str, str] | None:
         elif char == ']':
             bracket_depth -= 1
         elif char == separator and bracket_depth == 0:
-            return (text[:i].strip(), text[i + 1:].strip())
+            return (text[:i], text[i + 1:])
 
     return None
 
@@ -62,12 +75,13 @@ def expand_commutators_and_conjugates(moves: str) -> str:
     Commutator [A, B] = A B A' B'
     Conjugate [A: B] = A B A'
     """
-    result = moves.strip()
+    result = moves
 
     while '[' in result:
         bracket_pos = find_innermost_brackets(result)
         if bracket_pos is None:
-            break
+            msg = f'Malformed bracket in { result }'
+            raise InvalidBracketError(msg)
 
         start, end = bracket_pos
 
@@ -83,7 +97,7 @@ def expand_commutators_and_conjugates(moves: str) -> str:
             b_expanded = expand_commutators_and_conjugates(b_part)
 
             a_inverted = invert_moves(a_expanded)
-            expanded = f'{a_expanded} {b_expanded} {a_inverted}'.strip()
+            expanded = f'{a_expanded} {b_expanded} {a_inverted}'
 
         elif comma_split is not None:
             a_part, b_part = comma_split
@@ -96,7 +110,8 @@ def expand_commutators_and_conjugates(moves: str) -> str:
             expanded = f'{a_expanded} {b_expanded} {a_inverted} {b_inverted}'
 
         else:
-            expanded = expand_commutators_and_conjugates(bracket_content)
+            msg = f'Invalid operator in { bracket_content }'
+            raise InvalidOperatorError(msg)
 
         result = result[:start] + ' ' + expanded + ' ' + result[end + 1:]
 
