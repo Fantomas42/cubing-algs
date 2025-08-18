@@ -5,11 +5,11 @@ This module provides functions to clean, validate, and convert
 string representations of Rubik's cube algorithms into structured
 Algorithm objects.
 """
-
 import logging
 import re
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
 from cubing_algs.constants import MOVE_SPLIT
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 CLEAN_PATTERNS = [
     (re.compile(r'[`’]'), "'"),  # # noqa RUF001
-    (re.compile(r'[():\[\]]'), ' '),
+    (re.compile(r'[():,\[\]]'), ' '),
     (re.compile(r'\s+'), ' '),
     (re.compile(r"2'"), '2'),
 ]
@@ -101,6 +101,14 @@ def parse_moves(raw_moves: str | list[str] | Algorithm,
     - If raw_moves is a list, it's joined into a string
     - Strings are cleaned, split into moves, validated, and converted
       to an Algorithm
+
+    Now supports commutators [A, B] and conjugates [A: B].
+
+    Examples:
+        [A, B] becomes A B A' B' (commutator)
+        [A: B] becomes A B A' (conjugate)
+        [[R: U], D] becomes R U R' D R U' R' D'
+        [F: [U, R]] becomes F U R U' R' F'
     """
     if isinstance(raw_moves, Algorithm):
         return raw_moves
@@ -108,10 +116,12 @@ def parse_moves(raw_moves: str | list[str] | Algorithm,
     if isinstance(raw_moves, list):
         raw_moves = ''.join(str(m) for m in raw_moves)
 
+    expanded_moves = expand_commutators_and_conjugates(raw_moves)
+
     if not secure:
-        moves = split_moves(clean_moves(raw_moves))
+        moves = split_moves(clean_moves(expanded_moves))
     else:
-        moves = split_moves(raw_moves)
+        moves = split_moves(expanded_moves)
 
     if not secure and not check_moves(moves):
         error = f'{ raw_moves } contains invalid move'

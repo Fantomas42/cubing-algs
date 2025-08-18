@@ -1,5 +1,7 @@
 import unittest
 
+from cubing_algs.commutator_conjugate import InvalidBracketError
+from cubing_algs.commutator_conjugate import InvalidOperatorError
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import check_moves
@@ -147,6 +149,147 @@ class ParseMovesTestCase(unittest.TestCase):
     def test_parse_moves_algorithm(self):
         moves = 'R2 L2'
         expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_conjugate(self):
+        moves = 'F [R, U] F'
+        expect = ['F', 'R', 'U', "R'", "U'", 'F']
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+        moves = 'F[R,U]F'
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_conjugate_malformed(self):
+        moves = 'F [R, U F'
+
+        self.assertRaises(
+            InvalidBracketError,
+            parse_moves, moves,
+            secure=False,
+        )
+
+    def test_parse_moves_conjugate_invalid_moves(self):
+        moves = 'F [T, U] F'
+
+        self.assertRaises(
+            InvalidMoveError,
+            parse_moves, moves,
+            secure=False,
+        )
+
+        self.assertRaises(
+            InvalidMoveError,
+            parse_moves, moves,
+            secure=True,
+        )
+
+    def test_parse_moves_conjugate_nested(self):
+        moves = 'F [[R, U], B] F'
+        expect = [
+            'F',
+            'R', 'U', "R'", "U'",
+            'B',
+            'U', 'R', "U'", "R'",
+            "B'",
+            'F',
+        ]
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_commutator(self):
+        moves = 'F [R: U] F'
+        expect = ['F', 'R', 'U', "R'", 'F']
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+        moves = 'F[R:U]F'
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_commutator_malformed(self):
+        moves = 'F [R: U F'
+
+        self.assertRaises(
+            InvalidBracketError,
+            parse_moves, moves,
+            secure=False,
+        )
+
+    def test_parse_moves_commutator_invalid_moves(self):
+        moves = 'F [T: U] F'
+
+        self.assertRaises(
+            InvalidMoveError,
+            parse_moves, moves,
+            secure=False,
+        )
+
+        self.assertRaises(
+            InvalidMoveError,
+            parse_moves, moves,
+            secure=True,
+        )
+
+    def test_parse_moves_commutator_nested(self):
+        moves = 'F [[R: U]: B] F'
+        expect = [
+            'F',
+            'R', 'U', "R'",
+            'B',
+            'R', "U'", "R'",
+            'F',
+        ]
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_invalid_operator(self):
+        moves = 'F [R; U] F'
+
+        self.assertRaises(
+            InvalidOperatorError,
+            parse_moves, moves,
+            secure=False,
+        )
+
+    def test_parse_moves_complex_1(self):
+        moves = '[[R: U], D] B [F: [U, R]]'
+        expect = [
+            'R', 'U', "R'", 'D',
+            'R', "U'", "R'", "D'",
+            'B',
+            'F', 'U', 'R', "U'", "R'", "F'",
+        ]
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_complex_2(self):
+        moves = '[[R F: U L], D] B'
+        expect = [
+            'R', 'F', 'U', 'L', "F'", "R'",
+            'D',
+            'R', 'F', "L'", "U'", "F'", "R'",
+            "D'",
+            'B',
+        ]
         self.assertEqual(
             parse_moves(parse_moves(moves)),
             expect,
