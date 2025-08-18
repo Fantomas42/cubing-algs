@@ -152,6 +152,76 @@ class ParseMovesTestCase(unittest.TestCase):
             expect,
         )
 
+    def test_parse_moves_conjugator(self):
+        moves = 'F [R, U] F'
+        expect = ['F', 'R', 'U', "R'", "U'", 'F']
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+        moves = 'F[R,U]F'
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_conjugator_nested(self):
+        moves = 'F [[R, U], B] F'
+        expect = [
+            'F',
+            'R', 'U', "R'", "U'",
+            'B',
+            'U', 'R', "U'", "R'",
+            "B'",
+            'F',
+        ]
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_commutator(self):
+        moves = 'F [R: U] F'
+        expect = ['F', 'R', 'U', "R'", 'F']
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+        moves = 'F[R:U]F'
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_commutator_nested(self):
+        moves = 'F [[R: U]: B] F'
+        expect = [
+            'F',
+            'R', 'U', "R'",
+            'B',
+            'R', "U'", "R'",
+            'F',
+        ]
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
+    def test_parse_moves_complex(self):
+        moves = '[[R: U], D] B [F: [U, R]]'
+        expect = [
+            'R', 'U', "R'", 'D',
+            'R', "U'", "R'", "D'",
+            'B',
+            'F', 'U', 'R', "U'", "R'", "F'",
+        ]
+        self.assertEqual(
+            parse_moves(parse_moves(moves)),
+            expect,
+        )
+
 
 class ParseMovesCFOPTestCase(unittest.TestCase):
 
