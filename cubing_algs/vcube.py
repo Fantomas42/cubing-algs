@@ -27,6 +27,7 @@ class VCube:
     Virtual 3x3 cube for tracking moves on facelets
     """
     size = 3
+    face_size = size * size
 
     def __init__(self, initial: str | None = None):
         if initial:
@@ -73,7 +74,7 @@ class VCube:
             )
             raise InvalidCubeStateError(msg)
 
-        if not all(count == 9 for count in color_counts.values()):
+        if not all(count == self.face_size for count in color_counts.values()):
             msg = 'State string must have nine of each color'
             raise InvalidCubeStateError(msg)
 
@@ -689,16 +690,20 @@ class VCube:
         return VCubePrinter(self, orientation, colors).print_cube()
 
     def show(self, orientation: str = '',
-             colors: list[str] | None = None) -> str:
+             colors: list[str] | None = None) -> None:
         print(self.display(orientation, colors), end='')
+
+    def get_face(self, face: str):
+        index = FACE_ORDER.index(face)
+        return self._state[index * self.face_size: (index + 1) * self.face_size]
 
     def __str__(self) -> str:
         """
         Return the facelets of the cube
         """
         faces = []
-        for i, face in enumerate(FACE_ORDER):
-            faces.append(f'{ face }: { self._state[i * 9: (i + 1) * 9]}')
+        for face in FACE_ORDER:
+            faces.append(f'{ face }: { self.get_face(face)}')
 
         return '\n'.join(faces)
 
