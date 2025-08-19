@@ -686,11 +686,11 @@ class VCube:
 
     def display(self, orientation: str = '',
                 colors: list[str] | None = None) -> str:
-        display = VCubePrinter(self, orientation, colors).print_cube()
+        return VCubePrinter(self, orientation, colors).print_cube()
 
-        print(display, end='')
-
-        return display
+    def show(self, orientation: str = '',
+             colors: list[str] | None = None) -> str:
+        print(self.display(orientation, colors), end='')
 
     def __str__(self) -> str:
         """
