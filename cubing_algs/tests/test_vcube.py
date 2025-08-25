@@ -132,6 +132,38 @@ class VCubeTestCase(unittest.TestCase):
 
         self.assertNotEqual(view_1, view_2)
 
+    def test_get_face(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            cube.get_face('U'),
+            'LUULUUFFF',
+        )
+
+        cube.rotate('z2')
+
+        self.assertEqual(
+            cube.get_face('U'),
+            'BDDBDDBRR',
+        )
+
+    def test_get_face_center(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            cube.get_face_by_center('U'),
+            'LUULUUFFF',
+        )
+
+        cube.rotate('z2')
+
+        self.assertEqual(
+            cube.get_face_by_center('U'),
+            'FFFUULUUL',
+        )
+
     def test_str(self):
         cube = VCube()
         cube.rotate('F R U')

@@ -697,6 +697,15 @@ class VCube:
         index = FACE_ORDER.index(face)
         return self._state[index * self.face_size: (index + 1) * self.face_size]
 
+    def get_face_by_center(self, face: str):
+        face_centers = []
+        for i in range(6):
+            face_centers.append(self.state[(i * 9) + 4])
+
+        index = face_centers.index(face)
+
+        return self._state[index * self.face_size: (index + 1) * self.face_size]
+
     def __str__(self) -> str:
         """
         Return the facelets of the cube
