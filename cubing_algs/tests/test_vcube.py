@@ -1,4 +1,6 @@
 import unittest
+from io import StringIO
+from unittest.mock import patch
 
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.parsing import parse_moves
@@ -526,3 +528,90 @@ class RegressionVCubeTestCase(unittest.TestCase):
 
     def test_rotate_z(self):
         self.check_rotate('z')
+
+
+class TestVCubeShow(unittest.TestCase):
+
+    def setUp(self):
+        self.cube = VCube()
+
+    def test_show_default_parameters(self):
+        captured_output = StringIO()
+        with patch('sys.stdout', captured_output):
+            self.cube.show()
+
+        output = captured_output.getvalue()
+
+        self.assertIsInstance(output, str)
+        self.assertGreater(len(output), 0)
+
+    def test_show_with_orientation(self):
+        orientations = ['', 'x', 'y', 'z', 'x2', 'y2', 'z2']
+
+        for orientation in orientations:
+            with self.subTest(orientation=orientation):
+                captured_output = StringIO()
+                with patch('sys.stdout', captured_output):
+                    self.cube.show(orientation=orientation)
+
+                output = captured_output.getvalue()
+                self.assertIsInstance(output, str)
+                self.assertGreater(len(output), 0)
+
+    def test_show_with_custom_colors(self):
+        custom_colors = ['red', 'blue', 'green', 'yellow', 'orange', 'white']
+
+        captured_output = StringIO()
+        with patch('sys.stdout', captured_output):
+            self.cube.show(colors=custom_colors)
+
+        output = captured_output.getvalue()
+        self.assertIsInstance(output, str)
+        self.assertGreater(len(output), 0)
+
+    def test_show_scrambled_cube(self):
+        self.cube.rotate("R U R' U'")
+
+        captured_output = StringIO()
+        with patch('sys.stdout', captured_output):
+            self.cube.show()
+
+        output = captured_output.getvalue()
+        self.assertIsInstance(output, str)
+        self.assertGreater(len(output), 0)
+
+        face_letters = ['U', 'R', 'F', 'D', 'L', 'B']
+        for letter in face_letters:
+            self.assertEqual(output.count(letter), 9)
+
+    def test_show_output_consistency(self):
+        captured_output1 = StringIO()
+        with patch('sys.stdout', captured_output1):
+            self.cube.show()
+        output1 = captured_output1.getvalue()
+
+        captured_output2 = StringIO()
+        with patch('sys.stdout', captured_output2):
+            self.cube.show()
+        output2 = captured_output2.getvalue()
+
+        self.assertEqual(output1, output2)
+
+    def test_show_vs_display_consistency(self):
+        display_result = self.cube.display()
+
+        captured_output = StringIO()
+        with patch('sys.stdout', captured_output):
+            self.cube.show()
+        show_result = captured_output.getvalue()
+
+        self.assertEqual(display_result, show_result)
+
+    def test_show_empty_parameters(self):
+        captured_output = StringIO()
+        with patch('sys.stdout', captured_output):
+            self.cube.show(orientation='', colors=None)
+
+        output = captured_output.getvalue()
+        self.assertIsInstance(output, str)
+        self.assertGreater(len(output), 0)
