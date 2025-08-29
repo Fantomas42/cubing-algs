@@ -34,7 +34,6 @@ namespaces = false
 [tool.setuptools.dynamic]
 version = {attr = "cubing_algs.__version__"}
 
-
 [tool.setuptools]
 ext-modules = [{name = "cubing_algs.extensions.rotate", sources = ["cubing_algs/extensions/rotate.c"], extra-compile-args = ["-O3", "-Wall"]}]
 
