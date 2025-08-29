@@ -127,7 +127,10 @@ addopts = "--cov=cubing_algs"
 
 [tool.coverage.run]
 branch = true
-omit = ["cubing_algs/tests/*"]
+omit = [
+     "cubing_algs/tests/*",
+     "cubing_algs/poc/*",
+]
 
 [tool.coverage.report]
 show_missing = true
