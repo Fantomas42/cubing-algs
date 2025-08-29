@@ -44,7 +44,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
         } else if (move[1] == '2') {
             direction = 2; // 180°
         } else {
-            PyErr_SetString(PyExc_ValueError, "Invalid move modifier");
+            PyErr_Format(PyExc_ValueError, "Invalid move modifier: '%c'", move[1]);
             return NULL;
         }
     }
@@ -538,7 +538,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
         }
 
         default:
-            PyErr_SetString(PyExc_ValueError, "Invalid move face");
+            PyErr_Format(PyExc_ValueError, "Invalid move face: '%c'", face);
             return NULL;
     }
 
