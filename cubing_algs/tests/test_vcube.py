@@ -2,8 +2,10 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
+from cubing_algs.move import Move
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.fat import unfat_rotation_moves
 from cubing_algs.vcube import INITIAL
 from cubing_algs.vcube import InvalidCubeStateError
 from cubing_algs.vcube import VCube
@@ -458,6 +460,55 @@ class VCubeRotateTestCase(unittest.TestCase):
             cube.rotate(scramble, self.c_version),
             'FBFUUDUUDBFUFRLRRRLRLLFRRDBFBUBDBFUDRFBRLFLLULUDDBDBLD',
         )
+
+
+class VCubeRotateWideTestCase(unittest.TestCase):
+    c_version = True
+
+    def check_rotate(self, raw_move):
+        base_move = Move(raw_move)
+
+        for move, name in zip(
+                [base_move, base_move.inverted, base_move.doubled],
+                ['Base', 'Inverted', 'Doubled'],
+                strict=True,
+        ):
+            with self.subTest(name, move=move):
+                cube = VCube()
+                cube_wide = VCube()
+
+                self.assertEqual(
+                    cube.rotate(
+                        move,
+                        self.c_version,
+                    ),
+                    cube_wide.rotate(
+                        parse_moves(
+                            str(move),
+                        ).transform(
+                            unfat_rotation_moves,
+                        ),
+                        self.c_version,
+                    ),
+                )
+
+    def test_rotate_u(self):
+        self.check_rotate('u')
+
+    def test_rotate_r(self):
+        self.check_rotate('r')
+
+    def test_rotate_f(self):
+        self.check_rotate('f')
+
+    def test_rotate_d(self):
+        self.check_rotate('d')
+
+    def test_rotate_l(self):
+        self.check_rotate('l')
+
+    def test_rotate_b(self):
+        self.check_rotate('b')
 
 
 class CVCubeRotateTestCase(VCubeRotateTestCase):
