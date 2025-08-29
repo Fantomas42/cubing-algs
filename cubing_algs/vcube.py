@@ -1,4 +1,3 @@
-# ruff: noqa: TRY003
 from importlib.util import find_spec
 
 from cubing_algs.algorithm import Algorithm
