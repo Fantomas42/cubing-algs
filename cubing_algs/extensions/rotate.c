@@ -546,21 +546,21 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 }
 
 // Définition des méthodes du module
-static PyMethodDef VCubeRotateMethods[] = {
+static PyMethodDef RotateMethods[] = {
     {"rotate_move", rotate_move, METH_VARARGS, "Rotate cube state with given move"},
     {NULL, NULL, 0, NULL}
 };
 
 // Définition du module
-static struct PyModuleDef vcuberotatemodule = {
+static struct PyModuleDef rotatemodule = {
     PyModuleDef_HEAD_INIT,
-    "vcube_rotate",
+    "rotate",
     "Fast cube rotation operations",
     -1,
-    VCubeRotateMethods
+    RotateMethods
 };
 
 // Fonction d'initialisation du module
-PyMODINIT_FUNC PyInit_vcube_rotate(void) {
-    return PyModule_Create(&vcuberotatemodule);
+PyMODINIT_FUNC PyInit_rotate(void) {
+    return PyModule_Create(&rotatemodule);
 }

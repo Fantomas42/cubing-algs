@@ -36,7 +36,7 @@ version = {attr = "cubing_algs.__version__"}
 
 
 [tool.setuptools]
-ext-modules = [{name = "cubing_algs.vcube_rotate", sources = ["cubing_algs/vcube_rotate.c"], extra-compile-args = ["-O3", "-Wall"]}]
+ext-modules = [{name = "cubing_algs.extensions.rotate", sources = ["cubing_algs/extensions/rotate.c"], extra-compile-args = ["-O3", "-Wall"]}]
 
 [tool.ruff]
 line-length = 80

@@ -9,8 +9,8 @@ from cubing_algs.move import InvalidMoveError
 from cubing_algs.vcube_print import VCubePrinter
 
 FAST_ROTATE_AVAILABLE = False
-if find_spec('cubing_algs.vcube_rotate') is not None:  # pragma: no cover
-    from cubing_algs import vcube_rotate  # type: ignore[attr-defined]
+if find_spec('cubing_algs.extensions.rotate') is not None:  # pragma: no cover
+    from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
     FAST_ROTATE_AVAILABLE = True
 
 INITIAL = ''
@@ -92,7 +92,7 @@ class VCube:
     def rotate_move(self, move: str, *, allow_fast: bool = True) -> str:
         if allow_fast and FAST_ROTATE_AVAILABLE:
             try:
-                self._state = vcube_rotate.rotate_move(self._state, move)
+                self._state = rotate.rotate_move(self._state, move)
             except ValueError as e:
                 raise InvalidMoveError(str(e)) from e
             else:
