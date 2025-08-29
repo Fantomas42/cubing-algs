@@ -537,6 +537,100 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
             break;
         }
 
+        case 'u': {
+            // u est équivalent à D y, optimisé en transformation directe
+            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
+            for (int j = 0; j < 9; j++) {
+                u_face[j] = new_state[j];
+                r_face[j] = new_state[9 + j];
+                f_face[j] = new_state[18 + j];
+                d_face[j] = new_state[27 + j];
+                l_face[j] = new_state[36 + j];
+                b_face[j] = new_state[45 + j];
+            }
+
+            char u_rotated[9], d_rotated[9];
+
+            if (direction == 1) {
+                // u = D y : U horaire, D anti-horaire
+                rotate_face_clockwise(u_face, u_rotated);
+                rotate_face_counterclockwise(d_face, d_rotated);
+
+                for (int j = 0; j < 9; j++) {
+                    new_state[j] = u_rotated[j];
+                    new_state[27 + j] = d_rotated[j];
+                }
+
+                // Top et middle rows: seulement effet y (F->R, R->B, B->L, L->F)
+                for (int j = 0; j < 6; j++) {
+                    new_state[9 + j] = b_face[j];   // R <- B
+                    new_state[18 + j] = r_face[j];  // F <- R
+                    new_state[36 + j] = f_face[j];  // L <- F
+                    new_state[45 + j] = l_face[j];  // B <- L
+                }
+
+                // Bottom rows: D et y s'annulent, restent identiques
+                for (int j = 6; j < 9; j++) {
+                    new_state[9 + j] = r_face[j];   // R bot unchanged
+                    new_state[18 + j] = f_face[j];  // F bot unchanged
+                    new_state[36 + j] = l_face[j];  // L bot unchanged
+                    new_state[45 + j] = b_face[j];  // B bot unchanged
+                }
+
+            } else if (direction == 2) {
+                // u2 = D2 y2
+                rotate_face_180(u_face, u_rotated);
+                rotate_face_180(d_face, d_rotated);
+
+                for (int j = 0; j < 9; j++) {
+                    new_state[j] = u_rotated[j];
+                    new_state[27 + j] = d_rotated[j];
+                }
+
+                // Top et middle rows: seulement y2 (F<->B, R<->L)
+                for (int j = 0; j < 6; j++) {
+                    new_state[9 + j] = l_face[j];      // R <- L
+                    new_state[18 + j] = b_face[j];     // F <- B
+                    new_state[36 + j] = r_face[j];     // L <- R
+                    new_state[45 + j] = f_face[j];     // B <- F
+                }
+
+                // Bottom rows: D2 et y2 s'annulent, restent identiques
+                for (int j = 6; j < 9; j++) {
+                    new_state[9 + j] = r_face[j];      // R bot unchanged
+                    new_state[18 + j] = f_face[j];     // F bot unchanged
+                    new_state[36 + j] = l_face[j];     // L bot unchanged
+                    new_state[45 + j] = b_face[j];     // B bot unchanged
+                }
+            } else {
+                // u' = D' y'
+                rotate_face_counterclockwise(u_face, u_rotated);
+                rotate_face_clockwise(d_face, d_rotated);
+
+                for (int j = 0; j < 9; j++) {
+                    new_state[j] = u_rotated[j];
+                    new_state[27 + j] = d_rotated[j];
+                }
+
+                // Top et middle rows: effet y' (F->L, L->B, B->R, R->F)
+                for (int j = 0; j < 6; j++) {
+                    new_state[9 + j] = f_face[j];      // R <- F
+                    new_state[18 + j] = l_face[j];     // F <- L
+                    new_state[36 + j] = b_face[j];     // L <- B
+                    new_state[45 + j] = r_face[j];     // B <- R
+                }
+
+                // Bottom rows: D' et y' s'annulent aussi
+                for (int j = 6; j < 9; j++) {
+                    new_state[9 + j] = r_face[j];      // R bot unchanged
+                    new_state[18 + j] = f_face[j];     // F bot unchanged
+                    new_state[36 + j] = l_face[j];     // L bot unchanged
+                    new_state[45 + j] = b_face[j];     // B bot unchanged
+                }
+            }
+            break;
+        }
+
         default:
             PyErr_Format(PyExc_ValueError, "Invalid move face: '%c'", face);
             return NULL;
