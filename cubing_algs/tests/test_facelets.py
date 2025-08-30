@@ -47,7 +47,14 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
         so = [0, 1, 2, 3, 4, 5]
         mask = ('1' * 9) + ('0' * 45)
-        facelets = 'UU-UU----UUU------------------------------------U--U--'
+        facelets = (
+            'UU-UU----'
+            'UUU------'
+            '---------'
+            '---------'
+            '---------'
+            '---U--U--'
+        )
 
         self.assertEqual(
             cubies_to_facelets(
@@ -82,7 +89,14 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
         eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         so = [2, 1, 3, 5, 4, 0]
         mask = ('1' * 9) + ('0' * 45)
-        facelets = 'FF-FF-FF-------------------------------------F--F--F--'
+        facelets = (
+            '---------'
+            '--U--U--U'
+            '---------'
+            '--U--U---'
+            '---------'
+            '----UU-UU'
+        )
 
         self.assertEqual(
             cubies_to_facelets(
