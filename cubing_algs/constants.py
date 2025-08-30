@@ -360,6 +360,8 @@ OPPOSITE_FACES = {
 
 FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
 
+FACES = ''.join(FACE_ORDER)
+
 CORNER_FACELET_MAP = [
     [8, 9, 20],    # URF
     [6, 18, 38],   # UFL
@@ -385,3 +387,7 @@ EDGE_FACELET_MAP = [
     [50, 39],  # BL
     [48, 14],  # BR
 ]
+
+MASKED_CHAR = '-'
+
+FULL_MASK = '1' * 54

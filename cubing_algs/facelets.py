@@ -1,10 +1,8 @@
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
-from cubing_algs.constants import FACE_ORDER
-
-FACES = ''.join(FACE_ORDER)
-FULL_MASK = '1' * 54
-MASKED = '-'
+from cubing_algs.constants import FACES
+from cubing_algs.constants import FULL_MASK
+from cubing_algs.constants import MASKED_CHAR
 
 
 def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
@@ -50,7 +48,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
         if mask[center_pos] == '1':
             facelets[center_pos] = FACES[so[i]]
         else:
-            facelets[center_pos] = MASKED
+            facelets[center_pos] = MASKED_CHAR
 
     for i in range(8):
         for p in range(3):
@@ -63,7 +61,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
                 color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
                 facelets[real_facelet_idx] = FACES[so[color_face_idx]]
             else:
-                facelets[real_facelet_idx] = MASKED
+                facelets[real_facelet_idx] = MASKED_CHAR
 
     for i in range(12):
         for p in range(2):
@@ -76,7 +74,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
                 color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
                 facelets[real_facelet_idx] = FACES[so[color_face_idx]]
             else:
-                facelets[real_facelet_idx] = MASKED
+                facelets[real_facelet_idx] = MASKED_CHAR
 
     return ''.join(facelets)
 
