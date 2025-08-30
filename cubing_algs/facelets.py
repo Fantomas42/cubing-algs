@@ -7,7 +7,7 @@ from cubing_algs.constants import MASKED_CHAR
 
 def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
                        ep: list[int], eo: list[int],
-                       so: list[int], mask: str = FULL_MASK) -> str:
+                       so: list[int], mask: str = '') -> str:
     """
     Convert Corner/Edge Permutation/Orientation cube state
     to the Kociemba facelets representation string with an optional
@@ -42,6 +42,9 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
         Cube state in the Kociemba facelets representation string
     """
     facelets = [''] * 54
+
+    if not mask:
+        mask = FULL_MASK
 
     for i in range(6):
         center_pos = 9 * i + 4
