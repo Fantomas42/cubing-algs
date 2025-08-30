@@ -40,6 +40,24 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
             facelets,
         )
 
+    def test_cubies_to_facelets_mask(self):
+        cp = [0, 5, 2, 1, 7, 4, 6, 3]
+        co = [1, 2, 0, 2, 1, 1, 0, 2]
+        ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
+        eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        so = [0, 1, 2, 3, 4, 5]
+        mask = ('1' * 9) + ('0' * 45)
+        facelets = 'UU-UU----UUU------------------------------------U--U--'
+
+        self.assertEqual(
+            cubies_to_facelets(
+                cp, co,
+                ep, eo,
+                so, mask,
+            ),
+            facelets,
+        )
+
     def test_cubies_to_facelets_oriented(self):
         cp = [4, 0, 1, 3, 7, 5, 6, 2]
         co = [2, 0, 0, 1, 1, 0, 0, 2]
@@ -53,6 +71,24 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
                 cp, co,
                 ep, eo,
                 so,
+            ),
+            facelets,
+        )
+
+    def test_cubies_to_facelets_oriented_masked(self):
+        cp = [4, 0, 1, 3, 7, 5, 6, 2]
+        co = [2, 0, 0, 1, 1, 0, 0, 2]
+        ep = [8, 0, 1, 2, 11, 5, 6, 7, 4, 9, 10, 3]
+        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        so = [2, 1, 3, 5, 4, 0]
+        mask = ('1' * 9) + ('0' * 45)
+        facelets = 'FF-FF-FF-------------------------------------F--F--F--'
+
+        self.assertEqual(
+            cubies_to_facelets(
+                cp, co,
+                ep, eo,
+                so, mask,
             ),
             facelets,
         )

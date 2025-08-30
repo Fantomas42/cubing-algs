@@ -3,14 +3,17 @@ from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_ORDER
 
 FACES = ''.join(FACE_ORDER)
+FULL_MASK = '1' * 54
+MASKED = '-'
 
 
-def cubies_to_facelets(cp: list[int], co: list[int],
+def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
                        ep: list[int], eo: list[int],
-                       so: list[int]) -> str:
+                       so: list[int], mask: str = FULL_MASK) -> str:
     """
     Convert Corner/Edge Permutation/Orientation cube state
-    to the Kociemba facelets representation string.
+    to the Kociemba facelets representation string with an optional
+    binary mask to omit facelets.
 
     Example - solved state:
       cp = [0, 1, 2, 3, 4, 5, 6, 7]
@@ -34,6 +37,8 @@ def cubies_to_facelets(cp: list[int], co: list[int],
         ep: Edge Permutation
         eo: Edge Orientation
         so: Spatial Orientation
+        mask: 54-character string with '1' and '0' for facelets to show or hide.
+              The mask applies to original piece colors, not final positions.
 
     Returns:
         Cube state in the Kociemba facelets representation string
@@ -41,19 +46,37 @@ def cubies_to_facelets(cp: list[int], co: list[int],
     facelets = [''] * 54
 
     for i in range(6):
-        facelets[9 * i + 4] = FACES[so[i]]
+        center_pos = 9 * i + 4
+        if mask[center_pos] == '1':
+            facelets[center_pos] = FACES[so[i]]
+        else:
+            facelets[center_pos] = MASKED
 
     for i in range(8):
         for p in range(3):
             real_facelet_idx = CORNER_FACELET_MAP[i][(p + co[i]) % 3]
-            color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
-            facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+
+            original_corner_idx = cp[i]
+            original_facelet_idx = CORNER_FACELET_MAP[original_corner_idx][p]
+
+            if mask[original_facelet_idx] == '1':
+                color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
+                facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+            else:
+                facelets[real_facelet_idx] = MASKED
 
     for i in range(12):
         for p in range(2):
             real_facelet_idx = EDGE_FACELET_MAP[i][(p + eo[i]) % 2]
-            color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
-            facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+
+            original_edge_idx = ep[i]
+            original_facelet_idx = EDGE_FACELET_MAP[original_edge_idx][p]
+
+            if mask[original_facelet_idx] == '1':
+                color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
+                facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+            else:
+                facelets[real_facelet_idx] = MASKED
 
     return ''.join(facelets)
 
