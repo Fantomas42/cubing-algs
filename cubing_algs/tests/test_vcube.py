@@ -103,6 +103,26 @@ class VCubeTestCase(unittest.TestCase):
             ),
         )
 
+    def test_from_cubies_equality(self):
+        cube = VCube()
+        cube.rotate('F R')
+        n_cube = VCube.from_cubies(*cube.to_cubies)
+
+        self.assertEqual(
+            cube.state,
+            n_cube.state,
+        )
+
+    def test_from_cubies_oriented_equality(self):
+        cube = VCube()
+        cube.rotate('F R x')
+        n_cube = VCube.from_cubies(*cube.to_cubies)
+
+        self.assertEqual(
+            cube.state,
+            n_cube.state,
+        )
+
     def test_display(self):
         cube = VCube()
         cube.rotate('F R U')
