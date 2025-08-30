@@ -36,7 +36,8 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
         eo: Edge Orientation
         so: Spatial Orientation
         mask: 54-character string with '1' and '0' for facelets to show or hide.
-              The mask applies to original piece colors, not final positions.
+              The mask applies to original piece positions and shows them
+              wherever they end up.
 
     Returns:
         Cube state in the Kociemba facelets representation string
@@ -48,36 +49,47 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
 
     for i in range(6):
         center_pos = 9 * i + 4
-        if mask[center_pos] == '1':
+        logical_face_here = so[i]
+        logical_center_pos = logical_face_here * 9 + 4
+
+        if mask[logical_center_pos] == '1':
             facelets[center_pos] = FACES[so[i]]
         else:
             facelets[center_pos] = MASKED_CHAR
 
     for i in range(8):
         for p in range(3):
-            real_facelet_idx = CORNER_FACELET_MAP[i][(p + co[i]) % 3]
+            physical_facelet_idx = CORNER_FACELET_MAP[i][(p + co[i]) % 3]
+
+            color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
+            logical_color = so[color_face_idx]
 
             original_corner_idx = cp[i]
             original_facelet_idx = CORNER_FACELET_MAP[original_corner_idx][p]
 
-            if mask[original_facelet_idx] == '1':
-                color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
-                facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+            logical_facelet_idx = logical_color * 9 + (original_facelet_idx % 9)
+
+            if mask[logical_facelet_idx] == '1':
+                facelets[physical_facelet_idx] = FACES[logical_color]
             else:
-                facelets[real_facelet_idx] = MASKED_CHAR
+                facelets[physical_facelet_idx] = MASKED_CHAR
 
     for i in range(12):
         for p in range(2):
-            real_facelet_idx = EDGE_FACELET_MAP[i][(p + eo[i]) % 2]
+            physical_facelet_idx = EDGE_FACELET_MAP[i][(p + eo[i]) % 2]
+
+            color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
+            logical_color = so[color_face_idx]
 
             original_edge_idx = ep[i]
             original_facelet_idx = EDGE_FACELET_MAP[original_edge_idx][p]
 
-            if mask[original_facelet_idx] == '1':
-                color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
-                facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+            logical_facelet_idx = logical_color * 9 + (original_facelet_idx % 9)
+
+            if mask[logical_facelet_idx] == '1':
+                facelets[physical_facelet_idx] = FACES[logical_color]
             else:
-                facelets[real_facelet_idx] = MASKED_CHAR
+                facelets[physical_facelet_idx] = MASKED_CHAR
 
     return ''.join(facelets)
 
