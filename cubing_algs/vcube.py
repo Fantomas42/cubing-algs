@@ -43,11 +43,14 @@ class VCube:
 
     @staticmethod
     def from_cubies(cp: list[int], co: list[int],
-                    ep: list[int], eo: list[int]) -> 'VCube':
-        return VCube(cubies_to_facelets(cp, co, ep, eo))
+                    ep: list[int], eo: list[int],
+                    so: list[int]) -> 'VCube':
+        return VCube(cubies_to_facelets(cp, co, ep, eo, so))
 
     @property
-    def to_cubies(self) -> tuple[list[int], list[int], list[int], list[int]]:
+    def to_cubies(self) -> tuple[
+            list[int], list[int], list[int], list[int], list[int],
+    ]:
         return facelets_to_cubies(self._state)
 
     @property

@@ -6,7 +6,8 @@ FACES = ''.join(FACE_ORDER)
 
 
 def cubies_to_facelets(cp: list[int], co: list[int],
-                       ep: list[int], eo: list[int]) -> str:
+                       ep: list[int], eo: list[int],
+                       so: list[int]) -> str:
     """
     Convert Corner/Edge Permutation/Orientation cube state
     to the Kociemba facelets representation string.
@@ -16,6 +17,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],
       co = [0, 0, 0, 0, 0, 0, 0, 0]
       ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
       eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      so = [0, 1, 2, 3, 4, 5]
       facelets = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB'
 
     Example - state after F R moves made:
@@ -23,6 +25,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],
       co = [1, 2, 0, 2, 1, 1, 0, 2]
       ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
       eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+      so = [0, 1, 2, 3, 4, 5]
       facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
     Args:
@@ -30,36 +33,33 @@ def cubies_to_facelets(cp: list[int], co: list[int],
         co: Corner Orientation
         ep: Edge Permutation
         eo: Edge Orientation
+        so: Spatial Orientation
 
     Returns:
         Cube state in the Kociemba facelets representation string
     """
-    facelets = []
+    facelets = [''] * 54
 
-    for i in range(54):
-        facelets.append(FACES[i // 9])
+    for i in range(6):
+        facelets[9 * i + 4] = FACES[so[i]]
 
     for i in range(8):
         for p in range(3):
-            facelets[
-                CORNER_FACELET_MAP[i][(p + co[i]) % 3]
-            ] = FACES[
-                CORNER_FACELET_MAP[cp[i]][p] // 9
-            ]
+            real_facelet_idx = CORNER_FACELET_MAP[i][(p + co[i]) % 3]
+            color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
+            facelets[real_facelet_idx] = FACES[so[color_face_idx]]
 
     for i in range(12):
         for p in range(2):
-            facelets[
-                EDGE_FACELET_MAP[i][(p + eo[i]) % 2]
-            ] = FACES[
-                EDGE_FACELET_MAP[ep[i]][p] // 9
-            ]
+            real_facelet_idx = EDGE_FACELET_MAP[i][(p + eo[i]) % 2]
+            color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
+            facelets[real_facelet_idx] = FACES[so[color_face_idx]]
 
     return ''.join(facelets)
 
 
 def facelets_to_cubies(facelets: str) -> tuple[
-        list[int], list[int], list[int], list[int],
+        list[int], list[int], list[int], list[int], list[int],
 ]:
     """
     Convert Kociemba facelets representation string to
@@ -70,11 +70,12 @@ def facelets_to_cubies(facelets: str) -> tuple[
                   in Kociemba facelets format (URFDLB)
 
     Returns:
-        tuple: (cp, co, ep, eo) where:
+        tuple: (cp, co, ep, eo, so) where:
             cp: Corner Permutation list of 8 integers
             co: Corner Orientation list of 8 integers
             ep: Edge Permutation list of 12 integers
             eo: Edge Orientation list of 12 integers
+            so: Spatial Orientation list of 6 integers
 
     Example:
         facelets = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB'
@@ -83,20 +84,23 @@ def facelets_to_cubies(facelets: str) -> tuple[
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5],
         )
     """
     # Get center colors to create color mapping
-    centers = (
-        facelets[4] + facelets[13] +
-        facelets[22] + facelets[31] +
-        facelets[40] + facelets[49]
-    )
+    so = [0] * 6
+    for i in range(6):
+        so[i] = FACES.find(facelets[9 * i + 4])
+
+    # Invert the spatial orientation to create color mapping
+    so_inv = [0] * 6
+    for i in range(6):
+        so_inv[so[i]] = i
 
     # Create color mapping array (convert facelet colors to face indices)
-    f = []
+    f = [0] * 54
     for i in range(54):
-        color_index = centers.find(facelets[i])
-        f.append(color_index)
+        f[i] = so_inv[FACES.find(facelets[i])]
 
     # Initialize arrays
     cp = [0] * 8
@@ -109,10 +113,7 @@ def facelets_to_cubies(facelets: str) -> tuple[
         # Find orientation by looking for U or D face (0 or 3 in color mapping)
         ori = 0
         for ori in range(3):
-            if (
-                    f[CORNER_FACELET_MAP[i][ori]] == 0
-                    or f[CORNER_FACELET_MAP[i][ori]] == 3
-            ):
+            if f[CORNER_FACELET_MAP[i][ori]] in {0, 3}:
                 break
 
         # Get the other two colors
@@ -146,4 +147,4 @@ def facelets_to_cubies(facelets: str) -> tuple[
                 eo[i] = 1
                 break
 
-    return cp, co, ep, eo
+    return cp, co, ep, eo, so

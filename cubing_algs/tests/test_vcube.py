@@ -2,8 +2,8 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
-from cubing_algs.move import Move
 from cubing_algs.move import InvalidMoveError
+from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.fat import unfat_rotation_moves
 from cubing_algs.vcube import INITIAL
@@ -78,9 +78,10 @@ class VCubeTestCase(unittest.TestCase):
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        so = [0, 1, 2, 3, 4, 5]
         facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
-        cube = VCube.from_cubies(cp, co, ep, eo)
+        cube = VCube.from_cubies(cp, co, ep, eo, so)
         self.assertEqual(cube.state, facelets)
 
         cube = VCube()
@@ -93,6 +94,7 @@ class VCubeTestCase(unittest.TestCase):
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        so = [0, 1, 2, 3, 4, 5]
         facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
         self.assertEqual(
@@ -100,6 +102,7 @@ class VCubeTestCase(unittest.TestCase):
             (
                 cp, co,
                 ep, eo,
+                so,
             ),
         )
 
