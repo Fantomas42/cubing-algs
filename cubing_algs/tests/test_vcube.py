@@ -43,6 +43,12 @@ class VCubeTestCase(unittest.TestCase):
             initial,
         )
 
+    def test_initial_bad_size_no_check(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
+
+        cube = VCube(initial, check=False)
+        self.assertEqual(cube.state, initial)
+
     def test_initial_bad_size(self):
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
 

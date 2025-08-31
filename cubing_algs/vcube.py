@@ -28,10 +28,11 @@ class VCube:
     size = 3
     face_size = size * size
 
-    def __init__(self, initial: str | None = None):
+    def __init__(self, initial: str | None = None, *, check: bool = True):
         if initial:
             self._state = initial
-            self.check_state()
+            if check:
+                self.check_state()
         else:
             self._state = INITIAL
 
@@ -688,12 +689,14 @@ class VCube:
         return self._state
 
     def display(self, orientation: str = '',
+                mode: str = '',
                 colors: list[str] | None = None) -> str:
-        return VCubePrinter(self, orientation, colors).print_cube()
+        return VCubePrinter(self, orientation, colors).display(mode)
 
     def show(self, orientation: str = '',
+             mode: str = '',
              colors: list[str] | None = None) -> None:
-        print(self.display(orientation, colors), end='')
+        print(self.display(orientation, mode, colors), end='')
 
     def get_face(self, face: str):
         index = FACE_ORDER.index(face)
