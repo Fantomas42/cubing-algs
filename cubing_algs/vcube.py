@@ -2,10 +2,10 @@ from importlib.util import find_spec
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display import VCubePrinter
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.move import InvalidMoveError
-from cubing_algs.display import VCubePrinter
 
 FAST_ROTATE_AVAILABLE = False
 if find_spec('cubing_algs.extensions.rotate') is not None:  # pragma: no cover

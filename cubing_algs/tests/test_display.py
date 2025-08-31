@@ -2,10 +2,10 @@ import os
 import unittest
 from unittest.mock import patch
 
-from cubing_algs.vcube import VCube
 from cubing_algs.display import DEFAULT_COLORS
 from cubing_algs.display import TERM_COLORS
 from cubing_algs.display import VCubePrinter
+from cubing_algs.vcube import VCube
 
 
 class TestVCubePrinter(unittest.TestCase):

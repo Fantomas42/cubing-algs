@@ -1,3 +1,4 @@
+# ruff: noqa: ERA001
 import unittest
 from io import StringIO
 from unittest.mock import patch
