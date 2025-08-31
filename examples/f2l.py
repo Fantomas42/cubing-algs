@@ -1,10 +1,10 @@
 from cubing_algs.vcube import VCube
 
-cube = VCube()
+c = VCube()
 
-cube.rotate("z2 R U R' U' z2")
+c.rotate("z2 R U R' U' z2")
 
-cube.show(
+c.show(
     orientation='z2',
     mode='f2l',
 )

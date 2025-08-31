@@ -3,9 +3,9 @@ import unittest
 from unittest.mock import patch
 
 from cubing_algs.vcube import VCube
-from cubing_algs.vcube_print import DEFAULT_COLORS
-from cubing_algs.vcube_print import TERM_COLORS
-from cubing_algs.vcube_print import VCubePrinter
+from cubing_algs.display import DEFAULT_COLORS
+from cubing_algs.display import TERM_COLORS
+from cubing_algs.display import VCubePrinter
 
 
 class TestVCubePrinter(unittest.TestCase):
@@ -50,7 +50,7 @@ class TestVCubePrinter(unittest.TestCase):
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_with_colors(self):
-        with patch('cubing_algs.vcube_print.USE_COLORS', True):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
             printer = VCubePrinter(self.cube)
             result = printer.display_facelet('U')
             expected = f"{ TERM_COLORS['white'] } U { TERM_COLORS['reset'] }"
@@ -58,14 +58,14 @@ class TestVCubePrinter(unittest.TestCase):
 
     @patch.dict(os.environ, {'TERM': 'other'})
     def test_display_facelet_without_colors(self):
-        with patch('cubing_algs.vcube_print.USE_COLORS', False):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', False):  # noqa FBT003
             printer = VCubePrinter(self.cube)
             result = printer.display_facelet('U')
             self.assertEqual(result, ' U ')
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_hidden(self):
-        with patch('cubing_algs.vcube_print.USE_COLORS', True):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
             printer = VCubePrinter(self.cube)
             result = printer.display_facelet('U', '0')
             expected = f"{ TERM_COLORS['hide'] } U { TERM_COLORS['reset'] }"
