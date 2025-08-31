@@ -15,7 +15,7 @@ DEFAULT_COLORS = [
 
 TERM_COLORS = {
     'reset': '\x1b[0;0m',
-    'hide': '\x1b[48;5;240m\x1b[38;5;252m',
+    'hide': '\x1b[48;5;238m\x1b[38;5;252m',
     'green': '\x1b[48;5;40m\x1b[38;5;232m',
     'blue': '\x1b[48;5;21m\x1b[38;5;230m',
     'red': '\x1b[48;5;196m\x1b[38;5;232m',
@@ -32,17 +32,15 @@ class VCubeDisplay:
 
     def __init__(self,
                  cube: 'VCube',
-                 orientation: str = '',
-                 colors: list[str] | None = None):
+                 orientation: str = ''):
         self.cube = cube
         self.cube_size = cube.size
         self.face_size = self.cube_size * self.cube_size
 
         self.orientation = orientation
-        self.colors = colors or DEFAULT_COLORS
 
         self.face_colors = dict(
-            zip(FACE_ORDER, self.colors, strict=True),
+            zip(FACE_ORDER, DEFAULT_COLORS, strict=True),
         )
 
     def compute_mask(self, mask):

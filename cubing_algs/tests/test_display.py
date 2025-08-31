@@ -21,7 +21,6 @@ class TestVCubeDisplay(unittest.TestCase):
         self.assertEqual(printer.cube_size, 3)
         self.assertEqual(printer.face_size, 9)
         self.assertEqual(printer.orientation, '')
-        self.assertEqual(printer.colors, DEFAULT_COLORS)
 
         expected_face_colors = {
             'U': 'white',
@@ -34,19 +33,14 @@ class TestVCubeDisplay(unittest.TestCase):
         self.assertEqual(printer.face_colors, expected_face_colors)
 
     def test_init_custom_parameters(self):
-        custom_colors = ['black', 'purple', 'cyan', 'magenta', 'pink', 'grey']
-        custom_orientation = "R U R'"
+        custom_orientation = 'z2'
 
         printer = VCubeDisplay(
             self.cube,
             orientation=custom_orientation,
-            colors=custom_colors,
         )
 
         self.assertEqual(printer.orientation, custom_orientation)
-        self.assertEqual(printer.colors, custom_colors)
-        self.assertEqual(printer.face_colors['U'], 'black')
-        self.assertEqual(printer.face_colors['R'], 'purple')
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_with_colors(self):

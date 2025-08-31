@@ -689,14 +689,12 @@ class VCube:
         return self._state
 
     def display(self, orientation: str = '',
-                mode: str = '',
-                colors: list[str] | None = None) -> str:
-        return VCubeDisplay(self, orientation, colors).display(mode)
+                mode: str = '') -> str:
+        return VCubeDisplay(self, orientation).display(mode)
 
     def show(self, orientation: str = '',
-             mode: str = '',
-             colors: list[str] | None = None) -> None:
-        print(self.display(orientation, mode, colors), end='')
+             mode: str = '') -> None:
+        print(self.display(orientation, mode), end='')
 
     def get_face(self, face: str):
         index = FACE_ORDER.index(face)

@@ -641,17 +641,6 @@ class TestVCubeShow(unittest.TestCase):
                 self.assertIsInstance(output, str)
                 self.assertGreater(len(output), 0)
 
-    def test_show_with_custom_colors(self):
-        custom_colors = ['red', 'blue', 'green', 'yellow', 'orange', 'white']
-
-        captured_output = StringIO()
-        with patch('sys.stdout', captured_output):
-            self.cube.show(colors=custom_colors)
-
-        output = captured_output.getvalue()
-        self.assertIsInstance(output, str)
-        self.assertGreater(len(output), 0)
-
     def test_show_scrambled_cube(self):
         self.cube.rotate("R U R' U'")
 
@@ -693,7 +682,7 @@ class TestVCubeShow(unittest.TestCase):
     def test_show_empty_parameters(self):
         captured_output = StringIO()
         with patch('sys.stdout', captured_output):
-            self.cube.show(orientation='', colors=None)
+            self.cube.show(orientation='')
 
         output = captured_output.getvalue()
         self.assertIsInstance(output, str)
