@@ -4,18 +4,18 @@ from unittest.mock import patch
 
 from cubing_algs.display import DEFAULT_COLORS
 from cubing_algs.display import TERM_COLORS
-from cubing_algs.display import VCubePrinter
+from cubing_algs.display import VCubeDisplay
 from cubing_algs.vcube import VCube
 
 
-class TestVCubePrinter(unittest.TestCase):
+class TestVCubeDisplay(unittest.TestCase):
 
     def setUp(self):
         self.cube = VCube()
-        self.printer = VCubePrinter(self.cube)
+        self.printer = VCubeDisplay(self.cube)
 
     def test_init_default_parameters(self):
-        printer = VCubePrinter(self.cube)
+        printer = VCubeDisplay(self.cube)
 
         self.assertEqual(printer.cube, self.cube)
         self.assertEqual(printer.cube_size, 3)
@@ -37,7 +37,7 @@ class TestVCubePrinter(unittest.TestCase):
         custom_colors = ['black', 'purple', 'cyan', 'magenta', 'pink', 'grey']
         custom_orientation = "R U R'"
 
-        printer = VCubePrinter(
+        printer = VCubeDisplay(
             self.cube,
             orientation=custom_orientation,
             colors=custom_colors,
@@ -51,7 +51,7 @@ class TestVCubePrinter(unittest.TestCase):
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_with_colors(self):
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
-            printer = VCubePrinter(self.cube)
+            printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U')
             expected = f"{ TERM_COLORS['white'] } U { TERM_COLORS['reset'] }"
             self.assertEqual(result, expected)
@@ -59,20 +59,20 @@ class TestVCubePrinter(unittest.TestCase):
     @patch.dict(os.environ, {'TERM': 'other'})
     def test_display_facelet_without_colors(self):
         with patch('cubing_algs.display.USE_COLORS', False):  # noqa FBT003
-            printer = VCubePrinter(self.cube)
+            printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U')
             self.assertEqual(result, ' U ')
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_hidden(self):
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
-            printer = VCubePrinter(self.cube)
+            printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U', '0')
             expected = f"{ TERM_COLORS['hide'] } U { TERM_COLORS['reset'] }"
             self.assertEqual(result, expected)
 
     def test_display_top_down_face(self):
-        printer = VCubePrinter(self.cube)
+        printer = VCubeDisplay(self.cube)
         face = 'UUUUUUUUU'
 
         result = printer.display_top_down_face(face, '111111111')
@@ -86,7 +86,7 @@ class TestVCubePrinter(unittest.TestCase):
             self.assertEqual(line.count('U'), 3)
 
     def test_display_cube_without_orientation(self):
-        printer = VCubePrinter(self.cube)
+        printer = VCubeDisplay(self.cube)
 
         result = printer.display_cube()
 
@@ -99,7 +99,7 @@ class TestVCubePrinter(unittest.TestCase):
 
     def test_display_cube_with_orientation(self):
         orientation = 'z2'
-        printer = VCubePrinter(self.cube, orientation=orientation)
+        printer = VCubeDisplay(self.cube, orientation=orientation)
 
         initial_state = self.cube.state
 
@@ -110,7 +110,7 @@ class TestVCubePrinter(unittest.TestCase):
         self.assertEqual(len(lines), 10)
 
     def test_display_cube_structure(self):
-        printer = VCubePrinter(self.cube)
+        printer = VCubeDisplay(self.cube)
         result = printer.display_cube()
 
         lines = [line for line in result.split('\n') if line.strip()]
@@ -126,7 +126,7 @@ class TestVCubePrinter(unittest.TestCase):
 
     def test_display_cube_face_order(self):
         cube = VCube()
-        printer = VCubePrinter(cube)
+        printer = VCubeDisplay(cube)
 
         result = printer.display_cube()
         lines = result.split('\n')

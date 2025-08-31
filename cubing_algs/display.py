@@ -27,7 +27,7 @@ TERM_COLORS = {
 USE_COLORS = os.environ.get('TERM') == 'xterm-256color'
 
 
-class VCubePrinter:
+class VCubeDisplay:
     facelet_size = 3
 
     def __init__(self,

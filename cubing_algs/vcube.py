@@ -2,7 +2,7 @@ from importlib.util import find_spec
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.display import VCubePrinter
+from cubing_algs.display import VCubeDisplay
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.move import InvalidMoveError
@@ -691,7 +691,7 @@ class VCube:
     def display(self, orientation: str = '',
                 mode: str = '',
                 colors: list[str] | None = None) -> str:
-        return VCubePrinter(self, orientation, colors).display(mode)
+        return VCubeDisplay(self, orientation, colors).display(mode)
 
     def show(self, orientation: str = '',
              mode: str = '',
