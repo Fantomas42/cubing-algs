@@ -182,6 +182,22 @@ class VCubeTestCase(unittest.TestCase):
             'BDDBDDBRR',
         )
 
+    def test_get_face_by_center(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            cube.get_face_by_center('U'),
+            'LUULUUFFF',
+        )
+
+        cube.rotate('z2')
+
+        self.assertEqual(
+            cube.get_face_by_center('U'),
+            'FFFUULUUL',
+        )
+
     def test_get_face_center(self):
         cube = VCube()
         cube.rotate('F R U')
@@ -196,6 +212,38 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(
             cube.get_face_by_center('U'),
             'FFFUULUUL',
+        )
+
+    def test_get_face_index(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            cube.get_face_index('U'),
+            0,
+        )
+
+        cube.rotate('z2')
+
+        self.assertEqual(
+            cube.get_face_index('U'),
+            3,
+        )
+
+    def test_get_face_center_indexes(self):
+        cube = VCube()
+        cube.rotate('F R U')
+
+        self.assertEqual(
+            cube.get_face_center_indexes(),
+            ['U', 'R', 'F', 'D', 'L', 'B'],
+        )
+
+        cube.rotate('z2')
+
+        self.assertEqual(
+            cube.get_face_center_indexes(),
+            ['D', 'L', 'F', 'U', 'R', 'B'],
         )
 
     def test_str(self):

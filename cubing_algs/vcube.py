@@ -700,12 +700,16 @@ class VCube:
         index = FACE_ORDER.index(face)
         return self._state[index * self.face_size: (index + 1) * self.face_size]
 
-    def get_face_index(self, face: str):
+    def get_face_center_indexes(self) -> list[str]:
         face_centers = []
+
         for i in range(6):
             face_centers.append(self.state[(i * 9) + 4])
 
-        return face_centers.index(face)
+        return face_centers
+
+    def get_face_index(self, face: str) -> int:
+        return self.get_face_center_indexes().index(face)
 
     def get_face_by_center(self, face: str):
         index = self.get_face_index(face)
