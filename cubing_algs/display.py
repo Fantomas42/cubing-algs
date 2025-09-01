@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 from cubing_algs.constants import F2L_MASK
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import FULL_MASK
+from cubing_algs.constants import OLL_MASK
+from cubing_algs.constants import PLL_MASK
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
@@ -43,7 +45,7 @@ class VCubeDisplay:
             zip(FACE_ORDER, DEFAULT_COLORS, strict=True),
         )
 
-    def compute_mask(self, mask):
+    def compute_mask(self, mask: str) -> str:
         if not mask:
             return FULL_MASK
 
@@ -56,15 +58,45 @@ class VCubeDisplay:
 
         return cube.state
 
-    def display(self, mode: str = ''):
-        if mode == 'oll':
-            return self.display_face()
-        if mode == 'pll':
-            return self.display_face()
-        if mode == 'f2l':
-            return self.display_cube(F2L_MASK)
+    def split_faces(self, state: str) -> list[str]:
+        return [
+            state[i * self.face_size: (i + 1) * self.face_size]
+            for i in range(6)
+        ]
 
-        return self.display_cube()
+    def display(self, mode: str = ''):
+        cube = self.cube
+
+        original_cube_state = cube.state
+        original_cube_history = list(cube.history)
+
+        if self.orientation:
+            cube.rotate(self.orientation)
+
+        faces = self.split_faces(cube.state)
+
+        if mode == 'oll':
+            display = self.display_yellow_face(
+                faces, self.split_faces(self.compute_mask(OLL_MASK)),
+            )
+        elif mode == 'pll':
+            display = self.display_yellow_face(
+                faces, self.split_faces(self.compute_mask(PLL_MASK)),
+            )
+        elif mode == 'f2l':
+            display = self.display_cube(
+                faces, self.split_faces(self.compute_mask(F2L_MASK)),
+            )
+        else:
+            display = self.display_cube(
+                faces, self.split_faces(self.compute_mask(None)),
+            )
+
+        if self.orientation:
+            cube._state = original_cube_state  # noqa: SLF001
+            cube.history = original_cube_history
+
+        return display
 
     def display_facelet(self, facelet: str, mask: str = '') -> str:
         face_color = 'hide' if mask == '0' else self.face_colors[facelet]
@@ -94,27 +126,27 @@ class VCubeDisplay:
 
         return result
 
-    def display_cube(self, mask: str = '') -> str:
-        cube = self.cube
+    def display_top_down_adjacent_facelets(self, face: str, face_mask: str,
+                                           *, top=False) -> str:
+        result = '   '
+        facelets = face[:3]
+        facelets_mask = face_mask[:3]
 
-        original_cube_state = cube.state
-        original_cube_history = list(cube.history)
+        if top:
+            facelets = facelets[::-1]
+            facelets_mask = facelets_mask[::-1]
 
-        if self.orientation:
-            cube.rotate(self.orientation)
+        for index, facelet in enumerate(facelets):
+            result += self.display_facelet(
+                facelet,
+                facelets_mask[index],
+            )
 
-        cube_state = cube.state
-        cube_mask = self.compute_mask(mask)
+        result += '\n'
 
-        faces = [
-            cube_state[i * self.face_size: (i + 1) * self.face_size]
-            for i in range(6)
-        ]
-        faces_mask = [
-            cube_mask[i * self.face_size: (i + 1) * self.face_size]
-            for i in range(6)
-        ]
+        return result
 
+    def display_cube(self, faces: list[str], faces_mask: list[str]) -> str:
         middle = [
             faces[4], faces[2],
             faces[1], faces[5],
@@ -140,11 +172,54 @@ class VCubeDisplay:
         # Bottom
         result += self.display_top_down_face(faces[3], faces_mask[3])
 
-        if self.orientation:
-            cube._state = original_cube_state  # noqa: SLF001
-            cube.history = original_cube_history
-
         return result
 
-    def display_face(self, mask: str = '') -> str:
-        ...
+    def display_yellow_face(self, faces: list[str], faces_mask: list[str]) -> str:
+        """
+        Because OLL/PLL maybe not on Down face,
+        it's better to look for the yellow face wich is more a standard.
+        """
+        result = ''
+
+        centers = self.cube.get_face_center_indexes()
+        yellow_index = centers.index('D')
+        red_index = centers.index('R')
+        green_index = centers.index('F')
+        blue_index = centers.index('B')
+        orange_index = centers.index('L')
+
+        # Top
+        result = self.display_top_down_adjacent_facelets(
+            faces[blue_index],
+            faces_mask[blue_index],
+            top=True,
+        )
+
+        # Middle
+        for line in range(3):
+            result += self.display_facelet(
+                faces[red_index][line],
+                faces_mask[red_index][line],
+            )
+
+            for i in range(3):
+                result += self.display_facelet(
+                    faces[yellow_index][line * 3 + i],
+                    faces_mask[yellow_index][line * 3 + i],
+                )
+
+            result += self.display_facelet(
+                faces[orange_index][2 - line],
+                faces_mask[orange_index][2 - line],
+            )
+
+            result += '\n'
+
+        # Bottom
+        result += self.display_top_down_adjacent_facelets(
+            faces[green_index],
+            faces_mask[green_index],
+            top=False,
+        )
+
+        return result
