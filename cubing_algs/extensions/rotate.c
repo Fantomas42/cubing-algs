@@ -1063,6 +1063,125 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
             break;
         }
 
+        case 'l': {
+            // l est équivalent à R x', optimisé en transformation directe
+            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
+            for (int j = 0; j < 9; j++) {
+                u_face[j] = new_state[j];
+                r_face[j] = new_state[9 + j];
+                f_face[j] = new_state[18 + j];
+                d_face[j] = new_state[27 + j];
+                l_face[j] = new_state[36 + j];
+                b_face[j] = new_state[45 + j];
+            }
+
+            char l_rotated[9], r_rotated[9];
+
+            if (direction == 1) {
+                // l = R x' : L horaire, R anti-horaire
+                rotate_face_clockwise(l_face, l_rotated);
+                rotate_face_counterclockwise(r_face, r_rotated);
+
+                for (int j = 0; j < 9; j++) {
+                    new_state[36 + j] = l_rotated[j];
+                    new_state[9 + j] = r_rotated[j];
+                }
+
+                // Left et middle columns: seulement effet x' (U->B inv, B inv->D, D->F, F->U)
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3] = b_face[8 - i*3];      // U left <- B right inversé
+                    new_state[18 + i*3] = u_face[i*3];     // F left <- U left
+                    new_state[27 + i*3] = f_face[i*3];     // D left <- F left
+                    new_state[45 + i*3 + 2] = d_face[i*3]; // B right <- D left
+                }
+
+                // Right columns: R et x' s'annulent, restent identiques
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3 + 2] = u_face[i*3 + 2]; // U right unchanged
+                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
+                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
+                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
+                }
+
+                // Middle columns: seulement effet x'
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3 + 1] = b_face[8 - i*3 - 1];     // U middle <- B middle inversé
+                    new_state[18 + i*3 + 1] = u_face[i*3 + 1];    // F middle <- U middle
+                    new_state[27 + i*3 + 1] = f_face[i*3 + 1];    // D middle <- F middle
+                    new_state[45 + i*3 + 1] = d_face[i*3 + 1];    // B middle <- D middle
+                }
+
+            } else if (direction == 2) {
+                // l2 = R2 x2
+                rotate_face_180(l_face, l_rotated);
+                rotate_face_180(r_face, r_rotated);
+
+                for (int j = 0; j < 9; j++) {
+                    new_state[36 + j] = l_rotated[j];
+                    new_state[9 + j] = r_rotated[j];
+                }
+
+                // Left et middle columns: seulement x2 (U<->D, F<->B inv)
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3] = d_face[i*3];              // U left <- D left
+                    new_state[18 + i*3] = b_face[8 - i*3 - 2]; // F left <- B right inversé
+                    new_state[27 + i*3] = u_face[i*3];         // D left <- U left
+                    new_state[45 + i*3 + 2] = f_face[i*3];     // B right <- F left inversé
+                }
+
+                // Right columns: R2 et x2 s'annulent, restent identiques
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3 + 2] = u_face[i*3 + 2];     // U right unchanged
+                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
+                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
+                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
+                }
+
+                // Middle columns: seulement x2
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3 + 1] = d_face[i*3 + 1];         // U middle <- D middle
+                    new_state[18 + i*3 + 1] = b_face[8 - i*3 - 1]; // F middle <- B middle inversé
+                    new_state[27 + i*3 + 1] = u_face[i*3 + 1];     // D middle <- U middle
+                    new_state[45 + i*3 + 1] = f_face[i*3 + 1];     // B middle <- F middle inversé
+                }
+
+            } else {
+                // l' = R' x
+                rotate_face_counterclockwise(l_face, l_rotated);
+                rotate_face_clockwise(r_face, r_rotated);
+
+                for (int j = 0; j < 9; j++) {
+                    new_state[36 + j] = l_rotated[j];
+                    new_state[9 + j] = r_rotated[j];
+                }
+
+                // Left et middle columns: seulement effet x (U->F, F->D, D->B inv, B inv->U)
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3] = f_face[i*3];         // U left <- F left
+                    new_state[18 + i*3] = d_face[i*3];    // F left <- D left
+                    new_state[27 + i*3] = b_face[8 - i*3 - 2]; // D left <- B right inversé
+                    new_state[45 + i*3 + 2] = u_face[i*3]; // B right <- U left
+                }
+
+                // Right columns: R' et x s'annulent aussi
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3 + 2] = u_face[i*3 + 2];     // U right unchanged
+                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
+                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
+                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
+                }
+
+                // Middle columns: seulement effet x
+                for (int i = 0; i < 3; i++) {
+                    new_state[i*3 + 1] = f_face[i*3 + 1];     // U middle <- F middle
+                    new_state[18 + i*3 + 1] = d_face[i*3 + 1]; // F middle <- D middle
+                    new_state[27 + i*3 + 1] = b_face[8 - i*3 - 1]; // D middle <- B middle inversé
+                    new_state[45 + i*3 + 1] = u_face[i*3 + 1]; // B middle <- U middle
+                }
+            }
+            break;
+        }
+
         case 'b': {
             // Analyse directe des transformations b à partir des exemples donnés
             char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
