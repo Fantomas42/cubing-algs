@@ -47,7 +47,7 @@ class VCube:
 
     @property
     def is_solved(self) -> bool:
-        return self.state == INITIAL_STATE
+        return all(face * self.face_size in self.state for face in FACE_ORDER)
 
     def check_state(self) -> bool:
         # TODO(me): Check corners, edges stickers # noqa: FIX002
@@ -108,7 +108,7 @@ class VCube:
         face_centers = []
 
         for i in range(6):
-            face_centers.append(self.state[(i * 9) + 4])
+            face_centers.append(self.state[(i * self.face_size) + 4])
 
         return face_centers
 

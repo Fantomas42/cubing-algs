@@ -79,6 +79,14 @@ class VCubeTestCase(unittest.TestCase):
             cube.is_solved,
         )
 
+    def test_is_solved_oriented(self):
+        cube = VCube()
+        cube.rotate('z2')
+
+        self.assertTrue(
+            cube.is_solved,
+        )
+
     def test_from_cubies(self):
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
