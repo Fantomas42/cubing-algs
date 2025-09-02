@@ -174,7 +174,8 @@ class VCubeDisplay:
 
         return result
 
-    def display_yellow_face(self, faces: list[str], faces_mask: list[str]) -> str:
+    def display_yellow_face(self, faces: list[str],
+                            faces_mask: list[str]) -> str:
         """
         Because OLL/PLL maybe not on Down face,
         it's better to look for the yellow face wich is more a standard.

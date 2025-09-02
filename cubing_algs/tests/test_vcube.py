@@ -1,13 +1,12 @@
-# ruff: noqa: ERA001
 import unittest
 from io import StringIO
 from unittest.mock import patch
 
+from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.fat import unfat_rotation_moves
-from cubing_algs.vcube import INITIAL
 from cubing_algs.vcube import InvalidCubeStateError
 from cubing_algs.vcube import VCube
 
@@ -20,7 +19,7 @@ class VCubeTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.state,
-            INITIAL,
+            INITIAL_STATE,
         )
 
         result = cube.rotate('R2 U2')
@@ -271,23 +270,22 @@ class VCubeTestCase(unittest.TestCase):
 
 
 class VCubeRotateTestCase(unittest.TestCase):
-    c_version = False
 
     def test_rotate_u(self):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('U', self.c_version),
+            cube.rotate('U'),
             'UUUUUUUUUBBBRRRRRRRRRFFFFFFDDDDDDDDDFFFLLLLLLLLLBBBBBB',
         )
 
         self.assertEqual(
-            cube.rotate("U'", self.c_version),
-            INITIAL,
+            cube.rotate("U'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('U2', self.c_version),
+            cube.rotate('U2'),
             'UUUUUUUUULLLRRRRRRBBBFFFFFFDDDDDDDDDRRRLLLLLLFFFBBBBBB',
         )
 
@@ -295,17 +293,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('R', self.c_version),
+            cube.rotate('R'),
             'UUFUUFUUFRRRRRRRRRFFDFFDFFDDDBDDBDDBLLLLLLLLLUBBUBBUBB',
         )
 
         self.assertEqual(
-            cube.rotate("R'", self.c_version),
-            INITIAL,
+            cube.rotate("R'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('R2', self.c_version),
+            cube.rotate('R2'),
             'UUDUUDUUDRRRRRRRRRFFBFFBFFBDDUDDUDDULLLLLLLLLFBBFBBFBB',
         )
 
@@ -313,17 +311,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('F', self.c_version),
+            cube.rotate('F'),
             'UUUUUULLLURRURRURRFFFFFFFFFRRRDDDDDDLLDLLDLLDBBBBBBBBB',
         )
 
         self.assertEqual(
-            cube.rotate("F'", self.c_version),
-            INITIAL,
+            cube.rotate("F'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('F2', self.c_version),
+            cube.rotate('F2'),
             'UUUUUUDDDLRRLRRLRRFFFFFFFFFUUUDDDDDDLLRLLRLLRBBBBBBBBB',
         )
 
@@ -331,17 +329,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('D', self.c_version),
+            cube.rotate('D'),
             'UUUUUUUUURRRRRRFFFFFFFFFLLLDDDDDDDDDLLLLLLBBBBBBBBBRRR',
         )
 
         self.assertEqual(
-            cube.rotate("D'", self.c_version),
-            INITIAL,
+            cube.rotate("D'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('D2', self.c_version),
+            cube.rotate('D2'),
             'UUUUUUUUURRRRRRLLLFFFFFFBBBDDDDDDDDDLLLLLLRRRBBBBBBFFF',
         )
 
@@ -349,17 +347,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('L', self.c_version),
+            cube.rotate('L'),
             'BUUBUUBUURRRRRRRRRUFFUFFUFFFDDFDDFDDLLLLLLLLLBBDBBDBBD',
         )
 
         self.assertEqual(
-            cube.rotate("L'", self.c_version),
-            INITIAL,
+            cube.rotate("L'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('L2', self.c_version),
+            cube.rotate('L2'),
             'DUUDUUDUURRRRRRRRRBFFBFFBFFUDDUDDUDDLLLLLLLLLBBFBBFBBF',
         )
 
@@ -367,17 +365,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('B', self.c_version),
+            cube.rotate('B'),
             'RRRUUUUUURRDRRDRRDFFFFFFFFFDDDDDDLLLULLULLULLBBBBBBBBB',
         )
 
         self.assertEqual(
-            cube.rotate("B'", self.c_version),
-            INITIAL,
+            cube.rotate("B'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('B2', self.c_version),
+            cube.rotate('B2'),
             'DDDUUUUUURRLRRLRRLFFFFFFFFFDDDDDDUUURLLRLLRLLBBBBBBBBB',
         )
 
@@ -385,17 +383,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('M', self.c_version),
+            cube.rotate('M'),
             'UBUUBUUBURRRRRRRRRFUFFUFFUFDFDDFDDFDLLLLLLLLLBDBBDBBDB',
         )
 
         self.assertEqual(
-            cube.rotate("M'", self.c_version),
-            INITIAL,
+            cube.rotate("M'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('M2', self.c_version),
+            cube.rotate('M2'),
             'UDUUDUUDURRRRRRRRRFBFFBFFBFDUDDUDDUDLLLLLLLLLBFBBFBBFB',
         )
 
@@ -403,17 +401,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('S', self.c_version),
+            cube.rotate('S'),
             'UUULLLUUURURRURRURFFFFFFFFFDDDRRRDDDLDLLDLLDLBBBBBBBBB',
         )
 
         self.assertEqual(
-            cube.rotate("S'", self.c_version),
-            INITIAL,
+            cube.rotate("S'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('S2', self.c_version),
+            cube.rotate('S2'),
             'UUUDDDUUURLRRLRRLRFFFFFFFFFDDDUUUDDDLRLLRLLRLBBBBBBBBB',
         )
 
@@ -421,17 +419,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('E', self.c_version),
+            cube.rotate('E'),
             'UUUUUUUUURRRFFFRRRFFFLLLFFFDDDDDDDDDLLLBBBLLLBBBRRRBBB',
         )
 
         self.assertEqual(
-            cube.rotate("E'", self.c_version),
-            INITIAL,
+            cube.rotate("E'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('E2', self.c_version),
+            cube.rotate('E2'),
             'UUUUUUUUURRRLLLRRRFFFBBBFFFDDDDDDDDDLLLRRRLLLBBBFFFBBB',
         )
 
@@ -439,17 +437,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('x', self.c_version),
+            cube.rotate('x'),
             'FFFFFFFFFRRRRRRRRRDDDDDDDDDBBBBBBBBBLLLLLLLLLUUUUUUUUU',
         )
 
         self.assertEqual(
-            cube.rotate("x'", self.c_version),
-            INITIAL,
+            cube.rotate("x'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('x2', self.c_version),
+            cube.rotate('x2'),
             'DDDDDDDDDRRRRRRRRRBBBBBBBBBUUUUUUUUULLLLLLLLLFFFFFFFFF',
         )
 
@@ -457,17 +455,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('y', self.c_version),
+            cube.rotate('y'),
             'UUUUUUUUUBBBBBBBBBRRRRRRRRRDDDDDDDDDFFFFFFFFFLLLLLLLLL',
         )
 
         self.assertEqual(
-            cube.rotate("y'", self.c_version),
-            INITIAL,
+            cube.rotate("y'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('y2', self.c_version),
+            cube.rotate('y2'),
             'UUUUUUUUULLLLLLLLLBBBBBBBBBDDDDDDDDDRRRRRRRRRFFFFFFFFF',
         )
 
@@ -475,17 +473,17 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         self.assertEqual(
-            cube.rotate('z', self.c_version),
+            cube.rotate('z'),
             'LLLLLLLLLUUUUUUUUUFFFFFFFFFRRRRRRRRRDDDDDDDDDBBBBBBBBB',
         )
 
         self.assertEqual(
-            cube.rotate("z'", self.c_version),
-            INITIAL,
+            cube.rotate("z'"),
+            INITIAL_STATE,
         )
 
         self.assertEqual(
-            cube.rotate('z2', self.c_version),
+            cube.rotate('z2'),
             'DDDDDDDDDLLLLLLLLLFFFFFFFFFUUUUUUUUURRRRRRRRRBBBBBBBBB',
         )
 
@@ -493,20 +491,20 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube = VCube()
 
         with self.assertRaises(InvalidMoveError):
-            cube.rotate('z3', self.c_version)
+            cube.rotate('z3')
 
     def test_rotate_invalid_move(self):
         cube = VCube()
 
         with self.assertRaises(InvalidMoveError):
-            cube.rotate('T2', self.c_version)
+            cube.rotate('T2')
 
     def test_real_case(self):
         cube = VCube()
         scramble = "U2 D2 F U2 F2 U R' L U2 R2 U' B2 D R2 L2 F2 U' L2 D F2 U'"
 
         self.assertEqual(
-            cube.rotate(scramble, self.c_version),
+            cube.rotate(scramble),
             'FBFUUDUUDBFUFRLRRRLRLLFRRDBFBUBDBFUDRFBRLFLLULUDDBDBLD',
         )
 
@@ -515,7 +513,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         scramble = "F R' F' U' D2 B' L F U' F L' U F2 U' F2 B2 L2 D2 B2 D' L2"
 
         self.assertEqual(
-            cube.rotate(scramble, self.c_version),
+            cube.rotate(scramble),
             'LDBRUUBBDFLUFRLBDDLURLFDFRLLFUFDRFDBFUDBLBRUURBDFBRRLU',
         )
 
@@ -524,7 +522,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         scramble = "F R F' U' D2 B' L F U' F L' U F2 U' F2 B2 L2 D2 B2 D' L2 B'"
 
         self.assertEqual(
-            cube.rotate(scramble, self.c_version),
+            cube.rotate(scramble),
             'UFFRUUBBDFLLFRDBUFLURLFDBRLDFUBDRLLRBDDDLBFRRDURBBLUFU',
         )
 
@@ -535,13 +533,12 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
         self.assertEqual(
-            cube.rotate(scramble, self.c_version),
+            cube.rotate(scramble),
             'FBFUUDUUDBFUFRLRRRLRLLFRRDBFBUBDBFUDRFBRLFLLULUDDBDBLD',
         )
 
 
 class VCubeRotateWideTestCase(unittest.TestCase):
-    c_version = True
 
     def check_rotate(self, raw_move):
         base_move = Move(raw_move)
@@ -556,17 +553,13 @@ class VCubeRotateWideTestCase(unittest.TestCase):
                 cube_wide = VCube()
 
                 self.assertEqual(
-                    cube.rotate(
-                        move,
-                        self.c_version,
-                    ),
+                    cube.rotate(move),
                     cube_wide.rotate(
                         parse_moves(
                             str(move),
                         ).transform(
                             unfat_rotation_moves,
                         ),
-                        self.c_version,
                     ),
                 )
 
@@ -587,76 +580,6 @@ class VCubeRotateWideTestCase(unittest.TestCase):
 
     def test_rotate_b(self):
         self.check_rotate('b')
-
-
-class CVCubeRotateTestCase(VCubeRotateTestCase):
-    c_version = True
-
-
-class RegressionVCubeTestCase(unittest.TestCase):
-    initial = 'UDBRUUDBDFLUFRLBDRLUDRFDBRLLFULDRFDURBFULUBBDRBFFBFRLL'
-
-    def check_rotate(self, move):
-        p_cube = VCube(self.initial)
-        c_cube = VCube(self.initial)
-
-        with self.subTest('Clockwise', move=move):
-            self.assertEqual(
-                p_cube.rotate(move, allow_fast=False),
-                c_cube.rotate(move, allow_fast=True),
-            )
-
-        p_cube = VCube(self.initial)
-        c_cube = VCube(self.initial)
-        with self.subTest('Anti-Clockwise', move=move):
-            self.assertEqual(
-                p_cube.rotate(f"{ move }'", allow_fast=False),
-                c_cube.rotate(f"{ move }'", allow_fast=True),
-            )
-
-        p_cube = VCube(self.initial)
-        c_cube = VCube(self.initial)
-        with self.subTest('Double', move=move):
-            self.assertEqual(
-                p_cube.rotate(f'{ move }2', allow_fast=False),
-                c_cube.rotate(f'{ move }2', allow_fast=True),
-            )
-
-    def test_rotate_u(self):
-        self.check_rotate('U')
-
-    def test_rotate_r(self):
-        self.check_rotate('R')
-
-    def test_rotate_f(self):
-        self.check_rotate('F')
-
-    def test_rotate_d(self):
-        self.check_rotate('D')
-
-    def test_rotate_l(self):
-        self.check_rotate('L')
-
-    def test_rotate_b(self):
-        self.check_rotate('B')
-
-    def test_rotate_m(self):
-        self.check_rotate('M')
-
-    def test_rotate_s(self):
-        self.check_rotate('S')
-
-    def test_rotate_e(self):
-        self.check_rotate('E')
-
-    def test_rotate_x(self):
-        self.check_rotate('x')
-
-    def test_rotate_y(self):
-        self.check_rotate('y')
-
-    def test_rotate_z(self):
-        self.check_rotate('z')
 
 
 class TestVCubeShow(unittest.TestCase):
