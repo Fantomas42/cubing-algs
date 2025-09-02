@@ -846,6 +846,129 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
           }
           break;
         }
+
+        case 'f': {
+            // Analyse directe des transformations f à partir des exemples donnés
+            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
+            for (int j = 0; j < 9; j++) {
+                u_face[j] = new_state[j];
+                r_face[j] = new_state[9 + j];
+                f_face[j] = new_state[18 + j];
+                d_face[j] = new_state[27 + j];
+                l_face[j] = new_state[36 + j];
+                b_face[j] = new_state[45 + j];
+            }
+
+            char f_rotated[9];
+
+            if (direction == 1) {
+                // f: 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
+                //    'UUULLLLLLUURUURUURFFFFFFFFFRRRRRRDDDLDDLDDLDDBBBBBBBBB'
+                rotate_face_clockwise(f_face, f_rotated);
+
+                // U face: UUU LLL LLL
+                new_state[0] = u_face[0]; new_state[1] = u_face[1]; new_state[2] = u_face[2];
+                new_state[3] = l_face[3]; new_state[4] = l_face[4]; new_state[5] = l_face[5];
+                new_state[6] = l_face[6]; new_state[7] = l_face[7]; new_state[8] = l_face[8];
+
+                // R face: UUR UUR UUR
+                new_state[9] = u_face[3]; new_state[10] = u_face[4]; new_state[11] = r_face[2];
+                new_state[12] = u_face[5]; new_state[13] = u_face[6]; new_state[14] = r_face[5];
+                new_state[15] = u_face[7]; new_state[16] = u_face[8]; new_state[17] = r_face[8];
+
+                // F face: rotated
+                for (int j = 0; j < 9; j++) {
+                    new_state[18 + j] = f_rotated[j];
+                }
+
+                // D face: RRR RRR DDD
+                new_state[27] = r_face[0]; new_state[28] = r_face[1]; new_state[29] = r_face[3];
+                new_state[30] = r_face[4]; new_state[31] = r_face[6]; new_state[32] = r_face[7];
+                new_state[33] = d_face[6]; new_state[34] = d_face[7]; new_state[35] = d_face[8];
+
+                // L face: LDD LDD LDD
+                new_state[36] = l_face[0]; new_state[37] = d_face[0]; new_state[38] = d_face[3];
+                new_state[39] = l_face[1]; new_state[40] = d_face[1]; new_state[41] = d_face[4];
+                new_state[42] = l_face[2]; new_state[43] = d_face[2]; new_state[44] = d_face[5];
+
+                // B face: unchanged
+                for (int j = 0; j < 9; j++) {
+                    new_state[45 + j] = b_face[j];
+                }
+
+            } else if (direction == 2) {
+                // f2: 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
+                //     'UUUDDDDDDLLRLLRLLRFFFFFFFFFUUUUUUDDDLRRLRRLRRBBBBBBBBB'
+                rotate_face_180(f_face, f_rotated);
+
+                // U face: UUU DDD DDD
+                new_state[0] = u_face[0]; new_state[1] = u_face[1]; new_state[2] = u_face[2];
+                new_state[3] = d_face[3]; new_state[4] = d_face[4]; new_state[5] = d_face[5];
+                new_state[6] = d_face[6]; new_state[7] = d_face[7]; new_state[8] = d_face[8];
+
+                // R face: LLR LLR LLR
+                new_state[9] = l_face[0]; new_state[10] = l_face[1]; new_state[11] = r_face[2];
+                new_state[12] = l_face[3]; new_state[13] = l_face[4]; new_state[14] = r_face[5];
+                new_state[15] = l_face[6]; new_state[16] = l_face[7]; new_state[17] = r_face[8];
+
+                // F face: rotated 180
+                for (int j = 0; j < 9; j++) {
+                    new_state[18 + j] = f_rotated[j];
+                }
+
+                // D face: UUU UUU DDD
+                new_state[27] = u_face[6]; new_state[28] = u_face[7]; new_state[29] = u_face[8];
+                new_state[30] = u_face[3]; new_state[31] = u_face[4]; new_state[32] = u_face[5];
+                new_state[33] = d_face[6]; new_state[34] = d_face[7]; new_state[35] = d_face[8];
+
+                // L face: LRR LRR LRR
+                new_state[36] = l_face[8]; new_state[37] = r_face[0]; new_state[38] = r_face[1];
+                new_state[39] = l_face[5]; new_state[40] = r_face[3]; new_state[41] = r_face[4];
+                new_state[42] = l_face[2]; new_state[43] = r_face[6]; new_state[44] = r_face[7];
+
+                // B face: unchanged
+                for (int j = 0; j < 9; j++) {
+                    new_state[45 + j] = b_face[j];
+                }
+
+            } else {
+                // f': 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
+                //     'UUURRRRRRDDRDDRDDRFFFFFFFFFLLLLLLDDDLUULUULUUBBBBBBBBB'
+                rotate_face_counterclockwise(f_face, f_rotated);
+
+                // U face: UUU RRR RRR
+                new_state[0] = u_face[0]; new_state[1] = u_face[1]; new_state[2] = u_face[2];
+                new_state[3] = r_face[3]; new_state[4] = r_face[4]; new_state[5] = r_face[5];
+                new_state[6] = r_face[6]; new_state[7] = r_face[7]; new_state[8] = r_face[8];
+
+                // R face: DDR DDR DDR
+                new_state[9] = d_face[0]; new_state[10] = d_face[1]; new_state[11] = r_face[2];
+                new_state[12] = d_face[3]; new_state[13] = d_face[4]; new_state[14] = r_face[5];
+                new_state[15] = d_face[6]; new_state[16] = d_face[7]; new_state[17] = r_face[8];
+
+                // F face: rotated counterclockwise
+                for (int j = 0; j < 9; j++) {
+                    new_state[18 + j] = f_rotated[j];
+                }
+
+                // D face: LLL LLL DDD
+                new_state[27] = l_face[6]; new_state[28] = l_face[7]; new_state[29] = l_face[8];
+                new_state[30] = l_face[3]; new_state[31] = l_face[4]; new_state[32] = l_face[5];
+                new_state[33] = d_face[6]; new_state[34] = d_face[7]; new_state[35] = d_face[8];
+
+                // L face: LUU LUU LUU
+                new_state[36] = l_face[0]; new_state[37] = u_face[6]; new_state[38] = u_face[3];
+                new_state[39] = l_face[1]; new_state[40] = u_face[7]; new_state[41] = u_face[4];
+                new_state[42] = l_face[2]; new_state[43] = u_face[8]; new_state[44] = u_face[5];
+
+                // B face: unchanged
+                for (int j = 0; j < 9; j++) {
+                    new_state[45 + j] = b_face[j];
+                }
+            }
+            break;
+        }
+
         default:
             PyErr_Format(PyExc_ValueError, "Invalid move face: '%c'", face);
             return NULL;

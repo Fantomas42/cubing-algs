@@ -576,8 +576,8 @@ class VCubeRotateWideTestCase(unittest.TestCase):
     def test_rotate_r(self):
         self.check_rotate('r')
 
-    # def test_rotate_f(self):
-    #     self.check_rotate('f')
+    def test_rotate_f(self):
+        self.check_rotate('f')
 
     # def test_rotate_d(self):
     #     self.check_rotate('d')
