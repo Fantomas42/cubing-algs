@@ -39,13 +39,18 @@ def build_cube_move_set(cube_size: int) -> list[str]:
                     f'{ face }w2',
                 ],
             )
-            if cube_size > 5:  # TODO(me): change
+            if cube_size > 5:
                 for i in range(2, math.ceil(cube_size / 2) + 1):
                     moves.extend(
                         [
                             f'{ i }{ face }',
                             f"{ i }{ face }'",
                             f'{ i }{ face }2',
+                        ],
+                    )
+                    if i > 2:
+                        moves.extend(
+                        [
                             f'{ i }{ face }w',
                             f"{ i }{ face }w'",
                             f'{ i }{ face }w2',
