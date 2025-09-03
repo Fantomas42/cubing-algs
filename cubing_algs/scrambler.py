@@ -74,7 +74,7 @@ def is_valid_next_move(current: str, previous: str) -> bool:
 
 def random_moves(cube_size: int,
                  move_set: list[str],
-                 iterations: int) -> Algorithm:
+                 iterations: int = 0) -> Algorithm:
     value = choice(move_set)
     moves = [value]
     previous = value

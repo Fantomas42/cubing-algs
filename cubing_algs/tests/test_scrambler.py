@@ -259,6 +259,13 @@ class TestRandomMoves(unittest.TestCase):
             len(moves), 5,
         )
 
+    def test_random_moves_50x50x50(self):
+        moves = random_moves(50, ['F', 'R', 'U'])
+
+        self.assertEqual(
+            len(moves), 100,
+        )
+
 
 class TestScramble(unittest.TestCase):
 
