@@ -51,6 +51,16 @@ class VCubeTestCase(unittest.TestCase):
 
         self.assertTrue(cube.is_solved)
 
+    def test_copy(self):
+        cube = VCube()
+        cube.rotate('R2 F2 D2 B')
+        copy = cube.copy()
+
+        self.assertEqual(
+            cube.state,
+            copy.state,
+        )
+
     def test_from_cubies(self):
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
@@ -454,7 +464,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
 
         for rotation in rotations:
             with self.subTest(rotation=rotation):
-                cube_copy = VCube(cube.state)
+                cube_copy = cube.copy()
                 cube_copy.rotate(rotation)
                 self.assertTrue(cube_copy.check_integrity())
 

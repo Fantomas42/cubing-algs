@@ -65,6 +65,9 @@ class VCube(VCubeIntegrityChecker):
             self.history.append(move)
             return self._state
 
+    def copy(self) -> 'VCube':
+        return VCube(self.state, check=False)
+
     def display(self, orientation: str = '',
                 mode: str = '') -> str:
         return VCubeDisplay(self, orientation).display(mode)
