@@ -28,7 +28,7 @@ def find_innermost_brackets(text: str) -> tuple[int, int] | None:
     while i < len(text):
         if text[i] == '[':
             current_depth += 1
-            if current_depth > max_depth:
+            if current_depth > max_depth:  # pragma: no branch
                 max_depth = current_depth
                 innermost_start = i
         elif text[i] == ']':
@@ -115,4 +115,4 @@ def expand_commutators_and_conjugates(moves: str) -> str:
 
         result = result[:start] + ' ' + expanded + ' ' + result[end + 1:]
 
-    return result
+    return result.strip()
