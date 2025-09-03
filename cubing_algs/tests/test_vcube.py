@@ -3,11 +3,11 @@ from io import StringIO
 from unittest.mock import patch
 
 from cubing_algs.constants import INITIAL_STATE
+from cubing_algs.integrity import InvalidCubeStateError
 from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.fat import unfat_rotation_moves
-from cubing_algs.vcube import InvalidCubeStateError
 from cubing_algs.vcube import VCube
 
 
@@ -33,40 +33,6 @@ class VCubeTestCase(unittest.TestCase):
             cube.state,
         )
 
-    def test_initial(self):
-        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB'
-
-        cube = VCube(initial)
-
-        self.assertEqual(
-            cube.state,
-            initial,
-        )
-
-    def test_initial_bad_size_no_check(self):
-        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
-
-        cube = VCube(initial, check=False)
-        self.assertEqual(cube.state, initial)
-
-    def test_initial_bad_size(self):
-        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
-
-        with self.assertRaises(InvalidCubeStateError):
-            VCube(initial)
-
-    def test_initial_bad_char(self):
-        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBT'
-
-        with self.assertRaises(InvalidCubeStateError):
-            VCube(initial)
-
-    def test_initial_bad_face(self):
-        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBF'
-
-        with self.assertRaises(InvalidCubeStateError):
-            VCube(initial)
-
     def test_is_solved(self):
         cube = VCube()
 
@@ -83,9 +49,7 @@ class VCubeTestCase(unittest.TestCase):
         cube = VCube()
         cube.rotate('z2')
 
-        self.assertTrue(
-            cube.is_solved,
-        )
+        self.assertTrue(cube.is_solved)
 
     def test_from_cubies(self):
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
@@ -274,6 +238,237 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(
             repr(cube),
             "VCube('LUULUUFFFLBBRRRRRRUUUFFDFFDRRBDDBDDBFFRLLDLLDLLDUBBUBB')",
+        )
+
+
+class VCubeCheckIntegrityTestCase(unittest.TestCase):
+    """Tests pour les nouvelles vérifications de check_integrity"""
+
+    def test_initial(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB'
+
+        cube = VCube(initial)
+
+        self.assertEqual(
+            cube.state,
+            initial,
+        )
+
+    def test_invalid_length_no_check(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
+
+        cube = VCube(initial, check=False)
+        self.assertEqual(cube.state, initial)
+
+    def test_invalid_length(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'State string must be 54 characters long',
+        ):
+            VCube(initial)
+
+    def test_invalid_character(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBT'
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'State string can only contains U R F D L B characters',
+        ):
+            VCube(initial)
+
+    def test_invalid_face(self):
+        initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBF'
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'State string must have 9 of each color',
+        ):
+            VCube(initial)
+
+    def test_invalid_centers_not_unique(self):
+        invalid_state = (
+            'UUUUUUUUR'
+            'RRRRURRRR'
+            'FFFFFFFFF'
+            'DDDDDDDDD'
+            'LLLLLLLLL'
+            'BBBBBBBBB'
+        )
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Face centers must be unique',
+        ):
+            VCube(invalid_state)
+
+    def test_invalid_corner_orientation_sum(self):
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Sum of corner orientations must be divisible by 3',
+        ):
+            VCube().check_corner_sum(co)
+
+    def test_invalid_edge_orientation_sum(self):
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Sum of edge orientations must be even',
+        ):
+            VCube().check_edge_sum(eo)
+
+    def test_invalid_corner_permutation_duplicate(self):
+        cp = [0, 0, 2, 3, 4, 5, 6, 7]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Corner permutation must contain exactly '
+                'one instance of each corner',
+        ):
+            VCube().check_corner_permutations(cp)
+
+    def test_invalid_edge_permutation_duplicate(self):
+        ep = [0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Edge permutation must contain exactly '
+                'one instance of each edge',
+        ):
+            VCube().check_edge_permutations(ep)
+
+    def test_invalid_corner_orientation_value(self):
+        co = [3, 0, 0, 0, 0, 0, 0, 0]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Corner orientation must be 0, 1, or 2 '
+                'for each corner',
+        ):
+            VCube().check_corner_orientations(co)
+
+    def test_invalid_edge_orientation_value(self):
+        eo = [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Edge orientation must be 0 or 1 '
+                'for each edge',
+        ):
+            VCube().check_edge_orientations(eo)
+
+    def test_invalid_center_orientation_value(self):
+        so = [7, 0, 0, 0, 0, 0]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Center orientation must be between 0 and 5 '
+                'for each center',
+        ):
+            VCube().check_center_orientations(so)
+
+    def test_invalid_permutation_parity(self):
+        # Swap 0,1 = 1 inversion (odd)
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        # Identity = 0 inversions (even)
+        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Corner and edge permutation parities must be equal',
+        ):
+            VCube().check_permutation_parity(cp, ep)
+
+    @unittest.mock.patch.object(VCube, 'check_colors')
+    def test_invalid_corner_same_colors(self, *_):
+        invalid_state = list(INITIAL_STATE)
+        # Corner URF: same color on the 2 faces
+        invalid_state[8] = invalid_state[9]
+        invalid_state = ''.join(invalid_state)
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Corner 0 must have 3 different colors, got',
+        ):
+            VCube(invalid_state)
+
+    @unittest.mock.patch.object(VCube, 'check_colors')
+    def test_invalid_edge_same_colors(self, *_):
+        invalid_state = list(INITIAL_STATE)
+        # Edge UR: same color on the 2 faces
+        invalid_state[5] = invalid_state[10]
+        invalid_state = ''.join(invalid_state)
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Edge 0 must have 2 different colors, got ',
+        ):
+            VCube(invalid_state)
+
+    @unittest.mock.patch.object(VCube, 'check_colors')
+    def test_invalid_corner_opposite_colors(self, *_):
+        invalid_state = list(INITIAL_STATE)
+        invalid_state[8] = 'U'  # Face U
+        invalid_state[9] = 'D'  # Opposite face D
+        invalid_state[20] = 'F'  # Third face
+        invalid_state = ''.join(invalid_state)
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Corner 0 cannot have opposite colors '
+                'U and D',
+        ):
+            VCube(invalid_state)
+
+    @unittest.mock.patch.object(VCube, 'check_colors')
+    def test_invalid_edge_opposite_colors(self, *_):
+        invalid_state = list(INITIAL_STATE)
+        invalid_state[5] = 'F'
+        invalid_state[10] = 'B'  # Opposite color
+        invalid_state = ''.join(invalid_state)
+
+        with self.assertRaisesRegex(
+                InvalidCubeStateError,
+                'Edge 0 cannot have opposite colors '
+                'F and B',
+        ):
+            VCube(invalid_state)
+
+    def test_valid_complex_scramble(self):
+        cube = VCube()
+        complex_scramble = (
+            "R U2 R' D' R U' R' D R' U "
+            "R U' R' U R U2 R' U' R U' R'"
+        )
+        cube.rotate(complex_scramble)
+
+        self.assertTrue(cube.check_integrity())
+
+    def test_rotations_preserve_validity(self):
+        cube = VCube()
+        rotations = ['x', 'y', 'z', "x'", "y'", "z'", 'x2', 'y2', 'z2']
+
+        for rotation in rotations:
+            with self.subTest(rotation=rotation):
+                cube_copy = VCube(cube.state)
+                cube_copy.rotate(rotation)
+                self.assertTrue(cube_copy.check_integrity())
+
+    def test_preserve_validity(self):
+        cube = VCube()
+
+        self.assertTrue(cube.check_integrity())
+
+    def test_oriented_preserve_validity(self):
+        cube = VCube()
+        cube.rotate('z2')
+
+        self.assertTrue(
+            VCube(cube.state).check_integrity(),
         )
 
 

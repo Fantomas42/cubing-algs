@@ -5,25 +5,23 @@ from cubing_algs.display import VCubeDisplay
 from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
+from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import InvalidMoveError
 
 
-class InvalidCubeStateError(Exception):
-    ...
-
-
-class VCube:
+class VCube(VCubeIntegrityChecker):
     """
     Virtual 3x3 cube for tracking moves on facelets
     """
     size = 3
+    face_number = 6
     face_size = size * size
 
     def __init__(self, initial: str | None = None, *, check: bool = True):
         if initial:
             self._state = initial
             if check:
-                self.check_state()
+                self.check_integrity()
         else:
             self._state = INITIAL_STATE
 
@@ -48,31 +46,6 @@ class VCube:
     @property
     def is_solved(self) -> bool:
         return all(face * self.face_size in self.state for face in FACE_ORDER)
-
-    def check_state(self) -> bool:
-        # TODO(me): Check corners, edges stickers # noqa: FIX002
-
-        if len(self._state) != 54:
-            msg = 'State string must be 54 characters long'
-            raise InvalidCubeStateError(msg)
-
-        color_counts: dict[str, int] = {}
-        for i in self._state:
-            color_counts.setdefault(i, 0)
-            color_counts[i] += 1
-
-        if set(color_counts.keys()) - set(FACE_ORDER):
-            msg = (
-                'State string can only '
-                f'contains { " ".join(FACE_ORDER) } characters'
-            )
-            raise InvalidCubeStateError(msg)
-
-        if not all(count == self.face_size for count in color_counts.values()):
-            msg = 'State string must have nine of each color'
-            raise InvalidCubeStateError(msg)
-
-        return True
 
     def rotate(self, moves: str | Algorithm) -> str:
         if isinstance(moves, Algorithm):
