@@ -78,10 +78,10 @@ class TestVCubeDisplay(unittest.TestCase):
             self.assertTrue(line.startswith('         '))
             self.assertEqual(line.count('U'), 3)
 
-    def test_display_cube_without_orientation(self):
+    def test_display_without_orientation(self):
         printer = VCubeDisplay(self.cube)
 
-        result = printer.display_cube()
+        result = printer.display()
 
         lines = result.split('\n')
 
@@ -90,21 +90,21 @@ class TestVCubeDisplay(unittest.TestCase):
         for face in ['U', 'R', 'F', 'D', 'L', 'B']:
             self.assertIn(face, result)
 
-    def test_display_cube_with_orientation(self):
+    def test_display_with_orientation(self):
         orientation = 'z2'
         printer = VCubeDisplay(self.cube, orientation=orientation)
 
         initial_state = self.cube.state
 
-        result = printer.display_cube()
+        result = printer.display()
         lines = result.split('\n')
 
         self.assertEqual(self.cube.state, initial_state)
         self.assertEqual(len(lines), 10)
 
-    def test_display_cube_structure(self):
+    def test_display_structure(self):
         printer = VCubeDisplay(self.cube)
-        result = printer.display_cube()
+        result = printer.display()
 
         lines = [line for line in result.split('\n') if line.strip()]
 
@@ -117,11 +117,11 @@ class TestVCubeDisplay(unittest.TestCase):
             for top_line in top_lines:
                 self.assertGreater(len(middle_line), len(top_line))
 
-    def test_display_cube_face_order(self):
+    def test_display_face_order(self):
         cube = VCube()
         printer = VCubeDisplay(cube)
 
-        result = printer.display_cube()
+        result = printer.display()
         lines = result.split('\n')
 
         top_section = ''.join(lines[0:3])
