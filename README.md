@@ -17,6 +17,10 @@ pip install cubing-algs
 - Big cubes notation support
 - SiGN notation support
 - Display and tracks facelets on 3x3x3 cube
+- Commutator and conjugate notation support
+- Pattern library with classic cube patterns
+- Scramble generation for various cube sizes
+- Virtual cube simulation and state tracking
 
 ## Basic Usage
 
@@ -50,6 +54,34 @@ algo = parse_moves("3Rw 3-4u' 2R2")   # For big cubes
 from cubing_algs.parsing import parse_moves_cfop
 algo = parse_moves_cfop("y U R U R' U'")  # Will remove the initial y
 ```
+
+## Commutators and Conjugates
+
+The module supports advanced notation for commutators and conjugates:
+
+```python
+from cubing_algs.parsing import parse_moves
+
+# Commutator notation [A, B] = A B A' B'
+algo = parse_moves("[R, U]")  # Expands to: R U R' U'
+
+# Conjugate notation [A: B] = A B A'
+algo = parse_moves("[R: U]")  # Expands to: R U R'
+
+# Nested commutators and conjugates
+algo = parse_moves("[R, [U, D]]")  # Nested commutator
+algo = parse_moves("[R: [U, D]]")  # Conjugate with commutator
+
+# Complex examples
+algo = parse_moves("[R U: F]")     # R U F U' R'
+algo = parse_moves("[R, U D']")    # R U D' R' D U'
+```
+
+**Supported notation:**
+- `[A, B]` - Commutator: expands to `A B A' B'`
+- `[A: B]` - Conjugate: expands to `A B A'`
+- Nested brackets are fully supported
+- Can be mixed with regular move notation
 
 ## Transformations
 
@@ -158,6 +190,120 @@ print(f"ETM: {algo.metrics['etm']}")
 print(f"QSTM: {algo.metrics['qstm']}")
 print(f"Generators: {', '.join(algo.metrics['generators'])}")
 ```
+
+## Cube Patterns
+
+Access a library of classic cube patterns:
+
+```python
+from cubing_algs.patterns import get_pattern, PATTERNS
+
+# Get a specific pattern
+superflip = get_pattern('Superflip')
+print(superflip)  # U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2
+
+checkerboard = get_pattern('EasyCheckerboard')
+print(checkerboard)  # U2 D2 R2 L2 F2 B2
+
+# List all available patterns
+print(list(PATTERNS.keys()))
+
+# Some popular patterns
+cube_in_cube = get_pattern('CubeInTheCube')
+anaconda = get_pattern('Anaconda')
+wire = get_pattern('Wire')
+tetris = get_pattern('Tetris')
+```
+
+**Available patterns include:**
+- `Superflip` - All edges flipped
+- `EasyCheckerboard` - Classic checkerboard pattern
+- `CubeInTheCube` - Cube within a cube effect
+- `Tetris` - Tetris-like pattern
+- `Wire` - Wire frame effect
+- `Anaconda`, `Python`, `GreenMamba`, `BlackMamba` - Snake patterns
+- `Cross`, `Plus`, `Minus` - Cross patterns
+- And many more! (70+ patterns total)
+
+## Scramble Generation
+
+Generate scrambles for various cube sizes:
+
+```python
+from cubing_algs.scrambler import scramble, scramble_easy_cross
+
+# Generate scramble for 3x3x3 cube (default 25 moves)
+scramble_3x3 = scramble(3)
+print(scramble_3x3)
+
+# Generate scramble for 4x4x4 cube
+scramble_4x4 = scramble(4)
+print(scramble_4x4)
+
+# Generate scramble with specific number of moves
+custom_scramble = scramble(3, iterations=20)
+print(custom_scramble)
+
+# Generate easy cross scramble (only F, R, B, L moves)
+easy_scramble = scramble_easy_cross()
+print(easy_scramble)
+```
+
+**Features:**
+- Supports cube sizes 2x2 through 7x7+
+- Automatic move count based on cube size
+- Prevents consecutive moves on same face or opposite faces
+- Includes wide moves for big cubes
+- Easy cross scrambles for beginners
+
+## Virtual Cube Simulation
+
+Track cube state and visualize the cube:
+
+```python
+from cubing_algs.vcube import VCube
+from cubing_algs.parsing import parse_moves
+
+# Create a new solved cube
+cube = VCube()
+print(cube.is_solved)  # True
+
+# Apply moves
+cube.rotate("R U R' U'")
+print(cube.is_solved)  # False
+
+# Apply algorithm object
+algo = parse_moves("F R U R' U' F'")
+cube.rotate(algo)
+
+# Display the cube (ASCII art)
+cube.show()
+
+# Get cube state as facelets string
+print(cube.state)  # 54-character string representing all facelets
+
+# Get move history
+print(cube.history)  # List of all moves applied
+
+# Create cube from specific state
+custom_cube = VCube("UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB")
+
+# Work with cube coordinates (corner/edge positions and orientations)
+cp, co, ep, eo, so = cube.to_cubies
+new_cube = VCube.from_cubies(cp, co, ep, eo, so)
+
+# Get individual faces
+u_face = cube.get_face('U')  # Get U face facelets
+center_piece = cube.get_face_center_indexes()  # Get all face centers
+```
+
+**VCube features:**
+- Full 3x3x3 cube state tracking
+- ASCII art display with multiple orientations
+- Move history tracking
+- Conversion between facelets and cubie coordinates
+- Integrity checking to ensure valid cube states
+- Support for creating cubes from custom states
 
 ## Move Object
 
@@ -322,4 +468,56 @@ from cubing_algs.transform.degrip import degrip_y_moves
 algo = parse_moves("y F R U R' U' F'")
 degripped = algo.transform(degrip_y_moves)
 print(degripped)  # R F R F' R' y
+```
+
+### Working with commutators and patterns
+
+```python
+from cubing_algs.parsing import parse_moves
+from cubing_algs.patterns import get_pattern
+from cubing_algs.vcube import VCube
+
+# Parse and expand a commutator
+comm = parse_moves("[R, U]")  # R U R' U'
+
+# Apply a pattern to a virtual cube
+cube = VCube()
+pattern = get_pattern('Superflip')
+cube.rotate(pattern)
+cube.show()  # Display the superflip pattern
+
+# Generate and apply a scramble
+from cubing_algs.scrambler import scramble
+scramble_algo = scramble(3, 25)
+cube = VCube()
+cube.rotate(scramble_algo)
+print(f"Scrambled with: {scramble_algo}")
+```
+
+### Advanced algorithm development workflow
+
+```python
+from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.symmetry import symmetry_m_moves
+from cubing_algs.vcube import VCube
+
+# Start with a commutator
+base_alg = parse_moves("[R U R', D]")  # R U R' D R U' R' D'
+
+# Generate variations
+mirrored = base_alg.transform(mirror_moves)
+m_symmetric = base_alg.transform(symmetry_m_moves)
+
+# Test on virtual cube
+cube = VCube()
+cube.rotate(base_alg)
+print(f"Original: {base_alg} ({base_alg.metrics['htm']} HTM)")
+print(f"Mirrored: {mirrored} ({mirrored.metrics['htm']} HTM)")
+print(f"Is solved after: {cube.is_solved}")
+
+# Create conjugate setup
+setup = parse_moves("R U")
+full_alg = parse_moves(f"[{setup}: {base_alg}]")
+print(f"With setup: {full_alg}")
 ```
