@@ -250,7 +250,7 @@ print(easy_scramble)
 ```
 
 **Features:**
-- Supports cube sizes 2x2 through 7x7+
+- Supports cube sizes 2x2x2 through 7x7x7+
 - Automatic move count based on cube size
 - Prevents consecutive moves on same face or opposite faces
 - Includes wide moves for big cubes
