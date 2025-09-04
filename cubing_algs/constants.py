@@ -429,3 +429,17 @@ ITERATIONS_BY_CUBE_SIZE = {
     6: (80, 80),
     7: (100, 100),
 }
+
+TOP_FACE_TRANSLATIONS = {
+    1: "z'",  # R
+    2: 'x',   # F
+    3: 'z2',  # D
+    4: 'z',   # L
+    5: "x'",  # B
+}
+
+FRONT_FACE_TRANSLATIONS = {
+    -1: 'y',   # R
+    2:  "y'",  # L
+    3:  'y2',  # B
+}

@@ -8,6 +8,7 @@ from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.fat import unfat_rotation_moves
+from cubing_algs.vcube import InvalidFaceError
 from cubing_algs.vcube import VCube
 
 
@@ -261,6 +262,99 @@ class VCubeTestCase(unittest.TestCase):
             repr(cube),
             "VCube('LUULUUFFFLBBRRRRRRUUUFFDFFDRRBDDBDDBFFRLLDLLDLLDUBBUBB')",
         )
+
+
+class VCubeOrientTestCase(unittest.TestCase):
+    maxDiff = None
+
+    def test_orient_faces(self):
+        cube = VCube()
+        base_state = cube.state
+        cube.orient('D', 'F')
+
+        self.assertNotEqual(
+            cube.state,
+            base_state,
+        )
+
+    def test_orient_top_only(self):
+        cube = VCube()
+        base_state = cube.state
+        cube.orient('D')
+
+        self.assertNotEqual(
+            cube.state,
+            base_state,
+        )
+
+    def test_orient_faces_stable(self):
+        cube = VCube()
+        base_state = cube.state
+        cube.orient('U', 'F')
+
+        self.assertEqual(
+            cube.state,
+            base_state,
+        )
+
+    def test_orient_invalid_top_face(self):
+        cube = VCube()
+
+        with self.assertRaises(InvalidFaceError):
+            cube.orient('T', 'F')
+
+    def test_orient_invalid_front_face(self):
+        cube = VCube()
+
+        with self.assertRaises(InvalidFaceError):
+            cube.orient('F', 'T')
+
+    def test_orient_invalid_opposite_face(self):
+        cube = VCube()
+
+        with self.assertRaises(InvalidFaceError):
+            cube.orient('F', 'B')
+
+    def test_history_preservation(self):
+        cube = VCube()
+        cube.rotate('R F')
+
+        self.assertEqual(
+            len(cube.history),
+            2,
+        )
+
+        cube.orient('D', 'F')
+
+        self.assertEqual(
+            len(cube.history),
+            2,
+        )
+
+    def test_all_reorientation(self):
+        orientations = [
+            'UF', 'UB', 'UR', 'UL',
+            'DF', 'DB', 'DR', 'DL',
+            'FU', 'FD', 'FR', 'FL',
+            'BU', 'BD', 'BR', 'BL',
+            'RU', 'RD', 'RF', 'RB',
+            'LU', 'LD', 'LF', 'LB',
+        ]
+
+        for orientation in orientations:
+            with self.subTest(orientation=orientation):
+                cube = VCube()
+                cube.orient(*orientation)
+
+                self.assertEqual(
+                    cube.state[4],
+                    orientation[0],
+                )
+
+                self.assertEqual(
+                    cube.state[21],
+                    orientation[1],
+                )
 
 
 class VCubeCheckIntegrityTestCase(unittest.TestCase):
