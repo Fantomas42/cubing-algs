@@ -227,34 +227,67 @@ tetris = get_pattern('Tetris')
 
 ## Scramble Generation
 
-Generate scrambles for various cube sizes:
+Generate scrambles for various cube sizes with advanced customization options:
 
 ```python
-from cubing_algs.scrambler import scramble, scramble_easy_cross
+from cubing_algs.scrambler import scramble, scramble_easy_cross, build_cube_move_set
 
 # Generate scramble for 3x3x3 cube (default 25 moves)
 scramble_3x3 = scramble(3)
 print(scramble_3x3)
 
-# Generate scramble for 4x4x4 cube
+# Generate scramble for 4x4x4 cube (includes wide moves)
 scramble_4x4 = scramble(4)
-print(scramble_4x4)
+print(scramble_4x4)  # Example: Rw U 2R D' Fw2 R' Uw F2 ...
+
+# Generate scramble for 6x6x6 cube (includes multi-layer moves)
+scramble_6x6 = scramble(6)
+print(scramble_6x6)  # Example: 3Rw 2F' 4Uw2 3Fw R 2Bw' ...
 
 # Generate scramble with specific number of moves
 custom_scramble = scramble(3, iterations=20)
-print(custom_scramble)
+print(f"Custom 20-move scramble: {custom_scramble}")
 
-# Generate easy cross scramble (only F, R, B, L moves)
+# Generate easy cross scramble (only F, R, B, L moves - 10 moves)
 easy_scramble = scramble_easy_cross()
-print(easy_scramble)
+print(f"Easy cross scramble: {easy_scramble}")  # Example: F R B' L F' R2 B L' F R
+
+# Build custom move set for specific cube size
+move_set_3x3 = build_cube_move_set(3)
+print(f"3x3 moves: {move_set_3x3[:12]}")  # ['R', "R'", 'R2', 'U', "U'", 'U2', ...]
+
+move_set_4x4 = build_cube_move_set(4)
+print(f"4x4 additional moves: {[m for m in move_set_4x4 if 'w' in m][:9]}")  # ['Rw', "Rw'", 'Rw2', ...]
+
+move_set_6x6 = build_cube_move_set(6)
+multi_layer = [m for m in move_set_6x6 if any(c.isdigit() for c in m)]
+print(f"6x6 multi-layer moves: {multi_layer[:12]}")  # ['2R', "2R'", '2R2', '3R', ...]
 ```
 
-**Features:**
-- Supports cube sizes 2x2x2 through 7x7x7+
-- Automatic move count based on cube size
-- Prevents consecutive moves on same face or opposite faces
-- Includes wide moves for big cubes
-- Easy cross scrambles for beginners
+**Scramble Features:**
+- **Cube sizes**: Supports 2x2x2 through 7x7x7+ cubes
+- **Automatic move count**: Based on cube size (configurable ranges)
+  - 2x2x2: 9-11 moves
+  - 3x3x3: 20-25 moves
+  - 4x4x4: 40-45 moves
+  - 5x5x5+: 60-70 moves
+- **Smart move validation**: Prevents consecutive moves on same face or opposite faces
+- **Big cube support**:
+  - Wide moves (Rw, Uw, etc.) for 4x4x4+
+  - Multi-layer moves (2R, 3Rw, etc.) for 6x6x6+
+- **Easy cross scrambles**: Only F, R, B, L moves for beginners
+- **Customizable iterations**: Override default move counts
+
+**Move Set Generation:**
+The `build_cube_move_set()` function creates appropriate move sets:
+- **3x3x3**: Basic face turns (R, U, F, etc.) with modifiers (', 2)
+- **4x4x4+**: Adds wide moves (Rw, Uw, Fw, etc.)
+- **6x6x6+**: Adds numbered layer moves (2R, 3R, 2Rw, 3Rw, etc.)
+
+**Validation Logic:**
+- No consecutive moves on the same face (R R' is invalid)
+- No consecutive moves on opposite faces (R L is invalid)
+- Ensures natural, realistic scramble sequences
 
 ## Virtual Cube Simulation
 
@@ -494,6 +527,39 @@ cube.rotate(scramble_algo)
 print(f"Scrambled with: {scramble_algo}")
 ```
 
+### Advanced scramble generation and testing
+
+```python
+from cubing_algs.scrambler import scramble, scramble_easy_cross, build_cube_move_set
+from cubing_algs.vcube import VCube
+
+# Test different scramble types
+cube = VCube()
+
+# Standard 3x3x3 scramble
+standard_scramble = scramble(3)
+cube.rotate(standard_scramble)
+print(f"Standard scramble ({standard_scramble.metrics['htm']} HTM): {standard_scramble}")
+
+# Easy cross scramble for beginners
+cube = VCube()
+easy_scramble = scramble_easy_cross()
+cube.rotate(easy_scramble)
+print(f"Easy cross scramble: {easy_scramble}")
+cube.show()  # Visual check of scrambled state
+
+# Big cube scramble with specific length
+big_cube_scramble = scramble(5, iterations=50)
+print(f"5x5x5 scramble (50 moves): {big_cube_scramble}")
+
+# Analyze move distribution
+move_set = build_cube_move_set(4)
+face_moves = [m for m in move_set if not 'w' in m]
+wide_moves = [m for m in move_set if 'w' in m]
+print(f"4x4x4 face moves: {len(face_moves)}")  # 18 moves (6 faces × 3 modifiers)
+print(f"4x4x4 wide moves: {len(wide_moves)}")  # 18 moves (6 faces × 3 modifiers)
+```
+
 ### Advanced algorithm development workflow
 
 ```python
@@ -501,6 +567,7 @@ from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.transform.symmetry import symmetry_m_moves
 from cubing_algs.vcube import VCube
+from cubing_algs.scrambler import scramble
 
 # Start with a commutator
 base_alg = parse_moves("[R U R', D]")  # R U R' D R U' R' D'
@@ -515,6 +582,16 @@ cube.rotate(base_alg)
 print(f"Original: {base_alg} ({base_alg.metrics['htm']} HTM)")
 print(f"Mirrored: {mirrored} ({mirrored.metrics['htm']} HTM)")
 print(f"Is solved after: {cube.is_solved}")
+
+# Test algorithm on scrambled cube
+test_cube = VCube()
+test_scramble = scramble(3, 15)
+test_cube.rotate(test_scramble)
+print(f"Applied scramble: {test_scramble}")
+
+# Apply algorithm and check result
+test_cube.rotate(base_alg)
+print(f"Cube state after algorithm: {test_cube.state[:9]}...")  # First 9 facelets
 
 # Create conjugate setup
 setup = parse_moves("R U")

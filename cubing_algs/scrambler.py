@@ -19,8 +19,11 @@ MOVES_EASY_CROSS = [
     'L',
 ]
 
+EXCLUDE_ODD_FACES = {'D', 'L', 'B'}
 
-def build_cube_move_set(cube_size: int) -> list[str]:
+
+def build_cube_move_set(cube_size: int, *,
+                        inner_layers: bool = False) -> list[str]:
     moves = []
 
     for face in OUTER_BASIC_MOVES:
@@ -32,15 +35,44 @@ def build_cube_move_set(cube_size: int) -> list[str]:
             ],
         )
         if cube_size > 3:
-            moves.extend(
-                [
-                    f'{ face }w',
-                    f"{ face }w'",
-                    f'{ face }w2',
-                ],
-            )
-            if cube_size > 5:
-                for i in range(2, math.ceil(cube_size / 2) + 1):
+            center_ceil = math.ceil(cube_size / 2)
+            center_floor = math.floor(cube_size / 2)
+            odd_cube = bool(cube_size % 2)
+            even_cube = not odd_cube
+
+            if cube_size > 4 or face not in EXCLUDE_ODD_FACES:
+                moves.extend(
+                    [
+                        f'{ face }w',
+                        f"{ face }w'",
+                        f'{ face }w2',
+                    ],
+                )
+
+            for i in range(3, center_floor + 1):
+                if (
+                        even_cube
+                        and face in EXCLUDE_ODD_FACES
+                        and i == center_floor
+                ):
+                    continue
+                moves.extend(
+                    [
+                        f'{ i }{ face }w',
+                        f"{ i }{ face }w'",
+                        f'{ i }{ face }w2',
+                    ],
+                )
+
+            if inner_layers:
+                for i in range(2, center_ceil + 1):
+                    if (
+                            odd_cube
+                            and face in EXCLUDE_ODD_FACES
+                            and i == center_ceil
+                    ):
+                        continue
+
                     moves.extend(
                         [
                             f'{ i }{ face }',
@@ -48,15 +80,6 @@ def build_cube_move_set(cube_size: int) -> list[str]:
                             f'{ i }{ face }2',
                         ],
                     )
-                    if i > 2:
-                        moves.extend(
-                        [
-                            f'{ i }{ face }w',
-                            f"{ i }{ face }w'",
-                            f'{ i }{ face }w2',
-                        ],
-                    )
-                # TODO(me): implement inner layers
 
     return moves
 
@@ -98,8 +121,12 @@ def random_moves(cube_size: int,
     return parse_moves(moves)
 
 
-def scramble(cube_size: int, iterations: int = 0) -> Algorithm:
-    move_set = build_cube_move_set(cube_size)
+def scramble(cube_size: int, iterations: int = 0, *,
+             inner_layers: bool = False) -> Algorithm:
+    move_set = build_cube_move_set(
+        cube_size,
+        inner_layers=inner_layers,
+    )
 
     return random_moves(cube_size, move_set, iterations)
 
