@@ -4,8 +4,8 @@ from collections.abc import Iterable
 from functools import cached_property
 
 from cubing_algs.constants import MAX_ITERATIONS
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.metrics import compute_metrics
-from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 
 

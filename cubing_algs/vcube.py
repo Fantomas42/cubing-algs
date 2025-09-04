@@ -5,15 +5,12 @@ from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.constants import TOP_FACE_TRANSLATIONS
 from cubing_algs.display import VCubeDisplay
+from cubing_algs.exceptions import InvalidFaceError
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.integrity import VCubeIntegrityChecker
-from cubing_algs.move import InvalidMoveError
-
-
-class InvalidFaceError(Exception):
-    ...
 
 
 class VCube(VCubeIntegrityChecker):

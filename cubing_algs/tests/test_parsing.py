@@ -1,8 +1,8 @@
 import unittest
 
-from cubing_algs.commutator_conjugate import InvalidBracketError
-from cubing_algs.commutator_conjugate import InvalidOperatorError
-from cubing_algs.move import InvalidMoveError
+from cubing_algs.exceptions import InvalidBracketError
+from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.exceptions import InvalidOperatorError
 from cubing_algs.move import Move
 from cubing_algs.parsing import check_moves
 from cubing_algs.parsing import clean_moves

@@ -1,18 +1,7 @@
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.move import InvalidMoveError
+from cubing_algs.exceptions import InvalidBracketError
+from cubing_algs.exceptions import InvalidOperatorError
 from cubing_algs.transform.mirror import mirror_moves
-
-
-class InvalidBracketError(InvalidMoveError):
-    """
-    Exception raised when an invalid bracket formation is encountered.
-    """
-
-
-class InvalidOperatorError(InvalidMoveError):
-    """
-    Exception raised when an invalid bracket formation is encountered.
-    """
 
 
 def find_innermost_brackets(text: str) -> tuple[int, int] | None:

@@ -2,7 +2,7 @@
 import unittest
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.algorithm import InvalidMoveError
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves

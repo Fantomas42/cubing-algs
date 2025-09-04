@@ -3,12 +3,12 @@ from io import StringIO
 from unittest.mock import patch
 
 from cubing_algs.constants import INITIAL_STATE
-from cubing_algs.integrity import InvalidCubeStateError
-from cubing_algs.move import InvalidMoveError
+from cubing_algs.exceptions import InvalidCubeStateError
+from cubing_algs.exceptions import InvalidFaceError
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.fat import unfat_rotation_moves
-from cubing_algs.vcube import InvalidFaceError
 from cubing_algs.vcube import VCube
 
 

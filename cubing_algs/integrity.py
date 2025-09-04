@@ -3,6 +3,7 @@ from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.facelets import facelets_to_cubies
 
 CORNER_NUMBER = 8
@@ -21,10 +22,6 @@ def count_inversions(permutation: list[int]) -> int:
                 inversions += 1
 
     return inversions
-
-
-class InvalidCubeStateError(Exception):
-    ...
 
 
 class VCubeIntegrityChecker:

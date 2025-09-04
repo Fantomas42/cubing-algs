@@ -2,12 +2,12 @@ import unittest
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
-from cubing_algs.commutator_conjugate import InvalidBracketError
-from cubing_algs.commutator_conjugate import InvalidOperatorError
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
 from cubing_algs.commutator_conjugate import find_innermost_brackets
 from cubing_algs.commutator_conjugate import invert_moves
 from cubing_algs.commutator_conjugate import split_on_separator
+from cubing_algs.exceptions import InvalidBracketError
+from cubing_algs.exceptions import InvalidOperatorError
 
 
 class TestFindInnermostBrackets(unittest.TestCase):
