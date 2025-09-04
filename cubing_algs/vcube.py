@@ -17,7 +17,9 @@ class VCube(VCubeIntegrityChecker):
     face_number = 6
     face_size = size * size
 
-    def __init__(self, initial: str | None = None, *, check: bool = True):
+    def __init__(self, initial: str | None = None, *,
+                 check: bool = True,
+                 history: list[str] | None = None):
         if initial:
             self._state = initial
             if check:
@@ -25,7 +27,7 @@ class VCube(VCubeIntegrityChecker):
         else:
             self._state = INITIAL_STATE
 
-        self.history: list[str] = []
+        self.history: list[str] = history or []
 
     @property
     def state(self) -> str:
@@ -65,8 +67,12 @@ class VCube(VCubeIntegrityChecker):
             self.history.append(move)
             return self._state
 
-    def copy(self) -> 'VCube':
-        return VCube(self.state, check=False)
+    def copy(self, *, full: bool = False) -> 'VCube':
+        return VCube(
+            self.state,
+            check=False,
+            history=self.history if full else None,
+        )
 
     def display(self, orientation: str = '',
                 mode: str = '') -> str:

@@ -60,6 +60,18 @@ class VCubeTestCase(unittest.TestCase):
             cube.state,
             copy.state,
         )
+        self.assertFalse(copy.history)
+
+    def test_full_copy(self):
+        cube = VCube()
+        cube.rotate('R2 F2 D2 B')
+        copy = cube.copy(full=True)
+
+        self.assertEqual(
+            cube.state,
+            copy.state,
+        )
+        self.assertTrue(copy.history)
 
     def test_from_cubies(self):
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
