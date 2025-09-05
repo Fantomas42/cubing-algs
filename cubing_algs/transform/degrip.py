@@ -12,19 +12,19 @@ from cubing_algs.transform.offset import offset_z2_moves
 from cubing_algs.transform.offset import offset_z_moves
 from cubing_algs.transform.offset import offset_zprime_moves
 
-DEGRIP_X = {
+DEGRIP_X: dict[str, Callable[[list[Move]], list[Move]]] = {
     'x': offset_xprime_moves,
     'x2': offset_x2_moves,
     "x'": offset_x_moves,
 }
 
-DEGRIP_Y = {
+DEGRIP_Y: dict[str, Callable[[list[Move]], list[Move]]] = {
     'y': offset_yprime_moves,
     'y2': offset_y2_moves,
     "y'": offset_y_moves,
 }
 
-DEGRIP_Z = {
+DEGRIP_Z: dict[str, Callable[[list[Move]], list[Move]]] = {
     'z': offset_zprime_moves,
     'z2': offset_z2_moves,
     "z'": offset_z_moves,
