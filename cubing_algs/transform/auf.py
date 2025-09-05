@@ -41,7 +41,7 @@ def remove_auf_moves(old_moves: list[Move]) -> list[Move]:
 
     score = (
         calculate_auf_score(old_moves) +
-        calculate_auf_score(reversed(old_moves))
+        calculate_auf_score(list(reversed(old_moves)))
     ) % 4
 
     transforms = [trim_moves(AUF_CHAR)]
