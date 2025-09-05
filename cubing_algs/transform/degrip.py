@@ -42,8 +42,8 @@ def has_grip(
         config: dict[str, Callable[[list[Move]], list[Move]]],
 ) -> tuple[bool, Any, Any, Any]:
     i = 0
-    prefix = []
-    suffix = []
+    prefix: list[Move] = []
+    suffix: list[Move] = []
 
     while i < len(old_moves) - 1:
         move = old_moves[i].untimed
