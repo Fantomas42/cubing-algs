@@ -72,7 +72,7 @@ class VCubeIntegrityChecker:
             msg = f'State string must be { expected_length } characters long'
             raise InvalidCubeStateError(msg)
 
-    def check_characters(self, color_counts) -> None:
+    def check_characters(self, color_counts: dict[str, int]) -> None:
         if set(color_counts.keys()) - set(FACE_ORDER):
             msg = (
                 'State string can only '
@@ -80,7 +80,7 @@ class VCubeIntegrityChecker:
             )
             raise InvalidCubeStateError(msg)
 
-    def check_colors(self, color_counts) -> None:
+    def check_colors(self, color_counts: dict[str, int]) -> None:
         if not all(count == self.face_size for count in color_counts.values()):
             msg = f'State string must have { self.face_size } of each color'
             raise InvalidCubeStateError(msg)
@@ -201,7 +201,7 @@ class VCubeIntegrityChecker:
             )
             raise InvalidCubeStateError(msg)
 
-    def check_face_orientations(self, faces: str):
+    def check_face_orientations(self, faces: str) -> tuple[str, str]:
         if not faces:
             msg = 'Specify at leat one face to orient'
             raise InvalidFaceError(msg)

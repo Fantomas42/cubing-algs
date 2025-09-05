@@ -62,7 +62,7 @@ class VCubeDisplay:
             for i in range(6)
         ]
 
-    def display(self, mode: str = '', orientation: str = ''):
+    def display(self, mode: str = '', orientation: str = '') -> str:
         mask = ''
         display_method = self.display_cube
         default_orientation = ''
@@ -122,7 +122,7 @@ class VCubeDisplay:
         return result
 
     def display_top_down_adjacent_facelets(self, face: str, face_mask: str,
-                                           *, top=False) -> str:
+                                           *, top: bool = False) -> str:
         result = '   '
         facelets = face[:3]
         facelets_mask = face_mask[:3]
