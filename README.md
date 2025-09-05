@@ -453,10 +453,16 @@ The module calculates the following metrics:
 ```python
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.vcube import VCube
 
-oll = parse_moves("r U R' U' r' F R F'")
+oll = parse_moves("F U F' R' F R U' R' F' R")  # 14 Anti-Gun
 oll_mirror = oll.transform(mirror_moves)
-print(oll_mirror)  # F' R' F r U R U' r'
+print(oll_mirror)  # R' F R U R' F' R F U' F'
+
+cube = VCube()
+cube.rotate('z2')
+cube.rotate(oll)
+cube.show('oll')  # Display OLL pattern
 ```
 
 ### Converting a wide move algorithm to SiGN notation
@@ -546,7 +552,7 @@ cube = VCube()
 easy_scramble = scramble_easy_cross()
 cube.rotate(easy_scramble)
 print(f"Easy cross scramble: {easy_scramble}")
-cube.show()  # Visual check of scrambled state
+cube.show(orientation='DF')  # Visual check of scrambled state with DF orientation
 
 # Big cube scramble with specific length
 big_cube_scramble = scramble(5, iterations=50)
