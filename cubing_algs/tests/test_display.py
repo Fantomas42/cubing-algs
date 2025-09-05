@@ -80,6 +80,32 @@ class TestVCubeDisplay(unittest.TestCase):
         self.assertEqual(self.cube.state, initial_state)
         self.assertEqual(len(lines), 10)
 
+    def test_display_with_last_layer(self):
+        printer = VCubeDisplay(self.cube)
+
+        initial_state = self.cube.state
+
+        result = printer.display(mode='oll')
+        lines = result.split('\n')
+
+        self.assertEqual(self.cube.state, initial_state)
+        self.assertEqual(len(lines), 6)
+
+    def test_display_f2l(self):
+        self.cube.rotate("z2 R U R' U' z2")
+        printer = VCubeDisplay(self.cube)
+
+        result = printer.display(mode='f2l')
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 10)
+
+    def test_display_f2l_initial_no_reorientation(self):
+        printer = VCubeDisplay(self.cube)
+
+        result = printer.display(mode='f2l', orientation='UF')
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 10)
+
     def test_display_structure(self):
         printer = VCubeDisplay(self.cube)
         result = printer.display()

@@ -947,13 +947,26 @@ class TestVCubeShow(unittest.TestCase):
         self.assertGreater(len(output), 0)
 
     def test_show_with_orientation(self):
-        orientations = ['', 'x', 'y', 'z', 'x2', 'y2', 'z2']
+        orientations = ['', 'DF', 'FR']
 
         for orientation in orientations:
             with self.subTest(orientation=orientation):
                 captured_output = StringIO()
                 with patch('sys.stdout', captured_output):
                     self.cube.show(orientation=orientation)
+
+                output = captured_output.getvalue()
+                self.assertIsInstance(output, str)
+                self.assertGreater(len(output), 0)
+
+    def test_show_with_mode(self):
+        modes = ['f2l', 'oll', 'pll']
+
+        for mode in modes:
+            with self.subTest(mode=mode):
+                captured_output = StringIO()
+                with patch('sys.stdout', captured_output):
+                    self.cube.show(mode=mode)
 
                 output = captured_output.getvalue()
                 self.assertIsInstance(output, str)
