@@ -5,10 +5,8 @@ def show_cube_oriented(faces):
     cube = VCube()
     cube.rotate("R U R' U'")
 
-    cube_oriented = cube.oriented_copy(faces)
-
     print(faces, '====>')
-    cube_oriented.show()
+    cube.show(orientation=faces)
 
 
 show_cube_oriented('UF')

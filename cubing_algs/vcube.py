@@ -1,4 +1,5 @@
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import FRONT_FACE_TRANSLATIONS
 from cubing_algs.constants import INITIAL_STATE
@@ -100,16 +101,14 @@ class VCube(VCubeIntegrityChecker):
 
         return cube
 
-    def display(self, orientation: str = '',
-                mode: str = '') -> str:
-        return VCubeDisplay(self, orientation).display(mode)
+    def display(self, mode: str = '', orientation: str = '') -> str:
+        return VCubeDisplay(self).display(mode, orientation)
 
-    def show(self, orientation: str = '',
-             mode: str = '') -> None:
-        print(self.display(orientation, mode), end='')
+    def show(self, mode: str = '', orientation: str = '') -> None:
+        print(self.display(mode, orientation), end='')
 
     def get_face(self, face: str):
-        index = FACE_ORDER.index(face)
+        index = FACE_INDEXES[face]
         return self._state[index * self.face_size: (index + 1) * self.face_size]
 
     def get_face_center_indexes(self) -> list[str]:

@@ -19,27 +19,6 @@ class TestVCubeDisplay(unittest.TestCase):
         self.assertEqual(printer.cube, self.cube)
         self.assertEqual(printer.cube_size, 3)
         self.assertEqual(printer.face_size, 9)
-        self.assertEqual(printer.orientation, '')
-
-        expected_face_colors = {
-            'U': 'white',
-            'R': 'red',
-            'F': 'green',
-            'D': 'yellow',
-            'L': 'orange',
-            'B': 'blue',
-        }
-        self.assertEqual(printer.face_colors, expected_face_colors)
-
-    def test_init_custom_parameters(self):
-        custom_orientation = 'z2'
-
-        printer = VCubeDisplay(
-            self.cube,
-            orientation=custom_orientation,
-        )
-
-        self.assertEqual(printer.orientation, custom_orientation)
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_with_colors(self):
@@ -91,12 +70,11 @@ class TestVCubeDisplay(unittest.TestCase):
             self.assertIn(face, result)
 
     def test_display_with_orientation(self):
-        orientation = 'z2'
-        printer = VCubeDisplay(self.cube, orientation=orientation)
+        printer = VCubeDisplay(self.cube)
 
         initial_state = self.cube.state
 
-        result = printer.display()
+        result = printer.display(orientation='DF')
         lines = result.split('\n')
 
         self.assertEqual(self.cube.state, initial_state)

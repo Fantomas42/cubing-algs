@@ -2,10 +2,10 @@ from cubing_algs.vcube import VCube
 
 c = VCube()
 
-c.rotate("z2 R U R' U' z2")
+c.rotate("z2 F U F' R' F R U' R' F' R z2")  # 14 Anti-Gun
 
 print('Before:')
 c.show()
 
 print('After:')
-c.show('f2l')
+c.show('oll')

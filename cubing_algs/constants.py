@@ -360,6 +360,11 @@ OPPOSITE_FACES = {
 
 FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
 
+FACE_INDEXES = {
+    face: FACE_ORDER.index(face)
+    for face in FACE_ORDER
+}
+
 FACES = ''.join(FACE_ORDER)
 
 INITIAL_STATE = ''
