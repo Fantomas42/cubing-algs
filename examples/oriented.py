@@ -4,10 +4,11 @@ from cubing_algs.vcube import VCube
 def show_cube_oriented(faces):
     cube = VCube()
     cube.rotate("R U R' U'")
-    cube.orient(*faces)
+
+    cube_oriented = cube.oriented_copy(faces)
 
     print(faces, '====>')
-    cube.show()
+    cube_oriented.show()
 
 
 show_cube_oriented('UF')

@@ -146,7 +146,7 @@ class VCubeTestCase(unittest.TestCase):
 
         state = cube.state
 
-        cube.display('z2')
+        cube.display(orientation='DF')
 
         self.assertEqual(len(cube.history), 3)
         self.assertEqual(state, cube.state)
@@ -156,7 +156,7 @@ class VCubeTestCase(unittest.TestCase):
         cube_2 = VCube()
 
         view_1 = cube_1.display()
-        view_2 = cube_2.display('z2')
+        view_2 = cube_2.display(orientation='DF')
 
         self.assertNotEqual(view_1, view_2)
 
@@ -264,56 +264,64 @@ class VCubeTestCase(unittest.TestCase):
         )
 
 
-class VCubeOrientTestCase(unittest.TestCase):
+class VCubeOrientedCopyTestCase(unittest.TestCase):
     maxDiff = None
 
-    def test_orient_faces(self):
+    def test_oriented_copy_faces(self):
         cube = VCube()
-        base_state = cube.state
-        cube.orient('D', 'F')
 
         self.assertNotEqual(
             cube.state,
-            base_state,
+            cube.oriented_copy('DF').state,
         )
 
-    def test_orient_top_only(self):
+    def test_oriented_copy_top_only(self):
         cube = VCube()
-        base_state = cube.state
-        cube.orient('D')
 
         self.assertNotEqual(
             cube.state,
-            base_state,
+            cube.oriented_copy('D').state,
         )
 
-    def test_orient_faces_stable(self):
+    def test_oriented_copy_faces_stable(self):
         cube = VCube()
         base_state = cube.state
-        cube.orient('U', 'F')
+        cube.oriented_copy('UF')
 
         self.assertEqual(
             cube.state,
             base_state,
         )
 
-    def test_orient_invalid_top_face(self):
+    def test_oriented_copy_invalid_empty(self):
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
-            cube.orient('T', 'F')
+            cube.oriented_copy('')
 
-    def test_orient_invalid_front_face(self):
+    def test_oriented_copy_invalid_too_much(self):
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
-            cube.orient('F', 'T')
+            cube.oriented_copy('FRU')
 
-    def test_orient_invalid_opposite_face(self):
+    def test_oriented_copy_invalid_top_face(self):
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
-            cube.orient('F', 'B')
+            cube.oriented_copy('TF')
+
+    def test_oriented_copy_invalid_front_face(self):
+        cube = VCube()
+
+        with self.assertRaises(InvalidFaceError):
+            cube.oriented_copy('FT')
+
+    def test_oriented_copy_invalid_opposite_face(self):
+        cube = VCube()
+
+        with self.assertRaises(InvalidFaceError):
+            cube.oriented_copy('FB')
 
     def test_history_preservation(self):
         cube = VCube()
@@ -324,11 +332,34 @@ class VCubeOrientTestCase(unittest.TestCase):
             2,
         )
 
-        cube.orient('D', 'F')
+        oriented = cube.oriented_copy('DF')
 
         self.assertEqual(
             len(cube.history),
             2,
+        )
+
+        self.assertEqual(
+            len(oriented.history),
+            0,
+        )
+
+    def test_history_tracking(self):
+        cube = VCube()
+        cube.rotate('R F')
+
+        oriented = cube.oriented_copy('DF', full=True)
+
+        self.assertEqual(
+            len(oriented.history),
+            3,
+        )
+
+        oriented = cube.oriented_copy('DB', full=True)
+
+        self.assertEqual(
+            len(oriented.history),
+            4,
         )
 
     def test_all_reorientation(self):
@@ -343,8 +374,7 @@ class VCubeOrientTestCase(unittest.TestCase):
 
         for orientation in orientations:
             with self.subTest(orientation=orientation):
-                cube = VCube()
-                cube.orient(*orientation)
+                cube = VCube().oriented_copy(orientation)
 
                 self.assertEqual(
                     cube.state[4],

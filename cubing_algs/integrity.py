@@ -4,6 +4,7 @@ from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.exceptions import InvalidCubeStateError
+from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.facelets import facelets_to_cubies
 
 CORNER_NUMBER = 8
@@ -199,3 +200,29 @@ class VCubeIntegrityChecker:
                 'for each center'
             )
             raise InvalidCubeStateError(msg)
+
+    def check_face_orientations(self, faces: str):
+        if not faces:
+            msg = 'Specify at leat one face to orient'
+            raise InvalidFaceError(msg)
+
+        if len(faces) > 2:
+            msg = f'Too much faces ({ len(faces) })'
+            raise InvalidFaceError(msg)
+
+        top_face = faces[0]
+        front_face = (len(faces) > 1 and faces[1]) or ''
+
+        if top_face not in OPPOSITE_FACES:
+            msg = f'{ top_face } is an invalid face'
+            raise InvalidFaceError(msg)
+
+        if OPPOSITE_FACES[top_face] == front_face:
+            msg = f'{ top_face } { front_face } are opposed faces'
+            raise InvalidFaceError(msg)
+
+        if front_face and front_face not in OPPOSITE_FACES:
+            msg = f'{ front_face } is an invalid face'
+            raise InvalidFaceError(msg)
+
+        return top_face, front_face

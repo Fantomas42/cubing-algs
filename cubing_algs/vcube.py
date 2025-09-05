@@ -2,10 +2,8 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import FRONT_FACE_TRANSLATIONS
 from cubing_algs.constants import INITIAL_STATE
-from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.constants import TOP_FACE_TRANSLATIONS
 from cubing_algs.display import VCubeDisplay
-from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
 from cubing_algs.facelets import cubies_to_facelets
@@ -72,38 +70,35 @@ class VCube(VCubeIntegrityChecker):
                 self.history.append(move)
             return self._state
 
-    def orient(self, top_face: str, front_face: str = ''):
-        if top_face not in OPPOSITE_FACES:
-            msg = f'{ top_face } is an invalid face'
-            raise InvalidFaceError(msg)
+    def copy(self, *, full: bool = False) -> 'VCube':
+        history = None
+        if full:
+            history = list(self.history)
 
-        if OPPOSITE_FACES[top_face] == front_face:
-            msg = f'{ top_face } { front_face } are opposed faces'
-            raise InvalidFaceError(msg)
+        return VCube(
+            self.state,
+            check=False,
+            history=history,
+        )
 
-        if front_face and front_face not in OPPOSITE_FACES:
-            msg = f'{ front_face } is an invalid face'
-            raise InvalidFaceError(msg)
+    def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
+        top_face, front_face = self.check_face_orientations(faces)
+        cube = self.copy(full=full)
 
-        top_face_index = self.get_face_index(top_face)
+        top_face_index = cube.get_face_index(top_face)
         if top_face_index:
             top_rotation = TOP_FACE_TRANSLATIONS[top_face_index]
-            self.rotate_move(top_rotation, history=False)
+            cube.rotate_move(top_rotation, history=full)
 
         if front_face:
-            front_face_index = self.get_face_index(front_face)
+            front_face_index = cube.get_face_index(front_face)
             delta = front_face_index - 2  # F index
 
             if delta:
                 front_rotation = FRONT_FACE_TRANSLATIONS[delta]
-                self.rotate_move(front_rotation, history=False)
+                cube.rotate_move(front_rotation, history=full)
 
-    def copy(self, *, full: bool = False) -> 'VCube':
-        return VCube(
-            self.state,
-            check=False,
-            history=self.history if full else None,
-        )
+        return cube
 
     def display(self, orientation: str = '',
                 mode: str = '') -> str:
