@@ -54,6 +54,11 @@ class Algorithm(UserList[Move]):
         self.extend(other)
         return self
 
+    def __radd__(self, other) -> 'Algorithm':
+        result = self.parse_moves(other)
+        result += self
+        return result
+
     def __add__(self, other) -> 'Algorithm':
         if isinstance(other, Algorithm):
             result = self.copy()

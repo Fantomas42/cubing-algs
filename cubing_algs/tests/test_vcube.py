@@ -620,6 +620,28 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
 
 class VCubeRotateTestCase(unittest.TestCase):
 
+    def test_rotate_types(self):
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate(parse_moves('R F') + 'z2'),
+            'BDDBDDRRRBLLDLLDLLDDDFFFFFFLLLFUUFUURRFRRURRUBBUBBUBBU',
+        )
+
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('z' + parse_moves('R F')),
+            'LLFLLFDDDLUULUUFUUFFFFFFRRRUUURRBRRBDDRDDRDDBLBBLBBLBB',
+        )
+
+        cube = VCube()
+
+        self.assertEqual(
+            cube.rotate('z2' + parse_moves('R F')),
+            'DDFDDFRRRDLLDLLFLLFFFFFFUUULLLUUBUUBRRURRURRBDBBDBBDBB',
+        )
+
     def test_rotate_u(self):
         cube = VCube()
 
