@@ -437,11 +437,15 @@ PLL_MASK = (
 
 F2L_FACES = ['F', 'L', 'R', 'B']
 
-F2L_EDGE_ORIENTATIONS = {
+F2L_FACE_ORIENTATIONS = {
     'FL': 'F',
     'FR': 'R',
     'LB': 'L',
     'RB': 'B',
+    'F': 'F',
+    'R': 'R',
+    'L': 'L',
+    'B': 'B',
 }
 
 ITERATIONS_BY_CUBE_SIZE = {

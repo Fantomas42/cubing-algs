@@ -9,3 +9,18 @@ c.show()
 
 print('After:')
 c.show('f2l')
+
+
+print('Special case #1')
+
+c = VCube()
+c.rotate("z2 F' L F L' z2")
+c.show('f2l')
+
+
+print('Special case #2')
+
+c = VCube()
+
+c.rotate("z2 L U' L' U' L U L' U' L U2 L' z2")
+c.show('f2l')
