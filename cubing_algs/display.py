@@ -78,7 +78,19 @@ class VCubeDisplay:
             default_orientation = 'D'
         elif mode == 'f2l':
             mask = F2L_MASK
-            default_orientation = 'DF'
+
+            selected_front_face = ''
+            for face in ['F', 'L', 'R', 'B']:
+                facelets = self.cube.get_face_by_center(face)
+                bottom = facelets[0:3]
+                middle = facelets[3:6]
+                top = facelets[6:9]
+                if len({bottom, middle, top}) > 2:
+                    selected_front_face = face
+                    break
+
+            default_orientation = f'D{ selected_front_face }'
+
         elif mode == 'cross':
             mask = CROSS_MASK
             default_orientation = 'BU'

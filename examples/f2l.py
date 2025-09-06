@@ -2,7 +2,7 @@ from cubing_algs.vcube import VCube
 
 c = VCube()
 
-c.rotate("z2 R U R' U' z2")
+c.rotate("y' z2 R U R' U' z2 y2")
 
 print('Before:')
 c.show()
