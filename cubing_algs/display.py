@@ -7,7 +7,6 @@ from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import F2L_MASK
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.constants import FULL_MASK
 from cubing_algs.constants import OLL_MASK
 from cubing_algs.constants import PLL_MASK
 
@@ -44,11 +43,11 @@ class VCubeDisplay:
         self.cube = cube
         self.cube_size = cube.size
         self.face_size = self.cube_size * self.cube_size
+        self.face_number = cube.face_number
 
-    @staticmethod
-    def compute_mask(cube: 'VCube', mask: str) -> str:
+    def compute_mask(self, cube: 'VCube', mask: str) -> str:
         if not mask:
-            return FULL_MASK
+            return '1' * (self.face_number * self.face_size)
 
         new_cube = cube.__class__(mask, check=False)
 
@@ -62,7 +61,7 @@ class VCubeDisplay:
     def split_faces(self, state: str) -> list[str]:
         return [
             state[i * self.face_size: (i + 1) * self.face_size]
-            for i in range(6)
+            for i in range(self.face_number)
         ]
 
     def display(self, mode: str = '', orientation: str = '') -> str:
@@ -70,6 +69,7 @@ class VCubeDisplay:
         display_method = self.display_cube
         default_orientation = ''
 
+        # Only work for 3x3x3
         if mode == 'oll':
             mask = OLL_MASK
             display_method = self.display_top_face
@@ -78,6 +78,9 @@ class VCubeDisplay:
             mask = PLL_MASK
             display_method = self.display_top_face
             default_orientation = 'D'
+        elif mode == 'cross':
+            mask = CROSS_MASK
+            default_orientation = 'BU'
         elif mode == 'f2l':
             mask = F2L_MASK
 
@@ -96,10 +99,6 @@ class VCubeDisplay:
             )
 
             default_orientation = f'D{ selected_front_face }'
-
-        elif mode == 'cross':
-            mask = CROSS_MASK
-            default_orientation = 'BU'
 
         final_orientation = orientation or default_orientation
         if final_orientation:
@@ -120,7 +119,7 @@ class VCubeDisplay:
 
         if USE_COLORS:
             return (
-                f'{ TERM_COLORS[face_color]}'
+                f'{ TERM_COLORS[face_color] }'
                 f' { facelet } '
                 f'{ TERM_COLORS["reset"] }'
             )
