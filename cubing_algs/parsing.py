@@ -11,7 +11,7 @@ import re
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
 from cubing_algs.constants import MOVE_SPLIT
-from cubing_algs.move import InvalidMoveError
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 
 logger = logging.getLogger(__name__)

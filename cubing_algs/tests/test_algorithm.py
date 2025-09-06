@@ -2,7 +2,7 @@
 import unittest
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.algorithm import InvalidMoveError
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
@@ -112,7 +112,7 @@ class AlgorithmTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
         with self.assertRaises(InvalidMoveError):
-            algo.extend(['F2', 'G'])
+            algo += 'F2 G'
 
     def test_iadd_operator(self):
         algo = parse_moves('R2 U')
@@ -130,7 +130,29 @@ class AlgorithmTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
         with self.assertRaises(InvalidMoveError):
-            algo.extend(['F2', 'G'])
+            algo + 'F2 G'
+
+    def test_radd_operator(self):
+        algo = 'F2R2' + parse_moves('D2 U')
+        self.assertEqual(str(algo), 'F2 R2 D2 U')
+
+        for m in algo:
+            self.assertTrue(isinstance(m, Move))
+
+        with self.assertRaises(InvalidMoveError):
+            'F2 G' + algo
+
+    def test_radd_operator_z(self):
+        algo = 'z' + parse_moves('R2 U')
+        self.assertEqual(str(algo), 'z R2 U')
+
+    def test_radd_operator_zprime(self):
+        algo = "z'" + parse_moves('R2 U')
+        self.assertEqual(str(algo), "z' R2 U")
+
+    def test_radd_operator_z2(self):
+        algo = 'z2' + parse_moves('R2 U')
+        self.assertEqual(str(algo), 'z2 R2 U')
 
     def test_add_exploded(self):
         algo = parse_moves('R2 U')

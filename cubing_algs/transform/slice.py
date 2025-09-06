@@ -14,9 +14,9 @@ from cubing_algs.move import Move
 def unslice(old_moves: list[Move], config: dict[str, list[str]]) -> list[Move]:
     moves = []
 
-    move_cache = {}
+    move_cache: dict[Move, list[Move]] = {}
     for move_str, replacements in config.items():
-        move_cache[move_str] = [Move(m) for m in replacements]
+        move_cache[Move(move_str)] = [Move(m) for m in replacements]
 
     for move in old_moves:
         move_untimed = move.untimed

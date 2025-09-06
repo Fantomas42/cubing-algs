@@ -4,8 +4,8 @@ from collections.abc import Iterable
 from functools import cached_property
 
 from cubing_algs.constants import MAX_ITERATIONS
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.metrics import compute_metrics
-from cubing_algs.move import InvalidMoveError
 from cubing_algs.move import Move
 
 
@@ -53,6 +53,11 @@ class Algorithm(UserList[Move]):
     def __iadd__(self, other) -> 'Algorithm':
         self.extend(other)
         return self
+
+    def __radd__(self, other) -> 'Algorithm':
+        result = self.parse_moves(other)
+        result += self
+        return result
 
     def __add__(self, other) -> 'Algorithm':
         if isinstance(other, Algorithm):

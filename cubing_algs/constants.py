@@ -360,6 +360,17 @@ OPPOSITE_FACES = {
 
 FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
 
+FACE_INDEXES = {
+    face: FACE_ORDER.index(face)
+    for face in FACE_ORDER
+}
+
+FACES = ''.join(FACE_ORDER)
+
+INITIAL_STATE = ''
+for face in FACE_ORDER:
+    INITIAL_STATE += face * 9
+
 CORNER_FACELET_MAP = [
     [8, 9, 20],    # URF
     [6, 18, 38],   # UFL
@@ -385,3 +396,73 @@ EDGE_FACELET_MAP = [
     [50, 39],  # BL
     [48, 14],  # BR
 ]
+
+FULL_MASK = '1' * 54
+
+CROSS_MASK = (
+    '010111010'
+    '010010000'
+    '010010000'
+    '000000000'
+    '010010000'
+    '010010000'
+)
+
+F2L_MASK = (
+    '111111111'
+    '111111000'
+    '111111000'
+    '000000000'
+    '111111000'
+    '111111000'
+)
+
+OLL_MASK = (
+    '000000000'
+    '000000000'
+    '000000000'
+    '111111111'
+    '000000000'
+    '000000000'
+)
+
+PLL_MASK = (
+    '000000000'
+    '000000111'
+    '000000111'
+    '111111111'
+    '000000111'
+    '000000111'
+)
+
+F2L_FACES = ['F', 'L', 'R', 'B']
+
+F2L_EDGE_ORIENTATIONS = {
+    'FL': 'F',
+    'FR': 'R',
+    'LB': 'L',
+    'RB': 'B',
+}
+
+ITERATIONS_BY_CUBE_SIZE = {
+    2: (9, 11),
+    3: (25, 30),
+    4: (45, 50),
+    5: (60, 60),
+    6: (80, 80),
+    7: (100, 100),
+}
+
+TOP_FACE_TRANSLATIONS = {
+    1: "z'",  # R
+    2: 'x',   # F
+    3: 'z2',  # D
+    4: 'z',   # L
+    5: "x'",  # B
+}
+
+FRONT_FACE_TRANSLATIONS = {
+    -1: 'y',   # R
+    2:  "y'",  # L
+    3:  'y2',  # B
+}

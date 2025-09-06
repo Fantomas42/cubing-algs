@@ -19,15 +19,6 @@ from cubing_algs.constants import ROTATIONS
 from cubing_algs.constants import WIDE_CHAR
 
 
-class InvalidMoveError(Exception):
-    """
-    Exception raised when an invalid move notation is encountered.
-
-    This can occur when parsing algorithms with incorrect or unsupported
-    move notations.
-    """
-
-
 class Move(UserString):
     """
     Represents a single move in a Rubik's cube algorithm.

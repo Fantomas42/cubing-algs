@@ -1,18 +1,7 @@
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.move import InvalidMoveError
+from cubing_algs.exceptions import InvalidBracketError
+from cubing_algs.exceptions import InvalidOperatorError
 from cubing_algs.transform.mirror import mirror_moves
-
-
-class InvalidBracketError(InvalidMoveError):
-    """
-    Exception raised when an invalid bracket formation is encountered.
-    """
-
-
-class InvalidOperatorError(InvalidMoveError):
-    """
-    Exception raised when an invalid bracket formation is encountered.
-    """
 
 
 def find_innermost_brackets(text: str) -> tuple[int, int] | None:
@@ -28,7 +17,7 @@ def find_innermost_brackets(text: str) -> tuple[int, int] | None:
     while i < len(text):
         if text[i] == '[':
             current_depth += 1
-            if current_depth > max_depth:
+            if current_depth > max_depth:  # pragma: no branch
                 max_depth = current_depth
                 innermost_start = i
         elif text[i] == ']':
@@ -115,4 +104,4 @@ def expand_commutators_and_conjugates(moves: str) -> str:
 
         result = result[:start] + ' ' + expanded + ' ' + result[end + 1:]
 
-    return result
+    return result.strip()
