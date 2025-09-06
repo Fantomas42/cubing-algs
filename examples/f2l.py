@@ -24,3 +24,11 @@ c = VCube()
 
 c.rotate("z2 L U' L' U' L U L' U' L U2 L' z2")
 c.show('f2l')
+
+
+print('Special case #3')
+
+c = VCube()
+
+c.rotate("z2 R' D' R U R' D R U' z2")
+c.show('f2l')
