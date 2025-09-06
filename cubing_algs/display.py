@@ -2,6 +2,8 @@ import os
 from typing import TYPE_CHECKING
 
 from cubing_algs.constants import CROSS_MASK
+from cubing_algs.constants import F2L_EDGE_ORIENTATIONS
+from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import F2L_MASK
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -79,15 +81,13 @@ class VCubeDisplay:
         elif mode == 'f2l':
             mask = F2L_MASK
 
-            selected_front_face = ''
-            for face in ['F', 'L', 'R', 'B']:
+            impacted_faces = ''
+            for face in F2L_FACES:
                 facelets = self.cube.get_face_by_center(face)
-                bottom = facelets[0:3]
-                middle = facelets[3:6]
-                top = facelets[6:9]
-                if len({bottom, middle, top}) > 2:
-                    selected_front_face = face
-                    break
+                if face * 6 not in facelets:
+                    impacted_faces += face
+
+            selected_front_face = F2L_EDGE_ORIENTATIONS.get(impacted_faces, '')
 
             default_orientation = f'D{ selected_front_face }'
 

@@ -1,11 +1,16 @@
 from cubing_algs.vcube import VCube
 
-c = VCube()
 
-c.rotate("y2 z2 R U' R' U R' F R F' U")
+def show_f2l_oriented(orientation):
+    c = VCube()
 
-print('Before:')
-c.show()
+    c.rotate(f"{ orientation } z2 R U' R' U R' F R F' U".strip())
 
-print('After:')
-c.show('f2l')
+    print(f'{ orientation} ====>')
+    c.show('f2l')
+
+
+show_f2l_oriented('')
+show_f2l_oriented('y')
+show_f2l_oriented('y2')
+show_f2l_oriented("y'")
