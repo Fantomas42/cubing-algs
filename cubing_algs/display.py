@@ -1,6 +1,7 @@
 import os
 from typing import TYPE_CHECKING
 
+from cubing_algs.constants import CROSS_MASK
 from cubing_algs.constants import F2L_MASK
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -78,6 +79,9 @@ class VCubeDisplay:
         elif mode == 'f2l':
             mask = F2L_MASK
             default_orientation = 'DF'
+        elif mode == 'cross':
+            mask = CROSS_MASK
+            default_orientation = 'BU'
 
         final_orientation = orientation or default_orientation
         if final_orientation:

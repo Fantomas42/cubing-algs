@@ -106,6 +106,14 @@ class TestVCubeDisplay(unittest.TestCase):
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
 
+    def test_display_cross(self):
+        self.cube.rotate('B L F L F R F L B R')
+        printer = VCubeDisplay(self.cube)
+
+        result = printer.display(mode='cross')
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 10)
+
     def test_display_structure(self):
         printer = VCubeDisplay(self.cube)
         result = printer.display()
