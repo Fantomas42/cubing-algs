@@ -1,15 +1,15 @@
 import os
 from typing import TYPE_CHECKING
 
-from cubing_algs.constants import CROSS_MASK
 from cubing_algs.constants import F2L_ADJACENT_FACES
 from cubing_algs.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.constants import F2L_FACES
-from cubing_algs.constants import F2L_MASK
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.constants import OLL_MASK
-from cubing_algs.constants import PLL_MASK
+from cubing_algs.masks import CROSS_MASK
+from cubing_algs.masks import F2L_MASK
+from cubing_algs.masks import OLL_MASK
+from cubing_algs.masks import PLL_MASK
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
