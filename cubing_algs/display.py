@@ -21,13 +21,20 @@ DEFAULT_COLORS = [
 
 TERM_COLORS = {
     'reset': '\x1b[0;0m',
-    'hide': '\x1b[48;5;238m\x1b[38;5;252m',
+
     'green': '\x1b[48;5;40m\x1b[38;5;232m',
     'blue': '\x1b[48;5;21m\x1b[38;5;230m',
     'red': '\x1b[48;5;196m\x1b[38;5;232m',
     'orange': '\x1b[48;5;208m\x1b[38;5;232m',
     'yellow': '\x1b[48;5;226m\x1b[38;5;232m',
     'white': '\x1b[48;5;254m\x1b[38;5;232m',
+
+    'green_hidden': '\x1b[48;5;238m\x1b[38;5;40m',
+    'blue_hidden': '\x1b[48;5;238m\x1b[38;5;39m',
+    'red_hidden': '\x1b[48;5;238m\x1b[38;5;196m',
+    'orange_hidden': '\x1b[48;5;238m\x1b[38;5;208m',
+    'yellow_hidden': '\x1b[48;5;238m\x1b[38;5;226m',
+    'white_hidden': '\x1b[48;5;238m\x1b[38;5;254m',
 }
 
 FACE_COLORS = dict(
@@ -122,7 +129,9 @@ class VCubeDisplay:
 
     @staticmethod
     def display_facelet(facelet: str, mask: str = '') -> str:
-        face_color = 'hide' if mask == '0' else FACE_COLORS[facelet]
+        face_color = FACE_COLORS[facelet]
+        if mask == '0':
+            face_color += '_hidden'
 
         if USE_COLORS:
             return (
