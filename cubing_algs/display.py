@@ -57,14 +57,44 @@ class VCubeDisplay:
         if not mask:
             return '1' * (self.face_number * self.face_size)
 
-        new_cube = cube.__class__(mask, check=False)
-
         moves = ' '.join(cube.history)
+        new_cube = cube.__class__(mask, check=False)
 
         if moves:
             new_cube.rotate(moves)
 
         return new_cube.state
+
+    def compute_f2l_front_face(self) -> str:
+        impacted_faces = ''
+        saved_facelets = ''
+        cube_d_top = self.cube.oriented_copy('D')
+
+        for face in F2L_FACES:
+            exclusion_pattern = face * 6
+            facelets = cube_d_top.get_face_by_center(face)[3:9]
+
+            if exclusion_pattern != facelets:
+                impacted_faces += face
+                saved_facelets = facelets
+
+        if impacted_faces and len(impacted_faces) != 2:
+            last_face = impacted_faces[-1]
+            index = (
+                0
+                if saved_facelets[0] != last_face
+                or saved_facelets[3] != last_face
+                else 1
+            )
+            impacted_faces = (
+                last_face
+                + F2L_ADJACENT_FACES[last_face][index]
+            )
+
+        return F2L_FACE_ORIENTATIONS.get(
+            ''.join(sorted(impacted_faces)),
+            '',
+        )
 
     def split_faces(self, state: str) -> list[str]:
         return [
@@ -91,28 +121,7 @@ class VCubeDisplay:
             default_orientation = 'BU'
         elif mode in {'f2l', 'af2l'}:
             mask = F2L_MASK
-
-            cube_d_top = self.cube.oriented_copy('D')
-
-            impacted_faces = ''
-            saved_facelets = ''
-            for face in F2L_FACES:
-                exclusion_pattern = face * 6
-                facelets = cube_d_top.get_face_by_center(face)[3:9]
-
-                if exclusion_pattern != facelets:
-                    impacted_faces += face
-                    saved_facelets = facelets
-
-            if len(impacted_faces) == 1:
-                index = 0 if saved_facelets[0] != saved_facelets[3] else 1
-                impacted_faces += F2L_ADJACENT_FACES[impacted_faces][index]
-
-            selected_front_face = F2L_FACE_ORIENTATIONS.get(
-                ''.join(sorted(impacted_faces)), '',
-            )
-
-            default_orientation = f'D{ selected_front_face }'
+            default_orientation = f'D{ self.compute_f2l_front_face() }'
 
         final_orientation = orientation or default_orientation
         if final_orientation:

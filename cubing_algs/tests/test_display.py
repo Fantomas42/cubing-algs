@@ -40,7 +40,9 @@ class TestVCubeDisplay(unittest.TestCase):
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U', '0')
-            expected = f"{ TERM_COLORS['hide'] } U { TERM_COLORS['reset'] }"
+            expected = (
+                f"{ TERM_COLORS['white_hidden'] } U { TERM_COLORS['reset'] }"
+            )
             self.assertEqual(result, expected)
 
     def test_display_top_down_face(self):
@@ -80,9 +82,10 @@ class TestVCubeDisplay(unittest.TestCase):
         self.assertEqual(self.cube.state, initial_state)
         self.assertEqual(len(lines), 10)
 
-    def test_display_with_last_layer(self):
-        printer = VCubeDisplay(self.cube)
+    def test_display_oll(self):
+        self.cube.rotate("z2 F U F' R' F R U' R' F' R z2")
 
+        printer = VCubeDisplay(self.cube)
         initial_state = self.cube.state
 
         result = printer.display(mode='oll')
@@ -91,11 +94,33 @@ class TestVCubeDisplay(unittest.TestCase):
         self.assertEqual(self.cube.state, initial_state)
         self.assertEqual(len(lines), 6)
 
+    def test_display_pll(self):
+        self.cube.rotate("z2 L2 U' L2 D F2 R2 U R2 D' F2 z2")
+
+        printer = VCubeDisplay(self.cube)
+        initial_state = self.cube.state
+
+        result = printer.display(mode='pll')
+        lines = result.split('\n')
+
+        self.assertEqual(self.cube.state, initial_state)
+        self.assertEqual(len(lines), 6)
+
     def test_display_f2l(self):
         self.cube.rotate("z2 R U R' U' z2")
+
         printer = VCubeDisplay(self.cube)
 
         result = printer.display(mode='f2l')
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 10)
+
+    def test_display_af2l(self):
+        self.cube.rotate("z2 B' U' B F U F' U2")
+
+        printer = VCubeDisplay(self.cube)
+
+        result = printer.display(mode='af2l')
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
 
@@ -108,6 +133,7 @@ class TestVCubeDisplay(unittest.TestCase):
 
     def test_display_cross(self):
         self.cube.rotate('B L F L F R F L B R')
+
         printer = VCubeDisplay(self.cube)
 
         result = printer.display(mode='cross')
@@ -147,3 +173,92 @@ class TestVCubeDisplay(unittest.TestCase):
         middle_section = ''.join(lines[3:6])
         for face in ['L', 'F', 'R', 'B']:
             self.assertIn(face, middle_section)
+
+    def test_split_faces(self):
+        printer = VCubeDisplay(self.cube)
+
+        self.assertEqual(
+            printer.split_faces(self.cube.state),
+            [
+                'UUUUUUUUU',
+                'RRRRRRRRR',
+                'FFFFFFFFF',
+                'DDDDDDDDD',
+                'LLLLLLLLL',
+                'BBBBBBBBB',
+            ],
+        )
+
+    def test_compute_mask(self):
+        printer = VCubeDisplay(self.cube)
+        base_mask = (
+            '000000000'
+            '111111111'
+            '111111111'
+            '000000000'
+            '111111111'
+            '111111111'
+        )
+
+        self.assertEqual(
+            printer.compute_mask(
+                self.cube,
+                base_mask,
+            ),
+            base_mask,
+        )
+
+    def test_compute_mask_moves(self):
+        self.cube.rotate('R U F')
+
+        printer = VCubeDisplay(self.cube)
+        base_mask = (
+            '000000000'
+            '111111111'
+            '111111111'
+            '000000000'
+            '111111111'
+            '111111111'
+        )
+
+        self.assertEqual(
+            printer.compute_mask(
+                self.cube,
+                base_mask,
+            ),
+            '000000110'
+            '111111111'
+            '111111001'
+            '110001001'
+            '110110111'
+            '111011011',
+        )
+
+    def test_compute_no_mask(self):
+        printer = VCubeDisplay(self.cube)
+
+        self.assertEqual(
+            printer.compute_mask(self.cube, ''),
+            54 * '1',
+        )
+
+    def test_compute_f2l_front_face(self):
+        cube = VCube()
+        cube.rotate("z2 R U R' U' z2")
+
+        printer = VCubeDisplay(cube)
+
+        self.assertEqual(
+            printer.compute_f2l_front_face(),
+            'F',
+        )
+
+        cube = VCube()
+        cube.rotate("y2 z2 R U R' U' z2")
+
+        printer = VCubeDisplay(cube)
+
+        self.assertEqual(
+            printer.compute_f2l_front_face(),
+            'B',
+        )
