@@ -82,7 +82,7 @@ class VCubeDisplay:
         elif mode == 'cross':
             mask = CROSS_MASK
             default_orientation = 'BU'
-        elif mode == 'f2l':
+        elif mode in {'f2l', 'af2l'}:
             mask = F2L_MASK
 
             cube_d_top = self.cube.oriented_copy('D')
