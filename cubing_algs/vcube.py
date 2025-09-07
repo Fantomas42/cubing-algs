@@ -101,11 +101,13 @@ class VCube(VCubeIntegrityChecker):
 
         return cube
 
-    def display(self, mode: str = '', orientation: str = '') -> str:
-        return VCubeDisplay(self).display(mode, orientation)
+    def display(self, mode: str = '', orientation: str = '',
+                mask: str = '') -> str:
+        return VCubeDisplay(self).display(mode, orientation, mask)
 
-    def show(self, mode: str = '', orientation: str = '') -> None:
-        print(self.display(mode, orientation), end='')
+    def show(self, mode: str = '', orientation: str = '',
+             mask: str = '') -> None:
+        print(self.display(mode, orientation, mask), end='')
 
     def get_face(self, face: str) -> str:
         index = FACE_INDEXES[face]

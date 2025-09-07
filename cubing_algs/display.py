@@ -102,25 +102,26 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, mode: str = '', orientation: str = '') -> str:
-        mask = ''
+    def display(self, mode: str = '', orientation: str = '',
+                mask: str = '') -> str:
+        mode_mask = ''
         display_method = self.display_cube
         default_orientation = ''
 
         # Only work for 3x3x3
         if mode == 'oll':
-            mask = OLL_MASK
+            mode_mask = OLL_MASK
             display_method = self.display_top_face
             default_orientation = 'D'
         elif mode == 'pll':
-            mask = PLL_MASK
+            mode_mask = PLL_MASK
             display_method = self.display_top_face
             default_orientation = 'D'
         elif mode == 'cross':
-            mask = CROSS_MASK
+            mode_mask = CROSS_MASK
             default_orientation = 'BU'
         elif mode in {'f2l', 'af2l'}:
-            mask = F2L_MASK
+            mode_mask = F2L_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
 
         final_orientation = orientation or default_orientation
@@ -131,7 +132,7 @@ class VCubeDisplay:
 
         faces = self.split_faces(cube.state)
         masked_faces = self.split_faces(
-            self.compute_mask(cube, mask),
+            self.compute_mask(cube, mask or mode_mask),
         )
 
         return display_method(faces, masked_faces)
