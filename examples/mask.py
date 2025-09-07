@@ -9,6 +9,8 @@ from cubing_algs.constants import L2_MASK
 from cubing_algs.constants import L3_MASK
 from cubing_algs.constants import OLL_MASK
 from cubing_algs.constants import PLL_MASK
+from cubing_algs.masks import intersection_masks
+from cubing_algs.masks import union_masks
 from cubing_algs.vcube import VCube
 
 
@@ -31,6 +33,20 @@ examples = (
     ['L1', L1_MASK],
     ['L2', L2_MASK],
     ['L3', L3_MASK],
+    ['L1 | L3', union_masks(L1_MASK, L3_MASK)],
+    [
+        'PLL | (F2L FR FL BR BL & L1)',
+        union_masks(
+            PLL_MASK,
+            intersection_masks(
+                L1_MASK,
+                union_masks(
+                    F2L_BL_MASK, F2L_BR_MASK,
+                    F2L_FL_MASK, F2L_FR_MASK,
+                ),
+            ),
+        ),
+     ],
 )
 
 for name, mask in examples:
