@@ -440,12 +440,15 @@ F2L_FACES = ['F', 'L', 'R', 'B']
 F2L_FACE_ORIENTATIONS = {
     'FL': 'F',
     'FR': 'R',
-    'LB': 'L',
-    'RB': 'B',
-    'F': 'F',
-    'R': 'R',
-    'L': 'L',
-    'B': 'B',
+    'BL': 'L',
+    'BR': 'B',
+}
+
+F2L_ADJACENT_FACES = {
+    'R': ('B', 'F'),
+    'L': ('F', 'B'),
+    'B': ('L', 'R'),
+    'F': ('R', 'L'),
 }
 
 ITERATIONS_BY_CUBE_SIZE = {
