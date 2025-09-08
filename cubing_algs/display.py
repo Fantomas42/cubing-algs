@@ -119,7 +119,7 @@ class VCubeDisplay:
             default_orientation = 'D'
         elif mode == 'cross':
             mode_mask = CROSS_MASK
-            default_orientation = 'BU'
+            default_orientation = 'FU'
         elif mode in {'f2l', 'af2l'}:
             mode_mask = F2L_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
