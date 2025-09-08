@@ -42,7 +42,7 @@ examples = (
     ['CORNERS | EDGES', union_masks(CORNERS_MASK, EDGES_MASK)],
     ['L1 | L3', union_masks(L1_MASK, L3_MASK)],
     [
-        'PLL | (F2L FR FL BR BL & L1)',
+        'DC | PLL | (F2L FR FL BR BL & L1)',
         union_masks(
             PLL_MASK,
             intersection_masks(
@@ -52,6 +52,12 @@ examples = (
                     F2L_FL_MASK, F2L_FR_MASK,
                 ),
             ),
+            '000000000'
+            '000000000'
+            '000000000'
+            '000010000'
+            '000000000'
+            '000000000',
         ),
      ],
 )
