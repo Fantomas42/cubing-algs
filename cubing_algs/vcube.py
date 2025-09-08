@@ -1,9 +1,8 @@
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.constants import FRONT_FACE_TRANSLATIONS
 from cubing_algs.constants import INITIAL_STATE
-from cubing_algs.constants import TOP_FACE_TRANSLATIONS
+from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
@@ -52,13 +51,13 @@ class VCube(VCubeIntegrityChecker):
     def is_solved(self) -> bool:
         return all(face * self.face_size in self.state for face in FACE_ORDER)
 
-    def rotate(self, moves: str | Algorithm) -> str:
+    def rotate(self, moves: str | Algorithm, *, history: bool = True) -> str:
         if isinstance(moves, Algorithm):
             for m in moves:
-                self.rotate_move(str(m))
+                self.rotate_move(str(m), history=history)
         else:
             for m in moves.split(' '):
-                self.rotate_move(m)
+                self.rotate_move(m, history=history)
         return self._state
 
     def rotate_move(self, move: str, *, history: bool = True) -> str:
@@ -82,30 +81,33 @@ class VCube(VCubeIntegrityChecker):
             history=history,
         )
 
-    def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
+    def compute_orientation_moves(self, faces: str) -> str:
         top_face, front_face = self.check_face_orientations(faces)
-        cube = self.copy(full=full)
 
-        top_face_index = cube.get_face_index(top_face)
-        if top_face_index:
-            top_rotation = TOP_FACE_TRANSLATIONS[top_face_index]
-            cube.rotate_move(top_rotation, history=full)
+        orientation_key = str(self.get_face_index(top_face))
 
         if front_face:
-            front_face_index = cube.get_face_index(front_face)
-            delta = front_face_index - 2  # F index
+            orientation_key += str(self.get_face_index(front_face))
 
-            if delta:
-                front_rotation = FRONT_FACE_TRANSLATIONS[delta]
-                cube.rotate_move(front_rotation, history=full)
+        return OFFSET_ORIENTATION_MAP[orientation_key]
+
+    def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
+        cube = self.copy(full=full)
+
+        moves = self.compute_orientation_moves(faces)
+
+        if moves:
+            cube.rotate(moves, history=full)
 
         return cube
 
-    def display(self, mode: str = '', orientation: str = '') -> str:
-        return VCubeDisplay(self).display(mode, orientation)
+    def display(self, mode: str = '', orientation: str = '',
+                mask: str = '') -> str:
+        return VCubeDisplay(self).display(mode, orientation, mask)
 
-    def show(self, mode: str = '', orientation: str = '') -> None:
-        print(self.display(mode, orientation), end='')
+    def show(self, mode: str = '', orientation: str = '',
+             mask: str = '') -> None:
+        print(self.display(mode, orientation, mask), end='')
 
     def get_face(self, face: str) -> str:
         index = FACE_INDEXES[face]

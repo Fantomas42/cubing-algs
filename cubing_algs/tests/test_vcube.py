@@ -52,6 +52,26 @@ class VCubeTestCase(unittest.TestCase):
 
         self.assertTrue(cube.is_solved)
 
+    def test_rotate_history(self):
+        cube = VCube()
+        cube.rotate('R')
+
+        self.assertEqual(cube.history, ['R'])
+
+        cube.rotate('L', history=False)
+
+        self.assertEqual(cube.history, ['R'])
+
+    def test_rotate_move_history(self):
+        cube = VCube()
+        cube.rotate_move('R')
+
+        self.assertEqual(cube.history, ['R'])
+
+        cube.rotate_move('L', history=False)
+
+        self.assertEqual(cube.history, ['R'])
+
     def test_copy(self):
         cube = VCube()
         cube.rotate('R2 F2 D2 B')
@@ -323,7 +343,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
         with self.assertRaises(InvalidFaceError):
             cube.oriented_copy('FB')
 
-    def test_history_preservation(self):
+    def test_oriented_copy_history_preservation(self):
         cube = VCube()
         cube.rotate('R F')
 
@@ -344,25 +364,25 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
             0,
         )
 
-    def test_history_tracking(self):
+    def test_oriented_copy_history_tracking(self):
         cube = VCube()
         cube.rotate('R F')
 
         oriented = cube.oriented_copy('DF', full=True)
 
         self.assertEqual(
-            len(oriented.history),
-            3,
+            oriented.history,
+            ['R', 'F', 'z2'],
         )
 
-        oriented = cube.oriented_copy('DB', full=True)
+        oriented = cube.oriented_copy('DR', full=True)
 
         self.assertEqual(
-            len(oriented.history),
-            4,
+            oriented.history,
+            ['R', 'F', 'y', 'z2'],
         )
 
-    def test_all_reorientation(self):
+    def test_all_edge_reorientation(self):
         orientations = [
             'UF', 'UB', 'UR', 'UL',
             'DF', 'DB', 'DR', 'DL',
@@ -384,6 +404,20 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
                 self.assertEqual(
                     cube.state[21],
                     orientation[1],
+                )
+
+    def test_all_reorientation(self):
+        orientations = [
+            'U', 'R', 'F', 'D', 'L', 'B',
+        ]
+
+        for orientation in orientations:
+            with self.subTest(orientation=orientation):
+                cube = VCube().oriented_copy(orientation)
+
+                self.assertEqual(
+                    cube.state[4],
+                    orientation[0],
                 )
 
 
