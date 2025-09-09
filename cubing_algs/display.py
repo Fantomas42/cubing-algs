@@ -170,7 +170,7 @@ class VCubeDisplay:
 
     def display_top_down_adjacent_facelets(self, face: str, face_mask: str,
                                            *, top: bool = False) -> str:
-        result = '   '
+        result = ' ' * (self.facelet_size * self.cube_size)
         facelets = face[:3]
         facelets_mask = face_mask[:3]
 
@@ -239,6 +239,8 @@ class VCubeDisplay:
 
         # Middle
         for line in range(3):
+            result += ' ' * (self.facelet_size * (self.cube_size - 1))
+
             result += self.display_facelet(
                 faces[FACE_INDEXES['L']][line],
                 faces_mask[FACE_INDEXES['L']][line],
