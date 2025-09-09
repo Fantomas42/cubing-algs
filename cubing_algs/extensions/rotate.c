@@ -753,112 +753,104 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
             new_state[53] = b_face[8];
 
           } else if (direction == 2) {
-            // r2 : analyse précise position par position
+            // r2 = L2 x2, corrections basées sur l'analyse des permutations
             rotate_face_180(r_face, r_rotated);
-            rotate_face_180(l_face, l_rotated);
 
+            // Seule la face R tourne 180°, L reste inchangée d'après l'analyse
             for (int j = 0; j < 9; j++) {
               new_state[9 + j] = r_rotated[j];
-              new_state[36 + j] = l_rotated[j];
+              new_state[36 + j] = l_face[j];  // L reste inchangée
             }
 
-            // Face U: UUUUUUUUU -> UDDUDDUD
-            new_state[0] = u_face[0]; // U->U
-            new_state[1] = d_face[1]; // U->D
-            new_state[2] = d_face[2]; // U->D
-            new_state[3] = u_face[3]; // U->U
-            new_state[4] = d_face[4]; // U->D
-            new_state[5] = d_face[5]; // U->D
-            new_state[6] = u_face[6]; // U->U
-            new_state[7] = d_face[7]; // U->D
-            new_state[8] = d_face[8]; // U->D
+            // Corrections exactes basées sur l'analyse L2 x2
+            new_state[ 1] = d_face[1]; // U[1]
+            new_state[ 2] = d_face[2]; // U[2]
+            new_state[ 4] = d_face[4]; // U[4]
+            new_state[ 5] = d_face[5]; // U[5]
+            new_state[ 7] = d_face[7]; // U[7]
+            new_state[ 8] = d_face[8]; // U[8]
+            new_state[19] = b_face[7]; // F[1]
+            new_state[20] = b_face[6]; // F[2]
+            new_state[22] = b_face[4]; // F[4]
+            new_state[23] = b_face[3]; // F[5]
+            new_state[25] = b_face[1]; // F[7]
+            new_state[26] = b_face[0]; // F[8]
+            new_state[28] = u_face[1]; // D[1]
+            new_state[29] = u_face[2]; // D[2]
+            new_state[31] = u_face[4]; // D[4]
+            new_state[32] = u_face[5]; // D[5]
+            new_state[34] = u_face[7]; // D[7]
+            new_state[35] = u_face[8]; // D[8]
+            new_state[45] = f_face[8]; // B[0]
+            new_state[46] = f_face[7]; // B[1]
+            new_state[48] = f_face[5]; // B[3]
+            new_state[49] = f_face[4]; // B[4]
+            new_state[51] = f_face[2]; // B[6]
+            new_state[52] = f_face[1]; // B[7]
 
-            // Face F: FFFFFFFFF -> FBBFBBFBB
-            new_state[18] = f_face[0]; // F->F
-            new_state[19] = b_face[1]; // F->B
-            new_state[20] = b_face[2]; // F->B
-            new_state[21] = f_face[3]; // F->F
-            new_state[22] = b_face[4]; // F->B
-            new_state[23] = b_face[5]; // F->B
-            new_state[24] = f_face[6]; // F->F
-            new_state[25] = b_face[7]; // F->B
-            new_state[26] = b_face[8]; // F->B
-
-            // Face D: DDDDDDDDD -> DUUDUUDUU
-            new_state[27] = d_face[0]; // D->D
-            new_state[28] = u_face[1]; // D->U
-            new_state[29] = u_face[2]; // D->U
-            new_state[30] = d_face[3]; // D->D
-            new_state[31] = u_face[4]; // D->U
-            new_state[32] = u_face[5]; // D->U
-            new_state[33] = d_face[6]; // D->D
-            new_state[34] = u_face[7]; // D->U
-            new_state[35] = u_face[8]; // D->U
-
-            // Face B: BBBBBBBBB -> FFBFFBFFB
-            new_state[45] = f_face[1]; // B->F
-            new_state[46] = f_face[2]; // B->F
-            new_state[47] = b_face[2]; // B->B
-            new_state[48] = f_face[4]; // B->F
-            new_state[49] = f_face[5]; // B->F
-            new_state[50] = b_face[5]; // B->B
-            new_state[51] = f_face[7]; // B->F
-            new_state[52] = f_face[8]; // B->F
-            new_state[53] = b_face[8]; // B->B
+            // Toutes les autres positions restent inchangées
+            new_state[0] = u_face[0];
+            new_state[3] = u_face[3];
+            new_state[6] = u_face[6];
+            new_state[18] = f_face[0];
+            new_state[21] = f_face[3];
+            new_state[24] = f_face[6];
+            new_state[27] = d_face[0];
+            new_state[30] = d_face[3];
+            new_state[33] = d_face[6];
+            new_state[47] = b_face[2];
+            new_state[50] = b_face[5];
+            new_state[53] = b_face[8];
 
           } else {
-            // r' : analyse précise position par position
+            // r' = L' x', corrections basées sur l'analyse des permutations
             rotate_face_counterclockwise(r_face, r_rotated);
-            rotate_face_clockwise(l_face, l_rotated);
 
+            // Seule la face R tourne, L reste inchangée d'après l'analyse
             for (int j = 0; j < 9; j++) {
               new_state[9 + j] = r_rotated[j];
-              new_state[36 + j] = l_rotated[j];
+              new_state[36 + j] = l_face[j];  // L reste inchangée
             }
 
-            // Face U: UUUUUUUUU -> UBBUBBUB
-            new_state[0] = u_face[0]; // U->U
-            new_state[1] = b_face[1]; // U->B
-            new_state[2] = b_face[2]; // U->B
-            new_state[3] = u_face[3]; // U->U
-            new_state[4] = b_face[4]; // U->B
-            new_state[5] = b_face[5]; // U->B
-            new_state[6] = u_face[6]; // U->U
-            new_state[7] = b_face[7]; // U->B
-            new_state[8] = b_face[8]; // U->B
+            // Corrections exactes basées sur l'analyse L' x'
+            new_state[ 1] = b_face[7]; // U[1]
+            new_state[ 2] = b_face[6]; // U[2]
+            new_state[ 4] = b_face[4]; // U[4]
+            new_state[ 5] = b_face[3]; // U[5]
+            new_state[ 7] = b_face[1]; // U[7]
+            new_state[ 8] = b_face[0]; // U[8]
+            new_state[19] = u_face[1]; // F[1]
+            new_state[20] = u_face[2]; // F[2]
+            new_state[22] = u_face[4]; // F[4]
+            new_state[23] = u_face[5]; // F[5]
+            new_state[25] = u_face[7]; // F[7]
+            new_state[26] = u_face[8]; // F[8]
+            new_state[28] = f_face[1]; // D[1]
+            new_state[29] = f_face[2]; // D[2]
+            new_state[31] = f_face[4]; // D[4]
+            new_state[32] = f_face[5]; // D[5]
+            new_state[34] = f_face[7]; // D[7]
+            new_state[35] = f_face[8]; // D[8]
+            new_state[45] = d_face[8]; // B[0]
+            new_state[46] = d_face[7]; // B[1]
+            new_state[48] = d_face[5]; // B[3]
+            new_state[49] = d_face[4]; // B[4]
+            new_state[51] = d_face[2]; // B[6]
+            new_state[52] = d_face[1]; // B[7]
 
-            // Face F: FFFFFFFFF -> FUUFUUFUU
-            new_state[18] = f_face[0]; // F->F
-            new_state[19] = u_face[1]; // F->U
-            new_state[20] = u_face[2]; // F->U
-            new_state[21] = f_face[3]; // F->F
-            new_state[22] = u_face[4]; // F->U
-            new_state[23] = u_face[5]; // F->U
-            new_state[24] = f_face[6]; // F->F
-            new_state[25] = u_face[7]; // F->U
-            new_state[26] = u_face[8]; // F->U
-
-            // Face D: DDDDDDDDD -> DFFDFFDFF
-            new_state[27] = d_face[0]; // D->D
-            new_state[28] = f_face[1]; // D->F
-            new_state[29] = f_face[2]; // D->F
-            new_state[30] = d_face[3]; // D->D
-            new_state[31] = f_face[4]; // D->F
-            new_state[32] = f_face[5]; // D->F
-            new_state[33] = d_face[6]; // D->D
-            new_state[34] = f_face[7]; // D->F
-            new_state[35] = f_face[8]; // D->F
-
-            // Face B: BBBBBBBBB -> DDBDDBDDB
-            new_state[45] = d_face[1]; // B->D
-            new_state[46] = d_face[2]; // B->D
-            new_state[47] = b_face[2]; // B->B
-            new_state[48] = d_face[4]; // B->D
-            new_state[49] = d_face[5]; // B->D
-            new_state[50] = b_face[5]; // B->B
-            new_state[51] = d_face[7]; // B->D
-            new_state[52] = d_face[8]; // B->D
-            new_state[53] = b_face[8]; // B->B
+            // Toutes les autres positions restent inchangées
+            new_state[0] = u_face[0];
+            new_state[3] = u_face[3];
+            new_state[6] = u_face[6];
+            new_state[18] = f_face[0];
+            new_state[21] = f_face[3];
+            new_state[24] = f_face[6];
+            new_state[27] = d_face[0];
+            new_state[30] = d_face[3];
+            new_state[33] = d_face[6];
+            new_state[47] = b_face[2];
+            new_state[50] = b_face[5];
+            new_state[53] = b_face[8];
           }
           break;
         }
@@ -930,39 +922,39 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 // f2 equivalent à B2 z2 - appliquer f deux fois
                 rotate_face_180(f_face, f_rotated);
                 
-                // Application de f deux fois via les permutations calculées
-                new_state[ 3] = d_face[8]; // U[3]
-                new_state[ 4] = d_face[7]; // U[4]
-                new_state[ 5] = d_face[6]; // U[5]
-                new_state[ 6] = d_face[5]; // U[6]
-                new_state[ 7] = d_face[4]; // U[7]
-                new_state[ 8] = d_face[3]; // U[8]
+                // Application des corrections d'après l'analyse B2 z2
+                new_state[ 3] = d_face[5]; // U[3]
+                new_state[ 4] = d_face[4]; // U[4]
+                new_state[ 5] = d_face[3]; // U[5]
+                new_state[ 6] = d_face[2]; // U[6]
+                new_state[ 7] = d_face[1]; // U[7]
+                new_state[ 8] = d_face[0]; // U[8]
                 new_state[ 9] = l_face[8]; // R[0]
                 new_state[10] = l_face[7]; // R[1]
                 new_state[12] = l_face[5]; // R[3]
                 new_state[13] = l_face[4]; // R[4]
                 new_state[15] = l_face[2]; // R[6]
                 new_state[16] = l_face[1]; // R[7]
-                new_state[18] = f_rotated[8]; // F[0]
-                new_state[19] = f_rotated[7]; // F[1]
-                new_state[20] = f_rotated[6]; // F[2]
-                new_state[21] = f_rotated[5]; // F[3]
-                new_state[23] = f_rotated[3]; // F[5]
-                new_state[24] = f_rotated[2]; // F[6]
-                new_state[25] = f_rotated[1]; // F[7]
-                new_state[26] = f_rotated[0]; // F[8]
+                new_state[18] = f_face[8]; // F[0]
+                new_state[19] = f_face[7]; // F[1]
+                new_state[20] = f_face[6]; // F[2]
+                new_state[21] = f_face[5]; // F[3]
+                new_state[23] = f_face[3]; // F[5]
+                new_state[24] = f_face[2]; // F[6]
+                new_state[25] = f_face[1]; // F[7]
+                new_state[26] = f_face[0]; // F[8]
                 new_state[27] = u_face[8]; // D[0]
                 new_state[28] = u_face[7]; // D[1]
                 new_state[29] = u_face[6]; // D[2]
                 new_state[30] = u_face[5]; // D[3]
                 new_state[31] = u_face[4]; // D[4]
                 new_state[32] = u_face[3]; // D[5]
-                new_state[37] = r_face[1]; // L[1]
-                new_state[38] = r_face[0]; // L[2]
+                new_state[37] = r_face[7]; // L[1]
+                new_state[38] = r_face[6]; // L[2]
                 new_state[40] = r_face[4]; // L[4]
                 new_state[41] = r_face[3]; // L[5]
-                new_state[43] = r_face[7]; // L[7]
-                new_state[44] = r_face[6]; // L[8]
+                new_state[43] = r_face[1]; // L[7]
+                new_state[44] = r_face[0]; // L[8]
 
                 // Éléments non modifiés
                 new_state[0] = u_face[0]; new_state[1] = u_face[1]; new_state[2] = u_face[2];
@@ -991,14 +983,14 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[13] = d_face[4]; // R[4]
                 new_state[15] = d_face[0]; // R[6]
                 new_state[16] = d_face[3]; // R[7]
-                new_state[18] = f_rotated[2]; // F[0]
-                new_state[19] = f_rotated[5]; // F[1]
-                new_state[20] = f_rotated[8]; // F[2]
-                new_state[21] = f_rotated[1]; // F[3]
-                new_state[23] = f_rotated[7]; // F[5]
-                new_state[24] = f_rotated[0]; // F[6]
-                new_state[25] = f_rotated[3]; // F[7]
-                new_state[26] = f_rotated[6]; // F[8]
+                new_state[18] = f_face[2]; // F[0]
+                new_state[19] = f_face[5]; // F[1]
+                new_state[20] = f_face[8]; // F[2]
+                new_state[21] = f_face[1]; // F[3]
+                new_state[23] = f_face[7]; // F[5]
+                new_state[24] = f_face[0]; // F[6]
+                new_state[25] = f_face[3]; // F[7]
+                new_state[26] = f_face[6]; // F[8]
                 new_state[27] = l_face[2]; // D[0]
                 new_state[28] = l_face[5]; // D[1]
                 new_state[29] = l_face[8]; // D[2]
@@ -1241,72 +1233,104 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[51] = b_face[6];
 
             } else if (direction == 2) {
-                // l2 = R2 x2
+                // l2 = R2 x2, corrections basées sur l'analyse des permutations
                 rotate_face_180(l_face, l_rotated);
-                rotate_face_180(r_face, r_rotated);
 
+                // Seule la face L tourne 180°, R reste inchangée d'après l'analyse
                 for (int j = 0; j < 9; j++) {
                     new_state[36 + j] = l_rotated[j];
-                    new_state[9 + j] = r_rotated[j];
+                    new_state[9 + j] = r_face[j];  // R reste inchangée
                 }
 
-                // Left et middle columns: seulement x2 (U<->D, F<->B inv)
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3] = d_face[i*3];              // U left <- D left
-                    new_state[18 + i*3] = b_face[8 - i*3 - 2]; // F left <- B right inversé
-                    new_state[27 + i*3] = u_face[i*3];         // D left <- U left
-                    new_state[45 + i*3 + 2] = f_face[i*3];     // B right <- F left inversé
-                }
+                // Corrections exactes basées sur l'analyse R2 x2
+                new_state[ 0] = d_face[0]; // U[0]
+                new_state[ 1] = d_face[1]; // U[1]
+                new_state[ 3] = d_face[3]; // U[3]
+                new_state[ 4] = d_face[4]; // U[4]
+                new_state[ 6] = d_face[6]; // U[6]
+                new_state[ 7] = d_face[7]; // U[7]
+                new_state[18] = b_face[8]; // F[0]
+                new_state[19] = b_face[7]; // F[1]
+                new_state[21] = b_face[5]; // F[3]
+                new_state[22] = b_face[4]; // F[4]
+                new_state[24] = b_face[2]; // F[6]
+                new_state[25] = b_face[1]; // F[7]
+                new_state[27] = u_face[0]; // D[0]
+                new_state[28] = u_face[1]; // D[1]
+                new_state[30] = u_face[3]; // D[3]
+                new_state[31] = u_face[4]; // D[4]
+                new_state[33] = u_face[6]; // D[6]
+                new_state[34] = u_face[7]; // D[7]
+                new_state[46] = f_face[7]; // B[1]
+                new_state[47] = f_face[6]; // B[2]
+                new_state[49] = f_face[4]; // B[4]
+                new_state[50] = f_face[3]; // B[5]
+                new_state[52] = f_face[1]; // B[7]
+                new_state[53] = f_face[0]; // B[8]
 
-                // Right columns: R2 et x2 s'annulent, restent identiques
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 2] = u_face[i*3 + 2];     // U right unchanged
-                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
-                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
-                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
-                }
-
-                // Middle columns: seulement x2
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 1] = d_face[i*3 + 1];         // U middle <- D middle
-                    new_state[18 + i*3 + 1] = b_face[8 - i*3 - 1]; // F middle <- B middle inversé
-                    new_state[27 + i*3 + 1] = u_face[i*3 + 1];     // D middle <- U middle
-                    new_state[45 + i*3 + 1] = f_face[i*3 + 1];     // B middle <- F middle inversé
-                }
+                // Toutes les autres positions restent inchangées
+                new_state[2] = u_face[2];
+                new_state[5] = u_face[5];
+                new_state[8] = u_face[8];
+                new_state[20] = f_face[2];
+                new_state[23] = f_face[5];
+                new_state[26] = f_face[8];
+                new_state[29] = d_face[2];
+                new_state[32] = d_face[5];
+                new_state[35] = d_face[8];
+                new_state[45] = b_face[0];
+                new_state[48] = b_face[3];
+                new_state[51] = b_face[6];
 
             } else {
-                // l' = R' x
+                // l' = R' x, corrections basées sur l'analyse des permutations
                 rotate_face_counterclockwise(l_face, l_rotated);
-                rotate_face_clockwise(r_face, r_rotated);
 
+                // Seule la face L tourne, R reste inchangée d'après l'analyse
                 for (int j = 0; j < 9; j++) {
                     new_state[36 + j] = l_rotated[j];
-                    new_state[9 + j] = r_rotated[j];
+                    new_state[9 + j] = r_face[j];  // R reste inchangée
                 }
 
-                // Left et middle columns: seulement effet x (U->F, F->D, D->B inv, B inv->U)
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3] = f_face[i*3];         // U left <- F left
-                    new_state[18 + i*3] = d_face[i*3];    // F left <- D left
-                    new_state[27 + i*3] = b_face[8 - i*3 - 2]; // D left <- B right inversé
-                    new_state[45 + i*3 + 2] = u_face[i*3]; // B right <- U left
-                }
+                // Corrections exactes basées sur l'analyse R' x
+                new_state[ 0] = f_face[0]; // U[0]
+                new_state[ 1] = f_face[1]; // U[1]
+                new_state[ 3] = f_face[3]; // U[3]
+                new_state[ 4] = f_face[4]; // U[4]
+                new_state[ 6] = f_face[6]; // U[6]
+                new_state[ 7] = f_face[7]; // U[7]
+                new_state[18] = d_face[0]; // F[0]
+                new_state[19] = d_face[1]; // F[1]
+                new_state[21] = d_face[3]; // F[3]
+                new_state[22] = d_face[4]; // F[4]
+                new_state[24] = d_face[6]; // F[6]
+                new_state[25] = d_face[7]; // F[7]
+                new_state[27] = b_face[8]; // D[0]
+                new_state[28] = b_face[7]; // D[1]
+                new_state[30] = b_face[5]; // D[3]
+                new_state[31] = b_face[4]; // D[4]
+                new_state[33] = b_face[2]; // D[6]
+                new_state[34] = b_face[1]; // D[7]
+                new_state[46] = u_face[7]; // B[1]
+                new_state[47] = u_face[6]; // B[2]
+                new_state[49] = u_face[4]; // B[4]
+                new_state[50] = u_face[3]; // B[5]
+                new_state[52] = u_face[1]; // B[7]
+                new_state[53] = u_face[0]; // B[8]
 
-                // Right columns: R' et x s'annulent aussi
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 2] = u_face[i*3 + 2];     // U right unchanged
-                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
-                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
-                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
-                }
-
-                // Middle columns: seulement effet x
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 1] = f_face[i*3 + 1];     // U middle <- F middle
-                    new_state[18 + i*3 + 1] = d_face[i*3 + 1]; // F middle <- D middle
-                    new_state[27 + i*3 + 1] = b_face[8 - i*3 - 1]; // D middle <- B middle inversé
-                    new_state[45 + i*3 + 1] = u_face[i*3 + 1]; // B middle <- U middle
-                }
+                // Toutes les autres positions restent inchangées
+                new_state[2] = u_face[2];
+                new_state[5] = u_face[5];
+                new_state[8] = u_face[8];
+                new_state[20] = f_face[2];
+                new_state[23] = f_face[5];
+                new_state[26] = f_face[8];
+                new_state[29] = d_face[2];
+                new_state[32] = d_face[5];
+                new_state[35] = d_face[8];
+                new_state[45] = b_face[0];
+                new_state[48] = b_face[3];
+                new_state[51] = b_face[6];
             }
             break;
         }
