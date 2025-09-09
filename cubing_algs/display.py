@@ -21,6 +21,7 @@ DEFAULT_COLORS = [
 
 TERM_COLORS = {
     'reset': '\x1b[0;0m',
+    'masked': '\x1b[48;5;236m\x1b[38;5;252m',
 
     'green': '\x1b[48;5;40m\x1b[38;5;232m',
     'blue': '\x1b[48;5;21m\x1b[38;5;230m',
@@ -139,9 +140,12 @@ class VCubeDisplay:
 
     @staticmethod
     def display_facelet(facelet: str, mask: str = '') -> str:
-        face_color = FACE_COLORS[facelet]
-        if mask == '0':
-            face_color += '_hidden'
+        if facelet not in FACE_COLORS:
+            face_color = 'masked'
+        else:
+            face_color = FACE_COLORS[facelet]
+            if mask == '0':
+                face_color += '_hidden'
 
         if USE_COLORS:
             return (
