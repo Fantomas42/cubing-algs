@@ -51,76 +51,168 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
     switch (face) {
         case 'U': {
-            // Sauvegarder les rangées du haut des 4 faces latérales
-            char f_top[3] = {new_state[18], new_state[19], new_state[20]};
-            char r_top[3] = {new_state[9], new_state[10], new_state[11]};
-            char b_top[3] = {new_state[45], new_state[46], new_state[47]};
-            char l_top[3] = {new_state[36], new_state[37], new_state[38]};
-
-            // Rotation de la face U selon la direction
-            char u_face[9];
-            for (int j = 0; j < 9; j++) u_face[j] = new_state[j];
-            char rotated_u[9];
+            char temp_state[55];
+            strcpy(temp_state, new_state);
 
             if (direction == 1) {
-                rotate_face_clockwise(u_face, rotated_u);
-                // Rotation des rangées du haut (sens horaire)
-                new_state[9] = b_top[0]; new_state[10] = b_top[1]; new_state[11] = b_top[2];
-                new_state[18] = r_top[0]; new_state[19] = r_top[1]; new_state[20] = r_top[2];
-                new_state[36] = f_top[0]; new_state[37] = f_top[1]; new_state[38] = f_top[2];
-                new_state[45] = l_top[0]; new_state[46] = l_top[1]; new_state[47] = l_top[2];
+                // Face U rotation clockwise
+                new_state[0] = temp_state[6];   // U[6] -> U[0]
+                new_state[1] = temp_state[3];   // U[3] -> U[1]
+                new_state[2] = temp_state[0];   // U[0] -> U[2]
+                new_state[3] = temp_state[7];   // U[7] -> U[3]
+                new_state[4] = temp_state[4];   // U[4] -> U[4]
+                new_state[5] = temp_state[1];   // U[1] -> U[5]
+                new_state[6] = temp_state[8];   // U[8] -> U[6]
+                new_state[7] = temp_state[5];   // U[5] -> U[7]
+                new_state[8] = temp_state[2];   // U[2] -> U[8]
+                
+                // Rotation des rangées du haut (sens horaire: R<-B, F<-R, L<-F, B<-L)
+                new_state[9] = temp_state[45];   // B[0] -> R[0]
+                new_state[10] = temp_state[46];  // B[1] -> R[1]
+                new_state[11] = temp_state[47];  // B[2] -> R[2]
+                new_state[18] = temp_state[9];   // R[0] -> F[0]
+                new_state[19] = temp_state[10];  // R[1] -> F[1]
+                new_state[20] = temp_state[11];  // R[2] -> F[2]
+                new_state[36] = temp_state[18];  // F[0] -> L[0]
+                new_state[37] = temp_state[19];  // F[1] -> L[1]
+                new_state[38] = temp_state[20];  // F[2] -> L[2]
+                new_state[45] = temp_state[36];  // L[0] -> B[0]
+                new_state[46] = temp_state[37];  // L[1] -> B[1]
+                new_state[47] = temp_state[38];  // L[2] -> B[2]
             } else if (direction == 2) {
-                rotate_face_180(u_face, rotated_u);
-                // Rotation 180° des rangées du haut
-                new_state[9] = l_top[0]; new_state[10] = l_top[1]; new_state[11] = l_top[2];
-                new_state[18] = b_top[0]; new_state[19] = b_top[1]; new_state[20] = b_top[2];
-                new_state[36] = r_top[0]; new_state[37] = r_top[1]; new_state[38] = r_top[2];
-                new_state[45] = f_top[0]; new_state[46] = f_top[1]; new_state[47] = f_top[2];
+                // Face U rotation 180°
+                new_state[0] = temp_state[8];   // U[8] -> U[0]
+                new_state[1] = temp_state[7];   // U[7] -> U[1]
+                new_state[2] = temp_state[6];   // U[6] -> U[2]
+                new_state[3] = temp_state[5];   // U[5] -> U[3]
+                new_state[4] = temp_state[4];   // U[4] -> U[4]
+                new_state[5] = temp_state[3];   // U[3] -> U[5]
+                new_state[6] = temp_state[2];   // U[2] -> U[6]
+                new_state[7] = temp_state[1];   // U[1] -> U[7]
+                new_state[8] = temp_state[0];   // U[0] -> U[8]
+                
+                // Rotation 180° des rangées du haut (R<-L, F<-B, L<-R, B<-F)
+                new_state[9] = temp_state[36];   // L[0] -> R[0]
+                new_state[10] = temp_state[37];  // L[1] -> R[1]
+                new_state[11] = temp_state[38];  // L[2] -> R[2]
+                new_state[18] = temp_state[45];  // B[0] -> F[0]
+                new_state[19] = temp_state[46];  // B[1] -> F[1]
+                new_state[20] = temp_state[47];  // B[2] -> F[2]
+                new_state[36] = temp_state[9];   // R[0] -> L[0]
+                new_state[37] = temp_state[10];  // R[1] -> L[1]
+                new_state[38] = temp_state[11];  // R[2] -> L[2]
+                new_state[45] = temp_state[18];  // F[0] -> B[0]
+                new_state[46] = temp_state[19];  // F[1] -> B[1]
+                new_state[47] = temp_state[20];  // F[2] -> B[2]
             } else { // direction == 3 (anti-horaire)
-                rotate_face_counterclockwise(u_face, rotated_u);
-                // Rotation des rangées du haut (sens anti-horaire)
-                new_state[9] = f_top[0]; new_state[10] = f_top[1]; new_state[11] = f_top[2];
-                new_state[18] = l_top[0]; new_state[19] = l_top[1]; new_state[20] = l_top[2];
-                new_state[36] = b_top[0]; new_state[37] = b_top[1]; new_state[38] = b_top[2];
-                new_state[45] = r_top[0]; new_state[46] = r_top[1]; new_state[47] = r_top[2];
+                // Face U rotation counterclockwise
+                new_state[0] = temp_state[2];   // U[2] -> U[0]
+                new_state[1] = temp_state[5];   // U[5] -> U[1]
+                new_state[2] = temp_state[8];   // U[8] -> U[2]
+                new_state[3] = temp_state[1];   // U[1] -> U[3]
+                new_state[4] = temp_state[4];   // U[4] -> U[4]
+                new_state[5] = temp_state[7];   // U[7] -> U[5]
+                new_state[6] = temp_state[0];   // U[0] -> U[6]
+                new_state[7] = temp_state[3];   // U[3] -> U[7]
+                new_state[8] = temp_state[6];   // U[6] -> U[8]
+                
+                // Rotation des rangées du haut (sens anti-horaire: R<-F, F<-L, L<-B, B<-R)
+                new_state[9] = temp_state[18];   // F[0] -> R[0]
+                new_state[10] = temp_state[19];  // F[1] -> R[1]
+                new_state[11] = temp_state[20];  // F[2] -> R[2]
+                new_state[18] = temp_state[36];  // L[0] -> F[0]
+                new_state[19] = temp_state[37];  // L[1] -> F[1]
+                new_state[20] = temp_state[38];  // L[2] -> F[2]
+                new_state[36] = temp_state[45];  // B[0] -> L[0]
+                new_state[37] = temp_state[46];  // B[1] -> L[1]
+                new_state[38] = temp_state[47];  // B[2] -> L[2]
+                new_state[45] = temp_state[9];   // R[0] -> B[0]
+                new_state[46] = temp_state[10];  // R[1] -> B[1]
+                new_state[47] = temp_state[11];  // R[2] -> B[2]
             }
-
-            // Mise à jour de la face U
-            for (int j = 0; j < 9; j++) new_state[j] = rotated_u[j];
             break;
         }
 
         case 'R': {
-            char u_right[3] = {new_state[2], new_state[5], new_state[8]};
-            char f_right[3] = {new_state[20], new_state[23], new_state[26]};
-            char d_right[3] = {new_state[29], new_state[32], new_state[35]};
-            char b_left[3] = {new_state[45], new_state[48], new_state[51]};
-
-            char r_face[9];
-            for (int j = 0; j < 9; j++) r_face[j] = new_state[9 + j];
-            char rotated_r[9];
+            char temp_state[55];
+            strcpy(temp_state, new_state);
 
             if (direction == 1) {
-                rotate_face_clockwise(r_face, rotated_r);
-                new_state[2] = f_right[0]; new_state[5] = f_right[1]; new_state[8] = f_right[2];
-                new_state[20] = d_right[0]; new_state[23] = d_right[1]; new_state[26] = d_right[2];
-                new_state[29] = b_left[2]; new_state[32] = b_left[1]; new_state[35] = b_left[0];
-                new_state[45] = u_right[2]; new_state[48] = u_right[1]; new_state[51] = u_right[0];
+                // Face R rotation clockwise
+                new_state[9] = temp_state[15];   // R[6] -> R[0]
+                new_state[10] = temp_state[12];  // R[3] -> R[1]
+                new_state[11] = temp_state[9];   // R[0] -> R[2]
+                new_state[12] = temp_state[16];  // R[7] -> R[3]
+                new_state[13] = temp_state[13];  // R[4] -> R[4]
+                new_state[14] = temp_state[10];  // R[1] -> R[5]
+                new_state[15] = temp_state[17];  // R[8] -> R[6]
+                new_state[16] = temp_state[14];  // R[5] -> R[7]
+                new_state[17] = temp_state[11];  // R[2] -> R[8]
+                
+                // Rotation des colonnes de droite (sens horaire: U<-F, F<-D, D<-B, B<-U)
+                new_state[2] = temp_state[20];   // F[2] -> U[2]
+                new_state[5] = temp_state[23];   // F[5] -> U[5]
+                new_state[8] = temp_state[26];   // F[8] -> U[8]
+                new_state[20] = temp_state[29];  // D[2] -> F[2]
+                new_state[23] = temp_state[32];  // D[5] -> F[5]
+                new_state[26] = temp_state[35];  // D[8] -> F[8]
+                new_state[29] = temp_state[51];  // B[6] -> D[2]
+                new_state[32] = temp_state[48];  // B[3] -> D[5]
+                new_state[35] = temp_state[45];  // B[0] -> D[8]
+                new_state[45] = temp_state[8];   // U[8] -> B[0]
+                new_state[48] = temp_state[5];   // U[5] -> B[3]
+                new_state[51] = temp_state[2];   // U[2] -> B[6]
             } else if (direction == 2) {
-                rotate_face_180(r_face, rotated_r);
-                new_state[2] = d_right[0]; new_state[5] = d_right[1]; new_state[8] = d_right[2];
-                new_state[20] = b_left[2]; new_state[23] = b_left[1]; new_state[26] = b_left[0];
-                new_state[29] = u_right[0]; new_state[32] = u_right[1]; new_state[35] = u_right[2];
-                new_state[45] = f_right[2]; new_state[48] = f_right[1]; new_state[51] = f_right[0];
-            } else {
-                rotate_face_counterclockwise(r_face, rotated_r);
-                new_state[2] = b_left[2]; new_state[5] = b_left[1]; new_state[8] = b_left[0];
-                new_state[20] = u_right[0]; new_state[23] = u_right[1]; new_state[26] = u_right[2];
-                new_state[29] = f_right[0]; new_state[32] = f_right[1]; new_state[35] = f_right[2];
-                new_state[45] = d_right[2]; new_state[48] = d_right[1]; new_state[51] = d_right[0];
+                // Face R rotation 180°
+                new_state[9] = temp_state[17];   // R[8] -> R[0]
+                new_state[10] = temp_state[16];  // R[7] -> R[1]
+                new_state[11] = temp_state[15];  // R[6] -> R[2]
+                new_state[12] = temp_state[14];  // R[5] -> R[3]
+                new_state[13] = temp_state[13];  // R[4] -> R[4]
+                new_state[14] = temp_state[12];  // R[3] -> R[5]
+                new_state[15] = temp_state[11];  // R[2] -> R[6]
+                new_state[16] = temp_state[10];  // R[1] -> R[7]
+                new_state[17] = temp_state[9];   // R[0] -> R[8]
+                
+                // Rotation 180° des colonnes de droite (U<-D, F<-B, D<-U, B<-F)
+                new_state[2] = temp_state[29];   // D[2] -> U[2]
+                new_state[5] = temp_state[32];   // D[5] -> U[5]
+                new_state[8] = temp_state[35];   // D[8] -> U[8]
+                new_state[20] = temp_state[51];  // B[6] -> F[2]
+                new_state[23] = temp_state[48];  // B[3] -> F[5]
+                new_state[26] = temp_state[45];  // B[0] -> F[8]
+                new_state[29] = temp_state[2];   // U[2] -> D[2]
+                new_state[32] = temp_state[5];   // U[5] -> D[5]
+                new_state[35] = temp_state[8];   // U[8] -> D[8]
+                new_state[45] = temp_state[26];  // F[8] -> B[0]
+                new_state[48] = temp_state[23];  // F[5] -> B[3]
+                new_state[51] = temp_state[20];  // F[2] -> B[6]
+            } else { // direction == 3 (anti-horaire)
+                // Face R rotation counterclockwise
+                new_state[9] = temp_state[11];   // R[2] -> R[0]
+                new_state[10] = temp_state[14];  // R[5] -> R[1]
+                new_state[11] = temp_state[17];  // R[8] -> R[2]
+                new_state[12] = temp_state[10];  // R[1] -> R[3]
+                new_state[13] = temp_state[13];  // R[4] -> R[4]
+                new_state[14] = temp_state[16];  // R[7] -> R[5]
+                new_state[15] = temp_state[9];   // R[0] -> R[6]
+                new_state[16] = temp_state[12];  // R[3] -> R[7]
+                new_state[17] = temp_state[15];  // R[6] -> R[8]
+                
+                // Rotation des colonnes de droite (sens anti-horaire: U<-B, F<-U, D<-F, B<-D)
+                new_state[2] = temp_state[51];   // B[6] -> U[2]
+                new_state[5] = temp_state[48];   // B[3] -> U[5]
+                new_state[8] = temp_state[45];   // B[0] -> U[8]
+                new_state[20] = temp_state[2];   // U[2] -> F[2]
+                new_state[23] = temp_state[5];   // U[5] -> F[5]
+                new_state[26] = temp_state[8];   // U[8] -> F[8]
+                new_state[29] = temp_state[20];  // F[2] -> D[2]
+                new_state[32] = temp_state[23];  // F[5] -> D[5]
+                new_state[35] = temp_state[26];  // F[8] -> D[8]
+                new_state[45] = temp_state[35];  // D[8] -> B[0]
+                new_state[48] = temp_state[32];  // D[5] -> B[3]
+                new_state[51] = temp_state[29];  // D[2] -> B[6]
             }
-
-            for (int j = 0; j < 9; j++) new_state[9 + j] = rotated_r[j];
             break;
         }
 
