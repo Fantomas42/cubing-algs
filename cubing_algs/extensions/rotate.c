@@ -454,85 +454,220 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
         }
 
         case 'z': {
-            // z est la rotation de tout le cube autour de l'axe z (même que F)
-            char temp_state[55];
-            strcpy(temp_state, new_state);
-
             char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
             for (int j = 0; j < 9; j++) {
-                u_face[j] = temp_state[j];
-                r_face[j] = temp_state[9 + j];
-                f_face[j] = temp_state[18 + j];
-                d_face[j] = temp_state[27 + j];
-                l_face[j] = temp_state[36 + j];
-                b_face[j] = temp_state[45 + j];
+                u_face[j] = new_state[j];
+                r_face[j] = new_state[9 + j];
+                f_face[j] = new_state[18 + j];
+                d_face[j] = new_state[27 + j];
+                l_face[j] = new_state[36 + j];
+                b_face[j] = new_state[45 + j];
             }
-
-            char f_rotated[9], b_rotated[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(f_face, f_rotated);
-                rotate_face_counterclockwise(b_face, b_rotated);
-
-                // Transformation des autres faces (elles tournent en changeant de position)
-                char u_transformed[9], r_transformed[9], d_transformed[9], l_transformed[9];
-                for (int j = 0; j < 9; j++) {
-                    u_transformed[j] = u_face[6 - 3*(j%3) + j/3];
-                    r_transformed[j] = r_face[6 - 3*(j%3) + j/3];
-                    d_transformed[j] = d_face[6 - 3*(j%3) + j/3];
-                    l_transformed[j] = l_face[6 - 3*(j%3) + j/3];
-                }
-
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = l_transformed[j];     // U devient L
-                    new_state[9 + j] = u_transformed[j]; // R devient U
-                    new_state[18 + j] = f_rotated[j];    // F reste F mais tourne
-                    new_state[27 + j] = r_transformed[j]; // D devient R
-                    new_state[36 + j] = d_transformed[j]; // L devient D
-                    new_state[45 + j] = b_rotated[j];    // B reste B mais tourne anti-horaire
-                }
+                // z rotation: U<-L, R<-U, F clockwise, D<-R, L<-D, B counter-clockwise  
+                // Based on expected permutations: 0<-42, 1<-39, 2<-36, etc.
+                
+                // U <- L (with rotation: L positions that go to U)
+                new_state[0] = l_face[6];  // L[6] -> U[0] (position 42 -> 0)
+                new_state[1] = l_face[3];  // L[3] -> U[1] (position 39 -> 1)  
+                new_state[2] = l_face[0];  // L[0] -> U[2] (position 36 -> 2)
+                new_state[3] = l_face[7];  // L[7] -> U[3] (position 43 -> 3)
+                new_state[4] = l_face[4];  // L[4] -> U[4] (position 40 -> 4)
+                new_state[5] = l_face[1];  // L[1] -> U[5] (position 37 -> 5)
+                new_state[6] = l_face[8];  // L[8] -> U[6] (position 44 -> 6)
+                new_state[7] = l_face[5];  // L[5] -> U[7] (position 41 -> 7)
+                new_state[8] = l_face[2];  // L[2] -> U[8] (position 38 -> 8)
+                
+                // R <- U (with rotation)
+                new_state[9] = u_face[6];  // U[6] -> R[0] (position 6 -> 9)
+                new_state[10] = u_face[3]; // U[3] -> R[1] (position 3 -> 10)
+                new_state[11] = u_face[0]; // U[0] -> R[2] (position 0 -> 11)
+                new_state[12] = u_face[7]; // U[7] -> R[3] (position 7 -> 12)
+                new_state[13] = u_face[4]; // U[4] -> R[4] (position 4 -> 13)
+                new_state[14] = u_face[1]; // U[1] -> R[5] (position 1 -> 14)
+                new_state[15] = u_face[8]; // U[8] -> R[6] (position 8 -> 15)
+                new_state[16] = u_face[5]; // U[5] -> R[7] (position 5 -> 16)
+                new_state[17] = u_face[2]; // U[2] -> R[8] (position 2 -> 17)
+                
+                // F rotates clockwise
+                new_state[18] = f_face[6]; // F[0] <- F[6]
+                new_state[19] = f_face[3]; // F[1] <- F[3]
+                new_state[20] = f_face[0]; // F[2] <- F[0]
+                new_state[21] = f_face[7]; // F[3] <- F[7]
+                new_state[22] = f_face[4]; // F[4] <- F[4]
+                new_state[23] = f_face[1]; // F[5] <- F[1]
+                new_state[24] = f_face[8]; // F[6] <- F[8]
+                new_state[25] = f_face[5]; // F[7] <- F[5]
+                new_state[26] = f_face[2]; // F[8] <- F[2]
+                
+                // D <- R (with rotation)
+                new_state[27] = r_face[6]; // R[6] -> D[0] (position 15 -> 27)
+                new_state[28] = r_face[3]; // R[3] -> D[1] (position 12 -> 28)
+                new_state[29] = r_face[0]; // R[0] -> D[2] (position 9 -> 29)
+                new_state[30] = r_face[7]; // R[7] -> D[3] (position 16 -> 30)
+                new_state[31] = r_face[4]; // R[4] -> D[4] (position 13 -> 31)
+                new_state[32] = r_face[1]; // R[1] -> D[5] (position 10 -> 32)
+                new_state[33] = r_face[8]; // R[8] -> D[6] (position 17 -> 33)
+                new_state[34] = r_face[5]; // R[5] -> D[7] (position 14 -> 34)
+                new_state[35] = r_face[2]; // R[2] -> D[8] (position 11 -> 35)
+                
+                // L <- D (with rotation)
+                new_state[36] = d_face[6]; // D[6] -> L[0] (position 33 -> 36)
+                new_state[37] = d_face[3]; // D[3] -> L[1] (position 30 -> 37)
+                new_state[38] = d_face[0]; // D[0] -> L[2] (position 27 -> 38)
+                new_state[39] = d_face[7]; // D[7] -> L[3] (position 34 -> 39)
+                new_state[40] = d_face[4]; // D[4] -> L[4] (position 31 -> 40)
+                new_state[41] = d_face[1]; // D[1] -> L[5] (position 28 -> 41)
+                new_state[42] = d_face[8]; // D[8] -> L[6] (position 35 -> 42)
+                new_state[43] = d_face[5]; // D[5] -> L[7] (position 32 -> 43)
+                new_state[44] = d_face[2]; // D[2] -> L[8] (position 29 -> 44)
+                
+                // B rotates counterclockwise 
+                new_state[45] = b_face[2]; // B[0] <- B[2]
+                new_state[46] = b_face[5]; // B[1] <- B[5]
+                new_state[47] = b_face[8]; // B[2] <- B[8]
+                new_state[48] = b_face[1]; // B[3] <- B[1]
+                new_state[49] = b_face[4]; // B[4] <- B[4]
+                new_state[50] = b_face[7]; // B[5] <- B[7]
+                new_state[51] = b_face[0]; // B[6] <- B[0]
+                new_state[52] = b_face[3]; // B[7] <- B[3]
+                new_state[53] = b_face[6]; // B[8] <- B[6]
             } else if (direction == 2) {
-                rotate_face_180(f_face, f_rotated);
-                rotate_face_180(b_face, b_rotated);
-
-                // Transformation 180° des autres faces
-                char u_transformed[9], r_transformed[9], d_transformed[9], l_transformed[9];
-                for (int j = 0; j < 9; j++) {
-                    u_transformed[j] = u_face[8-j];
-                    r_transformed[j] = r_face[8-j];
-                    d_transformed[j] = d_face[8-j];
-                    l_transformed[j] = l_face[8-j];
-                }
-
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = d_transformed[j];     // U devient D (inversé)
-                    new_state[9 + j] = l_transformed[j]; // R devient L (inversé)
-                    new_state[18 + j] = f_rotated[j];    // F reste F mais tourne 180°
-                    new_state[27 + j] = u_transformed[j]; // D devient U (inversé)
-                    new_state[36 + j] = r_transformed[j]; // L devient R (inversé)
-                    new_state[45 + j] = b_rotated[j];    // B reste B mais tourne 180°
-                }
+                // z2 rotation: 180° rotation
+                // U -> D (with 180° rotation: j -> 8-j)
+                new_state[27] = u_face[8]; // U[0] -> D[0]
+                new_state[28] = u_face[7]; // U[1] -> D[1]
+                new_state[29] = u_face[6]; // U[2] -> D[2]
+                new_state[30] = u_face[5]; // U[3] -> D[3]
+                new_state[31] = u_face[4]; // U[4] -> D[4]
+                new_state[32] = u_face[3]; // U[5] -> D[5]
+                new_state[33] = u_face[2]; // U[6] -> D[6]
+                new_state[34] = u_face[1]; // U[7] -> D[7]
+                new_state[35] = u_face[0]; // U[8] -> D[8]
+                
+                // R -> L (with 180° rotation)
+                new_state[36] = r_face[8]; // R[0] -> L[0]
+                new_state[37] = r_face[7]; // R[1] -> L[1]
+                new_state[38] = r_face[6]; // R[2] -> L[2]
+                new_state[39] = r_face[5]; // R[3] -> L[3]
+                new_state[40] = r_face[4]; // R[4] -> L[4]
+                new_state[41] = r_face[3]; // R[5] -> L[5]
+                new_state[42] = r_face[2]; // R[6] -> L[6]
+                new_state[43] = r_face[1]; // R[7] -> L[7]
+                new_state[44] = r_face[0]; // R[8] -> L[8]
+                
+                // F rotates 180°
+                new_state[18] = f_face[8]; // F[0] <- F[8]
+                new_state[19] = f_face[7]; // F[1] <- F[7]
+                new_state[20] = f_face[6]; // F[2] <- F[6]
+                new_state[21] = f_face[5]; // F[3] <- F[5]
+                new_state[22] = f_face[4]; // F[4] <- F[4]
+                new_state[23] = f_face[3]; // F[5] <- F[3]
+                new_state[24] = f_face[2]; // F[6] <- F[2]
+                new_state[25] = f_face[1]; // F[7] <- F[1]
+                new_state[26] = f_face[0]; // F[8] <- F[0]
+                
+                // D -> U (with 180° rotation)
+                new_state[0] = d_face[8];  // D[0] -> U[0]
+                new_state[1] = d_face[7];  // D[1] -> U[1]
+                new_state[2] = d_face[6];  // D[2] -> U[2]
+                new_state[3] = d_face[5];  // D[3] -> U[3]
+                new_state[4] = d_face[4];  // D[4] -> U[4]
+                new_state[5] = d_face[3];  // D[5] -> U[5]
+                new_state[6] = d_face[2];  // D[6] -> U[6]
+                new_state[7] = d_face[1];  // D[7] -> U[7]
+                new_state[8] = d_face[0];  // D[8] -> U[8]
+                
+                // L -> R (with 180° rotation)
+                new_state[9] = l_face[8];  // L[0] -> R[0]
+                new_state[10] = l_face[7]; // L[1] -> R[1]
+                new_state[11] = l_face[6]; // L[2] -> R[2]
+                new_state[12] = l_face[5]; // L[3] -> R[3]
+                new_state[13] = l_face[4]; // L[4] -> R[4]
+                new_state[14] = l_face[3]; // L[5] -> R[5]
+                new_state[15] = l_face[2]; // L[6] -> R[6]
+                new_state[16] = l_face[1]; // L[7] -> R[7]
+                new_state[17] = l_face[0]; // L[8] -> R[8]
+                
+                // B rotates 180°
+                new_state[45] = b_face[8]; // B[0] <- B[8]
+                new_state[46] = b_face[7]; // B[1] <- B[7]
+                new_state[47] = b_face[6]; // B[2] <- B[6]
+                new_state[48] = b_face[5]; // B[3] <- B[5]
+                new_state[49] = b_face[4]; // B[4] <- B[4]
+                new_state[50] = b_face[3]; // B[5] <- B[3]
+                new_state[51] = b_face[2]; // B[6] <- B[2]
+                new_state[52] = b_face[1]; // B[7] <- B[1]
+                new_state[53] = b_face[0]; // B[8] <- B[0]
             } else {
-                rotate_face_counterclockwise(f_face, f_rotated);
-                rotate_face_clockwise(b_face, b_rotated);
-
-                // Transformation anti-horaire des autres faces
-                char u_transformed[9], r_transformed[9], d_transformed[9], l_transformed[9];
-                for (int j = 0; j < 9; j++) {
-                    u_transformed[j] = u_face[2 + 3*(j%3) - j/3];
-                    r_transformed[j] = r_face[2 + 3*(j%3) - j/3];
-                    d_transformed[j] = d_face[2 + 3*(j%3) - j/3];
-                    l_transformed[j] = l_face[2 + 3*(j%3) - j/3];
-                }
-
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = r_transformed[j];     // U devient R
-                    new_state[9 + j] = d_transformed[j]; // R devient D
-                    new_state[18 + j] = f_rotated[j];    // F reste F mais tourne anti-horaire
-                    new_state[27 + j] = l_transformed[j]; // D devient L
-                    new_state[36 + j] = u_transformed[j]; // L devient U
-                    new_state[45 + j] = b_rotated[j];    // B reste B mais tourne horaire
-                }
+                // z' rotation: reverse of z  
+                // Based on expected permutations: 0<-11, 1<-14, 2<-17, etc.
+                
+                // U <- R (with rotation)
+                new_state[0] = r_face[2];  // R[2] -> U[0] (position 11 -> 0)
+                new_state[1] = r_face[5];  // R[5] -> U[1] (position 14 -> 1)
+                new_state[2] = r_face[8];  // R[8] -> U[2] (position 17 -> 2)
+                new_state[3] = r_face[1];  // R[1] -> U[3] (position 10 -> 3)
+                new_state[4] = r_face[4];  // R[4] -> U[4] (position 13 -> 4)
+                new_state[5] = r_face[7];  // R[7] -> U[5] (position 16 -> 5)
+                new_state[6] = r_face[0];  // R[0] -> U[6] (position 9 -> 6)
+                new_state[7] = r_face[3];  // R[3] -> U[7] (position 12 -> 7)
+                new_state[8] = r_face[6];  // R[6] -> U[8] (position 15 -> 8)
+                
+                // R <- D (with rotation) 
+                new_state[9] = d_face[2];  // D[2] -> R[0] (position 29 -> 9)
+                new_state[10] = d_face[5]; // D[5] -> R[1] (position 32 -> 10)
+                new_state[11] = d_face[8]; // D[8] -> R[2] (position 35 -> 11)
+                new_state[12] = d_face[1]; // D[1] -> R[3] (position 28 -> 12)
+                new_state[13] = d_face[4]; // D[4] -> R[4] (position 31 -> 13)
+                new_state[14] = d_face[7]; // D[7] -> R[5] (position 34 -> 14)
+                new_state[15] = d_face[0]; // D[0] -> R[6] (position 27 -> 15)
+                new_state[16] = d_face[3]; // D[3] -> R[7] (position 30 -> 16)
+                new_state[17] = d_face[6]; // D[6] -> R[8] (position 33 -> 17)
+                
+                // F rotates counterclockwise
+                new_state[18] = f_face[2]; // F[0] <- F[2]
+                new_state[19] = f_face[5]; // F[1] <- F[5]
+                new_state[20] = f_face[8]; // F[2] <- F[8]
+                new_state[21] = f_face[1]; // F[3] <- F[1]
+                new_state[22] = f_face[4]; // F[4] <- F[4]
+                new_state[23] = f_face[7]; // F[5] <- F[7]
+                new_state[24] = f_face[0]; // F[6] <- F[0]
+                new_state[25] = f_face[3]; // F[7] <- F[3]
+                new_state[26] = f_face[6]; // F[8] <- F[6]
+                
+                // D <- L (with rotation) - for z' (27<-38, 28<-41, 29<-44, etc.)
+                new_state[27] = l_face[2]; // L[2] -> D[0] (position 38 -> 27)
+                new_state[28] = l_face[5]; // L[5] -> D[1] (position 41 -> 28)
+                new_state[29] = l_face[8]; // L[8] -> D[2] (position 44 -> 29)
+                new_state[30] = l_face[1]; // L[1] -> D[3] (position 37 -> 30)
+                new_state[31] = l_face[4]; // L[4] -> D[4] (position 40 -> 31)
+                new_state[32] = l_face[7]; // L[7] -> D[5] (position 43 -> 32)
+                new_state[33] = l_face[0]; // L[0] -> D[6] (position 36 -> 33)
+                new_state[34] = l_face[3]; // L[3] -> D[7] (position 39 -> 34)
+                new_state[35] = l_face[6]; // L[6] -> D[8] (position 42 -> 35)
+                
+                // L <- U (with rotation) - for z' (36<-2, 37<-5, 38<-8, etc.)
+                new_state[36] = u_face[2]; // U[2] -> L[0] (position 2 -> 36)
+                new_state[37] = u_face[5]; // U[5] -> L[1] (position 5 -> 37)
+                new_state[38] = u_face[8]; // U[8] -> L[2] (position 8 -> 38)
+                new_state[39] = u_face[1]; // U[1] -> L[3] (position 1 -> 39)
+                new_state[40] = u_face[4]; // U[4] -> L[4] (position 4 -> 40)
+                new_state[41] = u_face[7]; // U[7] -> L[5] (position 7 -> 41)
+                new_state[42] = u_face[0]; // U[0] -> L[6] (position 0 -> 42)
+                new_state[43] = u_face[3]; // U[3] -> L[7] (position 3 -> 43)
+                new_state[44] = u_face[6]; // U[6] -> L[8] (position 6 -> 44)
+                
+                // B rotates clockwise
+                new_state[45] = b_face[6]; // B[0] <- B[6]
+                new_state[46] = b_face[3]; // B[1] <- B[3]
+                new_state[47] = b_face[0]; // B[2] <- B[0]
+                new_state[48] = b_face[7]; // B[3] <- B[7]
+                new_state[49] = b_face[4]; // B[4] <- B[4]
+                new_state[50] = b_face[1]; // B[5] <- B[1]
+                new_state[51] = b_face[8]; // B[6] <- B[8]
+                new_state[52] = b_face[5]; // B[7] <- B[5]
+                new_state[53] = b_face[2]; // B[8] <- B[2]
             }
             break;
         }
