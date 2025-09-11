@@ -35,6 +35,9 @@ class Move(UserString):
 
     @cached_property
     def layer_move_modifier_time(self) -> tuple[str, str, str, str]:
+        """
+        Parse the move string into its component parts.
+        """
         layer = ''
         move = ''
         modifier = ''
