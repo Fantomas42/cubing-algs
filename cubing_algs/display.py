@@ -21,6 +21,7 @@ DEFAULT_COLORS = [
 
 TERM_COLORS = {
     'reset': '\x1b[0;0m',
+    'masked': '\x1b[48;5;236m\x1b[38;5;252m',
 
     'green': '\x1b[48;5;40m\x1b[38;5;232m',
     'blue': '\x1b[48;5;21m\x1b[38;5;230m',
@@ -139,9 +140,12 @@ class VCubeDisplay:
 
     @staticmethod
     def display_facelet(facelet: str, mask: str = '') -> str:
-        face_color = FACE_COLORS[facelet]
-        if mask == '0':
-            face_color += '_hidden'
+        if facelet not in FACE_COLORS:
+            face_color = 'masked'
+        else:
+            face_color = FACE_COLORS[facelet]
+            if mask == '0':
+                face_color += '_hidden'
 
         if USE_COLORS:
             return (
@@ -170,7 +174,7 @@ class VCubeDisplay:
 
     def display_top_down_adjacent_facelets(self, face: str, face_mask: str,
                                            *, top: bool = False) -> str:
-        result = '   '
+        result = ' ' * (self.facelet_size * self.cube_size)
         facelets = face[:3]
         facelets_mask = face_mask[:3]
 
@@ -239,6 +243,8 @@ class VCubeDisplay:
 
         # Middle
         for line in range(3):
+            result += ' ' * (self.facelet_size * (self.cube_size - 1))
+
             result += self.display_facelet(
                 faces[FACE_INDEXES['L']][line],
                 faces_mask[FACE_INDEXES['L']][line],

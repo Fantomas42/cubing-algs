@@ -88,14 +88,6 @@ class Algorithm(UserList[Move]):
         """
         return f'Algorithm("{ "".join([str(m) for m in self]) }")'
 
-    def __hash__(self) -> int:
-        """
-        Calculate a hash value for this algorithm.
-
-        This allows Algorithm objects to be used as dictionary keys.
-        """
-        return hash(self.__str__())
-
     @property
     def metrics(self) -> dict[str, int | list[str]]:
         """

@@ -320,10 +320,6 @@ class AlgorithmTestCase(unittest.TestCase):
 
         self.assertEqual(algo, algo_list)
 
-    def test_hash(self):
-        algo = parse_moves('R2 U')
-        self.assertTrue(hash(algo))
-
     def test_transform(self):
         algo = parse_moves('R R U F2 F2')
         expected = parse_moves('R2 U')

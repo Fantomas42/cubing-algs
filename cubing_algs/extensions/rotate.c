@@ -1,27 +1,7 @@
 #include <Python.h>
 #include <string.h>
 
-// Fonction utilitaire pour rotation d'une face 3x3 dans le sens horaire
-static void rotate_face_clockwise(char* face, char* result) {
-    result[0] = face[6]; result[1] = face[3]; result[2] = face[0];
-    result[3] = face[7]; result[4] = face[4]; result[5] = face[1];
-    result[6] = face[8]; result[7] = face[5]; result[8] = face[2];
-}
-
-static void rotate_face_180(char* face, char* result) {
-    result[0] = face[8]; result[1] = face[7]; result[2] = face[6];
-    result[3] = face[5]; result[4] = face[4]; result[5] = face[3];
-    result[6] = face[2]; result[7] = face[1]; result[8] = face[0];
-}
-
-static void rotate_face_counterclockwise(char* face, char* result) {
-    result[0] = face[2]; result[1] = face[5]; result[2] = face[8];
-    result[3] = face[1]; result[4] = face[4]; result[5] = face[7];
-    result[6] = face[0]; result[7] = face[3]; result[8] = face[6];
-}
-
-
-// Fonction principale de rotation d'un mouvement
+// Main function for rotating a move
 static PyObject* rotate_move(PyObject* self, PyObject* args) {
     const char* state;
     const char* move;
@@ -30,17 +10,20 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
         return NULL;
     }
 
-    // Copier l'état pour modification
+    // Copy state for modification
     char new_state[55];
     strcpy(new_state, state);
 
-    // Parser le mouvement
+    char temp_state[55];
+    strcpy(temp_state, new_state);
+
+    // Parse the move
     char face = move[0];
-    int direction = 1; // Par défaut: sens horaire
+    int direction = 1; // Default: clockwise
 
     if (strlen(move) > 1) {
         if (move[1] == '\'') {
-            direction = 3; // Anti-horaire
+            direction = 3; // Anticlockwise
         } else if (move[1] == '2') {
             direction = 2; // 180°
         } else {
@@ -51,1255 +34,1972 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
     switch (face) {
         case 'U': {
-            // Sauvegarder les rangées du haut des 4 faces latérales
-            char f_top[3] = {new_state[18], new_state[19], new_state[20]};
-            char r_top[3] = {new_state[9], new_state[10], new_state[11]};
-            char b_top[3] = {new_state[45], new_state[46], new_state[47]};
-            char l_top[3] = {new_state[36], new_state[37], new_state[38]};
-
-            // Rotation de la face U selon la direction
-            char u_face[9];
-            for (int j = 0; j < 9; j++) u_face[j] = new_state[j];
-            char rotated_u[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(u_face, rotated_u);
-                // Rotation des rangées du haut (sens horaire)
-                new_state[9] = b_top[0]; new_state[10] = b_top[1]; new_state[11] = b_top[2];
-                new_state[18] = r_top[0]; new_state[19] = r_top[1]; new_state[20] = r_top[2];
-                new_state[36] = f_top[0]; new_state[37] = f_top[1]; new_state[38] = f_top[2];
-                new_state[45] = l_top[0]; new_state[46] = l_top[1]; new_state[47] = l_top[2];
-            } else if (direction == 2) {
-                rotate_face_180(u_face, rotated_u);
-                // Rotation 180° des rangées du haut
-                new_state[9] = l_top[0]; new_state[10] = l_top[1]; new_state[11] = l_top[2];
-                new_state[18] = b_top[0]; new_state[19] = b_top[1]; new_state[20] = b_top[2];
-                new_state[36] = r_top[0]; new_state[37] = r_top[1]; new_state[38] = r_top[2];
-                new_state[45] = f_top[0]; new_state[46] = f_top[1]; new_state[47] = f_top[2];
-            } else { // direction == 3 (anti-horaire)
-                rotate_face_counterclockwise(u_face, rotated_u);
-                // Rotation des rangées du haut (sens anti-horaire)
-                new_state[9] = f_top[0]; new_state[10] = f_top[1]; new_state[11] = f_top[2];
-                new_state[18] = l_top[0]; new_state[19] = l_top[1]; new_state[20] = l_top[2];
-                new_state[36] = b_top[0]; new_state[37] = b_top[1]; new_state[38] = b_top[2];
-                new_state[45] = r_top[0]; new_state[46] = r_top[1]; new_state[47] = r_top[2];
-            }
+                // Face U rotation clockwise
+                new_state[0] = temp_state[6];   // U[6] -> U[0]
+                new_state[1] = temp_state[3];   // U[3] -> U[1]
+                new_state[2] = temp_state[0];   // U[0] -> U[2]
+                new_state[3] = temp_state[7];   // U[7] -> U[3]
+                new_state[4] = temp_state[4];   // U[4] -> U[4]
+                new_state[5] = temp_state[1];   // U[1] -> U[5]
+                new_state[6] = temp_state[8];   // U[8] -> U[6]
+                new_state[7] = temp_state[5];   // U[5] -> U[7]
+                new_state[8] = temp_state[2];   // U[2] -> U[8]
 
-            // Mise à jour de la face U
-            for (int j = 0; j < 9; j++) new_state[j] = rotated_u[j];
+                // Top row rotation (clockwise: R<-B, F<-R, L<-F, B<-L)
+                new_state[9] = temp_state[45];   // B[0] -> R[0]
+                new_state[10] = temp_state[46];  // B[1] -> R[1]
+                new_state[11] = temp_state[47];  // B[2] -> R[2]
+                new_state[18] = temp_state[9];   // R[0] -> F[0]
+                new_state[19] = temp_state[10];  // R[1] -> F[1]
+                new_state[20] = temp_state[11];  // R[2] -> F[2]
+                new_state[36] = temp_state[18];  // F[0] -> L[0]
+                new_state[37] = temp_state[19];  // F[1] -> L[1]
+                new_state[38] = temp_state[20];  // F[2] -> L[2]
+                new_state[45] = temp_state[36];  // L[0] -> B[0]
+                new_state[46] = temp_state[37];  // L[1] -> B[1]
+                new_state[47] = temp_state[38];  // L[2] -> B[2]
+            } else if (direction == 2) {
+                // Face U rotation 180°
+                new_state[0] = temp_state[8];   // U[8] -> U[0]
+                new_state[1] = temp_state[7];   // U[7] -> U[1]
+                new_state[2] = temp_state[6];   // U[6] -> U[2]
+                new_state[3] = temp_state[5];   // U[5] -> U[3]
+                new_state[4] = temp_state[4];   // U[4] -> U[4]
+                new_state[5] = temp_state[3];   // U[3] -> U[5]
+                new_state[6] = temp_state[2];   // U[2] -> U[6]
+                new_state[7] = temp_state[1];   // U[1] -> U[7]
+                new_state[8] = temp_state[0];   // U[0] -> U[8]
+
+                // 180° top row rotation (R<-L, F<-B, L<-R, B<-F)
+                new_state[9] = temp_state[36];   // L[0] -> R[0]
+                new_state[10] = temp_state[37];  // L[1] -> R[1]
+                new_state[11] = temp_state[38];  // L[2] -> R[2]
+                new_state[18] = temp_state[45];  // B[0] -> F[0]
+                new_state[19] = temp_state[46];  // B[1] -> F[1]
+                new_state[20] = temp_state[47];  // B[2] -> F[2]
+                new_state[36] = temp_state[9];   // R[0] -> L[0]
+                new_state[37] = temp_state[10];  // R[1] -> L[1]
+                new_state[38] = temp_state[11];  // R[2] -> L[2]
+                new_state[45] = temp_state[18];  // F[0] -> B[0]
+                new_state[46] = temp_state[19];  // F[1] -> B[1]
+                new_state[47] = temp_state[20];  // F[2] -> B[2]
+            } else { // direction == 3 (counterclockwise)
+                // Face U rotation counterclockwise
+                new_state[0] = temp_state[2];   // U[2] -> U[0]
+                new_state[1] = temp_state[5];   // U[5] -> U[1]
+                new_state[2] = temp_state[8];   // U[8] -> U[2]
+                new_state[3] = temp_state[1];   // U[1] -> U[3]
+                new_state[4] = temp_state[4];   // U[4] -> U[4]
+                new_state[5] = temp_state[7];   // U[7] -> U[5]
+                new_state[6] = temp_state[0];   // U[0] -> U[6]
+                new_state[7] = temp_state[3];   // U[3] -> U[7]
+                new_state[8] = temp_state[6];   // U[6] -> U[8]
+
+                // Top row rotation (counterclockwise: R<-F, F<-L, L<-B, B<-R)
+                new_state[9] = temp_state[18];   // F[0] -> R[0]
+                new_state[10] = temp_state[19];  // F[1] -> R[1]
+                new_state[11] = temp_state[20];  // F[2] -> R[2]
+                new_state[18] = temp_state[36];  // L[0] -> F[0]
+                new_state[19] = temp_state[37];  // L[1] -> F[1]
+                new_state[20] = temp_state[38];  // L[2] -> F[2]
+                new_state[36] = temp_state[45];  // B[0] -> L[0]
+                new_state[37] = temp_state[46];  // B[1] -> L[1]
+                new_state[38] = temp_state[47];  // B[2] -> L[2]
+                new_state[45] = temp_state[9];   // R[0] -> B[0]
+                new_state[46] = temp_state[10];  // R[1] -> B[1]
+                new_state[47] = temp_state[11];  // R[2] -> B[2]
+            }
             break;
         }
 
         case 'R': {
-            char u_right[3] = {new_state[2], new_state[5], new_state[8]};
-            char f_right[3] = {new_state[20], new_state[23], new_state[26]};
-            char d_right[3] = {new_state[29], new_state[32], new_state[35]};
-            char b_left[3] = {new_state[45], new_state[48], new_state[51]};
-
-            char r_face[9];
-            for (int j = 0; j < 9; j++) r_face[j] = new_state[9 + j];
-            char rotated_r[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(r_face, rotated_r);
-                new_state[2] = f_right[0]; new_state[5] = f_right[1]; new_state[8] = f_right[2];
-                new_state[20] = d_right[0]; new_state[23] = d_right[1]; new_state[26] = d_right[2];
-                new_state[29] = b_left[2]; new_state[32] = b_left[1]; new_state[35] = b_left[0];
-                new_state[45] = u_right[2]; new_state[48] = u_right[1]; new_state[51] = u_right[0];
-            } else if (direction == 2) {
-                rotate_face_180(r_face, rotated_r);
-                new_state[2] = d_right[0]; new_state[5] = d_right[1]; new_state[8] = d_right[2];
-                new_state[20] = b_left[2]; new_state[23] = b_left[1]; new_state[26] = b_left[0];
-                new_state[29] = u_right[0]; new_state[32] = u_right[1]; new_state[35] = u_right[2];
-                new_state[45] = f_right[2]; new_state[48] = f_right[1]; new_state[51] = f_right[0];
-            } else {
-                rotate_face_counterclockwise(r_face, rotated_r);
-                new_state[2] = b_left[2]; new_state[5] = b_left[1]; new_state[8] = b_left[0];
-                new_state[20] = u_right[0]; new_state[23] = u_right[1]; new_state[26] = u_right[2];
-                new_state[29] = f_right[0]; new_state[32] = f_right[1]; new_state[35] = f_right[2];
-                new_state[45] = d_right[2]; new_state[48] = d_right[1]; new_state[51] = d_right[0];
-            }
+                // Face R rotation clockwise
+                new_state[9] = temp_state[15];   // R[6] -> R[0]
+                new_state[10] = temp_state[12];  // R[3] -> R[1]
+                new_state[11] = temp_state[9];   // R[0] -> R[2]
+                new_state[12] = temp_state[16];  // R[7] -> R[3]
+                new_state[13] = temp_state[13];  // R[4] -> R[4]
+                new_state[14] = temp_state[10];  // R[1] -> R[5]
+                new_state[15] = temp_state[17];  // R[8] -> R[6]
+                new_state[16] = temp_state[14];  // R[5] -> R[7]
+                new_state[17] = temp_state[11];  // R[2] -> R[8]
 
-            for (int j = 0; j < 9; j++) new_state[9 + j] = rotated_r[j];
+                // Right column rotation (clockwise: U<-F, F<-D, D<-B, B<-U)
+                new_state[2] = temp_state[20];   // F[2] -> U[2]
+                new_state[5] = temp_state[23];   // F[5] -> U[5]
+                new_state[8] = temp_state[26];   // F[8] -> U[8]
+                new_state[20] = temp_state[29];  // D[2] -> F[2]
+                new_state[23] = temp_state[32];  // D[5] -> F[5]
+                new_state[26] = temp_state[35];  // D[8] -> F[8]
+                new_state[29] = temp_state[51];  // B[6] -> D[2]
+                new_state[32] = temp_state[48];  // B[3] -> D[5]
+                new_state[35] = temp_state[45];  // B[0] -> D[8]
+                new_state[45] = temp_state[8];   // U[8] -> B[0]
+                new_state[48] = temp_state[5];   // U[5] -> B[3]
+                new_state[51] = temp_state[2];   // U[2] -> B[6]
+            } else if (direction == 2) {
+                // Face R rotation 180°
+                new_state[9] = temp_state[17];   // R[8] -> R[0]
+                new_state[10] = temp_state[16];  // R[7] -> R[1]
+                new_state[11] = temp_state[15];  // R[6] -> R[2]
+                new_state[12] = temp_state[14];  // R[5] -> R[3]
+                new_state[13] = temp_state[13];  // R[4] -> R[4]
+                new_state[14] = temp_state[12];  // R[3] -> R[5]
+                new_state[15] = temp_state[11];  // R[2] -> R[6]
+                new_state[16] = temp_state[10];  // R[1] -> R[7]
+                new_state[17] = temp_state[9];   // R[0] -> R[8]
+
+                // 180° right column rotation (U<-D, F<-B, D<-U, B<-F)
+                new_state[2] = temp_state[29];   // D[2] -> U[2]
+                new_state[5] = temp_state[32];   // D[5] -> U[5]
+                new_state[8] = temp_state[35];   // D[8] -> U[8]
+                new_state[20] = temp_state[51];  // B[6] -> F[2]
+                new_state[23] = temp_state[48];  // B[3] -> F[5]
+                new_state[26] = temp_state[45];  // B[0] -> F[8]
+                new_state[29] = temp_state[2];   // U[2] -> D[2]
+                new_state[32] = temp_state[5];   // U[5] -> D[5]
+                new_state[35] = temp_state[8];   // U[8] -> D[8]
+                new_state[45] = temp_state[26];  // F[8] -> B[0]
+                new_state[48] = temp_state[23];  // F[5] -> B[3]
+                new_state[51] = temp_state[20];  // F[2] -> B[6]
+            } else { // direction == 3 (counterclockwise)
+                // Face R rotation counterclockwise
+                new_state[9] = temp_state[11];   // R[2] -> R[0]
+                new_state[10] = temp_state[14];  // R[5] -> R[1]
+                new_state[11] = temp_state[17];  // R[8] -> R[2]
+                new_state[12] = temp_state[10];  // R[1] -> R[3]
+                new_state[13] = temp_state[13];  // R[4] -> R[4]
+                new_state[14] = temp_state[16];  // R[7] -> R[5]
+                new_state[15] = temp_state[9];   // R[0] -> R[6]
+                new_state[16] = temp_state[12];  // R[3] -> R[7]
+                new_state[17] = temp_state[15];  // R[6] -> R[8]
+
+                // Right column rotation (counterclockwise: U<-B, F<-U, D<-F, B<-D)
+                new_state[2] = temp_state[51];   // B[6] -> U[2]
+                new_state[5] = temp_state[48];   // B[3] -> U[5]
+                new_state[8] = temp_state[45];   // B[0] -> U[8]
+                new_state[20] = temp_state[2];   // U[2] -> F[2]
+                new_state[23] = temp_state[5];   // U[5] -> F[5]
+                new_state[26] = temp_state[8];   // U[8] -> F[8]
+                new_state[29] = temp_state[20];  // F[2] -> D[2]
+                new_state[32] = temp_state[23];  // F[5] -> D[5]
+                new_state[35] = temp_state[26];  // F[8] -> D[8]
+                new_state[45] = temp_state[35];  // D[8] -> B[0]
+                new_state[48] = temp_state[32];  // D[5] -> B[3]
+                new_state[51] = temp_state[29];  // D[2] -> B[6]
+            }
             break;
         }
 
-        // Similaire pour F, D, L, B...
         case 'F': {
-            char u_bottom[3] = {new_state[6], new_state[7], new_state[8]};
-            char r_left[3] = {new_state[9], new_state[12], new_state[15]};
-            char d_top[3] = {new_state[27], new_state[28], new_state[29]};
-            char l_right[3] = {new_state[38], new_state[41], new_state[44]};
-
-            char f_face[9];
-            for (int j = 0; j < 9; j++) f_face[j] = new_state[18 + j];
-            char rotated_f[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(f_face, rotated_f);
-                new_state[6] = l_right[2]; new_state[7] = l_right[1]; new_state[8] = l_right[0];
-                new_state[9] = u_bottom[0]; new_state[12] = u_bottom[1]; new_state[15] = u_bottom[2];
-                new_state[27] = r_left[2]; new_state[28] = r_left[1]; new_state[29] = r_left[0];
-                new_state[38] = d_top[0]; new_state[41] = d_top[1]; new_state[44] = d_top[2];
-            } else if (direction == 2) {
-                rotate_face_180(f_face, rotated_f);
-                new_state[6] = d_top[2]; new_state[7] = d_top[1]; new_state[8] = d_top[0];
-                new_state[9] = l_right[2]; new_state[12] = l_right[1]; new_state[15] = l_right[0];
-                new_state[27] = u_bottom[2]; new_state[28] = u_bottom[1]; new_state[29] = u_bottom[0];
-                new_state[38] = r_left[2]; new_state[41] = r_left[1]; new_state[44] = r_left[0];
-            } else {
-                rotate_face_counterclockwise(f_face, rotated_f);
-                new_state[6] = r_left[0]; new_state[7] = r_left[1]; new_state[8] = r_left[2];
-                new_state[9] = d_top[2]; new_state[12] = d_top[1]; new_state[15] = d_top[0];
-                new_state[27] = l_right[0]; new_state[28] = l_right[1]; new_state[29] = l_right[2];
-                new_state[38] = u_bottom[2]; new_state[41] = u_bottom[1]; new_state[44] = u_bottom[0];
-            }
+                // Face F rotation clockwise
+                new_state[18] = temp_state[24];  // F[6] -> F[0]
+                new_state[19] = temp_state[21];  // F[3] -> F[1]
+                new_state[20] = temp_state[18];  // F[0] -> F[2]
+                new_state[21] = temp_state[25];  // F[7] -> F[3]
+                new_state[22] = temp_state[22];  // F[4] -> F[4]
+                new_state[23] = temp_state[19];  // F[1] -> F[5]
+                new_state[24] = temp_state[26];  // F[8] -> F[6]
+                new_state[25] = temp_state[23];  // F[5] -> F[7]
+                new_state[26] = temp_state[20];  // F[2] -> F[8]
 
-            for (int j = 0; j < 9; j++) new_state[18 + j] = rotated_f[j];
+                // Front edge rotation (clockwise: U<-L, R<-U, D<-R, L<-D)
+                new_state[6] = temp_state[44];   // L[8] -> U[6]
+                new_state[7] = temp_state[41];   // L[5] -> U[7]
+                new_state[8] = temp_state[38];   // L[2] -> U[8]
+                new_state[9] = temp_state[6];    // U[6] -> R[0]
+                new_state[12] = temp_state[7];   // U[7] -> R[3]
+                new_state[15] = temp_state[8];   // U[8] -> R[6]
+                new_state[27] = temp_state[15];  // R[6] -> D[0]
+                new_state[28] = temp_state[12];  // R[3] -> D[1]
+                new_state[29] = temp_state[9];   // R[0] -> D[2]
+                new_state[38] = temp_state[27];  // D[0] -> L[2]
+                new_state[41] = temp_state[28];  // D[1] -> L[5]
+                new_state[44] = temp_state[29];  // D[2] -> L[8]
+            } else if (direction == 2) {
+                // Face F rotation 180°
+                new_state[18] = temp_state[26];  // F[8] -> F[0]
+                new_state[19] = temp_state[25];  // F[7] -> F[1]
+                new_state[20] = temp_state[24];  // F[6] -> F[2]
+                new_state[21] = temp_state[23];  // F[5] -> F[3]
+                new_state[22] = temp_state[22];  // F[4] -> F[4]
+                new_state[23] = temp_state[21];  // F[3] -> F[5]
+                new_state[24] = temp_state[20];  // F[2] -> F[6]
+                new_state[25] = temp_state[19];  // F[1] -> F[7]
+                new_state[26] = temp_state[18];  // F[0] -> F[8]
+
+                // 180° front edge rotation (U<-D, R<-L, D<-U, L<-R)
+                new_state[6] = temp_state[29];   // D[2] -> U[6]
+                new_state[7] = temp_state[28];   // D[1] -> U[7]
+                new_state[8] = temp_state[27];   // D[0] -> U[8]
+                new_state[9] = temp_state[44];   // L[8] -> R[0]
+                new_state[12] = temp_state[41];  // L[5] -> R[3]
+                new_state[15] = temp_state[38];  // L[2] -> R[6]
+                new_state[27] = temp_state[8];   // U[8] -> D[0]
+                new_state[28] = temp_state[7];   // U[7] -> D[1]
+                new_state[29] = temp_state[6];   // U[6] -> D[2]
+                new_state[38] = temp_state[15];  // R[6] -> L[2]
+                new_state[41] = temp_state[12];  // R[3] -> L[5]
+                new_state[44] = temp_state[9];   // R[0] -> L[8]
+            } else { // direction == 3 (counterclockwise)
+                // Face F rotation counterclockwise
+                new_state[18] = temp_state[20];  // F[2] -> F[0]
+                new_state[19] = temp_state[23];  // F[5] -> F[1]
+                new_state[20] = temp_state[26];  // F[8] -> F[2]
+                new_state[21] = temp_state[19];  // F[1] -> F[3]
+                new_state[22] = temp_state[22];  // F[4] -> F[4]
+                new_state[23] = temp_state[25];  // F[7] -> F[5]
+                new_state[24] = temp_state[18];  // F[0] -> F[6]
+                new_state[25] = temp_state[21];  // F[3] -> F[7]
+                new_state[26] = temp_state[24];  // F[6] -> F[8]
+
+                // Front edge rotation (counterclockwise: U<-R, R<-D, D<-L, L<-U)
+                new_state[6] = temp_state[9];    // R[0] -> U[6]
+                new_state[7] = temp_state[12];   // R[3] -> U[7]
+                new_state[8] = temp_state[15];   // R[6] -> U[8]
+                new_state[9] = temp_state[29];   // D[2] -> R[0]
+                new_state[12] = temp_state[28];  // D[1] -> R[3]
+                new_state[15] = temp_state[27];  // D[0] -> R[6]
+                new_state[27] = temp_state[38];  // L[2] -> D[0]
+                new_state[28] = temp_state[41];  // L[5] -> D[1]
+                new_state[29] = temp_state[44];  // L[8] -> D[2]
+                new_state[38] = temp_state[8];   // U[8] -> L[2]
+                new_state[41] = temp_state[7];   // U[7] -> L[5]
+                new_state[44] = temp_state[6];   // U[6] -> L[8]
+            }
             break;
         }
 
         case 'D': {
-            char f_bottom[3] = {new_state[24], new_state[25], new_state[26]};
-            char r_bottom[3] = {new_state[15], new_state[16], new_state[17]};
-            char b_bottom[3] = {new_state[51], new_state[52], new_state[53]};
-            char l_bottom[3] = {new_state[42], new_state[43], new_state[44]};
-
-            char d_face[9];
-            for (int j = 0; j < 9; j++) d_face[j] = new_state[27 + j];
-            char rotated_d[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(d_face, rotated_d);
-                new_state[24] = l_bottom[0]; new_state[25] = l_bottom[1]; new_state[26] = l_bottom[2];
-                new_state[15] = f_bottom[0]; new_state[16] = f_bottom[1]; new_state[17] = f_bottom[2];
-                new_state[51] = r_bottom[0]; new_state[52] = r_bottom[1]; new_state[53] = r_bottom[2];
-                new_state[42] = b_bottom[0]; new_state[43] = b_bottom[1]; new_state[44] = b_bottom[2];
-            } else if (direction == 2) {
-                rotate_face_180(d_face, rotated_d);
-                new_state[24] = b_bottom[0]; new_state[25] = b_bottom[1]; new_state[26] = b_bottom[2];
-                new_state[15] = l_bottom[0]; new_state[16] = l_bottom[1]; new_state[17] = l_bottom[2];
-                new_state[51] = f_bottom[0]; new_state[52] = f_bottom[1]; new_state[53] = f_bottom[2];
-                new_state[42] = r_bottom[0]; new_state[43] = r_bottom[1]; new_state[44] = r_bottom[2];
-            } else {
-                rotate_face_counterclockwise(d_face, rotated_d);
-                new_state[24] = r_bottom[0]; new_state[25] = r_bottom[1]; new_state[26] = r_bottom[2];
-                new_state[15] = b_bottom[0]; new_state[16] = b_bottom[1]; new_state[17] = b_bottom[2];
-                new_state[51] = l_bottom[0]; new_state[52] = l_bottom[1]; new_state[53] = l_bottom[2];
-                new_state[42] = f_bottom[0]; new_state[43] = f_bottom[1]; new_state[44] = f_bottom[2];
-            }
+                // Face D rotation clockwise
+                new_state[27] = temp_state[33];  // D[6] -> D[0]
+                new_state[28] = temp_state[30];  // D[3] -> D[1]
+                new_state[29] = temp_state[27];  // D[0] -> D[2]
+                new_state[30] = temp_state[34];  // D[7] -> D[3]
+                new_state[31] = temp_state[31];  // D[4] -> D[4]
+                new_state[32] = temp_state[28];  // D[1] -> D[5]
+                new_state[33] = temp_state[35];  // D[8] -> D[6]
+                new_state[34] = temp_state[32];  // D[5] -> D[7]
+                new_state[35] = temp_state[29];  // D[2] -> D[8]
 
-            for (int j = 0; j < 9; j++) new_state[27 + j] = rotated_d[j];
+                // Bottom row rotation (clockwise: F<-L, R<-F, B<-R, L<-B)
+                new_state[24] = temp_state[42];  // L[6] -> F[6]
+                new_state[25] = temp_state[43];  // L[7] -> F[7]
+                new_state[26] = temp_state[44];  // L[8] -> F[8]
+                new_state[15] = temp_state[24];  // F[6] -> R[6]
+                new_state[16] = temp_state[25];  // F[7] -> R[7]
+                new_state[17] = temp_state[26];  // F[8] -> R[8]
+                new_state[51] = temp_state[15];  // R[6] -> B[6]
+                new_state[52] = temp_state[16];  // R[7] -> B[7]
+                new_state[53] = temp_state[17];  // R[8] -> B[8]
+                new_state[42] = temp_state[51];  // B[6] -> L[6]
+                new_state[43] = temp_state[52];  // B[7] -> L[7]
+                new_state[44] = temp_state[53];  // B[8] -> L[8]
+            } else if (direction == 2) {
+                // Face D rotation 180°
+                new_state[27] = temp_state[35];  // D[8] -> D[0]
+                new_state[28] = temp_state[34];  // D[7] -> D[1]
+                new_state[29] = temp_state[33];  // D[6] -> D[2]
+                new_state[30] = temp_state[32];  // D[5] -> D[3]
+                new_state[31] = temp_state[31];  // D[4] -> D[4]
+                new_state[32] = temp_state[30];  // D[3] -> D[5]
+                new_state[33] = temp_state[29];  // D[2] -> D[6]
+                new_state[34] = temp_state[28];  // D[1] -> D[7]
+                new_state[35] = temp_state[27];  // D[0] -> D[8]
+
+                // 180° bottom row rotation (F<-B, R<-L, B<-F, L<-R)
+                new_state[24] = temp_state[51];  // B[6] -> F[6]
+                new_state[25] = temp_state[52];  // B[7] -> F[7]
+                new_state[26] = temp_state[53];  // B[8] -> F[8]
+                new_state[15] = temp_state[42];  // L[6] -> R[6]
+                new_state[16] = temp_state[43];  // L[7] -> R[7]
+                new_state[17] = temp_state[44];  // L[8] -> R[8]
+                new_state[51] = temp_state[24];  // F[6] -> B[6]
+                new_state[52] = temp_state[25];  // F[7] -> B[7]
+                new_state[53] = temp_state[26];  // F[8] -> B[8]
+                new_state[42] = temp_state[15];  // R[6] -> L[6]
+                new_state[43] = temp_state[16];  // R[7] -> L[7]
+                new_state[44] = temp_state[17];  // R[8] -> L[8]
+            } else { // direction == 3 (counterclockwise)
+                // Face D rotation counterclockwise
+                new_state[27] = temp_state[29];  // D[2] -> D[0]
+                new_state[28] = temp_state[32];  // D[5] -> D[1]
+                new_state[29] = temp_state[35];  // D[8] -> D[2]
+                new_state[30] = temp_state[28];  // D[1] -> D[3]
+                new_state[31] = temp_state[31];  // D[4] -> D[4]
+                new_state[32] = temp_state[34];  // D[7] -> D[5]
+                new_state[33] = temp_state[27];  // D[0] -> D[6]
+                new_state[34] = temp_state[30];  // D[3] -> D[7]
+                new_state[35] = temp_state[33];  // D[6] -> D[8]
+
+                // Bottom row rotation (counterclockwise: F<-R, R<-B, B<-L, L<-F)
+                new_state[24] = temp_state[15];  // R[6] -> F[6]
+                new_state[25] = temp_state[16];  // R[7] -> F[7]
+                new_state[26] = temp_state[17];  // R[8] -> F[8]
+                new_state[15] = temp_state[51];  // B[6] -> R[6]
+                new_state[16] = temp_state[52];  // B[7] -> R[7]
+                new_state[17] = temp_state[53];  // B[8] -> R[8]
+                new_state[51] = temp_state[42];  // L[6] -> B[6]
+                new_state[52] = temp_state[43];  // L[7] -> B[7]
+                new_state[53] = temp_state[44];  // L[8] -> B[8]
+                new_state[42] = temp_state[24];  // F[6] -> L[6]
+                new_state[43] = temp_state[25];  // F[7] -> L[7]
+                new_state[44] = temp_state[26];  // F[8] -> L[8]
+            }
             break;
         }
 
         case 'L': {
-            char u_left[3] = {new_state[0], new_state[3], new_state[6]};
-            char f_left[3] = {new_state[18], new_state[21], new_state[24]};
-            char d_left[3] = {new_state[27], new_state[30], new_state[33]};
-            char b_right[3] = {new_state[47], new_state[50], new_state[53]};
-
-            char l_face[9];
-            for (int j = 0; j < 9; j++) l_face[j] = new_state[36 + j];
-            char rotated_l[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(l_face, rotated_l);
-                new_state[0] = b_right[2]; new_state[3] = b_right[1]; new_state[6] = b_right[0];
-                new_state[18] = u_left[0]; new_state[21] = u_left[1]; new_state[24] = u_left[2];
-                new_state[27] = f_left[0]; new_state[30] = f_left[1]; new_state[33] = f_left[2];
-                new_state[47] = d_left[2]; new_state[50] = d_left[1]; new_state[53] = d_left[0];
-            } else if (direction == 2) {
-                rotate_face_180(l_face, rotated_l);
-                new_state[0] = d_left[0]; new_state[3] = d_left[1]; new_state[6] = d_left[2];
-                new_state[18] = b_right[2]; new_state[21] = b_right[1]; new_state[24] = b_right[0];
-                new_state[27] = u_left[0]; new_state[30] = u_left[1]; new_state[33] = u_left[2];
-                new_state[47] = f_left[2]; new_state[50] = f_left[1]; new_state[53] = f_left[0];
-            } else {
-                rotate_face_counterclockwise(l_face, rotated_l);
-                new_state[0] = f_left[0]; new_state[3] = f_left[1]; new_state[6] = f_left[2];
-                new_state[18] = d_left[0]; new_state[21] = d_left[1]; new_state[24] = d_left[2];
-                new_state[27] = b_right[2]; new_state[30] = b_right[1]; new_state[33] = b_right[0];
-                new_state[47] = u_left[2]; new_state[50] = u_left[1]; new_state[53] = u_left[0];
-            }
+                // Face L rotation clockwise
+                new_state[36] = temp_state[42];  // L[6] -> L[0]
+                new_state[37] = temp_state[39];  // L[3] -> L[1]
+                new_state[38] = temp_state[36];  // L[0] -> L[2]
+                new_state[39] = temp_state[43];  // L[7] -> L[3]
+                new_state[40] = temp_state[40];  // L[4] -> L[4]
+                new_state[41] = temp_state[37];  // L[1] -> L[5]
+                new_state[42] = temp_state[44];  // L[8] -> L[6]
+                new_state[43] = temp_state[41];  // L[5] -> L[7]
+                new_state[44] = temp_state[38];  // L[2] -> L[8]
 
-            for (int j = 0; j < 9; j++) new_state[36 + j] = rotated_l[j];
+                // Left column rotation (clockwise: U<-B, F<-U, D<-F, B<-D)
+                new_state[0] = temp_state[53];   // B[8] -> U[0]
+                new_state[3] = temp_state[50];   // B[5] -> U[3]
+                new_state[6] = temp_state[47];   // B[2] -> U[6]
+                new_state[18] = temp_state[0];   // U[0] -> F[0]
+                new_state[21] = temp_state[3];   // U[3] -> F[3]
+                new_state[24] = temp_state[6];   // U[6] -> F[6]
+                new_state[27] = temp_state[18];  // F[0] -> D[0]
+                new_state[30] = temp_state[21];  // F[3] -> D[3]
+                new_state[33] = temp_state[24];  // F[6] -> D[6]
+                new_state[47] = temp_state[33];  // D[6] -> B[2]
+                new_state[50] = temp_state[30];  // D[3] -> B[5]
+                new_state[53] = temp_state[27];  // D[0] -> B[8]
+            } else if (direction == 2) {
+                // Face L rotation 180°
+                new_state[36] = temp_state[44];  // L[8] -> L[0]
+                new_state[37] = temp_state[43];  // L[7] -> L[1]
+                new_state[38] = temp_state[42];  // L[6] -> L[2]
+                new_state[39] = temp_state[41];  // L[5] -> L[3]
+                new_state[40] = temp_state[40];  // L[4] -> L[4]
+                new_state[41] = temp_state[39];  // L[3] -> L[5]
+                new_state[42] = temp_state[38];  // L[2] -> L[6]
+                new_state[43] = temp_state[37];  // L[1] -> L[7]
+                new_state[44] = temp_state[36];  // L[0] -> L[8]
+
+                // 180° left column rotation (U<-D, F<-B, D<-U, B<-F)
+                new_state[0] = temp_state[27];   // D[0] -> U[0]
+                new_state[3] = temp_state[30];   // D[3] -> U[3]
+                new_state[6] = temp_state[33];   // D[6] -> U[6]
+                new_state[18] = temp_state[53];  // B[8] -> F[0]
+                new_state[21] = temp_state[50];  // B[5] -> F[3]
+                new_state[24] = temp_state[47];  // B[2] -> F[6]
+                new_state[27] = temp_state[0];   // U[0] -> D[0]
+                new_state[30] = temp_state[3];   // U[3] -> D[3]
+                new_state[33] = temp_state[6];   // U[6] -> D[6]
+                new_state[47] = temp_state[24];  // F[6] -> B[2]
+                new_state[50] = temp_state[21];  // F[3] -> B[5]
+                new_state[53] = temp_state[18];  // F[0] -> B[8]
+            } else { // direction == 3 (counterclockwise)
+                // Face L rotation counterclockwise
+                new_state[36] = temp_state[38];  // L[2] -> L[0]
+                new_state[37] = temp_state[41];  // L[5] -> L[1]
+                new_state[38] = temp_state[44];  // L[8] -> L[2]
+                new_state[39] = temp_state[37];  // L[1] -> L[3]
+                new_state[40] = temp_state[40];  // L[4] -> L[4]
+                new_state[41] = temp_state[43];  // L[7] -> L[5]
+                new_state[42] = temp_state[36];  // L[0] -> L[6]
+                new_state[43] = temp_state[39];  // L[3] -> L[7]
+                new_state[44] = temp_state[42];  // L[6] -> L[8]
+
+                // Left column rotation (counterclockwise: U<-F, F<-D, D<-B, B<-U)
+                new_state[0] = temp_state[18];   // F[0] -> U[0]
+                new_state[3] = temp_state[21];   // F[3] -> U[3]
+                new_state[6] = temp_state[24];   // F[6] -> U[6]
+                new_state[18] = temp_state[27];  // D[0] -> F[0]
+                new_state[21] = temp_state[30];  // D[3] -> F[3]
+                new_state[24] = temp_state[33];  // D[6] -> F[6]
+                new_state[27] = temp_state[53];  // B[8] -> D[0]
+                new_state[30] = temp_state[50];  // B[5] -> D[3]
+                new_state[33] = temp_state[47];  // B[2] -> D[6]
+                new_state[47] = temp_state[6];   // U[6] -> B[2]
+                new_state[50] = temp_state[3];   // U[3] -> B[5]
+                new_state[53] = temp_state[0];   // U[0] -> B[8]
+            }
             break;
         }
 
         case 'B': {
-            char u_top[3] = {new_state[0], new_state[1], new_state[2]};
-            char r_right[3] = {new_state[11], new_state[14], new_state[17]};
-            char d_bottom[3] = {new_state[33], new_state[34], new_state[35]};
-            char l_left[3] = {new_state[36], new_state[39], new_state[42]};
-
-            char b_face[9];
-            for (int j = 0; j < 9; j++) b_face[j] = new_state[45 + j];
-            char rotated_b[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(b_face, rotated_b);
-                new_state[0] = r_right[0]; new_state[1] = r_right[1]; new_state[2] = r_right[2];
-                new_state[11] = d_bottom[2]; new_state[14] = d_bottom[1]; new_state[17] = d_bottom[0];
-                new_state[33] = l_left[0]; new_state[34] = l_left[1]; new_state[35] = l_left[2];
-                new_state[36] = u_top[2]; new_state[39] = u_top[1]; new_state[42] = u_top[0];
-            } else if (direction == 2) {
-                rotate_face_180(b_face, rotated_b);
-                new_state[0] = d_bottom[2]; new_state[1] = d_bottom[1]; new_state[2] = d_bottom[0];
-                new_state[11] = l_left[2]; new_state[14] = l_left[1]; new_state[17] = l_left[0];
-                new_state[33] = u_top[2]; new_state[34] = u_top[1]; new_state[35] = u_top[0];
-                new_state[36] = r_right[2]; new_state[39] = r_right[1]; new_state[42] = r_right[0];
-            } else {
-                rotate_face_counterclockwise(b_face, rotated_b);
-                new_state[0] = l_left[2]; new_state[1] = l_left[1]; new_state[2] = l_left[0];
-                new_state[11] = u_top[0]; new_state[14] = u_top[1]; new_state[17] = u_top[2];
-                new_state[33] = r_right[2]; new_state[34] = r_right[1]; new_state[35] = r_right[0];
-                new_state[36] = d_bottom[0]; new_state[39] = d_bottom[1]; new_state[42] = d_bottom[2];
-            }
+                // Face B rotation clockwise
+                new_state[45] = temp_state[51];  // B[6] -> B[0]
+                new_state[46] = temp_state[48];  // B[3] -> B[1]
+                new_state[47] = temp_state[45];  // B[0] -> B[2]
+                new_state[48] = temp_state[52];  // B[7] -> B[3]
+                new_state[49] = temp_state[49];  // B[4] -> B[4]
+                new_state[50] = temp_state[46];  // B[1] -> B[5]
+                new_state[51] = temp_state[53];  // B[8] -> B[6]
+                new_state[52] = temp_state[50];  // B[5] -> B[7]
+                new_state[53] = temp_state[47];  // B[2] -> B[8]
 
-            for (int j = 0; j < 9; j++) new_state[45 + j] = rotated_b[j];
+                // Back edge rotation (clockwise: U<-R, R<-D, D<-L, L<-U)
+                new_state[0] = temp_state[11];   // R[2] -> U[0]
+                new_state[1] = temp_state[14];   // R[5] -> U[1]
+                new_state[2] = temp_state[17];   // R[8] -> U[2]
+                new_state[11] = temp_state[35];  // D[8] -> R[2]
+                new_state[14] = temp_state[34];  // D[7] -> R[5]
+                new_state[17] = temp_state[33];  // D[6] -> R[8]
+                new_state[33] = temp_state[36];  // L[0] -> D[6]
+                new_state[34] = temp_state[39];  // L[3] -> D[7]
+                new_state[35] = temp_state[42];  // L[6] -> D[8]
+                new_state[36] = temp_state[2];   // U[2] -> L[0]
+                new_state[39] = temp_state[1];   // U[1] -> L[3]
+                new_state[42] = temp_state[0];   // U[0] -> L[6]
+            } else if (direction == 2) {
+                // Face B rotation 180°
+                new_state[45] = temp_state[53];  // B[8] -> B[0]
+                new_state[46] = temp_state[52];  // B[7] -> B[1]
+                new_state[47] = temp_state[51];  // B[6] -> B[2]
+                new_state[48] = temp_state[50];  // B[5] -> B[3]
+                new_state[49] = temp_state[49];  // B[4] -> B[4]
+                new_state[50] = temp_state[48];  // B[3] -> B[5]
+                new_state[51] = temp_state[47];  // B[2] -> B[6]
+                new_state[52] = temp_state[46];  // B[1] -> B[7]
+                new_state[53] = temp_state[45];  // B[0] -> B[8]
+
+                // 180° back edge rotation (U<-D, R<-L, D<-U, L<-R)
+                new_state[0] = temp_state[35];   // D[8] -> U[0]
+                new_state[1] = temp_state[34];   // D[7] -> U[1]
+                new_state[2] = temp_state[33];   // D[6] -> U[2]
+                new_state[11] = temp_state[42];  // L[6] -> R[2]
+                new_state[14] = temp_state[39];  // L[3] -> R[5]
+                new_state[17] = temp_state[36];  // L[0] -> R[8]
+                new_state[33] = temp_state[2];   // U[2] -> D[6]
+                new_state[34] = temp_state[1];   // U[1] -> D[7]
+                new_state[35] = temp_state[0];   // U[0] -> D[8]
+                new_state[36] = temp_state[17];  // R[8] -> L[0]
+                new_state[39] = temp_state[14];  // R[5] -> L[3]
+                new_state[42] = temp_state[11];  // R[2] -> L[6]
+            } else { // direction == 3 (counterclockwise)
+                // Face B rotation counterclockwise
+                new_state[45] = temp_state[47];  // B[2] -> B[0]
+                new_state[46] = temp_state[50];  // B[5] -> B[1]
+                new_state[47] = temp_state[53];  // B[8] -> B[2]
+                new_state[48] = temp_state[46];  // B[1] -> B[3]
+                new_state[49] = temp_state[49];  // B[4] -> B[4]
+                new_state[50] = temp_state[52];  // B[7] -> B[5]
+                new_state[51] = temp_state[45];  // B[0] -> B[6]
+                new_state[52] = temp_state[48];  // B[3] -> B[7]
+                new_state[53] = temp_state[51];  // B[6] -> B[8]
+
+                // Back edge rotation (counterclockwise: U<-L, R<-U, D<-R, L<-D)
+                new_state[0] = temp_state[42];   // L[6] -> U[0]
+                new_state[1] = temp_state[39];   // L[3] -> U[1]
+                new_state[2] = temp_state[36];   // L[0] -> U[2]
+                new_state[11] = temp_state[0];   // U[0] -> R[2]
+                new_state[14] = temp_state[1];   // U[1] -> R[5]
+                new_state[17] = temp_state[2];   // U[2] -> R[8]
+                new_state[33] = temp_state[17];  // R[8] -> D[6]
+                new_state[34] = temp_state[14];  // R[5] -> D[7]
+                new_state[35] = temp_state[11];  // R[2] -> D[8]
+                new_state[36] = temp_state[33];  // D[6] -> L[0]
+                new_state[39] = temp_state[34];  // D[7] -> L[3]
+                new_state[42] = temp_state[35];  // D[8] -> L[6]
+            }
             break;
         }
 
         case 'M': {
-            // M est la tranche du milieu entre L et R (même direction que L)
-            char u_middle[3] = {new_state[1], new_state[4], new_state[7]};
-            char f_middle[3] = {new_state[19], new_state[22], new_state[25]};
-            char d_middle[3] = {new_state[28], new_state[31], new_state[34]};
-            char b_middle[3] = {new_state[46], new_state[49], new_state[52]};
-
             if (direction == 1) {
-                new_state[1] = b_middle[2]; new_state[4] = b_middle[1]; new_state[7] = b_middle[0];
-                new_state[19] = u_middle[0]; new_state[22] = u_middle[1]; new_state[25] = u_middle[2];
-                new_state[28] = f_middle[0]; new_state[31] = f_middle[1]; new_state[34] = f_middle[2];
-                new_state[46] = d_middle[2]; new_state[49] = d_middle[1]; new_state[52] = d_middle[0];
+                // M rotation clockwise (same direction as L)
+                new_state[1] = temp_state[52];   // B[7] -> U[1]
+                new_state[4] = temp_state[49];   // B[4] -> U[4]
+                new_state[7] = temp_state[46];   // B[1] -> U[7]
+                new_state[19] = temp_state[1];   // U[1] -> F[1]
+                new_state[22] = temp_state[4];   // U[4] -> F[4]
+                new_state[25] = temp_state[7];   // U[7] -> F[7]
+                new_state[28] = temp_state[19];  // F[1] -> D[1]
+                new_state[31] = temp_state[22];  // F[4] -> D[4]
+                new_state[34] = temp_state[25];  // F[7] -> D[7]
+                new_state[46] = temp_state[34];  // D[7] -> B[1]
+                new_state[49] = temp_state[31];  // D[4] -> B[4]
+                new_state[52] = temp_state[28];  // D[1] -> B[7]
             } else if (direction == 2) {
-                new_state[1] = d_middle[0]; new_state[4] = d_middle[1]; new_state[7] = d_middle[2];
-                new_state[19] = b_middle[2]; new_state[22] = b_middle[1]; new_state[25] = b_middle[0];
-                new_state[28] = u_middle[0]; new_state[31] = u_middle[1]; new_state[34] = u_middle[2];
-                new_state[46] = f_middle[2]; new_state[49] = f_middle[1]; new_state[52] = f_middle[0];
-            } else {
-                new_state[1] = f_middle[0]; new_state[4] = f_middle[1]; new_state[7] = f_middle[2];
-                new_state[19] = d_middle[0]; new_state[22] = d_middle[1]; new_state[25] = d_middle[2];
-                new_state[28] = b_middle[2]; new_state[31] = b_middle[1]; new_state[34] = b_middle[0];
-                new_state[46] = u_middle[2]; new_state[49] = u_middle[1]; new_state[52] = u_middle[0];
+                // M rotation 180°
+                new_state[1] = temp_state[28];   // D[1] -> U[1]
+                new_state[4] = temp_state[31];   // D[4] -> U[4]
+                new_state[7] = temp_state[34];   // D[7] -> U[7]
+                new_state[19] = temp_state[52];  // B[7] -> F[1]
+                new_state[22] = temp_state[49];  // B[4] -> F[4]
+                new_state[25] = temp_state[46];  // B[1] -> F[7]
+                new_state[28] = temp_state[1];   // U[1] -> D[1]
+                new_state[31] = temp_state[4];   // U[4] -> D[4]
+                new_state[34] = temp_state[7];   // U[7] -> D[7]
+                new_state[46] = temp_state[25];  // F[7] -> B[1]
+                new_state[49] = temp_state[22];  // F[4] -> B[4]
+                new_state[52] = temp_state[19];  // F[1] -> B[7]
+            } else { // direction == 3 (counterclockwise)
+                // M rotation counterclockwise
+                new_state[1] = temp_state[19];   // F[1] -> U[1]
+                new_state[4] = temp_state[22];   // F[4] -> U[4]
+                new_state[7] = temp_state[25];   // F[7] -> U[7]
+                new_state[19] = temp_state[28];  // D[1] -> F[1]
+                new_state[22] = temp_state[31];  // D[4] -> F[4]
+                new_state[25] = temp_state[34];  // D[7] -> F[7]
+                new_state[28] = temp_state[52];  // B[7] -> D[1]
+                new_state[31] = temp_state[49];  // B[4] -> D[4]
+                new_state[34] = temp_state[46];  // B[1] -> D[7]
+                new_state[46] = temp_state[7];   // U[7] -> B[1]
+                new_state[49] = temp_state[4];   // U[4] -> B[4]
+                new_state[52] = temp_state[1];   // U[1] -> B[7]
             }
             break;
         }
 
         case 'S': {
-            // S est la tranche du milieu entre F et B (même direction que F)
-            char u_middle[3] = {new_state[3], new_state[4], new_state[5]};
-            char r_middle[3] = {new_state[10], new_state[13], new_state[16]};
-            char d_middle[3] = {new_state[30], new_state[31], new_state[32]};
-            char l_middle[3] = {new_state[37], new_state[40], new_state[43]};
-
             if (direction == 1) {
-                new_state[3] = l_middle[2]; new_state[4] = l_middle[1]; new_state[5] = l_middle[0];
-                new_state[10] = u_middle[0]; new_state[13] = u_middle[1]; new_state[16] = u_middle[2];
-                new_state[30] = r_middle[2]; new_state[31] = r_middle[1]; new_state[32] = r_middle[0];
-                new_state[37] = d_middle[0]; new_state[40] = d_middle[1]; new_state[43] = d_middle[2];
+                // S rotation clockwise (same direction as F)
+                new_state[3] = temp_state[43];   // L[7] -> U[3]
+                new_state[4] = temp_state[40];   // L[4] -> U[4]
+                new_state[5] = temp_state[37];   // L[1] -> U[5]
+                new_state[10] = temp_state[3];   // U[3] -> R[1]
+                new_state[13] = temp_state[4];   // U[4] -> R[4]
+                new_state[16] = temp_state[5];   // U[5] -> R[7]
+                new_state[30] = temp_state[16];  // R[7] -> D[3]
+                new_state[31] = temp_state[13];  // R[4] -> D[4]
+                new_state[32] = temp_state[10];  // R[1] -> D[5]
+                new_state[37] = temp_state[30];  // D[3] -> L[1]
+                new_state[40] = temp_state[31];  // D[4] -> L[4]
+                new_state[43] = temp_state[32];  // D[5] -> L[7]
             } else if (direction == 2) {
-                new_state[3] = d_middle[2]; new_state[4] = d_middle[1]; new_state[5] = d_middle[0];
-                new_state[10] = l_middle[2]; new_state[13] = l_middle[1]; new_state[16] = l_middle[0];
-                new_state[30] = u_middle[2]; new_state[31] = u_middle[1]; new_state[32] = u_middle[0];
-                new_state[37] = r_middle[2]; new_state[40] = r_middle[1]; new_state[43] = r_middle[0];
-            } else {
-                new_state[3] = r_middle[0]; new_state[4] = r_middle[1]; new_state[5] = r_middle[2];
-                new_state[10] = d_middle[2]; new_state[13] = d_middle[1]; new_state[16] = d_middle[0];
-                new_state[30] = l_middle[0]; new_state[31] = l_middle[1]; new_state[32] = l_middle[2];
-                new_state[37] = u_middle[2]; new_state[40] = u_middle[1]; new_state[43] = u_middle[0];
+                // S rotation 180°
+                new_state[3] = temp_state[32];   // D[5] -> U[3]
+                new_state[4] = temp_state[31];   // D[4] -> U[4]
+                new_state[5] = temp_state[30];   // D[3] -> U[5]
+                new_state[10] = temp_state[43];  // L[7] -> R[1]
+                new_state[13] = temp_state[40];  // L[4] -> R[4]
+                new_state[16] = temp_state[37];  // L[1] -> R[7]
+                new_state[30] = temp_state[5];   // U[5] -> D[3]
+                new_state[31] = temp_state[4];   // U[4] -> D[4]
+                new_state[32] = temp_state[3];   // U[3] -> D[5]
+                new_state[37] = temp_state[16];  // R[7] -> L[1]
+                new_state[40] = temp_state[13];  // R[4] -> L[4]
+                new_state[43] = temp_state[10];  // R[1] -> L[7]
+            } else { // direction == 3 (counterclockwise)
+                // S rotation counterclockwise
+                new_state[3] = temp_state[10];   // R[1] -> U[3]
+                new_state[4] = temp_state[13];   // R[4] -> U[4]
+                new_state[5] = temp_state[16];   // R[7] -> U[5]
+                new_state[10] = temp_state[32];  // D[5] -> R[1]
+                new_state[13] = temp_state[31];  // D[4] -> R[4]
+                new_state[16] = temp_state[30];  // D[3] -> R[7]
+                new_state[30] = temp_state[37];  // L[1] -> D[3]
+                new_state[31] = temp_state[40];  // L[4] -> D[4]
+                new_state[32] = temp_state[43];  // L[7] -> D[5]
+                new_state[37] = temp_state[5];   // U[5] -> L[1]
+                new_state[40] = temp_state[4];   // U[4] -> L[4]
+                new_state[43] = temp_state[3];   // U[3] -> L[7]
             }
             break;
         }
 
         case 'E': {
-            // E est la tranche du milieu entre U et D (même direction que D)
-            char f_middle[3] = {new_state[21], new_state[22], new_state[23]};
-            char r_middle[3] = {new_state[12], new_state[13], new_state[14]};
-            char b_middle[3] = {new_state[48], new_state[49], new_state[50]};
-            char l_middle[3] = {new_state[39], new_state[40], new_state[41]};
-
             if (direction == 1) {
-                new_state[21] = l_middle[0]; new_state[22] = l_middle[1]; new_state[23] = l_middle[2];
-                new_state[12] = f_middle[0]; new_state[13] = f_middle[1]; new_state[14] = f_middle[2];
-                new_state[48] = r_middle[0]; new_state[49] = r_middle[1]; new_state[50] = r_middle[2];
-                new_state[39] = b_middle[0]; new_state[40] = b_middle[1]; new_state[41] = b_middle[2];
+                // E rotation clockwise (same direction as D)
+                new_state[21] = temp_state[39];  // L[3] -> F[3]
+                new_state[22] = temp_state[40];  // L[4] -> F[4]
+                new_state[23] = temp_state[41];  // L[5] -> F[5]
+                new_state[12] = temp_state[21];  // F[3] -> R[3]
+                new_state[13] = temp_state[22];  // F[4] -> R[4]
+                new_state[14] = temp_state[23];  // F[5] -> R[5]
+                new_state[48] = temp_state[12];  // R[3] -> B[3]
+                new_state[49] = temp_state[13];  // R[4] -> B[4]
+                new_state[50] = temp_state[14];  // R[5] -> B[5]
+                new_state[39] = temp_state[48];  // B[3] -> L[3]
+                new_state[40] = temp_state[49];  // B[4] -> L[4]
+                new_state[41] = temp_state[50];  // B[5] -> L[5]
             } else if (direction == 2) {
-                new_state[21] = b_middle[0]; new_state[22] = b_middle[1]; new_state[23] = b_middle[2];
-                new_state[12] = l_middle[0]; new_state[13] = l_middle[1]; new_state[14] = l_middle[2];
-                new_state[48] = f_middle[0]; new_state[49] = f_middle[1]; new_state[50] = f_middle[2];
-                new_state[39] = r_middle[0]; new_state[40] = r_middle[1]; new_state[41] = r_middle[2];
-            } else {
-                new_state[21] = r_middle[0]; new_state[22] = r_middle[1]; new_state[23] = r_middle[2];
-                new_state[12] = b_middle[0]; new_state[13] = b_middle[1]; new_state[14] = b_middle[2];
-                new_state[48] = l_middle[0]; new_state[49] = l_middle[1]; new_state[50] = l_middle[2];
-                new_state[39] = f_middle[0]; new_state[40] = f_middle[1]; new_state[41] = f_middle[2];
+                // E rotation 180°
+                new_state[21] = temp_state[48];  // B[3] -> F[3]
+                new_state[22] = temp_state[49];  // B[4] -> F[4]
+                new_state[23] = temp_state[50];  // B[5] -> F[5]
+                new_state[12] = temp_state[39];  // L[3] -> R[3]
+                new_state[13] = temp_state[40];  // L[4] -> R[4]
+                new_state[14] = temp_state[41];  // L[5] -> R[5]
+                new_state[48] = temp_state[21];  // F[3] -> B[3]
+                new_state[49] = temp_state[22];  // F[4] -> B[4]
+                new_state[50] = temp_state[23];  // F[5] -> B[5]
+                new_state[39] = temp_state[12];  // R[3] -> L[3]
+                new_state[40] = temp_state[13];  // R[4] -> L[4]
+                new_state[41] = temp_state[14];  // R[5] -> L[5]
+            } else { // direction == 3 (counterclockwise)
+                // E rotation counterclockwise
+                new_state[21] = temp_state[12];  // R[3] -> F[3]
+                new_state[22] = temp_state[13];  // R[4] -> F[4]
+                new_state[23] = temp_state[14];  // R[5] -> F[5]
+                new_state[12] = temp_state[48];  // B[3] -> R[3]
+                new_state[13] = temp_state[49];  // B[4] -> R[4]
+                new_state[14] = temp_state[50];  // B[5] -> R[5]
+                new_state[48] = temp_state[39];  // L[3] -> B[3]
+                new_state[49] = temp_state[40];  // L[4] -> B[4]
+                new_state[50] = temp_state[41];  // L[5] -> B[5]
+                new_state[39] = temp_state[21];  // F[3] -> L[3]
+                new_state[40] = temp_state[22];  // F[4] -> L[4]
+                new_state[41] = temp_state[23];  // F[5] -> L[5]
             }
             break;
         }
 
         case 'x': {
-            // x est la rotation de tout le cube autour de l'axe x (même que R)
-            char temp_state[55];
-            strcpy(temp_state, new_state);
-
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = temp_state[j];
-                r_face[j] = temp_state[9 + j];
-                f_face[j] = temp_state[18 + j];
-                d_face[j] = temp_state[27 + j];
-                l_face[j] = temp_state[36 + j];
-                b_face[j] = temp_state[45 + j];
-            }
-
-            char r_rotated[9], l_rotated[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(r_face, r_rotated);
-                rotate_face_counterclockwise(l_face, l_rotated);
+                // x rotation: U<-F, R clockwise, F<-D, D<-B(inverted), L counter-clockwise, B<-U(inverted)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = f_face[j];        // U devient F
-                    new_state[9 + j] = r_rotated[j]; // R reste R mais tourne
-                    new_state[18 + j] = d_face[j];   // F devient D
-                    new_state[27 + j] = b_face[8-j]; // D devient B inversé
-                    new_state[36 + j] = l_rotated[j]; // L reste L mais tourne anti-horaire
-                    new_state[45 + j] = u_face[8-j]; // B devient U inversé
-                }
+                // U <- F (direct copy)
+                new_state[0] = temp_state[18];   // F[0] -> U[0] (position 18 -> 0)
+                new_state[1] = temp_state[19];   // F[1] -> U[1] (position 19 -> 1)
+                new_state[2] = temp_state[20];   // F[2] -> U[2] (position 20 -> 2)
+                new_state[3] = temp_state[21];   // F[3] -> U[3] (position 21 -> 3)
+                new_state[4] = temp_state[22];   // F[4] -> U[4] (position 22 -> 4)
+                new_state[5] = temp_state[23];   // F[5] -> U[5] (position 23 -> 5)
+                new_state[6] = temp_state[24];   // F[6] -> U[6] (position 24 -> 6)
+                new_state[7] = temp_state[25];   // F[7] -> U[7] (position 25 -> 7)
+                new_state[8] = temp_state[26];   // F[8] -> U[8] (position 26 -> 8)
+
+                // R rotates clockwise
+                new_state[9] = temp_state[15];   // R[6] -> R[0] (position 15 -> 9)
+                new_state[10] = temp_state[12];  // R[3] -> R[1] (position 12 -> 10)
+                new_state[11] = temp_state[9];   // R[0] -> R[2] (position 9 -> 11)
+                new_state[12] = temp_state[16];  // R[7] -> R[3] (position 16 -> 12)
+                new_state[13] = temp_state[13];  // R[4] -> R[4] (position 13 -> 13)
+                new_state[14] = temp_state[10];  // R[1] -> R[5] (position 10 -> 14)
+                new_state[15] = temp_state[17];  // R[8] -> R[6] (position 17 -> 15)
+                new_state[16] = temp_state[14];  // R[5] -> R[7] (position 14 -> 16)
+                new_state[17] = temp_state[11];  // R[2] -> R[8] (position 11 -> 17)
+
+                // F <- D (direct copy)
+                new_state[18] = temp_state[27];  // D[0] -> F[0] (position 27 -> 18)
+                new_state[19] = temp_state[28];  // D[1] -> F[1] (position 28 -> 19)
+                new_state[20] = temp_state[29];  // D[2] -> F[2] (position 29 -> 20)
+                new_state[21] = temp_state[30];  // D[3] -> F[3] (position 30 -> 21)
+                new_state[22] = temp_state[31];  // D[4] -> F[4] (position 31 -> 22)
+                new_state[23] = temp_state[32];  // D[5] -> F[5] (position 32 -> 23)
+                new_state[24] = temp_state[33];  // D[6] -> F[6] (position 33 -> 24)
+                new_state[25] = temp_state[34];  // D[7] -> F[7] (position 34 -> 25)
+                new_state[26] = temp_state[35];  // D[8] -> F[8] (position 35 -> 26)
+
+                // D <- B (inverted)
+                new_state[27] = temp_state[53];  // B[8] -> D[0] (position 53 -> 27)
+                new_state[28] = temp_state[52];  // B[7] -> D[1] (position 52 -> 28)
+                new_state[29] = temp_state[51];  // B[6] -> D[2] (position 51 -> 29)
+                new_state[30] = temp_state[50];  // B[5] -> D[3] (position 50 -> 30)
+                new_state[31] = temp_state[49];  // B[4] -> D[4] (position 49 -> 31)
+                new_state[32] = temp_state[48];  // B[3] -> D[5] (position 48 -> 32)
+                new_state[33] = temp_state[47];  // B[2] -> D[6] (position 47 -> 33)
+                new_state[34] = temp_state[46];  // B[1] -> D[7] (position 46 -> 34)
+                new_state[35] = temp_state[45];  // B[0] -> D[8] (position 45 -> 35)
+
+                // L rotates counter-clockwise
+                new_state[36] = temp_state[38];  // L[2] -> L[0] (position 38 -> 36)
+                new_state[37] = temp_state[41];  // L[5] -> L[1] (position 41 -> 37)
+                new_state[38] = temp_state[44];  // L[8] -> L[2] (position 44 -> 38)
+                new_state[39] = temp_state[37];  // L[1] -> L[3] (position 37 -> 39)
+                new_state[40] = temp_state[40];  // L[4] -> L[4] (position 40 -> 40)
+                new_state[41] = temp_state[43];  // L[7] -> L[5] (position 43 -> 41)
+                new_state[42] = temp_state[36];  // L[0] -> L[6] (position 36 -> 42)
+                new_state[43] = temp_state[39];  // L[3] -> L[7] (position 39 -> 43)
+                new_state[44] = temp_state[42];  // L[6] -> L[8] (position 42 -> 44)
+
+                // B <- U (inverted)
+                new_state[45] = temp_state[8];   // U[8] -> B[0] (position 8 -> 45)
+                new_state[46] = temp_state[7];   // U[7] -> B[1] (position 7 -> 46)
+                new_state[47] = temp_state[6];   // U[6] -> B[2] (position 6 -> 47)
+                new_state[48] = temp_state[5];   // U[5] -> B[3] (position 5 -> 48)
+                new_state[49] = temp_state[4];   // U[4] -> B[4] (position 4 -> 49)
+                new_state[50] = temp_state[3];   // U[3] -> B[5] (position 3 -> 50)
+                new_state[51] = temp_state[2];   // U[2] -> B[6] (position 2 -> 51)
+                new_state[52] = temp_state[1];   // U[1] -> B[7] (position 1 -> 52)
+                new_state[53] = temp_state[0];   // U[0] -> B[8] (position 0 -> 53)
             } else if (direction == 2) {
-                rotate_face_180(r_face, r_rotated);
-                rotate_face_180(l_face, l_rotated);
+                // x2 rotation: U<-D, R 180°, F<-B(inverted), D<-U, L 180°, B<-F(inverted)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = d_face[j];        // U devient D
-                    new_state[9 + j] = r_rotated[j]; // R reste R mais tourne 180°
-                    new_state[18 + j] = b_face[8-j]; // F devient B inversé
-                    new_state[27 + j] = u_face[j];   // D devient U
-                    new_state[36 + j] = l_rotated[j]; // L reste L mais tourne 180°
-                    new_state[45 + j] = f_face[8-j]; // B devient F inversé
-                }
+                // U <- D (direct copy)
+                new_state[0] = temp_state[27];   // D[0] -> U[0] (position 27 -> 0)
+                new_state[1] = temp_state[28];   // D[1] -> U[1] (position 28 -> 1)
+                new_state[2] = temp_state[29];   // D[2] -> U[2] (position 29 -> 2)
+                new_state[3] = temp_state[30];   // D[3] -> U[3] (position 30 -> 3)
+                new_state[4] = temp_state[31];   // D[4] -> U[4] (position 31 -> 4)
+                new_state[5] = temp_state[32];   // D[5] -> U[5] (position 32 -> 5)
+                new_state[6] = temp_state[33];   // D[6] -> U[6] (position 33 -> 6)
+                new_state[7] = temp_state[34];   // D[7] -> U[7] (position 34 -> 7)
+                new_state[8] = temp_state[35];   // D[8] -> U[8] (position 35 -> 8)
+
+                // R rotates 180°
+                new_state[9] = temp_state[17];   // R[8] -> R[0] (position 17 -> 9)
+                new_state[10] = temp_state[16];  // R[7] -> R[1] (position 16 -> 10)
+                new_state[11] = temp_state[15];  // R[6] -> R[2] (position 15 -> 11)
+                new_state[12] = temp_state[14];  // R[5] -> R[3] (position 14 -> 12)
+                new_state[13] = temp_state[13];  // R[4] -> R[4] (position 13 -> 13)
+                new_state[14] = temp_state[12];  // R[3] -> R[5] (position 12 -> 14)
+                new_state[15] = temp_state[11];  // R[2] -> R[6] (position 11 -> 15)
+                new_state[16] = temp_state[10];  // R[1] -> R[7] (position 10 -> 16)
+                new_state[17] = temp_state[9];   // R[0] -> R[8] (position 9 -> 17)
+
+                // F <- B (inverted)
+                new_state[18] = temp_state[53];  // B[8] -> F[0] (position 53 -> 18)
+                new_state[19] = temp_state[52];  // B[7] -> F[1] (position 52 -> 19)
+                new_state[20] = temp_state[51];  // B[6] -> F[2] (position 51 -> 20)
+                new_state[21] = temp_state[50];  // B[5] -> F[3] (position 50 -> 21)
+                new_state[22] = temp_state[49];  // B[4] -> F[4] (position 49 -> 22)
+                new_state[23] = temp_state[48];  // B[3] -> F[5] (position 48 -> 23)
+                new_state[24] = temp_state[47];  // B[2] -> F[6] (position 47 -> 24)
+                new_state[25] = temp_state[46];  // B[1] -> F[7] (position 46 -> 25)
+                new_state[26] = temp_state[45];  // B[0] -> F[8] (position 45 -> 26)
+
+                // D <- U (direct copy)
+                new_state[27] = temp_state[0];   // U[0] -> D[0] (position 0 -> 27)
+                new_state[28] = temp_state[1];   // U[1] -> D[1] (position 1 -> 28)
+                new_state[29] = temp_state[2];   // U[2] -> D[2] (position 2 -> 29)
+                new_state[30] = temp_state[3];   // U[3] -> D[3] (position 3 -> 30)
+                new_state[31] = temp_state[4];   // U[4] -> D[4] (position 4 -> 31)
+                new_state[32] = temp_state[5];   // U[5] -> D[5] (position 5 -> 32)
+                new_state[33] = temp_state[6];   // U[6] -> D[6] (position 6 -> 33)
+                new_state[34] = temp_state[7];   // U[7] -> D[7] (position 7 -> 34)
+                new_state[35] = temp_state[8];   // U[8] -> D[8] (position 8 -> 35)
+
+                // L rotates 180°
+                new_state[36] = temp_state[44];  // L[8] -> L[0] (position 44 -> 36)
+                new_state[37] = temp_state[43];  // L[7] -> L[1] (position 43 -> 37)
+                new_state[38] = temp_state[42];  // L[6] -> L[2] (position 42 -> 38)
+                new_state[39] = temp_state[41];  // L[5] -> L[3] (position 41 -> 39)
+                new_state[40] = temp_state[40];  // L[4] -> L[4] (position 40 -> 40)
+                new_state[41] = temp_state[39];  // L[3] -> L[5] (position 39 -> 41)
+                new_state[42] = temp_state[38];  // L[2] -> L[6] (position 38 -> 42)
+                new_state[43] = temp_state[37];  // L[1] -> L[7] (position 37 -> 43)
+                new_state[44] = temp_state[36];  // L[0] -> L[8] (position 36 -> 44)
+
+                // B <- F (inverted)
+                new_state[45] = temp_state[26];  // F[8] -> B[0] (position 26 -> 45)
+                new_state[46] = temp_state[25];  // F[7] -> B[1] (position 25 -> 46)
+                new_state[47] = temp_state[24];  // F[6] -> B[2] (position 24 -> 47)
+                new_state[48] = temp_state[23];  // F[5] -> B[3] (position 23 -> 48)
+                new_state[49] = temp_state[22];  // F[4] -> B[4] (position 22 -> 49)
+                new_state[50] = temp_state[21];  // F[3] -> B[5] (position 21 -> 50)
+                new_state[51] = temp_state[20];  // F[2] -> B[6] (position 20 -> 51)
+                new_state[52] = temp_state[19];  // F[1] -> B[7] (position 19 -> 52)
+                new_state[53] = temp_state[18];  // F[0] -> B[8] (position 18 -> 53)
             } else {
-                rotate_face_counterclockwise(r_face, r_rotated);
-                rotate_face_clockwise(l_face, l_rotated);
+                // x' rotation: U<-B(inverted), R counter-clockwise, F<-U, D<-F, L clockwise, B<-D(inverted)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = b_face[8-j];      // U devient B inversé
-                    new_state[9 + j] = r_rotated[j]; // R reste R mais tourne anti-horaire
-                    new_state[18 + j] = u_face[j];   // F devient U
-                    new_state[27 + j] = f_face[j];   // D devient F
-                    new_state[36 + j] = l_rotated[j]; // L reste L mais tourne horaire
-                    new_state[45 + j] = d_face[8-j]; // B devient D inversé
-                }
+                // U <- B (inverted)
+                new_state[0] = temp_state[53];   // B[8] -> U[0] (position 53 -> 0)
+                new_state[1] = temp_state[52];   // B[7] -> U[1] (position 52 -> 1)
+                new_state[2] = temp_state[51];   // B[6] -> U[2] (position 51 -> 2)
+                new_state[3] = temp_state[50];   // B[5] -> U[3] (position 50 -> 3)
+                new_state[4] = temp_state[49];   // B[4] -> U[4] (position 49 -> 4)
+                new_state[5] = temp_state[48];   // B[3] -> U[5] (position 48 -> 5)
+                new_state[6] = temp_state[47];   // B[2] -> U[6] (position 47 -> 6)
+                new_state[7] = temp_state[46];   // B[1] -> U[7] (position 46 -> 7)
+                new_state[8] = temp_state[45];   // B[0] -> U[8] (position 45 -> 8)
+
+                // R rotates counter-clockwise
+                new_state[9] = temp_state[11];   // R[2] -> R[0] (position 11 -> 9)
+                new_state[10] = temp_state[14];  // R[5] -> R[1] (position 14 -> 10)
+                new_state[11] = temp_state[17];  // R[8] -> R[2] (position 17 -> 11)
+                new_state[12] = temp_state[10];  // R[1] -> R[3] (position 10 -> 12)
+                new_state[13] = temp_state[13];  // R[4] -> R[4] (position 13 -> 13)
+                new_state[14] = temp_state[16];  // R[7] -> R[5] (position 16 -> 14)
+                new_state[15] = temp_state[9];   // R[0] -> R[6] (position 9 -> 15)
+                new_state[16] = temp_state[12];  // R[3] -> R[7] (position 12 -> 16)
+                new_state[17] = temp_state[15];  // R[6] -> R[8] (position 15 -> 17)
+
+                // F <- U (direct copy)
+                new_state[18] = temp_state[0];   // U[0] -> F[0] (position 0 -> 18)
+                new_state[19] = temp_state[1];   // U[1] -> F[1] (position 1 -> 19)
+                new_state[20] = temp_state[2];   // U[2] -> F[2] (position 2 -> 20)
+                new_state[21] = temp_state[3];   // U[3] -> F[3] (position 3 -> 21)
+                new_state[22] = temp_state[4];   // U[4] -> F[4] (position 4 -> 22)
+                new_state[23] = temp_state[5];   // U[5] -> F[5] (position 5 -> 23)
+                new_state[24] = temp_state[6];   // U[6] -> F[6] (position 6 -> 24)
+                new_state[25] = temp_state[7];   // U[7] -> F[7] (position 7 -> 25)
+                new_state[26] = temp_state[8];   // U[8] -> F[8] (position 8 -> 26)
+
+                // D <- F (direct copy)
+                new_state[27] = temp_state[18];  // F[0] -> D[0] (position 18 -> 27)
+                new_state[28] = temp_state[19];  // F[1] -> D[1] (position 19 -> 28)
+                new_state[29] = temp_state[20];  // F[2] -> D[2] (position 20 -> 29)
+                new_state[30] = temp_state[21];  // F[3] -> D[3] (position 21 -> 30)
+                new_state[31] = temp_state[22];  // F[4] -> D[4] (position 22 -> 31)
+                new_state[32] = temp_state[23];  // F[5] -> D[5] (position 23 -> 32)
+                new_state[33] = temp_state[24];  // F[6] -> D[6] (position 24 -> 33)
+                new_state[34] = temp_state[25];  // F[7] -> D[7] (position 25 -> 34)
+                new_state[35] = temp_state[26];  // F[8] -> D[8] (position 26 -> 35)
+
+                // L rotates clockwise
+                new_state[36] = temp_state[42];  // L[6] -> L[0]
+                new_state[37] = temp_state[39];  // L[3] -> L[1]
+                new_state[38] = temp_state[36];  // L[0] -> L[2]
+                new_state[39] = temp_state[43];  // L[7] -> L[3]
+                new_state[40] = temp_state[40];  // L[4] -> L[4]
+                new_state[41] = temp_state[37];  // L[1] -> L[5]
+                new_state[42] = temp_state[44];  // L[8] -> L[6]
+                new_state[43] = temp_state[41];  // L[5] -> L[7]
+                new_state[44] = temp_state[38];  // L[2] -> L[8]
+
+                // B <- D (inverted)
+                new_state[45] = temp_state[35];  // D[8] -> B[0] (position 35 -> 45)
+                new_state[46] = temp_state[34];  // D[7] -> B[1] (position 34 -> 46)
+                new_state[47] = temp_state[33];  // D[6] -> B[2] (position 33 -> 47)
+                new_state[48] = temp_state[32];  // D[5] -> B[3] (position 32 -> 48)
+                new_state[49] = temp_state[31];  // D[4] -> B[4] (position 31 -> 49)
+                new_state[50] = temp_state[30];  // D[3] -> B[5] (position 30 -> 50)
+                new_state[51] = temp_state[29];  // D[2] -> B[6] (position 29 -> 51)
+                new_state[52] = temp_state[28];  // D[1] -> B[7] (position 28 -> 52)
+                new_state[53] = temp_state[27];  // D[0] -> B[8] (position 27 -> 53)
             }
             break;
         }
 
         case 'y': {
-            // y est la rotation de tout le cube autour de l'axe y (même que U)
-            char temp_state[55];
-            strcpy(temp_state, new_state);
-
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = temp_state[j];
-                r_face[j] = temp_state[9 + j];
-                f_face[j] = temp_state[18 + j];
-                d_face[j] = temp_state[27 + j];
-                l_face[j] = temp_state[36 + j];
-                b_face[j] = temp_state[45 + j];
-            }
-
-            char u_rotated[9], d_rotated[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(u_face, u_rotated);
-                rotate_face_counterclockwise(d_face, d_rotated);
+                // y rotation: U clockwise, R<-B, F<-R, D counter-clockwise, L<-F, B<-L
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];     // U reste U mais tourne
-                    new_state[9 + j] = b_face[j];    // R devient B
-                    new_state[18 + j] = r_face[j];   // F devient R
-                    new_state[27 + j] = d_rotated[j]; // D reste D mais tourne anti-horaire
-                    new_state[36 + j] = f_face[j];   // L devient F
-                    new_state[45 + j] = l_face[j];   // B devient L
-                }
+                // U rotates clockwise
+                new_state[0] = temp_state[6];   // U[6] -> U[0] (position 6 -> 0)
+                new_state[1] = temp_state[3];   // U[3] -> U[1] (position 3 -> 1)
+                new_state[2] = temp_state[0];   // U[0] -> U[2] (position 0 -> 2)
+                new_state[3] = temp_state[7];   // U[7] -> U[3] (position 7 -> 3)
+                new_state[4] = temp_state[4];   // U[4] -> U[4] (position 4 -> 4)
+                new_state[5] = temp_state[1];   // U[1] -> U[5] (position 1 -> 5)
+                new_state[6] = temp_state[8];   // U[8] -> U[6] (position 8 -> 6)
+                new_state[7] = temp_state[5];   // U[5] -> U[7] (position 5 -> 7)
+                new_state[8] = temp_state[2];   // U[2] -> U[8] (position 2 -> 8)
+
+                // R <- B (direct copy)
+                new_state[9] = temp_state[45];   // B[0] -> R[0] (position 45 -> 9)
+                new_state[10] = temp_state[46];  // B[1] -> R[1] (position 46 -> 10)
+                new_state[11] = temp_state[47];  // B[2] -> R[2] (position 47 -> 11)
+                new_state[12] = temp_state[48];  // B[3] -> R[3] (position 48 -> 12)
+                new_state[13] = temp_state[49];  // B[4] -> R[4] (position 49 -> 13)
+                new_state[14] = temp_state[50];  // B[5] -> R[5] (position 50 -> 14)
+                new_state[15] = temp_state[51];  // B[6] -> R[6] (position 51 -> 15)
+                new_state[16] = temp_state[52];  // B[7] -> R[7] (position 52 -> 16)
+                new_state[17] = temp_state[53];  // B[8] -> R[8] (position 53 -> 17)
+
+                // F <- R (direct copy)
+                new_state[18] = temp_state[9];   // R[0] -> F[0] (position 9 -> 18)
+                new_state[19] = temp_state[10];  // R[1] -> F[1] (position 10 -> 19)
+                new_state[20] = temp_state[11];  // R[2] -> F[2] (position 11 -> 20)
+                new_state[21] = temp_state[12];  // R[3] -> F[3] (position 12 -> 21)
+                new_state[22] = temp_state[13];  // R[4] -> F[4] (position 13 -> 22)
+                new_state[23] = temp_state[14];  // R[5] -> F[5] (position 14 -> 23)
+                new_state[24] = temp_state[15];  // R[6] -> F[6] (position 15 -> 24)
+                new_state[25] = temp_state[16];  // R[7] -> F[7] (position 16 -> 25)
+                new_state[26] = temp_state[17];  // R[8] -> F[8] (position 17 -> 26)
+
+                // D rotates counter-clockwise
+                new_state[27] = temp_state[29];  // D[2] -> D[0] (position 29 -> 27)
+                new_state[28] = temp_state[32];  // D[5] -> D[1] (position 32 -> 28)
+                new_state[29] = temp_state[35];  // D[8] -> D[2] (position 35 -> 29)
+                new_state[30] = temp_state[28];  // D[1] -> D[3] (position 28 -> 30)
+                new_state[31] = temp_state[31];  // D[4] -> D[4] (position 31 -> 31)
+                new_state[32] = temp_state[34];  // D[7] -> D[5] (position 34 -> 32)
+                new_state[33] = temp_state[27];  // D[0] -> D[6] (position 27 -> 33)
+                new_state[34] = temp_state[30];  // D[3] -> D[7] (position 30 -> 34)
+                new_state[35] = temp_state[33];  // D[6] -> D[8] (position 33 -> 35)
+
+                // L <- F (direct copy)
+                new_state[36] = temp_state[18];  // F[0] -> L[0] (position 18 -> 36)
+                new_state[37] = temp_state[19];  // F[1] -> L[1] (position 19 -> 37)
+                new_state[38] = temp_state[20];  // F[2] -> L[2] (position 20 -> 38)
+                new_state[39] = temp_state[21];  // F[3] -> L[3] (position 21 -> 39)
+                new_state[40] = temp_state[22];  // F[4] -> L[4] (position 22 -> 40)
+                new_state[41] = temp_state[23];  // F[5] -> L[5] (position 23 -> 41)
+                new_state[42] = temp_state[24];  // F[6] -> L[6] (position 24 -> 42)
+                new_state[43] = temp_state[25];  // F[7] -> L[7] (position 25 -> 43)
+                new_state[44] = temp_state[26];  // F[8] -> L[8] (position 26 -> 44)
+
+                // B <- L (direct copy)
+                new_state[45] = temp_state[36];  // L[0] -> B[0] (position 36 -> 45)
+                new_state[46] = temp_state[37];  // L[1] -> B[1] (position 37 -> 46)
+                new_state[47] = temp_state[38];  // L[2] -> B[2] (position 38 -> 47)
+                new_state[48] = temp_state[39];  // L[3] -> B[3] (position 39 -> 48)
+                new_state[49] = temp_state[40];  // L[4] -> B[4] (position 40 -> 49)
+                new_state[50] = temp_state[41];  // L[5] -> B[5] (position 41 -> 50)
+                new_state[51] = temp_state[42];  // L[6] -> B[6] (position 42 -> 51)
+                new_state[52] = temp_state[43];  // L[7] -> B[7] (position 43 -> 52)
+                new_state[53] = temp_state[44];  // L[8] -> B[8] (position 44 -> 53)
             } else if (direction == 2) {
-                rotate_face_180(u_face, u_rotated);
-                rotate_face_180(d_face, d_rotated);
+                // y2 rotation: U 180°, R<-L, F<-B, D 180°, L<-R, B<-F
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];     // U reste U mais tourne 180°
-                    new_state[9 + j] = l_face[j];    // R devient L
-                    new_state[18 + j] = b_face[j];   // F devient B
-                    new_state[27 + j] = d_rotated[j]; // D reste D mais tourne 180°
-                    new_state[36 + j] = r_face[j];   // L devient R
-                    new_state[45 + j] = f_face[j];   // B devient F
-                }
+                // U rotates 180°
+                new_state[0] = temp_state[8];   // U[8] -> U[0] (position 8 -> 0)
+                new_state[1] = temp_state[7];   // U[7] -> U[1] (position 7 -> 1)
+                new_state[2] = temp_state[6];   // U[6] -> U[2] (position 6 -> 2)
+                new_state[3] = temp_state[5];   // U[5] -> U[3] (position 5 -> 3)
+                new_state[4] = temp_state[4];   // U[4] -> U[4] (position 4 -> 4)
+                new_state[5] = temp_state[3];   // U[3] -> U[5] (position 3 -> 5)
+                new_state[6] = temp_state[2];   // U[2] -> U[6] (position 2 -> 6)
+                new_state[7] = temp_state[1];   // U[1] -> U[7] (position 1 -> 7)
+                new_state[8] = temp_state[0];   // U[0] -> U[8] (position 0 -> 8)
+
+                // R <- L (direct copy)
+                new_state[9] = temp_state[36];   // L[0] -> R[0] (position 36 -> 9)
+                new_state[10] = temp_state[37];  // L[1] -> R[1] (position 37 -> 10)
+                new_state[11] = temp_state[38];  // L[2] -> R[2] (position 38 -> 11)
+                new_state[12] = temp_state[39];  // L[3] -> R[3] (position 39 -> 12)
+                new_state[13] = temp_state[40];  // L[4] -> R[4] (position 40 -> 13)
+                new_state[14] = temp_state[41];  // L[5] -> R[5] (position 41 -> 14)
+                new_state[15] = temp_state[42];  // L[6] -> R[6] (position 42 -> 15)
+                new_state[16] = temp_state[43];  // L[7] -> R[7] (position 43 -> 16)
+                new_state[17] = temp_state[44];  // L[8] -> R[8] (position 44 -> 17)
+
+                // F <- B (direct copy)
+                new_state[18] = temp_state[45];  // B[0] -> F[0] (position 45 -> 18)
+                new_state[19] = temp_state[46];  // B[1] -> F[1] (position 46 -> 19)
+                new_state[20] = temp_state[47];  // B[2] -> F[2] (position 47 -> 20)
+                new_state[21] = temp_state[48];  // B[3] -> F[3] (position 48 -> 21)
+                new_state[22] = temp_state[49];  // B[4] -> F[4] (position 49 -> 22)
+                new_state[23] = temp_state[50];  // B[5] -> F[5] (position 50 -> 23)
+                new_state[24] = temp_state[51];  // B[6] -> F[6] (position 51 -> 24)
+                new_state[25] = temp_state[52];  // B[7] -> F[7] (position 52 -> 25)
+                new_state[26] = temp_state[53];  // B[8] -> F[8] (position 53 -> 26)
+
+                // D rotates 180°
+                new_state[27] = temp_state[35];  // D[8] -> D[0] (position 35 -> 27)
+                new_state[28] = temp_state[34];  // D[7] -> D[1] (position 34 -> 28)
+                new_state[29] = temp_state[33];  // D[6] -> D[2] (position 33 -> 29)
+                new_state[30] = temp_state[32];  // D[5] -> D[3] (position 32 -> 30)
+                new_state[31] = temp_state[31];  // D[4] -> D[4] (position 31 -> 31)
+                new_state[32] = temp_state[30];  // D[3] -> D[5] (position 30 -> 32)
+                new_state[33] = temp_state[29];  // D[2] -> D[6] (position 29 -> 33)
+                new_state[34] = temp_state[28];  // D[1] -> D[7] (position 28 -> 34)
+                new_state[35] = temp_state[27];  // D[0] -> D[8] (position 27 -> 35)
+
+                // L <- R (direct copy)
+                new_state[36] = temp_state[9];   // R[0] -> L[0] (position 9 -> 36)
+                new_state[37] = temp_state[10];  // R[1] -> L[1] (position 10 -> 37)
+                new_state[38] = temp_state[11];  // R[2] -> L[2] (position 11 -> 38)
+                new_state[39] = temp_state[12];  // R[3] -> L[3] (position 12 -> 39)
+                new_state[40] = temp_state[13];  // R[4] -> L[4] (position 13 -> 40)
+                new_state[41] = temp_state[14];  // R[5] -> L[5] (position 14 -> 41)
+                new_state[42] = temp_state[15];  // R[6] -> L[6] (position 15 -> 42)
+                new_state[43] = temp_state[16];  // R[7] -> L[7] (position 16 -> 43)
+                new_state[44] = temp_state[17];  // R[8] -> L[8] (position 17 -> 44)
+
+                // B <- F (direct copy)
+                new_state[45] = temp_state[18];  // F[0] -> B[0] (position 18 -> 45)
+                new_state[46] = temp_state[19];  // F[1] -> B[1] (position 19 -> 46)
+                new_state[47] = temp_state[20];  // F[2] -> B[2] (position 20 -> 47)
+                new_state[48] = temp_state[21];  // F[3] -> B[3] (position 21 -> 48)
+                new_state[49] = temp_state[22];  // F[4] -> B[4] (position 22 -> 49)
+                new_state[50] = temp_state[23];  // F[5] -> B[5] (position 23 -> 50)
+                new_state[51] = temp_state[24];  // F[6] -> B[6] (position 24 -> 51)
+                new_state[52] = temp_state[25];  // F[7] -> B[7] (position 25 -> 52)
+                new_state[53] = temp_state[26];  // F[8] -> B[8] (position 26 -> 53)
             } else {
-                rotate_face_counterclockwise(u_face, u_rotated);
-                rotate_face_clockwise(d_face, d_rotated);
+                // y' rotation: U counter-clockwise, R<-F, F<-L, D clockwise, L<-B, B<-R
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];     // U reste U mais tourne anti-horaire
-                    new_state[9 + j] = f_face[j];    // R devient F
-                    new_state[18 + j] = l_face[j];   // F devient L
-                    new_state[27 + j] = d_rotated[j]; // D reste D mais tourne horaire
-                    new_state[36 + j] = b_face[j];   // L devient B
-                    new_state[45 + j] = r_face[j];   // B devient R
-                }
+                // U rotates counter-clockwise
+                new_state[0] = temp_state[2];   // U[2] -> U[0] (position 2 -> 0)
+                new_state[1] = temp_state[5];   // U[5] -> U[1] (position 5 -> 1)
+                new_state[2] = temp_state[8];   // U[8] -> U[2] (position 8 -> 2)
+                new_state[3] = temp_state[1];   // U[1] -> U[3] (position 1 -> 3)
+                new_state[4] = temp_state[4];   // U[4] -> U[4] (position 4 -> 4)
+                new_state[5] = temp_state[7];   // U[7] -> U[5] (position 7 -> 5)
+                new_state[6] = temp_state[0];   // U[0] -> U[6] (position 0 -> 6)
+                new_state[7] = temp_state[3];   // U[3] -> U[7] (position 3 -> 7)
+                new_state[8] = temp_state[6];   // U[6] -> U[8] (position 6 -> 8)
+
+                // R <- F (direct copy)
+                new_state[9] = temp_state[18];   // F[0] -> R[0] (position 18 -> 9)
+                new_state[10] = temp_state[19];  // F[1] -> R[1] (position 19 -> 10)
+                new_state[11] = temp_state[20];  // F[2] -> R[2] (position 20 -> 11)
+                new_state[12] = temp_state[21];  // F[3] -> R[3] (position 21 -> 12)
+                new_state[13] = temp_state[22];  // F[4] -> R[4] (position 22 -> 13)
+                new_state[14] = temp_state[23];  // F[5] -> R[5] (position 23 -> 14)
+                new_state[15] = temp_state[24];  // F[6] -> R[6] (position 24 -> 15)
+                new_state[16] = temp_state[25];  // F[7] -> R[7] (position 25 -> 16)
+                new_state[17] = temp_state[26];  // F[8] -> R[8] (position 26 -> 17)
+
+                // F <- L (direct copy)
+                new_state[18] = temp_state[36];  // L[0] -> F[0] (position 36 -> 18)
+                new_state[19] = temp_state[37];  // L[1] -> F[1] (position 37 -> 19)
+                new_state[20] = temp_state[38];  // L[2] -> F[2] (position 38 -> 20)
+                new_state[21] = temp_state[39];  // L[3] -> F[3] (position 39 -> 21)
+                new_state[22] = temp_state[40];  // L[4] -> F[4] (position 40 -> 22)
+                new_state[23] = temp_state[41];  // L[5] -> F[5] (position 41 -> 23)
+                new_state[24] = temp_state[42];  // L[6] -> F[6] (position 42 -> 24)
+                new_state[25] = temp_state[43];  // L[7] -> F[7] (position 43 -> 25)
+                new_state[26] = temp_state[44];  // L[8] -> F[8] (position 44 -> 26)
+
+                // D rotates clockwise
+                new_state[27] = temp_state[33];  // D[6] -> D[0] (position 33 -> 27)
+                new_state[28] = temp_state[30];  // D[3] -> D[1] (position 30 -> 28)
+                new_state[29] = temp_state[27];  // D[0] -> D[2] (position 27 -> 29)
+                new_state[30] = temp_state[34];  // D[7] -> D[3] (position 34 -> 30)
+                new_state[31] = temp_state[31];  // D[4] -> D[4] (position 31 -> 31)
+                new_state[32] = temp_state[28];  // D[1] -> D[5] (position 28 -> 32)
+                new_state[33] = temp_state[35];  // D[8] -> D[6] (position 35 -> 33)
+                new_state[34] = temp_state[32];  // D[5] -> D[7] (position 32 -> 34)
+                new_state[35] = temp_state[29];  // D[2] -> D[8] (position 29 -> 35)
+
+                // L <- B (direct copy)
+                new_state[36] = temp_state[45];  // B[0] -> L[0] (position 45 -> 36)
+                new_state[37] = temp_state[46];  // B[1] -> L[1] (position 46 -> 37)
+                new_state[38] = temp_state[47];  // B[2] -> L[2] (position 47 -> 38)
+                new_state[39] = temp_state[48];  // B[3] -> L[3] (position 48 -> 39)
+                new_state[40] = temp_state[49];  // B[4] -> L[4] (position 49 -> 40)
+                new_state[41] = temp_state[50];  // B[5] -> L[5] (position 50 -> 41)
+                new_state[42] = temp_state[51];  // B[6] -> L[6] (position 51 -> 42)
+                new_state[43] = temp_state[52];  // B[7] -> L[7] (position 52 -> 43)
+                new_state[44] = temp_state[53];  // B[8] -> L[8] (position 53 -> 44)
+
+                // B <- R (direct copy)
+                new_state[45] = temp_state[9];   // R[0] -> B[0] (position 9 -> 45)
+                new_state[46] = temp_state[10];  // R[1] -> B[1] (position 10 -> 46)
+                new_state[47] = temp_state[11];  // R[2] -> B[2] (position 11 -> 47)
+                new_state[48] = temp_state[12];  // R[3] -> B[3] (position 12 -> 48)
+                new_state[49] = temp_state[13];  // R[4] -> B[4] (position 13 -> 49)
+                new_state[50] = temp_state[14];  // R[5] -> B[5] (position 14 -> 50)
+                new_state[51] = temp_state[15];  // R[6] -> B[6] (position 15 -> 51)
+                new_state[52] = temp_state[16];  // R[7] -> B[7] (position 16 -> 52)
+                new_state[53] = temp_state[17];  // R[8] -> B[8] (position 17 -> 53)
             }
             break;
         }
 
         case 'z': {
-            // z est la rotation de tout le cube autour de l'axe z (même que F)
-            char temp_state[55];
-            strcpy(temp_state, new_state);
-
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = temp_state[j];
-                r_face[j] = temp_state[9 + j];
-                f_face[j] = temp_state[18 + j];
-                d_face[j] = temp_state[27 + j];
-                l_face[j] = temp_state[36 + j];
-                b_face[j] = temp_state[45 + j];
-            }
-
-            char f_rotated[9], b_rotated[9];
-
             if (direction == 1) {
-                rotate_face_clockwise(f_face, f_rotated);
-                rotate_face_counterclockwise(b_face, b_rotated);
+                // z rotation: U<-L, R<-U, F clockwise, D<-R, L<-D, B counter-clockwise
 
-                // Transformation des autres faces (elles tournent en changeant de position)
-                char u_transformed[9], r_transformed[9], d_transformed[9], l_transformed[9];
-                for (int j = 0; j < 9; j++) {
-                    u_transformed[j] = u_face[6 - 3*(j%3) + j/3];
-                    r_transformed[j] = r_face[6 - 3*(j%3) + j/3];
-                    d_transformed[j] = d_face[6 - 3*(j%3) + j/3];
-                    l_transformed[j] = l_face[6 - 3*(j%3) + j/3];
-                }
+                // U <- L (with rotation: L positions that go to U)
+                new_state[0] = temp_state[42];  // L[6] -> U[0] (position 42 -> 0)
+                new_state[1] = temp_state[39];  // L[3] -> U[1] (position 39 -> 1)
+                new_state[2] = temp_state[36];  // L[0] -> U[2] (position 36 -> 2)
+                new_state[3] = temp_state[43];  // L[7] -> U[3] (position 43 -> 3)
+                new_state[4] = temp_state[40];  // L[4] -> U[4] (position 40 -> 4)
+                new_state[5] = temp_state[37];  // L[1] -> U[5] (position 37 -> 5)
+                new_state[6] = temp_state[44];  // L[8] -> U[6] (position 44 -> 6)
+                new_state[7] = temp_state[41];  // L[5] -> U[7] (position 41 -> 7)
+                new_state[8] = temp_state[38];  // L[2] -> U[8] (position 38 -> 8)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = l_transformed[j];     // U devient L
-                    new_state[9 + j] = u_transformed[j]; // R devient U
-                    new_state[18 + j] = f_rotated[j];    // F reste F mais tourne
-                    new_state[27 + j] = r_transformed[j]; // D devient R
-                    new_state[36 + j] = d_transformed[j]; // L devient D
-                    new_state[45 + j] = b_rotated[j];    // B reste B mais tourne anti-horaire
-                }
+                // R <- U (with rotation)
+                new_state[9] = temp_state[6];   // U[6] -> R[0] (position 6 -> 9)
+                new_state[10] = temp_state[3];  // U[3] -> R[1] (position 3 -> 10)
+                new_state[11] = temp_state[0];  // U[0] -> R[2] (position 0 -> 11)
+                new_state[12] = temp_state[7];  // U[7] -> R[3] (position 7 -> 12)
+                new_state[13] = temp_state[4];  // U[4] -> R[4] (position 4 -> 13)
+                new_state[14] = temp_state[1];  // U[1] -> R[5] (position 1 -> 14)
+                new_state[15] = temp_state[8];  // U[8] -> R[6] (position 8 -> 15)
+                new_state[16] = temp_state[5];  // U[5] -> R[7] (position 5 -> 16)
+                new_state[17] = temp_state[2];  // U[2] -> R[8] (position 2 -> 17)
+
+                // F rotates clockwise
+                new_state[18] = temp_state[24]; // F[6] -> F[0]
+                new_state[19] = temp_state[21]; // F[3] -> F[1]
+                new_state[20] = temp_state[18]; // F[0] -> F[2]
+                new_state[21] = temp_state[25]; // F[7] -> F[3]
+                new_state[22] = temp_state[22]; // F[4] -> F[4]
+                new_state[23] = temp_state[19]; // F[1] -> F[5]
+                new_state[24] = temp_state[26]; // F[8] -> F[6]
+                new_state[25] = temp_state[23]; // F[5] -> F[7]
+                new_state[26] = temp_state[20]; // F[2] -> F[8]
+
+                // D <- R (with rotation)
+                new_state[27] = temp_state[15]; // R[6] -> D[0] (position 15 -> 27)
+                new_state[28] = temp_state[12]; // R[3] -> D[1] (position 12 -> 28)
+                new_state[29] = temp_state[9];  // R[0] -> D[2] (position 9 -> 29)
+                new_state[30] = temp_state[16]; // R[7] -> D[3] (position 16 -> 30)
+                new_state[31] = temp_state[13]; // R[4] -> D[4] (position 13 -> 31)
+                new_state[32] = temp_state[10]; // R[1] -> D[5] (position 10 -> 32)
+                new_state[33] = temp_state[17]; // R[8] -> D[6] (position 17 -> 33)
+                new_state[34] = temp_state[14]; // R[5] -> D[7] (position 14 -> 34)
+                new_state[35] = temp_state[11]; // R[2] -> D[8] (position 11 -> 35)
+
+                // L <- D (with rotation)
+                new_state[36] = temp_state[33]; // D[6] -> L[0] (position 33 -> 36)
+                new_state[37] = temp_state[30]; // D[3] -> L[1] (position 30 -> 37)
+                new_state[38] = temp_state[27]; // D[0] -> L[2] (position 27 -> 38)
+                new_state[39] = temp_state[34]; // D[7] -> L[3] (position 34 -> 39)
+                new_state[40] = temp_state[31]; // D[4] -> L[4] (position 31 -> 40)
+                new_state[41] = temp_state[28]; // D[1] -> L[5] (position 28 -> 41)
+                new_state[42] = temp_state[35]; // D[8] -> L[6] (position 35 -> 42)
+                new_state[43] = temp_state[32]; // D[5] -> L[7] (position 32 -> 43)
+                new_state[44] = temp_state[29]; // D[2] -> L[8] (position 29 -> 44)
+
+                // B rotates counterclockwise
+                new_state[45] = temp_state[47]; // B[2] -> B[0]
+                new_state[46] = temp_state[50]; // B[5] -> B[1]
+                new_state[47] = temp_state[53]; // B[8] -> B[2]
+                new_state[48] = temp_state[46]; // B[1] -> B[3]
+                new_state[49] = temp_state[49]; // B[4] -> B[4]
+                new_state[50] = temp_state[52]; // B[7] -> B[5]
+                new_state[51] = temp_state[45]; // B[0] -> B[6]
+                new_state[52] = temp_state[48]; // B[3] -> B[7]
+                new_state[53] = temp_state[51]; // B[6] -> B[8]
             } else if (direction == 2) {
-                rotate_face_180(f_face, f_rotated);
-                rotate_face_180(b_face, b_rotated);
+                // z2 rotation: 180° rotation
 
-                // Transformation 180° des autres faces
-                char u_transformed[9], r_transformed[9], d_transformed[9], l_transformed[9];
-                for (int j = 0; j < 9; j++) {
-                    u_transformed[j] = u_face[8-j];
-                    r_transformed[j] = r_face[8-j];
-                    d_transformed[j] = d_face[8-j];
-                    l_transformed[j] = l_face[8-j];
-                }
+                // U -> D (with 180° rotation)
+                new_state[27] = temp_state[8];  // U[8] -> D[0]
+                new_state[28] = temp_state[7];  // U[7] -> D[1]
+                new_state[29] = temp_state[6];  // U[6] -> D[2]
+                new_state[30] = temp_state[5];  // U[5] -> D[3]
+                new_state[31] = temp_state[4];  // U[4] -> D[4]
+                new_state[32] = temp_state[3];  // U[3] -> D[5]
+                new_state[33] = temp_state[2];  // U[2] -> D[6]
+                new_state[34] = temp_state[1];  // U[1] -> D[7]
+                new_state[35] = temp_state[0];  // U[0] -> D[8]
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = d_transformed[j];     // U devient D (inversé)
-                    new_state[9 + j] = l_transformed[j]; // R devient L (inversé)
-                    new_state[18 + j] = f_rotated[j];    // F reste F mais tourne 180°
-                    new_state[27 + j] = u_transformed[j]; // D devient U (inversé)
-                    new_state[36 + j] = r_transformed[j]; // L devient R (inversé)
-                    new_state[45 + j] = b_rotated[j];    // B reste B mais tourne 180°
-                }
+                // R -> L (with 180° rotation)
+                new_state[36] = temp_state[17]; // R[8] -> L[0]
+                new_state[37] = temp_state[16]; // R[7] -> L[1]
+                new_state[38] = temp_state[15]; // R[6] -> L[2]
+                new_state[39] = temp_state[14]; // R[5] -> L[3]
+                new_state[40] = temp_state[13]; // R[4] -> L[4]
+                new_state[41] = temp_state[12]; // R[3] -> L[5]
+                new_state[42] = temp_state[11]; // R[2] -> L[6]
+                new_state[43] = temp_state[10]; // R[1] -> L[7]
+                new_state[44] = temp_state[9];  // R[0] -> L[8]
+
+                // F rotates 180°
+                new_state[18] = temp_state[26]; // F[8] -> F[0]
+                new_state[19] = temp_state[25]; // F[7] -> F[1]
+                new_state[20] = temp_state[24]; // F[6] -> F[2]
+                new_state[21] = temp_state[23]; // F[5] -> F[3]
+                new_state[22] = temp_state[22]; // F[4] -> F[4]
+                new_state[23] = temp_state[21]; // F[3] -> F[5]
+                new_state[24] = temp_state[20]; // F[2] -> F[6]
+                new_state[25] = temp_state[19]; // F[1] -> F[7]
+                new_state[26] = temp_state[18]; // F[0] -> F[8]
+
+                // D -> U (with 180° rotation)
+                new_state[0] = temp_state[35];  // D[8] -> U[0]
+                new_state[1] = temp_state[34];  // D[7] -> U[1]
+                new_state[2] = temp_state[33];  // D[6] -> U[2]
+                new_state[3] = temp_state[32];  // D[5] -> U[3]
+                new_state[4] = temp_state[31];  // D[4] -> U[4]
+                new_state[5] = temp_state[30];  // D[3] -> U[5]
+                new_state[6] = temp_state[29];  // D[2] -> U[6]
+                new_state[7] = temp_state[28];  // D[1] -> U[7]
+                new_state[8] = temp_state[27];  // D[0] -> U[8]
+
+                // L -> R (with 180° rotation)
+                new_state[9] = temp_state[44];  // L[8] -> R[0]
+                new_state[10] = temp_state[43]; // L[7] -> R[1]
+                new_state[11] = temp_state[42]; // L[6] -> R[2]
+                new_state[12] = temp_state[41]; // L[5] -> R[3]
+                new_state[13] = temp_state[40]; // L[4] -> R[4]
+                new_state[14] = temp_state[39]; // L[3] -> R[5]
+                new_state[15] = temp_state[38]; // L[2] -> R[6]
+                new_state[16] = temp_state[37]; // L[1] -> R[7]
+                new_state[17] = temp_state[36]; // L[0] -> R[8]
+
+                // B rotates 180°
+                new_state[45] = temp_state[53]; // B[8] -> B[0]
+                new_state[46] = temp_state[52]; // B[7] -> B[1]
+                new_state[47] = temp_state[51]; // B[6] -> B[2]
+                new_state[48] = temp_state[50]; // B[5] -> B[3]
+                new_state[49] = temp_state[49]; // B[4] -> B[4]
+                new_state[50] = temp_state[48]; // B[3] -> B[5]
+                new_state[51] = temp_state[47]; // B[2] -> B[6]
+                new_state[52] = temp_state[46]; // B[1] -> B[7]
+                new_state[53] = temp_state[45]; // B[0] -> B[8]
             } else {
-                rotate_face_counterclockwise(f_face, f_rotated);
-                rotate_face_clockwise(b_face, b_rotated);
+                // z' rotation: reverse of z
 
-                // Transformation anti-horaire des autres faces
-                char u_transformed[9], r_transformed[9], d_transformed[9], l_transformed[9];
-                for (int j = 0; j < 9; j++) {
-                    u_transformed[j] = u_face[2 + 3*(j%3) - j/3];
-                    r_transformed[j] = r_face[2 + 3*(j%3) - j/3];
-                    d_transformed[j] = d_face[2 + 3*(j%3) - j/3];
-                    l_transformed[j] = l_face[2 + 3*(j%3) - j/3];
-                }
+                // U <- R (with rotation)
+                new_state[0] = temp_state[11];  // R[2] -> U[0] (position 11 -> 0)
+                new_state[1] = temp_state[14];  // R[5] -> U[1] (position 14 -> 1)
+                new_state[2] = temp_state[17];  // R[8] -> U[2] (position 17 -> 2)
+                new_state[3] = temp_state[10];  // R[1] -> U[3] (position 10 -> 3)
+                new_state[4] = temp_state[13];  // R[4] -> U[4] (position 13 -> 4)
+                new_state[5] = temp_state[16];  // R[7] -> U[5] (position 16 -> 5)
+                new_state[6] = temp_state[9];   // R[0] -> U[6] (position 9 -> 6)
+                new_state[7] = temp_state[12];  // R[3] -> U[7] (position 12 -> 7)
+                new_state[8] = temp_state[15];  // R[6] -> U[8] (position 15 -> 8)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = r_transformed[j];     // U devient R
-                    new_state[9 + j] = d_transformed[j]; // R devient D
-                    new_state[18 + j] = f_rotated[j];    // F reste F mais tourne anti-horaire
-                    new_state[27 + j] = l_transformed[j]; // D devient L
-                    new_state[36 + j] = u_transformed[j]; // L devient U
-                    new_state[45 + j] = b_rotated[j];    // B reste B mais tourne horaire
-                }
+                // R <- D (with rotation)
+                new_state[9] = temp_state[29];  // D[2] -> R[0] (position 29 -> 9)
+                new_state[10] = temp_state[32]; // D[5] -> R[1] (position 32 -> 10)
+                new_state[11] = temp_state[35]; // D[8] -> R[2] (position 35 -> 11)
+                new_state[12] = temp_state[28]; // D[1] -> R[3] (position 28 -> 12)
+                new_state[13] = temp_state[31]; // D[4] -> R[4] (position 31 -> 13)
+                new_state[14] = temp_state[34]; // D[7] -> R[5] (position 34 -> 14)
+                new_state[15] = temp_state[27]; // D[0] -> R[6] (position 27 -> 15)
+                new_state[16] = temp_state[30]; // D[3] -> R[7] (position 30 -> 16)
+                new_state[17] = temp_state[33]; // D[6] -> R[8] (position 33 -> 17)
+
+                // F rotates counterclockwise
+                new_state[18] = temp_state[20]; // F[2] -> F[0]
+                new_state[19] = temp_state[23]; // F[5] -> F[1]
+                new_state[20] = temp_state[26]; // F[8] -> F[2]
+                new_state[21] = temp_state[19]; // F[1] -> F[3]
+                new_state[22] = temp_state[22]; // F[4] -> F[4]
+                new_state[23] = temp_state[25]; // F[7] -> F[5]
+                new_state[24] = temp_state[18]; // F[0] -> F[6]
+                new_state[25] = temp_state[21]; // F[3] -> F[7]
+                new_state[26] = temp_state[24]; // F[6] -> F[8]
+
+                // D <- L (with rotation)
+                new_state[27] = temp_state[38]; // L[2] -> D[0] (position 38 -> 27)
+                new_state[28] = temp_state[41]; // L[5] -> D[1] (position 41 -> 28)
+                new_state[29] = temp_state[44]; // L[8] -> D[2] (position 44 -> 29)
+                new_state[30] = temp_state[37]; // L[1] -> D[3] (position 37 -> 30)
+                new_state[31] = temp_state[40]; // L[4] -> D[4] (position 40 -> 31)
+                new_state[32] = temp_state[43]; // L[7] -> D[5] (position 43 -> 32)
+                new_state[33] = temp_state[36]; // L[0] -> D[6] (position 36 -> 33)
+                new_state[34] = temp_state[39]; // L[3] -> D[7] (position 39 -> 34)
+                new_state[35] = temp_state[42]; // L[6] -> D[8] (position 42 -> 35)
+
+                // L <- U (with rotation)
+                new_state[36] = temp_state[2];  // U[2] -> L[0] (position 2 -> 36)
+                new_state[37] = temp_state[5];  // U[5] -> L[1] (position 5 -> 37)
+                new_state[38] = temp_state[8];  // U[8] -> L[2] (position 8 -> 38)
+                new_state[39] = temp_state[1];  // U[1] -> L[3] (position 1 -> 39)
+                new_state[40] = temp_state[4];  // U[4] -> L[4] (position 4 -> 40)
+                new_state[41] = temp_state[7];  // U[7] -> L[5] (position 7 -> 41)
+                new_state[42] = temp_state[0];  // U[0] -> L[6] (position 0 -> 42)
+                new_state[43] = temp_state[3];  // U[3] -> L[7] (position 3 -> 43)
+                new_state[44] = temp_state[6];  // U[6] -> L[8] (position 6 -> 44)
+
+                // B rotates clockwise
+                new_state[45] = temp_state[51]; // B[6] -> B[0]
+                new_state[46] = temp_state[48]; // B[3] -> B[1]
+                new_state[47] = temp_state[45]; // B[0] -> B[2]
+                new_state[48] = temp_state[52]; // B[7] -> B[3]
+                new_state[49] = temp_state[49]; // B[4] -> B[4]
+                new_state[50] = temp_state[46]; // B[1] -> B[5]
+                new_state[51] = temp_state[53]; // B[8] -> B[6]
+                new_state[52] = temp_state[50]; // B[5] -> B[7]
+                new_state[53] = temp_state[47]; // B[2] -> B[8]
             }
             break;
         }
 
         case 'u': {
-            // u est équivalent à D y, optimisé en transformation directe
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = new_state[j];
-                r_face[j] = new_state[9 + j];
-                f_face[j] = new_state[18 + j];
-                d_face[j] = new_state[27 + j];
-                l_face[j] = new_state[36 + j];
-                b_face[j] = new_state[45 + j];
-            }
-
-            char u_rotated[9], d_rotated[9];
-
             if (direction == 1) {
-                // u = D y : U horaire, D anti-horaire
-                rotate_face_clockwise(u_face, u_rotated);
-                rotate_face_counterclockwise(d_face, d_rotated);
+                // u move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];
-                    new_state[27 + j] = d_rotated[j];
-                }
+                // Face U turns clockwise
+                new_state[0] = temp_state[6];    // U[0] = temp[6]
+                new_state[1] = temp_state[3];    // U[1] = temp[3]
+                new_state[2] = temp_state[0];    // U[2] = temp[0]
+                new_state[3] = temp_state[7];    // U[3] = temp[7]
+                new_state[5] = temp_state[1];    // U[5] = temp[1]
+                new_state[6] = temp_state[8];    // U[6] = temp[8]
+                new_state[7] = temp_state[5];    // U[7] = temp[5]
+                new_state[8] = temp_state[2];    // U[8] = temp[2]
 
-                // Top et middle rows: seulement effet y (F->R, R->B, B->L, L->F)
-                for (int j = 0; j < 6; j++) {
-                    new_state[9 + j] = b_face[j];   // R <- B
-                    new_state[18 + j] = r_face[j];  // F <- R
-                    new_state[36 + j] = f_face[j];  // L <- F
-                    new_state[45 + j] = l_face[j];  // B <- L
-                }
-
-                // Bottom rows: D et y s'annulent, restent identiques
-                for (int j = 6; j < 9; j++) {
-                    new_state[9 + j] = r_face[j];   // R bot unchanged
-                    new_state[18 + j] = f_face[j];  // F bot unchanged
-                    new_state[36 + j] = l_face[j];  // L bot unchanged
-                    new_state[45 + j] = b_face[j];  // B bot unchanged
-                }
+                // Permutations for u wide (includes middle slice)
+                new_state[9] = temp_state[45];   // R[0] = B[0]
+                new_state[10] = temp_state[46];  // R[1] = B[1]
+                new_state[11] = temp_state[47];  // R[2] = B[2]
+                new_state[12] = temp_state[48];  // R[3] = B[3]
+                new_state[13] = temp_state[49];  // R[4] = B[4]
+                new_state[14] = temp_state[50];  // R[5] = B[5]
+                new_state[18] = temp_state[9];   // F[0] = R[0]
+                new_state[19] = temp_state[10];  // F[1] = R[1]
+                new_state[20] = temp_state[11];  // F[2] = R[2]
+                new_state[21] = temp_state[12];  // F[3] = R[3]
+                new_state[22] = temp_state[13];  // F[4] = R[4]
+                new_state[23] = temp_state[14];  // F[5] = R[5]
+                new_state[36] = temp_state[18];  // L[0] = F[0]
+                new_state[37] = temp_state[19];  // L[1] = F[1]
+                new_state[38] = temp_state[20];  // L[2] = F[2]
+                new_state[39] = temp_state[21];  // L[3] = F[3]
+                new_state[40] = temp_state[22];  // L[4] = F[4]
+                new_state[41] = temp_state[23];  // L[5] = F[5]
+                new_state[45] = temp_state[36];  // B[0] = L[0]
+                new_state[46] = temp_state[37];  // B[1] = L[1]
+                new_state[47] = temp_state[38];  // B[2] = L[2]
+                new_state[48] = temp_state[39];  // B[3] = L[3]
+                new_state[49] = temp_state[40];  // B[4] = L[4]
+                new_state[50] = temp_state[41];  // B[5] = L[5]
 
             } else if (direction == 2) {
-                // u2 = D2 y2
-                rotate_face_180(u_face, u_rotated);
-                rotate_face_180(d_face, d_rotated);
+                // u2 move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];
-                    new_state[27 + j] = d_rotated[j];
-                }
+                // Face U turns 180°
+                new_state[0] = temp_state[8];    // U[0] = temp[8]
+                new_state[1] = temp_state[7];    // U[1] = temp[7]
+                new_state[2] = temp_state[6];    // U[2] = temp[6]
+                new_state[3] = temp_state[5];    // U[3] = temp[5]
+                new_state[5] = temp_state[3];    // U[5] = temp[3]
+                new_state[6] = temp_state[2];    // U[6] = temp[2]
+                new_state[7] = temp_state[1];    // U[7] = temp[1]
+                new_state[8] = temp_state[0];    // U[8] = temp[0]
 
-                // Top et middle rows: seulement y2 (F<->B, R<->L)
-                for (int j = 0; j < 6; j++) {
-                    new_state[9 + j] = l_face[j];      // R <- L
-                    new_state[18 + j] = b_face[j];     // F <- B
-                    new_state[36 + j] = r_face[j];     // L <- R
-                    new_state[45 + j] = f_face[j];     // B <- F
-                }
+                // Permutations for u2 wide (includes middle slice)
+                new_state[9] = temp_state[36];   // R[0] = L[0]
+                new_state[10] = temp_state[37];  // R[1] = L[1]
+                new_state[11] = temp_state[38];  // R[2] = L[2]
+                new_state[12] = temp_state[39];  // R[3] = L[3]
+                new_state[13] = temp_state[40];  // R[4] = L[4]
+                new_state[14] = temp_state[41];  // R[5] = L[5]
+                new_state[18] = temp_state[45];  // F[0] = B[0]
+                new_state[19] = temp_state[46];  // F[1] = B[1]
+                new_state[20] = temp_state[47];  // F[2] = B[2]
+                new_state[21] = temp_state[48];  // F[3] = B[3]
+                new_state[22] = temp_state[49];  // F[4] = B[4]
+                new_state[23] = temp_state[50];  // F[5] = B[5]
+                new_state[36] = temp_state[9];   // L[0] = R[0]
+                new_state[37] = temp_state[10];  // L[1] = R[1]
+                new_state[38] = temp_state[11];  // L[2] = R[2]
+                new_state[39] = temp_state[12];  // L[3] = R[3]
+                new_state[40] = temp_state[13];  // L[4] = R[4]
+                new_state[41] = temp_state[14];  // L[5] = R[5]
+                new_state[45] = temp_state[18];  // B[0] = F[0]
+                new_state[46] = temp_state[19];  // B[1] = F[1]
+                new_state[47] = temp_state[20];  // B[2] = F[2]
+                new_state[48] = temp_state[21];  // B[3] = F[3]
+                new_state[49] = temp_state[22];  // B[4] = F[4]
+                new_state[50] = temp_state[23];  // B[5] = F[5]
 
-                // Bottom rows: D2 et y2 s'annulent, restent identiques
-                for (int j = 6; j < 9; j++) {
-                    new_state[9 + j] = r_face[j];      // R bot unchanged
-                    new_state[18 + j] = f_face[j];     // F bot unchanged
-                    new_state[36 + j] = l_face[j];     // L bot unchanged
-                    new_state[45 + j] = b_face[j];     // B bot unchanged
-                }
             } else {
-                // u' = D' y'
-                rotate_face_counterclockwise(u_face, u_rotated);
-                rotate_face_clockwise(d_face, d_rotated);
+                // u' move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];
-                    new_state[27 + j] = d_rotated[j];
-                }
+                // Face U turns counterclockwise
+                new_state[0] = temp_state[2];    // U[0] = temp[2]
+                new_state[1] = temp_state[5];    // U[1] = temp[5]
+                new_state[2] = temp_state[8];    // U[2] = temp[8]
+                new_state[3] = temp_state[1];    // U[3] = temp[1]
+                new_state[5] = temp_state[7];    // U[5] = temp[7]
+                new_state[6] = temp_state[0];    // U[6] = temp[0]
+                new_state[7] = temp_state[3];    // U[7] = temp[3]
+                new_state[8] = temp_state[6];    // U[8] = temp[6]
 
-                // Top et middle rows: effet y' (F->L, L->B, B->R, R->F)
-                for (int j = 0; j < 6; j++) {
-                    new_state[9 + j] = f_face[j];      // R <- F
-                    new_state[18 + j] = l_face[j];     // F <- L
-                    new_state[36 + j] = b_face[j];     // L <- B
-                    new_state[45 + j] = r_face[j];     // B <- R
-                }
-
-                // Bottom rows: D' et y' s'annulent aussi
-                for (int j = 6; j < 9; j++) {
-                    new_state[9 + j] = r_face[j];      // R bot unchanged
-                    new_state[18 + j] = f_face[j];     // F bot unchanged
-                    new_state[36 + j] = l_face[j];     // L bot unchanged
-                    new_state[45 + j] = b_face[j];     // B bot unchanged
-                }
+                // Permutations for u' wide (includes middle slice)
+                new_state[9] = temp_state[18];   // R[0] = F[0]
+                new_state[10] = temp_state[19];  // R[1] = F[1]
+                new_state[11] = temp_state[20];  // R[2] = F[2]
+                new_state[12] = temp_state[21];  // R[3] = F[3]
+                new_state[13] = temp_state[22];  // R[4] = F[4]
+                new_state[14] = temp_state[23];  // R[5] = F[5]
+                new_state[18] = temp_state[36];  // F[0] = L[0]
+                new_state[19] = temp_state[37];  // F[1] = L[1]
+                new_state[20] = temp_state[38];  // F[2] = L[2]
+                new_state[21] = temp_state[39];  // F[3] = L[3]
+                new_state[22] = temp_state[40];  // F[4] = L[4]
+                new_state[23] = temp_state[41];  // F[5] = L[5]
+                new_state[36] = temp_state[45];  // L[0] = B[0]
+                new_state[37] = temp_state[46];  // L[1] = B[1]
+                new_state[38] = temp_state[47];  // L[2] = B[2]
+                new_state[39] = temp_state[48];  // L[3] = B[3]
+                new_state[40] = temp_state[49];  // L[4] = B[4]
+                new_state[41] = temp_state[50];  // L[5] = B[5]
+                new_state[45] = temp_state[9];   // B[0] = R[0]
+                new_state[46] = temp_state[10];  // B[1] = R[1]
+                new_state[47] = temp_state[11];  // B[2] = R[2]
+                new_state[48] = temp_state[12];  // B[3] = R[3]
+                new_state[49] = temp_state[13];  // B[4] = R[4]
+                new_state[50] = temp_state[14];  // B[5] = R[5]
             }
             break;
         }
 
         case 'r': {
-          // r est équivalent à L x, optimisé en transformation directe
-          char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-          for (int j = 0; j < 9; j++) {
-            u_face[j] = new_state[j];
-            r_face[j] = new_state[9 + j];
-            f_face[j] = new_state[18 + j];
-            d_face[j] = new_state[27 + j];
-            l_face[j] = new_state[36 + j];
-            b_face[j] = new_state[45 + j];
-          }
+            if (direction == 1) {
+                // r move - direct permutations from test file (wide move)
 
-          char r_rotated[9], l_rotated[9];
+                // Face R turns clockwise
+                new_state[9] = temp_state[15];   // R[0] = temp[15]
+                new_state[10] = temp_state[12];  // R[1] = temp[12]
+                new_state[11] = temp_state[9];   // R[2] = temp[9]
+                new_state[12] = temp_state[16];  // R[3] = temp[16]
+                new_state[14] = temp_state[10];  // R[5] = temp[10]
+                new_state[15] = temp_state[17];  // R[6] = temp[17]
+                new_state[16] = temp_state[14];  // R[7] = temp[14]
+                new_state[17] = temp_state[11];  // R[8] = temp[11]
 
-          if (direction == 1) {
-            // r : analyse précise des transformations
-            rotate_face_clockwise(r_face, r_rotated);
-            rotate_face_counterclockwise(l_face, l_rotated);
+                // Permutations for r wide (includes middle slice)
+                new_state[1] = temp_state[19];   // U[1] = F[1]
+                new_state[2] = temp_state[20];   // U[2] = F[2]
+                new_state[4] = temp_state[22];   // U[4] = F[4]
+                new_state[5] = temp_state[23];   // U[5] = F[5]
+                new_state[7] = temp_state[25];   // U[7] = F[7]
+                new_state[8] = temp_state[26];   // U[8] = F[8]
+                new_state[19] = temp_state[28];  // F[1] = D[1]
+                new_state[20] = temp_state[29];  // F[2] = D[2]
+                new_state[22] = temp_state[31];  // F[4] = D[4]
+                new_state[23] = temp_state[32];  // F[5] = D[5]
+                new_state[25] = temp_state[34];  // F[7] = D[7]
+                new_state[26] = temp_state[35];  // F[8] = D[8]
+                new_state[28] = temp_state[52];  // D[1] = B[7]
+                new_state[29] = temp_state[51];  // D[2] = B[6]
+                new_state[31] = temp_state[49];  // D[4] = B[4]
+                new_state[32] = temp_state[48];  // D[5] = B[3]
+                new_state[34] = temp_state[46];  // D[7] = B[1]
+                new_state[35] = temp_state[45];  // D[8] = B[0]
+                new_state[45] = temp_state[8];   // B[0] = U[8]
+                new_state[46] = temp_state[7];   // B[1] = U[7]
+                new_state[48] = temp_state[5];   // B[3] = U[5]
+                new_state[49] = temp_state[4];   // B[4] = U[4]
+                new_state[51] = temp_state[2];   // B[6] = U[2]
+                new_state[52] = temp_state[1];   // B[7] = U[1]
 
-            // Face R et L tournent
-            for (int j = 0; j < 9; j++) {
-              new_state[9 + j] = r_rotated[j];
-              new_state[36 + j] = l_rotated[j];
+            } else if (direction == 2) {
+                // r2 move - direct permutations from test file (wide move)
+
+                // Face R turns 180°
+                new_state[9] = temp_state[17];   // R[0] = temp[17]
+                new_state[10] = temp_state[16];  // R[1] = temp[16]
+                new_state[11] = temp_state[15];  // R[2] = temp[15]
+                new_state[12] = temp_state[14];  // R[3] = temp[14]
+                new_state[14] = temp_state[12];  // R[5] = temp[12]
+                new_state[15] = temp_state[11];  // R[6] = temp[11]
+                new_state[16] = temp_state[10];  // R[7] = temp[10]
+                new_state[17] = temp_state[9];   // R[8] = temp[9]
+
+                // Permutations for r2 wide (includes middle slice)
+                new_state[1] = temp_state[28];   // U[1] = D[1]
+                new_state[2] = temp_state[29];   // U[2] = D[2]
+                new_state[4] = temp_state[31];   // U[4] = D[4]
+                new_state[5] = temp_state[32];   // U[5] = D[5]
+                new_state[7] = temp_state[34];   // U[7] = D[7]
+                new_state[8] = temp_state[35];   // U[8] = D[8]
+                new_state[19] = temp_state[52];  // F[1] = B[7]
+                new_state[20] = temp_state[51];  // F[2] = B[6]
+                new_state[22] = temp_state[49];  // F[4] = B[4]
+                new_state[23] = temp_state[48];  // F[5] = B[3]
+                new_state[25] = temp_state[46];  // F[7] = B[1]
+                new_state[26] = temp_state[45];  // F[8] = B[0]
+                new_state[28] = temp_state[1];   // D[1] = U[1]
+                new_state[29] = temp_state[2];   // D[2] = U[2]
+                new_state[31] = temp_state[4];   // D[4] = U[4]
+                new_state[32] = temp_state[5];   // D[5] = U[5]
+                new_state[34] = temp_state[7];   // D[7] = U[7]
+                new_state[35] = temp_state[8];   // D[8] = U[8]
+                new_state[45] = temp_state[26];  // B[0] = F[8]
+                new_state[46] = temp_state[25];  // B[1] = F[7]
+                new_state[48] = temp_state[23];  // B[3] = F[5]
+                new_state[49] = temp_state[22];  // B[4] = F[4]
+                new_state[51] = temp_state[20];  // B[6] = F[2]
+                new_state[52] = temp_state[19];  // B[7] = F[1]
+
+            } else {
+                // r' move - direct permutations from test file (wide move)
+
+                // Face R turns counterclockwise
+                new_state[9] = temp_state[11];   // R[0] = temp[11]
+                new_state[10] = temp_state[14];  // R[1] = temp[14]
+                new_state[11] = temp_state[17];  // R[2] = temp[17]
+                new_state[12] = temp_state[10];  // R[3] = temp[10]
+                new_state[14] = temp_state[16];  // R[5] = temp[16]
+                new_state[15] = temp_state[9];   // R[6] = temp[9]
+                new_state[16] = temp_state[12];  // R[7] = temp[12]
+                new_state[17] = temp_state[15];  // R[8] = temp[15]
+
+                // Permutations for r' wide (includes middle slice)
+                new_state[1] = temp_state[52];   // U[1] = B[7]
+                new_state[2] = temp_state[51];   // U[2] = B[6]
+                new_state[4] = temp_state[49];   // U[4] = B[4]
+                new_state[5] = temp_state[48];   // U[5] = B[3]
+                new_state[7] = temp_state[46];   // U[7] = B[1]
+                new_state[8] = temp_state[45];   // U[8] = B[0]
+                new_state[19] = temp_state[1];   // F[1] = U[1]
+                new_state[20] = temp_state[2];   // F[2] = U[2]
+                new_state[22] = temp_state[4];   // F[4] = U[4]
+                new_state[23] = temp_state[5];   // F[5] = U[5]
+                new_state[25] = temp_state[7];   // F[7] = U[7]
+                new_state[26] = temp_state[8];   // F[8] = U[8]
+                new_state[28] = temp_state[19];  // D[1] = F[1]
+                new_state[29] = temp_state[20];  // D[2] = F[2]
+                new_state[31] = temp_state[22];  // D[4] = F[4]
+                new_state[32] = temp_state[23];  // D[5] = F[5]
+                new_state[34] = temp_state[25];  // D[7] = F[7]
+                new_state[35] = temp_state[26];  // D[8] = F[8]
+                new_state[45] = temp_state[35];  // B[0] = D[8]
+                new_state[46] = temp_state[34];  // B[1] = D[7]
+                new_state[48] = temp_state[32];  // B[3] = D[5]
+                new_state[49] = temp_state[31];  // B[4] = D[4]
+                new_state[51] = temp_state[29];  // B[6] = D[2]
+                new_state[52] = temp_state[28];  // B[7] = D[1]
             }
-
-            // Transformation selon l'analyse position par position :
-            // Position 0: U -> U (reste)
-            new_state[0] = u_face[0];
-            // Position 1: U -> F
-            new_state[1] = f_face[1];
-            // Position 2: U -> F
-            new_state[2] = f_face[2];
-            // Position 3: U -> U (reste)
-            new_state[3] = u_face[3];
-            // Position 4: U -> F
-            new_state[4] = f_face[4];
-            // Position 5: U -> F
-            new_state[5] = f_face[5];
-            // Position 6: U -> U (reste)
-            new_state[6] = u_face[6];
-            // Position 7: U -> F
-            new_state[7] = f_face[7];
-            // Position 8: U -> F
-            new_state[8] = f_face[8];
-
-            // Face F: positions 18-26
-            // Position 18: F -> F (reste)
-            new_state[18] = f_face[0];
-            // Position 19: F -> D
-            new_state[19] = d_face[1];
-            // Position 20: F -> D
-            new_state[20] = d_face[2];
-            // Position 21: F -> F (reste)
-            new_state[21] = f_face[3];
-            // Position 22: F -> D
-            new_state[22] = d_face[4];
-            // Position 23: F -> D
-            new_state[23] = d_face[5];
-            // Position 24: F -> F (reste)
-            new_state[24] = f_face[6];
-            // Position 25: F -> D
-            new_state[25] = d_face[7];
-            // Position 26: F -> D
-            new_state[26] = d_face[8];
-
-            // Face D: positions 27-35
-            // Position 27: D -> D (reste)
-            new_state[27] = d_face[0];
-            // Position 28: D -> B
-            new_state[28] = b_face[7];
-            // Position 29: D -> B
-            new_state[29] = b_face[6];
-            // Position 30: D -> D (reste)
-            new_state[30] = d_face[3];
-            // Position 31: D -> B
-            new_state[31] = b_face[4];
-            // Position 32: D -> B
-            new_state[32] = b_face[3];
-            // Position 33: D -> D (reste)
-            new_state[33] = d_face[6];
-            // Position 34: D -> B
-            new_state[34] = b_face[1];
-            // Position 35: D -> B
-            new_state[35] = b_face[0];
-
-            // Face B: positions 45-53
-            // Position 45: B -> L (face L déjà appliquée dans l_rotated)
-            new_state[45] = u_face[7];
-            // Position 46: B -> U
-            new_state[46] = u_face[8];
-            // Position 47: B -> B (reste)
-            new_state[47] = b_face[2];
-            // Position 48: B -> U
-            new_state[48] = u_face[4];
-            // Position 49: B -> U
-            new_state[49] = u_face[5];
-            // Position 50: B -> B (reste)
-            new_state[50] = b_face[5];
-            // Position 51: B -> U
-            new_state[51] = u_face[1];
-            // Position 52: B -> U
-            new_state[52] = u_face[2];
-            // Position 53: B -> B (reste)
-            new_state[53] = b_face[8];
-
-          } else if (direction == 2) {
-            // r2 : analyse précise position par position
-            rotate_face_180(r_face, r_rotated);
-            rotate_face_180(l_face, l_rotated);
-
-            for (int j = 0; j < 9; j++) {
-              new_state[9 + j] = r_rotated[j];
-              new_state[36 + j] = l_rotated[j];
-            }
-
-            // Face U: UUUUUUUUU -> UDDUDDUD
-            new_state[0] = u_face[0]; // U->U
-            new_state[1] = d_face[1]; // U->D
-            new_state[2] = d_face[2]; // U->D
-            new_state[3] = u_face[3]; // U->U
-            new_state[4] = d_face[4]; // U->D
-            new_state[5] = d_face[5]; // U->D
-            new_state[6] = u_face[6]; // U->U
-            new_state[7] = d_face[7]; // U->D
-            new_state[8] = d_face[8]; // U->D
-
-            // Face F: FFFFFFFFF -> FBBFBBFBB
-            new_state[18] = f_face[0]; // F->F
-            new_state[19] = b_face[1]; // F->B
-            new_state[20] = b_face[2]; // F->B
-            new_state[21] = f_face[3]; // F->F
-            new_state[22] = b_face[4]; // F->B
-            new_state[23] = b_face[5]; // F->B
-            new_state[24] = f_face[6]; // F->F
-            new_state[25] = b_face[7]; // F->B
-            new_state[26] = b_face[8]; // F->B
-
-            // Face D: DDDDDDDDD -> DUUDUUDUU
-            new_state[27] = d_face[0]; // D->D
-            new_state[28] = u_face[1]; // D->U
-            new_state[29] = u_face[2]; // D->U
-            new_state[30] = d_face[3]; // D->D
-            new_state[31] = u_face[4]; // D->U
-            new_state[32] = u_face[5]; // D->U
-            new_state[33] = d_face[6]; // D->D
-            new_state[34] = u_face[7]; // D->U
-            new_state[35] = u_face[8]; // D->U
-
-            // Face B: BBBBBBBBB -> FFBFFBFFB
-            new_state[45] = f_face[1]; // B->F
-            new_state[46] = f_face[2]; // B->F
-            new_state[47] = b_face[2]; // B->B
-            new_state[48] = f_face[4]; // B->F
-            new_state[49] = f_face[5]; // B->F
-            new_state[50] = b_face[5]; // B->B
-            new_state[51] = f_face[7]; // B->F
-            new_state[52] = f_face[8]; // B->F
-            new_state[53] = b_face[8]; // B->B
-
-          } else {
-            // r' : analyse précise position par position
-            rotate_face_counterclockwise(r_face, r_rotated);
-            rotate_face_clockwise(l_face, l_rotated);
-
-            for (int j = 0; j < 9; j++) {
-              new_state[9 + j] = r_rotated[j];
-              new_state[36 + j] = l_rotated[j];
-            }
-
-            // Face U: UUUUUUUUU -> UBBUBBUB
-            new_state[0] = u_face[0]; // U->U
-            new_state[1] = b_face[1]; // U->B
-            new_state[2] = b_face[2]; // U->B
-            new_state[3] = u_face[3]; // U->U
-            new_state[4] = b_face[4]; // U->B
-            new_state[5] = b_face[5]; // U->B
-            new_state[6] = u_face[6]; // U->U
-            new_state[7] = b_face[7]; // U->B
-            new_state[8] = b_face[8]; // U->B
-
-            // Face F: FFFFFFFFF -> FUUFUUFUU
-            new_state[18] = f_face[0]; // F->F
-            new_state[19] = u_face[1]; // F->U
-            new_state[20] = u_face[2]; // F->U
-            new_state[21] = f_face[3]; // F->F
-            new_state[22] = u_face[4]; // F->U
-            new_state[23] = u_face[5]; // F->U
-            new_state[24] = f_face[6]; // F->F
-            new_state[25] = u_face[7]; // F->U
-            new_state[26] = u_face[8]; // F->U
-
-            // Face D: DDDDDDDDD -> DFFDFFDFF
-            new_state[27] = d_face[0]; // D->D
-            new_state[28] = f_face[1]; // D->F
-            new_state[29] = f_face[2]; // D->F
-            new_state[30] = d_face[3]; // D->D
-            new_state[31] = f_face[4]; // D->F
-            new_state[32] = f_face[5]; // D->F
-            new_state[33] = d_face[6]; // D->D
-            new_state[34] = f_face[7]; // D->F
-            new_state[35] = f_face[8]; // D->F
-
-            // Face B: BBBBBBBBB -> DDBDDBDDB
-            new_state[45] = d_face[1]; // B->D
-            new_state[46] = d_face[2]; // B->D
-            new_state[47] = b_face[2]; // B->B
-            new_state[48] = d_face[4]; // B->D
-            new_state[49] = d_face[5]; // B->D
-            new_state[50] = b_face[5]; // B->B
-            new_state[51] = d_face[7]; // B->D
-            new_state[52] = d_face[8]; // B->D
-            new_state[53] = b_face[8]; // B->B
-          }
-          break;
+            break;
         }
 
         case 'f': {
-            // Analyse directe des transformations f à partir des exemples donnés
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = new_state[j];
-                r_face[j] = new_state[9 + j];
-                f_face[j] = new_state[18 + j];
-                d_face[j] = new_state[27 + j];
-                l_face[j] = new_state[36 + j];
-                b_face[j] = new_state[45 + j];
-            }
-
-            char f_rotated[9];
-
             if (direction == 1) {
-                // f: 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
-                //    'UUULLLLLLUURUURUURFFFFFFFFFRRRRRRDDDLDDLDDLDDBBBBBBBBB'
-                rotate_face_clockwise(f_face, f_rotated);
+                // f move - direct permutations from test file (wide move)
 
-                // U face: UUU LLL LLL
-                new_state[0] = u_face[0]; new_state[1] = u_face[1]; new_state[2] = u_face[2];
-                new_state[3] = l_face[3]; new_state[4] = l_face[4]; new_state[5] = l_face[5];
-                new_state[6] = l_face[6]; new_state[7] = l_face[7]; new_state[8] = l_face[8];
+                // Face F turns clockwise
+                new_state[18] = temp_state[24];  // F[0] = temp[24]
+                new_state[19] = temp_state[21];  // F[1] = temp[21]
+                new_state[20] = temp_state[18];  // F[2] = temp[18]
+                new_state[21] = temp_state[25];  // F[3] = temp[25]
+                new_state[23] = temp_state[19];  // F[5] = temp[19]
+                new_state[24] = temp_state[26];  // F[6] = temp[26]
+                new_state[25] = temp_state[23];  // F[7] = temp[23]
+                new_state[26] = temp_state[20];  // F[8] = temp[20]
 
-                // R face: UUR UUR UUR
-                new_state[9] = u_face[3]; new_state[10] = u_face[4]; new_state[11] = r_face[2];
-                new_state[12] = u_face[5]; new_state[13] = u_face[6]; new_state[14] = r_face[5];
-                new_state[15] = u_face[7]; new_state[16] = u_face[8]; new_state[17] = r_face[8];
-
-                // F face: rotated
-                for (int j = 0; j < 9; j++) {
-                    new_state[18 + j] = f_rotated[j];
-                }
-
-                // D face: RRR RRR DDD
-                new_state[27] = r_face[0]; new_state[28] = r_face[1]; new_state[29] = r_face[3];
-                new_state[30] = r_face[4]; new_state[31] = r_face[6]; new_state[32] = r_face[7];
-                new_state[33] = d_face[6]; new_state[34] = d_face[7]; new_state[35] = d_face[8];
-
-                // L face: LDD LDD LDD
-                new_state[36] = l_face[0]; new_state[37] = d_face[0]; new_state[38] = d_face[3];
-                new_state[39] = l_face[1]; new_state[40] = d_face[1]; new_state[41] = d_face[4];
-                new_state[42] = l_face[2]; new_state[43] = d_face[2]; new_state[44] = d_face[5];
-
-                // B face: unchanged
-                for (int j = 0; j < 9; j++) {
-                    new_state[45 + j] = b_face[j];
-                }
+                // Permutations for f wide (includes middle slice)
+                new_state[3] = temp_state[43];   // U[3] = L[7]
+                new_state[4] = temp_state[40];   // U[4] = L[4]
+                new_state[5] = temp_state[37];   // U[5] = L[1]
+                new_state[6] = temp_state[44];   // U[6] = L[8]
+                new_state[7] = temp_state[41];   // U[7] = L[5]
+                new_state[8] = temp_state[38];   // U[8] = L[2]
+                new_state[9] = temp_state[6];    // R[0] = U[6]
+                new_state[10] = temp_state[3];   // R[1] = U[3]
+                new_state[12] = temp_state[7];   // R[3] = U[7]
+                new_state[13] = temp_state[4];   // R[4] = U[4]
+                new_state[15] = temp_state[8];   // R[6] = U[8]
+                new_state[16] = temp_state[5];   // R[7] = U[5]
+                new_state[27] = temp_state[15];  // D[0] = R[6]
+                new_state[28] = temp_state[12];  // D[1] = R[3]
+                new_state[29] = temp_state[9];   // D[2] = R[0]
+                new_state[30] = temp_state[16];  // D[3] = R[7]
+                new_state[31] = temp_state[13];  // D[4] = R[4]
+                new_state[32] = temp_state[10];  // D[5] = R[1]
+                new_state[37] = temp_state[30];  // L[1] = D[3]
+                new_state[38] = temp_state[27];  // L[2] = D[0]
+                new_state[40] = temp_state[31];  // L[4] = D[4]
+                new_state[41] = temp_state[28];  // L[5] = D[1]
+                new_state[43] = temp_state[32];  // L[7] = D[5]
+                new_state[44] = temp_state[29];  // L[8] = D[2]
 
             } else if (direction == 2) {
-                // f2: 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
-                //     'UUUDDDDDDLLRLLRLLRFFFFFFFFFUUUUUUDDDLRRLRRLRRBBBBBBBBB'
-                rotate_face_180(f_face, f_rotated);
+                // f2 move - direct permutations from test file (wide move)
 
-                // U face: UUU DDD DDD
-                new_state[0] = u_face[0]; new_state[1] = u_face[1]; new_state[2] = u_face[2];
-                new_state[3] = d_face[3]; new_state[4] = d_face[4]; new_state[5] = d_face[5];
-                new_state[6] = d_face[6]; new_state[7] = d_face[7]; new_state[8] = d_face[8];
+                // Face F turns 180°
+                new_state[18] = temp_state[26];  // F[0] = temp[26]
+                new_state[19] = temp_state[25];  // F[1] = temp[25]
+                new_state[20] = temp_state[24];  // F[2] = temp[24]
+                new_state[21] = temp_state[23];  // F[3] = temp[23]
+                new_state[23] = temp_state[21];  // F[5] = temp[21]
+                new_state[24] = temp_state[20];  // F[6] = temp[20]
+                new_state[25] = temp_state[19];  // F[7] = temp[19]
+                new_state[26] = temp_state[18];  // F[8] = temp[18]
 
-                // R face: LLR LLR LLR
-                new_state[9] = l_face[0]; new_state[10] = l_face[1]; new_state[11] = r_face[2];
-                new_state[12] = l_face[3]; new_state[13] = l_face[4]; new_state[14] = r_face[5];
-                new_state[15] = l_face[6]; new_state[16] = l_face[7]; new_state[17] = r_face[8];
-
-                // F face: rotated 180
-                for (int j = 0; j < 9; j++) {
-                    new_state[18 + j] = f_rotated[j];
-                }
-
-                // D face: UUU UUU DDD
-                new_state[27] = u_face[6]; new_state[28] = u_face[7]; new_state[29] = u_face[8];
-                new_state[30] = u_face[3]; new_state[31] = u_face[4]; new_state[32] = u_face[5];
-                new_state[33] = d_face[6]; new_state[34] = d_face[7]; new_state[35] = d_face[8];
-
-                // L face: LRR LRR LRR
-                new_state[36] = l_face[8]; new_state[37] = r_face[0]; new_state[38] = r_face[1];
-                new_state[39] = l_face[5]; new_state[40] = r_face[3]; new_state[41] = r_face[4];
-                new_state[42] = l_face[2]; new_state[43] = r_face[6]; new_state[44] = r_face[7];
-
-                // B face: unchanged
-                for (int j = 0; j < 9; j++) {
-                    new_state[45 + j] = b_face[j];
-                }
+                // Permutations for f2 wide (includes middle slice)
+                new_state[3] = temp_state[32];   // U[3] = D[5]
+                new_state[4] = temp_state[31];   // U[4] = D[4]
+                new_state[5] = temp_state[30];   // U[5] = D[3]
+                new_state[6] = temp_state[29];   // U[6] = D[2]
+                new_state[7] = temp_state[28];   // U[7] = D[1]
+                new_state[8] = temp_state[27];   // U[8] = D[0]
+                new_state[9] = temp_state[44];   // R[0] = L[8]
+                new_state[10] = temp_state[43];  // R[1] = L[7]
+                new_state[12] = temp_state[41];  // R[3] = L[5]
+                new_state[13] = temp_state[40];  // R[4] = L[4]
+                new_state[15] = temp_state[38];  // R[6] = L[2]
+                new_state[16] = temp_state[37];  // R[7] = L[1]
+                new_state[27] = temp_state[8];   // D[0] = U[8]
+                new_state[28] = temp_state[7];   // D[1] = U[7]
+                new_state[29] = temp_state[6];   // D[2] = U[6]
+                new_state[30] = temp_state[5];   // D[3] = U[5]
+                new_state[31] = temp_state[4];   // D[4] = U[4]
+                new_state[32] = temp_state[3];   // D[5] = U[3]
+                new_state[37] = temp_state[16];  // L[1] = R[7]
+                new_state[38] = temp_state[15];  // L[2] = R[6]
+                new_state[40] = temp_state[13];  // L[4] = R[4]
+                new_state[41] = temp_state[12];  // L[5] = R[3]
+                new_state[43] = temp_state[10];  // L[7] = R[1]
+                new_state[44] = temp_state[9];   // L[8] = R[0]
 
             } else {
-                // f': 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
-                //     'UUURRRRRRDDRDDRDDRFFFFFFFFFLLLLLLDDDLUULUULUUBBBBBBBBB'
-                rotate_face_counterclockwise(f_face, f_rotated);
+                // f' move - direct permutations from test file (wide move)
 
-                // U face: UUU RRR RRR
-                new_state[0] = u_face[0]; new_state[1] = u_face[1]; new_state[2] = u_face[2];
-                new_state[3] = r_face[3]; new_state[4] = r_face[4]; new_state[5] = r_face[5];
-                new_state[6] = r_face[6]; new_state[7] = r_face[7]; new_state[8] = r_face[8];
+                // Face F turns counterclockwise
+                new_state[18] = temp_state[20];  // F[0] = temp[20]
+                new_state[19] = temp_state[23];  // F[1] = temp[23]
+                new_state[20] = temp_state[26];  // F[2] = temp[26]
+                new_state[21] = temp_state[19];  // F[3] = temp[19]
+                new_state[23] = temp_state[25];  // F[5] = temp[25]
+                new_state[24] = temp_state[18];  // F[6] = temp[18]
+                new_state[25] = temp_state[21];  // F[7] = temp[21]
+                new_state[26] = temp_state[24];  // F[8] = temp[24]
 
-                // R face: DDR DDR DDR
-                new_state[9] = d_face[0]; new_state[10] = d_face[1]; new_state[11] = r_face[2];
-                new_state[12] = d_face[3]; new_state[13] = d_face[4]; new_state[14] = r_face[5];
-                new_state[15] = d_face[6]; new_state[16] = d_face[7]; new_state[17] = r_face[8];
-
-                // F face: rotated counterclockwise
-                for (int j = 0; j < 9; j++) {
-                    new_state[18 + j] = f_rotated[j];
-                }
-
-                // D face: LLL LLL DDD
-                new_state[27] = l_face[6]; new_state[28] = l_face[7]; new_state[29] = l_face[8];
-                new_state[30] = l_face[3]; new_state[31] = l_face[4]; new_state[32] = l_face[5];
-                new_state[33] = d_face[6]; new_state[34] = d_face[7]; new_state[35] = d_face[8];
-
-                // L face: LUU LUU LUU
-                new_state[36] = l_face[0]; new_state[37] = u_face[6]; new_state[38] = u_face[3];
-                new_state[39] = l_face[1]; new_state[40] = u_face[7]; new_state[41] = u_face[4];
-                new_state[42] = l_face[2]; new_state[43] = u_face[8]; new_state[44] = u_face[5];
-
-                // B face: unchanged
-                for (int j = 0; j < 9; j++) {
-                    new_state[45 + j] = b_face[j];
-                }
+                // Permutations for f' wide (includes middle slice)
+                new_state[3] = temp_state[10];   // U[3] = R[1]
+                new_state[4] = temp_state[13];   // U[4] = R[4]
+                new_state[5] = temp_state[16];   // U[5] = R[7]
+                new_state[6] = temp_state[9];    // U[6] = R[0]
+                new_state[7] = temp_state[12];   // U[7] = R[3]
+                new_state[8] = temp_state[15];   // U[8] = R[6]
+                new_state[9] = temp_state[29];   // R[0] = D[2]
+                new_state[10] = temp_state[32];  // R[1] = D[5]
+                new_state[12] = temp_state[28];  // R[3] = D[1]
+                new_state[13] = temp_state[31];  // R[4] = D[4]
+                new_state[15] = temp_state[27];  // R[6] = D[0]
+                new_state[16] = temp_state[30];  // R[7] = D[3]
+                new_state[27] = temp_state[38];  // D[0] = L[2]
+                new_state[28] = temp_state[41];  // D[1] = L[5]
+                new_state[29] = temp_state[44];  // D[2] = L[8]
+                new_state[30] = temp_state[37];  // D[3] = L[1]
+                new_state[31] = temp_state[40];  // D[4] = L[4]
+                new_state[32] = temp_state[43];  // D[5] = L[7]
+                new_state[37] = temp_state[5];   // L[1] = U[5]
+                new_state[38] = temp_state[8];   // L[2] = U[8]
+                new_state[40] = temp_state[4];   // L[4] = U[4]
+                new_state[41] = temp_state[7];   // L[5] = U[7]
+                new_state[43] = temp_state[3];   // L[7] = U[3]
+                new_state[44] = temp_state[6];   // L[8] = U[6]
             }
             break;
         }
 
         case 'd': {
-            // d est équivalent à U y'
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = new_state[j];
-                r_face[j] = new_state[9 + j];
-                f_face[j] = new_state[18 + j];
-                d_face[j] = new_state[27 + j];
-                l_face[j] = new_state[36 + j];
-                b_face[j] = new_state[45 + j];
-            }
-
-            char u_rotated[9], d_rotated[9];
-
             if (direction == 1) {
-                // d = U y' : U tourne anti-horaire, D tourne horaire
-                rotate_face_counterclockwise(u_face, u_rotated);
-                rotate_face_clockwise(d_face, d_rotated);
+                // d move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];
-                    new_state[27 + j] = d_rotated[j];
-                }
+                // Face D turns clockwise
+                new_state[27] = temp_state[33];  // D[0] = temp[33]
+                new_state[28] = temp_state[30];  // D[1] = temp[30]
+                new_state[29] = temp_state[27];  // D[2] = temp[27]
+                new_state[30] = temp_state[34];  // D[3] = temp[34]
+                new_state[32] = temp_state[28];  // D[5] = temp[28]
+                new_state[33] = temp_state[35];  // D[6] = temp[35]
+                new_state[34] = temp_state[32];  // D[7] = temp[32]
+                new_state[35] = temp_state[29];  // D[8] = temp[29]
 
-                // Bottom et middle rows: seulement effet y' (F->L, L->B, B->R, R->F)
-                for (int j = 3; j < 9; j++) {
-                    new_state[9 + j] = f_face[j];    // R <- F
-                    new_state[18 + j] = l_face[j];   // F <- L
-                    new_state[36 + j] = b_face[j];   // L <- B
-                    new_state[45 + j] = r_face[j];   // B <- R
-                }
-
-                // Top rows: U et y' s'annulent, restent inchangées
-                for (int j = 0; j < 3; j++) {
-                    new_state[9 + j] = r_face[j];    // R top unchanged
-                    new_state[18 + j] = f_face[j];   // F top unchanged
-                    new_state[36 + j] = l_face[j];   // L top unchanged
-                    new_state[45 + j] = b_face[j];   // B top unchanged
-                }
+                // Permutations for d wide (includes middle slice)
+                new_state[12] = temp_state[21];  // R[3] = F[3]
+                new_state[13] = temp_state[22];  // R[4] = F[4]
+                new_state[14] = temp_state[23];  // R[5] = F[5]
+                new_state[15] = temp_state[24];  // R[6] = F[6]
+                new_state[16] = temp_state[25];  // R[7] = F[7]
+                new_state[17] = temp_state[26];  // R[8] = F[8]
+                new_state[21] = temp_state[39];  // F[3] = L[3]
+                new_state[22] = temp_state[40];  // F[4] = L[4]
+                new_state[23] = temp_state[41];  // F[5] = L[5]
+                new_state[24] = temp_state[42];  // F[6] = L[6]
+                new_state[25] = temp_state[43];  // F[7] = L[7]
+                new_state[26] = temp_state[44];  // F[8] = L[8]
+                new_state[39] = temp_state[48];  // L[3] = B[3]
+                new_state[40] = temp_state[49];  // L[4] = B[4]
+                new_state[41] = temp_state[50];  // L[5] = B[5]
+                new_state[42] = temp_state[51];  // L[6] = B[6]
+                new_state[43] = temp_state[52];  // L[7] = B[7]
+                new_state[44] = temp_state[53];  // L[8] = B[8]
+                new_state[48] = temp_state[12];  // B[3] = R[3]
+                new_state[49] = temp_state[13];  // B[4] = R[4]
+                new_state[50] = temp_state[14];  // B[5] = R[5]
+                new_state[51] = temp_state[15];  // B[6] = R[6]
+                new_state[52] = temp_state[16];  // B[7] = R[7]
+                new_state[53] = temp_state[17];  // B[8] = R[8]
 
             } else if (direction == 2) {
-                // d2 = U2 y2
-                rotate_face_180(u_face, u_rotated);
-                rotate_face_180(d_face, d_rotated);
+                // d2 move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];
-                    new_state[27 + j] = d_rotated[j];
-                }
+                // Face D turns 180°
+                new_state[27] = temp_state[35];  // D[0] = temp[35]
+                new_state[28] = temp_state[34];  // D[1] = temp[34]
+                new_state[29] = temp_state[33];  // D[2] = temp[33]
+                new_state[30] = temp_state[32];  // D[3] = temp[32]
+                new_state[32] = temp_state[30];  // D[5] = temp[30]
+                new_state[33] = temp_state[29];  // D[6] = temp[29]
+                new_state[34] = temp_state[28];  // D[7] = temp[28]
+                new_state[35] = temp_state[27];  // D[8] = temp[27]
 
-                // Bottom et middle rows: seulement y2 (F<->B, R<->L)
-                for (int j = 3; j < 9; j++) {
-                    new_state[9 + j] = l_face[j];      // R <- L
-                    new_state[18 + j] = b_face[j];     // F <- B
-                    new_state[36 + j] = r_face[j];     // L <- R
-                    new_state[45 + j] = f_face[j];     // B <- F
-                }
+                // Permutations for d2 wide (includes middle slice)
+                new_state[12] = temp_state[39];  // R[3] = L[3]
+                new_state[13] = temp_state[40];  // R[4] = L[4]
+                new_state[14] = temp_state[41];  // R[5] = L[5]
+                new_state[15] = temp_state[42];  // R[6] = L[6]
+                new_state[16] = temp_state[43];  // R[7] = L[7]
+                new_state[17] = temp_state[44];  // R[8] = L[8]
+                new_state[21] = temp_state[48];  // F[3] = B[3]
+                new_state[22] = temp_state[49];  // F[4] = B[4]
+                new_state[23] = temp_state[50];  // F[5] = B[5]
+                new_state[24] = temp_state[51];  // F[6] = B[6]
+                new_state[25] = temp_state[52];  // F[7] = B[7]
+                new_state[26] = temp_state[53];  // F[8] = B[8]
+                new_state[39] = temp_state[12];  // L[3] = R[3]
+                new_state[40] = temp_state[13];  // L[4] = R[4]
+                new_state[41] = temp_state[14];  // L[5] = R[5]
+                new_state[42] = temp_state[15];  // L[6] = R[6]
+                new_state[43] = temp_state[16];  // L[7] = R[7]
+                new_state[44] = temp_state[17];  // L[8] = R[8]
+                new_state[48] = temp_state[21];  // B[3] = F[3]
+                new_state[49] = temp_state[22];  // B[4] = F[4]
+                new_state[50] = temp_state[23];  // B[5] = F[5]
+                new_state[51] = temp_state[24];  // B[6] = F[6]
+                new_state[52] = temp_state[25];  // B[7] = F[7]
+                new_state[53] = temp_state[26];  // B[8] = F[8]
 
-                // Top rows: U2 et y2 s'annulent, restent inchangées
-                for (int j = 0; j < 3; j++) {
-                    new_state[9 + j] = r_face[j];      // R top unchanged
-                    new_state[18 + j] = f_face[j];     // F top unchanged
-                    new_state[36 + j] = l_face[j];     // L top unchanged
-                    new_state[45 + j] = b_face[j];     // B top unchanged
-                }
             } else {
-                // d' = U' y
-                rotate_face_clockwise(u_face, u_rotated);
-                rotate_face_counterclockwise(d_face, d_rotated);
+                // d' move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[j] = u_rotated[j];
-                    new_state[27 + j] = d_rotated[j];
-                }
+                // Face D turns counterclockwise
+                new_state[27] = temp_state[29];  // D[0] = temp[29]
+                new_state[28] = temp_state[32];  // D[1] = temp[32]
+                new_state[29] = temp_state[35];  // D[2] = temp[35]
+                new_state[30] = temp_state[28];  // D[3] = temp[28]
+                new_state[32] = temp_state[34];  // D[5] = temp[34]
+                new_state[33] = temp_state[27];  // D[6] = temp[27]
+                new_state[34] = temp_state[30];  // D[7] = temp[30]
+                new_state[35] = temp_state[33];  // D[8] = temp[33]
 
-                // Bottom et middle rows: effet y (F->R, R->B, B->L, L->F)
-                for (int j = 3; j < 9; j++) {
-                    new_state[9 + j] = b_face[j];    // R <- B
-                    new_state[18 + j] = r_face[j];   // F <- R
-                    new_state[36 + j] = f_face[j];   // L <- F
-                    new_state[45 + j] = l_face[j];   // B <- L
-                }
-
-                // Top rows: U' et y s'annulent, restent inchangées
-                for (int j = 0; j < 3; j++) {
-                    new_state[9 + j] = r_face[j];    // R top unchanged
-                    new_state[18 + j] = f_face[j];   // F top unchanged
-                    new_state[36 + j] = l_face[j];   // L top unchanged
-                    new_state[45 + j] = b_face[j];   // B top unchanged
-                }
+                // Permutations for d' wide (includes middle slice)
+                new_state[12] = temp_state[48];  // R[3] = B[3]
+                new_state[13] = temp_state[49];  // R[4] = B[4]
+                new_state[14] = temp_state[50];  // R[5] = B[5]
+                new_state[15] = temp_state[51];  // R[6] = B[6]
+                new_state[16] = temp_state[52];  // R[7] = B[7]
+                new_state[17] = temp_state[53];  // R[8] = B[8]
+                new_state[21] = temp_state[12];  // F[3] = R[3]
+                new_state[22] = temp_state[13];  // F[4] = R[4]
+                new_state[23] = temp_state[14];  // F[5] = R[5]
+                new_state[24] = temp_state[15];  // F[6] = R[6]
+                new_state[25] = temp_state[16];  // F[7] = R[7]
+                new_state[26] = temp_state[17];  // F[8] = R[8]
+                new_state[39] = temp_state[21];  // L[3] = F[3]
+                new_state[40] = temp_state[22];  // L[4] = F[4]
+                new_state[41] = temp_state[23];  // L[5] = F[5]
+                new_state[42] = temp_state[24];  // L[6] = F[6]
+                new_state[43] = temp_state[25];  // L[7] = F[7]
+                new_state[44] = temp_state[26];  // L[8] = F[8]
+                new_state[48] = temp_state[39];  // B[3] = L[3]
+                new_state[49] = temp_state[40];  // B[4] = L[4]
+                new_state[50] = temp_state[41];  // B[5] = L[5]
+                new_state[51] = temp_state[42];  // B[6] = L[6]
+                new_state[52] = temp_state[43];  // B[7] = L[7]
+                new_state[53] = temp_state[44];  // B[8] = L[8]
             }
             break;
         }
 
         case 'l': {
-            // l est équivalent à R x', optimisé en transformation directe
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = new_state[j];
-                r_face[j] = new_state[9 + j];
-                f_face[j] = new_state[18 + j];
-                d_face[j] = new_state[27 + j];
-                l_face[j] = new_state[36 + j];
-                b_face[j] = new_state[45 + j];
-            }
-
-            char l_rotated[9], r_rotated[9];
-
             if (direction == 1) {
-                // l = R x' : L horaire, R anti-horaire
-                rotate_face_clockwise(l_face, l_rotated);
-                rotate_face_counterclockwise(r_face, r_rotated);
+                // l move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[36 + j] = l_rotated[j];
-                    new_state[9 + j] = r_rotated[j];
-                }
+                // Face L turns clockwise
+                new_state[36] = temp_state[42];  // L[0] = temp[42]
+                new_state[37] = temp_state[39];  // L[1] = temp[39]
+                new_state[38] = temp_state[36];  // L[2] = temp[36]
+                new_state[39] = temp_state[43];  // L[3] = temp[43]
+                new_state[41] = temp_state[37];  // L[5] = temp[37]
+                new_state[42] = temp_state[44];  // L[6] = temp[44]
+                new_state[43] = temp_state[41];  // L[7] = temp[41]
+                new_state[44] = temp_state[38];  // L[8] = temp[38]
 
-                // Left et middle columns: seulement effet x' (U->B inv, B inv->D, D->F, F->U)
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3] = b_face[8 - i*3];      // U left <- B right inversé
-                    new_state[18 + i*3] = u_face[i*3];     // F left <- U left
-                    new_state[27 + i*3] = f_face[i*3];     // D left <- F left
-                    new_state[45 + i*3 + 2] = d_face[i*3]; // B right <- D left
-                }
-
-                // Right columns: R et x' s'annulent, restent identiques
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 2] = u_face[i*3 + 2]; // U right unchanged
-                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
-                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
-                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
-                }
-
-                // Middle columns: seulement effet x'
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 1] = b_face[8 - i*3 - 1];     // U middle <- B middle inversé
-                    new_state[18 + i*3 + 1] = u_face[i*3 + 1];    // F middle <- U middle
-                    new_state[27 + i*3 + 1] = f_face[i*3 + 1];    // D middle <- F middle
-                    new_state[45 + i*3 + 1] = d_face[i*3 + 1];    // B middle <- D middle
-                }
+                // Permutations for l wide (includes middle slice)
+                new_state[0] = temp_state[53];   // U[0] = B[8]
+                new_state[1] = temp_state[52];   // U[1] = B[7]
+                new_state[3] = temp_state[50];   // U[3] = B[5]
+                new_state[4] = temp_state[49];   // U[4] = B[4]
+                new_state[6] = temp_state[47];   // U[6] = B[2]
+                new_state[7] = temp_state[46];   // U[7] = B[1]
+                new_state[18] = temp_state[0];   // F[0] = U[0]
+                new_state[19] = temp_state[1];   // F[1] = U[1]
+                new_state[21] = temp_state[3];   // F[3] = U[3]
+                new_state[22] = temp_state[4];   // F[4] = U[4]
+                new_state[24] = temp_state[6];   // F[6] = U[6]
+                new_state[25] = temp_state[7];   // F[7] = U[7]
+                new_state[27] = temp_state[18];  // D[0] = F[0]
+                new_state[28] = temp_state[19];  // D[1] = F[1]
+                new_state[30] = temp_state[21];  // D[3] = F[3]
+                new_state[31] = temp_state[22];  // D[4] = F[4]
+                new_state[33] = temp_state[24];  // D[6] = F[6]
+                new_state[34] = temp_state[25];  // D[7] = F[7]
+                new_state[46] = temp_state[34];  // B[1] = D[7]
+                new_state[47] = temp_state[33];  // B[2] = D[6]
+                new_state[49] = temp_state[31];  // B[4] = D[4]
+                new_state[50] = temp_state[30];  // B[5] = D[3]
+                new_state[52] = temp_state[28];  // B[7] = D[1]
+                new_state[53] = temp_state[27];  // B[8] = D[0]
 
             } else if (direction == 2) {
-                // l2 = R2 x2
-                rotate_face_180(l_face, l_rotated);
-                rotate_face_180(r_face, r_rotated);
+                // l2 move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[36 + j] = l_rotated[j];
-                    new_state[9 + j] = r_rotated[j];
-                }
+                // Face L turns 180°
+                new_state[36] = temp_state[44];  // L[0] = temp[44]
+                new_state[37] = temp_state[43];  // L[1] = temp[43]
+                new_state[38] = temp_state[42];  // L[2] = temp[42]
+                new_state[39] = temp_state[41];  // L[3] = temp[41]
+                new_state[41] = temp_state[39];  // L[5] = temp[39]
+                new_state[42] = temp_state[38];  // L[6] = temp[38]
+                new_state[43] = temp_state[37];  // L[7] = temp[37]
+                new_state[44] = temp_state[36];  // L[8] = temp[36]
 
-                // Left et middle columns: seulement x2 (U<->D, F<->B inv)
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3] = d_face[i*3];              // U left <- D left
-                    new_state[18 + i*3] = b_face[8 - i*3 - 2]; // F left <- B right inversé
-                    new_state[27 + i*3] = u_face[i*3];         // D left <- U left
-                    new_state[45 + i*3 + 2] = f_face[i*3];     // B right <- F left inversé
-                }
-
-                // Right columns: R2 et x2 s'annulent, restent identiques
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 2] = u_face[i*3 + 2];     // U right unchanged
-                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
-                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
-                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
-                }
-
-                // Middle columns: seulement x2
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 1] = d_face[i*3 + 1];         // U middle <- D middle
-                    new_state[18 + i*3 + 1] = b_face[8 - i*3 - 1]; // F middle <- B middle inversé
-                    new_state[27 + i*3 + 1] = u_face[i*3 + 1];     // D middle <- U middle
-                    new_state[45 + i*3 + 1] = f_face[i*3 + 1];     // B middle <- F middle inversé
-                }
+                // Permutations for l2 wide (includes middle slice)
+                new_state[0] = temp_state[27];   // U[0] = D[0]
+                new_state[1] = temp_state[28];   // U[1] = D[1]
+                new_state[3] = temp_state[30];   // U[3] = D[3]
+                new_state[4] = temp_state[31];   // U[4] = D[4]
+                new_state[6] = temp_state[33];   // U[6] = D[6]
+                new_state[7] = temp_state[34];   // U[7] = D[7]
+                new_state[18] = temp_state[53];  // F[0] = B[8]
+                new_state[19] = temp_state[52];  // F[1] = B[7]
+                new_state[21] = temp_state[50];  // F[3] = B[5]
+                new_state[22] = temp_state[49];  // F[4] = B[4]
+                new_state[24] = temp_state[47];  // F[6] = B[2]
+                new_state[25] = temp_state[46];  // F[7] = B[1]
+                new_state[27] = temp_state[0];   // D[0] = U[0]
+                new_state[28] = temp_state[1];   // D[1] = U[1]
+                new_state[30] = temp_state[3];   // D[3] = U[3]
+                new_state[31] = temp_state[4];   // D[4] = U[4]
+                new_state[33] = temp_state[6];   // D[6] = U[6]
+                new_state[34] = temp_state[7];   // D[7] = U[7]
+                new_state[46] = temp_state[25];  // B[1] = F[7]
+                new_state[47] = temp_state[24];  // B[2] = F[6]
+                new_state[49] = temp_state[22];  // B[4] = F[4]
+                new_state[50] = temp_state[21];  // B[5] = F[3]
+                new_state[52] = temp_state[19];  // B[7] = F[1]
+                new_state[53] = temp_state[18];  // B[8] = F[0]
 
             } else {
-                // l' = R' x
-                rotate_face_counterclockwise(l_face, l_rotated);
-                rotate_face_clockwise(r_face, r_rotated);
+                // l' move - direct permutations from test file (wide move)
 
-                for (int j = 0; j < 9; j++) {
-                    new_state[36 + j] = l_rotated[j];
-                    new_state[9 + j] = r_rotated[j];
-                }
+                // Face L turns counterclockwise
+                new_state[36] = temp_state[38];  // L[0] = temp[38]
+                new_state[37] = temp_state[41];  // L[1] = temp[41]
+                new_state[38] = temp_state[44];  // L[2] = temp[44]
+                new_state[39] = temp_state[37];  // L[3] = temp[37]
+                new_state[41] = temp_state[43];  // L[5] = temp[43]
+                new_state[42] = temp_state[36];  // L[6] = temp[36]
+                new_state[43] = temp_state[39];  // L[7] = temp[39]
+                new_state[44] = temp_state[42];  // L[8] = temp[42]
 
-                // Left et middle columns: seulement effet x (U->F, F->D, D->B inv, B inv->U)
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3] = f_face[i*3];         // U left <- F left
-                    new_state[18 + i*3] = d_face[i*3];    // F left <- D left
-                    new_state[27 + i*3] = b_face[8 - i*3 - 2]; // D left <- B right inversé
-                    new_state[45 + i*3 + 2] = u_face[i*3]; // B right <- U left
-                }
-
-                // Right columns: R' et x s'annulent aussi
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 2] = u_face[i*3 + 2];     // U right unchanged
-                    new_state[18 + i*3 + 2] = f_face[i*3 + 2]; // F right unchanged
-                    new_state[27 + i*3 + 2] = d_face[i*3 + 2]; // D right unchanged
-                    new_state[45 + i*3] = b_face[i*3];         // B left unchanged
-                }
-
-                // Middle columns: seulement effet x
-                for (int i = 0; i < 3; i++) {
-                    new_state[i*3 + 1] = f_face[i*3 + 1];     // U middle <- F middle
-                    new_state[18 + i*3 + 1] = d_face[i*3 + 1]; // F middle <- D middle
-                    new_state[27 + i*3 + 1] = b_face[8 - i*3 - 1]; // D middle <- B middle inversé
-                    new_state[45 + i*3 + 1] = u_face[i*3 + 1]; // B middle <- U middle
-                }
+                // Permutations for l' wide (includes middle slice)
+                new_state[0] = temp_state[18];   // U[0] = F[0]
+                new_state[1] = temp_state[19];   // U[1] = F[1]
+                new_state[3] = temp_state[21];   // U[3] = F[3]
+                new_state[4] = temp_state[22];   // U[4] = F[4]
+                new_state[6] = temp_state[24];   // U[6] = F[6]
+                new_state[7] = temp_state[25];   // U[7] = F[7]
+                new_state[18] = temp_state[27];  // F[0] = D[0]
+                new_state[19] = temp_state[28];  // F[1] = D[1]
+                new_state[21] = temp_state[30];  // F[3] = D[3]
+                new_state[22] = temp_state[31];  // F[4] = D[4]
+                new_state[24] = temp_state[33];  // F[6] = D[6]
+                new_state[25] = temp_state[34];  // F[7] = D[7]
+                new_state[27] = temp_state[53];  // D[0] = B[8]
+                new_state[28] = temp_state[52];  // D[1] = B[7]
+                new_state[30] = temp_state[50];  // D[3] = B[5]
+                new_state[31] = temp_state[49];  // D[4] = B[4]
+                new_state[33] = temp_state[47];  // D[6] = B[2]
+                new_state[34] = temp_state[46];  // D[7] = B[1]
+                new_state[46] = temp_state[7];   // B[1] = U[7]
+                new_state[47] = temp_state[6];   // B[2] = U[6]
+                new_state[49] = temp_state[4];   // B[4] = U[4]
+                new_state[50] = temp_state[3];   // B[5] = U[3]
+                new_state[52] = temp_state[1];   // B[7] = U[1]
+                new_state[53] = temp_state[0];   // B[8] = U[0]
             }
             break;
         }
 
         case 'b': {
-            // Analyse directe des transformations b à partir des exemples donnés
-            char u_face[9], r_face[9], f_face[9], d_face[9], l_face[9], b_face[9];
-            for (int j = 0; j < 9; j++) {
-                u_face[j] = new_state[j];
-                r_face[j] = new_state[9 + j];
-                f_face[j] = new_state[18 + j];
-                d_face[j] = new_state[27 + j];
-                l_face[j] = new_state[36 + j];
-                b_face[j] = new_state[45 + j];
-            }
-
-            char b_rotated[9];
-
             if (direction == 1) {
-                // b: 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
-                //    'RRRRRRUUURDDRDDRDDFFFFFFFFFDDDLLLLLLUULUULUULBBBBBBBBB'
-                rotate_face_clockwise(b_face, b_rotated);
+                // Face B rotation clockwise
+                new_state[45] = temp_state[51];  // B[6] -> B[0]
+                new_state[46] = temp_state[48];  // B[3] -> B[1]
+                new_state[47] = temp_state[45];  // B[0] -> B[2]
+                new_state[48] = temp_state[52];  // B[7] -> B[3]
+                new_state[49] = temp_state[49];  // B[4] -> B[4]
+                new_state[50] = temp_state[46];  // B[1] -> B[5]
+                new_state[51] = temp_state[53];  // B[8] -> B[6]
+                new_state[52] = temp_state[50];  // B[5] -> B[7]
+                new_state[53] = temp_state[47];  // B[2] -> B[8]
 
-                // U face: RRR RRR UUU
-                new_state[0] = r_face[0]; new_state[1] = r_face[1]; new_state[2] = r_face[2];
-                new_state[3] = r_face[3]; new_state[4] = r_face[4]; new_state[5] = r_face[5];
-                new_state[6] = u_face[6]; new_state[7] = u_face[7]; new_state[8] = u_face[8];
-
-                // R face: RDD RDD RDD
-                new_state[9] = r_face[6]; new_state[10] = d_face[0]; new_state[11] = d_face[3];
-                new_state[12] = r_face[7]; new_state[13] = d_face[1]; new_state[14] = d_face[4];
-                new_state[15] = r_face[8]; new_state[16] = d_face[2]; new_state[17] = d_face[5];
-
-                // F face: unchanged
-                for (int j = 0; j < 9; j++) {
-                    new_state[18 + j] = f_face[j];
-                }
-
-                // D face: DDD LLL LLL
-                new_state[27] = d_face[6]; new_state[28] = d_face[7]; new_state[29] = d_face[8];
-                new_state[30] = l_face[0]; new_state[31] = l_face[1]; new_state[32] = l_face[2];
-                new_state[33] = l_face[3]; new_state[34] = l_face[4]; new_state[35] = l_face[5];
-
-                // L face: UUL UUL UUL
-                new_state[36] = u_face[0]; new_state[37] = u_face[3]; new_state[38] = l_face[6];
-                new_state[39] = u_face[1]; new_state[40] = u_face[4]; new_state[41] = l_face[7];
-                new_state[42] = u_face[2]; new_state[43] = u_face[5]; new_state[44] = l_face[8];
-
-                // B face: rotated
-                for (int j = 0; j < 9; j++) {
-                    new_state[45 + j] = b_rotated[j];
-                }
-
+                // Back edge rotation (clockwise: U<-R, R<-D, D<-L, L<-U)
+                new_state[0] = temp_state[11];   // U[0] = R[2]
+                new_state[1] = temp_state[14];   // U[1] = R[5]
+                new_state[2] = temp_state[17];   // U[2] = R[8]
+                new_state[3] = temp_state[10];   // U[3] = R[1]
+                new_state[4] = temp_state[13];   // U[4] = R[4]
+                new_state[5] = temp_state[16];   // U[5] = R[7]
+                new_state[10] = temp_state[32];  // R[1] = D[5]
+                new_state[11] = temp_state[35];  // R[2] = D[8]
+                new_state[13] = temp_state[31];  // R[4] = D[4]
+                new_state[14] = temp_state[34];  // R[5] = D[7]
+                new_state[16] = temp_state[30];  // R[7] = D[3]
+                new_state[17] = temp_state[33];  // R[8] = D[6]
+                new_state[30] = temp_state[37];  // D[3] = L[1]
+                new_state[31] = temp_state[40];  // D[4] = L[4]
+                new_state[32] = temp_state[43];  // D[5] = L[7]
+                new_state[33] = temp_state[36];  // D[6] = L[0]
+                new_state[34] = temp_state[39];  // D[7] = L[3]
+                new_state[35] = temp_state[42];  // D[8] = L[6]
+                new_state[36] = temp_state[2];   // L[0] = U[2]
+                new_state[37] = temp_state[5];   // L[1] = U[5]
+                new_state[39] = temp_state[1];   // L[3] = U[1]
+                new_state[40] = temp_state[4];   // L[4] = U[4]
+                new_state[42] = temp_state[0];   // L[6] = U[0]
+                new_state[43] = temp_state[3];   // L[7] = U[3]
             } else if (direction == 2) {
-                // b2: 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
-                //     'DDDDDDUUURLLRLLRLLFFFFFFFFFDDDUUUUUURRLRRLRRLBBBBBBBBB'
-                rotate_face_180(b_face, b_rotated);
+                // Face B rotation 180°
+                new_state[45] = temp_state[53];  // B[8] -> B[0]
+                new_state[46] = temp_state[52];  // B[7] -> B[1]
+                new_state[47] = temp_state[51];  // B[6] -> B[2]
+                new_state[48] = temp_state[50];  // B[5] -> B[3]
+                new_state[49] = temp_state[49];  // B[4] -> B[4]
+                new_state[50] = temp_state[48];  // B[3] -> B[5]
+                new_state[51] = temp_state[47];  // B[2] -> B[6]
+                new_state[52] = temp_state[46];  // B[1] -> B[7]
+                new_state[53] = temp_state[45];  // B[0] -> B[8]
 
-                // U face: DDD DDD UUU
-                new_state[0] = d_face[0]; new_state[1] = d_face[1]; new_state[2] = d_face[2];
-                new_state[3] = d_face[3]; new_state[4] = d_face[4]; new_state[5] = d_face[5];
-                new_state[6] = u_face[6]; new_state[7] = u_face[7]; new_state[8] = u_face[8];
-
-                // R face: RLL RLL RLL
-                new_state[9] = r_face[6]; new_state[10] = l_face[0]; new_state[11] = l_face[3];
-                new_state[12] = r_face[7]; new_state[13] = l_face[1]; new_state[14] = l_face[4];
-                new_state[15] = r_face[8]; new_state[16] = l_face[2]; new_state[17] = l_face[5];
-
-                // F face: unchanged
-                for (int j = 0; j < 9; j++) {
-                    new_state[18 + j] = f_face[j];
-                }
-
-                // D face: DDD UUU UUU
-                new_state[27] = d_face[6]; new_state[28] = d_face[7]; new_state[29] = d_face[8];
-                new_state[30] = u_face[0]; new_state[31] = u_face[1]; new_state[32] = u_face[2];
-                new_state[33] = u_face[3]; new_state[34] = u_face[4]; new_state[35] = u_face[5];
-
-                // L face: RRL RRL RRL
-                new_state[36] = r_face[0]; new_state[37] = r_face[3]; new_state[38] = l_face[6];
-                new_state[39] = r_face[1]; new_state[40] = r_face[4]; new_state[41] = l_face[7];
-                new_state[42] = r_face[2]; new_state[43] = r_face[5]; new_state[44] = l_face[8];
-
-                // B face: rotated 180
-                for (int j = 0; j < 9; j++) {
-                    new_state[45 + j] = b_rotated[j];
-                }
-
+                // 180° back edge rotation (U<-D, R<-L, D<-U, L<-R)
+                new_state[0] = temp_state[35];   // U[0] = D[8]
+                new_state[1] = temp_state[34];   // U[1] = D[7]
+                new_state[2] = temp_state[33];   // U[2] = D[6]
+                new_state[3] = temp_state[32];   // U[3] = D[5]
+                new_state[4] = temp_state[31];   // U[4] = D[4]
+                new_state[5] = temp_state[30];   // U[5] = D[3]
+                new_state[10] = temp_state[43];  // R[1] = L[7]
+                new_state[11] = temp_state[42];  // R[2] = L[6]
+                new_state[13] = temp_state[40];  // R[4] = L[4]
+                new_state[14] = temp_state[39];  // R[5] = L[3]
+                new_state[16] = temp_state[37];  // R[7] = L[1]
+                new_state[17] = temp_state[36];  // R[8] = L[0]
+                new_state[30] = temp_state[5];   // D[3] = U[5]
+                new_state[31] = temp_state[4];   // D[4] = U[4]
+                new_state[32] = temp_state[3];   // D[5] = U[3]
+                new_state[33] = temp_state[2];   // D[6] = U[2]
+                new_state[34] = temp_state[1];   // D[7] = U[1]
+                new_state[35] = temp_state[0];   // D[8] = U[0]
+                new_state[36] = temp_state[17];  // L[0] = R[8]
+                new_state[37] = temp_state[16];  // L[1] = R[7]
+                new_state[39] = temp_state[14];  // L[3] = R[5]
+                new_state[40] = temp_state[13];  // L[4] = R[4]
+                new_state[42] = temp_state[11];  // L[6] = R[2]
+                new_state[43] = temp_state[10];  // L[7] = R[1]
             } else {
-                // b': 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB' ->
-                //     'LLLLLLUUURUURUURUUFFFFFFFFFDDDRRRRRRDDLDDLDDLBBBBBBBBB'
-                rotate_face_counterclockwise(b_face, b_rotated);
+                // Face B rotation counterclockwise
+                new_state[45] = temp_state[47];  // B[2] -> B[0]
+                new_state[46] = temp_state[50];  // B[5] -> B[1]
+                new_state[47] = temp_state[53];  // B[8] -> B[2]
+                new_state[48] = temp_state[46];  // B[1] -> B[3]
+                new_state[49] = temp_state[49];  // B[4] -> B[4]
+                new_state[50] = temp_state[52];  // B[7] -> B[5]
+                new_state[51] = temp_state[45];  // B[0] -> B[6]
+                new_state[52] = temp_state[48];  // B[3] -> B[7]
+                new_state[53] = temp_state[51];  // B[6] -> B[8]
 
-                // U face: LLL LLL UUU
-                new_state[0] = l_face[0]; new_state[1] = l_face[1]; new_state[2] = l_face[2];
-                new_state[3] = l_face[3]; new_state[4] = l_face[4]; new_state[5] = l_face[5];
-                new_state[6] = u_face[6]; new_state[7] = u_face[7]; new_state[8] = u_face[8];
-
-                // R face: RUU RUU RUU
-                new_state[9] = r_face[6]; new_state[10] = u_face[0]; new_state[11] = u_face[3];
-                new_state[12] = r_face[7]; new_state[13] = u_face[1]; new_state[14] = u_face[4];
-                new_state[15] = r_face[8]; new_state[16] = u_face[2]; new_state[17] = u_face[5];
-
-                // F face: unchanged
-                for (int j = 0; j < 9; j++) {
-                    new_state[18 + j] = f_face[j];
-                }
-
-                // D face: DDD RRR RRR
-                new_state[27] = d_face[6]; new_state[28] = d_face[7]; new_state[29] = d_face[8];
-                new_state[30] = r_face[0]; new_state[31] = r_face[1]; new_state[32] = r_face[2];
-                new_state[33] = r_face[3]; new_state[34] = r_face[4]; new_state[35] = r_face[5];
-
-                // L face: DDL DDL DDL
-                new_state[36] = d_face[0]; new_state[37] = d_face[3]; new_state[38] = l_face[6];
-                new_state[39] = d_face[1]; new_state[40] = d_face[4]; new_state[41] = l_face[7];
-                new_state[42] = d_face[2]; new_state[43] = d_face[5]; new_state[44] = l_face[8];
-
-                // B face: rotated counterclockwise
-                for (int j = 0; j < 9; j++) {
-                    new_state[45 + j] = b_rotated[j];
-                }
+                // Back edge rotation (counterclockwise: U<-L, R<-U, D<-R, L<-D)
+                new_state[0] = temp_state[42];   // U[0] = L[6]
+                new_state[1] = temp_state[39];   // U[1] = L[3]
+                new_state[2] = temp_state[36];   // U[2] = L[0]
+                new_state[3] = temp_state[43];   // U[3] = L[7]
+                new_state[4] = temp_state[40];   // U[4] = L[4]
+                new_state[5] = temp_state[37];   // U[5] = L[1]
+                new_state[10] = temp_state[3];   // R[1] = U[3]
+                new_state[11] = temp_state[0];   // R[2] = U[0]
+                new_state[13] = temp_state[4];   // R[4] = U[4]
+                new_state[14] = temp_state[1];   // R[5] = U[1]
+                new_state[16] = temp_state[5];   // R[7] = U[5]
+                new_state[17] = temp_state[2];   // R[8] = U[2]
+                new_state[30] = temp_state[16];  // D[3] = R[7]
+                new_state[31] = temp_state[13];  // D[4] = R[4]
+                new_state[32] = temp_state[10];  // D[5] = R[1]
+                new_state[33] = temp_state[17];  // D[6] = R[8]
+                new_state[34] = temp_state[14];  // D[7] = R[5]
+                new_state[35] = temp_state[11];  // D[8] = R[2]
+                new_state[36] = temp_state[33];  // L[0] = D[6]
+                new_state[37] = temp_state[30];  // L[1] = D[3]
+                new_state[39] = temp_state[34];  // L[3] = D[7]
+                new_state[40] = temp_state[31];  // L[4] = D[4]
+                new_state[42] = temp_state[35];  // L[6] = D[8]
+                new_state[43] = temp_state[32];  // L[7] = D[5]
+                new_state[52] = temp_state[48];  // B[7] = B[3]
+                new_state[53] = temp_state[51];  // B[8] = B[6]
             }
             break;
         }
@@ -1312,13 +2012,13 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
     return PyUnicode_FromString(new_state);
 }
 
-// Définition des méthodes du module
+// Module method definitions
 static PyMethodDef RotateMethods[] = {
     {"rotate_move", rotate_move, METH_VARARGS, "Rotate cube state with given move"},
     {NULL, NULL, 0, NULL}
 };
 
-// Définition du module
+// Module definition
 static struct PyModuleDef rotatemodule = {
     PyModuleDef_HEAD_INIT,
     "rotate",
@@ -1327,7 +2027,7 @@ static struct PyModuleDef rotatemodule = {
     RotateMethods
 };
 
-// Fonction d'initialisation du module
+// Module initialization function
 PyMODINIT_FUNC PyInit_rotate(void) {
     return PyModule_Create(&rotatemodule);
 }
