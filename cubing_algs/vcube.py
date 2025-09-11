@@ -45,13 +45,17 @@ class VCube(VCubeIntegrityChecker):
         return self._state
 
     @staticmethod
-    def from_cubies(cp: list[int], co: list[int],
+    def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
                     ep: list[int], eo: list[int],
-                    so: list[int]) -> 'VCube':
+                    so: list[int],
+                    scheme: str | None = None) -> 'VCube':
         """
         Create a VCube from cubie representation.
         """
-        return VCube(cubies_to_facelets(cp, co, ep, eo, so))
+        return VCube(
+            cubies_to_facelets(cp, co, ep, eo, so, scheme),
+            check=not bool(scheme),
+        )
 
     @property
     def to_cubies(self) -> tuple[
