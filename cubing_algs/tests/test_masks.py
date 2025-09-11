@@ -1,7 +1,11 @@
 import unittest
 
+from cubing_algs.constants import INITIAL_STATE
+from cubing_algs.masks import FULL_MASK
+from cubing_algs.masks import facelets_masked
 from cubing_algs.masks import intersection_masks
 from cubing_algs.masks import negate_mask
+from cubing_algs.masks import state_masked
 from cubing_algs.masks import union_masks
 
 
@@ -48,3 +52,77 @@ class TestBinaryMasks(unittest.TestCase):
 
     def test_negate_empty(self):
         self.assertEqual(negate_mask(''), '')
+
+    def test_facelets_masked_basic(self):
+        facelets = 'ABCD'
+        mask = '1010'
+        expected = 'A-C-'
+        self.assertEqual(facelets_masked(facelets, mask), expected)
+
+    def test_facelets_masked_all_ones(self):
+        facelets = 'ABCD'
+        mask = '1111'
+        expected = 'ABCD'
+        self.assertEqual(facelets_masked(facelets, mask), expected)
+
+    def test_facelets_masked_all_zeros(self):
+        facelets = 'ABCD'
+        mask = '0000'
+        expected = '----'
+        self.assertEqual(facelets_masked(facelets, mask), expected)
+
+    def test_facelets_masked_empty(self):
+        facelets = ''
+        mask = ''
+        expected = ''
+        self.assertEqual(facelets_masked(facelets, mask), expected)
+
+    def test_facelets_masked_single_char(self):
+        facelets = 'X'
+        mask = '1'
+        expected = 'X'
+        self.assertEqual(facelets_masked(facelets, mask), expected)
+
+        facelets = 'X'
+        mask = '0'
+        expected = '-'
+        self.assertEqual(facelets_masked(facelets, mask), expected)
+
+    def test_facelets_masked_real_cube_pattern(self):
+        facelets = INITIAL_STATE[:9]
+        mask = '101010101'
+        expected = 'U-U-U-U-U'
+        self.assertEqual(facelets_masked(facelets, mask), expected)
+
+    def test_state_masked_basic(self):
+        mask = FULL_MASK
+        result = state_masked(INITIAL_STATE, mask)
+
+        self.assertEqual(result, INITIAL_STATE)
+
+    def test_state_masked_all_zeros(self):
+        mask = '0' * 54
+        result = state_masked(INITIAL_STATE, mask)
+
+        self.assertTrue(result.replace('0', '-'), mask)
+
+    def test_state_masked_partial(self):
+        mask = '1' * 9 + '0' * 45
+        result = state_masked(INITIAL_STATE, mask)
+
+        self.assertEqual(
+            result,
+            'UUUUUUUUU---------------------------------------------',
+        )
+
+    def test_state_masked_different_state(self):
+        scrambled_state = (
+            'LUULUUFFFLBBRRRRRRUUUFFDFFDRRBDDBDDBFFRLLDLLDLLDUBBUBB'
+        )
+        mask = '1' * 27 + '0' * 27
+        result = state_masked(scrambled_state, mask)
+
+        self.assertEqual(
+            result,
+            '-UU-UUFFF---RRRRRRUUUFF-FF-RR-------FFR---------U--U--',
+        )
