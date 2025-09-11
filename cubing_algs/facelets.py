@@ -3,9 +3,10 @@ from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACES
 
 
-def cubies_to_facelets(cp: list[int], co: list[int],
+def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913, PLR0917
                        ep: list[int], eo: list[int],
-                       so: list[int]) -> str:
+                       so: list[int],
+                       scheme: str | None = None) -> str:
     """
     Convert Corner/Edge Permutation/Orientation cube state
     to the Kociemba facelets representation string.
@@ -32,6 +33,9 @@ def cubies_to_facelets(cp: list[int], co: list[int],
         ep: Edge Permutation
         eo: Edge Orientation
         so: Spatial Orientation
+        scheme: Optional 54-character string representing an initial
+                cube state. If provided, colors are taken from this state
+                instead of the standard solved cube (FACES).
 
     Returns:
         Cube state in the Kociemba facelets representation string
@@ -39,19 +43,30 @@ def cubies_to_facelets(cp: list[int], co: list[int],
     facelets = [''] * 54
 
     for i in range(6):
-        facelets[9 * i + 4] = FACES[so[i]]
+        if scheme is not None:
+            facelets[9 * i + 4] = scheme[9 * so[i] + 4]
+        else:
+            facelets[9 * i + 4] = FACES[so[i]]
 
     for i in range(8):
         for p in range(3):
             real_facelet_idx = CORNER_FACELET_MAP[i][(p + co[i]) % 3]
-            color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
-            facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+            if scheme is not None:
+                original_facelet_idx = CORNER_FACELET_MAP[cp[i]][p]
+                facelets[real_facelet_idx] = scheme[original_facelet_idx]
+            else:
+                color_face_idx = CORNER_FACELET_MAP[cp[i]][p] // 9
+                facelets[real_facelet_idx] = FACES[so[color_face_idx]]
 
     for i in range(12):
         for p in range(2):
             real_facelet_idx = EDGE_FACELET_MAP[i][(p + eo[i]) % 2]
-            color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
-            facelets[real_facelet_idx] = FACES[so[color_face_idx]]
+            if scheme is not None:
+                original_facelet_idx = EDGE_FACELET_MAP[ep[i]][p]
+                facelets[real_facelet_idx] = scheme[original_facelet_idx]
+            else:
+                color_face_idx = EDGE_FACELET_MAP[ep[i]][p] // 9
+                facelets[real_facelet_idx] = FACES[so[color_face_idx]]
 
     return ''.join(facelets)
 
