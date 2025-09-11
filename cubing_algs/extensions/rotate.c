@@ -1,7 +1,7 @@
 #include <Python.h>
 #include <string.h>
 
-// Fonction principale de rotation d'un mouvement
+// Main function for rotating a move
 static PyObject* rotate_move(PyObject* self, PyObject* args) {
     const char* state;
     const char* move;
@@ -10,20 +10,20 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
         return NULL;
     }
 
-    // Copier l'état pour modification
+    // Copy state for modification
     char new_state[55];
     strcpy(new_state, state);
 
     char temp_state[55];
     strcpy(temp_state, new_state);
 
-    // Parser le mouvement
+    // Parser the move
     char face = move[0];
-    int direction = 1; // Par défaut: sens horaire
+    int direction = 1; // Default: clockwise
 
     if (strlen(move) > 1) {
         if (move[1] == '\'') {
-            direction = 3; // Anti-horaire
+            direction = 3; // Anticlockwise
         } else if (move[1] == '2') {
             direction = 2; // 180°
         } else {
@@ -46,7 +46,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[7] = temp_state[5];   // U[5] -> U[7]
                 new_state[8] = temp_state[2];   // U[2] -> U[8]
 
-                // Rotation des rangées du haut (sens horaire: R<-B, F<-R, L<-F, B<-L)
+                // Top row rotation (clockwise: R<-B, F<-R, L<-F, B<-L)
                 new_state[9] = temp_state[45];   // B[0] -> R[0]
                 new_state[10] = temp_state[46];  // B[1] -> R[1]
                 new_state[11] = temp_state[47];  // B[2] -> R[2]
@@ -71,7 +71,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[7] = temp_state[1];   // U[1] -> U[7]
                 new_state[8] = temp_state[0];   // U[0] -> U[8]
 
-                // Rotation 180° des rangées du haut (R<-L, F<-B, L<-R, B<-F)
+                // 180° top row rotation (R<-L, F<-B, L<-R, B<-F)
                 new_state[9] = temp_state[36];   // L[0] -> R[0]
                 new_state[10] = temp_state[37];  // L[1] -> R[1]
                 new_state[11] = temp_state[38];  // L[2] -> R[2]
@@ -84,7 +84,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[45] = temp_state[18];  // F[0] -> B[0]
                 new_state[46] = temp_state[19];  // F[1] -> B[1]
                 new_state[47] = temp_state[20];  // F[2] -> B[2]
-            } else { // direction == 3 (anti-horaire)
+            } else { // direction == 3 (counterclockwise)
                 // Face U rotation counterclockwise
                 new_state[0] = temp_state[2];   // U[2] -> U[0]
                 new_state[1] = temp_state[5];   // U[5] -> U[1]
@@ -96,7 +96,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[7] = temp_state[3];   // U[3] -> U[7]
                 new_state[8] = temp_state[6];   // U[6] -> U[8]
 
-                // Rotation des rangées du haut (sens anti-horaire: R<-F, F<-L, L<-B, B<-R)
+                // Top row rotation (counterclockwise: R<-F, F<-L, L<-B, B<-R)
                 new_state[9] = temp_state[18];   // F[0] -> R[0]
                 new_state[10] = temp_state[19];  // F[1] -> R[1]
                 new_state[11] = temp_state[20];  // F[2] -> R[2]
@@ -126,7 +126,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[16] = temp_state[14];  // R[5] -> R[7]
                 new_state[17] = temp_state[11];  // R[2] -> R[8]
 
-                // Rotation des colonnes de droite (sens horaire: U<-F, F<-D, D<-B, B<-U)
+                // Right column rotation (clockwise: U<-F, F<-D, D<-B, B<-U)
                 new_state[2] = temp_state[20];   // F[2] -> U[2]
                 new_state[5] = temp_state[23];   // F[5] -> U[5]
                 new_state[8] = temp_state[26];   // F[8] -> U[8]
@@ -151,7 +151,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[16] = temp_state[10];  // R[1] -> R[7]
                 new_state[17] = temp_state[9];   // R[0] -> R[8]
 
-                // Rotation 180° des colonnes de droite (U<-D, F<-B, D<-U, B<-F)
+                // 180° right column rotation (U<-D, F<-B, D<-U, B<-F)
                 new_state[2] = temp_state[29];   // D[2] -> U[2]
                 new_state[5] = temp_state[32];   // D[5] -> U[5]
                 new_state[8] = temp_state[35];   // D[8] -> U[8]
@@ -164,7 +164,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[45] = temp_state[26];  // F[8] -> B[0]
                 new_state[48] = temp_state[23];  // F[5] -> B[3]
                 new_state[51] = temp_state[20];  // F[2] -> B[6]
-            } else { // direction == 3 (anti-horaire)
+            } else { // direction == 3 (counterclockwise)
                 // Face R rotation counterclockwise
                 new_state[9] = temp_state[11];   // R[2] -> R[0]
                 new_state[10] = temp_state[14];  // R[5] -> R[1]
@@ -176,7 +176,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[16] = temp_state[12];  // R[3] -> R[7]
                 new_state[17] = temp_state[15];  // R[6] -> R[8]
 
-                // Rotation des colonnes de droite (sens anti-horaire: U<-B, F<-U, D<-F, B<-D)
+                // Right column rotation (counterclockwise: U<-B, F<-U, D<-F, B<-D)
                 new_state[2] = temp_state[51];   // B[6] -> U[2]
                 new_state[5] = temp_state[48];   // B[3] -> U[5]
                 new_state[8] = temp_state[45];   // B[0] -> U[8]
@@ -193,7 +193,6 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
             break;
         }
 
-        // Similaire pour F, D, L, B...
         case 'F': {
             if (direction == 1) {
                 // Face F rotation clockwise
@@ -207,7 +206,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[25] = temp_state[23];  // F[5] -> F[7]
                 new_state[26] = temp_state[20];  // F[2] -> F[8]
 
-                // Rotation des bords frontaux (sens horaire: U<-L, R<-U, D<-R, L<-D)
+                // Front edge rotation (clockwise: U<-L, R<-U, D<-R, L<-D)
                 new_state[6] = temp_state[44];   // L[8] -> U[6]
                 new_state[7] = temp_state[41];   // L[5] -> U[7]
                 new_state[8] = temp_state[38];   // L[2] -> U[8]
@@ -232,7 +231,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[25] = temp_state[19];  // F[1] -> F[7]
                 new_state[26] = temp_state[18];  // F[0] -> F[8]
 
-                // Rotation 180° des bords frontaux (U<-D, R<-L, D<-U, L<-R)
+                // 180° front edge rotation (U<-D, R<-L, D<-U, L<-R)
                 new_state[6] = temp_state[29];   // D[2] -> U[6]
                 new_state[7] = temp_state[28];   // D[1] -> U[7]
                 new_state[8] = temp_state[27];   // D[0] -> U[8]
@@ -245,7 +244,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[38] = temp_state[15];  // R[6] -> L[2]
                 new_state[41] = temp_state[12];  // R[3] -> L[5]
                 new_state[44] = temp_state[9];   // R[0] -> L[8]
-            } else { // direction == 3 (anti-horaire)
+            } else { // direction == 3 (counterclockwise)
                 // Face F rotation counterclockwise
                 new_state[18] = temp_state[20];  // F[2] -> F[0]
                 new_state[19] = temp_state[23];  // F[5] -> F[1]
@@ -257,7 +256,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[25] = temp_state[21];  // F[3] -> F[7]
                 new_state[26] = temp_state[24];  // F[6] -> F[8]
 
-                // Rotation des bords frontaux (sens anti-horaire: U<-R, R<-D, D<-L, L<-U)
+                // Front edge rotation (counterclockwise: U<-R, R<-D, D<-L, L<-U)
                 new_state[6] = temp_state[9];    // R[0] -> U[6]
                 new_state[7] = temp_state[12];   // R[3] -> U[7]
                 new_state[8] = temp_state[15];   // R[6] -> U[8]
@@ -287,7 +286,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[34] = temp_state[32];  // D[5] -> D[7]
                 new_state[35] = temp_state[29];  // D[2] -> D[8]
 
-                // Rotation des rangées du bas (sens horaire: F<-L, R<-F, B<-R, L<-B)
+                // Bottom row rotation (clockwise: F<-L, R<-F, B<-R, L<-B)
                 new_state[24] = temp_state[42];  // L[6] -> F[6]
                 new_state[25] = temp_state[43];  // L[7] -> F[7]
                 new_state[26] = temp_state[44];  // L[8] -> F[8]
@@ -312,7 +311,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[34] = temp_state[28];  // D[1] -> D[7]
                 new_state[35] = temp_state[27];  // D[0] -> D[8]
 
-                // Rotation 180° des rangées du bas (F<-B, R<-L, B<-F, L<-R)
+                // 180° bottom row rotation (F<-B, R<-L, B<-F, L<-R)
                 new_state[24] = temp_state[51];  // B[6] -> F[6]
                 new_state[25] = temp_state[52];  // B[7] -> F[7]
                 new_state[26] = temp_state[53];  // B[8] -> F[8]
@@ -325,7 +324,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[42] = temp_state[15];  // R[6] -> L[6]
                 new_state[43] = temp_state[16];  // R[7] -> L[7]
                 new_state[44] = temp_state[17];  // R[8] -> L[8]
-            } else { // direction == 3 (anti-horaire)
+            } else { // direction == 3 (counterclockwise)
                 // Face D rotation counterclockwise
                 new_state[27] = temp_state[29];  // D[2] -> D[0]
                 new_state[28] = temp_state[32];  // D[5] -> D[1]
@@ -337,7 +336,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[34] = temp_state[30];  // D[3] -> D[7]
                 new_state[35] = temp_state[33];  // D[6] -> D[8]
 
-                // Rotation des rangées du bas (sens anti-horaire: F<-R, R<-B, B<-L, L<-F)
+                // Bottom row rotation (counterclockwise: F<-R, R<-B, B<-L, L<-F)
                 new_state[24] = temp_state[15];  // R[6] -> F[6]
                 new_state[25] = temp_state[16];  // R[7] -> F[7]
                 new_state[26] = temp_state[17];  // R[8] -> F[8]
@@ -367,7 +366,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[43] = temp_state[41];  // L[5] -> L[7]
                 new_state[44] = temp_state[38];  // L[2] -> L[8]
 
-                // Rotation des colonnes de gauche (sens horaire: U<-B, F<-U, D<-F, B<-D)
+                // Left column rotation (clockwise: U<-B, F<-U, D<-F, B<-D)
                 new_state[0] = temp_state[53];   // B[8] -> U[0]
                 new_state[3] = temp_state[50];   // B[5] -> U[3]
                 new_state[6] = temp_state[47];   // B[2] -> U[6]
@@ -392,7 +391,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[43] = temp_state[37];  // L[1] -> L[7]
                 new_state[44] = temp_state[36];  // L[0] -> L[8]
 
-                // Rotation 180° des colonnes de gauche (U<-D, F<-B, D<-U, B<-F)
+                // 180° left column rotation (U<-D, F<-B, D<-U, B<-F)
                 new_state[0] = temp_state[27];   // D[0] -> U[0]
                 new_state[3] = temp_state[30];   // D[3] -> U[3]
                 new_state[6] = temp_state[33];   // D[6] -> U[6]
@@ -405,7 +404,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[47] = temp_state[24];  // F[6] -> B[2]
                 new_state[50] = temp_state[21];  // F[3] -> B[5]
                 new_state[53] = temp_state[18];  // F[0] -> B[8]
-            } else { // direction == 3 (anti-horaire)
+            } else { // direction == 3 (counterclockwise)
                 // Face L rotation counterclockwise
                 new_state[36] = temp_state[38];  // L[2] -> L[0]
                 new_state[37] = temp_state[41];  // L[5] -> L[1]
@@ -417,7 +416,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[43] = temp_state[39];  // L[3] -> L[7]
                 new_state[44] = temp_state[42];  // L[6] -> L[8]
 
-                // Rotation des colonnes de gauche (sens anti-horaire: U<-F, F<-D, D<-B, B<-U)
+                // Left column rotation (counterclockwise: U<-F, F<-D, D<-B, B<-U)
                 new_state[0] = temp_state[18];   // F[0] -> U[0]
                 new_state[3] = temp_state[21];   // F[3] -> U[3]
                 new_state[6] = temp_state[24];   // F[6] -> U[6]
@@ -447,7 +446,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[52] = temp_state[50];  // B[5] -> B[7]
                 new_state[53] = temp_state[47];  // B[2] -> B[8]
 
-                // Rotation des bords arrière (sens horaire: U<-R, R<-D, D<-L, L<-U)
+                // Back edge rotation (clockwise: U<-R, R<-D, D<-L, L<-U)
                 new_state[0] = temp_state[11];   // R[2] -> U[0]
                 new_state[1] = temp_state[14];   // R[5] -> U[1]
                 new_state[2] = temp_state[17];   // R[8] -> U[2]
@@ -472,7 +471,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[52] = temp_state[46];  // B[1] -> B[7]
                 new_state[53] = temp_state[45];  // B[0] -> B[8]
 
-                // Rotation 180° des bords arrière (U<-D, R<-L, D<-U, L<-R)
+                // 180° back edge rotation (U<-D, R<-L, D<-U, L<-R)
                 new_state[0] = temp_state[35];   // D[8] -> U[0]
                 new_state[1] = temp_state[34];   // D[7] -> U[1]
                 new_state[2] = temp_state[33];   // D[6] -> U[2]
@@ -485,7 +484,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[36] = temp_state[17];  // R[8] -> L[0]
                 new_state[39] = temp_state[14];  // R[5] -> L[3]
                 new_state[42] = temp_state[11];  // R[2] -> L[6]
-            } else { // direction == 3 (anti-horaire)
+            } else { // direction == 3 (counterclockwise)
                 // Face B rotation counterclockwise
                 new_state[45] = temp_state[47];  // B[2] -> B[0]
                 new_state[46] = temp_state[50];  // B[5] -> B[1]
@@ -497,7 +496,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[52] = temp_state[48];  // B[3] -> B[7]
                 new_state[53] = temp_state[51];  // B[6] -> B[8]
 
-                // Rotation des bords arrière (sens anti-horaire: U<-L, R<-U, D<-R, L<-D)
+                // Back edge rotation (counterclockwise: U<-L, R<-U, D<-R, L<-D)
                 new_state[0] = temp_state[42];   // L[6] -> U[0]
                 new_state[1] = temp_state[39];   // L[3] -> U[1]
                 new_state[2] = temp_state[36];   // L[0] -> U[2]
@@ -516,7 +515,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'M': {
             if (direction == 1) {
-                // Rotation M clockwise (même direction que L)
+                // M rotation clockwise (same direction as L)
                 new_state[1] = temp_state[52];   // B[7] -> U[1]
                 new_state[4] = temp_state[49];   // B[4] -> U[4]
                 new_state[7] = temp_state[46];   // B[1] -> U[7]
@@ -530,7 +529,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[49] = temp_state[31];  // D[4] -> B[4]
                 new_state[52] = temp_state[28];  // D[1] -> B[7]
             } else if (direction == 2) {
-                // Rotation M 180°
+                // M rotation 180°
                 new_state[1] = temp_state[28];   // D[1] -> U[1]
                 new_state[4] = temp_state[31];   // D[4] -> U[4]
                 new_state[7] = temp_state[34];   // D[7] -> U[7]
@@ -543,8 +542,8 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[46] = temp_state[25];  // F[7] -> B[1]
                 new_state[49] = temp_state[22];  // F[4] -> B[4]
                 new_state[52] = temp_state[19];  // F[1] -> B[7]
-            } else { // direction == 3 (anti-horaire)
-                // Rotation M counterclockwise
+            } else { // direction == 3 (counterclockwise)
+                // M rotation counterclockwise
                 new_state[1] = temp_state[19];   // F[1] -> U[1]
                 new_state[4] = temp_state[22];   // F[4] -> U[4]
                 new_state[7] = temp_state[25];   // F[7] -> U[7]
@@ -563,7 +562,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'S': {
             if (direction == 1) {
-                // Rotation S clockwise (même direction que F)
+                // S rotation clockwise (same direction as F)
                 new_state[3] = temp_state[43];   // L[7] -> U[3]
                 new_state[4] = temp_state[40];   // L[4] -> U[4]
                 new_state[5] = temp_state[37];   // L[1] -> U[5]
@@ -577,7 +576,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[40] = temp_state[31];  // D[4] -> L[4]
                 new_state[43] = temp_state[32];  // D[5] -> L[7]
             } else if (direction == 2) {
-                // Rotation S 180°
+                // S rotation 180°
                 new_state[3] = temp_state[32];   // D[5] -> U[3]
                 new_state[4] = temp_state[31];   // D[4] -> U[4]
                 new_state[5] = temp_state[30];   // D[3] -> U[5]
@@ -590,8 +589,8 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[37] = temp_state[16];  // R[7] -> L[1]
                 new_state[40] = temp_state[13];  // R[4] -> L[4]
                 new_state[43] = temp_state[10];  // R[1] -> L[7]
-            } else { // direction == 3 (anti-horaire)
-                // Rotation S counterclockwise
+            } else { // direction == 3 (counterclockwise)
+                // S rotation counterclockwise
                 new_state[3] = temp_state[10];   // R[1] -> U[3]
                 new_state[4] = temp_state[13];   // R[4] -> U[4]
                 new_state[5] = temp_state[16];   // R[7] -> U[5]
@@ -610,7 +609,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'E': {
             if (direction == 1) {
-                // Rotation E clockwise (même direction que D)
+                // E rotation clockwise (same direction as D)
                 new_state[21] = temp_state[39];  // L[3] -> F[3]
                 new_state[22] = temp_state[40];  // L[4] -> F[4]
                 new_state[23] = temp_state[41];  // L[5] -> F[5]
@@ -624,7 +623,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[40] = temp_state[49];  // B[4] -> L[4]
                 new_state[41] = temp_state[50];  // B[5] -> L[5]
             } else if (direction == 2) {
-                // Rotation E 180°
+                // E rotation 180°
                 new_state[21] = temp_state[48];  // B[3] -> F[3]
                 new_state[22] = temp_state[49];  // B[4] -> F[4]
                 new_state[23] = temp_state[50];  // B[5] -> F[5]
@@ -637,8 +636,8 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[39] = temp_state[12];  // R[3] -> L[3]
                 new_state[40] = temp_state[13];  // R[4] -> L[4]
                 new_state[41] = temp_state[14];  // R[5] -> L[5]
-            } else { // direction == 3 (anti-horaire)
-                // Rotation E counterclockwise
+            } else { // direction == 3 (counterclockwise)
+                // E rotation counterclockwise
                 new_state[21] = temp_state[12];  // R[3] -> F[3]
                 new_state[22] = temp_state[13];  // R[4] -> F[4]
                 new_state[23] = temp_state[14];  // R[5] -> F[5]
@@ -1284,9 +1283,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'u': {
             if (direction == 1) {
-                // u mouvement - permutations directes du fichier de test (wide move)
+                // u move - direct permutations from test file (wide move)
 
-                // Face U tourne dans le sens horaire
+                // Face U turns clockwise
                 new_state[0] = temp_state[6];    // U[0] = temp[6]
                 new_state[1] = temp_state[3];    // U[1] = temp[3]
                 new_state[2] = temp_state[0];    // U[2] = temp[0]
@@ -1296,7 +1295,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[7] = temp_state[5];    // U[7] = temp[5]
                 new_state[8] = temp_state[2];    // U[8] = temp[2]
 
-                // Permutations pour u wide (includes middle slice)
+                // Permutations for u wide (includes middle slice)
                 new_state[9] = temp_state[45];   // R[0] = B[0]
                 new_state[10] = temp_state[46];  // R[1] = B[1]
                 new_state[11] = temp_state[47];  // R[2] = B[2]
@@ -1323,9 +1322,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[50] = temp_state[41];  // B[5] = L[5]
 
             } else if (direction == 2) {
-                // u2 mouvement - permutations directes du fichier de test (wide move)
+                // u2 move - direct permutations from test file (wide move)
 
-                // Face U tourne 180°
+                // Face U turns 180°
                 new_state[0] = temp_state[8];    // U[0] = temp[8]
                 new_state[1] = temp_state[7];    // U[1] = temp[7]
                 new_state[2] = temp_state[6];    // U[2] = temp[6]
@@ -1335,7 +1334,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[7] = temp_state[1];    // U[7] = temp[1]
                 new_state[8] = temp_state[0];    // U[8] = temp[0]
 
-                // Permutations pour u2 wide (includes middle slice)
+                // Permutations for u2 wide (includes middle slice)
                 new_state[9] = temp_state[36];   // R[0] = L[0]
                 new_state[10] = temp_state[37];  // R[1] = L[1]
                 new_state[11] = temp_state[38];  // R[2] = L[2]
@@ -1362,9 +1361,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[50] = temp_state[23];  // B[5] = F[5]
 
             } else {
-                // u' mouvement - permutations directes du fichier de test (wide move)
+                // u' move - direct permutations from test file (wide move)
 
-                // Face U tourne dans le sens antihoraire
+                // Face U turns counterclockwise
                 new_state[0] = temp_state[2];    // U[0] = temp[2]
                 new_state[1] = temp_state[5];    // U[1] = temp[5]
                 new_state[2] = temp_state[8];    // U[2] = temp[8]
@@ -1374,7 +1373,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[7] = temp_state[3];    // U[7] = temp[3]
                 new_state[8] = temp_state[6];    // U[8] = temp[6]
 
-                // Permutations pour u' wide (includes middle slice)
+                // Permutations for u' wide (includes middle slice)
                 new_state[9] = temp_state[18];   // R[0] = F[0]
                 new_state[10] = temp_state[19];  // R[1] = F[1]
                 new_state[11] = temp_state[20];  // R[2] = F[2]
@@ -1405,9 +1404,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'r': {
             if (direction == 1) {
-                // r mouvement - permutations directes du fichier de test (wide move)
+                // r move - direct permutations from test file (wide move)
 
-                // Face R tourne dans le sens horaire
+                // Face R turns clockwise
                 new_state[9] = temp_state[15];   // R[0] = temp[15]
                 new_state[10] = temp_state[12];  // R[1] = temp[12]
                 new_state[11] = temp_state[9];   // R[2] = temp[9]
@@ -1417,7 +1416,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[16] = temp_state[14];  // R[7] = temp[14]
                 new_state[17] = temp_state[11];  // R[8] = temp[11]
 
-                // Permutations pour r wide (includes middle slice)
+                // Permutations for r wide (includes middle slice)
                 new_state[1] = temp_state[19];   // U[1] = F[1]
                 new_state[2] = temp_state[20];   // U[2] = F[2]
                 new_state[4] = temp_state[22];   // U[4] = F[4]
@@ -1444,9 +1443,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[52] = temp_state[1];   // B[7] = U[1]
 
             } else if (direction == 2) {
-                // r2 mouvement - permutations directes du fichier de test (wide move)
+                // r2 move - direct permutations from test file (wide move)
 
-                // Face R tourne 180°
+                // Face R turns 180°
                 new_state[9] = temp_state[17];   // R[0] = temp[17]
                 new_state[10] = temp_state[16];  // R[1] = temp[16]
                 new_state[11] = temp_state[15];  // R[2] = temp[15]
@@ -1456,7 +1455,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[16] = temp_state[10];  // R[7] = temp[10]
                 new_state[17] = temp_state[9];   // R[8] = temp[9]
 
-                // Permutations pour r2 wide (includes middle slice)
+                // Permutations for r2 wide (includes middle slice)
                 new_state[1] = temp_state[28];   // U[1] = D[1]
                 new_state[2] = temp_state[29];   // U[2] = D[2]
                 new_state[4] = temp_state[31];   // U[4] = D[4]
@@ -1483,9 +1482,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[52] = temp_state[19];  // B[7] = F[1]
 
             } else {
-                // r' mouvement - permutations directes du fichier de test (wide move)
+                // r' move - direct permutations from test file (wide move)
 
-                // Face R tourne dans le sens antihoraire
+                // Face R turns counterclockwise
                 new_state[9] = temp_state[11];   // R[0] = temp[11]
                 new_state[10] = temp_state[14];  // R[1] = temp[14]
                 new_state[11] = temp_state[17];  // R[2] = temp[17]
@@ -1495,7 +1494,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[16] = temp_state[12];  // R[7] = temp[12]
                 new_state[17] = temp_state[15];  // R[8] = temp[15]
 
-                // Permutations pour r' wide (includes middle slice)
+                // Permutations for r' wide (includes middle slice)
                 new_state[1] = temp_state[52];   // U[1] = B[7]
                 new_state[2] = temp_state[51];   // U[2] = B[6]
                 new_state[4] = temp_state[49];   // U[4] = B[4]
@@ -1526,9 +1525,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'f': {
             if (direction == 1) {
-                // f mouvement - permutations directes du fichier de test (wide move)
+                // f move - direct permutations from test file (wide move)
 
-                // Face F tourne dans le sens horaire
+                // Face F turns clockwise
                 new_state[18] = temp_state[24];  // F[0] = temp[24]
                 new_state[19] = temp_state[21];  // F[1] = temp[21]
                 new_state[20] = temp_state[18];  // F[2] = temp[18]
@@ -1538,7 +1537,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[25] = temp_state[23];  // F[7] = temp[23]
                 new_state[26] = temp_state[20];  // F[8] = temp[20]
 
-                // Permutations pour f wide (includes middle slice)
+                // Permutations for f wide (includes middle slice)
                 new_state[3] = temp_state[43];   // U[3] = L[7]
                 new_state[4] = temp_state[40];   // U[4] = L[4]
                 new_state[5] = temp_state[37];   // U[5] = L[1]
@@ -1565,9 +1564,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[44] = temp_state[29];  // L[8] = D[2]
 
             } else if (direction == 2) {
-                // f2 mouvement - permutations directes du fichier de test (wide move)
+                // f2 move - direct permutations from test file (wide move)
 
-                // Face F tourne 180°
+                // Face F turns 180°
                 new_state[18] = temp_state[26];  // F[0] = temp[26]
                 new_state[19] = temp_state[25];  // F[1] = temp[25]
                 new_state[20] = temp_state[24];  // F[2] = temp[24]
@@ -1577,7 +1576,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[25] = temp_state[19];  // F[7] = temp[19]
                 new_state[26] = temp_state[18];  // F[8] = temp[18]
 
-                // Permutations pour f2 wide (includes middle slice)
+                // Permutations for f2 wide (includes middle slice)
                 new_state[3] = temp_state[32];   // U[3] = D[5]
                 new_state[4] = temp_state[31];   // U[4] = D[4]
                 new_state[5] = temp_state[30];   // U[5] = D[3]
@@ -1604,9 +1603,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[44] = temp_state[9];   // L[8] = R[0]
 
             } else {
-                // f' mouvement - permutations directes du fichier de test (wide move)
+                // f' move - direct permutations from test file (wide move)
 
-                // Face F tourne dans le sens antihoraire
+                // Face F turns counterclockwise
                 new_state[18] = temp_state[20];  // F[0] = temp[20]
                 new_state[19] = temp_state[23];  // F[1] = temp[23]
                 new_state[20] = temp_state[26];  // F[2] = temp[26]
@@ -1616,7 +1615,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[25] = temp_state[21];  // F[7] = temp[21]
                 new_state[26] = temp_state[24];  // F[8] = temp[24]
 
-                // Permutations pour f' wide (includes middle slice)
+                // Permutations for f' wide (includes middle slice)
                 new_state[3] = temp_state[10];   // U[3] = R[1]
                 new_state[4] = temp_state[13];   // U[4] = R[4]
                 new_state[5] = temp_state[16];   // U[5] = R[7]
@@ -1647,9 +1646,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'd': {
             if (direction == 1) {
-                // d mouvement - permutations directes du fichier de test (wide move)
+                // d move - direct permutations from test file (wide move)
 
-                // Face D tourne dans le sens horaire
+                // Face D turns clockwise
                 new_state[27] = temp_state[33];  // D[0] = temp[33]
                 new_state[28] = temp_state[30];  // D[1] = temp[30]
                 new_state[29] = temp_state[27];  // D[2] = temp[27]
@@ -1659,7 +1658,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[34] = temp_state[32];  // D[7] = temp[32]
                 new_state[35] = temp_state[29];  // D[8] = temp[29]
 
-                // Permutations pour d wide (includes middle slice)
+                // Permutations for d wide (includes middle slice)
                 new_state[12] = temp_state[21];  // R[3] = F[3]
                 new_state[13] = temp_state[22];  // R[4] = F[4]
                 new_state[14] = temp_state[23];  // R[5] = F[5]
@@ -1686,9 +1685,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[53] = temp_state[17];  // B[8] = R[8]
 
             } else if (direction == 2) {
-                // d2 mouvement - permutations directes du fichier de test (wide move)
+                // d2 move - direct permutations from test file (wide move)
 
-                // Face D tourne 180°
+                // Face D turns 180°
                 new_state[27] = temp_state[35];  // D[0] = temp[35]
                 new_state[28] = temp_state[34];  // D[1] = temp[34]
                 new_state[29] = temp_state[33];  // D[2] = temp[33]
@@ -1698,7 +1697,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[34] = temp_state[28];  // D[7] = temp[28]
                 new_state[35] = temp_state[27];  // D[8] = temp[27]
 
-                // Permutations pour d2 wide (includes middle slice)
+                // Permutations for d2 wide (includes middle slice)
                 new_state[12] = temp_state[39];  // R[3] = L[3]
                 new_state[13] = temp_state[40];  // R[4] = L[4]
                 new_state[14] = temp_state[41];  // R[5] = L[5]
@@ -1725,9 +1724,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[53] = temp_state[26];  // B[8] = F[8]
 
             } else {
-                // d' mouvement - permutations directes du fichier de test (wide move)
+                // d' move - direct permutations from test file (wide move)
 
-                // Face D tourne dans le sens antihoraire
+                // Face D turns counterclockwise
                 new_state[27] = temp_state[29];  // D[0] = temp[29]
                 new_state[28] = temp_state[32];  // D[1] = temp[32]
                 new_state[29] = temp_state[35];  // D[2] = temp[35]
@@ -1737,7 +1736,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[34] = temp_state[30];  // D[7] = temp[30]
                 new_state[35] = temp_state[33];  // D[8] = temp[33]
 
-                // Permutations pour d' wide (includes middle slice)
+                // Permutations for d' wide (includes middle slice)
                 new_state[12] = temp_state[48];  // R[3] = B[3]
                 new_state[13] = temp_state[49];  // R[4] = B[4]
                 new_state[14] = temp_state[50];  // R[5] = B[5]
@@ -1768,9 +1767,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         case 'l': {
             if (direction == 1) {
-                // l mouvement - permutations directes du fichier de test (wide move)
+                // l move - direct permutations from test file (wide move)
 
-                // Face L tourne dans le sens horaire
+                // Face L turns clockwise
                 new_state[36] = temp_state[42];  // L[0] = temp[42]
                 new_state[37] = temp_state[39];  // L[1] = temp[39]
                 new_state[38] = temp_state[36];  // L[2] = temp[36]
@@ -1780,7 +1779,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[43] = temp_state[41];  // L[7] = temp[41]
                 new_state[44] = temp_state[38];  // L[8] = temp[38]
 
-                // Permutations pour l wide (includes middle slice)
+                // Permutations for l wide (includes middle slice)
                 new_state[0] = temp_state[53];   // U[0] = B[8]
                 new_state[1] = temp_state[52];   // U[1] = B[7]
                 new_state[3] = temp_state[50];   // U[3] = B[5]
@@ -1807,9 +1806,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[53] = temp_state[27];  // B[8] = D[0]
 
             } else if (direction == 2) {
-                // l2 mouvement - permutations directes du fichier de test (wide move)
+                // l2 move - direct permutations from test file (wide move)
 
-                // Face L tourne 180°
+                // Face L turns 180°
                 new_state[36] = temp_state[44];  // L[0] = temp[44]
                 new_state[37] = temp_state[43];  // L[1] = temp[43]
                 new_state[38] = temp_state[42];  // L[2] = temp[42]
@@ -1819,7 +1818,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[43] = temp_state[37];  // L[7] = temp[37]
                 new_state[44] = temp_state[36];  // L[8] = temp[36]
 
-                // Permutations pour l2 wide (includes middle slice)
+                // Permutations for l2 wide (includes middle slice)
                 new_state[0] = temp_state[27];   // U[0] = D[0]
                 new_state[1] = temp_state[28];   // U[1] = D[1]
                 new_state[3] = temp_state[30];   // U[3] = D[3]
@@ -1846,9 +1845,9 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[53] = temp_state[18];  // B[8] = F[0]
 
             } else {
-                // l' mouvement - permutations directes du fichier de test (wide move)
+                // l' move - direct permutations from test file (wide move)
 
-                // Face L tourne dans le sens antihoraire
+                // Face L turns counterclockwise
                 new_state[36] = temp_state[38];  // L[0] = temp[38]
                 new_state[37] = temp_state[41];  // L[1] = temp[41]
                 new_state[38] = temp_state[44];  // L[2] = temp[44]
@@ -1858,7 +1857,7 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
                 new_state[43] = temp_state[39];  // L[7] = temp[39]
                 new_state[44] = temp_state[42];  // L[8] = temp[42]
 
-                // Permutations pour l' wide (includes middle slice)
+                // Permutations for l' wide (includes middle slice)
                 new_state[0] = temp_state[18];   // U[0] = F[0]
                 new_state[1] = temp_state[19];   // U[1] = F[1]
                 new_state[3] = temp_state[21];   // U[3] = F[3]
@@ -2002,13 +2001,13 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
     return PyUnicode_FromString(new_state);
 }
 
-// Définition des méthodes du module
+// Module method definitions
 static PyMethodDef RotateMethods[] = {
     {"rotate_move", rotate_move, METH_VARARGS, "Rotate cube state with given move"},
     {NULL, NULL, 0, NULL}
 };
 
-// Définition du module
+// Module definition
 static struct PyModuleDef rotatemodule = {
     PyModuleDef_HEAD_INIT,
     "rotate",
@@ -2017,7 +2016,7 @@ static struct PyModuleDef rotatemodule = {
     RotateMethods
 };
 
-// Fonction d'initialisation du module
+// Module initialization function
 PyMODINIT_FUNC PyInit_rotate(void) {
     return PyModule_Create(&rotatemodule);
 }
