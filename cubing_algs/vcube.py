@@ -14,7 +14,7 @@ from cubing_algs.integrity import VCubeIntegrityChecker
 class VCube(VCubeIntegrityChecker):
     """
     Virtual 3x3 cube for tracking moves on facelets.
-    
+
     Represents a Rubik's cube state using a 54-character string
     where each character represents a facelet color.
     """
