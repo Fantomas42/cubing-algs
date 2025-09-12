@@ -1,6 +1,8 @@
 import unittest
 
 from cubing_algs.constants import INITIAL_STATE
+from cubing_algs.masks import _CACHE_SIZE_LIMIT
+from cubing_algs.masks import _MASK_CACHE
 from cubing_algs.masks import FULL_MASK
 from cubing_algs.masks import facelets_masked
 from cubing_algs.masks import intersection_masks
@@ -126,3 +128,79 @@ class TestBinaryMasks(unittest.TestCase):
             result,
             '-UU-UUFFF---RRRRRRUUUFF-FF-RR-------FFR---------U--U--',
         )
+
+    def test_facelets_masked_cache_hit(self):
+        """Test cache hit path in optimized facelets_masked."""
+        _MASK_CACHE.clear()
+
+        facelets = 'ABCD'
+        mask = '1010'
+
+        # First call - cache miss
+        result1 = facelets_masked(facelets, mask)
+        self.assertEqual(result1, 'A-C-')
+        self.assertIn(mask, _MASK_CACHE)
+
+        # Second call - cache hit (covers lines 74-75)
+        result2 = facelets_masked(facelets, mask)
+        self.assertEqual(result2, 'A-C-')
+        self.assertEqual(result1, result2)
+
+    def test_facelets_masked_cache_eviction(self):
+        """Test cache eviction when size limit is reached."""
+        _MASK_CACHE.clear()
+
+        # Directly manipulate cache to test eviction by filling it beyond limit
+        # This allows us to test the eviction logic paths (lines 86-88)
+
+        # Fill cache manually to exactly the limit
+        for i in range(_CACHE_SIZE_LIMIT):
+            # Create unique keys and dummy values
+            key_prefix = f'test_mask_{i:04d}'
+            mask_key = key_prefix + '0' * (54 - len(key_prefix))
+            _MASK_CACHE[mask_key] = tuple(bool(j % 2) for j in range(54))
+
+        # Verify cache is at limit
+        self.assertEqual(len(_MASK_CACHE), _CACHE_SIZE_LIMIT)
+
+        # Now call facelets_masked with a new unique mask to trigger eviction
+        test_facelets = INITIAL_STATE
+        trigger_mask = '1' + '0' * 53  # Unique mask not in cache
+
+        result = facelets_masked(test_facelets, trigger_mask)
+
+        # Verify eviction occurred - cache should be reduced and new mask added
+        expected_size = _CACHE_SIZE_LIMIT // 2 + 1
+        self.assertEqual(len(_MASK_CACHE), expected_size)
+
+        # The triggering mask should be in the cache
+        self.assertIn(trigger_mask, _MASK_CACHE)
+
+        # Verify the result is correct
+        expected_result = 'U' + '-' * 53
+        self.assertEqual(result, expected_result)
+
+    def test_facelets_masked_cache_behavior_with_repeated_patterns(self):
+        """Test cache behavior with realistic repeated mask usage."""
+        _MASK_CACHE.clear()
+
+        # Test with cube-sized strings and common patterns
+        facelets = INITIAL_STATE
+        common_masks = [FULL_MASK, '0' * 54, '1' * 27 + '0' * 27]
+
+        # First round - populate cache
+        results1 = []
+        for mask in common_masks:
+            results1.append(facelets_masked(facelets, mask))
+
+        # Verify all masks are cached
+        for mask in common_masks:
+            self.assertIn(mask, _MASK_CACHE)
+
+        # Second round - should hit cache
+        results2 = []
+        for mask in common_masks:
+            results2.append(facelets_masked(facelets, mask))
+
+        # Results should be identical
+        self.assertEqual(results1, results2)
