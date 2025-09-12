@@ -25,12 +25,18 @@ class Algorithm(UserList[Move]):
 
     @staticmethod
     def parse_moves(items: str | list[str]) -> 'Algorithm':
+        """
+        Parse a string or list of strings into an Algorithm object.
+        """
         from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
         return parse_moves(items, secure=False)
 
     @staticmethod
     def parse_move(item: str) -> Move:
+        """
+        Parse a single move string into a Move object.
+        """
         move = Move(item)
         if not move.is_valid:
             msg = f'{ item } is an invalid move'
@@ -39,27 +45,45 @@ class Algorithm(UserList[Move]):
         return move
 
     def append(self, item) -> None:
+        """
+        Add a move to the end of the algorithm.
+        """
         self.data.append(self.parse_move(item))
 
     def insert(self, i, item) -> None:
+        """
+        Insert a move at a specific position in the algorithm.
+        """
         self.data.insert(i, self.parse_move(item))
 
     def extend(self, other) -> None:
+        """
+        Extend the algorithm with moves from another sequence.
+        """
         if isinstance(other, Algorithm):
             self.data.extend(other)
         else:
             self.data.extend(self.parse_moves(other))
 
     def __iadd__(self, other) -> 'Algorithm':
+        """
+        In-place addition operator (+=) for algorithms.
+        """
         self.extend(other)
         return self
 
     def __radd__(self, other) -> 'Algorithm':
+        """
+        Right addition operator for algorithms.
+        """
         result = self.parse_moves(other)
         result += self
         return result
 
     def __add__(self, other) -> 'Algorithm':
+        """
+        Addition operator (+) for algorithms.
+        """
         if isinstance(other, Algorithm):
             result = self.copy()
             result.extend(other)
@@ -70,6 +94,9 @@ class Algorithm(UserList[Move]):
         return result
 
     def __setitem__(self, i, item) -> None:
+        """
+        Set a move at a specific index in the algorithm.
+        """
         if isinstance(item, Move):
             self.data[i] = item
         else:

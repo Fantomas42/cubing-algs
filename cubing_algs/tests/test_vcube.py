@@ -6,6 +6,7 @@ from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.fat import unfat_rotation_moves
@@ -106,6 +107,25 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(cube.state, facelets)
 
         cube = VCube()
+        cube.rotate('F R')
+
+        self.assertEqual(cube.state, facelets)
+
+    def test_from_cubies_scheme(self):
+        cp = [0, 5, 2, 1, 7, 4, 6, 3]
+        co = [1, 2, 0, 2, 1, 1, 0, 2]
+        ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
+        eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        so = [0, 1, 2, 3, 4, 5]
+        facelets = '111111011111011011011010010010001001110110000111111100'
+
+        cube = VCube.from_cubies(
+            cp, co, ep, eo, so,
+            F2L_MASK,
+        )
+        self.assertEqual(cube.state, facelets)
+
+        cube = VCube(F2L_MASK, check=False)
         cube.rotate('F R')
 
         self.assertEqual(cube.state, facelets)

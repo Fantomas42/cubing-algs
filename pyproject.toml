@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 [project.urls]
-repository = "https://github.com/Fantomas/cubing-algs"
+repository = "https://github.com/Fantomas42/cubing-algs"
 
 [project.optional-dependencies]
 dev = [

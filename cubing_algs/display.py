@@ -6,6 +6,8 @@ from cubing_algs.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.facelets import cubies_to_facelets
+from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import OLL_MASK
@@ -58,13 +60,10 @@ class VCubeDisplay:
         if not mask:
             return '1' * (self.face_number * self.face_size)
 
-        moves = ' '.join(cube.history)
-        new_cube = cube.__class__(mask, check=False)
-
-        if moves:
-            new_cube.rotate(moves)
-
-        return new_cube.state
+        return cubies_to_facelets(
+            *facelets_to_cubies(cube.state),
+            mask,
+        )
 
     def compute_f2l_front_face(self) -> str:
         impacted_faces = ''
