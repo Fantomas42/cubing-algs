@@ -1,7 +1,15 @@
 import unittest
 
+from cubing_algs.constants import INITIAL_STATE
+from cubing_algs.facelets import _CORNER_LOOKUP
+from cubing_algs.facelets import _EDGE_LOOKUP
+from cubing_algs.facelets import _cache
+from cubing_algs.facelets import clear_cache
 from cubing_algs.facelets import cubies_to_facelets
+from cubing_algs.facelets import disable_cache
+from cubing_algs.facelets import enable_cache
 from cubing_algs.facelets import facelets_to_cubies
+from cubing_algs.facelets import get_cache_info
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.vcube import VCube
 
@@ -357,3 +365,320 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         expected = verification_cube.state
 
         self.assertEqual(result, expected)
+
+
+class TestFaceletsOptimizationCoverage(unittest.TestCase):
+    """
+    Test cases to achieve complete coverage
+    of the optimized facelets module.
+    """
+
+    @staticmethod
+    def setUp():
+        clear_cache()
+        enable_cache()
+
+    @staticmethod
+    def tearDown():
+        clear_cache()
+        enable_cache()
+
+    def test_cache_management_functions(self):
+        """Test all cache management utility functions."""
+        # Test initial state
+        info = get_cache_info()
+        self.assertEqual(info['facelets_cached'], 0)
+        self.assertEqual(info['cubies_cached'], 0)
+        self.assertEqual(info['max_size'], 512)
+        self.assertTrue(info['enabled'])
+
+        # Add some items to cache
+        facelets_to_cubies(INITIAL_STATE)
+        cubies_to_facelets(
+            [0, 1, 2, 3, 4, 5, 6, 7],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5],
+        )
+
+        info = get_cache_info()
+        self.assertGreater(info['facelets_cached'], 0)
+        self.assertGreater(info['cubies_cached'], 0)
+
+        # Test cache clearing
+        clear_cache()
+        info = get_cache_info()
+        self.assertEqual(info['facelets_cached'], 0)
+        self.assertEqual(info['cubies_cached'], 0)
+
+        # Test cache disable/enable
+        disable_cache()
+        info = get_cache_info()
+        self.assertFalse(info['enabled'])
+
+        # Operations should not be cached when disabled
+        facelets_to_cubies(INITIAL_STATE)
+        info = get_cache_info()
+        self.assertEqual(info['facelets_cached'], 0)
+
+        enable_cache()
+        info = get_cache_info()
+        self.assertTrue(info['enabled'])
+
+    def test_cache_eviction_facelets(self):
+        """
+        Test cache eviction when max size is reached for facelets cache.
+        """
+        # Set a small cache size
+        original_max_size = _cache.max_size
+        _cache.max_size = 2
+
+        try:
+            # Fill cache beyond max size using valid states
+            cube = VCube()
+
+            states = [INITIAL_STATE]
+
+            # Generate valid states
+            moves = ['R', 'U', 'F']
+            for move in moves:
+                cube.rotate(move)
+                states.append(cube.state)
+
+            for state in states:
+                facelets_to_cubies(state)
+
+            # Check that cache size is limited
+            info = get_cache_info()
+            self.assertLessEqual(info['facelets_cached'], 2)
+
+        finally:
+            _cache.max_size = original_max_size
+
+    def test_cache_eviction_cubies(self):
+        """Test cache eviction when max size is reached for cubies cache."""
+        # Set a small cache size
+        original_max_size = _cache.max_size
+        _cache.max_size = 2
+
+        try:
+            # Fill cache beyond max size
+            cubies_states = [
+                (
+                    [0, 1, 2, 3, 4, 5, 6, 7],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 2, 3, 4, 5],
+                ),
+                (
+                    [0, 1, 2, 3, 4, 5, 6, 7],
+                    [1, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 2, 3, 4, 5],
+                ),
+                (
+                    [0, 1, 2, 3, 4, 5, 6, 7],
+                    [2, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 2, 3, 4, 5],
+                ),
+            ]
+
+            for cubies_state in cubies_states:
+                cubies_to_facelets(*cubies_state)
+
+            # Check that cache size is limited
+            info = get_cache_info()
+            self.assertLessEqual(info['cubies_cached'], 2)
+
+        finally:
+            _cache.max_size = original_max_size
+
+    def test_corner_fallback_logic(self):
+        """Test fallback logic for invalid corner states."""
+        # Save original lookup
+        original_lookup = _CORNER_LOOKUP.copy()
+
+        try:
+            # Clear the lookup to force fallback
+            _CORNER_LOOKUP.clear()
+
+            # Now all corner lookups will fail and use fallback
+            result = facelets_to_cubies(INITIAL_STATE)
+
+            # Should still work with fallback logic
+            self.assertEqual(len(result), 5)
+            self.assertEqual(len(result[0]), 8)  # cp
+            self.assertEqual(len(result[1]), 8)  # co
+
+        finally:
+            # Restore original lookup
+            _CORNER_LOOKUP.clear()
+            _CORNER_LOOKUP.update(original_lookup)
+
+    def test_edge_fallback_logic(self):
+        """Test fallback logic for invalid edge states."""
+        # Save original lookup
+        original_lookup = _EDGE_LOOKUP.copy()
+
+        try:
+            # Clear the lookup to force fallback
+            _EDGE_LOOKUP.clear()
+
+            # Now all edge lookups will fail and use fallback
+            result = facelets_to_cubies(INITIAL_STATE)
+
+            # Should still work with fallback logic
+            self.assertEqual(len(result), 5)
+            self.assertEqual(len(result[2]), 12)  # ep
+            self.assertEqual(len(result[3]), 12)  # eo
+
+        finally:
+            # Restore original lookup
+            _EDGE_LOOKUP.clear()
+            _EDGE_LOOKUP.update(original_lookup)
+
+    def test_edge_fallback_flipped_orientation(self):
+        """Test fallback logic for flipped edge orientation case."""
+        # Create a cube with a flipped edge
+        cube = VCube()
+        cube.rotate('F')  # This creates a flipped edge
+
+        # Save original lookup
+        original_lookup = _EDGE_LOOKUP.copy()
+
+        try:
+            # Clear the lookup to force fallback
+            _EDGE_LOOKUP.clear()
+
+            # This should use fallback and hit the flipped edge case
+            result = facelets_to_cubies(cube.state)
+
+            # Should still work with fallback logic
+            self.assertEqual(len(result), 5)
+            self.assertEqual(len(result[2]), 12)  # ep
+            self.assertEqual(len(result[3]), 12)  # eo
+
+            # Check that at least one edge has orientation 1 (flipped)
+            self.assertTrue(any(eo == 1 for eo in result[3]))
+
+        finally:
+            # Restore original lookup
+            _EDGE_LOOKUP.clear()
+            _EDGE_LOOKUP.update(original_lookup)
+
+    def test_cache_hit_paths(self):
+        """Test cache hit paths explicitly."""
+        # Clear cache first
+        clear_cache()
+
+        info = get_cache_info()
+        self.assertEqual(info['cubies_cached'], 0)
+        self.assertEqual(info['facelets_cached'], 0)
+
+        # First call - cache miss
+        result1 = facelets_to_cubies(INITIAL_STATE)
+        info = get_cache_info()
+        self.assertEqual(info['facelets_cached'], 1)
+
+        # Second call - cache hit
+        result2 = facelets_to_cubies(INITIAL_STATE)
+        self.assertEqual(result1, result2)
+
+        info = get_cache_info()
+        self.assertEqual(info['facelets_cached'], 1)
+
+        # Test cubies_to_facelets cache hit
+        cubies_args = (
+            [0, 1, 2, 3, 4, 5, 6, 7],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5],
+        )
+
+        # First call - cache miss
+        result1 = cubies_to_facelets(*cubies_args)
+        info = get_cache_info()
+        self.assertEqual(info['cubies_cached'], 1)
+
+        # Second call - cache hit
+        result2 = cubies_to_facelets(*cubies_args)
+        self.assertEqual(result1, result2)
+
+        info = get_cache_info()
+        self.assertEqual(info['cubies_cached'], 1)
+
+    def test_cubies_to_facelets_with_scheme(self):
+        """Test cubies_to_facelets with custom scheme parameter."""
+        cubies_args = (
+            [0, 1, 2, 3, 4, 5, 6, 7],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5],
+        )
+
+        # Test with None scheme (default path)
+        result1 = cubies_to_facelets(*cubies_args, scheme=None)
+
+        # Test with custom scheme
+        custom_scheme = 'W' * 54  # All white
+        result2 = cubies_to_facelets(*cubies_args, scheme=custom_scheme)
+
+        # Results should be different
+        self.assertNotEqual(result1, result2)
+
+    def test_cache_disabled_paths(self):
+        """
+        Test that cache operations work correctly when caching is disabled.
+        """
+        disable_cache()
+
+        # Operations should not use cache
+        result1 = facelets_to_cubies(INITIAL_STATE)
+        result2 = facelets_to_cubies(INITIAL_STATE)
+
+        # Results should be identical but cache should remain empty
+        self.assertEqual(result1, result2)
+        info = get_cache_info()
+        self.assertEqual(info['facelets_cached'], 0)
+        self.assertFalse(info['enabled'])
+
+        # Test cubies_to_facelets
+        cubies_args = (
+            [0, 1, 2, 3, 4, 5, 6, 7],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 2, 3, 4, 5],
+        )
+
+        result1 = cubies_to_facelets(*cubies_args)
+        result2 = cubies_to_facelets(*cubies_args)
+
+        self.assertEqual(result1, result2)
+        info = get_cache_info()
+        self.assertEqual(info['cubies_cached'], 0)
+
+    def test_corner_orientation_modulo(self):
+        """Test corner orientation modulo operation in fallback logic."""
+        # Create a state that will trigger the fallback logic
+        # and test the ori % 3 operation
+        invalid_state = list(INITIAL_STATE)
+
+        # Create an invalid corner configuration
+        invalid_state[8] = 'U'
+        invalid_state[9] = 'U'  # Same color, will trigger fallback
+        invalid_state[20] = 'F'
+
+        invalid_state_str = ''.join(invalid_state)
+
+        result = facelets_to_cubies(invalid_state_str)
+        # The result should have valid corner orientations (0, 1, or 2)
+        for co in result[1]:  # Corner orientations
+            self.assertIn(co, [0, 1, 2])
