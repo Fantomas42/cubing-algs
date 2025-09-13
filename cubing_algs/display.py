@@ -12,37 +12,10 @@ from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
+from cubing_algs.palettes import load_palette
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
-
-DEFAULT_COLORS = [
-    'white', 'red', 'green',
-    'yellow', 'orange', 'blue',
-]
-
-TERM_COLORS = {
-    'reset': '\x1b[0;0m',
-    'masked': '\x1b[48;5;236m\x1b[38;5;252m',
-
-    'green': '\x1b[48;5;40m\x1b[38;5;232m',
-    'blue': '\x1b[48;5;21m\x1b[38;5;230m',
-    'red': '\x1b[48;5;196m\x1b[38;5;232m',
-    'orange': '\x1b[48;5;208m\x1b[38;5;232m',
-    'yellow': '\x1b[48;5;226m\x1b[38;5;232m',
-    'white': '\x1b[48;5;254m\x1b[38;5;232m',
-
-    'green_hidden': '\x1b[48;5;238m\x1b[38;5;40m',
-    'blue_hidden': '\x1b[48;5;238m\x1b[38;5;39m',
-    'red_hidden': '\x1b[48;5;238m\x1b[38;5;196m',
-    'orange_hidden': '\x1b[48;5;238m\x1b[38;5;208m',
-    'yellow_hidden': '\x1b[48;5;238m\x1b[38;5;226m',
-    'white_hidden': '\x1b[48;5;238m\x1b[38;5;254m',
-}
-
-FACE_COLORS = dict(
-    zip(FACE_ORDER, DEFAULT_COLORS, strict=True),
-)
 
 USE_COLORS = os.environ.get('TERM') == 'xterm-256color'
 
@@ -50,11 +23,13 @@ USE_COLORS = os.environ.get('TERM') == 'xterm-256color'
 class VCubeDisplay:
     facelet_size = 3
 
-    def __init__(self, cube: 'VCube'):
+    def __init__(self, cube: 'VCube', palette_name: str = ''):
         self.cube = cube
         self.cube_size = cube.size
         self.face_size = self.cube_size * self.cube_size
         self.face_number = cube.face_number
+
+        self.palette = load_palette(palette_name)
 
     def compute_mask(self, cube: 'VCube', mask: str) -> str:
         if not mask:
@@ -137,20 +112,20 @@ class VCubeDisplay:
 
         return display_method(faces, masked_faces)
 
-    @staticmethod
-    def display_facelet(facelet: str, mask: str = '') -> str:
-        if facelet not in FACE_COLORS:
-            face_color = 'masked'
+    def display_facelet(self, facelet: str, mask: str = '') -> str:
+        if facelet not in FACE_ORDER:
+            face_color = self.palette['masked']
         else:
-            face_color = FACE_COLORS[facelet]
+            face_key = facelet
             if mask == '0':
-                face_color += '_hidden'
+                face_key += '_hidden'
+            face_color = self.palette[face_key]
 
         if USE_COLORS:
             return (
-                f'{ TERM_COLORS[face_color] }'
+                f'{ face_color }'
                 f' { facelet } '
-                f'{ TERM_COLORS["reset"] }'
+                f'{ self.palette["reset"] }'
             )
         return f' { facelet } '
 
@@ -230,7 +205,7 @@ class VCubeDisplay:
         return result
 
     def display_top_face(self, faces: list[str],
-                            faces_mask: list[str]) -> str:
+                         faces_mask: list[str]) -> str:
         result = ''
 
         # Top
