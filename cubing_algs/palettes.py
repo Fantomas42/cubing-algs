@@ -105,6 +105,52 @@ PALETTES = {
             (173, 216, 230),
         ),
     },
+    'dracula': {
+        'faces_background_rgb': (
+            (248, 248, 242),
+            (255, 85, 85),
+            (80, 250, 123),
+            (241, 250, 140),
+            (255, 184, 108),
+            (139, 233, 253),
+        ),
+        'font_foreground_ansi': foreground_rgb_to_ansi(
+            40, 42, 54,
+        ),
+        'hidden_background_ansi': background_rgb_to_ansi(
+            68, 71, 90,
+        ),
+        'masked_ansi': build_ansi_color(
+            (40, 42, 54),
+            (248, 248, 242),
+        ),
+    },
+    'alucard': {
+        'faces_background_rgb': (
+            (255, 251, 235),
+            (203, 58, 42),
+            (20, 113, 10),
+            (132, 110, 21),
+            (163, 77, 20),
+            (3, 106, 150),
+        ),
+        'font_foreground_ansi': foreground_rgb_to_ansi(
+            255, 251, 235,
+        ),
+        'hidden_background_ansi': background_rgb_to_ansi(
+            207, 207, 222,
+        ),
+        'masked_ansi': build_ansi_color(
+            (108, 102, 75),
+            (255, 251, 235),
+        ),
+        'extra': {
+            'U': build_ansi_color(
+                (255, 251, 235),
+                (31, 31, 31),
+            ),
+        },
+    },
 }
 
 DEFAULT_FONT_FOREGROUND_ANSI = foreground_rgb_to_ansi(
