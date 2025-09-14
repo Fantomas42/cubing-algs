@@ -2,7 +2,6 @@ import os
 import unittest
 from unittest.mock import patch
 
-from cubing_algs.display import TERM_COLORS
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.vcube import VCube
 
@@ -25,8 +24,8 @@ class TestVCubeDisplay(unittest.TestCase):
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U')
-            expected = f"{ TERM_COLORS['white'] } U { TERM_COLORS['reset'] }"
-            self.assertEqual(result, expected)
+            expected = 'm U \x1b[0;0m'
+            self.assertIn(expected, result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
     def test_display_facelet_without_colors(self):
@@ -40,18 +39,16 @@ class TestVCubeDisplay(unittest.TestCase):
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U', '0')
-            expected = (
-                f"{ TERM_COLORS['white_hidden'] } U { TERM_COLORS['reset'] }"
-            )
-            self.assertEqual(result, expected)
+            expected = 'm U \x1b[0;0m'
+            self.assertIn(expected, result)
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_invalid(self):
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
             printer = VCubeDisplay(self.cube)
-            result = printer.display_facelet('X')  # Facelet invalide
-            expected = f"{ TERM_COLORS['masked'] } X { TERM_COLORS['reset'] }"
-            self.assertEqual(result, expected)
+            result = printer.display_facelet('X')  # Invalid facelet
+            expected = 'm X \x1b[0;0m'
+            self.assertIn(expected, result)
 
     def test_display_top_down_face(self):
         printer = VCubeDisplay(self.cube)

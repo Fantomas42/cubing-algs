@@ -57,22 +57,42 @@ def negate_mask(mask: str) -> str:
     return format(negated, f'0{ length }b')
 
 
+_MASK_CACHE: dict[str, tuple[bool, ...]] = {}
+_CACHE_SIZE_LIMIT = 1000  # Prevent unbounded memory growth
+
+
 def facelets_masked(facelets: str, mask: str) -> str:
     """
     Applies a binary mask to a facelets string.
 
     Returns a new facelets string where positions with '0' in the mask
-    are replaced with '0', and positions with '1' retain their original value.
+    are replaced with '-', and positions with '1' retain their original value.
+
+    Optimized for high-frequency usage with caching and fast string operations.
     """
-    masked = []
+    if mask in _MASK_CACHE:
+        translation = _MASK_CACHE[mask]
+        return ''.join(
+            char if keep else '-'
+            for char, keep in zip(facelets, translation, strict=True)
+        )
 
-    for i, value in enumerate(facelets):
-        if mask[i] == '0':
-            masked.append('-')
-        else:
-            masked.append(value)
+    # Build and cache translation for new masks
+    translation = tuple(c == '1' for c in mask)
 
-    return ''.join(masked)
+    # Manage cache size to prevent memory bloat
+    if len(_MASK_CACHE) >= _CACHE_SIZE_LIMIT:
+        # Remove oldest half of cache entries (simple LRU-like behavior)
+        items = list(_MASK_CACHE.items())
+        _MASK_CACHE.clear()
+        _MASK_CACHE.update(items[_CACHE_SIZE_LIMIT // 2:])
+
+    _MASK_CACHE[mask] = translation
+
+    return ''.join(
+        char if keep else '-'
+        for char, keep in zip(facelets, translation, strict=True)
+    )
 
 
 def state_masked(state: str, mask: str) -> str:

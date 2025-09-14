@@ -222,7 +222,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         )
 
         # Apply F move to custom state using VCube
-        cube = VCube(custom_state, check=False)
+        cube = VCube(custom_state)
         cube.rotate('F')
         expected_after_f = cube.state
 
@@ -238,6 +238,89 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         )
 
         self.assertEqual(result, expected_after_f)
+
+    def test_custom_state_with_moves_f_z2_turn(self):
+        """Test F z2 moves on custom state."""
+        # Use a pattern with clear face identification
+        custom_state = (
+            'UUUUUUUUU'
+            'RRRRRRRRR'
+            'FFFFFFFFF'
+            'DDDDDDDDD'
+            'LLLLLLLLL'
+            'BBBBBBBBB'
+        )
+
+        # Apply F then rotation move to custom state using VCube
+        cube = VCube(custom_state)
+        cube.rotate('F z2')
+        expected_after_moves = cube.state
+
+        # Get cubie representation of F z2 applied to solved cube
+        solved_cube = VCube()
+        solved_cube.rotate('F z2')
+        cp, co, ep, eo, so = solved_cube.to_cubies
+
+        # Apply same transformation to custom state
+        result = cubies_to_facelets(
+            cp, co, ep, eo, so,
+            scheme=custom_state,
+        )
+
+        self.assertEqual(result, expected_after_moves)
+
+    def test_custom_state_with_complex_moves_orientation(self):
+        """Test complex move on custom state."""
+        # Use a pattern with clear face identification
+        custom_state = (
+            '000000000'
+            'RRRRRRRRR'
+            '000000000'
+            'LLLLLLLLL'
+            '000000000'
+            '000000000'
+        )
+
+        # Apply moves to custom state using VCube
+        cube = VCube(custom_state, check=False)
+        cube.rotate('F R U2 D2 L2 z2 x y')
+        expected_after_moves = cube.state
+
+        # Get cubie representation of moves applied to solved cube
+        solved_cube = VCube()
+        solved_cube.rotate('F R U2 D2 L2 z2 x y')
+        cp, co, ep, eo, so = solved_cube.to_cubies
+
+        # Apply same transformation to custom state
+        result = cubies_to_facelets(
+            cp, co, ep, eo, so,
+            scheme=custom_state,
+        )
+
+        self.assertEqual(result, expected_after_moves)
+
+    def test_custom_state_tracked_with_complex_moves_orientation(self):
+        """Test F move on custom state."""
+        # Use a pattern with clear face identification
+        custom_state = ''.join([chr(ord('A') + i) for i in range(54)])
+
+        # Apply moves to custom state using VCube
+        cube = VCube(custom_state, check=False)
+        cube.rotate('F R U2 D2 L2 z2 y')
+        expected_after_moves = cube.state
+
+        # Get cubie representation of moves applied to solved cube
+        solved_cube = VCube()
+        solved_cube.rotate('F R U2 D2 L2 z2 y')
+        cp, co, ep, eo, so = solved_cube.to_cubies
+
+        # Apply same transformation to custom state
+        result = cubies_to_facelets(
+            cp, co, ep, eo, so,
+            scheme=custom_state,
+        )
+
+        self.assertEqual(result, expected_after_moves)
 
     def test_custom_state_with_move_sequence(self):
         """Test that a sequence of moves on scheme produces correct result."""
