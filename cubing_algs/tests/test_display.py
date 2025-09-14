@@ -54,7 +54,7 @@ class TestVCubeDisplay(unittest.TestCase):
         printer = VCubeDisplay(self.cube)
         face = 'UUUUUUUUU'
 
-        result = printer.display_top_down_face(face, '111111111')
+        result = printer.display_top_down_face(face, '111111111', 0)
         lines = result.split('\n')
 
         self.assertEqual(len(lines), 4)

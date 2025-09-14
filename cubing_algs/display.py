@@ -47,7 +47,9 @@ class VCubeDisplay:
 
         for face in F2L_FACES:
             exclusion_pattern = face * 6
-            facelets = cube_d_top.get_face_by_center(face)[3:9]
+            facelets = cube_d_top.get_face_by_center(face)[
+                self.cube_size:self.face_size
+            ]
 
             if exclusion_pattern != facelets:
                 impacted_faces += face
@@ -112,7 +114,8 @@ class VCubeDisplay:
 
         return display_method(faces, masked_faces)
 
-    def display_facelet(self, facelet: str, mask: str = '') -> str:
+    def display_facelet(self, facelet: str, mask: str = '',
+                        facelet_index: int | None = None) -> str:
         if facelet not in FACE_ORDER:
             face_color = self.palette['masked']
         else:
@@ -127,9 +130,11 @@ class VCubeDisplay:
                 f' { facelet } '
                 f'{ self.palette["reset"] }'
             )
+
         return f' { facelet } '
 
-    def display_top_down_face(self, face: str, face_mask: str) -> str:
+    def display_top_down_face(self, face: str, face_mask: str,
+                              face_index: int) -> str:
         result = ''
 
         for index, facelet in enumerate(face):
@@ -139,6 +144,7 @@ class VCubeDisplay:
             result += self.display_facelet(
                 facelet,
                 face_mask[index],
+                (face_index * self.face_size) + index,
             )
 
             if index % self.cube_size == self.cube_size - 1:
@@ -167,39 +173,51 @@ class VCubeDisplay:
         return result
 
     def display_cube(self, faces: list[str], faces_mask: list[str]) -> str:
-        middle = [
-            faces[FACE_INDEXES['L']],
-            faces[FACE_INDEXES['F']],
-            faces[FACE_INDEXES['R']],
-            faces[FACE_INDEXES['B']],
+        middle_face_indexes = [
+            FACE_INDEXES['L'],
+            FACE_INDEXES['F'],
+            FACE_INDEXES['R'],
+            FACE_INDEXES['B'],
         ]
-        middle_mask = [
-            faces_mask[FACE_INDEXES['L']],
-            faces_mask[FACE_INDEXES['F']],
-            faces_mask[FACE_INDEXES['R']],
-            faces_mask[FACE_INDEXES['B']],
+        middle_faces = [
+            faces[index]
+            for index in middle_face_indexes
+        ]
+        middle_masks = [
+            faces_mask[index]
+            for index in middle_face_indexes
         ]
 
         # Top
+        top_face_index = FACE_INDEXES['U']
         result = self.display_top_down_face(
-            faces[FACE_INDEXES['U']],
-            faces_mask[FACE_INDEXES['U']],
+            faces[top_face_index],
+            faces_mask[top_face_index],
+            top_face_index,
         )
 
         # Middle
         for i in range(self.cube_size):
-            for face, face_masked in zip(middle, middle_mask, strict=True):
+            for face, face_masked, middle_index in zip(
+                    middle_faces, middle_masks, middle_face_indexes,
+                    strict=True,
+            ):
                 for j in range(self.cube_size):
+                    facelet_index = (i * self.cube_size) + j
+
                     result += self.display_facelet(
-                        face[i * self.cube_size + j],
-                        face_masked[i * self.cube_size + j],
+                        face[facelet_index],
+                        face_masked[facelet_index],
+                        (middle_index * self.face_size) + facelet_index,
                     )
             result += '\n'
 
         # Bottom
+        bottom_face_index = FACE_INDEXES['D']
         result += self.display_top_down_face(
-            faces[FACE_INDEXES['D']],
-            faces_mask[FACE_INDEXES['D']],
+            faces[bottom_face_index],
+            faces_mask[bottom_face_index],
+            bottom_face_index,
         )
 
         return result
