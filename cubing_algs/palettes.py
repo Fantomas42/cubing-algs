@@ -55,7 +55,7 @@ PALETTES = {
             ),
         },
     },
-    'RGB': {
+    'rgb': {
         'faces_background_rgb': (
             (255, 255, 255),
             (255, 0, 0),

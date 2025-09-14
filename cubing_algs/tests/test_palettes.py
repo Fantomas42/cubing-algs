@@ -150,7 +150,7 @@ class TestLoadPalette(unittest.TestCase):
     def test_load_palette_nonexistent_fallback_to_env(self):
         """Test loading nonexistent palette falls back to env var."""
         # This should cover the branch where palette_name not in PALETTES
-        with patch.dict(os.environ, {'CUBING_ALGS_PALETTE': 'RGB'}):
+        with patch.dict(os.environ, {'CUBING_ALGS_PALETTE': 'rgb'}):
             palette = load_palette('nonexistent_palette')
 
             # Should have loaded the RGB palette from env var
