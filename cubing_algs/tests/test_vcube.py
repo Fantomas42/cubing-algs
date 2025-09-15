@@ -2,6 +2,7 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
+from cubing_algs.constants import FACES
 from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
@@ -1239,3 +1240,361 @@ class TestVCubeShow(unittest.TestCase):
         output = captured_output.getvalue()
         self.assertIsInstance(output, str)
         self.assertGreater(len(output), 0)
+
+
+class TestVCubeIsEqual(unittest.TestCase):
+
+    def setUp(self):
+        self.cube1 = VCube()
+        self.cube2 = VCube()
+
+    def test_is_equal_strict_identical_cubes(self):
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=True))
+        self.assertTrue(self.cube1.is_equal(self.cube2))
+
+    def test_is_equal_strict_identical_states_after_moves(self):
+        self.cube1.rotate("R U R'")
+        self.cube2.rotate("R U R'")
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=True))
+
+    def test_is_equal_strict_different_states(self):
+        self.cube1.rotate("R U R'")
+        self.cube2.rotate("L U L'")
+        self.assertFalse(self.cube1.is_equal(self.cube2, strict=True))
+
+    def test_is_equal_strict_different_orientations(self):
+        self.cube1.rotate('x')  # Rotate cube
+        # Both cubes are solved but have different orientations
+        self.assertFalse(self.cube1.is_equal(self.cube2, strict=True))
+
+    def test_is_equal_non_strict_identical_cubes(self):
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
+
+    def test_is_equal_non_strict_same_cube_different_orientations(self):
+        self.cube1.rotate('x')  # Rotate the first cube
+        # Both cubes should be considered equal in non-strict mode
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
+
+    def test_is_equal_non_strict_complex_orientations(self):
+        # Test various rotations that should still be equal in non-strict mode
+        rotations = ['x', 'y', 'z', 'x2', 'y2', 'z2', "x'", "y'", "z'"]
+
+        for rotation in rotations:
+            with self.subTest(rotation=rotation):
+                cube1 = VCube()
+                cube2 = VCube()
+                cube1.rotate(rotation)
+                self.assertTrue(cube1.is_equal(cube2, strict=False))
+
+    def test_is_equal_non_strict_combined_rotations(self):
+        self.cube1.rotate('x y z')
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
+
+    def test_is_equal_non_strict_scrambled_cubes_same_pattern(self):
+        scramble = "R U R' U'"
+        self.cube1.rotate(scramble)
+        self.cube2.rotate(scramble)
+
+        # Both have same pattern
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=True))
+
+        # Apply different orientations
+        self.cube1.rotate('x')
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
+
+    def test_is_equal_non_strict_different_scrambles(self):
+        self.cube1.rotate("R U R'")
+        self.cube2.rotate("L U L'")
+        self.assertFalse(self.cube1.is_equal(self.cube2, strict=False))
+
+    def test_is_equal_non_strict_scramble_vs_solved(self):
+        self.cube1.rotate("R U R' U'")  # Not solved
+        # cube2 remains solved
+        self.assertFalse(self.cube1.is_equal(self.cube2, strict=False))
+
+    def test_is_equal_non_strict_scrambled_and_oriented(self):
+        # Apply same scramble to both cubes
+        scramble = "R U2 R' D' R U' R' D"
+        self.cube1.rotate(scramble)
+        self.cube2.rotate(scramble)
+
+        # Orient first cube differently
+        self.cube1.rotate('y x')
+
+        # Should still be equal in non-strict mode
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
+
+        # But not in strict mode
+        self.assertFalse(self.cube1.is_equal(self.cube2, strict=True))
+
+    def test_is_equal_with_invalid_states(self):
+        # Test with cubes that have invalid states but same pattern
+        invalid_state = list(INITIAL_STATE)
+        invalid_state[4] = 'R'   # Change top center to R
+        invalid_state[22] = 'D'  # Change front center to D
+        invalid_state = ''.join(invalid_state)
+
+        cube1 = VCube(invalid_state, check=False)
+        cube2 = VCube(invalid_state, check=False)
+
+        self.assertTrue(cube1.is_equal(cube2, strict=True))
+        self.assertTrue(cube1.is_equal(cube2, strict=False))
+
+    def test_is_equal_edge_case_empty_history(self):
+        # Test that history doesn't affect equality
+        self.cube1.rotate("R U R'", history=True)
+        self.cube2.rotate("R U R'", history=False)
+
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=True))
+        self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
+
+    def test_is_equal_reflexive_property(self):
+        # A cube should always be equal to itself
+        self.assertTrue(self.cube1.is_equal(self.cube1, strict=True))
+        self.assertTrue(self.cube1.is_equal(self.cube1, strict=False))
+
+        # Even after moves
+        self.cube1.rotate("R U R' U'")
+        self.assertTrue(self.cube1.is_equal(self.cube1, strict=True))
+        self.assertTrue(self.cube1.is_equal(self.cube1, strict=False))
+
+    def test_is_equal_symmetric_property(self):
+        # If A equals B, then B equals A
+        cube_oriented = VCube()
+        cube_oriented.rotate('x')  # Apply orientation rotation
+
+        test_cases = [
+            (VCube(), VCube()),  # Both solved
+            (VCube(), cube_oriented),  # One oriented (for non-strict)
+        ]
+
+        for cube_a, cube_b in test_cases:
+            with self.subTest(cube_a=repr(cube_a), cube_b=repr(cube_b)):
+                # Strict mode
+                result_ab = cube_a.is_equal(cube_b, strict=True)
+                result_ba = cube_b.is_equal(cube_a, strict=True)
+                self.assertEqual(result_ab, result_ba)
+
+                # Non-strict mode
+                result_ab_ns = cube_a.is_equal(cube_b, strict=False)
+                result_ba_ns = cube_b.is_equal(cube_a, strict=False)
+                self.assertEqual(result_ab_ns, result_ba_ns)
+
+
+class TestVCubeOrientation(unittest.TestCase):
+
+    def setUp(self):
+        self.cube = VCube()
+
+    def test_orientation_solved_cube(self):
+        # Solved cube should have 'UF' orientation (top=U, front=F)
+        self.assertEqual(self.cube.orientation, 'UF')
+
+    def test_orientation_after_basic_rotations(self):
+        # Test each basic rotation
+        expected_orientations = {
+            'x': 'FD',   # x rotation: top becomes front, front becomes down
+            'y': 'UR',   # y rotation: top stays, front becomes right
+            'z': 'LF',   # z rotation: top becomes left, front stays
+            "x'": 'BU',  # x' rotation: top becomes back, front becomes up
+            "y'": 'UL',  # y' rotation: top stays, front becomes left
+            "z'": 'RF',  # z' rotation: top becomes right, front stays
+        }
+
+        for move, expected in expected_orientations.items():
+            with self.subTest(move=move):
+                cube = VCube()
+                cube.rotate(move)
+                self.assertEqual(cube.orientation, expected)
+
+    def test_orientation_after_double_rotations(self):
+        expected_orientations = {
+            'x2': 'DB',  # x2: top becomes down, front becomes back
+            'y2': 'UB',  # y2: top stays, front becomes back
+            'z2': 'DF',  # z2: top becomes down, front stays
+        }
+
+        for move, expected in expected_orientations.items():
+            with self.subTest(move=move):
+                cube = VCube()
+                cube.rotate(move)
+                self.assertEqual(cube.orientation, expected)
+
+    def test_orientation_combined_rotations(self):
+        # Test combinations of rotations
+        test_cases = [
+            ('x y', 'FR'),    # x then y
+            ('y x', 'RD'),    # y then x
+            ('z x', 'FR'),    # z then x
+            ('x y z', 'DR'),  # x, y, then z
+        ]
+
+        for moves, expected in test_cases:
+            with self.subTest(moves=moves):
+                cube = VCube()
+                cube.rotate(moves)
+                self.assertEqual(cube.orientation, expected)
+
+    def test_orientation_with_face_moves(self):
+        # Basic face moves (R, U, F, D, B) shouldn't change center positions
+        # Slice moves (M, E, S) are expected to change centers
+        face_moves = ['R', 'U', 'F', 'D', 'B', 'L']
+
+        for move in face_moves:
+            with self.subTest(move=move):
+                cube = VCube()
+                original_orientation = cube.orientation
+                cube.rotate(move)
+                self.assertEqual(cube.orientation, original_orientation)
+
+    def test_orientation_with_slice_moves(self):
+        # Slice moves (M, E, S) are expected to change center positions
+        slice_moves = {
+            'M': 'BU',  # Middle slice affects centers
+            'E': 'UL',  # Equatorial slice affects centers
+            'S': 'LF',  # Standing slice affects centers
+        }
+
+        for move, expected in slice_moves.items():
+            with self.subTest(move=move):
+                cube = VCube()
+                cube.rotate(move)
+                self.assertEqual(cube.orientation, expected)
+
+    def test_orientation_with_complex_sequences(self):
+        # Test that face moves don't affect orientation
+        # even in complex sequences
+        # Using only moves that don't change centers: R, U, F, D, B L
+        original_orientation = self.cube.orientation
+
+        # Complex sequence with only face moves that preserve centers
+        self.cube.rotate("R U R' U' R' F R2 U' R' U' R U R' F'")
+        self.assertEqual(self.cube.orientation, original_orientation)
+
+    def test_orientation_scrambled_cube(self):
+        # Orientation should still work correctly on scrambled cubes
+        self.cube.rotate("R U R' U' F R F' U2 R' U R U2")
+        original_orientation = self.cube.orientation
+
+        # Apply rotation to scrambled cube
+        self.cube.rotate('x')
+        self.assertNotEqual(self.cube.orientation, original_orientation)
+        self.assertEqual(self.cube.orientation, 'FD')
+
+    def test_orientation_all_24_possible_orientations(self):
+        # Test all 24 possible orientations of a cube
+        # Each face can be on top (6),
+        # and for each top face, 4 different front faces
+        orientations_found = set()
+
+        # Generate various rotation combinations to cover all orientations
+        rotation_sequences = [
+            '',         # UF
+            'x',        # FR
+            'x2',       # DB
+            "x'",       # BU
+            'y',        # UL
+            'y x',      # LU
+            'y x2',     # BD
+            "y x'",     # DL
+            'y2',       # UB
+            'y2 x',     # BR
+            'y2 x2',    # DF
+            "y2 x'",    # FD
+            "y'",       # UR
+            "y' x",     # RD
+            "y' x2",    # BF
+            "y' x'",    # FB
+            'z',        # LF
+            'z x',      # FU
+            'z x2',     # RB
+            "z x'",     # BL
+            "z'",       # RF
+            "z' x",     # FD
+            "z' x2",    # LB
+            "z' x'",    # BR
+        ]
+
+        for moves in rotation_sequences:
+            cube = VCube()
+            if moves:
+                cube.rotate(moves)
+            orientation = cube.orientation
+            orientations_found.add(orientation)
+
+        # Should find multiple unique orientations
+        self.assertEqual(len(orientations_found), 24)
+
+    def test_orientation_consistency_with_oriented_copy(self):
+        # Test that orientation property is consistent with oriented_copy method
+        target_orientations = ['UF', 'DF', 'FR', 'BL', 'UL', 'DR']
+
+        for target in target_orientations:
+            with self.subTest(target=target):
+                cube = VCube()
+                oriented_cube = cube.oriented_copy(target)
+                self.assertEqual(oriented_cube.orientation, target)
+
+    def test_orientation_with_invalid_state(self):
+        # Test orientation with an unchecked/invalid state
+        # Create a state with modified centers
+        invalid_state = list(INITIAL_STATE)
+        invalid_state[4] = 'R'   # Change top center to R
+        invalid_state[22] = 'D'  # Change front center to D
+        invalid_state = ''.join(invalid_state)
+
+        cube = VCube(invalid_state, check=False)
+        self.assertEqual(cube.orientation, 'RD')
+
+    def test_orientation_property_type(self):
+        # Test that orientation always returns a string
+        self.assertIsInstance(self.cube.orientation, str)
+
+        # Should always be exactly 2 characters
+        self.assertEqual(len(self.cube.orientation), 2)
+
+        # After moves, still 2 characters
+        self.cube.rotate("x y z R U R'")
+        self.assertIsInstance(self.cube.orientation, str)
+        self.assertEqual(len(self.cube.orientation), 2)
+
+    def test_orientation_valid_face_characters(self):
+        # Orientation should only contain valid face characters
+        rotations = ['', 'x', 'y', 'z', 'x2', 'y2', 'z2', 'x y', 'z x y']
+
+        for rotation in rotations:
+            with self.subTest(rotation=rotation):
+                cube = VCube()
+                if rotation:
+                    cube.rotate(rotation)
+
+                orientation = cube.orientation
+                self.assertTrue(
+                    all(char in FACES for char in orientation),
+                )
+
+    def test_orientation_specific_positions(self):
+        # Test that orientation correctly reads positions 4 and 21
+        cube = VCube()
+
+        # Verify initial state
+        self.assertEqual(cube.state[4], 'U')   # Top center
+        self.assertEqual(cube.state[21], 'F')  # Front center
+        self.assertEqual(cube.orientation, 'UF')
+
+        # After x rotation
+        cube.rotate('x')
+        self.assertEqual(cube.state[4], 'F')   # Top center now F
+        self.assertEqual(cube.state[21], 'D')  # Front center now D
+        self.assertEqual(cube.orientation, 'FD')
+
+    def test_orientation_edge_case_positions(self):
+        # Test edge case: what if centers are swapped in an invalid way
+        state = list(VCube().state)
+        # Swap some centers to create an unusual but testable state
+        state[4] = 'D'   # Top center = D
+        state[22] = 'U'  # Front center = U
+        state[31] = 'F'  # Bottom center = F (to maintain some validity)
+
+        cube = VCube(''.join(state), check=False)
+        self.assertEqual(cube.orientation, 'DU')

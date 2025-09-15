@@ -73,6 +73,33 @@ class VCube(VCubeIntegrityChecker):
         """
         return all(face * self.face_size in self.state for face in FACE_ORDER)
 
+    def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
+        """
+        Compare two cubes for equality with optional orientation flexibility.
+
+        In strict mode, compares exact facelet states.
+        In non-strict mode, reorients the other cube to match
+        this cube's orientation before comparing.
+        """
+        if strict:
+            return self.state == other_cube.state
+
+        oriented_copy = other_cube.oriented_copy(self.orientation)
+
+        return self.state == oriented_copy.state
+
+    @property
+    def orientation(self) -> str:
+        """
+        Get the cube's orientation as a two-character string.
+
+        Uses the top face center and front face center
+        to determine the current orientation of the cube in space.
+
+        It might not works well, with an unchecked state.
+        """
+        return self._state[4] + self._state[22]
+
     def rotate(self, moves: str | Algorithm, *, history: bool = True) -> str:
         """
         Apply a sequence of moves to the cube.
