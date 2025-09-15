@@ -150,7 +150,7 @@ class TestLoadPalette(unittest.TestCase):
     def test_load_palette_nonexistent_fallback_to_env(self):
         """Test loading nonexistent palette falls back to env var."""
         # This should cover the branch where palette_name not in PALETTES
-        with patch.dict(os.environ, {'CUBING_ALGS_PALETTE': 'RGB'}):
+        with patch.dict(os.environ, {'CUBING_ALGS_PALETTE': 'rgb'}):
             palette = load_palette('nonexistent_palette')
 
             # Should have loaded the RGB palette from env var
@@ -169,6 +169,15 @@ class TestLoadPalette(unittest.TestCase):
             # Should have loaded the default palette
             self.assertIsNotNone(palette)
             self.assertIn('U', palette)
+
+    def test_load_palette_case(self):
+        """Test that palette can be loaded without case issue"""
+        palette = load_palette('ViBRaNT')
+        self.assertIsNotNone(palette)
+        self.assertIn('U', palette)
+        self.assertIn('reset', palette)
+        self.assertIn('vibrant', LOADED_PALETTES)
+        self.assertNotIn('ViBRaNT', LOADED_PALETTES)
 
     def test_load_palette_caching(self):
         """Test that palettes are cached after first load."""

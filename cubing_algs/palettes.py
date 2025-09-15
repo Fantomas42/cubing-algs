@@ -55,7 +55,7 @@ PALETTES = {
             ),
         },
     },
-    'RGB': {
+    'rgb': {
         'faces_background_rgb': (
             (255, 255, 255),
             (255, 0, 0),
@@ -151,6 +151,234 @@ PALETTES = {
             ),
         },
     },
+    'cyberpunk': {
+        'faces_background_rgb': (
+            (15, 15, 15),
+            (255, 16, 240),
+            (0, 255, 150),
+            (255, 234, 0),
+            (255, 69, 0),
+            (0, 191, 255),
+        ),
+        'font_foreground_ansi': foreground_rgb_to_ansi(
+            0, 255, 255,
+        ),
+        'hidden_background_ansi': background_rgb_to_ansi(
+            45, 45, 45,
+        ),
+        'masked_ansi': build_ansi_color(
+            (113, 28, 145),
+            (0, 255, 255),
+        ),
+        'extra': {
+            'F': build_ansi_color(
+                (0, 255, 150),
+                (255, 16, 240),
+            ),
+            'D': build_ansi_color(
+                (255, 234, 0),
+                (255, 16, 240),
+            ),
+            'U_hidden': build_ansi_color(
+                (45, 45, 45),
+                (0, 255, 255),
+            ),
+        },
+    },
+    'sunset': {
+        'faces_background_rgb': (
+            (255, 255, 255),
+            (255, 94, 77),
+            (186, 203, 77),
+            (255, 206, 84),
+            (255, 118, 117),
+            (108, 99, 255),
+        ),
+    },
+    'ocean': {
+        'faces_background_rgb': (
+            (240, 248, 255),
+            (255, 99, 132),
+            (75, 192, 192),
+            (255, 205, 86),
+            (114, 162, 235),
+            (30, 144, 255),
+        ),
+    },
+    'forest': {
+        'faces_background_rgb': (
+            (245, 245, 220),
+            (220, 20, 60),
+            (34, 139, 34),
+            (255, 215, 0),
+            (139, 69, 19),
+            (25, 25, 112),
+        ),
+        'extra': {
+            'B': build_ansi_color(
+                (25, 25, 112),
+                (200, 200, 200),
+            ),
+        },
+    },
+    'synthwave': {
+        'faces_background_rgb': (
+            (20, 20, 40),
+            (255, 20, 147),
+            (255, 105, 180),
+            (255, 215, 0),
+            (255, 69, 0),
+            (138, 43, 226),
+        ),
+        'font_foreground_ansi': foreground_rgb_to_ansi(
+            255, 255, 255,
+        ),
+        'hidden_background_ansi': background_rgb_to_ansi(
+            60, 60, 100,
+        ),
+        'masked_ansi': build_ansi_color(
+            (40, 40, 80),
+            (255, 20, 147),
+        ),
+        'extra': {
+            'U_hidden': build_ansi_color(
+                (60, 60, 100),
+                (255, 255, 255),
+            ),
+        },
+    },
+    'retro': {
+        'faces_background_rgb': (
+            (255, 248, 220),
+            (205, 92, 92),
+            (144, 238, 144),
+            (255, 255, 154),
+            (255, 165, 0),
+            (135, 206, 250),
+        ),
+    },
+    'halloween': {
+        'faces_background_rgb': (
+            (248, 248, 255),
+            (255, 69, 0),
+            (50, 205, 50),
+            (255, 215, 0),
+            (255, 140, 0),
+            (72, 61, 139),
+        ),
+        'font_foreground_ansi': foreground_rgb_to_ansi(
+            25, 25, 25,
+        ),
+        'hidden_background_ansi': background_rgb_to_ansi(
+            40, 40, 40,
+        ),
+        'masked_ansi': build_ansi_color(
+            (25, 25, 25),
+            (255, 165, 0),
+        ),
+        'extra': {
+            'B': build_ansi_color(
+                (72, 61, 139),
+                (220, 220, 220),
+            ),
+            'B_hidden': build_ansi_color(
+                (40, 40, 40),
+                (132, 121, 199),
+            ),
+        },
+    },
+    'matrix': {
+        'faces_background_rgb': (
+            (0, 0, 0),
+            (0, 255, 0),
+            (50, 255, 50),
+            (100, 255, 100),
+            (150, 255, 150),
+            (200, 255, 200),
+        ),
+        'font_foreground_ansi': foreground_rgb_to_ansi(
+            0, 0, 0,
+        ),
+        'hidden_background_ansi': background_rgb_to_ansi(
+            20, 20, 20,
+        ),
+        'masked_ansi': build_ansi_color(
+            (0, 20, 0),
+            (0, 255, 0),
+        ),
+        'extra': {
+            'U': build_ansi_color(
+                (20, 20, 20),
+                (100, 255, 100),
+            ),
+            'U_hidden': build_ansi_color(
+                (20, 20, 20),
+                (150, 255, 150),
+            ),
+            'R': build_ansi_color(
+                (20, 20, 20),
+                (0, 255, 0),
+            ),
+            'F': build_ansi_color(
+                (20, 20, 20),
+                (150, 255, 150),
+            ),
+        },
+    },
+    'fire': {
+        'faces_background_rgb': (
+            (255, 250, 240),
+            (220, 20, 60),
+            (255, 69, 0),
+            (255, 215, 0),
+            (255, 140, 0),
+            (139, 0, 0),
+        ),
+    },
+    'ice': {
+        'faces_background_rgb': (
+            (240, 248, 255),
+            (176, 196, 222),
+            (173, 216, 230),
+            (224, 255, 255),
+            (175, 238, 238),
+            (95, 158, 160),
+        ),
+    },
+    'galaxy': {
+        'faces_background_rgb': (
+            (25, 25, 112),
+            (255, 20, 147),
+            (138, 43, 226),
+            (255, 215, 0),
+            (255, 105, 180),
+            (72, 61, 139),
+        ),
+        'font_foreground_ansi': foreground_rgb_to_ansi(
+            255, 255, 255,
+        ),
+        'hidden_background_ansi': background_rgb_to_ansi(
+            40, 40, 70,
+        ),
+        'masked_ansi': build_ansi_color(
+            (20, 20, 40),
+            (255, 225, 170),
+        ),
+        'extra': {
+            'D': build_ansi_color(
+                (255, 215, 0),
+                (75, 75, 75),
+            ),
+            'U_hidden': build_ansi_color(
+                (40, 40, 70),
+                (65, 65, 255),
+            ),
+            'B_hidden': build_ansi_color(
+                (40, 40, 70),
+                (112, 111, 209),
+            ),
+        },
+    },
 }
 
 DEFAULT_FONT_FOREGROUND_ANSI = foreground_rgb_to_ansi(
@@ -193,6 +421,8 @@ def build_ansi_palette(
 
 
 def load_palette(palette_name: str) -> dict[str, str]:
+    palette_name = palette_name.lower()
+
     if palette_name not in PALETTES:
         palette_name = os.getenv('CUBING_ALGS_PALETTE', 'default')
 
