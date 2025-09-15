@@ -115,16 +115,6 @@ class Algorithm(UserList[Move]):
         """
         return f'Algorithm("{ "".join([str(m) for m in self]) }")'
 
-    @property
-    def metrics(self) -> dict[str, int | list[str]]:
-        """
-        Calculate various metrics for this algorithm.
-
-        Uses the compute_metrics function to analyze the algorithm's efficiency,
-        move types, and other characteristics.
-        """
-        return compute_metrics(self)
-
     def transform(
             self,
             *processes: Callable[[list[Move]], list[Move]],
@@ -153,7 +143,17 @@ class Algorithm(UserList[Move]):
 
         return Algorithm(mod_moves)
 
-    @cached_property
+    @property
+    def metrics(self) -> dict[str, int | list[str]]:
+        """
+        Calculate various metrics for this algorithm.
+
+        Uses the compute_metrics function to analyze the algorithm's efficiency,
+        move types, and other characteristics.
+        """
+        return compute_metrics(self)
+
+    @property
     def min_cube_size(self) -> int:
         """
         Compute the minimum cube size required to apply the algorithm.
@@ -174,28 +174,28 @@ class Algorithm(UserList[Move]):
 
         return min_cube
 
-    @cached_property
+    @property
     def is_standard(self) -> bool:
         """
         Check if algorithm is in standard notations
         """
         return not self.is_sign
 
-    @cached_property
+    @property
     def is_sign(self) -> bool:
         """
         Check if algorithm contains SiGN notations
         """
         return any(m.is_sign_move for m in self)
 
-    @cached_property
+    @property
     def has_rotations(self) -> bool:
         """
         Check if algorithm contains rotations
         """
         return any(m.is_wide_move or m.is_rotation_move for m in self)
 
-    @cached_property
+    @property
     def has_internal_rotations(self) -> bool:
         """
         Check if algorithm contains internal rotations
