@@ -1,10 +1,10 @@
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
-from functools import cached_property
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.metrics import compute_cycles
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
@@ -152,6 +152,26 @@ class Algorithm(UserList[Move]):
         move types, and other characteristics.
         """
         return compute_metrics(self)
+
+    @property
+    def cycles(self) -> int:
+        """
+        Get the number of times this algorithm must be applied
+        to return a cube to its solved state.
+
+        This property calculates the "order" of the algorithm - how many times
+        you need to execute the sequence of moves to bring a solved cube back
+        to its original solved state.
+
+        This is useful for understanding the periodic behavior of algorithms
+        and their mathematical properties.
+
+        Example:
+            >>> alg = Algorithm("R U R' U'")
+            >>> alg.cycles
+            6  # Meaning applying this 6 times returns to solved
+        """
+        return compute_cycles(self)
 
     @property
     def min_cube_size(self) -> int:

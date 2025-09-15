@@ -468,3 +468,80 @@ class AlgorithmTestCase(unittest.TestCase):
         algo = parse_moves("B' R2 U x")
 
         self.assertFalse(algo.has_internal_rotations)
+
+
+class AlgorithmCyclesPropertyTestCase(unittest.TestCase):
+    """Test cases for the Algorithm.cycles property."""
+
+    def test_empty_algorithm_cycles(self):
+        """Test cycles property for empty algorithm."""
+        algo = Algorithm()
+        result = algo.cycles
+        self.assertEqual(result, 0)
+
+    def test_single_move_cycles(self):
+        """Test cycles property for single move."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.cycles
+        self.assertEqual(result, 4)  # R has order 4
+
+    def test_sexy_move_cycles(self):
+        """Test cycles property for sexy move."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.cycles
+        self.assertEqual(result, 6)  # Known order of sexy move
+
+    def test_half_turn_cycles(self):
+        """Test cycles property for half turn."""
+        algo = Algorithm.parse_moves('R2')
+        result = algo.cycles
+        self.assertEqual(result, 2)  # R2 has order 2
+
+    def test_identity_cycles(self):
+        """Test cycles property for identity algorithm."""
+        algo = Algorithm.parse_moves("R R'")
+        result = algo.cycles
+        self.assertEqual(result, 1)
+
+    def test_complex_algorithm_cycles(self):
+        """Test cycles property for complex algorithm."""
+        algo = Algorithm.parse_moves("R U2 R' D' R U' R' D")
+        result = algo.cycles
+        self.assertIsInstance(result, int)
+        self.assertGreaterEqual(result, 0)
+        self.assertLess(result, 100)
+
+    def test_cycles_return_int_non_negative(self):
+        """Test that cycles property returns integer."""
+        test_cases = ['R', "R U R' U'", 'F2', 'x', 'M', '']
+
+        for moves_str in test_cases:
+            with self.subTest(moves=moves_str):
+                if not moves_str:
+                    algo = Algorithm()
+                else:
+                    algo = Algorithm.parse_moves(moves_str)
+                result = algo.cycles
+                self.assertIsInstance(result, int)
+                self.assertGreaterEqual(result, 0)
+
+    def test_cycles_with_rotations(self):
+        """Test cycles property with cube rotations."""
+        algo = Algorithm.parse_moves('x y z')
+        result = algo.cycles
+        self.assertIsInstance(result, int)
+        self.assertEqual(result, 1)
+
+    def test_cycles_with_slice_moves(self):
+        """Test cycles property with slice moves."""
+        algo = Algorithm.parse_moves('M E S')
+        result = algo.cycles
+        self.assertIsInstance(result, int)
+        self.assertEqual(result, 4)
+
+    def test_cycles_with_wide_moves(self):
+        """Test cycles property with wide moves."""
+        algo = Algorithm.parse_moves('r u f')
+        result = algo.cycles
+        self.assertIsInstance(result, int)
+        self.assertEqual(result, 70)
