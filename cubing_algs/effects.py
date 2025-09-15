@@ -1,5 +1,4 @@
 import math
-import os
 
 
 def gradient(rgb, facelet_index, cube_size, **kw):
@@ -216,16 +215,12 @@ EFFECTS = {
 
 
 def load_effect(effect_name: str, palette_name: str):
-    effect_name = effect_name.lower()
-
-    if effect_name not in EFFECTS:
-        effect_name = os.getenv('CUBING_ALGS_EFFECT', '')
-
-    if not effect_name:
+    if not effect_name or effect_name not in EFFECTS:
         return None
 
     effect_function = EFFECTS[effect_name]['function']
     effect_parameters = EFFECTS[effect_name]['parameters']
+
     if palette_name in EFFECTS[effect_name]:
         effect_parameters.update(EFFECTS[effect_name][palette_name])
 

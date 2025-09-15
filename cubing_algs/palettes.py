@@ -1,5 +1,3 @@
-import os
-
 from cubing_algs.constants import FACE_ORDER
 
 LOADED_PALETTES: dict[str, dict[str, str]] = {}
@@ -421,10 +419,8 @@ def build_ansi_palette(
 
 
 def load_palette(palette_name: str) -> dict[str, str]:
-    palette_name = palette_name.lower()
-
     if palette_name not in PALETTES:
-        palette_name = os.getenv('CUBING_ALGS_PALETTE', 'default')
+        palette_name = 'default'
 
     if palette_name in LOADED_PALETTES:
         return LOADED_PALETTES[palette_name]

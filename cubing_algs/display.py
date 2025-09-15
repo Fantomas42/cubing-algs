@@ -22,6 +22,9 @@ if TYPE_CHECKING:
 
 USE_COLORS = os.environ.get('TERM') == 'xterm-256color'
 
+DEFAULT_EFFECT = os.getenv('CUBING_ALGS_EFFECT', '')
+DEFAULT_PALETTE = os.getenv('CUBING_ALGS_PALETTE', 'default')
+
 ANSI_TO_RGB = re.compile(
     r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
 )
@@ -37,8 +40,11 @@ class VCubeDisplay:
         self.face_size = self.cube_size * self.cube_size
         self.face_number = cube.face_number
 
-        self.palette = load_palette(palette_name)
-        self.effect = load_effect(effect_name, palette_name)
+        self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
+        self.palette_name = (palette_name or DEFAULT_PALETTE).lower()
+
+        self.palette = load_palette(self.palette_name)
+        self.effect = load_effect(self.effect_name, self.palette_name)
 
     def compute_mask(self, cube: 'VCube', mask: str) -> str:
         if not mask:
