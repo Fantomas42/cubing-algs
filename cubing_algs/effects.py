@@ -1,7 +1,8 @@
 import math
+import os
 
 
-def gradient(rgb, facelet_index, **kw):
+def gradient(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
     grad_position = facelet_index / 9  # 8 ?
@@ -17,7 +18,7 @@ def gradient(rgb, facelet_index, **kw):
     return r, g, b
 
 
-def chrome(rgb, facelet_index, **kw):
+def chrome(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
     local_index = facelet_index % 9
@@ -43,7 +44,7 @@ def chrome(rgb, facelet_index, **kw):
     return r, g, b
 
 
-def gold(rgb, facelet_index, **kw):
+def gold(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
     local_index = facelet_index % 9
@@ -62,7 +63,7 @@ def gold(rgb, facelet_index, **kw):
     return r, g, b
 
 
-def diamond(rgb, facelet_index, **kw):
+def diamond(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
     local_index = facelet_index % 9
@@ -87,7 +88,7 @@ def diamond(rgb, facelet_index, **kw):
     return r, g, b
 
 
-def rainbow(rgb, facelet_index, **_kw):
+def rainbow(rgb, facelet_index, cube_size, **_kw):
     r, g, b = rgb
 
     local_index = facelet_index % 9
@@ -123,7 +124,7 @@ def rainbow(rgb, facelet_index, **_kw):
     return r, g, b
 
 
-def soft(rgb, facelet_index, **kw):
+def soft(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
     local_index = facelet_index % 9
@@ -140,7 +141,7 @@ def soft(rgb, facelet_index, **kw):
     return r, g, b
 
 
-def neon(rgb, facelet_index, **kw):
+def neon(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
     local_index = facelet_index % 9
@@ -212,3 +213,26 @@ EFFECTS = {
         },
     },
 }
+
+
+def load_effect(effect_name: str, palette_name: str):
+    effect_name = effect_name.lower()
+
+    if effect_name not in EFFECTS:
+        effect_name = os.getenv('CUBING_ALGS_EFFECT', '')
+
+    if not effect_name:
+        return None
+
+    effect_function = EFFECTS[effect_name]['function']
+    effect_parameters = EFFECTS[effect_name]['parameters']
+    if palette_name in EFFECTS[effect_name]:
+        effect_parameters.update(EFFECTS[effect_name][palette_name])
+
+    def effect(rgb, facelet_index, cube_size):
+        return effect_function(
+            rgb, facelet_index, cube_size,
+            **effect_parameters,
+        )
+
+    return effect

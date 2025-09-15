@@ -1,4 +1,5 @@
 import os
+import re
 from typing import TYPE_CHECKING
 
 from cubing_algs.constants import F2L_ADJACENT_FACES
@@ -6,7 +7,7 @@ from cubing_algs.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.effects import EFFECTS
+from cubing_algs.effects import load_effect
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
@@ -21,6 +22,10 @@ if TYPE_CHECKING:
 
 USE_COLORS = os.environ.get('TERM') == 'xterm-256color'
 
+ANSI_TO_RGB = re.compile(
+    r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
+)
+
 
 class VCubeDisplay:
     facelet_size = 3
@@ -33,10 +38,7 @@ class VCubeDisplay:
         self.face_number = cube.face_number
 
         self.palette = load_palette(palette_name)
-
-        self.effect = ''
-        if effect_name:
-            self.effect = effect_name
+        self.effect = load_effect(effect_name, palette_name)
 
     def compute_mask(self, cube: 'VCube', mask: str) -> str:
         if not mask:
@@ -277,52 +279,18 @@ class VCubeDisplay:
         return result
 
     def position_based_effect(self, facelet_colors, facelet_index) -> str:
-        effect_config = EFFECTS.get(self.effect, None)
+        matches = ANSI_TO_RGB.search(facelet_colors)
 
-        if effect_config is None:
-            return facelet_colors
+        if matches:
+            background_rgb = tuple(int(c) for c in matches.groups()[0:3])
+            foreground_rgb = tuple(int(c) for c in matches.groups()[3:6])
 
-        def extract_rgb_from_ansi(ansi_string):
-            """
-            Extrait les triplets RGB de deux codes ANSI successifs.
-
-            Args:
-                ansi_string (str): La chaîne de caractères contenant les codes ANSI.
-
-            Returns:
-                tuple: Un tuple de deux tuples, chacun contenant les valeurs RGB (r, g, b).
-                       Retourne (None, None) si les codes ne sont pas trouvés.
-            """
-
-            # Motif de l'expression régulière pour capturer les 3 valeurs RGB
-            # On cherche d'abord le code de couleur de fond (48;2) puis le code de couleur de premier plan (38;2)
-            # Les parenthèses ( ) créent des groupes de capture pour les nombres.
-            pattern = r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m'
-            import re
-            match = re.search(pattern, ansi_string)
-
-            if match:
-                # Les groupes de capture sont accessibles via match.groups()
-                # et sont des chaînes de caractères. On les convertit en entiers.
-                bg_rgb = tuple(int(c) for c in match.groups()[0:3])
-                fg_rgb = tuple(int(c) for c in match.groups()[3:6])
-                return bg_rgb, fg_rgb
-
-            return None, None
-
-        background_rgb, foreground_rgb = extract_rgb_from_ansi(facelet_colors)
-
-        new_background_rgb = effect_config['function'](
+        new_background_rgb = self.effect(
             background_rgb, facelet_index,
-            **effect_config['parameters'],
+            self.cube_size,
         )
-        # new_foreground_rgb = effect_config['function'](
-        #     foreground_rgb, facelet_index,
-        #     **effect_config['parameters'],
-        # )
 
         return build_ansi_color(
             new_background_rgb,
-            # new_foreground_rgb,
             foreground_rgb,
         )
