@@ -139,18 +139,20 @@ class VCube(VCubeIntegrityChecker):
         return cube
 
     def display(self, mode: str = '', orientation: str = '',
-                mask: str = '', palette: str = '') -> str:
+                mask: str = '', palette: str = '', effect: str = '') -> str:
         """
         Generate a visual representation of the cube.
         """
-        return VCubeDisplay(self, palette).display(mode, orientation, mask)
+        return VCubeDisplay(self, palette, effect).display(
+            mode, orientation, mask,
+        )
 
     def show(self, mode: str = '', orientation: str = '',
-             mask: str = '', palette: str = '') -> None:
+             mask: str = '', palette: str = '', effect: str = '') -> None:
         """
         Print a visual representation of the cube.
         """
-        print(self.display(mode, orientation, mask, palette), end='')
+        print(self.display(mode, orientation, mask, palette, effect), end='')
 
     def get_face(self, face: str) -> str:
         """
