@@ -456,12 +456,24 @@ class AlgorithmTestCase(unittest.TestCase):
 
         self.assertTrue(algo.has_rotations)
 
+        algo = parse_moves('R2 E U')
+
+        self.assertTrue(algo.has_rotations)
+
+        algo = parse_moves('R2 F U D2 L B')
+
+        self.assertFalse(algo.has_rotations)
+
     def test_has_internal_rotations(self):
         algo = parse_moves("B' R2 U 2-4Fw2")
 
         self.assertTrue(algo.has_internal_rotations)
 
         algo = parse_moves("B' R2 U 2-4f2")
+
+        self.assertTrue(algo.has_internal_rotations)
+
+        algo = parse_moves('R2 E U')
 
         self.assertTrue(algo.has_internal_rotations)
 
