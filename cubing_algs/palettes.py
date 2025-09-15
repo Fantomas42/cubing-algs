@@ -193,6 +193,8 @@ def build_ansi_palette(
 
 
 def load_palette(palette_name: str) -> dict[str, str]:
+    palette_name = palette_name.lower()
+
     if palette_name not in PALETTES:
         palette_name = os.getenv('CUBING_ALGS_PALETTE', 'default')
 
