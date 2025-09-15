@@ -4,6 +4,7 @@ from collections.abc import Iterable
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.metrics import compute_cycles
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
@@ -222,3 +223,31 @@ class Algorithm(UserList[Move]):
         inducted by the moves.
         """
         return any(m.is_wide_move for m in self)
+
+    def show(self, mode: str = '', orientation: str = ''):
+        """
+        Visualize the algorithm's effect on a cube.
+
+        Creates a VCube, applies this algorithm to it, and displays the result
+        with a mask showing which facelets are affected by the algorithm.
+        """
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        cube = VCube()
+        cube.rotate(self)
+
+        state_unique = ''.join([chr(ord('A') + i) for i in range(54)])
+        state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
+
+        impact_mask = ''.join(
+            '0' if f1 == f2 else '1'
+            for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
+        )
+
+        cube.show(
+            mode=mode,
+            orientation=orientation,
+            mask=impact_mask,
+        )
+
+        return cube
