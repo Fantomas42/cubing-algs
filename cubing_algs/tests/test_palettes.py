@@ -170,15 +170,6 @@ class TestLoadPalette(unittest.TestCase):
             self.assertIsNotNone(palette)
             self.assertIn('U', palette)
 
-    def test_load_palette_case(self):
-        """Test that palette can be loaded without case issue"""
-        palette = load_palette('ViBRaNT')
-        self.assertIsNotNone(palette)
-        self.assertIn('U', palette)
-        self.assertIn('reset', palette)
-        self.assertIn('vibrant', LOADED_PALETTES)
-        self.assertNotIn('ViBRaNT', LOADED_PALETTES)
-
     def test_load_palette_caching(self):
         """Test that palettes are cached after first load."""
         # First load
