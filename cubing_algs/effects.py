@@ -12,7 +12,7 @@ FACE_POSITIONS = {
 # Positioning
 
 
-def global_light_position_factor(facelet_index, cube_size):
+def global_light_position_factor(facelet_index: int, cube_size: int) -> float:
     face_size = cube_size * cube_size
 
     face_index = facelet_index // face_size
@@ -33,7 +33,7 @@ def global_light_position_factor(facelet_index, cube_size):
     return max(min(pos / 12, 1.0), 0)
 
 
-def get_position_factor(facelet_index, cube_size, **kw):
+def get_position_factor(facelet_index: int, cube_size: int, **kw) -> float:
     face_size = cube_size * cube_size
 
     facelet_mode = kw.get('facelet_mode', 'local')
@@ -61,7 +61,8 @@ def get_position_factor(facelet_index, cube_size, **kw):
 # Effects
 
 
-def shine(rgb, facelet_index, cube_size, **kw):
+def shine(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+          **kw) -> tuple[int, int, int]:
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -79,7 +80,8 @@ def shine(rgb, facelet_index, cube_size, **kw):
     return r, g, b
 
 
-def neon(rgb, facelet_index, cube_size, **kw):
+def neon(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+         **kw) -> tuple[int, int, int]:
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -99,7 +101,8 @@ def neon(rgb, facelet_index, cube_size, **kw):
     return r, g, b
 
 
-def chrome(rgb, facelet_index, cube_size, **kw):
+def chrome(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+           **kw) -> tuple[int, int, int]:
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -125,7 +128,8 @@ def chrome(rgb, facelet_index, cube_size, **kw):
     return r, g, b
 
 
-def gold(rgb, facelet_index, cube_size, **kw):
+def gold(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+         **kw) -> tuple[int, int, int]:
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -144,7 +148,8 @@ def gold(rgb, facelet_index, cube_size, **kw):
     return r, g, b
 
 
-def diamond(rgb, facelet_index, cube_size, **kw):
+def diamond(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+            **kw) -> tuple[int, int, int]:
     r, g, b = rgb
 
     local_index = facelet_index % (cube_size * cube_size)
@@ -161,7 +166,7 @@ def diamond(rgb, facelet_index, cube_size, **kw):
         b = min(255, max(0, int(b * 0.2 + 255 * factor)))
     else:
         # Subtle base shine
-        shine_factor = kw['intensity'] * 0.3
+        shine_factor = kw.get('intensity', 0.5) * 0.3
         r = min(255, max(0, int(r + (255 - r) * shine_factor)))
         g = min(255, max(0, int(g + (255 - g) * shine_factor)))
         b = min(255, max(0, int(b + (255 - b) * shine_factor)))
@@ -169,7 +174,8 @@ def diamond(rgb, facelet_index, cube_size, **kw):
     return r, g, b
 
 
-def rainbow(rgb, facelet_index, cube_size, **kw):
+def rainbow(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+            **kw) -> tuple[int, int, int]:
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -233,7 +239,7 @@ EFFECTS = {
         'function': neon,
         'parameters': {
             'intensity': 0.7,
-            'saturation_boost': 1.5,
+            'saturation': 1.2,
             'facelet_mode': 'local',
             'position_mode': 'light',
         },
