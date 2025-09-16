@@ -13,6 +13,10 @@ FACE_POSITIONS = {
 
 
 def global_light_position_factor(facelet_index: int, cube_size: int) -> float:
+    """
+    Calculate global lighting position factor
+    based on facelet position across the entire cube.
+    """
     face_size = cube_size * cube_size
 
     face_index = facelet_index // face_size
@@ -34,6 +38,10 @@ def global_light_position_factor(facelet_index: int, cube_size: int) -> float:
 
 
 def get_position_factor(facelet_index: int, cube_size: int, **kw) -> float:
+    """
+    Calculate position factor for effect application
+    based on mode and facelet location.
+    """
     face_size = cube_size * cube_size
 
     facelet_mode = kw.get('facelet_mode', 'local')
@@ -63,6 +71,9 @@ def get_position_factor(facelet_index: int, cube_size: int, **kw) -> float:
 
 def shine(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
           **kw) -> tuple[int, int, int]:
+    """
+    Apply shine effect with smooth brightness variation across the surface.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -82,6 +93,9 @@ def shine(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def neon(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
          **kw) -> tuple[int, int, int]:
+    """
+    Apply neon glow effect with saturated colors and bright highlights.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -103,6 +117,9 @@ def neon(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def chrome(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
            **kw) -> tuple[int, int, int]:
+    """
+    Apply chrome effect with metallic highlights and reflective appearance.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -130,6 +147,9 @@ def chrome(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def gold(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
          **kw) -> tuple[int, int, int]:
+    """
+    Apply golden metallic effect with warm yellow highlights.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -150,6 +170,9 @@ def gold(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def silver(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
            **kw) -> tuple[int, int, int]:
+    """
+    Apply silver metallic effect with cool highlights.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -170,6 +193,9 @@ def silver(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def copper(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
            **kw) -> tuple[int, int, int]:
+    """
+    Apply copper metallic effect with warm red-orange tints.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -188,6 +214,9 @@ def copper(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def diamond(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
             **kw) -> tuple[int, int, int]:
+    """
+    Apply diamond effect with bright sparkle points at specific positions.
+    """
     r, g, b = rgb
 
     local_index = facelet_index % (cube_size * cube_size)
@@ -214,6 +243,9 @@ def diamond(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def rainbow(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
             **kw) -> tuple[int, int, int]:
+    """
+    Apply rainbow prismatic effect with color shifting based on position.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -247,6 +279,10 @@ def rainbow(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def matte(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
           **kw) -> tuple[int, int, int]:
+    """
+    Apply matte effect by reducing brightness for a flat,
+    non-reflective appearance.
+    """
     r, g, b = rgb
 
     reduction = kw.get('reduction', 0.3)
@@ -261,6 +297,9 @@ def matte(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
 
 def glossy(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
            **kw) -> tuple[int, int, int]:
+    """
+    Apply glossy effect with sharp highlights like polished plastic.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -278,6 +317,9 @@ def glossy(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def frosted(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
             **kw) -> tuple[int, int, int]:
+    """
+    Apply frosted effect with soft, diffused lighting.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -295,6 +337,9 @@ def frosted(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def checkerboard(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
                  **kw) -> tuple[int, int, int]:
+    """
+    Apply checkerboard pattern with alternating light and dark squares.
+    """
     r, g, b = rgb
 
     local_index = facelet_index % (cube_size * cube_size)
@@ -314,6 +359,9 @@ def checkerboard(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def stripes(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
             **kw) -> tuple[int, int, int]:
+    """
+    Apply stripe pattern in horizontal, vertical, or diagonal directions.
+    """
     r, g, b = rgb
 
     local_index = facelet_index % (cube_size * cube_size)
@@ -325,7 +373,7 @@ def stripes(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
         position = (local_index // cube_size) % frequency
     elif direction == 'vertical':
         position = (local_index % cube_size) % frequency
-    else:  # diagonal
+    else:  # Diagonal
         row = local_index // cube_size
         col = local_index % cube_size
         position = (row + col) % frequency
@@ -341,6 +389,9 @@ def stripes(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def spiral(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
            **kw) -> tuple[int, int, int]:
+    """
+    Apply spiral pattern radiating from the center of each face.
+    """
     r, g, b = rgb
 
     local_index = facelet_index % (cube_size * cube_size)
@@ -368,6 +419,9 @@ def spiral(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def plasma(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
            **kw) -> tuple[int, int, int]:
+    """
+    Apply plasma effect with multiple interference wave patterns.
+    """
     r, g, b = rgb
 
     local_index = facelet_index % (cube_size * cube_size)
@@ -392,6 +446,10 @@ def plasma(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def holographic(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
                 **kw) -> tuple[int, int, int]:
+    """
+    Apply holographic effect with color shifting
+    that simulates viewing angle changes.
+    """
     r, g, b = rgb
 
     position_factor = get_position_factor(facelet_index, cube_size, **kw)
@@ -411,6 +469,9 @@ def holographic(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def dim(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
         **kw) -> tuple[int, int, int]:
+    """
+    Reduce brightness uniformly across all color channels.
+    """
     # Merge with brigthen
     r, g, b = rgb
 
@@ -425,6 +486,9 @@ def dim(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
 
 def brighten(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
              **kw) -> tuple[int, int, int]:
+    """
+    Increase brightness uniformly across all color channels.
+    """
     r, g, b = rgb
 
     factor = kw.get('factor', 1.3)
@@ -438,6 +502,9 @@ def brighten(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
 
 def contrast(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
              **kw) -> tuple[int, int, int]:
+    """
+    Enhance contrast by amplifying differences from middle gray.
+    """
     r, g, b = rgb
 
     factor = kw.get('factor', 1.5)
@@ -452,6 +519,10 @@ def contrast(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
 
 def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
              **kw) -> tuple[int, int, int]:
+    """
+    Adjust brightness based on face visibility
+    with front faces brighter than back faces.
+    """
     face_size = cube_size * cube_size
 
     face_index = facelet_index // face_size
@@ -465,6 +536,9 @@ def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 def vintage(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
             **kw) -> tuple[int, int, int]:
+    """
+    Apply vintage effect with desaturation and sepia tinting.
+    """
     r, g, b = rgb
 
     sepia_strength = kw.get('sepia', 0.5)
@@ -486,6 +560,9 @@ def vintage(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
 
 def noop(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
          **_kw) -> tuple[int, int, int]:
+    """
+    No-operation effect that returns the input color unchanged.
+    """
     return rgb
 
 # Configuration
@@ -683,6 +760,9 @@ EFFECTS = {
 
 
 def load_effect(effect_name: str, palette_name: str):
+    """
+    Load and configure an effect function with its parameters.
+    """
     if not effect_name or effect_name not in EFFECTS:
         return None
 
