@@ -1,13 +1,75 @@
 import math
 
+FACE_POSITIONS = {
+    0: [0, 1],
+    1: [1, 2],
+    2: [1, 1],
+    3: [2, 1],
+    4: [1, 0],
+    5: [1, 3],
+}
 
-def gradient(rgb, facelet_index, cube_size, **kw):
+# Positioning
+
+
+def global_light_position_factor(facelet_index, cube_size):
+    face_size = cube_size * cube_size
+
+    face_index = facelet_index // face_size
+    face_positions = FACE_POSITIONS[face_index]
+
+    index = facelet_index % face_size
+
+    col = index % cube_size
+    row = index // cube_size
+
+    pos = (
+        face_positions[1] * cube_size + col
+    ) + (
+        face_positions[0] * cube_size + row
+    )
+
+    # 12 is a factor to offset radius
+    return max(min(pos / 12, 1.0), 0)
+
+
+def get_position_factor(facelet_index, cube_size, **kw):
+    face_size = cube_size * cube_size
+
+    facelet_mode = kw.get('facelet_mode', 'local')
+    position_mode = kw.get('position_mode', 'numeral')
+
+    if position_mode == 'numeral':
+        if facelet_mode == 'local':
+            position_factor = (facelet_index % face_size) / face_size
+        else:
+            position_factor = facelet_index / (face_size * 6)
+    elif facelet_mode == 'local':  # Light local
+        index = facelet_index % face_size
+
+        col = index % cube_size
+        row = index // cube_size
+
+        position_factor = (col + row) / ((cube_size - 1) * 2)
+    else:  # Light global
+        position_factor = global_light_position_factor(
+            facelet_index, cube_size,
+        )
+
+    return position_factor
+
+# Effects
+
+
+def shine(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
-    grad_position = facelet_index / 9  # 8 ?
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
 
-    # Add shine gradient based on position (0.0 to 1.0)
-    shine_factor = math.sin(grad_position * math.pi) * kw['intensity']
+    shine_factor = (
+        math.sin(position_factor * math.pi)
+        * kw.get('intensity', 0.5)
+    )
 
     # Brighten the color
     r = min(255, max(0, int(r + (255 - r) * shine_factor)))
@@ -17,28 +79,48 @@ def gradient(rgb, facelet_index, cube_size, **kw):
     return r, g, b
 
 
+def neon(rgb, facelet_index, cube_size, **kw):
+    r, g, b = rgb
+
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
+
+    glow_factor = (
+        math.sin(position_factor * math.pi)
+        * kw.get('intensity', 0.5)
+    )
+    saturation = kw.get('saturation', 1.0)
+
+    max_component = max(r, g, b)
+    if max_component > 0:
+        r = min(255, max(0, int(r * saturation + glow_factor * 100)))
+        g = min(255, max(0, int(g * saturation + glow_factor * 100)))
+        b = min(255, max(0, int(b * saturation + glow_factor * 100)))
+
+    return r, g, b
+
+
 def chrome(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
-    local_index = facelet_index % 9
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
 
-    row = local_index // 3
-    col = local_index % 3
-    position_factor = (row + col) / 4.0  # 0.0 to 1.0 diagonal
+    shine_factor = (
+        math.sin(position_factor * math.pi)
+        * kw.get('intensity', 0.5)
+    )
 
-    shine_intensity = math.sin(position_factor * math.pi) * kw['intensity']
-    metallic = kw['metallic_factor']
+    metallic = kw.get('metallic', 0.5)
 
-    if shine_intensity > 0.5:  # noqa: PLR2004
+    if shine_factor > 0.5:  # noqa: PLR2004
         # Bright metallic highlight
         r = min(255, max(0, int(r * (1 - metallic) + 255 * metallic)))
         g = min(255, max(0, int(g * (1 - metallic) + 255 * metallic)))
         b = min(255, max(0, int(b * (1 - metallic) + 255 * metallic)))
     else:
         # Subtle enhancement
-        r = min(255, max(0, int(r + (200 - r) * shine_intensity)))
-        g = min(255, max(0, int(g + (200 - g) * shine_intensity)))
-        b = min(255, max(0, int(b + (200 - b) * shine_intensity)))
+        r = min(255, max(0, int(r + (200 - r) * shine_factor)))
+        g = min(255, max(0, int(g + (200 - g) * shine_factor)))
+        b = min(255, max(0, int(b + (200 - b) * shine_factor)))
 
     return r, g, b
 
@@ -46,18 +128,18 @@ def chrome(rgb, facelet_index, cube_size, **kw):
 def gold(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
-    local_index = facelet_index % 9
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
 
-    row = local_index // 3
-    col = local_index % 3
-    position_factor = (row + col) / 4.0  # 0.0 to 1.0 diagonal
+    shine_factor = (
+        math.sin(position_factor * math.pi)
+        * kw.get('intensity', 0.5)
+    )
 
-    shine_intensity = math.sin(position_factor * math.pi) * kw['intensity']
-    warmth = kw['warmth']
+    warmth = kw.get('warmth', 0.5)
 
-    r = min(255, max(0, int(r + (255 - r) * shine_intensity * warmth)))
-    g = min(255, max(0, int(g + (200 - g) * shine_intensity)))
-    b = min(255, max(0, int(b + (100 - b) * shine_intensity * 0.5)))
+    r = min(255, max(0, int(r + (255 - r) * shine_factor * warmth)))
+    g = min(255, max(0, int(g + (200 - g) * shine_factor)))
+    b = min(255, max(0, int(b + (100 - b) * shine_factor * 0.5)))
 
     return r, g, b
 
@@ -65,10 +147,10 @@ def gold(rgb, facelet_index, cube_size, **kw):
 def diamond(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
-    local_index = facelet_index % 9
+    local_index = facelet_index % (cube_size * cube_size)
 
-    row = local_index // 3
-    col = local_index % 3
+    row = local_index // cube_size
+    col = local_index % cube_size
 
     sparkle_pos = [(0, 0), (1, 1), (2, 2), (0, 2), (2, 0)]
     if (row, col) in sparkle_pos:
@@ -79,22 +161,18 @@ def diamond(rgb, facelet_index, cube_size, **kw):
         b = min(255, max(0, int(b * 0.2 + 255 * factor)))
     else:
         # Subtle base shine
-        shine_intensity = kw['intensity'] * 0.3
-        r = min(255, max(0, int(r + (255 - r) * shine_intensity)))
-        g = min(255, max(0, int(g + (255 - g) * shine_intensity)))
-        b = min(255, max(0, int(b + (255 - b) * shine_intensity)))
+        shine_factor = kw['intensity'] * 0.3
+        r = min(255, max(0, int(r + (255 - r) * shine_factor)))
+        g = min(255, max(0, int(g + (255 - g) * shine_factor)))
+        b = min(255, max(0, int(b + (255 - b) * shine_factor)))
 
     return r, g, b
 
 
-def rainbow(rgb, facelet_index, cube_size, **_kw):
+def rainbow(rgb, facelet_index, cube_size, **kw):
     r, g, b = rgb
 
-    local_index = facelet_index % 9
-
-    row = local_index // 3
-    col = local_index % 3
-    position_factor = (row + col) / 4.0  # 0.0 to 1.0 diagonal
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
 
     # Rainbow prismatic effect
     base_intensity = sum([r, g, b]) / 3
@@ -123,85 +201,32 @@ def rainbow(rgb, facelet_index, cube_size, **_kw):
     return r, g, b
 
 
-def soft(rgb, facelet_index, cube_size, **kw):
-    r, g, b = rgb
-
-    local_index = facelet_index % 9
-
-    row = local_index // 3
-    col = local_index % 3
-    position_factor = (row + col) / 4.0  # 0.0 to 1.0 diagonal
-
-    shine_intensity = math.sin(position_factor * math.pi) * kw['intensity']
-    r = min(255, max(0, int(r + (255 - r) * shine_intensity)))
-    g = min(255, max(0, int(g + (255 - g) * shine_intensity)))
-    b = min(255, max(0, int(b + (255 - b) * shine_intensity)))
-
-    return r, g, b
-
-
-def neon(rgb, facelet_index, cube_size, **kw):
-    r, g, b = rgb
-
-    local_index = facelet_index % 9
-
-    row = local_index // 3
-    col = local_index % 3
-    position_factor = (row + col) / 4.0  # 0.0 to 1.0 diagonal
-
-    # Neon glow effect
-    glow_intensity = math.sin(position_factor * math.pi) * kw['intensity']
-    saturation = kw.get('saturation_boost', 1.0)
-
-    # Boost saturation and brightness
-    max_component = max(r, g, b)
-    if max_component > 0:
-        r = min(255, max(0, int(r * saturation + glow_intensity * 100)))
-        g = min(255, max(0, int(g * saturation + glow_intensity * 100)))
-        b = min(255, max(0, int(b * saturation + glow_intensity * 100)))
-
-    return r, g, b
+# Configuration
 
 
 EFFECTS = {
-    'gradient': {
-        'function': gradient,
+    'shine': {
+        'function': shine,
         'parameters': {
             'intensity': 0.6,
-        },
-    },
-    'chrome': {
-        'function': chrome,
-        'parameters': {
-            'intensity': 0.8,
-            'metallic_factor': 0.7,
-        },
-    },
-    'gold': {
-        'function': gold,
-        'parameters': {
-            'intensity': 0.6,
-            'warmth': 1.2,
-        },
-    },
-    'diamond': {
-        'function': diamond,
-        'parameters': {
-            'intensity': 0.9,
-            'sparkle': True,
-        },
-    },
-    'rainbow': {
-        'function': rainbow,
-        'parameters': {
-            'intensity': 0.5,  # TODO: unused
-            'prismatic': True,  # TODO: unused
+            'facelet_mode': 'local',
+            'position_mode': 'light',
         },
     },
     'soft': {
-        'function': soft,
+        'function': shine,
         'parameters': {
             'intensity': 0.3,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'gradient': {
+        'function': shine,
+        'parameters': {
+            'intensity': 0.6,
+            'facelet_mode': 'local',
+            'position_mode': 'numeral',
         },
     },
     'neon': {
@@ -209,6 +234,39 @@ EFFECTS = {
         'parameters': {
             'intensity': 0.7,
             'saturation_boost': 1.5,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'chrome': {
+        'function': chrome,
+        'parameters': {
+            'intensity': 0.8,
+            'metallic': 0.7,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'gold': {
+        'function': gold,
+        'parameters': {
+            'intensity': 0.6,
+            'warmth': 1.2,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'diamond': {
+        'function': diamond,
+        'parameters': {
+            'intensity': 0.9,
+        },
+    },
+    'rainbow': {
+        'function': rainbow,
+        'parameters': {
+            'facelet_mode': 'local',
+            'position_mode': 'light',
         },
     },
 }
