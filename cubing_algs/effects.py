@@ -148,6 +148,44 @@ def gold(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
     return r, g, b
 
 
+def silver(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+           **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
+    intensity = kw.get('intensity', 0.7)
+
+    shine_factor = math.sin(position_factor * math.pi) * intensity
+
+    # Cool metallic highlights
+    average = (r + g + b) / 3
+    metallic_boost = (255 - average) * shine_factor * 0.8
+
+    r = min(255, max(0, int(r + metallic_boost * 0.9)))
+    g = min(255, max(0, int(g + metallic_boost)))
+    b = min(255, max(0, int(b + metallic_boost * 1.1)))
+
+    return r, g, b
+
+
+def copper(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+           **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
+    intensity = kw.get('intensity', 0.6)
+    warmth = kw.get('warmth', 1.0)
+
+    shine_factor = math.sin(position_factor * math.pi) * intensity
+
+    # Copper coloring: red-orange with green tints
+    r = min(255, max(0, int(r + (220 - r) * shine_factor * warmth)))
+    g = min(255, max(0, int(g + (140 - g) * shine_factor * 0.8)))
+    b = min(255, max(0, int(b + (80 - b) * shine_factor * 0.4)))
+
+    return r, g, b
+
+
 def diamond(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
             **kw) -> tuple[int, int, int]:
     r, g, b = rgb
@@ -207,6 +245,249 @@ def rainbow(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
     return r, g, b
 
 
+def matte(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+          **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    reduction = kw.get('reduction', 0.3)
+
+    # Reduce brightness variations for flat look
+    r = min(255, max(0, int(r * (1 - reduction))))
+    g = min(255, max(0, int(g * (1 - reduction))))
+    b = min(255, max(0, int(b * (1 - reduction))))
+
+    return r, g, b
+
+
+def glossy(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+           **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
+    intensity = kw.get('intensity', 0.8)
+
+    # Sharp highlights like polished plastic
+    highlight = (math.sin(position_factor * math.pi) ** 3) * intensity
+
+    r = min(255, max(0, int(r + (255 - r) * highlight)))
+    g = min(255, max(0, int(g + (255 - g) * highlight)))
+    b = min(255, max(0, int(b + (255 - b) * highlight)))
+
+    return r, g, b
+
+
+def frosted(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+            **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
+    intensity = kw.get('intensity', 0.4)
+
+    # Soft, diffused lighting
+    diffuse = math.cos(position_factor * math.pi / 2) * intensity
+
+    r = min(255, max(0, int(r + (255 - r) * diffuse)))
+    g = min(255, max(0, int(g + (255 - g) * diffuse)))
+    b = min(255, max(0, int(b + (255 - b) * diffuse)))
+
+    return r, g, b
+
+
+def checkerboard(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+                 **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    local_index = facelet_index % (cube_size * cube_size)
+    row = local_index // cube_size
+    col = local_index % cube_size
+
+    intensity = kw.get('intensity', 0.5)
+
+    factor = 1 + intensity if (row + col) % 2 == 0 else 1 - intensity
+
+    r = min(255, max(0, int(r * factor)))
+    g = min(255, max(0, int(g * factor)))
+    b = min(255, max(0, int(b * factor)))
+
+    return r, g, b
+
+
+def stripes(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+            **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    local_index = facelet_index % (cube_size * cube_size)
+    direction = kw.get('direction', 'horizontal')
+    frequency = kw.get('frequency', 2)
+    intensity = kw.get('intensity', 0.4)
+
+    if direction == 'horizontal':
+        position = (local_index // cube_size) % frequency
+    elif direction == 'vertical':
+        position = (local_index % cube_size) % frequency
+    else:  # diagonal
+        row = local_index // cube_size
+        col = local_index % cube_size
+        position = (row + col) % frequency
+
+    factor = 1 + intensity if position < frequency / 2 else 1 - intensity
+
+    r = min(255, max(0, int(r * factor)))
+    g = min(255, max(0, int(g * factor)))
+    b = min(255, max(0, int(b * factor)))
+
+    return r, g, b
+
+
+def spiral(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+           **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    local_index = facelet_index % (cube_size * cube_size)
+    row = local_index // cube_size
+    col = local_index % cube_size
+
+    intensity = kw.get('intensity', 0.5)
+
+    # Distance from center
+    center = (cube_size - 1) / 2
+    dx = col - center
+    dy = row - center
+    angle = math.atan2(dy, dx)
+    distance = math.sqrt(dx * dx + dy * dy)
+
+    # Spiral pattern
+    spiral_factor = math.sin(angle * 2 + distance) * intensity
+
+    r = min(255, max(0, int(r + (255 - r) * spiral_factor)))
+    g = min(255, max(0, int(g + (255 - g) * spiral_factor)))
+    b = min(255, max(0, int(b + (255 - b) * spiral_factor)))
+
+    return r, g, b
+
+
+def plasma(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+           **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    local_index = facelet_index % (cube_size * cube_size)
+    row = local_index // cube_size
+    col = local_index % cube_size
+
+    intensity = kw.get('intensity', 0.4)
+
+    # Multiple interference patterns
+    plasma1 = math.sin(row * 0.5) * math.cos(col * 0.5)
+    plasma2 = math.sin(math.sqrt(row * row + col * col) * 0.3)
+    plasma3 = math.sin((row + col) * 0.4)
+
+    plasma_factor = (plasma1 + plasma2 + plasma3) / 3 * intensity
+
+    r = min(255, max(0, int(r + (255 - r) * plasma_factor)))
+    g = min(255, max(0, int(g + (255 - g) * plasma_factor)))
+    b = min(255, max(0, int(b + (255 - b) * plasma_factor)))
+
+    return r, g, b
+
+
+def holographic(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+                **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    position_factor = get_position_factor(facelet_index, cube_size, **kw)
+    intensity = kw.get('intensity', 0.6)
+
+    # Simulate color shifting based on viewing angle
+    shift_r = math.sin(position_factor * 4 * math.pi) * intensity
+    shift_g = math.sin(position_factor * 4 * math.pi + 2.09) * intensity
+    shift_b = math.sin(position_factor * 4 * math.pi + 4.18) * intensity
+
+    r = min(255, max(0, int(r + shift_r * 100)))
+    g = min(255, max(0, int(g + shift_g * 100)))
+    b = min(255, max(0, int(b + shift_b * 100)))
+
+    return r, g, b
+
+
+def dim(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+        **kw) -> tuple[int, int, int]:
+    # Merge with brigthen
+    r, g, b = rgb
+
+    factor = kw.get('factor', 0.7)
+
+    r = min(255, max(0, int(r * factor)))
+    g = min(255, max(0, int(g * factor)))
+    b = min(255, max(0, int(b * factor)))
+
+    return r, g, b
+
+
+def brighten(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+             **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    factor = kw.get('factor', 1.3)
+
+    r = min(255, max(0, int(r * factor)))
+    g = min(255, max(0, int(g * factor)))
+    b = min(255, max(0, int(b * factor)))
+
+    return r, g, b
+
+
+def contrast(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+             **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    factor = kw.get('factor', 1.5)
+
+    # Enhance differences from middle gray (128)
+    r = min(255, max(0, int(128 + (r - 128) * factor)))
+    g = min(255, max(0, int(128 + (g - 128) * factor)))
+    b = min(255, max(0, int(128 + (b - 128) * factor)))
+
+    return r, g, b
+
+
+def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
+             **kw) -> tuple[int, int, int]:
+    face_size = cube_size * cube_size
+
+    face_index = facelet_index // face_size
+    kw['factor'] = 0.7
+
+    if face_index < 3:
+        kw['factor'] = 1.5
+
+    return dim(rgb, facelet_index, cube_size, **kw)
+
+
+def vintage(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+            **kw) -> tuple[int, int, int]:
+    r, g, b = rgb
+
+    sepia_strength = kw.get('sepia', 0.5)
+    desaturation = kw.get('desaturation', 0.3)
+
+    # Desaturate
+    gray = int(0.299 * r + 0.587 * g + 0.114 * b)
+    r = int(r * (1 - desaturation) + gray * desaturation)
+    g = int(g * (1 - desaturation) + gray * desaturation)
+    b = int(b * (1 - desaturation) + gray * desaturation)
+
+    # Apply sepia tint
+    sepia_r = min(255, int(r + sepia_strength * 40))
+    sepia_g = min(255, int(g + sepia_strength * 20))
+    sepia_b = max(0, int(b - sepia_strength * 30))
+
+    return sepia_r, sepia_g, sepia_b
+
+
+def noop(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+         **_kw) -> tuple[int, int, int]:
+    return rgb
+
 # Configuration
 
 
@@ -262,6 +543,23 @@ EFFECTS = {
             'position_mode': 'light',
         },
     },
+    'silver': {
+        'function': silver,
+        'parameters': {
+            'intensity': 0.7,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'copper': {
+        'function': copper,
+        'parameters': {
+            'intensity': 0.6,
+            'warmth': 1.0,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
     'diamond': {
         'function': diamond,
         'parameters': {
@@ -275,6 +573,112 @@ EFFECTS = {
             'position_mode': 'light',
         },
     },
+    'matte': {
+        'function': matte,
+        'parameters': {
+            'reduction': 0.3,
+        },
+    },
+    'glossy': {
+        'function': glossy,
+        'parameters': {
+            'intensity': 0.8,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'frosted': {
+        'function': frosted,
+        'parameters': {
+            'intensity': 0.4,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'checkerboard': {
+        'function': checkerboard,
+        'parameters': {
+            'intensity': 0.5,
+        },
+    },
+    'h-stripes': {
+        'function': stripes,
+        'parameters': {
+            'direction': 'horizontal',
+            'frequency': 2,
+            'intensity': 0.4,
+        },
+    },
+    'v-stripes': {
+        'function': stripes,
+        'parameters': {
+            'direction': 'vertical',
+            'frequency': 2,
+            'intensity': 0.4,
+        },
+    },
+    'd-stripes': {
+        'function': stripes,
+        'parameters': {
+            'direction': 'diagonal',
+            'frequency': 2,
+            'intensity': 0.4,
+        },
+    },
+    'spiral': {
+        'function': spiral,
+        'parameters': {
+            'intensity': 0.5,
+        },
+    },
+    'plasma': {
+        'function': plasma,
+        'parameters': {
+            'intensity': 0.4,
+        },
+    },
+    'holographic': {
+        'function': holographic,
+        'parameters': {
+            'intensity': 0.6,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
+        },
+    },
+    'dim': {
+        'function': dim,
+        'parameters': {
+            'factor': 0.7,
+        },
+    },
+    'brighten': {
+        'function': brighten,
+        'parameters': {
+            'factor': 1.3,
+        },
+    },
+    'contrast': {
+        'function': contrast,
+        'parameters': {
+            'factor': 1.5,
+        },
+    },
+    'vintage': {
+        'function': vintage,
+        'parameters': {
+            'sepia': 0.5,
+            'desaturation': 0.3,
+        },
+    },
+    'face-visible': {
+        'function': face_visible,
+        'parameters': {
+            'factor': 1.3,
+        },
+    },
+    'noop': {
+        'function': noop,
+    },
 }
 
 
@@ -283,7 +687,7 @@ def load_effect(effect_name: str, palette_name: str):
         return None
 
     effect_function = EFFECTS[effect_name]['function']
-    effect_parameters = EFFECTS[effect_name]['parameters']
+    effect_parameters = EFFECTS[effect_name].get('parameters', {})
 
     if palette_name in EFFECTS[effect_name]:
         effect_parameters.update(EFFECTS[effect_name][palette_name])
