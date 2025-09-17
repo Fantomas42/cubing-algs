@@ -40,11 +40,11 @@ class VCubeDisplay:
     facelet_size = 3
 
     def __init__(self, cube: 'VCube',
-                 palette_name: str = '', effect_name: str = ''):
+                 palette_name: str = '', effect_name: str = '') -> None:
         self.cube = cube
-        self.cube_size = cube.size
-        self.face_size = self.cube_size * self.cube_size
-        self.face_number = cube.face_number
+        self.cube_size: int = cube.size
+        self.face_size: int = self.cube_size * self.cube_size
+        self.face_number: int = cube.face_number
 
         self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
         self.palette_name = (palette_name or DEFAULT_PALETTE).lower()
@@ -302,7 +302,8 @@ class VCubeDisplay:
 
         return result
 
-    def position_based_effect(self, facelet_colors, facelet_index) -> str:
+    def position_based_effect(self, facelet_colors: str,
+                              facelet_index: int) -> str:
         matches = ANSI_TO_RGB.search(facelet_colors)
 
         if matches:
