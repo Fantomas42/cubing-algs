@@ -20,6 +20,8 @@ from cubing_algs.effects import load_effect
 from cubing_algs.effects import matte
 from cubing_algs.effects import neon
 from cubing_algs.effects import noop
+from cubing_algs.effects import parse_effect_name
+from cubing_algs.effects import parse_effect_parameters
 from cubing_algs.effects import plasma
 from cubing_algs.effects import rainbow
 from cubing_algs.effects import shine
@@ -906,3 +908,258 @@ class TestLoadEffect(unittest.TestCase):
                 effect_func, f'Failed to load effect: {effect_name}',
             )
             self.assertTrue(callable(effect_func))
+
+
+class TestParameterParsing(unittest.TestCase):
+    """Test parameter parsing functions."""
+
+    def test_parse_effect_parameters_empty(self):
+        """Test parsing empty parameter string."""
+        result = parse_effect_parameters('')
+        self.assertEqual(result, {})
+
+    def test_parse_effect_parameters_single_int(self):
+        """Test parsing single integer parameter."""
+        result = parse_effect_parameters('intensity=5')
+        self.assertEqual(result, {'intensity': 5})
+
+    def test_parse_effect_parameters_single_float(self):
+        """Test parsing single float parameter."""
+        result = parse_effect_parameters('factor=0.75')
+        self.assertEqual(result, {'factor': 0.75})
+
+    def test_parse_effect_parameters_single_string(self):
+        """Test parsing single string parameter."""
+        result = parse_effect_parameters('direction=horizontal')
+        self.assertEqual(result, {'direction': 'horizontal'})
+
+    def test_parse_effect_parameters_quoted_string(self):
+        """Test parsing quoted string parameter."""
+        result = parse_effect_parameters('mode="light mode"')
+        self.assertEqual(result, {'mode': 'light mode'})
+
+        result = parse_effect_parameters("mode='dark mode'")
+        self.assertEqual(result, {'mode': 'dark mode'})
+
+    def test_parse_effect_parameters_boolean(self):
+        """Test parsing boolean parameters."""
+        result = parse_effect_parameters('enabled=true')
+        self.assertEqual(result, {'enabled': True})
+
+        result = parse_effect_parameters('disabled=false')
+        self.assertEqual(result, {'disabled': False})
+
+    def test_parse_effect_parameters_multiple(self):
+        """Test parsing multiple parameters."""
+        result = parse_effect_parameters(
+            'intensity=0.8,factor=1.5,direction=vertical',
+        )
+        expected = {
+            'intensity': 0.8, 'factor': 1.5,
+            'direction': 'vertical',
+        }
+        self.assertEqual(result, expected)
+
+    def test_parse_effect_parameters_mixed_types(self):
+        """Test parsing mixed parameter types."""
+        result = parse_effect_parameters(
+            'intensity=0.8,frequency=3,enabled=true,mode=glossy',
+        )
+        expected = {
+            'intensity': 0.8, 'frequency': 3,
+            'enabled': True, 'mode': 'glossy',
+        }
+        self.assertEqual(result, expected)
+
+    def test_parse_effect_parameters_negative_numbers(self):
+        """Test parsing negative numbers."""
+        result = parse_effect_parameters('offset=-5,factor=-0.3')
+        expected = {'offset': -5, 'factor': -0.3}
+        self.assertEqual(result, expected)
+
+    def test_parse_effect_parameters_whitespace(self):
+        """Test parsing with extra whitespace."""
+        result = parse_effect_parameters('  intensity = 0.8 , factor = 1.5  ')
+        expected = {'intensity': 0.8, 'factor': 1.5}
+        self.assertEqual(result, expected)
+
+    def test_parse_effect_parameters_invalid_format(self):
+        """Test parsing with invalid parameter format."""
+        result = parse_effect_parameters('intensity,factor=1.5')
+        expected = {'factor': 1.5}  # Invalid param is ignored
+        self.assertEqual(result, expected)
+
+    def test_parse_effect_name_simple(self):
+        """Test parsing simple effect name without parameters."""
+        name, params = parse_effect_name('shine')
+        self.assertEqual(name, 'shine')
+        self.assertEqual(params, {})
+
+    def test_parse_effect_name_with_parameters(self):
+        """Test parsing effect name with parameters."""
+        name, params = parse_effect_name('shine(intensity=0.8)')
+        self.assertEqual(name, 'shine')
+        self.assertEqual(params, {'intensity': 0.8})
+
+    def test_parse_effect_name_with_multiple_parameters(self):
+        """Test parsing effect name with multiple parameters."""
+        name, params = parse_effect_name('chrome(intensity=0.7,metallic=0.9)')
+        self.assertEqual(name, 'chrome')
+        self.assertEqual(params, {'intensity': 0.7, 'metallic': 0.9})
+
+    def test_parse_effect_name_empty_parameters(self):
+        """Test parsing effect name with empty parameter list."""
+        name, params = parse_effect_name('neon()')
+        self.assertEqual(name, 'neon')
+        self.assertEqual(params, {})
+
+    def test_parse_effect_name_whitespace(self):
+        """Test parsing effect name with whitespace."""
+        name, params = parse_effect_name('  gold( intensity=0.6 ) ')
+        self.assertEqual(name, 'gold')
+        self.assertEqual(params, {'intensity': 0.6})
+
+
+class TestEnhancedLoadEffect(unittest.TestCase):
+    """Test enhanced load_effect function with chaining and parameters."""
+
+    def test_load_effect_single_effect(self):
+        """Test loading single effect without changes."""
+        effect_func = load_effect('noop', 'default')
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 150, 200)
+        result = effect_func(test_rgb, 0, 3)
+        self.assertEqual(result, test_rgb)
+
+    def test_load_effect_single_with_custom_params(self):
+        """Test loading single effect with custom parameters."""
+        effect_func = load_effect('dim(factor=0.5)', 'default')
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+
+        # Should be dimmed by factor 0.5
+        expected = (50, 50, 50)
+        self.assertEqual(result, expected)
+
+    def test_load_effect_chained_effects(self):
+        """Test loading chained effects."""
+        effect_func = load_effect('brighten|dim', 'default')
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+
+        # Should apply brighten then dim
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 3)
+
+    def test_load_effect_chained_with_params(self):
+        """Test loading chained effects with custom parameters."""
+        effect_func = load_effect(
+            'brighten(factor=2.0)|dim(factor=0.5)',
+            'default',
+        )
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+
+        # Should apply brighten factor 2.0 then dim factor 0.5
+        # (100 * 2.0) * 0.5 = 100, so should return to original
+        expected = (100, 100, 100)
+        self.assertEqual(result, expected)
+
+    def test_load_effect_multiple_chained(self):
+        """Test loading multiple chained effects."""
+        effect_func = load_effect('noop|noop|noop', 'default')
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 150, 200)
+        result = effect_func(test_rgb, 0, 3)
+        # Chain of noops should return original
+        self.assertEqual(result, test_rgb)
+
+    def test_load_effect_invalid_in_chain(self):
+        """Test loading chain with invalid effect."""
+        effect_func = load_effect('shine|invalid_effect|dim', 'default')
+        # Should still work with valid effects
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+        # Should apply shine and dim, skipping invalid
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 3)
+
+    def test_load_effect_all_invalid_chain(self):
+        """Test loading chain with all invalid effects."""
+        effect_func = load_effect('invalid1|invalid2', 'default')
+        self.assertIsNone(effect_func)
+
+    def test_load_effect_empty_chain(self):
+        """Test loading empty effect chain."""
+        effect_func = load_effect('', 'default')
+        self.assertIsNone(effect_func)
+
+    def test_load_effect_complex_params(self):
+        """Test loading effect with complex parameter combinations."""
+        effect_func = load_effect(
+            'd-stripes(frequency=3,intensity=0.6)',
+            'default',
+        )
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 3)
+
+    def test_load_effect_parameter_override(self):
+        """Test that custom parameters override default ones."""
+        # Load with very low intensity
+        effect_func1 = load_effect('dim(factor=0.1)', 'default')
+
+        # Load with very high intensity
+        effect_func2 = load_effect('dim(factor=0.9)', 'default')
+
+        test_rgb = (100, 100, 100)
+        result1 = effect_func1(test_rgb, 0, 3)
+        result2 = effect_func2(test_rgb, 0, 3)
+
+        # Results should be different due to different factors
+        self.assertNotEqual(result1, result2)
+
+    def test_load_effect_whitespace_handling(self):
+        """Test that whitespace in effect names is handled correctly."""
+        effect_func = load_effect('  shine  |  dim  ', 'default')
+        self.assertIsNotNone(effect_func)
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 3)
+
+    def test_load_effect_real_world_combinations(self):
+        """Test real-world effect combinations."""
+        combinations = [
+            'shine(intensity=0.8)|chrome(metallic=0.7)',
+            'gold(warmth=1.2)|glossy(intensity=0.9)',
+            'checkerboard(intensity=0.3)|vintage(sepia=0.4)',
+            'h-stripes(frequency=2)|rainbow',
+            'dim(factor=0.8)|contrast(factor=1.5)|brighten(factor=1.1)',
+        ]
+
+        test_rgb = (128, 128, 128)
+        for combination in combinations:
+            effect_func = load_effect(combination, 'default')
+            self.assertIsNotNone(effect_func, f'Failed to load: {combination}')
+
+            result = effect_func(test_rgb, 4, 3)
+            self.assertIsInstance(result, tuple)
+            self.assertEqual(len(result), 3)
+            for component in result:
+                self.assertGreaterEqual(component, 0)
+                self.assertLessEqual(component, 255)

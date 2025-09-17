@@ -1,4 +1,7 @@
 import math
+import re
+from collections.abc import Callable
+from typing import Any
 
 FACE_POSITIONS = {
     0: [0, 1],
@@ -759,18 +762,82 @@ EFFECTS = {
 }
 
 
-def load_effect(effect_name: str, palette_name: str):
+def parse_effect_parameters(param_string: str) -> dict[
+        str, float | int | str | bool]:
     """
-    Load and configure an effect function with its parameters.
+    Parse parameter string in format "param1=value1,param2=value2".
+    Supports int, float, and string values.
+    """
+    parameters: dict[str, float | int | str | bool] = {}
+    if not param_string:
+        return parameters
+
+    for param_part in param_string.split(','):
+        param = param_part.strip()
+        if '=' not in param:
+            continue
+
+        key, value = param.split('=', 1)
+        key = key.strip()
+        value = value.strip()
+
+        # Try to convert to appropriate type
+        if value.lower() in {'true', 'false'}:
+            parameters[key] = value.lower() == 'true'
+        elif value.replace('.', '', 1).replace('-', '', 1).isdigit():
+            if '.' in value:
+                parameters[key] = float(value)
+            else:
+                parameters[key] = int(value)
+        else:
+            # Remove quotes if present
+            if (value.startswith('"') and value.endswith('"')) or (
+                value.startswith("'") and value.endswith("'")
+            ):
+                value = value[1:-1]
+            parameters[key] = value
+
+    return parameters
+
+
+def parse_effect_name(effect_name: str) -> tuple[str, dict[
+        str, float | int | str | bool]]:
+    """
+    Parse effect name with optional parameters.
+    Format: "effect_name(param1=value1,param2=value2)"
+    """
+    # Match pattern: effect_name(parameters)
+    match = re.match(r'^([^(]+)(?:\(([^)]*)\))?$', effect_name.strip())
+    if not match:
+        return effect_name.strip(), {}
+
+    name = match.group(1).strip()
+    param_string = match.group(2) or ''
+
+    return name, parse_effect_parameters(param_string)
+
+
+def load_single_effect(
+        effect_name: str,
+        custom_params: dict[str, float | int | str | bool],
+        palette_name: str,
+):
+    """
+    Load and configure a single effect function with its parameters.
     """
     if not effect_name or effect_name not in EFFECTS:
         return None
 
-    effect_function = EFFECTS[effect_name]['function']
-    effect_parameters = EFFECTS[effect_name].get('parameters', {})
+    effect_config: dict[str, Any] = EFFECTS[effect_name]  # type: ignore[assignment]
+    effect_function: Callable[..., tuple[int, int, int]] = effect_config[
+        'function'
+    ]
+    effect_parameters = effect_config.get('parameters', {}).copy()
 
-    if palette_name in EFFECTS[effect_name]:
-        effect_parameters.update(EFFECTS[effect_name][palette_name])
+    if palette_name in effect_config:
+        effect_parameters.update(effect_config[palette_name])
+
+    effect_parameters.update(custom_params)
 
     def effect(rgb, facelet_index, cube_size):
         return effect_function(
@@ -779,3 +846,41 @@ def load_effect(effect_name: str, palette_name: str):
         )
 
     return effect
+
+
+def load_effect(effect_name: str, palette_name: str):
+    """
+    Load and configure effect function(s) with parameters.
+    Supports chaining multiple effects using pipe separator.
+
+    Examples:
+        'shine' - Single effect
+        'shine(intensity=0.8)' - Single effect with custom parameter
+        'shine|dim' - Chained effects
+        'shine(intensity=0.8)|dim(factor=0.6)' - Chained effects with parameters
+    """
+    if not effect_name:
+        return None
+
+    effect_parts = [part.strip() for part in effect_name.split('|')]
+
+    effects = []
+    for part in effect_parts:
+        name, custom_params = parse_effect_name(part)
+        effect_func = load_single_effect(name, custom_params, palette_name)
+        if effect_func is not None:
+            effects.append(effect_func)
+
+    if not effects:
+        return None
+
+    if len(effects) == 1:
+        return effects[0]
+
+    def chained_effect(rgb, facelet_index, cube_size):
+        result = rgb
+        for effect_func in effects:
+            result = effect_func(result, facelet_index, cube_size)
+        return result
+
+    return chained_effect
