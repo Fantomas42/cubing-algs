@@ -173,19 +173,19 @@ class VCubeDisplay:
         return result
 
     def display_top_down_adjacent_facelets(self, face: str, face_mask: str,
-                                           *, top: bool = False) -> str:
+                                           face_index: int, *,
+                                           top: bool = False) -> str:
         result = ' ' * (self.facelet_size * self.cube_size)
-        facelets = face[:3]
-        facelets_mask = face_mask[:3]
+        index_range = list(range(self.cube_size))
 
         if top:
-            facelets = facelets[::-1]
-            facelets_mask = facelets_mask[::-1]
+            index_range.reverse()
 
-        for index, facelet in enumerate(facelets):
+        for index in index_range:
             result += self.display_facelet(
-                facelet,
-                facelets_mask[index],
+                face[index],
+                face_mask[index],
+                (face_index * self.face_size) + index,
             )
 
         result += '\n'
@@ -247,38 +247,50 @@ class VCubeDisplay:
         result = ''
 
         # Top
+        top_adjacent_index = FACE_INDEXES['B']
         result = self.display_top_down_adjacent_facelets(
-            faces[FACE_INDEXES['B']],
-            faces_mask[FACE_INDEXES['B']],
+            faces[top_adjacent_index],
+            faces_mask[top_adjacent_index],
+            top_adjacent_index,
             top=True,
         )
 
         # Middle
-        for line in range(3):
+        for line in range(self.cube_size):
             result += ' ' * (self.facelet_size * (self.cube_size - 1))
 
+            left_adjacent_index = FACE_INDEXES['L']
             result += self.display_facelet(
-                faces[FACE_INDEXES['L']][line],
-                faces_mask[FACE_INDEXES['L']][line],
+                faces[left_adjacent_index][line],
+                faces_mask[left_adjacent_index][line],
+                (left_adjacent_index * self.face_size) + line,
             )
 
-            for i in range(3):
+            middle_index = FACE_INDEXES['U']
+            for col_index in range(self.cube_size):
+                index = (line * self.cube_size) + col_index
                 result += self.display_facelet(
-                    faces[FACE_INDEXES['U']][line * 3 + i],
-                    faces_mask[FACE_INDEXES['U']][line * 3 + i],
+                    faces[middle_index][index],
+                    faces_mask[middle_index][index],
+                    (middle_index * self.face_size) + index,
                 )
 
+            right_adjacent_index = FACE_INDEXES['R']
+            col_index = self.cube_size - 1 - line
             result += self.display_facelet(
-                faces[FACE_INDEXES['R']][2 - line],
-                faces_mask[FACE_INDEXES['R']][2 - line],
+                faces[right_adjacent_index][col_index],
+                faces_mask[right_adjacent_index][col_index],
+                (right_adjacent_index * self.face_size) + col_index,
             )
 
             result += '\n'
 
         # Bottom
+        bottom_adjacent_index = FACE_INDEXES['F']
         result += self.display_top_down_adjacent_facelets(
-            faces[FACE_INDEXES['F']],
-            faces_mask[FACE_INDEXES['F']],
+            faces[bottom_adjacent_index],
+            faces_mask[bottom_adjacent_index],
+            bottom_adjacent_index,
             top=False,
         )
 
