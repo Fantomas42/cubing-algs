@@ -177,9 +177,10 @@ class Algorithm(UserList[Move]):
     @property
     def min_cube_size(self) -> int:
         """
-        Compute the minimum cube size required to apply the algorithm.
+        Compute the minimum cube size required to execute this algorithm.
 
-        This allows validation of the algorithm against a cube.
+        Analyzes the moves to determine the smallest cube that can accommodate
+        all the layered moves in the algorithm.
         """
         min_cube = 2
 
@@ -223,7 +224,7 @@ class Algorithm(UserList[Move]):
     def has_internal_rotations(self) -> bool:
         """
         Check if algorithm contains internal rotations
-        inducted by wide or inner moves.
+        induced by wide or inner moves.
         """
         return any(
             m.is_wide_move or m.is_inner_move

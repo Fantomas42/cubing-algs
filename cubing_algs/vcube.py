@@ -96,7 +96,7 @@ class VCube(VCubeIntegrityChecker):
         Uses the top face center and front face center
         to determine the current orientation of the cube in space.
 
-        It might not works well, with an unchecked state.
+        It might not work well with an unchecked state.
         """
         return self._state[4] + self._state[22]
 

@@ -104,7 +104,7 @@ class Move(UserString):
         Extract the base letter of the move without modifiers
         keeping original notation.
 
-        For standard notation, returns the two first character.
+        For standard notation, returns the first two characters.
         For SiGN notation, returns the first character.
         """
         return self.layer_move_modifier_time[1]
@@ -140,9 +140,9 @@ class Move(UserString):
     @cached_property
     def is_valid_layer(self) -> bool:
         """
-        Check if the layer is valid.
+        Check if the layer specification is valid.
 
-        Validates that the layer is effective and valid.
+        Validates that the layer notation is correctly formatted and meaningful.
         """
         if not self.is_layered:
             return True

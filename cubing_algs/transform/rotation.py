@@ -9,6 +9,12 @@ CANCEL_TRIPLET = {'x2', 'y2', 'z2'}
 
 
 def remove_final_rotations(old_moves: list[Move]) -> list[Move]:
+    """
+    Remove trailing rotations and pauses from an algorithm.
+
+    Strips rotation moves and pauses from the end of the algorithm
+    while preserving the core face moves.
+    """
     moves = []
 
     rotation = True
@@ -130,6 +136,12 @@ def optimize_conjugate_rotations(
 def split_moves_final_rotations(
         old_moves: list[Move],
 ) -> tuple[list[Move], list[Move]]:
+    """
+    Split an algorithm into core moves and final rotations.
+
+    Separates the algorithm into two parts: the main moves and
+    the trailing rotations and pauses.
+    """
     moves = []
     rotations = []
 
@@ -154,6 +166,12 @@ def compress_rotations(
         old_moves: list[Move],
         max_iterations: int = MAX_ITERATIONS,
 ) -> list[Move]:
+    """
+    Optimize rotation sequences by applying compression techniques.
+
+    Applies various optimization functions specifically designed
+    for rotation moves to reduce redundancy.
+    """
     moves = old_moves.copy()
 
     for _ in range(max_iterations):
@@ -177,6 +195,12 @@ def compress_rotations(
 
 
 def compress_final_rotations(old_moves: list[Move]) -> list[Move]:
+    """
+    Optimize final rotations in an algorithm.
+
+    Separates core moves from final rotations, optimizes the rotations,
+    and recombines them for a more efficient algorithm.
+    """
     moves, rotations = split_moves_final_rotations(old_moves)
 
     if len(rotations) > 1:

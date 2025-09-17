@@ -8,6 +8,12 @@ def symmetry_moves(
         ignore_moves: set[str],
         symmetry_table: dict[str, str],
 ) -> list[Move]:
+    """
+    Apply symmetry transformation to an algorithm using a symmetry table.
+
+    Transforms each move according to the provided symmetry mapping,
+    preserving move modifiers and notation style.
+    """
     moves = []
 
     for move in old_moves:
@@ -40,22 +46,39 @@ def symmetry_type_moves(
         old_moves: list[Move],
         symmetry_type: str,
 ) -> list[Move]:
+    """
+    Apply a specific type of symmetry transformation to moves.
+
+    Uses predefined symmetry tables to transform the algorithm.
+    """
     ignore_moves, symmetry_table = SYMMETRY_TABLE[symmetry_type]
     return symmetry_moves(old_moves, ignore_moves, symmetry_table)
 
 
 def symmetry_m_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply M-slice symmetry transformation to moves.
+    """
     return symmetry_type_moves(old_moves, 'M')
 
 
 def symmetry_s_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply S-slice symmetry transformation to moves.
+    """
     return symmetry_type_moves(old_moves, 'S')
 
 
 def symmetry_e_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply E-slice symmetry transformation to moves.
+    """
     return symmetry_type_moves(old_moves, 'E')
 
 
 def symmetry_c_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply combined symmetry transformation using M and S symmetries.
+    """
     moves = symmetry_m_moves(old_moves)
     return symmetry_s_moves(moves)

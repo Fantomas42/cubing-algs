@@ -31,6 +31,12 @@ ANSI_TO_RGB = re.compile(
 
 
 class VCubeDisplay:
+    """
+    Handle visual representation and display formatting for virtual cubes.
+
+    Provides methods to render cube states with different display modes,
+    color palettes, and visual effects for terminal output.
+    """
     facelet_size = 3
 
     def __init__(self, cube: 'VCube',

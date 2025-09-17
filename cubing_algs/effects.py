@@ -475,7 +475,7 @@ def dim(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
     """
     Reduce brightness uniformly across all color channels.
     """
-    # Merge with brigthen
+    # Merge with brighten
     r, g, b = rgb
 
     factor = kw.get('factor', 0.7)
