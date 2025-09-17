@@ -5,7 +5,7 @@ from cubing_algs.transform.optimize import optimize_double_moves
 from cubing_algs.transform.optimize import optimize_repeat_three_moves
 from cubing_algs.transform.optimize import optimize_triple_moves
 
-CANCEL_TRIPLET = {'x2', 'y2', 'z2'}
+CANCEL_TRIPLET: set[str | Move] = {'x2', 'y2', 'z2'}
 
 
 def remove_final_rotations(old_moves: list[Move]) -> list[Move]:

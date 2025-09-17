@@ -1,3 +1,5 @@
+from typing import Any
+
 from cubing_algs.constants import FACE_ORDER
 
 LOADED_PALETTES: dict[str, dict[str, str]] = {}
@@ -28,7 +30,7 @@ def build_ansi_color(
     )
 
 
-PALETTES = {
+PALETTES: dict[str, dict[str, Any]] = {
     'default': {
         'faces_background_rgb': (
             (228, 228, 228),
@@ -512,7 +514,7 @@ def build_ansi_palette(
         font_foreground_ansi: str = DEFAULT_FONT_FOREGROUND_ANSI,
         hidden_background_ansi: str = DEFAULT_HIDDEN_BACKGROUND_ANSI,
         masked_ansi: str = DEFAULT_MASKED_ANSI,
-        extra: dict | None = None,
+        extra: dict[str, str] | None = None,
 ) -> dict[str, str]:
     palette = {
         'reset': '\x1b[0;0m',

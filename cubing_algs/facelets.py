@@ -58,17 +58,29 @@ class ConversionCache:
 
     def __init__(self, max_size: int = 512):
         self.max_size = max_size
-        self.facelets_cache: dict[str, tuple] = {}
-        self.cubies_cache: dict[tuple, str] = {}
+        self.facelets_cache: dict[
+            str, tuple[
+                list[int], list[int], list[int],
+                list[int], list[int],
+            ],
+        ] = {}
+        self.cubies_cache: dict[
+            tuple[
+                tuple[int, ...], tuple[int, ...], tuple[int, ...],
+                tuple[int, ...], tuple[int, ...], str | None,
+            ], str,
+        ] = {}
         self._enabled = True
 
-    def get_cubies(self, facelets: str):
+    def get_cubies(self, facelets: str) -> tuple[
+            list[int], list[int], list[int], list[int], list[int]] | None:
         """Get cubies from cache or compute and cache."""
         if not self._enabled or facelets not in self.facelets_cache:
             return None
         return self.facelets_cache[facelets]
 
-    def set_cubies(self, facelets: str, result: tuple) -> None:
+    def set_cubies(self, facelets: str, result: tuple[
+            list[int], list[int], list[int], list[int], list[int]]) -> None:
         """Cache cubies result."""
         if not self._enabled:
             return
@@ -80,13 +92,19 @@ class ConversionCache:
 
         self.facelets_cache[facelets] = result
 
-    def get_facelets(self, key: tuple):
+    def get_facelets(self, key: tuple[
+            tuple[int, ...], tuple[int, ...], tuple[int, ...],
+            tuple[int, ...], tuple[int, ...], str | None,
+    ]) -> str | None:
         """Get facelets from cache."""
         if not self._enabled or key not in self.cubies_cache:
             return None
         return self.cubies_cache[key]
 
-    def set_facelets(self, key: tuple, result: str) -> None:
+    def set_facelets(self, key: tuple[
+            tuple[int, ...], tuple[int, ...], tuple[int, ...],
+            tuple[int, ...], tuple[int, ...], str | None,
+    ], result: str) -> None:
         """Cache facelets result."""
         if not self._enabled:
             return

@@ -38,8 +38,10 @@ def pause_moves(
         threshold = speed * factor
 
         previous_time = old_moves[0].timed
+        assert previous_time is not None  # noqa: S101
         for move in old_moves:
             time = move.timed
+            assert time is not None  # noqa: S101
             delta = time - previous_time
 
             if delta > threshold:

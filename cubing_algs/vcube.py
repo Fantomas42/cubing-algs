@@ -105,11 +105,11 @@ class VCube(VCubeIntegrityChecker):
         Apply a sequence of moves to the cube.
         """
         if isinstance(moves, Algorithm):
-            for m in moves:
-                self.rotate_move(str(m), history=history)
+            for move in moves:
+                self.rotate_move(str(move), history=history)
         else:
-            for m in moves.split(' '):
-                self.rotate_move(m, history=history)
+            for move_str in moves.split(' '):
+                self.rotate_move(move_str, history=history)
         return self._state
 
     def rotate_move(self, move: str, *, history: bool = True) -> str:
