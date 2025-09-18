@@ -86,7 +86,7 @@ class VCubeIntegrityChecker:
             raise InvalidCubeStateError(msg)
 
     def check_centers(self) -> None:
-        actual_centers = set(self.get_face_center_indexes())
+        actual_centers = set(self.get_face_center_indexes())  # type: ignore[attr-defined]
 
         if len(actual_centers) != self.face_number:
             msg = 'Face centers must be unique'
