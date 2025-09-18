@@ -529,10 +529,10 @@ def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
     face_size = cube_size * cube_size
 
     face_index = facelet_index // face_size
-    kw['factor'] = 0.7
+    kw['factor'] = kw.get('darken', 0.7)
 
     if face_index < 3:
-        kw['factor'] = 1.5
+        kw['factor'] = kw.get('lighten', 1.5)
 
     return dim(rgb, facelet_index, cube_size, **kw)
 
