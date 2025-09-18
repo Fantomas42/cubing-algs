@@ -267,3 +267,282 @@ class TestVCubeDisplay(unittest.TestCase):
             printer.compute_f2l_front_face(),
             'B',
         )
+
+
+class TestVCubeDisplayExtendedNet(unittest.TestCase):
+
+    def setUp(self):
+        self.cube = VCube()
+        self.printer = VCubeDisplay(self.cube)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_solved_cube_all_visible(self):
+        """Test extended net display with solved cube and all faces visible."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        expected = (
+            '                B  B  B \n'
+            '             L  U  U  U  R \n'
+            '             L  U  U  U  R \n'
+            '             L  U  U  U  R \n'
+            '    U  U  U                 U  U  U  U  U  U \n'
+            ' B  L  L  L     F  F  F     R  R  R  B  B  B  L \n'
+            ' B  L  L  L     F  F  F     R  R  R  B  B  B  L \n'
+            ' B  L  L  L     F  F  F     R  R  R  B  B  B  L \n'
+            '    D  D  D                 D  D  D  D  D  D \n'
+            '             L  D  D  D  R \n'
+            '             L  D  D  D  R \n'
+            '             L  D  D  D  R \n'
+            '                B  B  B \n'
+        )
+
+        self.assertEqual(result, expected)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_scrambled_cube_all_visible(self):
+        """
+        Test extended net display with scrambled cube
+        and all faces visible.
+        """
+        self.cube.rotate("R U R' U'")
+
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        # Verify structure - should have 14 lines (including empty line)
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 14)
+
+        # Verify each line contains expected
+        # number of characters (excluding spaces)
+        # Top line should have 3 face characters (B face)
+        top_line_chars = [c for c in lines[0] if c.isalpha()]
+        self.assertEqual(len(top_line_chars), 3)
+
+        # Middle extended lines should have appropriate
+        # number of face characters
+        # Line with all faces should have many characters
+        middle_lines = [lines[5], lines[6], lines[7]]  # Main horizontal strip
+        for line in middle_lines:
+            face_chars = [c for c in line if c.isalpha()]
+            self.assertGreater(len(face_chars), 10)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_partial_masking(self):
+        """Test extended net display with partial face masking."""
+        faces = self.printer.split_faces(self.cube.state)
+        # Create specific mask pattern - hide some U face facelets
+        mask = (
+            '000111111'  # U face - first 3 hidden, rest visible
+            '111111111'  # R face - all visible
+            '111111111'  # F face - all visible
+            '111111111'  # D face - all visible
+            '111111111'  # L face - all visible
+            '111111111'  # B face - all visible
+        )
+        faces_mask = self.printer.split_faces(mask)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        # Verify structure is maintained
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 14)
+
+        # Result should still contain proper layout with some masked elements
+        self.assertIn('U', result)
+        self.assertIn('F', result)
+        self.assertIn('R', result)
+        self.assertIn('L', result)
+        self.assertIn('B', result)
+        self.assertIn('D', result)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_all_faces_masked(self):
+        """Test extended net display with all faces masked (all zeros)."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('0' * 54)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        # Verify structure is maintained even when all masked
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 14)
+
+        # Should still contain face letters (masked display still shows them)
+        self.assertIn('U', result)
+        self.assertIn('F', result)
+        self.assertIn('R', result)
+        self.assertIn('L', result)
+        self.assertIn('B', result)
+        self.assertIn('D', result)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_single_face_state(self):
+        """Test extended net display with non-standard single face state."""
+        # Create cube with all facelets as 'X' for testing edge case
+        test_state = 'X' * 54
+        faces = self.printer.split_faces(test_state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        # Verify structure
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 14)
+
+        # Should contain all X characters
+        x_count = result.count('X')
+        self.assertGreater(x_count, 54)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_specific_rotation_state(self):
+        """Test extended net display after specific rotation."""
+        # Apply F move to create known state
+        self.cube.rotate('F')
+
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        # Verify structure
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 14)
+
+        # After F move, some faces should have mixed colors
+        # Verify that not all characters in result are the same
+        unique_faces = {c for c in result if c.strip() and c.isalpha()}
+        # Should have all 6 face types
+        self.assertGreaterEqual(len(unique_faces), 6)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_complex_masking_pattern(self):
+        """Test extended net display with complex masking pattern."""
+        faces = self.printer.split_faces(self.cube.state)
+        # Create checkerboard-like mask pattern
+        mask = (
+            '101010101'  # U face - alternating pattern
+            '010101010'  # R face - opposite pattern
+            '101010101'  # F face - alternating pattern
+            '010101010'  # D face - opposite pattern
+            '101010101'  # L face - alternating pattern
+            '010101010'  # B face - opposite pattern
+        )
+        faces_mask = self.printer.split_faces(mask)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        # Verify structure maintained
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 14)
+
+        # Should still show all face types
+        for face_char in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face_char, result)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_line_structure(self):
+        """Test that extended net display has correct line structure."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+        lines = result.split('\n')
+
+        # Should have exactly 14 lines (including empty line)
+        self.assertEqual(len(lines), 14)
+
+        # First line should be indented and contain B faces
+        self.assertTrue(lines[0].startswith(' '))
+        self.assertIn('B', lines[0])
+
+        # Lines 1-3 should contain U face with L and R on sides
+        for i in range(1, 4):
+            self.assertIn('U', lines[i])
+            self.assertIn('L', lines[i])
+            self.assertIn('R', lines[i])
+
+        # Line 4 should be the U extension line
+        self.assertIn('U', lines[4])
+
+        # Lines 5-7 should be the main horizontal strip with all faces
+        for i in range(5, 8):
+            line = lines[i]
+            self.assertIn('B', line)
+            self.assertIn('L', line)
+            self.assertIn('F', line)
+            self.assertIn('R', line)
+
+        # Line 8 should be the D extension line
+        self.assertIn('D', lines[8])
+
+        # Lines 9-11 should contain D face with L and R on sides
+        for i in range(9, 12):
+            self.assertIn('D', lines[i])
+            self.assertIn('L', lines[i])
+            self.assertIn('R', lines[i])
+
+        # Line 12 should contain B faces
+        self.assertIn('B', lines[12])
+
+        # Line 13 should be empty
+        self.assertEqual(lines[13], '')
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_empty_faces_list(self):
+        """Test extended net display with empty faces list."""
+        # This tests error handling for edge case
+        empty_faces = []
+        empty_masks = []
+
+        # This should raise an IndexError or similar
+        with self.assertRaises((IndexError, KeyError)):
+            self.printer.display_extended_net(empty_faces, empty_masks)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_mismatched_faces_masks(self):
+        """Test extended net display with mismatched faces and masks lengths."""
+        faces = self.printer.split_faces(self.cube.state)
+        # Provide fewer masks than faces
+        faces_mask = self.printer.split_faces('1' * 27)  # Only half the masks
+
+        # This should raise an IndexError
+        with self.assertRaises(IndexError):
+            self.printer.display_extended_net(faces, faces_mask)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_extended_net_face_character_counts(self):
+        """Test that extended net contains expected character counts."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_extended_net(faces, faces_mask)
+
+        # Verify that face characters appear in expected proportions
+        face_counts = {}
+        for char in result:
+            if char.isalpha():
+                face_counts[char] = face_counts.get(char, 0) + 1
+
+        # Each face should appear multiple times in the extended net
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face, face_counts)
+            # Each face should appear at least 9 times
+            # (some faces appear more in extended net)
+            self.assertGreaterEqual(face_counts[face], 9)
