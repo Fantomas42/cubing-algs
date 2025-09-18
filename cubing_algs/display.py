@@ -322,197 +322,166 @@ class VCubeDisplay:
 
         return result
 
+    # TODO(me): REVIEW
+    def display_facelet_by_face(self, faces: list[str], faces_mask: list[str],
+                                face_key: str, index: int) -> str:
+        face_idx = FACE_INDEXES[face_key]
+
+        return self.display_facelet(
+            faces[face_idx][index],
+            faces_mask[face_idx][index],
+            (face_idx * self.face_size) + index,
+        )
+
+    def display_face_indexes(self, faces: list[str], faces_mask: list[str],
+                             face_key: str, indexes: list[int]) -> str:
+        return ''.join(
+            self.display_facelet_by_face(
+                faces, faces_mask,
+                face_key, idx,
+            )
+            for idx in indexes
+        )
+
+    def display_row_with_sides(self, faces: list[str], faces_mask: list[str],
+                               center_face: str, left_indexes: list[int],
+                               right_indexes: list[int], row: int,
+                               leading_spaces: int = 0) -> str:
+        row_result = self.display_spaces(leading_spaces)
+        row_result += self.display_facelet_by_face(
+            faces, faces_mask,
+            'L', left_indexes[row],
+        )
+
+        for col in range(self.cube_size):
+            index = row * self.cube_size + col
+            row_result += self.display_facelet_by_face(
+                faces, faces_mask,
+                center_face, index,
+            )
+
+        row_result += self.display_facelet_by_face(
+            faces, faces_mask,
+            'R', right_indexes[row],
+        )
+        row_result += '\n'
+        return row_result
+
     def display_extended_net(self, faces: list[str],
                              faces_mask: list[str]) -> str:
         """Display cube as an extended net layout."""
-        l_face = FACE_INDEXES['L']
-        r_face = FACE_INDEXES['R']
-        d_face = FACE_INDEXES['D']
-        u_face = FACE_INDEXES['U']
-        f_face = FACE_INDEXES['F']
-        b_face = FACE_INDEXES['B']
-
-        top_adjacent_index = FACE_INDEXES['B']
+        # Top section with U face
         result = self.display_top_down_adjacent_facelets(
-            faces[top_adjacent_index],
-            faces_mask[top_adjacent_index],
-            top_adjacent_index,
+            faces[FACE_INDEXES['B']],
+            faces_mask[FACE_INDEXES['B']],
+            FACE_INDEXES['B'],
             top=True,
             end=False,
             spaces=self.cube_size + 2,
             break_line=True,
         )
 
-        l_indexes = [0, 1, 2]  # TODO(me): review
-        r_indexes = [2, 1, 0]   # TODO(me): review
-
+        top_l_indexes = [0, 1, 2]
+        top_r_indexes = [2, 1, 0]
         for row in range(self.cube_size):
-            result += self.display_spaces(self.cube_size + 1)
-            index = l_indexes[row]
-
-            result += self.display_facelet(
-                faces[l_face][index],
-                faces_mask[l_face][index],
-                (l_face * self.face_size) + index,
+            result += self.display_row_with_sides(
+                faces, faces_mask, 'U',
+                top_l_indexes, top_r_indexes,
+                row, self.cube_size + 1,
             )
 
-            for col in range(self.cube_size):
-                index = row * self.cube_size + col
-
-                result += self.display_facelet(
-                    faces[u_face][index],
-                    faces_mask[u_face][index],
-                    (u_face * self.face_size) + index,
-                )
-
-            index = r_indexes[row]
-            result += self.display_facelet(
-                faces[r_face][index],
-                faces_mask[r_face][index],
-                (r_face * self.face_size) + index,
-            )
-            result += '\n'
-
-        # MIDDLE
+        # Upper horizontal strip
         result += self.display_spaces(1)
-
-        for index in [0, 3, 6]:  # TODO(me): review
-            result += self.display_facelet(
-                faces[u_face][index],
-                faces_mask[u_face][index],
-                (u_face * self.face_size) + index,
-            )
-
+        result += self.display_face_indexes(
+            faces, faces_mask,
+            'U', [0, 3, 6],
+        )
         result += self.display_spaces(self.cube_size + 2)
-
-        for index in [8, 5, 2, 2, 1, 0]:  # TODO(me): review
-            result += self.display_facelet(
-                faces[u_face][index],
-                faces_mask[u_face][index],
-                (u_face * self.face_size) + index,
-            )
-
+        result += self.display_face_indexes(
+            faces, faces_mask,
+            'U', [8, 5, 2, 2, 1, 0],
+        )
         result += '\n'
 
-        b_indexes = [2, 5, 8]
-        l_indexes = [0, 3, 6]
+        # Central section with L F R B faces
+        mid_b_indexes = [2, 5, 8]
+        mid_l_indexes = [0, 3, 6]
 
         for row in range(self.cube_size):
-            index = b_indexes[row]
-
-            result += self.display_facelet(
-                faces[b_face][index],
-                faces_mask[b_face][index],
-                (b_face * self.face_size) + index,
+            result += self.display_facelet_by_face(
+                faces, faces_mask,
+                'B', mid_b_indexes[row],
             )
 
+            # L face row
             for col in range(self.cube_size):
                 index = row * self.cube_size + col
-
-                result += self.display_facelet(
-                    faces[l_face][index],
-                    faces_mask[l_face][index],
-                    (l_face * self.face_size) + index,
+                result += self.display_facelet_by_face(
+                    faces, faces_mask,
+                    'L', index,
                 )
 
             result += self.display_spaces(1)
 
+            # F face row
             for col in range(self.cube_size):
                 index = row * 3 + col
-
-                result += self.display_facelet(
-                    faces[f_face][index],
-                    faces_mask[f_face][index],
-                    (f_face * self.face_size) + index,
+                result += self.display_facelet_by_face(
+                    faces, faces_mask,
+                    'F', index,
                 )
 
             result += self.display_spaces(1)
 
+            # R face row
             for col in range(self.cube_size):
                 index = row * 3 + col
-
-                result += self.display_facelet(
-                    faces[r_face][index],
-                    faces_mask[r_face][index],
-                    (r_face * self.face_size) + index,
+                result += self.display_facelet_by_face(
+                    faces, faces_mask,
+                    'R', index,
                 )
 
+            # B face row
             for col in range(self.cube_size):
                 index = row * 3 + col
-
-                result += self.display_facelet(
-                    faces[b_face][index],
-                    faces_mask[b_face][index],
-                    (b_face * self.face_size) + index,
+                result += self.display_facelet_by_face(
+                    faces, faces_mask,
+                    'B', index,
                 )
 
-            index = l_indexes[row]
-
-            result += self.display_facelet(
-                faces[l_face][index],
-                faces_mask[l_face][index],
-                (l_face * self.face_size) + index,
+            result += self.display_facelet_by_face(
+                faces, faces_mask,
+                'L', mid_l_indexes[row],
             )
-
             result += '\n'
 
+        # Lower horizontal strip
         result += self.display_spaces(1)
-
-        for index in [6, 3, 0]:  # TODO(me): review
-            result += self.display_facelet(
-                faces[d_face][index],
-                faces_mask[d_face][index],
-                (d_face * self.face_size) + index,
-            )
-
+        result += self.display_face_indexes(
+            faces, faces_mask,
+            'D', [6, 3, 0],
+        )
         result += self.display_spaces(self.cube_size + 2)
-
-        for index in [2, 5, 8, 8, 7, 6]:  # TODO(me): review
-            result += self.display_facelet(
-                faces[d_face][index],
-                faces_mask[d_face][index],
-                (d_face * self.face_size) + index,
-            )
-
+        result += self.display_face_indexes(
+            faces, faces_mask,
+            'D', [2, 5, 8, 8, 7, 6],
+        )
         result += '\n'
 
-        # BOTTOM
-
-        l_indexes = [8, 7, 6]  # TODO(me): review
-        r_indexes = [6, 7, 8]  # TODO(me): review
-
+        # Bottom section with D face
+        bottom_l_indexes = [8, 7, 6]
+        bottom_r_indexes = [6, 7, 8]
         for row in range(self.cube_size):
-            result += self.display_spaces(self.cube_size + 1)
-            index = l_indexes[row]
-
-            result += self.display_facelet(
-                faces[l_face][index],
-                faces_mask[l_face][index],
-                (l_face * self.face_size) + index,
+            result += self.display_row_with_sides(
+                faces, faces_mask, 'D',
+                bottom_l_indexes, bottom_r_indexes,
+                row, self.cube_size + 1,
             )
 
-            for col in range(self.cube_size):
-                index = row * self.cube_size + col
-
-                result += self.display_facelet(
-                    faces[d_face][index],
-                    faces_mask[d_face][index],
-                    (d_face * self.face_size) + index,
-                )
-
-            index = r_indexes[row]
-            result += self.display_facelet(
-                faces[r_face][index],
-                faces_mask[r_face][index],
-                (r_face * self.face_size) + index,
-            )
-            result += '\n'
-
-        bottom_adjacent_index = FACE_INDEXES['B']
         result += self.display_top_down_adjacent_facelets(
-            faces[bottom_adjacent_index],
-            faces_mask[bottom_adjacent_index],
-            bottom_adjacent_index,
+            faces[FACE_INDEXES['B']],
+            faces_mask[FACE_INDEXES['B']],
+            FACE_INDEXES['B'],
             top=False,
             end=True,
             spaces=self.cube_size + 2,
