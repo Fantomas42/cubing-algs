@@ -330,34 +330,14 @@ class VCubeDisplay:
         )
 
         # Middle
-        for line in range(self.cube_size):
-            result += self.display_spaces(self.cube_size - 1)
-
-            left_adjacent_index = FACE_INDEXES['L']
-            result += self.display_facelet(
-                faces[left_adjacent_index][line],
-                faces_mask[left_adjacent_index][line],
-                (left_adjacent_index * self.face_size) + line,
+        l_indexes = [0, 1, 2]
+        r_indexes = [2, 1, 0]
+        for row in range(self.cube_size):
+            result += self.display_row_with_sides(
+                faces, faces_mask, 'U',
+                l_indexes, r_indexes,
+                row, self.cube_size - 1,
             )
-
-            middle_index = FACE_INDEXES['U']
-            for col_index in range(self.cube_size):
-                index = (line * self.cube_size) + col_index
-                result += self.display_facelet(
-                    faces[middle_index][index],
-                    faces_mask[middle_index][index],
-                    (middle_index * self.face_size) + index,
-                )
-
-            right_adjacent_index = FACE_INDEXES['R']
-            col_index = self.cube_size - 1 - line
-            result += self.display_facelet(
-                faces[right_adjacent_index][col_index],
-                faces_mask[right_adjacent_index][col_index],
-                (right_adjacent_index * self.face_size) + col_index,
-            )
-
-            result += '\n'
 
         # Bottom
         bottom_adjacent_index = FACE_INDEXES['F']
