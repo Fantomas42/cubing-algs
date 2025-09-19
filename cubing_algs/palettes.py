@@ -503,16 +503,21 @@ DEFAULT_HIDDEN_BACKGROUND_ANSI = background_rgb_to_ansi(
     68, 68, 68,
 )
 
+DEFAULT_ADJACENT_BACKGROUND_ANSI = background_rgb_to_ansi(
+    0, 0, 78,
+)
+
 DEFAULT_MASKED_ANSI = build_ansi_color(
     (48, 48, 48),
     (208, 208, 208),
 )
 
 
-def build_ansi_palette(
+def build_ansi_palette(  # noqa: PLR0913, PLR0917
         faces_background_rgb: tuple[tuple[int, int, int]],
         font_foreground_ansi: str = DEFAULT_FONT_FOREGROUND_ANSI,
         hidden_background_ansi: str = DEFAULT_HIDDEN_BACKGROUND_ANSI,
+        adjacent_background_ansi: str = DEFAULT_ADJACENT_BACKGROUND_ANSI,
         masked_ansi: str = DEFAULT_MASKED_ANSI,
         extra: dict[str, str] | None = None,
 ) -> dict[str, str]:
@@ -524,9 +529,11 @@ def build_ansi_palette(
     for face, color in zip(FACE_ORDER, faces_background_rgb, strict=True):
         ansi_face = rgb_to_ansi('48', *color) + font_foreground_ansi
         ansi_face_hidden = hidden_background_ansi + rgb_to_ansi('38', *color)
+        ansi_face_adj = adjacent_background_ansi + rgb_to_ansi('38', *color)
 
         palette[face] = ansi_face
         palette[f'{ face }_hidden'] = ansi_face_hidden
+        palette[f'{ face }_adjacent'] = ansi_face_adj
 
     if extra:
         palette.update(extra)

@@ -82,6 +82,8 @@ class TestBuildAnsiPalette(unittest.TestCase):
             'U', 'R', 'F', 'D', 'L', 'B',
             'U_hidden', 'R_hidden', 'F_hidden',
             'D_hidden', 'L_hidden', 'B_hidden',
+            'U_adjacent', 'R_adjacent', 'F_adjacent',
+            'D_adjacent', 'L_adjacent', 'B_adjacent',
         }
         self.assertEqual(set(palette.keys()), expected_keys)
 
@@ -96,6 +98,8 @@ class TestBuildAnsiPalette(unittest.TestCase):
             'U', 'R', 'F', 'D', 'L', 'B',
             'U_hidden', 'R_hidden', 'F_hidden',
             'D_hidden', 'L_hidden', 'B_hidden',
+            'U_adjacent', 'R_adjacent', 'F_adjacent',
+            'D_adjacent', 'L_adjacent', 'B_adjacent',
         }
         self.assertEqual(set(palette.keys()), expected_keys)
 

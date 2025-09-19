@@ -142,12 +142,13 @@ class VCubeDisplay:
 
         return display_method(faces, masked_faces)
 
-    def display_spaces(self, count):
+    def display_spaces(self, count: int) -> str:
         """Generate a string of spaces for display formatting."""
         return ' ' * (self.facelet_size * count)
 
     def display_facelet(self, facelet: str, mask: str = '',
-                        facelet_index: int | None = None) -> str:
+                        facelet_index: int | None = None,
+                        *, adjacent: bool = False) -> str:
         """Format a single facelet with colors and effects for display."""
         if facelet not in FACE_ORDER:
             face_color = self.palette['masked']
@@ -155,9 +156,11 @@ class VCubeDisplay:
             face_key = facelet
             if mask == '0':
                 face_key += '_hidden'
+            elif adjacent:
+                face_key += '_adjacent'
             face_color = self.palette[face_key]
 
-        if self.effect and facelet_index is not None:
+        if self.effect and not adjacent and facelet_index is not None:
             face_color = self.position_based_effect(
                 face_color, facelet_index,
             )
@@ -188,7 +191,8 @@ class VCubeDisplay:
         return result
 
     def display_facelet_by_face(self, faces: list[str], faces_mask: list[str],
-                                face_key: str, index: int) -> str:
+                                face_key: str, index: int, *,
+                                adjacent: bool = True) -> str:
         """Display a specific facelet from a face using face key and index."""
         face_idx = FACE_INDEXES[face_key]
 
@@ -196,15 +200,18 @@ class VCubeDisplay:
             faces[face_idx][index],
             faces_mask[face_idx][index],
             (face_idx * self.face_size) + index,
+            adjacent=adjacent,
         )
 
     def display_face_indexes(self, faces: list[str], faces_mask: list[str],
-                             face_key: str, indexes: list[int]) -> str:
+                             face_key: str, indexes: list[int], *,
+                             adjacent: bool = True) -> str:
         """Display multiple facelets from a face using specified indexes."""
         return ''.join(
             self.display_facelet_by_face(
                 faces, faces_mask,
                 face_key, idx,
+                adjacent=adjacent,
             )
             for idx in indexes
         )
@@ -214,12 +221,14 @@ class VCubeDisplay:
                                left_indexes: list[int],
                                right_indexes: list[int],
                                row: int,
-                               leading_spaces: int = 0) -> str:
+                               leading_spaces: int = 0, *,
+                               adjacent: bool = True) -> str:
         """Display a row with center face and adjacent side facelets."""
         row_result = self.display_spaces(leading_spaces)
         row_result += self.display_facelet_by_face(
             faces, faces_mask,
             'L', left_indexes[row],
+            adjacent=adjacent,
         )
 
         row_result += self.display_face_row(
@@ -230,6 +239,7 @@ class VCubeDisplay:
         row_result += self.display_facelet_by_face(
             faces, faces_mask,
             'R', right_indexes[row],
+            adjacent=adjacent,
         )
         row_result += '\n'
 
@@ -258,6 +268,7 @@ class VCubeDisplay:
                                            top: bool = False,
                                            end: bool = False,
                                            spaces: int = 0,
+                                           adjacent: bool = True,
                                            break_line: bool = True) -> str:
         """Display adjacent facelets in a linear arrangement."""
         result = self.display_spaces(spaces)
@@ -275,6 +286,7 @@ class VCubeDisplay:
                 face[index],
                 face_mask[index],
                 (face_index * self.face_size) + index,
+                adjacent=adjacent,
             )
 
         if break_line:
@@ -327,6 +339,7 @@ class VCubeDisplay:
             end=False,
             spaces=self.cube_size,
             break_line=True,
+            adjacent=False,
         )
 
         # Middle
@@ -337,6 +350,7 @@ class VCubeDisplay:
                 faces, faces_mask, 'U',
                 l_indexes, r_indexes,
                 row, self.cube_size - 1,
+                adjacent=False,
             )
 
         # Bottom
@@ -349,6 +363,7 @@ class VCubeDisplay:
             end=False,
             spaces=self.cube_size,
             break_line=True,
+            adjacent=False,
         )
 
         return result
@@ -367,6 +382,7 @@ class VCubeDisplay:
             end=False,
             spaces=self.cube_size + 2,
             break_line=True,
+            adjacent=True,
         )
 
         top_l_indexes = [0, 1, 2]
@@ -376,6 +392,7 @@ class VCubeDisplay:
                 faces, faces_mask, 'U',
                 top_l_indexes, top_r_indexes,
                 row, self.cube_size + 1,
+                adjacent=True,
             )
 
         # Upper horizontal strip
@@ -383,11 +400,13 @@ class VCubeDisplay:
         result += self.display_face_indexes(
             faces, faces_mask,
             'U', [0, 3, 6],
+            adjacent=True,
         )
         result += self.display_spaces(self.cube_size + 2)
         result += self.display_face_indexes(
             faces, faces_mask,
             'U', [8, 5, 2, 2, 1, 0],
+            adjacent=True,
         )
         result += '\n'
 
@@ -399,6 +418,7 @@ class VCubeDisplay:
             result += self.display_facelet_by_face(
                 faces, faces_mask,
                 'B', mid_b_indexes[row],
+                adjacent=True,
             )
 
             result += self.display_face_row(
@@ -419,6 +439,7 @@ class VCubeDisplay:
             result += self.display_facelet_by_face(
                 faces, faces_mask,
                 'L', mid_l_indexes[row],
+                adjacent=True,
             )
             result += '\n'
 
@@ -427,11 +448,13 @@ class VCubeDisplay:
         result += self.display_face_indexes(
             faces, faces_mask,
             'D', [6, 3, 0],
+            adjacent=True,
         )
         result += self.display_spaces(self.cube_size + 2)
         result += self.display_face_indexes(
             faces, faces_mask,
             'D', [2, 5, 8, 8, 7, 6],
+            adjacent=True,
         )
         result += '\n'
 
@@ -443,6 +466,7 @@ class VCubeDisplay:
                 faces, faces_mask, 'D',
                 bottom_l_indexes, bottom_r_indexes,
                 row, self.cube_size + 1,
+                adjacent=True,
             )
 
         result += self.display_top_down_adjacent_facelets(
@@ -453,6 +477,7 @@ class VCubeDisplay:
             end=True,
             spaces=self.cube_size + 2,
             break_line=True,
+            adjacent=True,
         )
 
         return result
@@ -465,6 +490,8 @@ class VCubeDisplay:
         if matches:
             background_rgb = tuple(int(c) for c in matches.groups()[0:3])
             foreground_rgb = tuple(int(c) for c in matches.groups()[3:6])
+
+        assert self.effect is not None  # noqa: S101
 
         new_background_rgb = self.effect(
             background_rgb, facelet_index,
