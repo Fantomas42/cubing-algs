@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from cubing_algs.effects import EFFECTS
 from cubing_algs.effects import FACE_POSITIONS
@@ -17,6 +18,7 @@ from cubing_algs.effects import glossy
 from cubing_algs.effects import gold
 from cubing_algs.effects import holographic
 from cubing_algs.effects import load_effect
+from cubing_algs.effects import load_single_effect
 from cubing_algs.effects import matte
 from cubing_algs.effects import neon
 from cubing_algs.effects import noop
@@ -1019,6 +1021,18 @@ class TestParameterParsing(unittest.TestCase):
         self.assertEqual(name, 'gold')
         self.assertEqual(params, {'intensity': 0.6})
 
+    def test_parse_effect_name_invalid_syntax(self):
+        """Test parsing effect name with invalid syntax triggers fallback."""
+        # Test case with unmatched parentheses that won't match the regex
+        name, params = parse_effect_name('shine(intensity=0.8')
+        self.assertEqual(name, 'shine(intensity=0.8')  # Returns as-is
+        self.assertEqual(params, {})
+
+        # Test case with multiple unmatched parentheses
+        name, params = parse_effect_name('effect((invalid')
+        self.assertEqual(name, 'effect((invalid')
+        self.assertEqual(params, {})
+
 
 class TestEnhancedLoadEffect(unittest.TestCase):
     """Test enhanced load_effect function with chaining and parameters."""
@@ -1136,6 +1150,26 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         """Test that whitespace in effect names is handled correctly."""
         effect_func = load_effect('  shine  |  dim  ', 'default')
         self.assertIsNotNone(effect_func)
+
+    def test_load_single_effect_palette_specific_params(self):
+        """Test load_single_effect with palette-specific parameters."""
+        # Create a mock effect config with palette-specific parameters
+        mock_effect_config = {
+            'function': noop,
+            'parameters': {'base_param': 1.0},
+            'default': {'palette_param': 2.0},  # Palette-specific parameter
+        }
+
+        with patch.dict(
+                'cubing_algs.effects.EFFECTS',
+                {'test_effect': mock_effect_config},
+        ):
+            effect_func = load_single_effect('test_effect', {}, 'default')
+            self.assertIsNotNone(effect_func)
+
+            # Test that the effect function works
+            result = effect_func((100, 100, 100), 0, 3)
+            self.assertEqual(result, (100, 100, 100))  # noop returns unchanged
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)

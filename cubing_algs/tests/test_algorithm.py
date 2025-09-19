@@ -7,6 +7,7 @@ from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
+from cubing_algs.vcube import VCube
 
 
 class AlgorithmTestCase(unittest.TestCase):
@@ -557,3 +558,24 @@ class AlgorithmCyclesPropertyTestCase(unittest.TestCase):
         result = algo.cycles
         self.assertIsInstance(result, int)
         self.assertEqual(result, 70)
+
+    def test_show_method_basic(self):
+        """Test show method returns VCube instance."""
+        algo = Algorithm.parse_moves("R U R'")
+        result = algo.show()
+
+        self.assertIsInstance(result, VCube)
+
+    def test_show_method_with_parameters(self):
+        """Test show method with mode and orientation parameters."""
+        algo = Algorithm.parse_moves("R U R'")
+        result = algo.show(mode='oll', orientation='FU')
+
+        self.assertIsInstance(result, VCube)
+
+    def test_show_method_empty_algorithm(self):
+        """Test show method with empty algorithm."""
+        algo = Algorithm()
+        result = algo.show()
+
+        self.assertIsInstance(result, VCube)

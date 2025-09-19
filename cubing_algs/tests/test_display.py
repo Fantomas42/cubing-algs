@@ -50,6 +50,31 @@ class TestVCubeDisplay(unittest.TestCase):
             expected = 'm X \x1b[0;0m'
             self.assertIn(expected, result)
 
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    def test_display_facelet_with_effect(self):
+        """
+        Test display_facelet with an effect to cover
+        position_based_effect call.
+        """
+        with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
+            printer = VCubeDisplay(self.cube, effect_name='shine')
+            result = printer.display_facelet('U', facelet_index=0)
+            # Should call position_based_effect since effect is set
+            self.assertIsInstance(result, str)
+            self.assertIn('U', result)
+
+    def test_position_based_effect_method(self):
+        """Test position_based_effect method directly."""
+        printer = VCubeDisplay(self.cube, effect_name='shine')
+
+        # Create valid ANSI color string that matches ANSI_TO_RGB pattern
+        ansi_color = '\x1b[48;2;255;255;255m\x1b[38;2;0;0;0m'
+
+        result = printer.position_based_effect(ansi_color, 0)
+
+        self.assertIsInstance(result, str)
+        self.assertIn('\x1b[', result)  # Should contain ANSI codes
+
     def test_display_top_down_face(self):
         printer = VCubeDisplay(self.cube)
         face = 'UUUUUUUUU'
@@ -144,6 +169,19 @@ class TestVCubeDisplay(unittest.TestCase):
         result = printer.display(mode='cross')
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
+
+    def test_display_extended(self):
+        """Test display with extended mode."""
+        self.cube.rotate("R U R' U'")
+        printer = VCubeDisplay(self.cube)
+        initial_state = self.cube.state
+
+        result = printer.display(mode='extended')
+        lines = result.split('\n')
+
+        self.assertEqual(self.cube.state, initial_state)
+        # Extended net should have more lines
+        self.assertGreater(len(lines), 10)
 
     def test_display_structure(self):
         printer = VCubeDisplay(self.cube)
