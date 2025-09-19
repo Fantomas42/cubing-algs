@@ -376,6 +376,18 @@ class TestVCubeDisplay(unittest.TestCase):
         # Should contain face characters (end=True reverses the face)
         self.assertIn('R', result)
 
+    def test_position_based_effect_no_effect_set(self):
+        """
+        Test position_based_effect when no effect is set raises AssertionError.
+        """
+        # Create printer without effect
+        printer = VCubeDisplay(self.cube, effect_name='')
+        ansi_color = '\x1b[48;2;255;255;255m\x1b[38;2;0;0;0m'
+
+        # This should raise AssertionError due to assert self.effect is not None
+        with self.assertRaises(AssertionError):
+            printer.position_based_effect(ansi_color, 0)
+
     def test_position_based_effect_with_non_matching_ansi_colors(self):
         """
         Test position_based_effect with colors
@@ -391,50 +403,9 @@ class TestVCubeDisplay(unittest.TestCase):
         # Test with invalid ANSI color string that won't match the regex
         invalid_ansi_colors = 'invalid_color_string'
 
-        # This should raise UnboundLocalError due to the bug in the code
-        with self.assertRaises(UnboundLocalError):
-            printer.position_based_effect(invalid_ansi_colors, 0)
+        result = printer.position_based_effect(invalid_ansi_colors, 0)
 
-    def test_position_based_effect_with_partial_ansi_match(self):
-        """
-        Test position_based_effect with partially matching ANSI string.
-
-        This also reveals the same bug as the previous test.
-        """
-        printer = VCubeDisplay(self.cube, effect_name='shine')
-
-        # Test with ANSI-like string that won't fully match the pattern
-        partial_ansi = '\x1b[48;2;255;255m'  # Missing parts
-
-        # This should also raise UnboundLocalError due to the bug
-        with self.assertRaises(UnboundLocalError):
-            printer.position_based_effect(partial_ansi, 5)
-
-    def test_position_based_effect_with_empty_string(self):
-        """
-        Test position_based_effect with empty color string.
-
-        This also reveals the same bug as the previous tests.
-        """
-        printer = VCubeDisplay(self.cube, effect_name='shine')
-
-        # Test with empty string
-        empty_colors = ''
-
-        # This should also raise UnboundLocalError due to the bug
-        with self.assertRaises(UnboundLocalError):
-            printer.position_based_effect(empty_colors, 3)
-
-    def test_position_based_effect_no_effect_set(self):
-        """
-        Test position_based_effect when no effect is set raises AssertionError.
-        """
-        # Create printer without effect
-        printer = VCubeDisplay(self.cube, effect_name='')
-
-        # This should raise AssertionError due to assert self.effect is not None
-        with self.assertRaises(AssertionError):
-            printer.position_based_effect('some_color_string', 0)
+        self.assertEqual(result, invalid_ansi_colors)
 
     def test_compute_f2l_front_face_single_impacted_face(self):
         """Test compute_f2l_front_face with single impacted face."""

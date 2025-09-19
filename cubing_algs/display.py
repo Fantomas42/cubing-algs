@@ -487,6 +487,9 @@ class VCubeDisplay:
         """Apply position-based visual effects to facelet colors."""
         matches = ANSI_TO_RGB.search(facelet_colors)
 
+        background_rgb = None
+        foreground_rgb = None
+
         if matches:
             background_rgb: tuple[int, int, int] = tuple(
                 int(c) for c in matches.groups()[0:3]
@@ -494,6 +497,9 @@ class VCubeDisplay:
             foreground_rgb: tuple[int, int, int] = tuple(
                 int(c) for c in matches.groups()[3:6]
             )  # type: ignore[assignment]
+
+        if not background_rgb or not background_rgb:
+            return facelet_colors
 
         assert self.effect is not None  # noqa: S101
 
