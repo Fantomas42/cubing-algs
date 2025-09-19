@@ -488,8 +488,12 @@ class VCubeDisplay:
         matches = ANSI_TO_RGB.search(facelet_colors)
 
         if matches:
-            background_rgb = tuple(int(c) for c in matches.groups()[0:3])
-            foreground_rgb = tuple(int(c) for c in matches.groups()[3:6])
+            background_rgb: tuple[int, int, int] = tuple(
+                int(c) for c in matches.groups()[0:3]
+            )  # type: ignore[assignment]
+            foreground_rgb: tuple[int, int, int] = tuple(
+                int(c) for c in matches.groups()[3:6]
+            )  # type: ignore[assignment]
 
         assert self.effect is not None  # noqa: S101
 
