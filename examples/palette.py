@@ -24,6 +24,10 @@ def show_cube_palette(palette_name):
 
     cube.show(palette=palette_name, mask=CENTERS_MASK)
 
+    print('\nExtended:')
+
+    cube.show(palette=palette_name, mode='extended')
+
     print('\nHidden:')
 
     cube = VCube(facelets_masked(INITIAL_STATE, F2L_MASK), check=False)
