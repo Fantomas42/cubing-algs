@@ -186,7 +186,7 @@ class VCubeDisplay:
 
         if self.facelet_type == 'compact':
             return (
-                f'\x1b{ face_color.split("\x1b")[1].replace("48", "38") }'
+                f"\x1b{ face_color.split('\x1b')[1].replace('48', '38') }"
                 f'◼︎ '
                 f'{ self.palette["reset"] }'
             )
