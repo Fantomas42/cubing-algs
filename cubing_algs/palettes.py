@@ -437,17 +437,24 @@ PALETTES: dict[str, dict[str, Any]] = {
     'colorblind': {
         'faces_background_rgb': (
             (255, 255, 255),
-            (213, 94, 0),
-            (64, 176, 166),
-            (240, 228, 66),
-            (204, 121, 167),
-            (26, 133, 255),
+            (255, 33, 32),
+            (33, 255, 144),
+            {
+                'background_rgb': (0, 0, 0),
+                'font_ansi': foreground_rgb_to_ansi(255, 255, 255),
+                #'hidden_font_ansi': rgb_to_ansi('38', 255, 255, 255),
+            },
+            (255, 161, 255),
+            {
+                'background_rgb': (26, 27, 255),
+                'font_ansi': foreground_rgb_to_ansi(255, 255, 255),
+            },
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             0, 0, 0,
         ),
         'hidden_background_ansi': background_rgb_to_ansi(
-            0, 0, 0,
+            65, 65, 65,
         ),
         'adjacent_background_ansi': background_rgb_to_ansi(
             75, 0, 146,
