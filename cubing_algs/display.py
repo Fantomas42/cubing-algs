@@ -40,7 +40,8 @@ class VCubeDisplay:
     facelet_size = 3
 
     def __init__(self, cube: 'VCube',
-                 palette_name: str = '', effect_name: str = '') -> None:
+                 palette_name: str = '', effect_name: str = '',
+                 facelet_type: str = '') -> None:
         """Initialize display handler with cube instance and visual settings."""
         self.cube = cube
         self.cube_size: int = cube.size
@@ -49,9 +50,15 @@ class VCubeDisplay:
 
         self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
         self.palette_name = (palette_name or DEFAULT_PALETTE).lower()
+        self.facelet_type = facelet_type.lower()
 
         self.palette = load_palette(self.palette_name)
         self.effect = load_effect(self.effect_name, self.palette_name)
+
+        if self.facelet_type == 'compact':
+            self.facelet_size = 2
+        elif self.facelet_type == 'condensed':
+            self.facelet_size = 1
 
     def compute_mask(self, cube: 'VCube', mask: str) -> str:
         """Convert mask string to facelets format for display filtering."""
@@ -162,19 +169,40 @@ class VCubeDisplay:
                 face_key += '_adjacent'
             face_color = self.palette[face_key]
 
+        if not USE_COLORS or self.facelet_type == 'no-color':
+            return f' { facelet } '
+
         if self.effect and not adjacent and facelet_index is not None:
             face_color = self.position_based_effect(
                 face_color, facelet_index,
             )
 
-        if USE_COLORS:
+        if self.facelet_type == 'unlettered':
             return (
                 f'{ face_color }'
-                f' { facelet } '
+                f'   '
                 f'{ self.palette["reset"] }'
             )
 
-        return f' { facelet } '
+        if self.facelet_type == 'compact':
+            return (
+                f'\x1b{ face_color.split("\x1b")[1].replace("48", "38") }'
+                f'◼︎ '
+                f'{ self.palette["reset"] }'
+            )
+
+        if self.facelet_type == 'condensed':
+            return (
+                f'\x1b{ face_color.split("\x1b")[1].replace("48", "38") }'
+                f'◼︎'
+                f'{ self.palette["reset"] }'
+            )
+
+        return (
+            f'{ face_color }'
+            f' { facelet } '
+            f'{ self.palette["reset"] }'
+        )
 
     def display_face_row(self, faces: list[str], faces_mask: list[str],
                          face_key: str, row: int) -> str:

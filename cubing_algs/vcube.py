@@ -165,21 +165,29 @@ class VCube(VCubeIntegrityChecker):
 
         return cube
 
-    def display(self, mode: str = '', orientation: str = '',
-                mask: str = '', palette: str = '', effect: str = '') -> str:
+    def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
+                mask: str = '', palette: str = '',
+                effect: str = '', facelet: str = '') -> str:
         """
         Generate a visual representation of the cube.
         """
-        return VCubeDisplay(self, palette, effect).display(
+        return VCubeDisplay(self, palette, effect, facelet).display(
             mode, orientation, mask,
         )
 
-    def show(self, mode: str = '', orientation: str = '',
-             mask: str = '', palette: str = '', effect: str = '') -> None:
+    def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
+             mask: str = '', palette: str = '',
+             effect: str = '', facelet: str = '') -> None:
         """
         Print a visual representation of the cube.
         """
-        print(self.display(mode, orientation, mask, palette, effect), end='')
+        print(
+            self.display(
+                mode, orientation, mask,
+                palette, effect, facelet,
+            ),
+            end='',
+        )
 
     def get_face(self, face: str) -> str:
         """

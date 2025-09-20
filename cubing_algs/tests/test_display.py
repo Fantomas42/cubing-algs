@@ -1196,3 +1196,104 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
                 # Each subpart should be a single character
                 for subpart in subparts:
                     self.assertEqual(len(subpart.strip()), 1)
+
+
+class TestVCubeDisplayFaceletTypes(unittest.TestCase):
+    """Test different facelet_type configurations and their display behavior."""
+
+    def setUp(self):
+        self.cube = VCube()
+
+    def test_facelet_type_compact_initialization(self):
+        """Test VCubeDisplay initialization with compact facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='compact')
+
+        self.assertEqual(printer.facelet_type, 'compact')
+        self.assertEqual(printer.facelet_size, 2)
+
+    def test_facelet_type_condensed_initialization(self):
+        """Test VCubeDisplay initialization with condensed facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='condensed')
+
+        self.assertEqual(printer.facelet_type, 'condensed')
+        self.assertEqual(printer.facelet_size, 1)
+
+    def test_facelet_type_default_initialization(self):
+        """Test VCubeDisplay initialization with default facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='')
+
+        self.assertEqual(printer.facelet_type, '')
+        self.assertEqual(printer.facelet_size, 3)  # Default size
+
+    def test_facelet_type_unknown_initialization(self):
+        """Test VCubeDisplay initialization with unknown facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='unknown')
+
+        self.assertEqual(printer.facelet_type, 'unknown')
+        self.assertEqual(printer.facelet_size, 3)  # Default size when unknown
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    def test_display_facelet_unlettered_type(self):
+        """Test display_facelet with unlettered facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='unlettered')
+
+        result = printer.display_facelet('U')
+
+        # Should contain color codes but no letter
+        self.assertIn('\x1b[', result)
+        self.assertIn('   ', result)  # Three spaces instead of letter
+        self.assertNotIn(' U ', result)  # Should not contain letter
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    def test_display_facelet_compact_type(self):
+        """Test display_facelet with compact facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='compact')
+
+        result = printer.display_facelet('U')
+
+        # Should contain color codes and block character
+        self.assertIn('\x1b[', result)
+        self.assertIn('◼︎ ', result)  # Block character with space
+        self.assertNotIn(' U ', result)  # Should not contain letter
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    def test_display_facelet_condensed_type(self):
+        """Test display_facelet with condensed facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='condensed')
+
+        result = printer.display_facelet('U')
+
+        # Should contain color codes and block character without space
+        self.assertIn('\x1b[', result)
+        self.assertIn('◼︎', result)  # Block character without trailing space
+        self.assertNotIn(' U ', result)  # Should not contain letter
+        # Condensed should be shorter than compact
+        compact_printer = VCubeDisplay(self.cube, facelet_type='compact')
+        compact_result = compact_printer.display_facelet('U')
+        self.assertLess(len(result), len(compact_result))
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_facelet_types_without_colors(self):
+        """Test all facelet_types behave correctly when colors are disabled."""
+        # When colors are disabled, all facelet types should return " U "
+        for facelet_type in ['', 'compact', 'condensed', 'unlettered']:
+            with self.subTest(facelet_type=facelet_type):
+                printer = VCubeDisplay(self.cube, facelet_type=facelet_type)
+                result = printer.display_facelet('U')
+                self.assertEqual(result, ' U ')
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    def test_display_facelet_no_color_type(self):
+        """Test display_facelet with no-color facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='no-color')
+
+        result = printer.display_facelet('U')
+
+        # Should return plain text even when colors are available
+        self.assertEqual(result, ' U ')
+        self.assertNotIn('\x1b[', result)
