@@ -33,27 +33,20 @@ def build_ansi_color(
 PALETTES: dict[str, dict[str, Any]] = {
     'default': {
         'faces_background_rgb': (
-            (228, 228, 228),
-            (255, 0, 0),
-            (0, 215, 0),
-            (255, 255, 0),
-            (255, 135, 0),
-            (0, 0, 255),
+            (228, 228, 228),  # U
+            (255, 0, 0),      # R
+            (0, 215, 0),      # F
+            (255, 255, 0),    # D
+            {   # L - with custom hidden font
+                'background_rgb': (255, 135, 0),
+                'hidden_font_ansi': foreground_rgb_to_ansi(255, 170, 0),
+            },
+            {   # B - with custom font and hidden font
+                'background_rgb': (0, 0, 255),
+                'font_ansi': foreground_rgb_to_ansi(255, 255, 215),
+                'hidden_font_ansi': foreground_rgb_to_ansi(0, 185, 255),
+            },
         ),
-        'extra': {
-            'B': build_ansi_color(
-                (0, 0, 255),
-                (255, 255, 215),
-            ),
-            'B_hidden': build_ansi_color(
-                (68, 68, 68),
-                (0, 185, 255),
-            ),
-            'L_hidden': build_ansi_color(
-                (68, 68, 68),
-                (255, 170, 0),
-            ),
-        },
     },
     'rgb': {
         'faces_background_rgb': (
@@ -137,12 +130,15 @@ PALETTES: dict[str, dict[str, Any]] = {
     },
     'alucard': {
         'faces_background_rgb': (
-            (255, 251, 235),
-            (203, 58, 42),
-            (20, 113, 10),
-            (132, 110, 21),
-            (163, 77, 20),
-            (3, 106, 150),
+            {   # U - with custom font (dark on light)
+                'background_rgb': (255, 251, 235),
+                'font_ansi': foreground_rgb_to_ansi(31, 31, 31),
+            },
+            (203, 58, 42),    # R
+            (20, 113, 10),    # F
+            (132, 110, 21),   # D
+            (163, 77, 20),    # L
+            (3, 106, 150),    # B
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             255, 251, 235,
@@ -154,12 +150,6 @@ PALETTES: dict[str, dict[str, Any]] = {
             (108, 102, 75),
             (255, 251, 235),
         ),
-        'extra': {
-            'U': build_ansi_color(
-                (255, 251, 235),
-                (31, 31, 31),
-            ),
-        },
     },
     'vampire': {
         'faces_background_rgb': (
@@ -183,12 +173,16 @@ PALETTES: dict[str, dict[str, Any]] = {
     },
     'halloween': {
         'faces_background_rgb': (
-            (248, 248, 255),
-            (255, 69, 0),
-            (50, 205, 50),
-            (255, 215, 0),
-            (255, 140, 0),
-            (72, 61, 139),
+            (248, 248, 255),  # U
+            (255, 69, 0),     # R
+            (50, 205, 50),    # F
+            (255, 215, 0),    # D
+            (255, 140, 0),    # L
+            {   # B - with custom font and hidden colors
+                'background_rgb': (72, 61, 139),
+                'font_ansi': foreground_rgb_to_ansi(220, 220, 220),
+                'hidden_font_ansi': foreground_rgb_to_ansi(132, 121, 199),
+            },
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             25, 25, 25,
@@ -200,25 +194,24 @@ PALETTES: dict[str, dict[str, Any]] = {
             (25, 25, 25),
             (255, 165, 0),
         ),
-        'extra': {
-            'B': build_ansi_color(
-                (72, 61, 139),
-                (220, 220, 220),
-            ),
-            'B_hidden': build_ansi_color(
-                (40, 40, 40),
-                (132, 121, 199),
-            ),
-        },
     },
     'cyberpunk': {
         'faces_background_rgb': (
-            (15, 15, 15),
-            (255, 16, 240),
-            (0, 255, 150),
-            (255, 234, 0),
-            (255, 69, 0),
-            (0, 191, 255),
+            {   # U - with custom hidden colors
+                'background_rgb': (15, 15, 15),
+                'hidden_font_ansi': foreground_rgb_to_ansi(0, 255, 255),
+            },
+            (255, 16, 240),   # R
+            {   # F - with custom font (magenta on green)
+                'background_rgb': (0, 255, 150),
+                'font_ansi': foreground_rgb_to_ansi(255, 16, 240),
+            },
+            {   # D - with custom font (magenta on yellow)
+                'background_rgb': (255, 234, 0),
+                'font_ansi': foreground_rgb_to_ansi(255, 16, 240),
+            },
+            (255, 69, 0),     # L
+            (0, 191, 255),    # B
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             0, 255, 255,
@@ -230,29 +223,18 @@ PALETTES: dict[str, dict[str, Any]] = {
             (113, 28, 145),
             (0, 255, 255),
         ),
-        'extra': {
-            'F': build_ansi_color(
-                (0, 255, 150),
-                (255, 16, 240),
-            ),
-            'D': build_ansi_color(
-                (255, 234, 0),
-                (255, 16, 240),
-            ),
-            'U_hidden': build_ansi_color(
-                (45, 45, 45),
-                (0, 255, 255),
-            ),
-        },
     },
     'synthwave': {
         'faces_background_rgb': (
-            (20, 20, 40),
-            (255, 20, 147),
-            (255, 105, 180),
-            (255, 215, 0),
-            (255, 69, 0),
-            (138, 43, 226),
+            {   # U - with custom hidden colors
+                'background_rgb': (20, 20, 40),
+                'hidden_font_ansi': foreground_rgb_to_ansi(255, 255, 255),
+            },
+            (255, 20, 147),   # R
+            (255, 105, 180),  # F
+            (255, 215, 0),    # D
+            (255, 69, 0),     # L
+            (138, 43, 226),   # B
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             255, 255, 255,
@@ -264,21 +246,25 @@ PALETTES: dict[str, dict[str, Any]] = {
             (40, 40, 80),
             (255, 20, 147),
         ),
-        'extra': {
-            'U_hidden': build_ansi_color(
-                (60, 60, 100),
-                (255, 255, 255),
-            ),
-        },
     },
     'matrix': {
         'faces_background_rgb': (
-            (0, 0, 0),
-            (0, 255, 0),
-            (50, 255, 50),
-            (100, 255, 100),
-            (150, 255, 150),
-            (200, 255, 200),
+            {   # U - custom background and hidden colors
+                'background_rgb': (20, 20, 20),
+                'font_ansi': foreground_rgb_to_ansi(100, 255, 100),
+                'hidden_font_ansi': foreground_rgb_to_ansi(150, 255, 150),
+            },
+            {   # R - custom background
+                'background_rgb': (20, 20, 20),
+                'font_ansi': foreground_rgb_to_ansi(0, 255, 0),
+            },
+            {   # F - custom background
+                'background_rgb': (20, 20, 20),
+                'font_ansi': foreground_rgb_to_ansi(150, 255, 150),
+            },
+            (100, 255, 100),  # D
+            (150, 255, 150),  # L
+            (200, 255, 200),  # B
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             0, 0, 0,
@@ -290,33 +276,24 @@ PALETTES: dict[str, dict[str, Any]] = {
             (0, 20, 0),
             (0, 255, 0),
         ),
-        'extra': {
-            'U': build_ansi_color(
-                (20, 20, 20),
-                (100, 255, 100),
-            ),
-            'U_hidden': build_ansi_color(
-                (20, 20, 20),
-                (150, 255, 150),
-            ),
-            'R': build_ansi_color(
-                (20, 20, 20),
-                (0, 255, 0),
-            ),
-            'F': build_ansi_color(
-                (20, 20, 20),
-                (150, 255, 150),
-            ),
-        },
     },
     'minecraft': {
         'faces_background_rgb': (
-            (113, 113, 113),
-            (229, 26, 2),
-            (143, 202, 92),
-            (250, 229, 68),
-            (133, 79, 43),
-            (129, 172, 255),
+            {   # U - with custom hidden font
+                'background_rgb': (113, 113, 113),
+                'hidden_font_ansi': foreground_rgb_to_ansi(200, 200, 200),
+            },
+            (229, 26, 2),     # R
+            (143, 202, 92),   # F
+            {   # D - with custom font (dark on yellow)
+                'background_rgb': (250, 229, 68),
+                'font_ansi': foreground_rgb_to_ansi(60, 60, 60),
+            },
+            {   # L - with custom hidden font
+                'background_rgb': (133, 79, 43),
+                'hidden_font_ansi': foreground_rgb_to_ansi(213, 159, 123),
+            },
+            (129, 172, 255),  # B
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             255, 255, 255,
@@ -328,20 +305,6 @@ PALETTES: dict[str, dict[str, Any]] = {
             (54, 54, 54),
             (221, 221, 221),
         ),
-        'extra': {
-            'D': build_ansi_color(
-                (250, 229, 68),
-                (60, 60, 60),
-            ),
-            'U_hidden': build_ansi_color(
-                (87, 87, 87),
-                (200, 200, 200),
-            ),
-            'L_hidden': build_ansi_color(
-                (87, 87, 87),
-                (213, 159, 123),
-            ),
-        },
     },
     'sunset': {
         'faces_background_rgb': (
@@ -365,19 +328,16 @@ PALETTES: dict[str, dict[str, Any]] = {
     },
     'forest': {
         'faces_background_rgb': (
-            (245, 245, 220),
-            (220, 20, 60),
-            (34, 139, 34),
-            (255, 215, 0),
-            (139, 69, 19),
-            (25, 25, 112),
+            (245, 245, 220),  # U
+            (220, 20, 60),    # R
+            (34, 139, 34),    # F
+            (255, 215, 0),    # D
+            (139, 69, 19),    # L
+            {   # B - with custom font (light on dark blue)
+                'background_rgb': (25, 25, 112),
+                'font_ansi': foreground_rgb_to_ansi(200, 200, 200),
+            },
         ),
-        'extra': {
-            'B': build_ansi_color(
-                (25, 25, 112),
-                (200, 200, 200),
-            ),
-        },
     },
     'fire': {
         'faces_background_rgb': (
@@ -401,12 +361,21 @@ PALETTES: dict[str, dict[str, Any]] = {
     },
     'galaxy': {
         'faces_background_rgb': (
-            (25, 25, 112),
-            (255, 20, 147),
-            (138, 43, 226),
-            (255, 215, 0),
-            (255, 105, 180),
-            (72, 61, 139),
+            {   # U - with custom hidden font
+                'background_rgb': (25, 25, 112),
+                'hidden_font_ansi': foreground_rgb_to_ansi(65, 65, 255),
+            },
+            (255, 20, 147),   # R
+            (138, 43, 226),   # F
+            {   # D - with custom font (dark on yellow)
+                'background_rgb': (255, 215, 0),
+                'font_ansi': foreground_rgb_to_ansi(75, 75, 75),
+            },
+            (255, 105, 180),  # L
+            {   # B - with custom hidden font
+                'background_rgb': (72, 61, 139),
+                'hidden_font_ansi': foreground_rgb_to_ansi(112, 111, 209),
+            },
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             255, 255, 255,
@@ -418,20 +387,6 @@ PALETTES: dict[str, dict[str, Any]] = {
             (20, 20, 40),
             (255, 225, 170),
         ),
-        'extra': {
-            'D': build_ansi_color(
-                (255, 215, 0),
-                (75, 75, 75),
-            ),
-            'U_hidden': build_ansi_color(
-                (40, 40, 70),
-                (65, 65, 255),
-            ),
-            'B_hidden': build_ansi_color(
-                (40, 40, 70),
-                (112, 111, 209),
-            ),
-        },
     },
     'white': {
         'faces_background_rgb': (
@@ -513,30 +468,53 @@ DEFAULT_MASKED_ANSI = build_ansi_color(
 )
 
 
-def build_ansi_palette(  # noqa: PLR0913, PLR0917
-        faces_background_rgb: tuple[tuple[int, int, int]],
+def build_ansi_palette(
+        faces_background_rgb: tuple[
+            tuple[int, int, int] | dict[str, Any]
+        ],
         font_foreground_ansi: str = DEFAULT_FONT_FOREGROUND_ANSI,
         hidden_background_ansi: str = DEFAULT_HIDDEN_BACKGROUND_ANSI,
         adjacent_background_ansi: str = DEFAULT_ADJACENT_BACKGROUND_ANSI,
         masked_ansi: str = DEFAULT_MASKED_ANSI,
-        extra: dict[str, str] | None = None,
 ) -> dict[str, str]:
     palette = {
         'reset': '\x1b[0;0m',
         'masked': masked_ansi,
     }
 
-    for face, color in zip(FACE_ORDER, faces_background_rgb, strict=True):
-        ansi_face = rgb_to_ansi('48', *color) + font_foreground_ansi
-        ansi_face_hidden = hidden_background_ansi + rgb_to_ansi('38', *color)
-        ansi_face_adj = adjacent_background_ansi + rgb_to_ansi('38', *color)
+    for face, face_config in zip(FACE_ORDER, faces_background_rgb, strict=True):
+        # Handle both simple RGB tuples and extended face configurations
+        if isinstance(face_config, dict):
+            background_rgb = face_config['background_rgb']
+            face_font_ansi = face_config.get('font_ansi', font_foreground_ansi)
+            face_hidden_bg_ansi = face_config.get(
+                'hidden_background_ansi', hidden_background_ansi,
+            )
+            face_hidden_font_ansi = face_config.get(
+                'hidden_font_ansi', rgb_to_ansi('38', *background_rgb),
+            )
+            face_adj_bg_ansi = face_config.get(
+                'adjacent_background_ansi', adjacent_background_ansi,
+            )
+            face_adj_font_ansi = face_config.get(
+                'adjacent_font_ansi', rgb_to_ansi('38', *background_rgb),
+            )
+        else:
+            # Simple RGB tuple - use defaults
+            background_rgb = face_config
+            face_font_ansi = font_foreground_ansi
+            face_hidden_bg_ansi = hidden_background_ansi
+            face_hidden_font_ansi = rgb_to_ansi('38', *background_rgb)
+            face_adj_bg_ansi = adjacent_background_ansi
+            face_adj_font_ansi = rgb_to_ansi('38', *background_rgb)
+
+        ansi_face = rgb_to_ansi('48', *background_rgb) + face_font_ansi
+        ansi_face_hidden = face_hidden_bg_ansi + face_hidden_font_ansi
+        ansi_face_adj = face_adj_bg_ansi + face_adj_font_ansi
 
         palette[face] = ansi_face
         palette[f'{ face }_hidden'] = ansi_face_hidden
         palette[f'{ face }_adjacent'] = ansi_face_adj
-
-    if extra:
-        palette.update(extra)
 
     return palette
 

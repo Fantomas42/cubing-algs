@@ -70,48 +70,6 @@ class TestBuildAnsiPalette(unittest.TestCase):
             self.assertIn(face, palette)
             self.assertIn(f'{face}_hidden', palette)
 
-    def test_build_ansi_palette_with_extra_none(self):
-        """Test building palette with extra=None (covers missing branch)."""
-        # This should cover the branch where extra is None/falsy
-        palette = build_ansi_palette(self.faces_bg, extra=None)
-
-        # Should not contain any extra keys beyond the standard ones
-        expected_keys = {
-            'reset',
-            'masked',
-            'U', 'R', 'F', 'D', 'L', 'B',
-            'U_hidden', 'R_hidden', 'F_hidden',
-            'D_hidden', 'L_hidden', 'B_hidden',
-            'U_adjacent', 'R_adjacent', 'F_adjacent',
-            'D_adjacent', 'L_adjacent', 'B_adjacent',
-        }
-        self.assertEqual(set(palette.keys()), expected_keys)
-
-    def test_build_ansi_palette_with_extra_empty(self):
-        """Test building palette with extra={} (covers missing branch)."""
-        # This should also cover the branch where extra is falsy
-        palette = build_ansi_palette(self.faces_bg, extra={})
-
-        # Should not contain any extra keys beyond the standard ones
-        expected_keys = {
-            'reset', 'masked',
-            'U', 'R', 'F', 'D', 'L', 'B',
-            'U_hidden', 'R_hidden', 'F_hidden',
-            'D_hidden', 'L_hidden', 'B_hidden',
-            'U_adjacent', 'R_adjacent', 'F_adjacent',
-            'D_adjacent', 'L_adjacent', 'B_adjacent',
-        }
-        self.assertEqual(set(palette.keys()), expected_keys)
-
-    def test_build_ansi_palette_with_extra(self):
-        """Test building palette with extra colors."""
-        extra = {'special': '\x1b[48;2;100;100;100m'}
-        palette = build_ansi_palette(self.faces_bg, extra=extra)
-
-        # Should contain the extra key
-        self.assertIn('special', palette)
-        self.assertEqual(palette['special'], '\x1b[48;2;100;100;100m')
-
     def test_build_ansi_palette_custom_parameters(self):
         """Test building palette with custom font, hidden, and masked colors."""
         custom_font = '\x1b[38;2;50;50;50m'
@@ -130,6 +88,46 @@ class TestBuildAnsiPalette(unittest.TestCase):
         self.assertIn(custom_font, palette['U'])
         # Check that hidden faces use the custom hidden background
         self.assertIn(custom_hidden, palette['U_hidden'])
+
+    def test_build_ansi_palette_with_face_overrides(self):
+        """Test building palette with per-face font color overrides."""
+        # Mix simple RGB tuples with extended face configurations
+        faces_config = (
+            (255, 255, 255),  # U - simple RGB
+            {  # R - with custom font
+                'background_rgb': (255, 0, 0),
+                'font_ansi': '\x1b[38;2;255;255;255m',  # white font
+            },
+            (0, 255, 0),  # F - simple RGB
+            {  # D - with custom font and hidden colors
+                'background_rgb': (255, 255, 0),
+                'font_ansi': '\x1b[38;2;0;0;0m',  # black font
+                'hidden_background_ansi': '\x1b[48;2;100;100;0m',  # darker bg
+                'hidden_font_ansi': '\x1b[38;2;200;200;0m',  # lighter font
+            },
+            (255, 135, 0),  # L - simple RGB
+            (0, 0, 255),    # B - simple RGB
+        )
+
+        palette = build_ansi_palette(faces_config)
+
+        # U should use default font
+        self.assertIn('\x1b[38;2;8;8;8m', palette['U'])
+
+        # R should use custom white font
+        self.assertIn('\x1b[38;2;255;255;255m', palette['R'])
+
+        # D should use custom black font
+        self.assertIn('\x1b[38;2;0;0;0m', palette['D'])
+
+        # D_hidden should use custom background and font
+        self.assertIn('\x1b[48;2;100;100;0m', palette['D_hidden'])
+        self.assertIn('\x1b[38;2;200;200;0m', palette['D_hidden'])
+
+        # Other faces should use defaults
+        self.assertIn('\x1b[38;2;8;8;8m', palette['F'])
+        self.assertIn('\x1b[38;2;8;8;8m', palette['L'])
+        self.assertIn('\x1b[38;2;8;8;8m', palette['B'])
 
 
 class TestLoadPalette(unittest.TestCase):
@@ -220,19 +218,41 @@ class TestPaletteConstants(unittest.TestCase):
                 faces_bg = palette_def['faces_background_rgb']
                 self.assertEqual(len(faces_bg), 6)
 
-                # Each face color should be an RGB tuple
-                for rgb in faces_bg:
-                    self.assertEqual(len(rgb), 3)
-                    self.assertTrue(all(0 <= val <= 255 for val in rgb))
+                # Each face color should be either an RGB tuple
+                # or a dict with background_rgb
+                for face_config in faces_bg:
+                    if isinstance(face_config, dict):
+                        # Extended face configuration
+                        self.assertIn('background_rgb', face_config)
+                        rgb = face_config['background_rgb']
+                        self.assertEqual(len(rgb), 3)
+                        self.assertTrue(all(0 <= val <= 255 for val in rgb))
+                    else:
+                        # Simple RGB tuple
+                        self.assertEqual(len(face_config), 3)
+                        self.assertTrue(
+                            all(0 <= val <= 255
+                                for val in face_config),
+                        )
 
     def test_palette_face_colors(self):
         """Test that palette face colors are valid RGB values."""
         for palette_name, palette_def in PALETTES.items():
             with self.subTest(palette=palette_name):
                 faces_bg = palette_def['faces_background_rgb']
-                for i, rgb in enumerate(faces_bg):
+                for i, face_config in enumerate(faces_bg):
                     with self.subTest(face_index=i):
-                        r, g, b = rgb
+                        # Handle both simple RGB tuples
+                        # and extended face configurations
+                        if isinstance(face_config, dict):
+                            # Extract RGB from dictionary configuration
+                            self.assertIn('background_rgb', face_config)
+                            r, g, b = face_config['background_rgb']
+                        else:
+                            # Simple RGB tuple
+                            r, g, b = face_config
+
+                        # Validate RGB values
                         self.assertIsInstance(r, int)
                         self.assertTrue(0 <= r <= 255)
                         self.assertIsInstance(g, int)
