@@ -2,6 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 
+from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.vcube import VCube
 
@@ -803,3 +804,395 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             # Each face should appear at least 9 times
             # (some faces appear more in extended net)
             self.assertGreaterEqual(face_counts[face], 9)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_solved_cube(self):
+        """Test display_linear with solved cube state."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+
+        # Expected output:
+        # 3 rows (for 3x3 cube), each with 6 faces + spaces + newline
+        expected_lines = [
+            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B  ',
+            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B  ',
+            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B  ',
+            '',
+        ]
+        expected = '\n'.join(expected_lines)
+
+        self.assertEqual(result, expected)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_scrambled_cube(self):
+        """Test display_linear with scrambled cube state."""
+        self.cube.rotate("R U R' U'")
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+
+        # Should have 4 lines (3 rows + empty line)
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 4)
+
+        # Each line (except last) should contain all 6 face types
+        for i in range(3):
+            line = lines[i]
+            # Should have some content for each face
+            self.assertGreater(len(line.strip()), 0)
+
+        # Last line should be empty
+        self.assertEqual(lines[3], '')
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_with_masking(self):
+        """Test display_linear with different masking patterns."""
+        faces = self.printer.split_faces(self.cube.state)
+
+        # Test with partial masking
+        mask = (
+            '111000111'  # U face - middle row hidden
+            '111111111'  # R face - all visible
+            '000111000'  # F face - top and bottom rows hidden
+            '111111111'  # D face - all visible
+            '101010101'  # L face - checkerboard pattern
+            '111111111'  # B face - all visible
+        )
+        faces_mask = self.printer.split_faces(mask)
+
+        result = self.printer.display_linear(faces, faces_mask)
+
+        # Structure should remain the same - 4 lines
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 4)
+
+        # Should still contain face characters
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face, result)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_all_faces_masked(self):
+        """Test display_linear with all faces masked."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('0' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+
+        # Structure should remain the same
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 4)
+
+        # Should still show all face characters
+        # (masking affects display color, not content)
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face, result)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_structure_and_spacing(self):
+        """Test that display_linear has correct structure and spacing."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+        lines = result.split('\n')
+
+        # Should have exactly 4 lines (3 data lines + 1 empty)
+        self.assertEqual(len(lines), 4)
+
+        # Each of the first 3 lines should have the same structure
+        for i in range(3):
+            line = lines[i]
+            # Should end with a space (from the loop logic)
+            self.assertTrue(line.endswith(' '))
+
+            # Count face characters - should be 18 (3 per face * 6 faces)
+            face_chars = [c for c in line if c.isalpha()]
+            self.assertEqual(len(face_chars), 18)
+
+        # Last line should be empty
+        self.assertEqual(lines[3], '')
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_face_order_consistency(self):
+        """Test that display_linear maintains consistent face order."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+        lines = result.split('\n')
+
+        # For each row, verify face order matches FACE_ORDER
+        for i in range(3):  # 3 rows
+            line = lines[i]
+            # Extract face characters in groups of 3
+            face_chars = [c for c in line if c.isalpha()]
+
+            # Should have groups of 3 consecutive same characters
+            for j in range(6):  # 6 faces
+                start_idx = j * 3
+                face_group = face_chars[start_idx:start_idx + 3]
+                expected_face = FACE_ORDER[j]
+
+                # All 3 characters in this group should be the same face
+                self.assertEqual(len(set(face_group)), 1)
+                self.assertEqual(face_group[0], expected_face)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_with_complex_state(self):
+        """Test display_linear with complex mixed face state."""
+        # Create a cube state with mixed face characters
+        mixed_state = (
+            'URFDLBURD'  # U face - mixed
+            'FDLBURFDL'  # R face - mixed
+            'LBURDFLBU'  # F face - mixed
+            'RDFLBURDL'  # D face - mixed
+            'BURLDBURL'  # L face - mixed
+            'DLFBURFDL'  # B face - mixed
+        )
+        faces = self.printer.split_faces(mixed_state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+        lines = result.split('\n')
+
+        # Structure should be maintained
+        self.assertEqual(len(lines), 4)
+
+        # Should contain all face types
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face, result)
+
+        # Each line should have 18 face characters
+        for i in range(3):
+            face_chars = [c for c in lines[i] if c.isalpha()]
+            self.assertEqual(len(face_chars), 18)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_with_invalid_face_characters(self):
+        """Test display_linear with invalid face characters."""
+        # Create state with invalid characters
+        invalid_state = 'X' * 54
+        faces = self.printer.split_faces(invalid_state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+        lines = result.split('\n')
+
+        # Structure should be maintained
+        self.assertEqual(len(lines), 4)
+
+        # Should contain X characters
+        self.assertIn('X', result)
+
+        # Each line should still have 18 characters
+        for i in range(3):
+            face_chars = [c for c in lines[i] if c.isalpha()]
+            self.assertEqual(len(face_chars), 18)
+
+    def test_display_linear_integration_with_display_method(self):
+        """Test display_linear integration through display() method."""
+        result = self.printer.display(mode='linear')
+
+        # Should be same as calling display_linear directly
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+        expected = self.printer.display_linear(faces, faces_mask)
+
+        self.assertEqual(result, expected)
+
+    def test_display_linear_integration_with_orientation(self):
+        """Test display_linear with orientation parameter."""
+        # Test with different orientation
+        result = self.printer.display(mode='linear', orientation='D')
+
+        # Should produce valid output
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 4)
+
+        # Should contain face characters
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face, result)
+
+    def test_display_linear_integration_with_mask(self):
+        """Test display_linear with mask parameter."""
+        # Test with custom mask
+        test_mask = '1' * 27 + '0' * 27  # Half visible, half hidden
+        result = self.printer.display(mode='linear', mask=test_mask)
+
+        # Should produce valid output
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 4)
+
+        # Should still show all face types
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face, result)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_empty_faces_error_handling(self):
+        """Test display_linear error handling with empty faces list."""
+        empty_faces = []
+        empty_masks = []
+
+        # Should raise IndexError when trying to access faces
+        with self.assertRaises(IndexError):
+            self.printer.display_linear(empty_faces, empty_masks)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_mismatched_faces_masks_lengths(self):
+        """Test display_linear with mismatched faces and masks lengths."""
+        faces = self.printer.split_faces(self.cube.state)
+        # Provide fewer masks than faces
+        faces_mask = self.printer.split_faces('1' * 27)  # Only half
+
+        # Should raise IndexError when accessing missing mask
+        with self.assertRaises(IndexError):
+            self.printer.display_linear(faces, faces_mask)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_insufficient_face_data(self):
+        """Test display_linear with insufficient face data."""
+        # Create faces with insufficient data
+        short_faces = ['UUU', 'RRR', 'FFF', 'DDD', 'LLL', 'BBB']
+        short_masks = ['111', '111', '111', '111', '111', '111']
+
+        # Should raise IndexError when trying to access non-existent face rows
+        with self.assertRaises(IndexError):
+            self.printer.display_linear(short_faces, short_masks)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_boundary_cube_sizes(self):
+        """Test display_linear behavior with current cube size assumptions."""
+        # This test verifies the method works with the current cube_size (3)
+        # and helps identify issues if cube_size changes in the future
+
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+        lines = result.split('\n')
+
+        # Number of lines should equal cube_size + 1
+        expected_lines = self.printer.cube_size + 1
+        self.assertEqual(len(lines), expected_lines)
+
+        # Each data line should have cube_size rows represented
+        for i in range(self.printer.cube_size):
+            line = lines[i]
+            # Should have content for all faces
+            self.assertGreater(len(line.strip()), 0)
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    def test_display_linear_with_colors_enabled(self):
+        """Test display_linear with colors enabled."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+
+        # Should contain ANSI color codes when colors are enabled
+        self.assertIn('\x1b[', result)
+
+        # Structure should remain the same
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 4)
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    def test_display_linear_with_effects_enabled(self):
+        """Test display_linear with visual effects enabled."""
+        printer = VCubeDisplay(self.cube, effect_name='shine')
+        faces = printer.split_faces(self.cube.state)
+        faces_mask = printer.split_faces('1' * 54)
+
+        result = printer.display_linear(faces, faces_mask)
+
+        # Should contain color codes (effects modify colors)
+        self.assertIn('\x1b[', result)
+
+        # Structure should remain the same
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 4)
+
+        # Should still contain face characters
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertIn(face, result)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_character_counting(self):
+        """Test that display_linear produces expected character counts."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+
+        # Count each face character in the result
+        face_counts = {}
+        for char in result:
+            if char.isalpha():
+                face_counts[char] = face_counts.get(char, 0) + 1
+
+        # For a solved cube, each face should appear exactly 9 times
+        # (3 rows * 3 characters per row)
+        for face in ['U', 'R', 'F', 'D', 'L', 'B']:
+            self.assertEqual(face_counts[face], 9)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    def test_display_linear_spacing_consistency(self):
+        """Test that display_linear maintains consistent spacing."""
+        faces = self.printer.split_faces(self.cube.state)
+        faces_mask = self.printer.split_faces('1' * 54)
+
+        result = self.printer.display_linear(faces, faces_mask)
+        lines = result.split('\n')
+
+        # Test spacing pattern in each line
+        for i in range(3):  # First 3 lines
+            line = lines[i]
+
+            # Line should match expected pattern:
+            # " X  X  X  Y  Y  Y  Z  Z  Z  A  A  A  B  B  B  C  C  C "
+            # Starting with space, groups of 3 chars with 2 spaces between
+
+            self.assertTrue(line.startswith(' '))  # Starts with space
+            self.assertTrue(line.endswith(' '))    # Ends with space
+
+            # Remove leading/trailing space for easier analysis
+            trimmed = line.strip()
+
+            # Should have specific pattern of spaces
+            # Expected: "X  X  X   Y  Y  Y   ..." with
+            # triple spaces between face groups
+            parts = trimmed.split('   ')
+
+            # Should have 6 face groups (one per face)
+            self.assertEqual(len(parts), 6)
+
+            # Each part should be a face section like "X  X  X"
+            for part in parts:
+                face_chars_in_part = [c for c in part if c.isalpha()]
+                self.assertEqual(len(face_chars_in_part), 3)
+                # Each face section should have the pattern "X  X  X"
+                # (double spaces between chars)
+                subparts = part.split('  ')
+                self.assertEqual(len(subparts), 3)
+                # Each subpart should be a single character
+                for subpart in subparts:
+                    self.assertEqual(len(subpart.strip()), 1)

@@ -128,6 +128,8 @@ class VCubeDisplay:
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'extended':
             display_method = self.display_extended_net
+        elif mode == 'linear':
+            display_method = self.display_linear
 
         final_orientation = orientation or default_orientation
         if final_orientation:
@@ -479,6 +481,19 @@ class VCubeDisplay:
             break_line=True,
             adjacent=True,
         )
+
+        return result
+
+    def display_linear(self, faces: list[str],
+                       faces_mask: list[str]) -> str:
+        """Display facelets in a linear arrangement."""
+        result = ''
+
+        for row in range(self.cube_size):
+            for face in FACE_ORDER:
+                result += self.display_face_row(faces, faces_mask, face, row)
+                result += ' '
+            result += '\n'
 
         return result
 
