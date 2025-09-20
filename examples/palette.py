@@ -1,3 +1,5 @@
+import argparse
+
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.masks import CENTERS_MASK
@@ -119,5 +121,44 @@ def show_cube_palette(palette_name):
     print()
 
 
-for palette_name in PALETTES:
-    show_cube_palette(palette_name)
+def main():
+    parser = argparse.ArgumentParser(
+        description=(
+            'Display cube visualizations using different color palettes'
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"""Available palettes:
+{', '.join(sorted(PALETTES.keys()))}
+
+Examples:
+  python palette.py                    # Show all palettes
+  python palette.py -p default         # Show only default palette
+  python palette.py -p neon vibrant    # Show neon and vibrant palettes
+""",
+    )
+
+    parser.add_argument(
+        '-p', '--palettes',
+        nargs='*',
+        help=(
+            'Specific palette(s) to display. '
+            'If not specified, all palettes will be shown.'
+        ),
+    )
+
+    args = parser.parse_args()
+
+    if args.palettes is None:
+        palettes_to_show = PALETTES.keys()
+    elif len(args.palettes) == 0:
+        parser.print_help()
+        return
+    else:
+        palettes_to_show = args.palettes
+
+    for palette_name in palettes_to_show:
+        show_cube_palette(palette_name)
+
+
+if __name__ == '__main__':
+    main()
