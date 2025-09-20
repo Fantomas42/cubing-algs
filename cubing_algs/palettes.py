@@ -403,6 +403,9 @@ PALETTES: dict[str, dict[str, Any]] = {
         'hidden_background_ansi': background_rgb_to_ansi(
             162, 162, 162,
         ),
+        'adjacent_background_ansi': background_rgb_to_ansi(
+            0, 0, 0,
+        ),
         'masked_ansi': build_ansi_color(
             (255, 255, 255),
             (64, 64, 64),
@@ -423,6 +426,9 @@ PALETTES: dict[str, dict[str, Any]] = {
         'hidden_background_ansi': background_rgb_to_ansi(
             152, 152, 152,
         ),
+        'adjacent_background_ansi': background_rgb_to_ansi(
+            200, 200, 200,
+        ),
         'masked_ansi': build_ansi_color(
             (0, 0, 0),
             (192, 192, 192),
@@ -432,20 +438,23 @@ PALETTES: dict[str, dict[str, Any]] = {
         'faces_background_rgb': (
             (255, 255, 255),
             (213, 94, 0),
-            (0, 114, 178),
+            (64, 176, 166),
             (240, 228, 66),
             (204, 121, 167),
-            (86, 180, 233),
+            (26, 133, 255),
         ),
         'font_foreground_ansi': foreground_rgb_to_ansi(
             0, 0, 0,
         ),
         'hidden_background_ansi': background_rgb_to_ansi(
-            240, 240, 240,
+            0, 0, 0,
+        ),
+        'adjacent_background_ansi': background_rgb_to_ansi(
+            75, 0, 146,
         ),
         'masked_ansi': build_ansi_color(
+            (93, 58, 155),
             (255, 255, 255),
-            (68, 68, 68),
         ),
     },
 }
