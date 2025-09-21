@@ -213,7 +213,7 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     },
     # Dark
     # 'vampire': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (20, 20, 20),
     #         (40, 40, 40),
     #         (32, 32, 32),
@@ -221,75 +221,75 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #         (24, 24, 24),
     #         (36, 36, 36),
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         219, 0, 0,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         80, 80, 110,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (0, 0, 0),
     #         (139, 0, 0),
     #     ),
     # },
     # 'halloween': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (248, 248, 255),  # U
     #         (255, 69, 0),     # R
     #         (50, 205, 50),    # F
     #         (255, 215, 0),    # D
     #         (255, 140, 0),    # L
     #         {   # B - with custom font and hidden colors
-    #             'background_rgb': (72, 61, 139),
-    #             'font_ansi': foreground_rgb_to_ansi(220, 220, 220),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(132, 121, 199),
+    #             'background': (72, 61, 139),
+    #             'font': foreground_rgb_to_ansi(220, 220, 220),
+    #             'font_masked': foreground_rgb_to_ansi(132, 121, 199),
     #         },
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         25, 25, 25,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         40, 40, 40,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (25, 25, 25),
     #         (255, 165, 0),
     #     ),
     # },
     # 'cyberpunk': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         {   # U - with custom hidden colors
-    #             'background_rgb': (15, 15, 15),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(0, 255, 255),
+    #             'background': (15, 15, 15),
+    #             'font_masked': foreground_rgb_to_ansi(0, 255, 255),
     #         },
     #         (255, 16, 240),   # R
     #         {   # F - with custom font (magenta on green)
-    #             'background_rgb': (0, 255, 150),
-    #             'font_ansi': foreground_rgb_to_ansi(255, 16, 240),
+    #             'background': (0, 255, 150),
+    #             'font': foreground_rgb_to_ansi(255, 16, 240),
     #         },
     #         {   # D - with custom font (magenta on yellow)
-    #             'background_rgb': (255, 234, 0),
-    #             'font_ansi': foreground_rgb_to_ansi(255, 16, 240),
+    #             'background': (255, 234, 0),
+    #             'font': foreground_rgb_to_ansi(255, 16, 240),
     #         },
     #         (255, 69, 0),     # L
     #         (0, 191, 255),    # B
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         0, 255, 255,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         45, 45, 45,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (113, 28, 145),
     #         (0, 255, 255),
     #     ),
     # },
     # 'synthwave': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         {   # U - with custom hidden colors
-    #             'background_rgb': (20, 20, 40),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(255, 255, 255),
+    #             'background': (20, 20, 40),
+    #             'font_masked': foreground_rgb_to_ansi(255, 255, 255),
     #         },
     #         (255, 20, 147),   # R
     #         (255, 105, 180),  # F
@@ -297,92 +297,92 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #         (255, 69, 0),     # L
     #         (138, 43, 226),   # B
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         255, 255, 255,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         60, 60, 100,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (40, 40, 80),
     #         (255, 20, 147),
     #     ),
     # },
     # 'galaxy': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         {   # U - with custom hidden font
-    #             'background_rgb': (25, 25, 112),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(65, 65, 255),
+    #             'background': (25, 25, 112),
+    #             'font_masked': foreground_rgb_to_ansi(65, 65, 255),
     #         },
     #         (255, 20, 147),   # R
     #         (138, 43, 226),   # F
     #         {   # D - with custom font (dark on yellow)
-    #             'background_rgb': (255, 215, 0),
-    #             'font_ansi': foreground_rgb_to_ansi(75, 75, 75),
+    #             'background': (255, 215, 0),
+    #             'font': foreground_rgb_to_ansi(75, 75, 75),
     #         },
     #         (255, 105, 180),  # L
     #         {   # B - with custom hidden font
-    #             'background_rgb': (72, 61, 139),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(112, 111, 209),
+    #             'background': (72, 61, 139),
+    #             'font_masked': foreground_rgb_to_ansi(112, 111, 209),
     #         },
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         255, 255, 255,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         40, 40, 70,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (20, 20, 40),
     #         (255, 225, 170),
     #     ),
     # },
     # 'matrix': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         {
-    #             'background_rgb': (20, 20, 20),
-    #             'font_ansi': foreground_rgb_to_ansi(0, 255, 0),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(0, 150, 0),
+    #             'background': (20, 20, 20),
+    #             'font': foreground_rgb_to_ansi(0, 255, 0),
+    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
     #         },
     #         {
-    #             'background_rgb': (20, 20, 20),
-    #             'font_ansi': foreground_rgb_to_ansi(100, 255, 100),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(0, 150, 0),
+    #             'background': (20, 20, 20),
+    #             'font': foreground_rgb_to_ansi(100, 255, 100),
+    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
     #         },
     #         {
-    #             'background_rgb': (20, 20, 20),
-    #             'font_ansi': foreground_rgb_to_ansi(200, 255, 200),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(0, 150, 0),
+    #             'background': (20, 20, 20),
+    #             'font': foreground_rgb_to_ansi(200, 255, 200),
+    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
     #         },
     #         {
-    #             'background_rgb': (100, 255, 100),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(0, 150, 0),
+    #             'background': (100, 255, 100),
+    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
     #         },
     #         {
-    #             'background_rgb': (150, 255, 150),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(0, 150, 0),
+    #             'background': (150, 255, 150),
+    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
     #         },
     #         {
-    #             'background_rgb': (200, 255, 200),
-    #             'hidden_font_ansi': foreground_rgb_to_ansi(0, 150, 0),
+    #             'background': (200, 255, 200),
+    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
     #         },
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         0, 0, 0,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         20, 20, 20,
     #     ),
-    #     'adjacent_background_ansi': background_rgb_to_ansi(
+    #     'adjacent_background': background_rgb_to_ansi(
     #         0, 50, 0,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (0, 20, 0),
     #         (0, 255, 0),
     #     ),
     # },
     # 'sunset': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (255, 255, 255),
     #         (255, 94, 77),
     #         (186, 203, 77),
@@ -392,7 +392,7 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #     ),
     # },
     # 'ocean': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (240, 248, 255),
     #         (255, 99, 132),
     #         (75, 192, 192),
@@ -402,30 +402,30 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #     ),
     # },
     # 'forest': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (245, 245, 220),
     #         (220, 20, 60),
     #         (34, 139, 34),
     #         (255, 215, 0),
     #         {
-    #             'background_rgb': (139, 69, 19),
-    #             'font_ansi': foreground_rgb_to_ansi(200, 200, 200),
-    #             'hidden_font_ansi': rgb_to_ansi('38', 179, 109, 69),
-    #             'adjacent_font_ansi': rgb_to_ansi('38', 179, 109, 69),
+    #             'background': (139, 69, 19),
+    #             'font': foreground_rgb_to_ansi(200, 200, 200),
+    #             'font_masked': rgb_to_ansi('38', 179, 109, 69),
+    #             'font_adjacent': rgb_to_ansi('38', 179, 109, 69),
     #         },
     #         {
-    #             'background_rgb': (25, 25, 112),
-    #             'font_ansi': foreground_rgb_to_ansi(200, 200, 200),
-    #             'hidden_font_ansi': rgb_to_ansi('38', 155, 155, 255),
-    #             'adjacent_font_ansi': rgb_to_ansi('38', 105, 105, 255),
+    #             'background': (25, 25, 112),
+    #             'font': foreground_rgb_to_ansi(200, 200, 200),
+    #             'font_masked': rgb_to_ansi('38', 155, 155, 255),
+    #             'font_adjacent': rgb_to_ansi('38', 105, 105, 255),
     #         },
     #     ),
-    #     'adjacent_background_ansi': background_rgb_to_ansi(
+    #     'adjacent_background': background_rgb_to_ansi(
     #         0, 50, 0,
     #     ),
     # },
     # 'fire': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (255, 250, 240),
     #         (220, 20, 60),
     #         (255, 69, 0),
@@ -433,12 +433,12 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #         (255, 140, 0),
     #         (139, 0, 0),
     #     ),
-    #     'adjacent_background_ansi': background_rgb_to_ansi(
+    #     'adjacent_background': background_rgb_to_ansi(
     #         50, 0, 0,
     #     ),
     # },
     # 'ice': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (240, 248, 255),
     #         (176, 196, 222),
     #         (173, 216, 230),
@@ -446,12 +446,12 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #         (175, 238, 238),
     #         (95, 158, 160),
     #     ),
-    #     'adjacent_background_ansi': background_rgb_to_ansi(
+    #     'adjacent_background': background_rgb_to_ansi(
     #         45, 108, 200,
     #     ),
     # },
     # 'white': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (255, 255, 255),
     #         (248, 248, 248),
     #         (240, 240, 240),
@@ -459,22 +459,22 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #         (224, 224, 224),
     #         (216, 216, 216),
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         0, 0, 0,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         162, 162, 162,
     #     ),
-    #     'adjacent_background_ansi': background_rgb_to_ansi(
+    #     'adjacent_background': background_rgb_to_ansi(
     #         0, 0, 0,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (255, 255, 255),
     #         (64, 64, 64),
     #     ),
     # },
     # 'black': {
-    #     'faces_background_rgb': (
+    #     'faces': (
     #         (0, 0, 0),
     #         (32, 32, 32),
     #         (48, 48, 48),
@@ -482,16 +482,16 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
     #         (80, 80, 80),
     #         (96, 96, 96),
     #     ),
-    #     'font_foreground_ansi': foreground_rgb_to_ansi(
+    #     'font': foreground_rgb_to_ansi(
     #         255, 255, 255,
     #     ),
-    #     'hidden_background_ansi': background_rgb_to_ansi(
+    #     'masked_background': background_rgb_to_ansi(
     #         152, 152, 152,
     #     ),
-    #     'adjacent_background_ansi': background_rgb_to_ansi(
+    #     'adjacent_background': background_rgb_to_ansi(
     #         200, 200, 200,
     #     ),
-    #     'masked_ansi': build_ansi_color(
+    #     'hidden_ansi': build_ansi_color(
     #         (0, 0, 0),
     #         (192, 192, 192),
     #     ),
