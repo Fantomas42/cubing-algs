@@ -466,71 +466,66 @@ PALETTES: dict[str, dict[str, Any]] = {
     },
 }
 
-DEFAULT_FONT_FOREGROUND_ANSI = foreground_rgb_to_ansi(
-    8, 8, 8,
-)
+DEFAULT_FONT_RGB = (8, 8, 8)
 
-DEFAULT_HIDDEN_BACKGROUND_ANSI = background_rgb_to_ansi(
-    68, 68, 68,
-)
+DEFAULT_MASKED_BACKGROUND_RGB = (68, 68, 68)
 
-DEFAULT_ADJACENT_BACKGROUND_ANSI = background_rgb_to_ansi(
-    0, 0, 78,
-)
+DEFAULT_ADJACENT_BACKGROUND_RGB = (0, 0, 78)
 
-DEFAULT_MASKED_ANSI = build_ansi_color(
+DEFAULT_HIDDEN_ANSI = build_ansi_color(
     (48, 48, 48),
     (208, 208, 208),
 )
 
 
 def build_ansi_palette(
-        faces_background_rgb: tuple[
+        faces_rgb: tuple[
             tuple[int, int, int] | dict[str, Any]
         ],
-        font_foreground_ansi: str = DEFAULT_FONT_FOREGROUND_ANSI,
-        hidden_background_ansi: str = DEFAULT_HIDDEN_BACKGROUND_ANSI,
-        adjacent_background_ansi: str = DEFAULT_ADJACENT_BACKGROUND_ANSI,
-        masked_ansi: str = DEFAULT_MASKED_ANSI,
+        font_rgb: str = DEFAULT_FONT_RGB,
+        masked_background_rgb: str = DEFAULT_MASKED_BACKGROUND_RGB,
+        adjacent_background_rgb: str = DEFAULT_ADJACENT_BACKGROUND_RGB,
+        hidden_ansi: str = DEFAULT_HIDDEN_ANSI,
 ) -> dict[str, str]:
     palette = {
         'reset': '\x1b[0;0m',
-        'masked': masked_ansi,
+        'hidden': hidden_ansi,
     }
 
-    for face, face_config in zip(FACE_ORDER, faces_background_rgb, strict=True):
-        # Handle both simple RGB tuples and extended face configurations
+    for face, face_config in zip(FACE_ORDER, faces_rgb, strict=True):
         if isinstance(face_config, dict):
             background_rgb = face_config['background_rgb']
-            face_font_ansi = face_config.get('font_ansi', font_foreground_ansi)
-            face_hidden_bg_ansi = face_config.get(
-                'hidden_background_ansi', hidden_background_ansi,
+            font_ansi = foreground_rgb_to_ansi(
+                *face_config.get(
+                    'font_rgb',
+                    font_rgb,
+                ),
             )
-            face_hidden_font_ansi = face_config.get(
-                'hidden_font_ansi', rgb_to_ansi('38', *background_rgb),
+            font_masked_ansi = foreground_rgb_to_ansi(
+                *face_config.get(
+                    'font_masked_rgb',
+                    background_rgb,
+                ),
             )
-            face_adj_bg_ansi = face_config.get(
-                'adjacent_background_ansi', adjacent_background_ansi,
-            )
-            face_adj_font_ansi = face_config.get(
-                'adjacent_font_ansi', rgb_to_ansi('38', *background_rgb),
+            font_adjacent_ansi = foreground_rgb_to_ansi(
+                *face_config.get(
+                    'font_adjacent_rgb',
+                    background_rgb,
+                ),
             )
         else:
-            # Simple RGB tuple - use defaults
             background_rgb = face_config
-            face_font_ansi = font_foreground_ansi
-            face_hidden_bg_ansi = hidden_background_ansi
-            face_hidden_font_ansi = rgb_to_ansi('38', *background_rgb)
-            face_adj_bg_ansi = adjacent_background_ansi
-            face_adj_font_ansi = rgb_to_ansi('38', *background_rgb)
+            font_ansi = foreground_rgb_to_ansi(*font_rgb)
+            font_masked_ansi = foreground_rgb_to_ansi(*background_rgb)
+            font_adjacent_ansi = foreground_rgb_to_ansi(*background_rgb)
 
-        ansi_face = rgb_to_ansi('48', *background_rgb) + face_font_ansi
-        ansi_face_hidden = face_hidden_bg_ansi + face_hidden_font_ansi
-        ansi_face_adj = face_adj_bg_ansi + face_adj_font_ansi
+        ansi_face = background_rgb_to_ansi(*background_rgb) + font_ansi
+        ansi_face_masked = background_rgb_to_ansi(*masked_background_rgb) + font_masked_ansi
+        ansi_face_adjacent = background_rgb_to_ansi(*adjacent_background_rgb) + font_adjacent_ansi
 
         palette[face] = ansi_face
-        palette[f'{ face }_hidden'] = ansi_face_hidden
-        palette[f'{ face }_adjacent'] = ansi_face_adj
+        palette[f'{ face }_masked'] = ansi_face_masked
+        palette[f'{ face }_adjacent'] = ansi_face_adjacent
 
     return palette
 

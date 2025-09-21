@@ -160,11 +160,11 @@ class VCubeDisplay:
                         *, adjacent: bool = False) -> str:
         """Format a single facelet with colors and effects for display."""
         if facelet not in FACE_ORDER:
-            face_color = self.palette['masked']
+            face_color = self.palette['hidden']
         else:
             face_key = facelet
             if mask == '0':
-                face_key += '_hidden'
+                face_key += '_masked'
             elif adjacent:
                 face_key += '_adjacent'
             face_color = self.palette[face_key]
