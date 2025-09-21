@@ -1,6 +1,16 @@
+from typing import TypedDict
+
 from cubing_algs.constants import FACE_ORDER
 
 LOADED_PALETTES: dict[str, dict[str, str]] = {}
+
+
+class PaletteConfig(TypedDict, total=False):
+    faces: tuple[str | dict[str, str], ...]
+    font: str
+    masked_background: str
+    adjacent_background: str
+    hidden_ansi: str
 
 
 def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
@@ -49,7 +59,7 @@ def build_ansi_color(background_hex: str, foreground_hex: str) -> str:
     )
 
 
-PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
+PALETTES: dict[str, PaletteConfig] = {
     'default': {
         'faces': (
             '#F5F5F5',
@@ -564,7 +574,7 @@ DEFAULT_HIDDEN_ANSI = build_ansi_color('#303030', '#DADADA')
 
 
 def build_ansi_palette(
-        faces: tuple[str | dict[str, str]],
+        faces: tuple[str | dict[str, str], ...],
         font: str = DEFAULT_FONT,
         masked_background: str = DEFAULT_MASKED_BACKGROUND,
         adjacent_background: str = DEFAULT_ADJACENT_BACKGROUND,
