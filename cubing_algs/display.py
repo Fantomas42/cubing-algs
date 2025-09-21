@@ -14,7 +14,6 @@ from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
-from cubing_algs.palettes import build_ansi_color
 from cubing_algs.palettes import load_palette
 
 if TYPE_CHECKING:
@@ -547,7 +546,7 @@ class VCubeDisplay:
             self.cube_size,
         )
 
-        return build_ansi_color(
-            new_background_rgb,
-            foreground_rgb,
+        return (
+            f'\x1b[48;2;{ ";".join(str(c) for c in new_background_rgb) }m'
+            f'\x1b[38;2;{ ";".join(str(c) for c in foreground_rgb) }m'
         )

@@ -10,6 +10,7 @@ from cubing_algs.palettes import build_ansi_color
 from cubing_algs.palettes import build_ansi_palette
 from cubing_algs.palettes import foreground_hex_to_ansi
 from cubing_algs.palettes import hex_to_ansi
+from cubing_algs.palettes import hex_to_rgb
 from cubing_algs.palettes import load_palette
 
 
@@ -20,6 +21,26 @@ class TestHexToAnsi(unittest.TestCase):
         """Test basic hex to ANSI conversion."""
         result = hex_to_ansi('38', '#FF0000')
         self.assertEqual(result, '\x1b[38;2;255;0;0m')
+
+    def test_hex_to_rgb(self):
+        """Test basic hex to rgb conversion."""
+        result = hex_to_rgb('#FF0000')
+        self.assertEqual(result, (255, 0, 0))
+
+    def test_hex_compressed_to_rgb(self):
+        """Test compressed hex to rgb conversion."""
+        result = hex_to_rgb('#F00')
+        self.assertEqual(result, (255, 0, 0))
+
+    def test_hex_to_rgb_invalid_size(self):
+        """Test compressed hex to rgb invalid size."""
+        with self.assertRaises(ValueError):
+            hex_to_rgb('#F0')
+
+    def test_hex_to_rgb_invalid_value(self):
+        """Test compressed hex to rgb invalid value."""
+        with self.assertRaises(ValueError):
+            hex_to_rgb('#G00')
 
     def test_background_hex_to_ansi(self):
         """Test hex to background ANSI conversion."""
