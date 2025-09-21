@@ -5,32 +5,53 @@ from cubing_algs.constants import FACE_ORDER
 LOADED_PALETTES: dict[str, dict[str, str]] = {}
 
 
-def rgb_to_ansi(domain: str, r: int, g: int, b: int) -> str:
-    """Convert RGB values to ANSI escape code."""
+def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
+    """Convert hexadecimal color string to RGB tuple."""
+    hex_color = hex_color.lstrip('#')
+
+    if len(hex_color) == 3:
+        hex_color = ''.join(c * 2 for c in hex_color)
+
+    if len(hex_color) != 6:
+        msg = f'Invalid hex color format: { hex_color }'
+        raise ValueError(msg)
+
+    try:
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+    except ValueError as e:
+        msg = f'Invalid hex color format: { hex_color }'
+        raise ValueError(msg) from e
+
+    return (r, g, b)
+
+
+def hex_to_ansi(domain: str, hex_color: str) -> str:
+    """Convert hexadecimal color value to ANSI escape code."""
+    r, g, b = hex_to_rgb(hex_color)
     return f'\x1b[{ domain };2;{ r };{ g };{ b }m'
 
 
-def background_rgb_to_ansi(r: int, g: int, b: int) -> str:
-    """Convert RGB value to ANSI background color code."""
-    return rgb_to_ansi('48', r, g, b)
+def background_hex_to_ansi(hex_color: str) -> str:
+    """Convert hexadecimal color value to ANSI background color code."""
+    return hex_to_ansi('48', hex_color)
 
 
-def foreground_rgb_to_ansi(r: int, g: int, b: int) -> str:
-    """Convert RGB value to ANSI foreground color code."""
-    return rgb_to_ansi('38', r, g, b)
+def foreground_hex_to_ansi(hex_color: str) -> str:
+    """Convert hexadecimal color value to ANSI foreground color code."""
+    return hex_to_ansi('38', hex_color)
 
 
-def build_ansi_color(
-        background_rgb: tuple[int, int, int],
-        foreground_rgb: tuple[int, int, int]) -> str:
+def build_ansi_color(background_hex: str, foreground_hex: str) -> str:
     """Build a complete ANSI color scheme"""
     return (
-        background_rgb_to_ansi(*background_rgb)
-        + foreground_rgb_to_ansi(*foreground_rgb)
+        background_hex_to_ansi(background_hex)
+        + foreground_hex_to_ansi(foreground_hex)
     )
 
 
-PALETTES: dict[str, dict[str, Any]] = {
+PALETTES: dict[str, dict[str, str]] = {
     'default': {
         'faces_background_rgb': (
             (228, 228, 228),  # U
@@ -466,25 +487,20 @@ PALETTES: dict[str, dict[str, Any]] = {
     },
 }
 
-DEFAULT_FONT_RGB = (8, 8, 8)
+DEFAULT_FONT = '#080808'
 
-DEFAULT_MASKED_BACKGROUND_RGB = (68, 68, 68)
+DEFAULT_MASKED_BACKGROUND = '#444444'
 
-DEFAULT_ADJACENT_BACKGROUND_RGB = (0, 0, 78)
+DEFAULT_ADJACENT_BACKGROUND = '#00004E'
 
-DEFAULT_HIDDEN_ANSI = build_ansi_color(
-    (48, 48, 48),
-    (208, 208, 208),
-)
+DEFAULT_HIDDEN_ANSI = build_ansi_color('#303030', '#DADADA')
 
 
 def build_ansi_palette(
-        faces_rgb: tuple[
-            tuple[int, int, int] | dict[str, Any]
-        ],
-        font_rgb: str = DEFAULT_FONT_RGB,
-        masked_background_rgb: str = DEFAULT_MASKED_BACKGROUND_RGB,
-        adjacent_background_rgb: str = DEFAULT_ADJACENT_BACKGROUND_RGB,
+        faces: tuple[str | dict[str, str]],
+        font: str = DEFAULT_FONT,
+        masked_background: str = DEFAULT_MASKED_BACKGROUND,
+        adjacent_background: str = DEFAULT_ADJACENT_BACKGROUND,
         hidden_ansi: str = DEFAULT_HIDDEN_ANSI,
 ) -> dict[str, str]:
     palette = {
@@ -492,36 +508,45 @@ def build_ansi_palette(
         'hidden': hidden_ansi,
     }
 
-    for face, face_config in zip(FACE_ORDER, faces_rgb, strict=True):
+    for face, face_config in zip(FACE_ORDER, faces, strict=True):
         if isinstance(face_config, dict):
-            background_rgb = face_config['background_rgb']
-            font_ansi = foreground_rgb_to_ansi(
-                *face_config.get(
-                    'font_rgb',
-                    font_rgb,
+            background = face_config['background']
+            font_ansi = foreground_hex_to_ansi(
+                face_config.get(
+                    'font',
+                    font,
                 ),
             )
-            font_masked_ansi = foreground_rgb_to_ansi(
-                *face_config.get(
-                    'font_masked_rgb',
-                    background_rgb,
+            font_masked_ansi = foreground_hex_to_ansi(
+                face_config.get(
+                    'font_masked',
+                    background,
                 ),
             )
-            font_adjacent_ansi = foreground_rgb_to_ansi(
-                *face_config.get(
-                    'font_adjacent_rgb',
-                    background_rgb,
+            font_adjacent_ansi = foreground_hex_to_ansi(
+                face_config.get(
+                    'font_adjacent',
+                    background,
                 ),
             )
         else:
-            background_rgb = face_config
-            font_ansi = foreground_rgb_to_ansi(*font_rgb)
-            font_masked_ansi = foreground_rgb_to_ansi(*background_rgb)
-            font_adjacent_ansi = foreground_rgb_to_ansi(*background_rgb)
+            background = face_config
+            font_ansi = foreground_hex_to_ansi(font)
+            font_masked_ansi = foreground_hex_to_ansi(background)
+            font_adjacent_ansi = foreground_hex_to_ansi(background)
 
-        ansi_face = background_rgb_to_ansi(*background_rgb) + font_ansi
-        ansi_face_masked = background_rgb_to_ansi(*masked_background_rgb) + font_masked_ansi
-        ansi_face_adjacent = background_rgb_to_ansi(*adjacent_background_rgb) + font_adjacent_ansi
+        ansi_face = (
+            background_hex_to_ansi(background)
+            + font_ansi
+        )
+        ansi_face_masked = (
+            background_hex_to_ansi(masked_background)
+            + font_masked_ansi
+        )
+        ansi_face_adjacent = (
+            background_hex_to_ansi(adjacent_background)
+            + font_adjacent_ansi
+        )
 
         palette[face] = ansi_face
         palette[f'{ face }_masked'] = ansi_face_masked
