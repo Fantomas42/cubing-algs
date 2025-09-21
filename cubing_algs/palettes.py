@@ -42,7 +42,7 @@ def foreground_hex_to_ansi(hex_color: str) -> str:
 
 
 def build_ansi_color(background_hex: str, foreground_hex: str) -> str:
-    """Build a complete ANSI color scheme"""
+    """Build a complete ANSI escape sequence with background and foreground."""
     return (
         background_hex_to_ansi(background_hex)
         + foreground_hex_to_ansi(foreground_hex)
@@ -192,7 +192,7 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
         'font': '#282A36',
         'masked_background': '#44475A',
         'adjacent_background': '#6272A4',
-        'hidden_ansi': build_ansi_color('#282A36', '#F8F8F2')
+        'hidden_ansi': build_ansi_color('#282A36', '#F8F8F2'),
     },
     'alucard': {
         'faces': (
@@ -211,291 +211,347 @@ PALETTES: dict[str, dict[str, str | tuple[str | dict[str, str], ...]]] = {
         'adjacent_background': '#CFCFDE',
         'hidden_ansi': build_ansi_color('#6C664B', '#FFFBEB'),
     },
-    # Dark
-    # 'vampire': {
-    #     'faces': (
-    #         (20, 20, 20),
-    #         (40, 40, 40),
-    #         (32, 32, 32),
-    #         (48, 48, 48),
-    #         (24, 24, 24),
-    #         (36, 36, 36),
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         219, 0, 0,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         80, 80, 110,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (0, 0, 0),
-    #         (139, 0, 0),
-    #     ),
-    # },
-    # 'halloween': {
-    #     'faces': (
-    #         (248, 248, 255),  # U
-    #         (255, 69, 0),     # R
-    #         (50, 205, 50),    # F
-    #         (255, 215, 0),    # D
-    #         (255, 140, 0),    # L
-    #         {   # B - with custom font and hidden colors
-    #             'background': (72, 61, 139),
-    #             'font': foreground_rgb_to_ansi(220, 220, 220),
-    #             'font_masked': foreground_rgb_to_ansi(132, 121, 199),
-    #         },
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         25, 25, 25,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         40, 40, 40,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (25, 25, 25),
-    #         (255, 165, 0),
-    #     ),
-    # },
-    # 'cyberpunk': {
-    #     'faces': (
-    #         {   # U - with custom hidden colors
-    #             'background': (15, 15, 15),
-    #             'font_masked': foreground_rgb_to_ansi(0, 255, 255),
-    #         },
-    #         (255, 16, 240),   # R
-    #         {   # F - with custom font (magenta on green)
-    #             'background': (0, 255, 150),
-    #             'font': foreground_rgb_to_ansi(255, 16, 240),
-    #         },
-    #         {   # D - with custom font (magenta on yellow)
-    #             'background': (255, 234, 0),
-    #             'font': foreground_rgb_to_ansi(255, 16, 240),
-    #         },
-    #         (255, 69, 0),     # L
-    #         (0, 191, 255),    # B
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         0, 255, 255,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         45, 45, 45,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (113, 28, 145),
-    #         (0, 255, 255),
-    #     ),
-    # },
-    # 'synthwave': {
-    #     'faces': (
-    #         {   # U - with custom hidden colors
-    #             'background': (20, 20, 40),
-    #             'font_masked': foreground_rgb_to_ansi(255, 255, 255),
-    #         },
-    #         (255, 20, 147),   # R
-    #         (255, 105, 180),  # F
-    #         (255, 215, 0),    # D
-    #         (255, 69, 0),     # L
-    #         (138, 43, 226),   # B
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         255, 255, 255,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         60, 60, 100,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (40, 40, 80),
-    #         (255, 20, 147),
-    #     ),
-    # },
-    # 'galaxy': {
-    #     'faces': (
-    #         {   # U - with custom hidden font
-    #             'background': (25, 25, 112),
-    #             'font_masked': foreground_rgb_to_ansi(65, 65, 255),
-    #         },
-    #         (255, 20, 147),   # R
-    #         (138, 43, 226),   # F
-    #         {   # D - with custom font (dark on yellow)
-    #             'background': (255, 215, 0),
-    #             'font': foreground_rgb_to_ansi(75, 75, 75),
-    #         },
-    #         (255, 105, 180),  # L
-    #         {   # B - with custom hidden font
-    #             'background': (72, 61, 139),
-    #             'font_masked': foreground_rgb_to_ansi(112, 111, 209),
-    #         },
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         255, 255, 255,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         40, 40, 70,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (20, 20, 40),
-    #         (255, 225, 170),
-    #     ),
-    # },
-    # 'matrix': {
-    #     'faces': (
-    #         {
-    #             'background': (20, 20, 20),
-    #             'font': foreground_rgb_to_ansi(0, 255, 0),
-    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
-    #         },
-    #         {
-    #             'background': (20, 20, 20),
-    #             'font': foreground_rgb_to_ansi(100, 255, 100),
-    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
-    #         },
-    #         {
-    #             'background': (20, 20, 20),
-    #             'font': foreground_rgb_to_ansi(200, 255, 200),
-    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
-    #         },
-    #         {
-    #             'background': (100, 255, 100),
-    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
-    #         },
-    #         {
-    #             'background': (150, 255, 150),
-    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
-    #         },
-    #         {
-    #             'background': (200, 255, 200),
-    #             'font_masked': foreground_rgb_to_ansi(0, 150, 0),
-    #         },
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         0, 0, 0,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         20, 20, 20,
-    #     ),
-    #     'adjacent_background': background_rgb_to_ansi(
-    #         0, 50, 0,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (0, 20, 0),
-    #         (0, 255, 0),
-    #     ),
-    # },
-    # 'sunset': {
-    #     'faces': (
-    #         (255, 255, 255),
-    #         (255, 94, 77),
-    #         (186, 203, 77),
-    #         (255, 206, 84),
-    #         (255, 118, 117),
-    #         (108, 99, 255),
-    #     ),
-    # },
-    # 'ocean': {
-    #     'faces': (
-    #         (240, 248, 255),
-    #         (255, 99, 132),
-    #         (75, 192, 192),
-    #         (255, 205, 86),
-    #         (114, 162, 235),
-    #         (30, 144, 255),
-    #     ),
-    # },
-    # 'forest': {
-    #     'faces': (
-    #         (245, 245, 220),
-    #         (220, 20, 60),
-    #         (34, 139, 34),
-    #         (255, 215, 0),
-    #         {
-    #             'background': (139, 69, 19),
-    #             'font': foreground_rgb_to_ansi(200, 200, 200),
-    #             'font_masked': rgb_to_ansi('38', 179, 109, 69),
-    #             'font_adjacent': rgb_to_ansi('38', 179, 109, 69),
-    #         },
-    #         {
-    #             'background': (25, 25, 112),
-    #             'font': foreground_rgb_to_ansi(200, 200, 200),
-    #             'font_masked': rgb_to_ansi('38', 155, 155, 255),
-    #             'font_adjacent': rgb_to_ansi('38', 105, 105, 255),
-    #         },
-    #     ),
-    #     'adjacent_background': background_rgb_to_ansi(
-    #         0, 50, 0,
-    #     ),
-    # },
-    # 'fire': {
-    #     'faces': (
-    #         (255, 250, 240),
-    #         (220, 20, 60),
-    #         (255, 69, 0),
-    #         (255, 215, 0),
-    #         (255, 140, 0),
-    #         (139, 0, 0),
-    #     ),
-    #     'adjacent_background': background_rgb_to_ansi(
-    #         50, 0, 0,
-    #     ),
-    # },
-    # 'ice': {
-    #     'faces': (
-    #         (240, 248, 255),
-    #         (176, 196, 222),
-    #         (173, 216, 230),
-    #         (224, 255, 255),
-    #         (175, 238, 238),
-    #         (95, 158, 160),
-    #     ),
-    #     'adjacent_background': background_rgb_to_ansi(
-    #         45, 108, 200,
-    #     ),
-    # },
-    # 'white': {
-    #     'faces': (
-    #         (255, 255, 255),
-    #         (248, 248, 248),
-    #         (240, 240, 240),
-    #         (232, 232, 232),
-    #         (224, 224, 224),
-    #         (216, 216, 216),
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         0, 0, 0,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         162, 162, 162,
-    #     ),
-    #     'adjacent_background': background_rgb_to_ansi(
-    #         0, 0, 0,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (255, 255, 255),
-    #         (64, 64, 64),
-    #     ),
-    # },
-    # 'black': {
-    #     'faces': (
-    #         (0, 0, 0),
-    #         (32, 32, 32),
-    #         (48, 48, 48),
-    #         (64, 64, 64),
-    #         (80, 80, 80),
-    #         (96, 96, 96),
-    #     ),
-    #     'font': foreground_rgb_to_ansi(
-    #         255, 255, 255,
-    #     ),
-    #     'masked_background': background_rgb_to_ansi(
-    #         152, 152, 152,
-    #     ),
-    #     'adjacent_background': background_rgb_to_ansi(
-    #         200, 200, 200,
-    #     ),
-    #     'hidden_ansi': build_ansi_color(
-    #         (0, 0, 0),
-    #         (192, 192, 192),
-    #     ),
-    # },
+    'solarized-dark': {
+        'faces': (
+            {
+                'background': '#073642',
+                'font_masked': '#FDF6E3',
+                'font_adjacent': '#FDF6E3',
+            },
+            '#DC322F',
+            '#859900',
+            '#B58900',
+            '#CB4B16',
+            '#268BD2',
+        ),
+        'font': '#FDF6E3',
+        'masked_background': '#002B36',
+        'adjacent_background': '#073642',
+        'hidden_ansi': build_ansi_color('#002B36', '#839496'),
+    },
+    'solarized-light': {
+        'faces': (
+            {
+                'background': '#EEE8D5',
+                'font_masked': '#002B36',
+                'font_adjacent': '#FDF6E3',
+            },
+            '#DC322F',
+            '#859900',
+            '#B58900',
+            '#CB4B16',
+            '#268BD2',
+        ),
+        'font': '#002B36',
+        'masked_background': '#EEE8D5',
+        'adjacent_background': '#FDF6E3',
+        'hidden_ansi': build_ansi_color('#FDF6E3', '#657B83'),
+    },
+    # Env
+    'halloween': {
+        'faces': (
+            '#F8F8FF',
+            '#FF4500',
+            '#32CD32',
+            '#FFD700',
+            '#FF8C00',
+            {
+                'background': '#483D8B',
+                'font': '#DCDCDC',
+                'font_masked': '#8479C7',
+                'font_adjacent': '#8479C7',
+            },
+        ),
+        'font': '#191919',
+        'masked_background': '#282828',
+        'hidden_ansi': build_ansi_color('#191919', '#FFA500'),
+    },
+    'galaxy': {
+        'faces': (
+            {
+                'background': '#191970',
+                'font_masked': '#4141FF',
+                'font_adjacent': '#6666FF',
+            },
+            '#FF1493',
+            '#8A2BE2',
+            {
+                'background': '#FFD700',
+                'font': '#4B4B4B',
+            },
+            '#FF69B4',
+            {
+                'background': '#483D8B',
+                'font_masked': '#706FD1',
+                'font_adjacent': '#AAAAFF',
+            },
+        ),
+        'font': '#FFFFFF',
+        'masked_background': '#282846',
+        'hidden_ansi': build_ansi_color('#141428', '#FFE1AA'),
+    },
+    # Dark / Goth
+    'vampire': {
+        'faces': (
+            '#141414',
+            '#181818',
+            '#222222',
+            '#262626',
+            '#303030',
+            '#343434',
+        ),
+        'font': '#DB0000',
+        'masked_background': '#AE3030',
+        'adjacent_background': '#AE6060',
+        'hidden_ansi': build_ansi_color('#000000', '#AE0000'),
+    },
+    'ghoul': {
+        'faces': (
+            '#141414',
+            '#181818',
+            '#222222',
+            '#262626',
+            '#303030',
+            '#343434',
+        ),
+        'font': '#26C4EC',
+        'masked_background': '#297E97',
+        'adjacent_background': '#8BD8F3',
+        'hidden_ansi': build_ansi_color('#000000', '#26C4EC'),
+    },
+    'goblin': {
+        'faces': (
+            '#141414',
+            '#181818',
+            '#222222',
+            '#262626',
+            '#303030',
+            '#343434',
+        ),
+        'font': '#00F253',
+        'masked_background': '#5CA165',
+        'adjacent_background': '#2AE464',
+        'hidden_ansi': build_ansi_color('#000000', '#00F253'),
+    },
+    # Futuristic
+    'cyberpunk': {
+        'faces': (
+            {
+                'background': '#0F0F0F',
+                'font_masked': '#00FFFF',
+                'font_adjacent': '#00FFFF',
+            },
+            '#FF10F0',
+            {
+                'background': '#00FF96',
+                'font': '#FF10F0',
+            },
+            {
+                'background': '#FFEA00',
+                'font': '#FF10F0',
+            },
+            '#FF4500',
+            '#00BFFF',
+        ),
+        'font': '#00FFFF',
+        'masked_background': '#2D2D2D',
+        'hidden_ansi': build_ansi_color('#711C91', '#00FFFF'),
+    },
+    'synthwave': {
+        'faces': (
+            {
+                'background': '#141428',
+                'font_masked': '#FFFFFF',
+            },
+            '#FF1493',
+            '#FF69B4',
+            {
+                'background': '#FFD700',
+                'font': '#000',
+            },
+            '#FF4500',
+            '#8A2BE2',
+        ),
+        'font': '#FFFFFF',
+        'masked_background': '#3C3C64',
+        'hidden_ansi': build_ansi_color('#282850', '#FF1493'),
+    },
+    'matrix': {
+        'faces': (
+            {
+                'background': '#141414',
+                'font': '#00FF00',
+                'font_masked': '#009600',
+                'font_adjacent': '#B8FFB8',
+            },
+            {
+                'background': '#141414',
+                'font': '#64FF64',
+                'font_masked': '#009600',
+                'font_adjacent': '#B8FFB8',
+            },
+            {
+                'background': '#141414',
+                'font': '#C8FFC8',
+                'font_masked': '#009600',
+                'font_adjacent': '#B8FFB8',
+            },
+            {
+                'background': '#64FF64',
+                'font_masked': '#009600',
+                'font_adjacent': '#B8FFB8',
+            },
+            {
+                'background': '#96FF96',
+                'font_masked': '#009600',
+                'font_adjacent': '#B8FFB8',
+            },
+            {
+                'background': '#B8FFB8',
+                'font_masked': '#009600',
+                'font_adjacent': '#B8FFB8',
+            },
+        ),
+        'font': '#000000',
+        'masked_background': '#141414',
+        'adjacent_background': '#003200',
+        'hidden_ansi': build_ansi_color('#003400', '#00FF00'),
+    },
+    # Nature
+    'sunset': {
+        'faces': (
+            '#FFFFFF',
+            '#FF5E4D',
+            '#BACB4D',
+            '#FFCE54',
+            '#FF7675',
+            '#6C63FF',
+        ),
+    },
+    'ocean': {
+        'faces': (
+            '#F0F8FF',
+            '#FF6384',
+            '#4BC0C0',
+            '#FFCD56',
+            '#72A2EB',
+            '#1E90FF',
+        ),
+    },
+    'forest': {
+        'faces': (
+            '#F5F5DC',
+            '#DC143C',
+            '#228B22',
+            '#FFD700',
+            {
+                'background': '#8B4513',
+                'font': '#C8C8C8',
+                'font_masked': '#B36D45',
+                'font_adjacent': '#B36D45',
+            },
+            {
+                'background': '#191970',
+                'font': '#C8C8C8',
+                'font_masked': '#9B9BFF',
+                'font_adjacent': '#6969FF',
+            },
+        ),
+        'adjacent_background': '#003200',
+    },
+    'fire': {
+        'faces': (
+            '#FFFAF0',
+            '#DC143C',
+            '#FF4500',
+            '#FFD700',
+            '#FF8C00',
+            '#8B0000',
+        ),
+        'adjacent_background': '#320000',
+    },
+    'ice': {
+        'faces': (
+            '#F0F8FF',
+            '#B0C4DE',
+            '#ADD8E6',
+            '#E0FFFF',
+            '#AFEEEE',
+            '#5F9EA0',
+        ),
+        'adjacent_background': '#2D6CC8',
+    },
+    # Monochrome
+    'white': {
+        'faces': (
+            '#FFFFFF',
+            '#F8F8F8',
+            '#F0F0F0',
+            '#E8E8E8',
+            '#E0E0E0',
+            '#D8D8D8',
+        ),
+        'font': '#000000',
+        'masked_background': '#A2A2A2',
+        'adjacent_background': '#000000',
+        'hidden_ansi': build_ansi_color('#FFFFFF', '#404040'),
+    },
+    'black': {
+        'faces': (
+            '#000000',
+            '#202020',
+            '#303030',
+            '#404040',
+            '#505050',
+            '#606060',
+        ),
+        'font': '#FFFFFF',
+        'masked_background': '#989898',
+        'adjacent_background': '#C8C8C8',
+        'hidden_ansi': build_ansi_color('#000000', '#C0C0C0'),
+    },
+    'red': {
+        'faces': (
+            '#200000',
+            '#300000',
+            '#400000',
+            '#500000',
+            '#600000',
+            '#800000',
+        ),
+        'font': '#FFFFFF',
+        'masked_background': '#AA7070',
+        'adjacent_background': '#F8C8C8',
+        'hidden_ansi': build_ansi_color('#000000', '#00BB00'),
+    },
+    'green': {
+        'faces': (
+            '#002000',
+            '#003000',
+            '#004000',
+            '#005000',
+            '#006000',
+            '#008000',
+        ),
+        'font': '#FFFFFF',
+        'masked_background': '#70AA70',
+        'adjacent_background': '#C8F8C8',
+        'hidden_ansi': build_ansi_color('#000000', '#00BB00'),
+    },
+    'blue': {
+        'faces': (
+            '#000020',
+            '#000030',
+            '#000040',
+            '#000050',
+            '#000060',
+            '#000080',
+        ),
+        'font': '#FFFFFF',
+        'masked_background': '#7070AA',
+        'adjacent_background': '#C8C8F8',
+        'hidden_ansi': build_ansi_color('#000000', '#0000BB'),
+    },
 }
 
 DEFAULT_FONT = '#080808'
@@ -514,6 +570,15 @@ def build_ansi_palette(
         adjacent_background: str = DEFAULT_ADJACENT_BACKGROUND,
         hidden_ansi: str = DEFAULT_HIDDEN_ANSI,
 ) -> dict[str, str]:
+    """
+    Build a complete ANSI color palette for cube face display.
+
+    Creates ANSI escape sequences for each cube face in three states:
+      normal, masked, and adjacent.
+
+    Each face can be defined as a simple hex color string
+    or a dictionary with custom background, font, and masked font colors.
+    """
     palette = {
         'reset': '\x1b[0;0m',
         'hidden': hidden_ansi,
@@ -567,6 +632,14 @@ def build_ansi_palette(
 
 
 def load_palette(palette_name: str) -> dict[str, str]:
+    """
+    Load and cache an ANSI color palette by name.
+
+    Returns a cached palette if already loaded, otherwise builds
+    and caches the palette from the PALETTES dictionary.
+
+    Falls back to 'default' palette if the requested palette name is not found.
+    """
     if palette_name not in PALETTES:
         palette_name = 'default'
 
