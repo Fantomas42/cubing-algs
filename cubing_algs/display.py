@@ -14,7 +14,6 @@ from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
-from cubing_algs.palettes import build_ansi_color
 from cubing_algs.palettes import load_palette
 
 if TYPE_CHECKING:
@@ -160,11 +159,11 @@ class VCubeDisplay:
                         *, adjacent: bool = False) -> str:
         """Format a single facelet with colors and effects for display."""
         if facelet not in FACE_ORDER:
-            face_color = self.palette['masked']
+            face_color = self.palette['hidden']
         else:
             face_key = facelet
             if mask == '0':
-                face_key += '_hidden'
+                face_key += '_masked'
             elif adjacent:
                 face_key += '_adjacent'
             face_color = self.palette[face_key]
@@ -547,7 +546,7 @@ class VCubeDisplay:
             self.cube_size,
         )
 
-        return build_ansi_color(
-            new_background_rgb,
-            foreground_rgb,
+        return (
+            f'\x1b[48;2;{ ";".join(str(c) for c in new_background_rgb) }m'
+            f'\x1b[38;2;{ ";".join(str(c) for c in foreground_rgb) }m'
         )
