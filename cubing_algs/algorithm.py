@@ -1,6 +1,7 @@
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.exceptions import InvalidMoveError
@@ -8,6 +9,9 @@ from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.metrics import compute_cycles
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
+
+if TYPE_CHECKING:
+    from cubing_algs.vcube import VCube  # pragma: no cover
 
 
 class Algorithm(UserList[Move]):
@@ -231,7 +235,7 @@ class Algorithm(UserList[Move]):
             for m in self
         )
 
-    def show(self, mode: str = '', orientation: str = ''):
+    def show(self, mode: str = '', orientation: str = '') -> 'VCube':
         """
         Visualize the algorithm's effect on a cube.
 

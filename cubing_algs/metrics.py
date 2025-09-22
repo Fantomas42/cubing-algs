@@ -71,7 +71,7 @@ def compute_score(mode: str,
     )
 
 
-def compute_generators(moves: list[Move]) -> list[str]:
+def compute_generators(moves: 'Algorithm') -> list[str]:
     """
     Identify the most frequently used move faces in an algorithm.
 
@@ -99,7 +99,7 @@ def compute_generators(moves: list[Move]) -> list[str]:
 
 
 def regroup_moves(
-        moves: list[Move],
+        moves: 'Algorithm',
 ) -> tuple[list[Move], list[Move], list[Move], list[Move]]:
     """
     Categorize moves into pause, rotation, outer, and inner move types.
@@ -125,7 +125,7 @@ def regroup_moves(
     return pauses, rotations, outer_moves, inner_moves
 
 
-def compute_metrics(moves: list[Move]) -> dict[str, Any]:
+def compute_metrics(moves: 'Algorithm') -> dict[str, Any]:
     """
     Calculate a comprehensive set of metrics for an algorithm.
 
