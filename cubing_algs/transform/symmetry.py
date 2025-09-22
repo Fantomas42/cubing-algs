@@ -1,20 +1,21 @@
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import SYMMETRY_TABLE
 from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.move import Move
 
 
 def symmetry_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         ignore_moves: set[str],
         symmetry_table: dict[str, str],
-) -> list[Move]:
+) -> Algorithm:
     """
     Apply symmetry transformation to an algorithm using a symmetry table.
 
     Transforms each move according to the provided symmetry mapping,
     preserving move modifiers and notation style.
     """
-    moves = []
+    moves: list[Move] = []
 
     for move in old_moves:
         if move.is_pause or move.base_move in ignore_moves:
@@ -39,13 +40,13 @@ def symmetry_moves(
             else:
                 moves.append(new_move)
 
-    return moves
+    return Algorithm(moves)
 
 
 def symmetry_type_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         symmetry_type: str,
-) -> list[Move]:
+) -> Algorithm:
     """
     Apply a specific type of symmetry transformation to moves.
 
@@ -55,28 +56,28 @@ def symmetry_type_moves(
     return symmetry_moves(old_moves, ignore_moves, symmetry_table)
 
 
-def symmetry_m_moves(old_moves: list[Move]) -> list[Move]:
+def symmetry_m_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply M-slice symmetry transformation to moves.
     """
     return symmetry_type_moves(old_moves, 'M')
 
 
-def symmetry_s_moves(old_moves: list[Move]) -> list[Move]:
+def symmetry_s_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply S-slice symmetry transformation to moves.
     """
     return symmetry_type_moves(old_moves, 'S')
 
 
-def symmetry_e_moves(old_moves: list[Move]) -> list[Move]:
+def symmetry_e_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply E-slice symmetry transformation to moves.
     """
     return symmetry_type_moves(old_moves, 'E')
 
 
-def symmetry_c_moves(old_moves: list[Move]) -> list[Move]:
+def symmetry_c_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply combined symmetry transformation using M and S symmetries.
     """

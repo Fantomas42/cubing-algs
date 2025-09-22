@@ -1,11 +1,11 @@
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
-from cubing_algs.move import Move
 
 
 def optimize_repeat_three_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     R, R, R --> R'
     """
@@ -33,9 +33,9 @@ def optimize_repeat_three_moves(
 
 
 def optimize_do_undo_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     R R' --> <nothing>
     R2 R2 --> <nothing>
@@ -69,9 +69,9 @@ def optimize_do_undo_moves(
 
 
 def optimize_double_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     R, R --> R2
     """
@@ -100,9 +100,9 @@ def optimize_double_moves(
 
 
 def optimize_triple_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     R, R2 --> R'
     R2, R --> R'

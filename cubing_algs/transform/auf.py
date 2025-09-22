@@ -1,5 +1,7 @@
+from collections.abc import Iterable
 from itertools import takewhile
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import AUF_CHAR
 from cubing_algs.move import Move
 from cubing_algs.transform.offset import offset_y2_moves
@@ -28,14 +30,14 @@ def is_auf_or_pause(move: Move) -> bool:
     return move.base_move == AUF_CHAR or move.is_pause
 
 
-def calculate_auf_score(moves: list[Move]) -> int:
+def calculate_auf_score(moves: Iterable[Move]) -> int:
     return sum(
         get_move_score(move)
         for move in takewhile(is_auf_or_pause, moves)
     )
 
 
-def remove_auf_moves(old_moves: list[Move]) -> list[Move]:
+def remove_auf_moves(old_moves: Algorithm) -> Algorithm:
     if not old_moves:
         return old_moves
 

@@ -1,3 +1,4 @@
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.move import Move
 from cubing_algs.transform.optimize import optimize_do_undo_moves
@@ -8,14 +9,14 @@ from cubing_algs.transform.optimize import optimize_triple_moves
 CANCEL_TRIPLET: set[str | Move] = {'x2', 'y2', 'z2'}
 
 
-def remove_final_rotations(old_moves: list[Move]) -> list[Move]:
+def remove_final_rotations(old_moves: Algorithm) -> Algorithm:
     """
     Remove trailing rotations and pauses from an algorithm.
 
     Strips rotation moves and pauses from the end of the algorithm
     while preserving the core face moves.
     """
-    moves = []
+    moves: list[Move] = []
 
     rotation = True
     for move in reversed(old_moves):
@@ -24,13 +25,13 @@ def remove_final_rotations(old_moves: list[Move]) -> list[Move]:
         rotation = False
         moves.append(move)
 
-    return list(reversed(moves))
+    return Algorithm(reversed(moves))
 
 
 def optimize_triple_rotations(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     x2, y2, z2 --> <nothing>
     x2, z2, y2 --> <nothing>
@@ -58,9 +59,9 @@ def optimize_triple_rotations(
 
 
 def optimize_double_rotations(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     x2, y2 --> z2
     x2, z2 --> y2
@@ -94,9 +95,9 @@ def optimize_double_rotations(
 
 
 def optimize_conjugate_rotations(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     x, y2, x' --> z2
     x', y2, x --> z2
@@ -134,16 +135,16 @@ def optimize_conjugate_rotations(
 
 
 def split_moves_final_rotations(
-        old_moves: list[Move],
-) -> tuple[list[Move], list[Move]]:
+        old_moves: Algorithm,
+) -> tuple[Algorithm, Algorithm]:
     """
     Split an algorithm into core moves and final rotations.
 
     Separates the algorithm into two parts: the main moves and
     the trailing rotations and pauses.
     """
-    moves = []
-    rotations = []
+    moves: list[Move] = []
+    rotations: list[Move] = []
 
     rotation = True
     for move in reversed(old_moves):
@@ -154,18 +155,18 @@ def split_moves_final_rotations(
         moves.append(move)
 
     if not rotations:
-        return old_moves, []
+        return old_moves, Algorithm()
 
     moves.reverse()
     rotations.reverse()
 
-    return moves, rotations
+    return Algorithm(moves), Algorithm(rotations)
 
 
 def compress_rotations(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_iterations: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     Optimize rotation sequences by applying compression techniques.
 
@@ -194,7 +195,7 @@ def compress_rotations(
     return moves
 
 
-def compress_final_rotations(old_moves: list[Move]) -> list[Move]:
+def compress_final_rotations(old_moves: Algorithm) -> Algorithm:
     """
     Optimize final rotations in an algorithm.
 

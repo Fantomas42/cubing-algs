@@ -1,3 +1,4 @@
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.constants import REFAT_MOVES
 from cubing_algs.constants import UNFAT_ROTATION_MOVES
@@ -6,10 +7,10 @@ from cubing_algs.move import Move
 
 
 def unfat(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         config: dict[str, list[str]],
-) -> list[Move]:
-    moves = []
+) -> Algorithm:
+    moves: list[Move] = []
 
     move_cache: dict[Move, list[Move]] = {}
     for move_str, replacements in config.items():
@@ -31,27 +32,27 @@ def unfat(
         else:
             moves.append(move)
 
-    return moves
+    return Algorithm(moves)
 
 
-def unfat_slice_moves(old_moves: list[Move]) -> list[Move]:
+def unfat_slice_moves(old_moves: Algorithm) -> Algorithm:
     return unfat(old_moves, UNFAT_SLICE_MOVES)
 
 
-def unfat_rotation_moves(old_moves: list[Move]) -> list[Move]:
+def unfat_rotation_moves(old_moves: Algorithm) -> Algorithm:
     return unfat(old_moves, UNFAT_ROTATION_MOVES)
 
 
 def refat(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         config: dict[str, str],
         max_depth: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     if max_depth <= 0:
         return old_moves
 
     i = 0
-    moves = []
+    moves: list[Move] = []
     changed = False
 
     while i < len(old_moves) - 1:
@@ -68,10 +69,13 @@ def refat(
         moves.append(old_moves[i])
 
     if changed:
-        return refat(moves, config, max_depth - 1)
+        return refat(
+            Algorithm(moves), config,
+            max_depth - 1,
+        )
 
-    return moves
+    return Algorithm(moves)
 
 
-def refat_moves(old_moves: list[Move]) -> list[Move]:
+def refat_moves(old_moves: Algorithm) -> Algorithm:
     return refat(old_moves, REFAT_MOVES)

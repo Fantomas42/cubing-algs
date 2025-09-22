@@ -1,22 +1,24 @@
 from collections.abc import Callable
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import PAUSE_CHAR
 from cubing_algs.move import Move
 
 
-def unpause_moves(old_moves: list[Move]) -> list[Move]:
-    moves = []
+def unpause_moves(old_moves: Algorithm) -> Algorithm:
+    moves: list[Move] = []
+
     for move in old_moves:
         if not move.is_pause:
             moves.append(move)
 
-    return moves
+    return Algorithm(moves)
 
 
 def pause_moves(
         speed: int = 200, factor: int = 2,
         *, multiple: bool = False,
-) -> Callable[[list[Move]], list[Move]]:
+) -> Callable[[Algorithm], Algorithm]:
     """
     Create a configurable pause_moves function.
 
@@ -27,14 +29,14 @@ def pause_moves(
     Returns:
         A function that can be used with transform() or called directly.
     """
-    def _pause_moves(old_moves: list[Move]) -> list[Move]:
+    def _pause_moves(old_moves: Algorithm) -> Algorithm:
         if not old_moves:
             return old_moves
 
         if any(not m.is_timed for m in old_moves):
             return old_moves
 
-        moves = []
+        moves: list[Move] = []
         threshold = speed * factor
 
         previous_time = old_moves[0].timed
@@ -75,6 +77,6 @@ def pause_moves(
                 moves.append(move)
             previous_time = time
 
-        return moves
+        return Algorithm(moves)
 
     return _pause_moves

@@ -1,3 +1,4 @@
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.move import Move
 from cubing_algs.transform.optimize import optimize_do_undo_moves
@@ -7,9 +8,9 @@ from cubing_algs.transform.optimize import optimize_triple_moves
 
 
 def compress_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         max_iterations: int = MAX_ITERATIONS,
-) -> list[Move]:
+) -> Algorithm:
     """
     Optimize an algorithm by applying move compression techniques.
 
@@ -35,7 +36,7 @@ def compress_moves(
     return moves
 
 
-def expand_moves(old_moves: list[Move]) -> list[Move]:
+def expand_moves(old_moves: Algorithm) -> Algorithm:
     """
     Expand an algorithm by converting double moves to two single moves.
 
@@ -49,4 +50,4 @@ def expand_moves(old_moves: list[Move]) -> list[Move]:
         else:
             moves.append(move)
 
-    return moves
+    return Algorithm(moves)

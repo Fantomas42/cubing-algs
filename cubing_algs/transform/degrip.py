@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Any
 
-from cubing_algs.move import Move
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.transform.offset import offset_x2_moves
 from cubing_algs.transform.offset import offset_x_moves
 from cubing_algs.transform.offset import offset_xprime_moves
@@ -12,19 +12,19 @@ from cubing_algs.transform.offset import offset_z2_moves
 from cubing_algs.transform.offset import offset_z_moves
 from cubing_algs.transform.offset import offset_zprime_moves
 
-DEGRIP_X: dict[str, Callable[[list[Move]], list[Move]]] = {
+DEGRIP_X: dict[str, Callable[[Algorithm], Algorithm]] = {
     'x': offset_xprime_moves,
     'x2': offset_x2_moves,
     "x'": offset_x_moves,
 }
 
-DEGRIP_Y: dict[str, Callable[[list[Move]], list[Move]]] = {
+DEGRIP_Y: dict[str, Callable[[Algorithm], Algorithm]] = {
     'y': offset_yprime_moves,
     'y2': offset_y2_moves,
     "y'": offset_y_moves,
 }
 
-DEGRIP_Z: dict[str, Callable[[list[Move]], list[Move]]] = {
+DEGRIP_Z: dict[str, Callable[[Algorithm], Algorithm]] = {
     'z': offset_zprime_moves,
     'z2': offset_z2_moves,
     "z'": offset_z_moves,
@@ -38,12 +38,12 @@ DEGRIP_FULL.update(DEGRIP_Z)
 
 
 def has_grip(
-        old_moves: list[Move],
-        config: dict[str, Callable[[list[Move]], list[Move]]],
+        old_moves: Algorithm,
+        config: dict[str, Callable[[Algorithm], Algorithm]],
 ) -> tuple[bool, Any, Any, Any]:
     i = 0
-    prefix: list[Move] = []
-    suffix: list[Move] = []
+    prefix = Algorithm()
+    suffix = Algorithm()
 
     while i < len(old_moves) - 1:
         move = old_moves[i].untimed
@@ -63,41 +63,41 @@ def has_grip(
 
 
 def degrip(
-        old_moves: list[Move],
-        config: dict[str, Callable[[list[Move]], list[Move]]],
-) -> list[Move]:
+        old_moves: Algorithm,
+        config: dict[str, Callable[[Algorithm], Algorithm]],
+) -> Algorithm:
     _gripped, prefix, suffix, gripper = has_grip(old_moves, config)
 
     if suffix:
-        degripped = [*config[gripper](suffix), gripper]
+        degripped = Algorithm([*config[gripper](suffix), gripper])
 
         if has_grip(degripped, config)[0]:
             return degrip(prefix + degripped, config)
 
-        return prefix + degripped
+        return Algorithm(prefix + degripped)
 
     return old_moves
 
 
-def degrip_x_moves(old_moves: list[Move]) -> list[Move]:
+def degrip_x_moves(old_moves: Algorithm) -> Algorithm:
     return degrip(
         old_moves, DEGRIP_X,
     )
 
 
-def degrip_y_moves(old_moves: list[Move]) -> list[Move]:
+def degrip_y_moves(old_moves: Algorithm) -> Algorithm:
     return degrip(
         old_moves, DEGRIP_Y,
     )
 
 
-def degrip_z_moves(old_moves: list[Move]) -> list[Move]:
+def degrip_z_moves(old_moves: Algorithm) -> Algorithm:
     return degrip(
         old_moves, DEGRIP_Z,
     )
 
 
-def degrip_full_moves(old_moves: list[Move]) -> list[Move]:
+def degrip_full_moves(old_moves: Algorithm) -> Algorithm:
     return degrip(
         old_moves, DEGRIP_FULL,
     )

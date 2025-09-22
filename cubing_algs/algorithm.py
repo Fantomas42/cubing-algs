@@ -122,7 +122,7 @@ class Algorithm(UserList[Move]):
 
     def transform(
             self,
-            *processes: Callable[[list[Move]], list[Move]],
+            *processes: Callable[['Algorithm'], 'Algorithm'],
             to_fixpoint: bool = False,
     ) -> 'Algorithm':
         """
@@ -146,7 +146,7 @@ class Algorithm(UserList[Move]):
                 break
             new_moves = mod_moves
 
-        return Algorithm(mod_moves)
+        return mod_moves
 
     @property
     def metrics(self) -> dict[str, int | list[str]]:

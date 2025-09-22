@@ -1,19 +1,20 @@
 from collections.abc import Callable
 from itertools import dropwhile
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import Move
 
 
 def trim_moves(
         trim_move: str,
         start: bool = True, end: bool = True,  # noqa: FBT001, FBT002
-) -> Callable[[list[Move]], list[Move]]:
+) -> Callable[[Algorithm], Algorithm]:
 
-    def trimmer(old_moves: list[Move]) -> list[Move]:
+    def trimmer(old_moves: Algorithm) -> Algorithm:
         if not old_moves:
-            return []
+            return old_moves
 
-        moves = old_moves.copy()
+        moves = list(old_moves.copy())
 
         def should_trim(m: Move) -> bool:
             return m.base_move == trim_move or m.is_pause
@@ -32,6 +33,6 @@ def trim_moves(
                 ),
             )
 
-        return moves
+        return Algorithm(moves)
 
     return trimmer
