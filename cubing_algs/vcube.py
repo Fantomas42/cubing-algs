@@ -73,16 +73,43 @@ class VCube(VCubeIntegrityChecker):
         """
         return all(face * self.face_size in self.state for face in FACE_ORDER)
 
+    def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
+        """
+        Compare two cubes for equality with optional orientation flexibility.
+
+        In strict mode, compares exact facelet states.
+        In non-strict mode, reorients the other cube to match
+        this cube's orientation before comparing.
+        """
+        if strict:
+            return self.state == other_cube.state
+
+        oriented_copy = other_cube.oriented_copy(self.orientation)
+
+        return self.state == oriented_copy.state
+
+    @property
+    def orientation(self) -> str:
+        """
+        Get the cube's orientation as a two-character string.
+
+        Uses the top face center and front face center
+        to determine the current orientation of the cube in space.
+
+        It might not work well with an unchecked state.
+        """
+        return self._state[4] + self._state[22]
+
     def rotate(self, moves: str | Algorithm, *, history: bool = True) -> str:
         """
         Apply a sequence of moves to the cube.
         """
         if isinstance(moves, Algorithm):
-            for m in moves:
-                self.rotate_move(str(m), history=history)
+            for move in moves:
+                self.rotate_move(str(move), history=history)
         else:
-            for m in moves.split(' '):
-                self.rotate_move(m, history=history)
+            for move_str in moves.split(' '):
+                self.rotate_move(move_str, history=history)
         return self._state
 
     def rotate_move(self, move: str, *, history: bool = True) -> str:
@@ -138,19 +165,29 @@ class VCube(VCubeIntegrityChecker):
 
         return cube
 
-    def display(self, mode: str = '', orientation: str = '',
-                mask: str = '', palette: str = '') -> str:
+    def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
+                mask: str = '', palette: str = '',
+                effect: str = '', facelet: str = '') -> str:
         """
         Generate a visual representation of the cube.
         """
-        return VCubeDisplay(self, palette).display(mode, orientation, mask)
+        return VCubeDisplay(self, palette, effect, facelet).display(
+            mode, orientation, mask,
+        )
 
-    def show(self, mode: str = '', orientation: str = '',
-             mask: str = '', palette: str = '') -> None:
+    def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
+             mask: str = '', palette: str = '',
+             effect: str = '', facelet: str = '') -> None:
         """
         Print a visual representation of the cube.
         """
-        print(self.display(mode, orientation, mask, palette), end='')
+        print(
+            self.display(
+                mode, orientation, mask,
+                palette, effect, facelet,
+            ),
+            end='',
+        )
 
     def get_face(self, face: str) -> str:
         """

@@ -27,5 +27,5 @@ class InvalidBracketError(InvalidMoveError):
 
 class InvalidOperatorError(InvalidMoveError):
     """
-    Exception raised when an invalid bracket formation is encountered.
+    Exception raised when an invalid operator is encountered.
     """

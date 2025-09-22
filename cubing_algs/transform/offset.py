@@ -4,6 +4,12 @@ from cubing_algs.move import Move
 
 
 def rotate(old_moves: list[Move], rotation: str) -> list[Move]:
+    """
+    Apply a rotation transformation to moves using the offset table.
+
+    Transforms each move according to the specified rotation direction,
+    maintaining move properties and notation style.
+    """
     moves: list[Move] = []
     rotation_table: dict[str, str] = OFFSET_TABLE[rotation]
 
@@ -37,6 +43,11 @@ def offset_moves(
         rotation: str,
         count: int = 1,
 ) -> list[Move]:
+    """
+    Apply a rotation transformation multiple times to an algorithm.
+
+    Repeatedly applies the specified rotation to achieve the desired offset.
+    """
     result = old_moves
     for _ in range(count):
         result = rotate(result, rotation)
@@ -44,36 +55,63 @@ def offset_moves(
 
 
 def offset_x_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply x' rotation to moves.
+    """
     return offset_moves(old_moves, "x'")
 
 
 def offset_x2_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply x2 rotation to moves.
+    """
     return offset_moves(old_moves, 'x', 2)
 
 
 def offset_xprime_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply x rotation to moves.
+    """
     return offset_moves(old_moves, 'x')
 
 
 def offset_y_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply y' rotation to moves.
+    """
     return offset_moves(old_moves, "y'")
 
 
 def offset_y2_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply y2 rotation to moves.
+    """
     return offset_moves(old_moves, 'y', 2)
 
 
 def offset_yprime_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply y rotation to moves.
+    """
     return offset_moves(old_moves, 'y')
 
 
 def offset_z_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply z' rotation to moves.
+    """
     return offset_moves(old_moves, "z'")
 
 
 def offset_z2_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply z2 rotation to moves.
+    """
     return offset_moves(old_moves, 'z', 2)
 
 
 def offset_zprime_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Apply z rotation to moves.
+    """
     return offset_moves(old_moves, 'z')

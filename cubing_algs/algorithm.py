@@ -1,10 +1,11 @@
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
-from functools import cached_property
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.facelets import cubies_to_facelets
+from cubing_algs.metrics import compute_cycles
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
@@ -115,16 +116,6 @@ class Algorithm(UserList[Move]):
         """
         return f'Algorithm("{ "".join([str(m) for m in self]) }")'
 
-    @property
-    def metrics(self) -> dict[str, int | list[str]]:
-        """
-        Calculate various metrics for this algorithm.
-
-        Uses the compute_metrics function to analyze the algorithm's efficiency,
-        move types, and other characteristics.
-        """
-        return compute_metrics(self)
-
     def transform(
             self,
             *processes: Callable[[list[Move]], list[Move]],
@@ -153,12 +144,43 @@ class Algorithm(UserList[Move]):
 
         return Algorithm(mod_moves)
 
-    @cached_property
+    @property
+    def metrics(self) -> dict[str, int | list[str]]:
+        """
+        Calculate various metrics for this algorithm.
+
+        Uses the compute_metrics function to analyze the algorithm's efficiency,
+        move types, and other characteristics.
+        """
+        return compute_metrics(self)
+
+    @property
+    def cycles(self) -> int:
+        """
+        Get the number of times this algorithm must be applied
+        to return a cube to its solved state.
+
+        This property calculates the "order" of the algorithm - how many times
+        you need to execute the sequence of moves to bring a solved cube back
+        to its original solved state.
+
+        This is useful for understanding the periodic behavior of algorithms
+        and their mathematical properties.
+
+        Example:
+            >>> alg = Algorithm("R U R' U'")
+            >>> alg.cycles
+            6  # Meaning applying this 6 times returns to solved
+        """
+        return compute_cycles(self)
+
+    @property
     def min_cube_size(self) -> int:
         """
-        Compute the minimum cube size required to apply the algorithm.
+        Compute the minimum cube size required to execute this algorithm.
 
-        This allows validation of the algorithm against a cube.
+        Analyzes the moves to determine the smallest cube that can accommodate
+        all the layered moves in the algorithm.
         """
         min_cube = 2
 
@@ -174,31 +196,65 @@ class Algorithm(UserList[Move]):
 
         return min_cube
 
-    @cached_property
+    @property
     def is_standard(self) -> bool:
         """
-        Check if algorithm is in standard notations
+        Check if algorithm is in standard notations.
         """
         return not self.is_sign
 
-    @cached_property
+    @property
     def is_sign(self) -> bool:
         """
-        Check if algorithm contains SiGN notations
+        Check if algorithm contains SiGN notations.
         """
         return any(m.is_sign_move for m in self)
 
-    @cached_property
+    @property
     def has_rotations(self) -> bool:
         """
-        Check if algorithm contains rotations
+        Check if algorithm contains rotations.
         """
-        return any(m.is_wide_move or m.is_rotation_move for m in self)
+        return any(
+            m.is_wide_move or m.is_inner_move or m.is_rotation_move
+            for m in self
+        )
 
-    @cached_property
+    @property
     def has_internal_rotations(self) -> bool:
         """
         Check if algorithm contains internal rotations
-        inducted by the moves.
+        induced by wide or inner moves.
         """
-        return any(m.is_wide_move for m in self)
+        return any(
+            m.is_wide_move or m.is_inner_move
+            for m in self
+        )
+
+    def show(self, mode: str = '', orientation: str = ''):
+        """
+        Visualize the algorithm's effect on a cube.
+
+        Creates a VCube, applies this algorithm to it, and displays the result
+        with a mask showing which facelets are affected by the algorithm.
+        """
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        cube = VCube()
+        cube.rotate(self)
+
+        state_unique = ''.join([chr(ord('A') + i) for i in range(54)])
+        state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
+
+        impact_mask = ''.join(
+            '0' if f1 == f2 else '1'
+            for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
+        )
+
+        cube.show(
+            mode=mode,
+            orientation=orientation,
+            mask=impact_mask,
+        )
+
+        return cube

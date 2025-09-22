@@ -10,6 +10,12 @@ def compress_moves(
         old_moves: list[Move],
         max_iterations: int = MAX_ITERATIONS,
 ) -> list[Move]:
+    """
+    Optimize an algorithm by applying move compression techniques.
+
+    Repeatedly applies optimization functions to reduce the number of moves
+    by eliminating redundancies and combining moves.
+    """
     moves = old_moves.copy()
 
     for _ in range(max_iterations):
@@ -30,6 +36,11 @@ def compress_moves(
 
 
 def expand_moves(old_moves: list[Move]) -> list[Move]:
+    """
+    Expand an algorithm by converting double moves to two single moves.
+
+    Replaces each double move (like R2) with two identical single moves (R R).
+    """
     moves: list[Move] = []
 
     for move in old_moves:

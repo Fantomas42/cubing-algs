@@ -3,7 +3,7 @@ from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 
 
-def union_masks(*masks) -> str:
+def union_masks(*masks: str) -> str:
     """
     Performs the union (logical OR) of multiple binary masks.
 
@@ -21,7 +21,7 @@ def union_masks(*masks) -> str:
     return format(result, f'0{ length }b')
 
 
-def intersection_masks(*masks) -> str:
+def intersection_masks(*masks: str) -> str:
     """
     Performs the intersection (logical AND) of multiple binary masks.
 
