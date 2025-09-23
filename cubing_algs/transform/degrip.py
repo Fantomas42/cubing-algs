@@ -41,6 +41,9 @@ def has_grip(
         old_moves: Algorithm,
         config: dict[str, Callable[[Algorithm], Algorithm]],
 ) -> tuple[bool, Any, Any, Any]:
+    """
+    Check if an algorithm contains grip moves according to config.
+    """
     i = 0
     prefix = Algorithm()
     suffix = Algorithm()
@@ -66,6 +69,9 @@ def degrip(
         old_moves: Algorithm,
         config: dict[str, Callable[[Algorithm], Algorithm]],
 ) -> Algorithm:
+    """
+    Remove grip moves from an algorithm by applying appropriate transformations.
+    """
     _gripped, prefix, suffix, gripper = has_grip(old_moves, config)
 
     if suffix:
@@ -80,24 +86,36 @@ def degrip(
 
 
 def degrip_x_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove X-axis grip rotations from an algorithm.
+    """
     return degrip(
         old_moves, DEGRIP_X,
     )
 
 
 def degrip_y_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove Y-axis grip rotations from an algorithm.
+    """
     return degrip(
         old_moves, DEGRIP_Y,
     )
 
 
 def degrip_z_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove Z-axis grip rotations from an algorithm.
+    """
     return degrip(
         old_moves, DEGRIP_Z,
     )
 
 
 def degrip_full_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove all grip rotations from an algorithm.
+    """
     return degrip(
         old_moves, DEGRIP_FULL,
     )

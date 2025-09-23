@@ -3,6 +3,9 @@ from cubing_algs.move import Move
 
 
 def sign_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert an algorithm from standard notation to SiGN notation.
+    """
     moves: list[Move] = []
 
     for move in old_moves:
@@ -12,6 +15,9 @@ def sign_moves(old_moves: Algorithm) -> Algorithm:
 
 
 def unsign_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert an algorithm from SiGN notation to standard notation.
+    """
     moves: list[Move] = []
 
     for move in old_moves:

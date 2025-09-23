@@ -10,6 +10,9 @@ def unfat(
         old_moves: Algorithm,
         config: dict[str, list[str]],
 ) -> Algorithm:
+    """
+    Expand fat moves using the provided configuration mapping.
+    """
     moves: list[Move] = []
 
     move_cache: dict[Move, list[Move]] = {}
@@ -36,10 +39,16 @@ def unfat(
 
 
 def unfat_slice_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Expand wide moves into outer face and slice moves.
+    """
     return unfat(old_moves, UNFAT_SLICE_MOVES)
 
 
 def unfat_rotation_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Expand wide moves into outer face and rotation moves.
+    """
     return unfat(old_moves, UNFAT_ROTATION_MOVES)
 
 
@@ -48,6 +57,9 @@ def refat(
         config: dict[str, str],
         max_depth: int = MAX_ITERATIONS,
 ) -> Algorithm:
+    """
+    Convert sequences of moves back into fat moves using configuration.
+    """
     if max_depth <= 0:
         return old_moves
 
@@ -78,4 +90,7 @@ def refat(
 
 
 def refat_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert move sequences back into fat moves where possible.
+    """
     return refat(old_moves, REFAT_MOVES)

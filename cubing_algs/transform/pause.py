@@ -6,6 +6,9 @@ from cubing_algs.move import Move
 
 
 def unpause_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove all pause moves from an algorithm.
+    """
     moves: list[Move] = []
 
     for move in old_moves:

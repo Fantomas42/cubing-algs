@@ -1,3 +1,11 @@
+"""
+Constants and configuration values for the cubing-algs library.
+
+This module defines all the fundamental constants used throughout the library
+including move notations, facelet mappings, transformation tables, and
+algorithm patterns. These constants support cube manipulation, move parsing,
+transformations, and visual display.
+"""
 import re
 
 MAX_ITERATIONS = 50

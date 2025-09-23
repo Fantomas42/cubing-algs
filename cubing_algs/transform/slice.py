@@ -13,6 +13,9 @@ from cubing_algs.move import Move
 
 
 def unslice(old_moves: Algorithm, config: dict[str, list[str]]) -> Algorithm:
+    """
+    Convert slice moves to their component moves using configuration.
+    """
     moves: list[Move] = []
 
     move_cache: dict[Move, list[Move]] = {}
@@ -39,10 +42,16 @@ def unslice(old_moves: Algorithm, config: dict[str, list[str]]) -> Algorithm:
 
 
 def unslice_wide_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert slice moves to wide moves.
+    """
     return unslice(old_moves, UNSLICE_WIDE_MOVES)
 
 
 def unslice_rotation_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert slice moves to outer face and rotation moves.
+    """
     return unslice(old_moves, UNSLICE_ROTATION_MOVES)
 
 
@@ -52,6 +61,9 @@ def reslice(
         max_depth: int = MAX_ITERATIONS,
         threshold: int = 0,
 ) -> Algorithm:
+    """
+    Convert move combinations back to slice moves using configuration.
+    """
     if max_depth <= 0:
         return old_moves
 
@@ -95,24 +107,39 @@ def reslice(
 
 
 def reslice_m_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert move combinations back to M slice moves.
+    """
     return reslice(old_moves, RESLICE_M_MOVES)
 
 
 def reslice_s_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert move combinations back to S slice moves.
+    """
     return reslice(old_moves, RESLICE_S_MOVES)
 
 
 def reslice_e_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert move combinations back to E slice moves.
+    """
     return reslice(old_moves, RESLICE_E_MOVES)
 
 
 def reslice_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Convert move combinations back to all slice moves.
+    """
     return reslice(old_moves, RESLICE_MOVES)
 
 
 def reslice_m_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
 ) -> Callable[[Algorithm], Algorithm]:
+    """
+    Create a timed M-slice reslicing function with configurable threshold.
+    """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
         return reslice(old_moves, RESLICE_M_MOVES, threshold=threshold)
@@ -123,6 +150,9 @@ def reslice_m_timed_moves(
 def reslice_s_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
 ) -> Callable[[Algorithm], Algorithm]:
+    """
+    Create a timed S-slice reslicing function with configurable threshold.
+    """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
         return reslice(old_moves, RESLICE_S_MOVES, threshold=threshold)
@@ -133,6 +163,9 @@ def reslice_s_timed_moves(
 def reslice_e_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
 ) -> Callable[[Algorithm], Algorithm]:
+    """
+    Create a timed E-slice reslicing function with configurable threshold.
+    """
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
         return reslice(old_moves, RESLICE_E_MOVES, threshold=threshold)
 
@@ -142,6 +175,10 @@ def reslice_e_timed_moves(
 def reslice_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
 ) -> Callable[[Algorithm], Algorithm]:
+    """
+    Create a timed reslicing function
+    for all slice moves with configurable threshold.
+    """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
         return reslice(old_moves, RESLICE_MOVES, threshold=threshold)
