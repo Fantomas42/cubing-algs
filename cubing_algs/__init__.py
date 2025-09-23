@@ -14,5 +14,12 @@ Core modules:
 - parsing: Parse move strings into Algorithm objects
 - transform: Modular transformation functions
 """
+from cubing_algs.algorithm import Algorithm
+from cubing_algs.vcube import VCube
 
 __version__ = '1.0.10'
+
+__all__ = [  # noqa: PLE0604
+    Algorithm.__name__,
+    VCube.__name__,
+]
