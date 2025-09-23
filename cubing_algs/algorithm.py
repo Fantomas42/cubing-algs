@@ -29,7 +29,7 @@ class Algorithm(UserList[Move]):
             self.data.extend(initlist)
 
     @staticmethod
-    def parse_moves(items: str | list[str]) -> 'Algorithm':
+    def parse_moves(items: Iterable[Move | str] | str) -> 'Algorithm':
         """
         Parse a string or list of strings into an Algorithm object.
         """
@@ -62,7 +62,7 @@ class Algorithm(UserList[Move]):
         """
         self.data.insert(i, self.parse_move(item))
 
-    def extend(self, other) -> None:
+    def extend(self, other: Iterable[Move | str]) -> None:
         """
         Extend the algorithm with moves from another sequence.
         """
@@ -71,14 +71,14 @@ class Algorithm(UserList[Move]):
         else:
             self.data.extend(self.parse_moves(other))
 
-    def __iadd__(self, other) -> 'Algorithm':
+    def __iadd__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
         """
         In-place addition operator (+=) for algorithms.
         """
         self.extend(other)
         return self
 
-    def __radd__(self, other) -> 'Algorithm':
+    def __radd__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
         """
         Right addition operator for algorithms.
         """
@@ -86,7 +86,7 @@ class Algorithm(UserList[Move]):
         result += self
         return result
 
-    def __add__(self, other) -> 'Algorithm':
+    def __add__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
         """
         Addition operator (+) for algorithms.
         """

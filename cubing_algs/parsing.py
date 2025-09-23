@@ -7,6 +7,7 @@ Algorithm objects.
 """
 import logging
 import re
+from collections.abc import Iterable
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
@@ -90,7 +91,7 @@ def check_moves(moves: list[Move]) -> bool:
     return True
 
 
-def parse_moves(raw_moves: str | list[str] | Algorithm,
+def parse_moves(raw_moves: str | Iterable[Move | str] | Algorithm,
                 secure: bool = True) -> Algorithm:  # noqa: FBT001, FBT002
     """
     Parse raw move data into an Algorithm object.
@@ -114,9 +115,11 @@ def parse_moves(raw_moves: str | list[str] | Algorithm,
         return raw_moves
 
     if isinstance(raw_moves, list):
-        raw_moves = ''.join(str(m) for m in raw_moves)
+        raw_moves_str = ''.join(str(m) for m in raw_moves)
+    else:
+        raw_moves_str = str(raw_moves)
 
-    expanded_moves = expand_commutators_and_conjugates(raw_moves)
+    expanded_moves = expand_commutators_and_conjugates(raw_moves_str)
 
     if not secure:
         moves = split_moves(clean_moves(expanded_moves))
