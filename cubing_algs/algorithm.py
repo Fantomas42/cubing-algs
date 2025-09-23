@@ -38,24 +38,25 @@ class Algorithm(UserList[Move]):
         return parse_moves(items, secure=False)
 
     @staticmethod
-    def parse_move(item: str) -> Move:
+    def parse_move(item: Move | str) -> Move:
         """
         Parse a single move string into a Move object.
         """
-        move = Move(item)
+        move = item if isinstance(item, Move) else Move(item)
+
         if not move.is_valid:
             msg = f'{ item } is an invalid move'
             raise InvalidMoveError(msg)
 
         return move
 
-    def append(self, item) -> None:
+    def append(self, item: Move | str) -> None:
         """
         Add a move to the end of the algorithm.
         """
         self.data.append(self.parse_move(item))
 
-    def insert(self, i, item) -> None:
+    def insert(self, i: int, item: Move | str) -> None:
         """
         Insert a move at a specific position in the algorithm.
         """
