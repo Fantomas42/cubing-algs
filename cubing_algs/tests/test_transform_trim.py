@@ -7,7 +7,7 @@ from cubing_algs.transform.trim import trim_moves
 
 class TransformTrimTestCase(unittest.TestCase):
 
-    def test_trim(self):
+    def test_trim(self) -> None:
         provide = parse_moves('U F R B U')
         expect = parse_moves('F R B')
 
@@ -21,7 +21,7 @@ class TransformTrimTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_trim_multiple(self):
+    def test_trim_multiple(self) -> None:
         provide = parse_moves("U U' F R B U2")
         expect = parse_moves('F R B')
 
@@ -35,7 +35,7 @@ class TransformTrimTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_trim_multiple_paused(self):
+    def test_trim_multiple_paused(self) -> None:
         provide = parse_moves("U' . U2 F R B U . . U'")
         expect = parse_moves('F R B')
 
@@ -49,7 +49,7 @@ class TransformTrimTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_trim_start(self):
+    def test_trim_start(self) -> None:
         provide = parse_moves('U F R B U')
         expect = parse_moves('F R B U')
 
@@ -63,7 +63,7 @@ class TransformTrimTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_trim_end(self):
+    def test_trim_end(self) -> None:
         provide = parse_moves('U F R B U')
         expect = parse_moves('U F R B')
 
@@ -77,7 +77,7 @@ class TransformTrimTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_trim_empty(self):
+    def test_trim_empty(self) -> None:
         provide = parse_moves('')
 
         result = trim_moves('U', start=False)(provide)

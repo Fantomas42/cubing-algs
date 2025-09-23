@@ -9,31 +9,31 @@ from cubing_algs.scrambler import scramble_easy_cross
 
 class TestValidNextMove(unittest.TestCase):
 
-    def test_is_valid_next_move_valid(self):
+    def test_is_valid_next_move_valid(self) -> None:
         """Test that valid next moves are recognized."""
         self.assertTrue(is_valid_next_move('F', 'R'))
         self.assertTrue(is_valid_next_move("F'", 'R'))
         self.assertTrue(is_valid_next_move('F2', "R'"))
 
-    def test_is_valid_next_move_invalid_same_face(self):
+    def test_is_valid_next_move_invalid_same_face(self) -> None:
         """Test that moves on the same face are invalid."""
         self.assertFalse(is_valid_next_move('F', 'F'))
         self.assertFalse(is_valid_next_move('F', "F'"))
         self.assertFalse(is_valid_next_move('F2', 'F'))
 
-    def test_is_valid_next_move_invalid_none(self):
+    def test_is_valid_next_move_invalid_none(self) -> None:
         """Test that moves does not matche."""
         self.assertFalse(is_valid_next_move('', 'F'))
         self.assertFalse(is_valid_next_move('F', ''))
         self.assertFalse(is_valid_next_move('Z', 'F'))
 
-    def test_is_valid_next_move_invalid_opposite_faces(self):
+    def test_is_valid_next_move_invalid_opposite_faces(self) -> None:
         """Test that moves on opposite faces are invalid."""
         self.assertFalse(is_valid_next_move('F', 'B'))
         self.assertFalse(is_valid_next_move('R', 'L'))
         self.assertFalse(is_valid_next_move('U', 'D'))
 
-    def test_is_valid_next_move_with_modifiers(self):
+    def test_is_valid_next_move_with_modifiers(self) -> None:
         """Test that modifiers don't affect face validation."""
         self.assertFalse(is_valid_next_move('Fw', 'F'))
         self.assertFalse(is_valid_next_move('Fw', 'B'))
@@ -42,7 +42,7 @@ class TestValidNextMove(unittest.TestCase):
 class TestCubeMoveSet(unittest.TestCase):
     maxDiff = None
 
-    def test_build_cube_move_set_2x2x2(self):
+    def test_build_cube_move_set_2x2x2(self) -> None:
         self.assertEqual(
             build_cube_move_set(2),
             [
@@ -55,7 +55,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_2x2x2_inner_layers(self):
+    def test_build_cube_move_set_2x2x2_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(2, inner_layers=True),
             [
@@ -68,7 +68,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_3x3x3(self):
+    def test_build_cube_move_set_3x3x3(self) -> None:
         self.assertEqual(
             build_cube_move_set(3),
             [
@@ -81,7 +81,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_3x3x3_inner_layers(self):
+    def test_build_cube_move_set_3x3x3_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(3, inner_layers=True),
             [
@@ -94,7 +94,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_4x4x4(self):
+    def test_build_cube_move_set_4x4x4(self) -> None:
         self.assertEqual(
             build_cube_move_set(4),
             [
@@ -107,7 +107,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_4x4x4_inner_layers(self):
+    def test_build_cube_move_set_4x4x4_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(4, inner_layers=True),
             [
@@ -126,7 +126,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_5x5x5(self):
+    def test_build_cube_move_set_5x5x5(self) -> None:
         self.assertEqual(
             build_cube_move_set(5),
             [
@@ -139,7 +139,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_5x5x5_inner_layers(self):
+    def test_build_cube_move_set_5x5x5_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(5, inner_layers=True),
             [
@@ -163,7 +163,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_6x6x6(self):
+    def test_build_cube_move_set_6x6x6(self) -> None:
         self.assertEqual(
             build_cube_move_set(6),
             [
@@ -184,7 +184,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_6x6x6_inner_layers(self):
+    def test_build_cube_move_set_6x6x6_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(6, inner_layers=True),
             [
@@ -217,7 +217,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_7x7x7(self):
+    def test_build_cube_move_set_7x7x7(self) -> None:
         self.assertEqual(
             build_cube_move_set(7),
             [
@@ -241,7 +241,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_7x7x7_inner_layers(self):
+    def test_build_cube_move_set_7x7x7_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(7, inner_layers=True),
             [
@@ -280,7 +280,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_8x8x8(self):
+    def test_build_cube_move_set_8x8x8(self) -> None:
         self.assertEqual(
             build_cube_move_set(8),
             [
@@ -307,7 +307,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_8x8x8_inner_layers(self):
+    def test_build_cube_move_set_8x8x8_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(8, inner_layers=True),
             [
@@ -352,7 +352,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_9x9x9(self):
+    def test_build_cube_move_set_9x9x9(self) -> None:
         self.assertEqual(
             build_cube_move_set(9),
             [
@@ -382,7 +382,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_cube_move_set_9x9x9_inner_layers(self):
+    def test_build_cube_move_set_9x9x9_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(9, inner_layers=True),
             [
@@ -433,7 +433,7 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
-    def test_build_big_cube_move_set_no_options(self):
+    def test_build_big_cube_move_set_no_options(self) -> None:
         self.assertEqual(
             build_cube_move_set(6),
             [
@@ -455,7 +455,7 @@ class TestCubeMoveSet(unittest.TestCase):
 
 class TestRandomMoves(unittest.TestCase):
 
-    def test_random_moves_2x2x2(self):
+    def test_random_moves_2x2x2(self) -> None:
         moves = random_moves(2, ['F', 'R', 'U'], 0)
 
         self.assertGreaterEqual(
@@ -466,14 +466,14 @@ class TestRandomMoves(unittest.TestCase):
             len(moves), 11,
         )
 
-    def test_random_moves_2x2x2_iterations(self):
+    def test_random_moves_2x2x2_iterations(self) -> None:
         moves = random_moves(2, ['F', 'R', 'U'], 5)
 
         self.assertEqual(
             len(moves), 5,
         )
 
-    def test_random_moves_50x50x50(self):
+    def test_random_moves_50x50x50(self) -> None:
         moves = random_moves(50, ['F', 'R', 'U'])
 
         self.assertEqual(
@@ -483,7 +483,7 @@ class TestRandomMoves(unittest.TestCase):
 
 class TestScramble(unittest.TestCase):
 
-    def test_scramble_3x3x3(self):
+    def test_scramble_3x3x3(self) -> None:
         moves = scramble(3)
 
         self.assertGreaterEqual(
@@ -494,7 +494,7 @@ class TestScramble(unittest.TestCase):
             len(moves), 30,
         )
 
-    def test_scramble_3x3x3_iterations(self):
+    def test_scramble_3x3x3_iterations(self) -> None:
         moves = scramble(3, 5)
 
         self.assertEqual(
@@ -504,7 +504,7 @@ class TestScramble(unittest.TestCase):
 
 class TestScrambleEasyCross(unittest.TestCase):
 
-    def test_scramble_easy_cross(self):
+    def test_scramble_easy_cross(self) -> None:
         moves = scramble_easy_cross()
 
         self.assertEqual(

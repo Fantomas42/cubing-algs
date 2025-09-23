@@ -60,7 +60,7 @@ class TransformDegripTestCase(unittest.TestCase):
             for m in degripped:
                 self.assertTrue(isinstance(m, Move))
 
-    def test_basic_x_grip_degrip(self):
+    def test_basic_x_grip_degrip(self) -> None:
         for _move, _expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('R', 'D', 'F', 'L', 'U', 'B', 'M', 'E', "S'", 'x', 'z', "y'"),
@@ -113,7 +113,7 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=True,
                 )
 
-    def test_basic_y_grip_degrip(self):
+    def test_basic_y_grip_degrip(self) -> None:
         for _move, _expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('B', 'R', 'U', 'F', 'L', 'D', 'S', "M'", 'E', "z'", 'y', 'x'),
@@ -164,7 +164,7 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=True,
                 )
 
-    def test_basic_z_grip_degrip(self):
+    def test_basic_z_grip_degrip(self) -> None:
         for _move, _expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('U', 'F', 'L', 'D', 'B', 'R', 'E', 'S', "M'", 'y', "x'", 'z'),
@@ -215,7 +215,7 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=True,
                 )
 
-    def test_start_degrip_x(self):
+    def test_start_degrip_x(self) -> None:
         basic_moves = 'RF'
         provide = 'x' + basic_moves
         expect = 'RD'
@@ -226,7 +226,7 @@ class TransformDegripTestCase(unittest.TestCase):
             'Start Degrip X',
         )
 
-    def test_end_degrip_x(self):
+    def test_end_degrip_x(self) -> None:
         basic_moves = 'RF'
         provide = basic_moves + 'x'
         expect = 'RF'
@@ -237,7 +237,7 @@ class TransformDegripTestCase(unittest.TestCase):
             'End Degrip X',
         )
 
-    def test_middle_degrip_x(self):
+    def test_middle_degrip_x(self) -> None:
         provide = 'R' + 'x' + 'F'
         expect = 'RD'
 
@@ -247,7 +247,7 @@ class TransformDegripTestCase(unittest.TestCase):
             'Middle Degrip X',
         )
 
-    def test_degrip_x(self):
+    def test_degrip_x(self) -> None:
         base_algo = "RUR'U'"
 
         for prefix, suffix, expect, name in [
@@ -277,7 +277,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_degrip_y(self):
+    def test_degrip_y(self) -> None:
         base_algo = "RUR'U'"
 
         for prefix, suffix, expect, name in [
@@ -306,7 +306,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_degrip_z(self):
+    def test_degrip_z(self) -> None:
         base_algo = "RUR'U'"
 
         for prefix, suffix, expect, name in [
@@ -335,7 +335,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_multi_degrip_full_moves(self):
+    def test_multi_degrip_full_moves(self) -> None:
         self.check_degrip(
             ''.join(['y2', 'z2', 'M2', "D'", 'M2', 'D2', 'M2', "D'", 'M2', 'z2']),  # noqa: FLY002
             ''.join(['M2', "U'", 'M2', 'U2', 'M2', "U'", 'M2', 'z2', 'y2', 'z2']),  # noqa: FLY002
@@ -350,7 +350,7 @@ class TransformDegripTestCase(unittest.TestCase):
             'Multi move degrip KO',
         )
 
-    def test_degrip_full_moves(self):
+    def test_degrip_full_moves(self) -> None:
         for provide, expect, name in [
                 ("RUR'U'", "RUR'U'", 'No Degrip'),
                 ("R2U'R'URU'x'U'z'U'RU'R'U'rB", "R2U'R'URU'B'R'FR'F'R'fDz'y'", 'Complex 1'),
@@ -363,7 +363,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_degrip_big_moves(self):
+    def test_degrip_big_moves(self) -> None:
         provide = split_moves('z2 3R')
         expect = split_moves('3L')
 
@@ -394,7 +394,7 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_degrip_big_moves_timed(self):
+    def test_degrip_big_moves_timed(self) -> None:
         provide = split_moves('z2@100 3R@200')
         expect = split_moves('3L@200')
 
@@ -425,7 +425,7 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_degrip_big_moves_timed_paused(self):
+    def test_degrip_big_moves_timed_paused(self) -> None:
         provide = split_moves('z2@100 .@150 3R@200')
         expect = split_moves('.@150 3L@200')
 

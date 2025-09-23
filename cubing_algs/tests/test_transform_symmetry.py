@@ -10,7 +10,7 @@ from cubing_algs.transform.symmetry import symmetry_s_moves
 
 class TransformSymmetryTestCase(unittest.TestCase):
 
-    def test_symmetry_c_moves(self):
+    def test_symmetry_c_moves(self) -> None:
         provide = parse_moves("U R U' R'")
         expect = parse_moves("U L U' L'")
 
@@ -32,7 +32,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_e_moves(self):
+    def test_symmetry_e_moves(self) -> None:
         provide = parse_moves("U R U' R'")
         expect = parse_moves("D' R' D R")
 
@@ -49,7 +49,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves(self):
+    def test_symmetry_m_moves(self) -> None:
         provide = parse_moves("U R U' R'")
         expect = parse_moves("U' L' U L")
 
@@ -74,7 +74,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves_sign(self):
+    def test_symmetry_m_moves_sign(self) -> None:
         provide = parse_moves("U R u' r'")
         expect = parse_moves("U' L' u l")
 
@@ -83,7 +83,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves_wide_standard(self):
+    def test_symmetry_m_moves_wide_standard(self) -> None:
         provide = parse_moves("U R Uw' Rw'")
         expect = parse_moves("U' L' Uw Lw")
 
@@ -92,7 +92,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_s_moves(self):
+    def test_symmetry_s_moves(self) -> None:
         provide = parse_moves("U R U' R'")
         expect = parse_moves("U' R' U R")
 
@@ -109,7 +109,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves_big_moves(self):
+    def test_symmetry_m_moves_big_moves(self) -> None:
         provide = parse_moves("U R 2Uw' 3Rw'")
         expect = parse_moves("U' L' 2Uw 3Lw")
 
@@ -118,7 +118,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves_big_moves_timed(self):
+    def test_symmetry_m_moves_big_moves_timed(self) -> None:
         provide = parse_moves("U R 2Uw'@300 3Rw'")
         expect = parse_moves("U' L' 2Uw@300 3Lw")
 
@@ -127,7 +127,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_symmetry_m_moves_big_moves_timed_paused(self):
+    def test_symmetry_m_moves_big_moves_timed_paused(self) -> None:
         provide = parse_moves("U R .@200 2Uw'@300 3Rw'")
         expect = parse_moves("U' L' .@200 2Uw@300 3Lw")
 

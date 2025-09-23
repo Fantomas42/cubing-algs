@@ -7,13 +7,13 @@ from cubing_algs.patterns import get_pattern
 
 class PatternsTestCase(unittest.TestCase):
 
-    def test_patterns_size(self):
+    def test_patterns_size(self) -> None:
         self.assertEqual(
             len(PATTERNS.keys()),
             69,
         )
 
-    def test_get_pattern(self):
+    def test_get_pattern(self) -> None:
         pattern = get_pattern('DontCrossLine')
 
         self.assertEqual(
@@ -23,7 +23,7 @@ class PatternsTestCase(unittest.TestCase):
         for m in pattern:
             self.assertTrue(isinstance(m, Move))
 
-    def test_get_pattern_inexistant(self):
+    def test_get_pattern_inexistant(self) -> None:
         pattern = get_pattern('El Matadore')
 
         self.assertEqual(

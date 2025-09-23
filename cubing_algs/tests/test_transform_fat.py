@@ -12,7 +12,7 @@ from cubing_algs.transform.rotation import remove_final_rotations
 
 class TransformFatTestCase(unittest.TestCase):
 
-    def test_unfat_rotation_moves(self):
+    def test_unfat_rotation_moves(self) -> None:
         provide = parse_moves('f r u')
         expect = parse_moves('B z L x D y')
 
@@ -26,7 +26,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_rotation_moves_part_two(self):
+    def test_unfat_rotation_moves_part_two(self) -> None:
         provide = parse_moves('b l d')
         expect = parse_moves("F z' R x' U y'")
 
@@ -40,7 +40,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_rotation_moves_part_three(self):
+    def test_unfat_rotation_moves_part_three(self) -> None:
         provide = parse_moves('r F u b')
         expect = parse_moves("L x F D y F z'")
 
@@ -54,7 +54,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_rotation_moves_cleaned(self):
+    def test_unfat_rotation_moves_cleaned(self) -> None:
         provide = parse_moves('f r u')
         expect = parse_moves('B D B')
 
@@ -74,7 +74,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_rotation_moves_cleaned_part_two(self):
+    def test_unfat_rotation_moves_cleaned_part_two(self) -> None:
         provide = parse_moves('b l d')
         expect = parse_moves('F D B')
 
@@ -94,7 +94,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_slice_moves(self):
+    def test_unfat_slice_moves(self) -> None:
         provide = parse_moves('f r u')
         expect = parse_moves("F S R M' U E'")
 
@@ -108,7 +108,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_slice_moves_part_two(self):
+    def test_unfat_slice_moves_part_two(self) -> None:
         provide = parse_moves('b l d')
         expect = parse_moves("B S' L M D E")
 
@@ -122,7 +122,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_slice_moves_part_three(self):
+    def test_unfat_slice_moves_part_three(self) -> None:
         provide = parse_moves('r F u b')
         expect = parse_moves("R M' F U E' B S'")
 
@@ -136,7 +136,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_timed_moves(self):
+    def test_unfat_timed_moves(self) -> None:
         provide = parse_moves('f@1 r@2 u@3')
         expect = parse_moves('B@1 z@1 L@2 x@2 D@3 y@3')
 
@@ -150,7 +150,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unfat_timed_pauses(self):
+    def test_unfat_timed_pauses(self) -> None:
         provide = parse_moves('f@1 .@2 r@3 u@4')
         expect = parse_moves('B@1 z@1 .@2 L@3 x@3 D@4 y@4')
 
@@ -164,7 +164,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_refat_moves(self):
+    def test_refat_moves(self) -> None:
         provide = parse_moves('L x')
         expect = parse_moves('r')
 
@@ -178,7 +178,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_refat_moves_alt(self):
+    def test_refat_moves_alt(self) -> None:
         provide = parse_moves('x L')
         expect = parse_moves('r')
 
@@ -192,7 +192,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_refat_moves_mixed(self):
+    def test_refat_moves_mixed(self) -> None:
         provide = parse_moves('L x f')
         expect = parse_moves('r f')
 
@@ -206,7 +206,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_refat_moves_mixed_big_moves(self):
+    def test_refat_moves_mixed_big_moves(self) -> None:
         provide = parse_moves('L x 2F')
         expect = parse_moves('r 2F')
 
@@ -233,7 +233,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_refat_moves_mixed_timed_moves(self):
+    def test_refat_moves_mixed_timed_moves(self) -> None:
         provide = parse_moves('L@1 x@2 F@3')
         expect = parse_moves('r@1 F@3')
 
@@ -260,7 +260,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_refat_moves_mixed_timed_moves_timed_pauses(self):
+    def test_refat_moves_mixed_timed_moves_timed_pauses(self) -> None:
         provide = parse_moves('L@1 x@2 .@3 F@4')
         expect = parse_moves('r@1 .@3 F@4')
 
@@ -287,7 +287,7 @@ class TransformFatTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_refat_max(self):
+    def test_refat_max(self) -> None:
         provide = parse_moves('L x')
 
         self.assertEqual(

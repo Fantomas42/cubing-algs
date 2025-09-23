@@ -17,7 +17,7 @@ from cubing_algs.transform.slice import unslice_wide_moves
 
 class TransformSliceTestCase(unittest.TestCase):
 
-    def test_unslice_rotation_moves(self):
+    def test_unslice_rotation_moves(self) -> None:
         provide = parse_moves('M2 U S E')
         expect = parse_moves("L2 R2 x2 U F' B z D' U y'")
 
@@ -31,7 +31,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unslice_wide_moves(self):
+    def test_unslice_wide_moves(self) -> None:
         provide = parse_moves('M2 U S E')
         expect = parse_moves("r2 R2 U f F' u' U")
 
@@ -45,7 +45,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unslice_timed_moves(self):
+    def test_unslice_timed_moves(self) -> None:
         provide = parse_moves('M2@1 U@2 S@3 E@4')
         expect = parse_moves(
             "L2@1 R2@1 x2@1 U@2 F'@3 B@3 z@3 D'@4 U@4 y'@4",
@@ -61,7 +61,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unslice_timed_moves_pauses(self):
+    def test_unslice_timed_moves_pauses(self) -> None:
 
         provide = parse_moves('M2@1 .@2 U@3 S@4 E@5')
         expect = parse_moves(
@@ -78,7 +78,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_moves(self):
+    def test_reslice_moves(self) -> None:
         provide = parse_moves("U' D")
         expect = parse_moves("E' y'")
 
@@ -92,7 +92,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_moves_alt(self):
+    def test_reslice_moves_alt(self) -> None:
         provide = parse_moves("D U'")
         expect = parse_moves("E' y'")
 
@@ -106,7 +106,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_moves_fat(self):
+    def test_reslice_moves_fat(self) -> None:
         provide = parse_moves("r' R")
         expect = parse_moves('M')
 
@@ -120,7 +120,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_moves_fat_alt(self):
+    def test_reslice_moves_fat_alt(self) -> None:
         provide = parse_moves("R r'")
         expect = parse_moves('M')
 
@@ -134,7 +134,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_e_moves(self):
+    def test_reslice_e_moves(self) -> None:
         provide = parse_moves("U' D F")
         expect = parse_moves("E' y' F")
 
@@ -148,7 +148,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_m_moves(self):
+    def test_reslice_m_moves(self) -> None:
         provide = parse_moves("L' R F")
         expect = parse_moves('M x F')
 
@@ -162,7 +162,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_m_moves_double(self):
+    def test_reslice_m_moves_double(self) -> None:
         provide = parse_moves('R2 L2 F')
         expect = parse_moves('M2 x2 F')
 
@@ -176,7 +176,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_m_moves_timed(self):
+    def test_reslice_m_moves_timed(self) -> None:
         provide = parse_moves("L'@100 R@200 F@300")
         expect = parse_moves('M@100 x@100 F@300')
 
@@ -190,7 +190,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_m_moves_big(self):
+    def test_reslice_m_moves_big(self) -> None:
         provide = parse_moves("L' R 2F")
         expect = parse_moves('M x 2F')
 
@@ -217,7 +217,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_m_moves_big_timed(self):
+    def test_reslice_m_moves_big_timed(self) -> None:
         provide = parse_moves("L' R 2F@200")
         expect = parse_moves('M x 2F@200')
 
@@ -244,7 +244,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_m_moves_big_timed_pauses(self):
+    def test_reslice_m_moves_big_timed_pauses(self) -> None:
         provide = parse_moves("L' . R 2F@200")
         expect = parse_moves("L' . R 2F@200")
 
@@ -258,7 +258,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_s_moves(self):
+    def test_reslice_s_moves(self) -> None:
         provide = parse_moves("B' F F")
         expect = parse_moves("S' z F")
 
@@ -272,7 +272,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_max(self):
+    def test_reslice_max(self) -> None:
         provide = parse_moves("U' D")
 
         self.assertEqual(
@@ -283,7 +283,7 @@ class TransformSliceTestCase(unittest.TestCase):
 
 class TransformSliceTimedTestCase(unittest.TestCase):
 
-    def test_reslice_timed_moves(self):
+    def test_reslice_timed_moves(self) -> None:
         provide = parse_moves("U'@100 D@150")
         expect = parse_moves("E'@100 y'@100")
 
@@ -297,7 +297,7 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_timed_moves_failed(self):
+    def test_reslice_timed_moves_failed(self) -> None:
         provide = parse_moves("U'@100 D@150")
 
         result = reslice_timed_moves(10)(provide)
@@ -310,7 +310,7 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_timed_moves_chained(self):
+    def test_reslice_timed_moves_chained(self) -> None:
         provide = parse_moves(
             "F@21031 "
             "B'@23249 F@23279 "
@@ -372,7 +372,7 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_timed_moves_without_time(self):
+    def test_reslice_timed_moves_without_time(self) -> None:
         provide = parse_moves("U' D")
         expect = parse_moves("E'y'")
 
@@ -386,7 +386,7 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_m_timed_moves(self):
+    def test_reslice_m_timed_moves(self) -> None:
         provide = parse_moves("L'@0 R@30 F@70")
         expect = parse_moves('M@0 x@0 F@70')
 
@@ -400,7 +400,7 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_s_timed_moves(self):
+    def test_reslice_s_timed_moves(self) -> None:
         provide = parse_moves("B'@0 F@30 F@70")
         expect = parse_moves("S'@0 z@0 F@70")
 
@@ -414,7 +414,7 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_e_timed_moves(self):
+    def test_reslice_e_timed_moves(self) -> None:
         provide = parse_moves("U'@0 D@30 F@70")
         expect = parse_moves("E'@0 y'@0 F@70")
 
