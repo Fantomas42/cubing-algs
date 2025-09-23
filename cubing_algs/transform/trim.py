@@ -14,12 +14,18 @@ def trim_moves(
     """
 
     def trimmer(old_moves: Algorithm) -> Algorithm:
+        """
+        Apply the trimming logic to remove specified moves from ends.
+        """
         if not old_moves:
             return old_moves
 
         moves = list(old_moves.copy())
 
         def should_trim(m: Move) -> bool:
+            """
+            Check if a move should be trimmed based on criteria.
+            """
             return m.base_move == trim_move or m.is_pause
 
         if start:

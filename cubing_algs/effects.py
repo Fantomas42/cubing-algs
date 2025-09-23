@@ -841,6 +841,9 @@ def load_single_effect(
 
     def effect(rgb: tuple[int, int, int], facelet_index: int,
                cube_size: int) -> tuple[int, int, int]:
+        """
+        Apply the configured effect function with pre-loaded parameters.
+        """
         return effect_function(
             rgb, facelet_index, cube_size,
             **effect_parameters,
@@ -881,6 +884,9 @@ def load_effect(effect_name: str, palette_name: str) -> Callable[
 
     def chained_effect(rgb: tuple[int, int, int], facelet_index: int,
                        cube_size: int) -> tuple[int, int, int]:
+        """
+        Apply multiple effects in sequence to create combined visuals.
+        """
         result = rgb
         for effect_func in effects:
             result = effect_func(result, facelet_index, cube_size)
