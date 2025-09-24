@@ -462,3 +462,14 @@ OFFSET_ORIENTATION_MAP = {
     '4': 'z',
     '5': "x'",
 }
+
+ORIENTATIONS = [
+    'UF', 'UR', 'UL', 'UB',
+    'DF', 'DR', 'DL', 'DB',
+
+    'RF', 'RD', 'RB', 'RU',
+    'LF', 'LD', 'LB', 'LU',
+
+    'FD', 'FR', 'FU', 'FL',
+    'BD', 'BR', 'BU', 'BL',
+]
