@@ -532,7 +532,7 @@ def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
     kw['factor'] = kw.get('darken', 0.7)
 
     if face_index < 3:
-        kw['factor'] = kw.get('lighten', 1.5)
+        kw['factor'] = kw.get('lighten', 1.0)
 
     return dim(rgb, facelet_index, cube_size, **kw)
 
@@ -753,7 +753,8 @@ EFFECTS = {
     'face-visible': {
         'function': face_visible,
         'parameters': {
-            'factor': 1.3,
+            'lighten': 1.0,
+            'darken': 0.7,
         },
     },
     'noop': {
