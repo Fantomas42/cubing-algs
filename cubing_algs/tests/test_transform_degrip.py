@@ -389,6 +389,18 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
+    def test_degrip_full_moves_commutatives(self) -> None:
+        for provide, expect, name in [
+                ("y RUR'U'", "BUB'U' y", 'Com 1'),
+                ("y' z RUR'U'", "UBU'B' y' z", 'Com 2'),
+        ]:
+            self.check_degrip(
+                provide,
+                expect,
+                degrip_full_moves,
+                name,
+            )
+
     def test_degrip_big_moves(self) -> None:
         provide = parse_moves('z2 3R')
         expect = parse_moves('3L')
