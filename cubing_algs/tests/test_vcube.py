@@ -1,5 +1,6 @@
 import unittest
 from io import StringIO
+from typing import Any
 from unittest.mock import patch
 
 from cubing_algs.constants import FACES
@@ -585,7 +586,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_permutation_parity(cp, ep)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_corner_same_colors(self, *_) -> None:
+    def test_invalid_corner_same_colors(self, *_: Any) -> None:
         invalid_state = list(INITIAL_STATE)
         # Corner URF: same color on the 2 faces
         invalid_state[8] = invalid_state[9]
@@ -598,7 +599,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_edge_same_colors(self, *_) -> None:
+    def test_invalid_edge_same_colors(self, *_: Any) -> None:
         invalid_state = list(INITIAL_STATE)
         # Edge UR: same color on the 2 faces
         invalid_state[5] = invalid_state[10]
@@ -611,7 +612,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_corner_opposite_colors(self, *_) -> None:
+    def test_invalid_corner_opposite_colors(self, *_: Any) -> None:
         invalid_state = list(INITIAL_STATE)
         invalid_state[8] = 'U'  # Face U
         invalid_state[9] = 'D'  # Opposite face D
@@ -626,7 +627,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_edge_opposite_colors(self, *_) -> None:
+    def test_invalid_edge_opposite_colors(self, *_: Any) -> None:
         invalid_state = list(INITIAL_STATE)
         invalid_state[5] = 'F'
         invalid_state[10] = 'B'  # Opposite color
@@ -966,7 +967,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
 class VCubeRotateWideTestCase(unittest.TestCase):
 
-    def check_rotate(self, raw_move):
+    def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
 
         for move, name in zip(
@@ -1010,7 +1011,7 @@ class VCubeRotateWideTestCase(unittest.TestCase):
 
 class VCubeRotateWideCancelTestCase(unittest.TestCase):
 
-    def check_rotate(self, raw_move):
+    def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
 
         cube = VCube()
@@ -1057,7 +1058,7 @@ class VCubeRotateWideCancelTestCase(unittest.TestCase):
 
 class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
 
-    def check_rotate(self, raw_move):
+    def check_rotate(self, raw_move: str) -> None:
         move = Move(raw_move).doubled
 
         cube = VCube()
@@ -1109,7 +1110,7 @@ class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
 
 class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
 
-    def check_rotate(self, raw_move):
+    def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
 
         cube = VCube()
@@ -1155,7 +1156,7 @@ class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
 
 class TestVCubeShow(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cube = VCube()
 
     def test_show_default_parameters(self) -> None:
@@ -1244,7 +1245,7 @@ class TestVCubeShow(unittest.TestCase):
 
 class TestVCubeIsEqual(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cube1 = VCube()
         self.cube2 = VCube()
 
@@ -1383,7 +1384,7 @@ class TestVCubeIsEqual(unittest.TestCase):
 
 class TestVCubeOrientation(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cube = VCube()
 
     def test_orientation_solved_cube(self) -> None:

@@ -64,7 +64,7 @@ class TestHexToAnsi(unittest.TestCase):
 class TestBuildAnsiPalette(unittest.TestCase):
     """Test ANSI palette building."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test data used by multiple test methods."""
         self.faces_bg = (
             '#FFFFFF',  # U
@@ -155,7 +155,7 @@ class TestBuildAnsiPalette(unittest.TestCase):
 class TestLoadPalette(unittest.TestCase):
     """Test palette loading functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Clear loaded palettes cache before each test."""
         LOADED_PALETTES.clear()
         self.faces = ['U', 'R', 'F', 'D', 'L', 'B']

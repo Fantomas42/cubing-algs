@@ -457,12 +457,12 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
     """
 
     @staticmethod
-    def setUp():
+    def setUp() -> None:
         clear_cache()
         enable_cache()
 
     @staticmethod
-    def tearDown():
+    def tearDown() -> None:
         clear_cache()
         enable_cache()
 

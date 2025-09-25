@@ -6,12 +6,13 @@ from cubing_algs.vcube import VCube
 class TestMovePermutations(unittest.TestCase):
 
     @staticmethod
-    def create_numbered_cube():
+    def create_numbered_cube() -> VCube:
         state = ''.join([chr(ord('A') + i) for i in range(54)])
         return VCube(initial=state, check=False)
 
     @staticmethod
-    def get_permutations(initial_state, final_state):
+    def get_permutations(initial_state: str,
+                         final_state: str) -> dict[int, int]:
         permutations = {}
         for dest_pos in range(54):
             dest_char = final_state[dest_pos]

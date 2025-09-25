@@ -1,4 +1,5 @@
 import unittest
+from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -95,7 +96,7 @@ class TestInvertMoves(unittest.TestCase):
     @patch('cubing_algs.commutator_conjugate.Algorithm')
     @patch('cubing_algs.commutator_conjugate.mirror_moves')
     def test_invert_moves(
-        self, mock_mirror_moves, mock_algorithm_class,
+        self, mock_mirror_moves: Any, mock_algorithm_class: Any,
     ) -> None:
         """
         Should create algorithm, transform with mirror_moves,
@@ -121,33 +122,24 @@ class TestInvertMoves(unittest.TestCase):
 
 class TestExpandCommutatorsAndConjugates(unittest.TestCase):
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_simple_commutator(self, mock_invert_moves) -> None:
+    def test_simple_commutator(self) -> None:
         """Should expand simple commutator [A, B] to A B A' B'"""
-        mock_invert_moves.side_effect = lambda x: f"{x}'"
-
         result = expand_commutators_and_conjugates('[R U, D F]')
-        expected = " R U D F R U' D F' "
-        self.assertEqual(result.strip(), expected.strip())
+        expected = "R U D F U' R' F' D'"
+        self.assertEqual(result.strip(), expected)
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_simple_conjugate(self, mock_invert_moves) -> None:
+    def test_simple_conjugate(self) -> None:
         """Should expand simple conjugate [A: B] to A B A'"""
-        mock_invert_moves.return_value = "R'"
-
         result = expand_commutators_and_conjugates('[R: U]')
-        expected = " R U R' "
-        self.assertEqual(result.strip(), expected.strip())
+        expected = "R U R'"
+        self.assertEqual(result.strip(), expected)
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_nested_commutator(self, mock_invert_moves) -> None:
+    def test_nested_commutator(self) -> None:
         """Should handle nested commutators"""
-        mock_invert_moves.side_effect = lambda x: f"({x})'"
-
         result = expand_commutators_and_conjugates('[[R, U], D]')
         # Inner commutator [R, U] expands to "R U R' U'"
         # Then outer commutator with D
-        self.assertIn("R U (R)' (U)'", result)
+        self.assertEqual("R U R' U' D U R U' R' D'", result)
 
     def test_no_brackets(self) -> None:
         """Should return unchanged string when no brackets"""
@@ -166,40 +158,28 @@ class TestExpandCommutatorsAndConjugates(unittest.TestCase):
             expand_commutators_and_conjugates('[R U | D F]')
         self.assertIn('Invalid operator', str(context.exception))
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_empty_bracket_parts(self, mock_invert_moves) -> None:
+    def test_empty_bracket_parts(self) -> None:
         """Should handle empty bracket parts"""
-        mock_invert_moves.return_value = ''
-
         result = expand_commutators_and_conjugates('[, D]')
-        expected = '  D  '
-        self.assertEqual(result.strip(), expected.strip())
+        expected = "D  D'"
+        self.assertEqual(result.strip(), expected)
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_multiple_brackets_same_level(self, mock_invert_moves) -> None:
+    def test_multiple_brackets_same_level(self) -> None:
         """Should handle multiple brackets at same level"""
-        mock_invert_moves.side_effect = lambda x: f"{x}'"
-
         result = expand_commutators_and_conjugates('[R, U] [D, F]')
         # Should expand both commutators
         self.assertIn("R U R' U'", result)
         self.assertIn("D F D' F'", result)
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_mixed_operators(self, mock_invert_moves) -> None:
+    def test_mixed_operators(self) -> None:
         """Should handle mix of commutators and conjugates"""
-        mock_invert_moves.side_effect = lambda x: f"{x}'"
-
         result = expand_commutators_and_conjugates('[R: U] [D, F]')
         # Should have conjugate (R U R') and commutator (D F D' F')
         self.assertIn("R U R'", result)
         self.assertIn("D F D' F'", result)
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_recursive_expansion(self, mock_invert_moves) -> None:
+    def test_recursive_expansion(self) -> None:
         """Should recursively expand nested structures"""
-        mock_invert_moves.side_effect = lambda x: f'inv({x})'
-
         # Test that recursive calls are made
         with patch(
                 'cubing_algs.commutator_conjugate.expand_commutators_and_conjugates',
@@ -226,11 +206,8 @@ class TestEdgeCases(unittest.TestCase):
         result = split_on_separator(' R U , D F ', ',')
         self.assertEqual(result, (' R U ', ' D F '))
 
-    @patch('cubing_algs.commutator_conjugate.invert_moves')
-    def test_single_character_moves(self, mock_invert_moves) -> None:
+    def test_single_character_moves(self) -> None:
         """Should handle single character moves"""
-        mock_invert_moves.side_effect = lambda x: f"{x}'"
-
         result = expand_commutators_and_conjugates('[R, U]')
         expected = " R U R' U' "
         self.assertEqual(result.strip(), expected.strip())

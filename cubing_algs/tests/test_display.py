@@ -9,7 +9,7 @@ from cubing_algs.vcube import VCube
 
 class TestVCubeDisplay(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cube = VCube()
         self.printer = VCubeDisplay(self.cube)
 
@@ -533,7 +533,7 @@ class TestVCubeDisplay(unittest.TestCase):
 
 class TestVCubeDisplayExtendedNet(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cube = VCube()
         self.printer = VCubeDisplay(self.cube)
 
@@ -1205,7 +1205,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
 class TestVCubeDisplayFaceletTypes(unittest.TestCase):
     """Test different facelet_type configurations and their display behavior."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.cube = VCube()
 
     def test_facelet_type_compact_initialization(self) -> None:

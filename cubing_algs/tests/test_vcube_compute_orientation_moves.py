@@ -16,7 +16,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
     - Verify correct orientation moves are computed
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures for each test method."""
         self.cube = VCube()
 
@@ -380,7 +380,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
 class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
     """Integration tests focusing on interaction with other VCube methods."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures for each test method."""
         self.cube = VCube()
 

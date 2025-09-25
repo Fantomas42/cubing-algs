@@ -147,6 +147,7 @@ class TestPositioningFunctions(unittest.TestCase):
             self.assertIsInstance(result, float)
             self.assertGreaterEqual(result, 0.0)
 
+
 class RGBTestCase(unittest.TestCase):
 
     def _validate_rgb_output(self, rgb: tuple[int, int, int]) -> None:
