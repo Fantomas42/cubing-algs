@@ -1,3 +1,4 @@
+# ruff: noqa: ARG001
 import math
 import re
 from collections.abc import Callable
@@ -280,7 +281,7 @@ def rainbow(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
     return r, g, b
 
 
-def matte(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+def matte(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
           **kw: Any) -> tuple[int, int, int]:
     """
     Apply matte effect by reducing brightness for a flat,
@@ -470,7 +471,7 @@ def holographic(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
     return r, g, b
 
 
-def dim(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+def dim(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
         **kw: Any) -> tuple[int, int, int]:
     """
     Reduce brightness uniformly across all color channels.
@@ -487,7 +488,7 @@ def dim(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
     return r, g, b
 
 
-def brighten(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+def brighten(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
              **kw: Any) -> tuple[int, int, int]:
     """
     Increase brightness uniformly across all color channels.
@@ -503,7 +504,7 @@ def brighten(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
     return r, g, b
 
 
-def contrast(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+def contrast(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
              **kw: Any) -> tuple[int, int, int]:
     """
     Enhance contrast by amplifying differences from middle gray.
@@ -537,7 +538,7 @@ def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
     return dim(rgb, facelet_index, cube_size, **kw)
 
 
-def vintage(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+def vintage(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
             **kw: Any) -> tuple[int, int, int]:
     """
     Apply vintage effect with desaturation and sepia tinting.
@@ -561,7 +562,7 @@ def vintage(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
     return sepia_r, sepia_g, sepia_b
 
 
-def noop(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
+def noop(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
          **_kw: Any) -> tuple[int, int, int]:
     """
     No-operation effect that returns the input color unchanged.
@@ -571,7 +572,7 @@ def noop(rgb: tuple[int, int, int], _facelet_index: int, _cube_size: int,
 # Configuration
 
 
-EFFECTS = {
+EFFECTS: dict[str, dict[str, Any]] = {
     'shine': {
         'function': shine,
         'parameters': {
@@ -829,7 +830,7 @@ def load_single_effect(
     if not effect_name or effect_name not in EFFECTS:
         return None
 
-    effect_config: dict[str, Any] = EFFECTS[effect_name]  # type: ignore[assignment]
+    effect_config: dict[str, Any] = EFFECTS[effect_name]
     effect_function: Callable[..., tuple[int, int, int]] = effect_config[
         'function'
     ]
@@ -853,7 +854,7 @@ def load_single_effect(
     return effect
 
 
-def load_effect(effect_name: str, palette_name: str) -> Callable[
+def load_effect(effect_name: str | None, palette_name: str) -> Callable[
         [tuple[int, int, int], int, int], tuple[int, int, int]] | None:
     """
     Load and configure effect function(s) with parameters.
