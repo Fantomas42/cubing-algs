@@ -242,7 +242,7 @@ RESLICE_MOVES.update(RESLICE_M_MOVES)
 RESLICE_MOVES.update(RESLICE_S_MOVES)
 RESLICE_MOVES.update(RESLICE_E_MOVES)
 
-UNFAT_ROTATION_MOVES = {
+UNWIDE_ROTATION_MOVES = {
     'r': ['L', 'x'],
     "r'": ["L'", "x'"],
     'r2': ['L2', 'x2'],
@@ -268,7 +268,7 @@ UNFAT_ROTATION_MOVES = {
     'd2': ['U2', 'y2'],
 }
 
-UNFAT_SLICE_MOVES = {
+UNWIDE_SLICE_MOVES = {
     'r': ['R', "M'"],
     "r'": ["R'", 'M'],
     'r2': ['R2', 'M2'],
@@ -294,26 +294,26 @@ UNFAT_SLICE_MOVES = {
     'd2': ['D2', 'E2'],
 }
 
-REFAT_MOVES = {
+REWIDE_MOVES = {
     ' '.join(v): k
-    for k, v in UNFAT_ROTATION_MOVES.items()
+    for k, v in UNWIDE_ROTATION_MOVES.items()
 }
-REFAT_MOVES.update(
+REWIDE_MOVES.update(
     {
         ' '.join(reversed(v)): k
-        for k, v in UNFAT_ROTATION_MOVES.items()
+        for k, v in UNWIDE_ROTATION_MOVES.items()
     },
 )
-REFAT_MOVES.update(
+REWIDE_MOVES.update(
     {
         ' '.join(v): k
-        for k, v in UNFAT_SLICE_MOVES.items()
+        for k, v in UNWIDE_SLICE_MOVES.items()
     },
 )
-REFAT_MOVES.update(
+REWIDE_MOVES.update(
     {
         ' '.join(reversed(v)): k
-        for k, v in UNFAT_SLICE_MOVES.items()
+        for k, v in UNWIDE_SLICE_MOVES.items()
     },
 )
 

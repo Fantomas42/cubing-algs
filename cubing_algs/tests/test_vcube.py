@@ -11,7 +11,7 @@ from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.fat import unfat_rotation_moves
+from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.vcube import VCube
 
 
@@ -985,7 +985,7 @@ class VCubeRotateWideSiGNTestCase(unittest.TestCase):
                         parse_moves(
                             str(move),
                         ).transform(
-                            unfat_rotation_moves,
+                            unwide_rotation_moves,
                         ),
                     ),
                 )
@@ -1029,7 +1029,7 @@ class VCubeRotateWideStandardTestCase(unittest.TestCase):
                         parse_moves(
                             str(move),
                         ).transform(
-                            unfat_rotation_moves,
+                            unwide_rotation_moves,
                         ),
                     ),
                 )
@@ -1073,7 +1073,7 @@ class VCubeRotateWideCancelTestCase(unittest.TestCase):
                         parse_moves(
                             str(move),
                         ).transform(
-                            unfat_rotation_moves,
+                            unwide_rotation_moves,
                         ),
                     ),
                 )
@@ -1114,7 +1114,7 @@ class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
                 parse_moves(
                     str(move),
                 ).transform(
-                    unfat_rotation_moves,
+                    unwide_rotation_moves,
                 ),
             ),
         )
@@ -1125,7 +1125,7 @@ class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
                 parse_moves(
                     str(move),
                 ).transform(
-                    unfat_rotation_moves,
+                    unwide_rotation_moves,
                 ),
             ),
         )
@@ -1174,7 +1174,7 @@ class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
                         parse_moves(
                             str(move),
                         ).transform(
-                            unfat_rotation_moves,
+                            unwide_rotation_moves,
                         ),
                     ),
                 )

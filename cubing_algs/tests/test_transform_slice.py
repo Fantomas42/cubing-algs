@@ -106,7 +106,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_moves_fat(self) -> None:
+    def test_reslice_moves_wide(self) -> None:
         provide = parse_moves("r' R")
         expect = parse_moves('M')
 
@@ -120,7 +120,7 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_reslice_moves_fat_alt(self) -> None:
+    def test_reslice_moves_wide_alt(self) -> None:
         provide = parse_moves("R r'")
         expect = parse_moves('M')
 

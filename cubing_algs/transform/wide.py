@@ -1,17 +1,17 @@
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
-from cubing_algs.constants import REFAT_MOVES
-from cubing_algs.constants import UNFAT_ROTATION_MOVES
-from cubing_algs.constants import UNFAT_SLICE_MOVES
+from cubing_algs.constants import REWIDE_MOVES
+from cubing_algs.constants import UNWIDE_ROTATION_MOVES
+from cubing_algs.constants import UNWIDE_SLICE_MOVES
 from cubing_algs.move import Move
 
 
-def unfat(
+def unwide(
         old_moves: Algorithm,
         config: dict[str, list[str]],
 ) -> Algorithm:
     """
-    Expand fat moves using the provided configuration mapping.
+    Expand wide moves using the provided configuration mapping.
     """
     moves: list[Move] = []
 
@@ -38,27 +38,27 @@ def unfat(
     return Algorithm(moves)
 
 
-def unfat_slice_moves(old_moves: Algorithm) -> Algorithm:
+def unwide_slice_moves(old_moves: Algorithm) -> Algorithm:
     """
     Expand wide moves into outer face and slice moves.
     """
-    return unfat(old_moves, UNFAT_SLICE_MOVES)
+    return unwide(old_moves, UNWIDE_SLICE_MOVES)
 
 
-def unfat_rotation_moves(old_moves: Algorithm) -> Algorithm:
+def unwide_rotation_moves(old_moves: Algorithm) -> Algorithm:
     """
     Expand wide moves into outer face and rotation moves.
     """
-    return unfat(old_moves, UNFAT_ROTATION_MOVES)
+    return unwide(old_moves, UNWIDE_ROTATION_MOVES)
 
 
-def refat(
+def rewide(
         old_moves: Algorithm,
         config: dict[str, str],
         max_depth: int = MAX_ITERATIONS,
 ) -> Algorithm:
     """
-    Convert sequences of moves back into fat moves using configuration.
+    Convert sequences of moves back into wide moves using configuration.
     """
     if max_depth <= 0:
         return old_moves
@@ -68,9 +68,9 @@ def refat(
     changed = False
 
     while i < len(old_moves) - 1:
-        fatted = f'{ old_moves[i].untimed } { old_moves[i + 1].untimed }'
-        if fatted in config:
-            moves.append(Move(f'{ config[fatted] }{ old_moves[i].time }'))
+        wided = f'{ old_moves[i].untimed } { old_moves[i + 1].untimed }'
+        if wided in config:
+            moves.append(Move(f'{ config[wided] }{ old_moves[i].time }'))
             changed = True
             i += 2
         else:
@@ -81,7 +81,7 @@ def refat(
         moves.append(old_moves[i])
 
     if changed:
-        return refat(
+        return rewide(
             Algorithm(moves), config,
             max_depth - 1,
         )
@@ -89,8 +89,8 @@ def refat(
     return Algorithm(moves)
 
 
-def refat_moves(old_moves: Algorithm) -> Algorithm:
+def rewide_moves(old_moves: Algorithm) -> Algorithm:
     """
-    Convert move sequences back into fat moves where possible.
+    Convert move sequences back into wide moves where possible.
     """
-    return refat(old_moves, REFAT_MOVES)
+    return rewide(old_moves, REWIDE_MOVES)
