@@ -1,5 +1,6 @@
 import unittest
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
@@ -89,7 +90,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
     def test_optimize_do_undo_moves(self) -> None:
         provide = parse_moves("R R'")
-        expect = []
+        expect = Algorithm()
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
@@ -166,7 +167,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
     def test_optimize_do_undo_double_moves(self) -> None:
         provide = parse_moves("R R R' R'")
-        expect = []
+        expect = Algorithm()
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
@@ -230,7 +231,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
 
     def test_optimize_do_undo_double_double_moves(self) -> None:
         provide = parse_moves('R2 R2')
-        expect = []
+        expect = Algorithm()
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
