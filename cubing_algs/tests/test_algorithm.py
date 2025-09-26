@@ -20,6 +20,10 @@ class AlgorithmTestCase(unittest.TestCase):
 
         self.assertEqual(str(algo), 'R2 U')
 
+    def test_init_value(self) -> None:
+        algo = Algorithm([Move('F'), Move('R'), Move('U2')])
+        self.assertEqual(str(algo), 'F R U2')
+
     def test_parse_moves(self) -> None:
         algo = Algorithm.parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
@@ -44,13 +48,13 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U F2')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo.append(Move('D'))
         self.assertEqual(str(algo), 'R2 U F2 D')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         with self.assertRaises(InvalidMoveError):
             algo.append('G')
@@ -74,13 +78,13 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo.extend([])
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo.extend('F R')
         self.assertEqual(str(algo), 'R2 U F2 B F R')
@@ -95,7 +99,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_add_operator(self) -> None:
         algo = parse_moves('R2 U')
@@ -104,13 +108,13 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo = algo + 'F R'
         self.assertEqual(str(algo), 'R2 U F2 B F R')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         with self.assertRaises(InvalidMoveError):
             algo += 'F2 G'
@@ -122,13 +126,13 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo += 'F R'
         self.assertEqual(str(algo), 'R2 U F2 B F R')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         with self.assertRaises(InvalidMoveError):
             algo + 'F2 G'
@@ -138,7 +142,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'F2 R2 D2 U')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         with self.assertRaises(InvalidMoveError):
             'F2 G' + algo
@@ -162,7 +166,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U R2 U F2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_add_operator_with_algorithm(self) -> None:
         algo = parse_moves('R2 U')
@@ -171,7 +175,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_insert(self) -> None:
         algo = parse_moves('R2 U')
@@ -180,7 +184,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'F2 R2 U')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_remove(self) -> None:
         algo = parse_moves('R2 U R2')
@@ -189,7 +193,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'U R2')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_pop(self) -> None:
         algo = parse_moves('R2 U')
@@ -199,29 +203,29 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(popped, 'U')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_copy(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
 
         copy = algo.copy()
-        self.assertTrue(isinstance(copy, Algorithm))
+        self.assertIsInstance(copy, Algorithm)
         self.assertEqual(str(copy), 'R2 U')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
         for m in copy:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo.pop()
         self.assertEqual(str(algo), 'R2')
         self.assertEqual(str(copy), 'R2 U')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
         for m in copy:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_iter(self) -> None:
         algo = parse_moves('R2 U')
@@ -231,7 +235,12 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_getitem(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(algo[1], 'U')
-        self.assertEqual(type(algo[1]), Move)
+        self.assertIsInstance(algo[1], Move)
+
+        algo = parse_moves('R2 U F D B L')[1:4]
+        self.assertEqual(str(algo), 'U F D')
+        self.assertIsInstance(algo, Algorithm)
+        self.assertIsInstance(algo[1], Move)
 
     def test_setitem_slice(self) -> None:
         algo = parse_moves('R2 U F')
@@ -239,14 +248,14 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo = parse_moves('R2 U F')
         algo[1:] = []
         self.assertEqual(str(algo), 'R2')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo = parse_moves('R2 U F')
         new_algo = parse_moves('B2 D')
@@ -254,7 +263,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 U B2 D')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo = parse_moves('R2 U F')
         new_algo = parse_moves('B2 D')
@@ -262,7 +271,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 B2 D')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
         algo = parse_moves('R2 U F L D')
         new_algo = parse_moves('B2 D')
@@ -270,7 +279,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 B2 D L D')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_setitem(self) -> None:
         algo = parse_moves('R2 U')
@@ -278,7 +287,7 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2 B')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
 
     def test_delitem(self) -> None:
         algo = parse_moves('R2 U')
@@ -286,7 +295,43 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(str(algo), 'R2')
 
         for m in algo:
-            self.assertTrue(isinstance(m, Move))
+            self.assertIsInstance(m, Move)
+
+    def test_contains(self) -> None:
+        algo = parse_moves('R2 U')
+        self.assertIn(Move('U'), algo)
+        self.assertIn(Move('R2'), algo)
+        self.assertNotIn(Move('R'), algo)
+
+        self.assertIn('U', algo)
+        self.assertIn('R2', algo)
+        self.assertNotIn('R', algo)
+        self.assertNotIn('2', algo)
+
+    def test_count(self) -> None:
+        algo = parse_moves('R2 U F R R2')
+        self.assertEqual(algo.count(Move('R')), 1)
+        self.assertEqual(algo.count(Move('R2')), 2)
+        self.assertEqual(algo.count(Move('L')), 0)
+
+        self.assertEqual(algo.count('R'), 1)
+        self.assertEqual(algo.count('R2'), 2)
+        self.assertEqual(algo.count('L'), 0)
+        self.assertEqual(algo.count('2'), 0)
+
+    def test_index(self) -> None:
+        algo = parse_moves('R2 U F R R2')
+        self.assertEqual(algo.index(Move('R')), 3)
+        self.assertEqual(algo.index(Move('R2')), 0)
+        with self.assertRaises(ValueError):
+            algo.index(Move('L'))
+
+        self.assertEqual(algo.index('R'), 3)
+        self.assertEqual(algo.index('R2'), 0)
+        with self.assertRaises(ValueError):
+            algo.index('L')
+        with self.assertRaises(ValueError):
+            algo.index('2')
 
     def test_length(self) -> None:
         algo = parse_moves('R2 U')

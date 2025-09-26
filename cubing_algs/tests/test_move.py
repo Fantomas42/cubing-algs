@@ -102,6 +102,12 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('.').is_rotation_move)
         self.assertTrue(Move('x').is_rotation_move)
 
+    def test_is_rotational_move(self) -> None:
+        self.assertFalse(Move('U').is_rotational_move)
+        self.assertFalse(Move('.').is_rotational_move)
+        self.assertTrue(Move('x').is_rotational_move)
+        self.assertTrue(Move('M').is_rotational_move)
+
     def test_is_face_move(self) -> None:
         self.assertFalse(Move('x').is_face_move)
         self.assertFalse(Move('.').is_face_move)

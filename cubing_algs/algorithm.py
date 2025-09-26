@@ -220,10 +220,7 @@ class Algorithm(UserList[Move]):
         """
         Check if algorithm contains rotations.
         """
-        return any(
-            m.is_wide_move or m.is_inner_move or m.is_rotation_move
-            for m in self
-        )
+        return any(m.is_rotational_move for m in self)
 
     @property
     def has_internal_rotations(self) -> bool:
