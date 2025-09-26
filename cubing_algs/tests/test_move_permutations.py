@@ -1,4 +1,5 @@
 import unittest
+from typing import Any
 
 from cubing_algs.vcube import VCube
 
@@ -44,7 +45,7 @@ class TestMovePermutations(unittest.TestCase):
                 f'Source position { src } invalid',
             )
 
-    def analyze_move_permutations(self, move_name):
+    def analyze_move_permutations(self, move_name: str) -> dict[str, Any]:
         cube = self.create_numbered_cube()
         initial_state = cube.state
 
@@ -60,7 +61,7 @@ class TestMovePermutations(unittest.TestCase):
         }
 
     @staticmethod
-    def find_cycles(permutations):
+    def find_cycles(permutations: dict[int, int]) -> list[list[int]]:
         visited = set()
         cycles = []
 

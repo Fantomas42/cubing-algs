@@ -1,5 +1,6 @@
 import unittest
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.rotation import compress_final_rotations
@@ -87,7 +88,7 @@ class SplitMovesFinalRotationsTestCase(unittest.TestCase):
 
     def test_split_moves_final_rotations_empty(self) -> None:
         provide = parse_moves('R2 F')
-        expect = (parse_moves('R2 F'), [])
+        expect = (parse_moves('R2 F'), Algorithm())
 
         result = split_moves_final_rotations(provide)
 
@@ -98,7 +99,7 @@ class SplitMovesFinalRotationsTestCase(unittest.TestCase):
 
     def test_split_moves_final_rotations_start(self) -> None:
         provide = parse_moves('x R2 F')
-        expect = (parse_moves('x R2 F'), [])
+        expect = (parse_moves('x R2 F'), Algorithm())
 
         result = split_moves_final_rotations(provide)
 
@@ -112,7 +113,7 @@ class TransformOptimizeTripleRotationsTestCase(unittest.TestCase):
 
     def test_optimize_triple_rotations(self) -> None:
         provide = parse_moves('x2 y2 z2')
-        expect = []
+        expect = Algorithm()
 
         result = optimize_triple_rotations(provide)
 
@@ -141,7 +142,7 @@ class TransformOptimizeTripleRotationsTestCase(unittest.TestCase):
 
     def test_optimize_triple_rotations_timed(self) -> None:
         provide = parse_moves('x2@0 y2@50 z2@100')
-        expect = []
+        expect = Algorithm()
 
         result = optimize_triple_rotations(provide)
 
@@ -438,7 +439,7 @@ class TransformCompressRotationsTestCase(unittest.TestCase):
 
     def test_compress_rotations_issues_01(self) -> None:
         provide = parse_moves("z@27089 y y z' z' z x x")
-        expect = []
+        expect = Algorithm()
 
         result = compress_rotations(provide)
 
