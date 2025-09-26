@@ -965,7 +965,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
 
-class VCubeRotateWideTestCase(unittest.TestCase):
+class VCubeRotateWideSiGNTestCase(unittest.TestCase):
 
     def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
@@ -1007,6 +1007,50 @@ class VCubeRotateWideTestCase(unittest.TestCase):
 
     def test_rotate_b(self) -> None:
         self.check_rotate('b')
+
+
+class VCubeRotateWideStandardTestCase(unittest.TestCase):
+
+    def check_rotate(self, raw_move: str) -> None:
+        base_move = Move(raw_move)
+
+        for move, name in zip(
+                [base_move, base_move.inverted, base_move.doubled],
+                ['Base', 'Inverted', 'Doubled'],
+                strict=True,
+        ):
+            with self.subTest(name, move=move):
+                cube = VCube()
+                cube_wide = VCube()
+
+                self.assertEqual(
+                    cube.rotate(move),
+                    cube_wide.rotate(
+                        parse_moves(
+                            str(move),
+                        ).transform(
+                            unfat_rotation_moves,
+                        ),
+                    ),
+                )
+
+    def test_rotate_u(self) -> None:
+        self.check_rotate('Uw')
+
+    def test_rotate_r(self) -> None:
+        self.check_rotate('Rw')
+
+    def test_rotate_f(self) -> None:
+        self.check_rotate('Fw')
+
+    def test_rotate_d(self) -> None:
+        self.check_rotate('Dw')
+
+    def test_rotate_l(self) -> None:
+        self.check_rotate('Lw')
+
+    def test_rotate_b(self) -> None:
+        self.check_rotate('Bw')
 
 
 class VCubeRotateWideCancelTestCase(unittest.TestCase):

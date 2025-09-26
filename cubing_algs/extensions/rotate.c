@@ -17,19 +17,42 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
     char temp_state[55];
     strcpy(temp_state, new_state);
 
-    // Parse the move
+    // Parse the move - optimized for speed
     char face = move[0];
     int direction = 1; // Default: clockwise
 
-    if (strlen(move) > 1) {
-        if (move[1] == '\'') {
+    // Fast path: check second character directly without strlen calls
+    char second = move[1];
+    if (second == 'w') {
+        // Handle wide moves: convert valid face letters to lowercase
+        // Only RLUDFB need conversion, other chars ignored for speed
+        switch (face) {
+            case 'R': face = 'r'; break;
+            case 'L': face = 'l'; break;
+            case 'U': face = 'u'; break;
+            case 'D': face = 'd'; break;
+            case 'F': face = 'f'; break;
+            case 'B': face = 'b'; break;
+            // default: leave face unchanged for non-face characters
+        }
+
+        // Check third character for modifiers
+        char third = move[2];
+        if (third == '\'') {
             direction = 3; // Anticlockwise
-        } else if (move[1] == '2') {
+        } else if (third == '2') {
             direction = 2; // 180°
-        } else {
-            PyErr_Format(PyExc_ValueError, "Invalid move modifier: '%c'", move[1]);
+        } else if (third != '\0') {
+            PyErr_Format(PyExc_ValueError, "Invalid move modifier: '%c'", third);
             return NULL;
         }
+    } else if (second == '\'') {
+        direction = 3; // Anticlockwise
+    } else if (second == '2') {
+        direction = 2; // 180°
+    } else if (second != '\0') {
+        PyErr_Format(PyExc_ValueError, "Invalid move modifier: '%c'", second);
+        return NULL;
     }
 
     switch (face) {
