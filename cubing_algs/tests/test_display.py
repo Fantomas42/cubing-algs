@@ -767,13 +767,9 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
     @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
     def test_display_extended_net_empty_faces_list(self) -> None:
         """Test extended net display with empty faces list."""
-        # This tests error handling for edge case
-        empty_faces = []
-        empty_masks = []
-
         # This should raise an IndexError or similar
         with self.assertRaises((IndexError, KeyError)):
-            self.printer.display_extended_net(empty_faces, empty_masks)
+            self.printer.display_extended_net([], [])
 
     @patch.dict(os.environ, {'TERM': 'other'})
     @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
@@ -797,7 +793,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         result = self.printer.display_extended_net(faces, faces_mask)
 
         # Verify that face characters appear in expected proportions
-        face_counts = {}
+        face_counts: dict[str, int] = {}
         for char in result:
             if char.isalpha():
                 face_counts[char] = face_counts.get(char, 0) + 1
@@ -1046,12 +1042,9 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
     @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
     def test_display_linear_empty_faces_error_handling(self) -> None:
         """Test display_linear error handling with empty faces list."""
-        empty_faces = []
-        empty_masks = []
-
         # Should raise IndexError when trying to access faces
         with self.assertRaises(IndexError):
-            self.printer.display_linear(empty_faces, empty_masks)
+            self.printer.display_linear([], [])
 
     @patch.dict(os.environ, {'TERM': 'other'})
     @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
@@ -1147,7 +1140,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         result = self.printer.display_linear(faces, faces_mask)
 
         # Count each face character in the result
-        face_counts = {}
+        face_counts: dict[str, int] = {}
         for char in result:
             if char.isalpha():
                 face_counts[char] = face_counts.get(char, 0) + 1

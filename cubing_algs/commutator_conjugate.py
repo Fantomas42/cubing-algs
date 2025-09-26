@@ -52,7 +52,7 @@ def invert_moves(old_moves: str) -> str:
     """
     Invert an algorithm string (reverse order and invert each move).
     """
-    algo = Algorithm() + old_moves
+    algo = Algorithm.parse_moves(old_moves)
 
     return str(algo.transform(mirror_moves))
 

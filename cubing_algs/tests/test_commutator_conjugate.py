@@ -1,6 +1,4 @@
 import unittest
-from typing import Any
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
@@ -93,31 +91,14 @@ class TestSplitOnSeparator(unittest.TestCase):
 
 class TestInvertMoves(unittest.TestCase):
 
-    @patch('cubing_algs.commutator_conjugate.Algorithm')
-    @patch('cubing_algs.commutator_conjugate.mirror_moves')
-    def test_invert_moves(
-        self, mock_mirror_moves: Any, mock_algorithm_class: Any,
-    ) -> None:
+    def test_invert_moves(self) -> None:
         """
         Should create algorithm, transform with mirror_moves,
         and return string
         """
-        # Setup mocks
-        mock_algorithm_instance = MagicMock()
-        mock_transformed_algo = MagicMock()
-        mock_algorithm_class.return_value = mock_algorithm_instance
-        mock_algorithm_instance.__add__.return_value = mock_algorithm_instance
-        mock_algorithm_instance.transform.return_value = mock_transformed_algo
-        mock_transformed_algo.__str__.return_value = "R' U' R U"
-
-        # Test
         result = invert_moves("R U R' U'")
-
-        # Assertions
-        mock_algorithm_class.assert_called_once()
-        mock_algorithm_instance.__add__.assert_called_once_with("R U R' U'")
-        mock_algorithm_instance.transform.assert_called_once_with(mock_mirror_moves)
-        self.assertEqual(result, "R' U' R U")
+        self.assertEqual(result, "U R U' R'")
+        self.assertIsInstance(result, str)
 
 
 class TestExpandCommutatorsAndConjugates(unittest.TestCase):
@@ -200,11 +181,11 @@ class TestEdgeCases(unittest.TestCase):
 
     def test_whitespace_handling(self) -> None:
         """Should handle whitespace in brackets"""
-        result = find_innermost_brackets('[ R U ]')
-        self.assertEqual(result, (0, 6))
+        result_find = find_innermost_brackets('[ R U ]')
+        self.assertEqual(result_find, (0, 6))
 
-        result = split_on_separator(' R U , D F ', ',')
-        self.assertEqual(result, (' R U ', ' D F '))
+        result_split = split_on_separator(' R U , D F ', ',')
+        self.assertEqual(result_split, (' R U ', ' D F '))
 
     def test_single_character_moves(self) -> None:
         """Should handle single character moves"""
