@@ -685,13 +685,13 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         )
 
         # First call - cache miss
-        result1 = cubies_to_facelets(*cubies_args)
+        result3 = cubies_to_facelets(*cubies_args)
         info = get_cache_info()
         self.assertEqual(info['cubies_cached'], 1)
 
         # Second call - cache hit
-        result2 = cubies_to_facelets(*cubies_args)
-        self.assertEqual(result1, result2)
+        result4 = cubies_to_facelets(*cubies_args)
+        self.assertEqual(result3, result4)
 
         info = get_cache_info()
         self.assertEqual(info['cubies_cached'], 1)
@@ -741,10 +741,10 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             [0, 1, 2, 3, 4, 5],
         )
 
-        result1 = cubies_to_facelets(*cubies_args)
-        result2 = cubies_to_facelets(*cubies_args)
+        result3 = cubies_to_facelets(*cubies_args)
+        result4 = cubies_to_facelets(*cubies_args)
 
-        self.assertEqual(result1, result2)
+        self.assertEqual(result3, result4)
         info = get_cache_info()
         self.assertEqual(info['cubies_cached'], 0)
 
