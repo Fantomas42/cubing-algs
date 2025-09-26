@@ -138,6 +138,21 @@ class ParseMovesTestCase(unittest.TestCase):
             secure=False,
         )
 
+    def test_parse_moves_invalid_case_but_corrected(self) -> None:
+        moves = ['R2', 'X2']
+        expect = ['R2', 'x2']
+        self.assertEqual(
+            parse_moves(moves, secure=False),
+            expect,
+        )
+
+        moves = ['R2', 'm2']
+        expect = ['R2', 'M2']
+        self.assertEqual(
+            parse_moves(moves, secure=False),
+            expect,
+        )
+
     def test_parse_moves_list_moves(self) -> None:
         moves = 'R2 L2'
         expect = ['R2', 'L2']
