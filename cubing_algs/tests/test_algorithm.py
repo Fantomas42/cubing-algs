@@ -604,6 +604,24 @@ class AlgorithmCyclesPropertyTestCase(unittest.TestCase):
         self.assertIsInstance(result, int)
         self.assertEqual(result, 70)
 
+    def test_cycles_with_pauses(self) -> None:
+        """Test cycles property with pauses."""
+        algo = Algorithm.parse_moves('R U . F')
+        result = algo.cycles
+        self.assertIsInstance(result, int)
+        self.assertEqual(result, 80)
+
+    def test_cycles_with_timed_moves(self) -> None:
+        """Test cycles property with timed moves."""
+        algo = Algorithm.parse_moves('R@50 U@75 F@100')
+        result = algo.cycles
+        self.assertIsInstance(result, int)
+        self.assertEqual(result, 80)
+
+
+class AlgorithmShowTestCase(unittest.TestCase):
+    """Test cases for the Algorithm.show method."""
+
     def test_show_method_basic(self) -> None:
         """Test show method returns VCube instance."""
         algo = Algorithm.parse_moves("R U R'")

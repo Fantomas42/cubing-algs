@@ -181,7 +181,14 @@ def compute_cycles(algorithm: 'Algorithm') -> int:
         infinite loops for algorithms that may have very high order
         or don't return to solved state.
     """
+    from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+    from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
     from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+    algorithm = algorithm.transform(
+        unpause_moves,
+        untime_moves,
+    )
 
     if len(algorithm) == 0:
         return 0
