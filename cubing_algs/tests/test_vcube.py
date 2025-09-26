@@ -587,10 +587,10 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
 
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_corner_same_colors(self, *_: Any) -> None:
-        invalid_state = list(INITIAL_STATE)
+        invalid_state_list = list(INITIAL_STATE)
         # Corner URF: same color on the 2 faces
-        invalid_state[8] = invalid_state[9]
-        invalid_state = ''.join(invalid_state)
+        invalid_state_list[8] = invalid_state_list[9]
+        invalid_state = ''.join(invalid_state_list)
 
         with self.assertRaisesRegex(
                 InvalidCubeStateError,
@@ -600,10 +600,10 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
 
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_edge_same_colors(self, *_: Any) -> None:
-        invalid_state = list(INITIAL_STATE)
+        invalid_state_list = list(INITIAL_STATE)
         # Edge UR: same color on the 2 faces
-        invalid_state[5] = invalid_state[10]
-        invalid_state = ''.join(invalid_state)
+        invalid_state_list[5] = invalid_state_list[10]
+        invalid_state = ''.join(invalid_state_list)
 
         with self.assertRaisesRegex(
                 InvalidCubeStateError,
@@ -613,11 +613,11 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
 
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_corner_opposite_colors(self, *_: Any) -> None:
-        invalid_state = list(INITIAL_STATE)
-        invalid_state[8] = 'U'  # Face U
-        invalid_state[9] = 'D'  # Opposite face D
-        invalid_state[20] = 'F'  # Third face
-        invalid_state = ''.join(invalid_state)
+        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list[8] = 'U'  # Face U
+        invalid_state_list[9] = 'D'  # Opposite face D
+        invalid_state_list[20] = 'F'  # Third face
+        invalid_state = ''.join(invalid_state_list)
 
         with self.assertRaisesRegex(
                 InvalidCubeStateError,
@@ -628,10 +628,10 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
 
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_edge_opposite_colors(self, *_: Any) -> None:
-        invalid_state = list(INITIAL_STATE)
-        invalid_state[5] = 'F'
-        invalid_state[10] = 'B'  # Opposite color
-        invalid_state = ''.join(invalid_state)
+        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list[5] = 'F'
+        invalid_state_list[10] = 'B'  # Opposite color
+        invalid_state = ''.join(invalid_state_list)
 
         with self.assertRaisesRegex(
                 InvalidCubeStateError,
@@ -697,6 +697,24 @@ class VCubeRotateTestCase(unittest.TestCase):
             cube.rotate('z2' + parse_moves('R F')),
             'DDFDDFRRRDLLDLLFLLFFFFFFUUULLLUUBUUBRRURRURRBDBBDBBDBB',
         )
+
+    def test_rotate_typing(self) -> None:
+        expected = 'UUFUUFUUFRRRRRRRRRFFDFFDFFDDDBDDBDDBLLLLLLLLLUBBUBBUBB'
+
+        move_str = 'R'
+        cube = VCube()
+        cube.rotate(move_str)
+        self.assertEqual(cube.state, expected)
+
+        move_algo = parse_moves('R')
+        cube = VCube()
+        cube.rotate(move_algo)
+        self.assertEqual(cube.state, expected)
+
+        move_algo = Move('R')
+        cube = VCube()
+        cube.rotate(move_algo)
+        self.assertEqual(cube.state, expected)
 
     def test_rotate_u(self) -> None:
         cube = VCube()
@@ -980,7 +998,7 @@ class VCubeRotateWideSiGNTestCase(unittest.TestCase):
                 cube_wide = VCube()
 
                 self.assertEqual(
-                    cube.rotate(move),
+                    cube.rotate(str(move)),
                     cube_wide.rotate(
                         parse_moves(
                             str(move),
@@ -1024,7 +1042,7 @@ class VCubeRotateWideStandardTestCase(unittest.TestCase):
                 cube_wide = VCube()
 
                 self.assertEqual(
-                    cube.rotate(move),
+                    cube.rotate(str(move)),
                     cube_wide.rotate(
                         parse_moves(
                             str(move),
@@ -1068,7 +1086,7 @@ class VCubeRotateWideCancelTestCase(unittest.TestCase):
         ):
             with self.subTest(name, move=move):
                 self.assertEqual(
-                    cube.rotate(move),
+                    cube.rotate(str(move)),
                     cube_wide.rotate(
                         parse_moves(
                             str(move),
@@ -1109,7 +1127,7 @@ class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
         cube_wide = VCube()
 
         self.assertEqual(
-            cube.rotate(move),
+            cube.rotate(str(move)),
             cube_wide.rotate(
                 parse_moves(
                     str(move),
@@ -1120,7 +1138,7 @@ class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
         )
 
         self.assertEqual(
-            cube.rotate(move),
+            cube.rotate(str(move)),
             cube_wide.rotate(
                 parse_moves(
                     str(move),
@@ -1169,7 +1187,7 @@ class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
         ):
             with self.subTest(name, move=move):
                 self.assertEqual(
-                    cube.rotate(move),
+                    cube.rotate(str(move)),
                     cube_wide.rotate(
                         parse_moves(
                             str(move),
@@ -1374,10 +1392,10 @@ class TestVCubeIsEqual(unittest.TestCase):
 
     def test_is_equal_with_invalid_states(self) -> None:
         # Test with cubes that have invalid states but same pattern
-        invalid_state = list(INITIAL_STATE)
-        invalid_state[4] = 'R'   # Change top center to R
-        invalid_state[22] = 'D'  # Change front center to D
-        invalid_state = ''.join(invalid_state)
+        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list[4] = 'R'   # Change top center to R
+        invalid_state_list[22] = 'D'  # Change front center to D
+        invalid_state = ''.join(invalid_state_list)
 
         cube1 = VCube(invalid_state, check=False)
         cube2 = VCube(invalid_state, check=False)
@@ -1583,10 +1601,10 @@ class TestVCubeOrientation(unittest.TestCase):
     def test_orientation_with_invalid_state(self) -> None:
         # Test orientation with an unchecked/invalid state
         # Create a state with modified centers
-        invalid_state = list(INITIAL_STATE)
-        invalid_state[4] = 'R'   # Change top center to R
-        invalid_state[22] = 'D'  # Change front center to D
-        invalid_state = ''.join(invalid_state)
+        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list[4] = 'R'   # Change top center to R
+        invalid_state_list[22] = 'D'  # Change front center to D
+        invalid_state = ''.join(invalid_state_list)
 
         cube = VCube(invalid_state, check=False)
         self.assertEqual(cube.orientation, 'RD')
