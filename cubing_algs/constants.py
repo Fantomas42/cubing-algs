@@ -316,6 +316,18 @@ REWIDE_MOVES.update(
         for k, v in UNWIDE_SLICE_MOVES.items()
     },
 )
+UNWIDE_ROTATION_MOVES.update(
+    {
+        f'{ k.upper() }w' if len(k) == 1 else f'{ k[0].upper() }w{ k[1] }': v
+        for k, v in UNWIDE_ROTATION_MOVES.items()
+    },
+)
+UNWIDE_SLICE_MOVES.update(
+    {
+        f'{ k.upper() }w' if len(k) == 1 else f'{ k[0].upper() }w{ k[1] }': v
+        for k, v in UNWIDE_SLICE_MOVES.items()
+    },
+)
 
 
 MOVE_SPLIT = re.compile(

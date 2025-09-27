@@ -26,6 +26,20 @@ class TransformWideTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_unwide_rotation_moves_standard(self) -> None:
+        provide = parse_moves('Fw Rw Uw')
+        expect = parse_moves('B z L x D y')
+
+        result = unwide_rotation_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_unwide_rotation_moves_part_two(self) -> None:
         provide = parse_moves('b l d')
         expect = parse_moves("F z' R x' U y'")
@@ -40,8 +54,36 @@ class TransformWideTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_unwide_rotation_moves_part_two_standard(self) -> None:
+        provide = parse_moves('Bw Lw Dw')
+        expect = parse_moves("F z' R x' U y'")
+
+        result = unwide_rotation_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_unwide_rotation_moves_part_three(self) -> None:
         provide = parse_moves('r F u b')
+        expect = parse_moves("L x F D y F z'")
+
+        result = unwide_rotation_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_unwide_rotation_moves_part_three_standard(self) -> None:
+        provide = parse_moves('Rw F Uw b')
         expect = parse_moves("L x F D y F z'")
 
         result = unwide_rotation_moves(provide)
@@ -96,6 +138,20 @@ class TransformWideTestCase(unittest.TestCase):
 
     def test_unwide_slice_moves(self) -> None:
         provide = parse_moves('f r u')
+        expect = parse_moves("F S R M' U E'")
+
+        result = unwide_slice_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_unwide_slice_moves_standard(self) -> None:
+        provide = parse_moves('Fw Rw Uw')
         expect = parse_moves("F S R M' U E'")
 
         result = unwide_slice_moves(provide)
