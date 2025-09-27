@@ -1,6 +1,5 @@
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
-from cubing_algs.move import Move
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
 from cubing_algs.transform.optimize import optimize_repeat_three_moves
@@ -42,12 +41,14 @@ def expand_moves(old_moves: Algorithm) -> Algorithm:
 
     Replaces each double move (like R2) with two identical single moves (R R).
     """
-    moves: list[Move] = []
-
-    for move in old_moves:
-        if move.is_double:
-            moves.extend((move.doubled, move.doubled))
-        else:
-            moves.append(move)
+    moves = [
+        expanded_move
+        for move in old_moves
+        for expanded_move in (
+                (move.doubled, move.doubled)
+                if move.is_double
+                else (move,)
+        )
+    ]
 
     return Algorithm(moves)
