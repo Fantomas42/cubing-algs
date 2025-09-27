@@ -32,9 +32,9 @@ def count_inversions(permutation: list[int]) -> int:
     """
     inversions = 0
 
-    for i in range(len(permutation)):
-        for j in range(i + 1, len(permutation)):
-            if permutation[i] > permutation[j]:
+    for i, val_i in enumerate(permutation):
+        for val_j in permutation[i + 1:]:
+            if val_i > val_j:
                 inversions += 1
 
     return inversions
