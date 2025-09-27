@@ -31,11 +31,17 @@ class AlgorithmTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves(['R2', 'U'])
         self.assertEqual(str(algo), 'R2 U')
 
+        algo = Algorithm.parse_moves([Move('R2'), Move('U')])
+        self.assertEqual(str(algo), 'R2 U')
+
         algo = Algorithm.parse_moves(Algorithm.parse_moves(['R2', 'U']))
         self.assertEqual(str(algo), 'R2 U')
 
     def test_parse_move(self) -> None:
         move = Algorithm.parse_move('R2')
+        self.assertEqual(move, 'R2')
+
+        move = Algorithm.parse_move(Move('R2'))
         self.assertEqual(move, 'R2')
 
         with self.assertRaises(InvalidMoveError):
@@ -44,6 +50,7 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_append(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo.append('F2')
         self.assertEqual(str(algo), 'R2 U F2')
 
@@ -66,14 +73,15 @@ class AlgorithmTestCase(unittest.TestCase):
             algo.append(Move('G'))
 
         with self.assertRaises(InvalidMoveError):
-            algo.append(['F', 'R'])
+            algo.append(['F', 'R'])  # type: ignore[arg-type]
 
         with self.assertRaises(InvalidMoveError):
-            algo.append([])
+            algo.append([])  # type: ignore[arg-type]
 
     def test_extend(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo.extend(['F2', 'B'])
         self.assertEqual(str(algo), 'R2 U F2 B')
 
@@ -89,12 +97,28 @@ class AlgorithmTestCase(unittest.TestCase):
         algo.extend('F R')
         self.assertEqual(str(algo), 'R2 U F2 B F R')
 
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo.extend('D2')
+        self.assertEqual(str(algo), 'R2 U F2 B F R D2')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo.extend([Move('L'), Move('B')])
+        self.assertEqual(str(algo), 'R2 U F2 B F R D2 L B')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
         with self.assertRaises(InvalidMoveError):
             algo.extend(['F2', 'G'])
 
     def test_extend_with_algorithm(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo.extend(parse_moves('F2 B'))
         self.assertEqual(str(algo), 'R2 U F2 B')
 
@@ -104,6 +128,7 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_add_operator(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo = algo + ['F2', 'B']
         self.assertEqual(str(algo), 'R2 U F2 B')
 
@@ -122,6 +147,7 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_iadd_operator(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo += ['F2', 'B']
         self.assertEqual(str(algo), 'R2 U F2 B')
 
@@ -134,12 +160,30 @@ class AlgorithmTestCase(unittest.TestCase):
         for m in algo:
             self.assertIsInstance(m, Move)
 
+        algo += [Move('L2'), Move('D')]
+        self.assertEqual(str(algo), 'R2 U F2 B F R L2 D')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
         with self.assertRaises(InvalidMoveError):
             algo + 'F2 G'
 
     def test_radd_operator(self) -> None:
         algo = 'F2R2' + parse_moves('D2 U')
         self.assertEqual(str(algo), 'F2 R2 D2 U')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo = ['R2', 'L'] + algo
+        self.assertEqual(str(algo), 'R2 L F2 R2 D2 U')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo = [Move('D'), Move('U')] + algo
+        self.assertEqual(str(algo), 'D U R2 L F2 R2 D2 U')
 
         for m in algo:
             self.assertIsInstance(m, Move)
@@ -159,9 +203,35 @@ class AlgorithmTestCase(unittest.TestCase):
         algo = 'z2' + parse_moves('R2 U')
         self.assertEqual(str(algo), 'z2 R2 U')
 
+    def test_add(self) -> None:
+        algo = parse_moves('R2 U')
+        self.assertEqual(str(algo), 'R2 U')
+
+        algo += ['F2', 'B']
+        self.assertEqual(str(algo), 'R2 U F2 B')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo += [Move('D2'), Move('B2')]
+        self.assertEqual(str(algo), 'R2 U F2 B D2 B2')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo += 'z y'
+        self.assertEqual(str(algo), 'R2 U F2 B D2 B2 z y')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        with self.assertRaises(InvalidMoveError):
+            algo += 'F G'
+
     def test_add_exploded(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo += [*algo, 'F2', 'B']
         self.assertEqual(str(algo), 'R2 U R2 U F2 B')
 
@@ -171,6 +241,7 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_add_operator_with_algorithm(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo = algo + parse_moves('F2 B')
         self.assertEqual(str(algo), 'R2 U F2 B')
 
@@ -180,16 +251,35 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_insert(self) -> None:
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
+
         algo.insert(0, 'F2')
         self.assertEqual(str(algo), 'F2 R2 U')
 
         for m in algo:
             self.assertIsInstance(m, Move)
 
+        algo.insert(0, Move('L'))
+        self.assertEqual(str(algo), 'L F2 R2 U')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        with self.assertRaises(InvalidMoveError):
+            algo.insert(0, 'G')
+
     def test_remove(self) -> None:
         algo = parse_moves('R2 U R2')
         self.assertEqual(str(algo), 'R2 U R2')
-        algo.remove('R2')
+        algo.remove(Move('R2'))
+        self.assertEqual(str(algo), 'U R2')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+    def test_remove_type_str(self) -> None:
+        algo = parse_moves('R2 U R2')
+        self.assertEqual(str(algo), 'R2 U R2')
+        algo.remove('R2')  # type: ignore[arg-type]
         self.assertEqual(str(algo), 'U R2')
 
         for m in algo:
@@ -303,6 +393,8 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertIn(Move('R2'), algo)
         self.assertNotIn(Move('R'), algo)
 
+    def test_contains_type_str(self) -> None:
+        algo = parse_moves('R2 U')
         self.assertIn('U', algo)
         self.assertIn('R2', algo)
         self.assertNotIn('R', algo)
@@ -314,24 +406,30 @@ class AlgorithmTestCase(unittest.TestCase):
         self.assertEqual(algo.count(Move('R2')), 2)
         self.assertEqual(algo.count(Move('L')), 0)
 
-        self.assertEqual(algo.count('R'), 1)
-        self.assertEqual(algo.count('R2'), 2)
-        self.assertEqual(algo.count('L'), 0)
-        self.assertEqual(algo.count('2'), 0)
+    def test_count_type_str(self) -> None:
+        algo = parse_moves('R2 U F R R2')
+        self.assertEqual(algo.count('R'), 1)   # type: ignore[arg-type]
+        self.assertEqual(algo.count('R2'), 2)  # type: ignore[arg-type]
+        self.assertEqual(algo.count('L'), 0)   # type: ignore[arg-type]
+        self.assertEqual(algo.count('2'), 0)   # type: ignore[arg-type]
 
     def test_index(self) -> None:
         algo = parse_moves('R2 U F R R2')
         self.assertEqual(algo.index(Move('R')), 3)
         self.assertEqual(algo.index(Move('R2')), 0)
+
         with self.assertRaises(ValueError):
             algo.index(Move('L'))
 
-        self.assertEqual(algo.index('R'), 3)
-        self.assertEqual(algo.index('R2'), 0)
+    def test_index_type_str(self) -> None:
+        algo = parse_moves('R2 U F R R2')
+        self.assertEqual(algo.index('R'), 3)   # type: ignore[arg-type]
+        self.assertEqual(algo.index('R2'), 0)  # type: ignore[arg-type]
+
         with self.assertRaises(ValueError):
-            algo.index('L')
+            algo.index('L')  # type: ignore[arg-type]
         with self.assertRaises(ValueError):
-            algo.index('2')
+            algo.index('2')  # type: ignore[arg-type]
 
     def test_length(self) -> None:
         algo = parse_moves('R2 U')
