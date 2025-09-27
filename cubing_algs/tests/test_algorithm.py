@@ -270,6 +270,7 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_remove(self) -> None:
         algo = parse_moves('R2 U R2')
         self.assertEqual(str(algo), 'R2 U R2')
+
         algo.remove(Move('R2'))
         self.assertEqual(str(algo), 'U R2')
 
@@ -279,6 +280,7 @@ class AlgorithmTestCase(unittest.TestCase):
     def test_remove_type_str(self) -> None:
         algo = parse_moves('R2 U R2')
         self.assertEqual(str(algo), 'R2 U R2')
+
         algo.remove('R2')  # type: ignore[arg-type]
         self.assertEqual(str(algo), 'U R2')
 
@@ -428,6 +430,7 @@ class AlgorithmTestCase(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             algo.index('L')  # type: ignore[arg-type]
+
         with self.assertRaises(ValueError):
             algo.index('2')  # type: ignore[arg-type]
 
