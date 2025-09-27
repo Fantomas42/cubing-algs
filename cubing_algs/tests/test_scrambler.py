@@ -107,6 +107,19 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
+    def test_build_cube_move_set_4x4x4_left_handed(self) -> None:
+        self.assertEqual(
+            build_cube_move_set(4, right_handed=False),
+            [
+                'R', "R'", 'R2',
+                'F', "F'", 'F2', 'Fw', "Fw'", 'Fw2',
+                'U', "U'", 'U2', 'Uw', "Uw'", 'Uw2',
+                'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
+                'B', "B'", 'B2',
+                'D', "D'", 'D2',
+            ],
+        )
+
     def test_build_cube_move_set_4x4x4_inner_layers(self) -> None:
         self.assertEqual(
             build_cube_move_set(4, inner_layers=True),
@@ -126,9 +139,41 @@ class TestCubeMoveSet(unittest.TestCase):
             ],
         )
 
+    def test_build_cube_move_set_4x4x4_inner_layers_left_handed(self) -> None:
+        self.assertEqual(
+            build_cube_move_set(4, inner_layers=True, right_handed=False),
+            [
+                'R', "R'", 'R2',
+                '2R', "2R'", '2R2',
+                'F', "F'", 'F2', 'Fw', "Fw'", 'Fw2',
+                '2F', "2F'", '2F2',
+                'U', "U'", 'U2', 'Uw', "Uw'", 'Uw2',
+                '2U', "2U'", '2U2',
+                'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
+                '2L', "2L'", '2L2',
+                'B', "B'", 'B2',
+                '2B', "2B'", '2B2',
+                'D', "D'", 'D2',
+                '2D', "2D'", '2D2',
+            ],
+        )
+
     def test_build_cube_move_set_5x5x5(self) -> None:
         self.assertEqual(
             build_cube_move_set(5),
+            [
+                'R', "R'", 'R2', 'Rw', "Rw'", 'Rw2',
+                'F', "F'", 'F2', 'Fw', "Fw'", 'Fw2',
+                'U', "U'", 'U2', 'Uw', "Uw'", 'Uw2',
+                'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
+                'B', "B'", 'B2', 'Bw', "Bw'", 'Bw2',
+                'D', "D'", 'D2', 'Dw', "Dw'", 'Dw2',
+            ],
+        )
+
+    def test_build_cube_move_set_5x5x5_left_handed(self) -> None:
+        self.assertEqual(
+            build_cube_move_set(5, right_handed=False),
             [
                 'R', "R'", 'R2', 'Rw', "Rw'", 'Rw2',
                 'F', "F'", 'F2', 'Fw', "Fw'", 'Fw2',
@@ -154,6 +199,30 @@ class TestCubeMoveSet(unittest.TestCase):
 
                 'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
                 '2L', "2L'", '2L2',
+
+                'B', "B'", 'B2', 'Bw', "Bw'", 'Bw2',
+                '2B', "2B'", '2B2',
+
+                'D', "D'", 'D2', 'Dw', "Dw'", 'Dw2',
+                '2D', "2D'", '2D2',
+            ],
+        )
+
+    def test_build_cube_move_set_5x5x5_inner_layers_left_handed(self) -> None:
+        self.assertEqual(
+            build_cube_move_set(5, inner_layers=True, right_handed=False),
+            [
+                'R', "R'", 'R2', 'Rw', "Rw'", 'Rw2',
+                '2R', "2R'", '2R2',
+
+                'F', "F'", 'F2', 'Fw', "Fw'", 'Fw2',
+                '2F', "2F'", '2F2', '3F', "3F'", '3F2',
+
+                'U', "U'", 'U2', 'Uw', "Uw'", 'Uw2',
+                '2U', "2U'", '2U2', '3U', "3U'", '3U2',
+
+                'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
+                '2L', "2L'", '2L2', '3L', "3L'", '3L2',
 
                 'B', "B'", 'B2', 'Bw', "Bw'", 'Bw2',
                 '2B', "2B'", '2B2',
@@ -204,6 +273,60 @@ class TestCubeMoveSet(unittest.TestCase):
                 '3U', "3U'", '3U2',
 
                 'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
+                '2L', "2L'", '2L2',
+                '3L', "3L'", '3L2',
+
+                'B', "B'", 'B2', 'Bw', "Bw'", 'Bw2',
+                '2B', "2B'", '2B2',
+                '3B', "3B'", '3B2',
+
+                'D', "D'", 'D2', 'Dw', "Dw'", 'Dw2',
+                '2D', "2D'", '2D2',
+                '3D', "3D'", '3D2',
+            ],
+        )
+
+    def test_build_cube_move_set_6x6x6_left_handed(self) -> None:
+        self.assertEqual(
+            build_cube_move_set(6, right_handed=False),
+            [
+                'R', "R'", 'R2', 'Rw', "Rw'", 'Rw2',
+
+                'F', "F'", 'F2', 'Fw', "Fw'", 'Fw2',
+                '3Fw', "3Fw'", '3Fw2',
+
+                'U', "U'", 'U2', 'Uw', "Uw'", 'Uw2',
+                '3Uw', "3Uw'", '3Uw2',
+
+                'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
+                '3Lw', "3Lw'", '3Lw2',
+
+                'B', "B'", 'B2', 'Bw', "Bw'", 'Bw2',
+
+                'D', "D'", 'D2', 'Dw', "Dw'", 'Dw2',
+            ],
+        )
+
+    def test_build_cube_move_set_6x6x6_inner_layers_left_handed(self) -> None:
+        self.assertEqual(
+            build_cube_move_set(6, inner_layers=True, right_handed=False),
+            [
+                'R', "R'", 'R2', 'Rw', "Rw'", 'Rw2',
+                '2R', "2R'", '2R2',
+                '3R', "3R'", '3R2',
+
+                'F', "F'", 'F2', 'Fw', "Fw'", 'Fw2',
+                '3Fw', "3Fw'", '3Fw2',
+                '2F', "2F'", '2F2',
+                '3F', "3F'", '3F2',
+
+                'U', "U'", 'U2', 'Uw', "Uw'", 'Uw2',
+                '3Uw', "3Uw'", '3Uw2',
+                '2U', "2U'", '2U2',
+                '3U', "3U'", '3U2',
+
+                'L', "L'", 'L2', 'Lw', "Lw'", 'Lw2',
+                '3Lw', "3Lw'", '3Lw2',
                 '2L', "2L'", '2L2',
                 '3L', "3L'", '3L2',
 
