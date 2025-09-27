@@ -9,6 +9,7 @@ from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.integrity import VCubeIntegrityChecker
+from cubing_algs.move import Move
 
 
 class VCube(VCubeIntegrityChecker):
@@ -100,16 +101,19 @@ class VCube(VCubeIntegrityChecker):
         """
         return self._state[4] + self._state[22]
 
-    def rotate(self, moves: str | Algorithm, *, history: bool = True) -> str:
+    def rotate(self, moves: Algorithm | Move | str, *,
+               history: bool = True) -> str:
         """
         Apply a sequence of moves to the cube.
         """
-        if isinstance(moves, Algorithm):
-            for move in moves:
-                self.rotate_move(str(move), history=history)
-        else:
-            for move_str in moves.split(' '):
-                self.rotate_move(move_str, history=history)
+        moves_str = str(moves)
+
+        if not moves_str:
+            return self._state
+
+        for move in moves_str.split(' '):
+            self.rotate_move(move, history=history)
+
         return self._state
 
     def rotate_move(self, move: str, *, history: bool = True) -> str:

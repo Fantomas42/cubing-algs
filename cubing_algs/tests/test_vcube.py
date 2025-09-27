@@ -711,9 +711,9 @@ class VCubeRotateTestCase(unittest.TestCase):
         cube.rotate(move_algo)
         self.assertEqual(cube.state, expected)
 
-        move_algo = Move('R')
+        move_move = Move('R')
         cube = VCube()
-        cube.rotate(move_algo)
+        cube.rotate(move_move)
         self.assertEqual(cube.state, expected)
 
     def test_rotate_u(self) -> None:
