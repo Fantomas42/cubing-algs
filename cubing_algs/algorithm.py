@@ -4,9 +4,10 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from cubing_algs.constants import MAX_ITERATIONS
+from cubing_algs.cycles import compute_cycles
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.facelets import cubies_to_facelets
-from cubing_algs.metrics import compute_cycles
+from cubing_algs.impacts import ImpactData
+from cubing_algs.impacts import compute_impacts
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
@@ -173,11 +174,30 @@ class Algorithm(UserList[Move]):
         and their mathematical properties.
 
         Example:
-            >>> alg = Algorithm("R U R' U'")
+            >>> alg = Algorithm.parse_moves("R U R' U'")
             >>> alg.cycles
             6  # Meaning applying this 6 times returns to solved
         """
         return compute_cycles(self)
+
+    @property
+    def impacts(self) -> ImpactData:
+        """
+        Analyze the spatial impact of this algorithm on cube facelets.
+
+        Computes comprehensive metrics about how the algorithm affects
+        individual facelets on the cube, including movement patterns,
+        distances, and face-level statistics.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("R U R' U'")
+            >>> impacts = alg.impacts
+            >>> impacts['mobilized_count']
+            18  # 18 out of 54 facelets are affected
+            >>> impacts['scrambled_percent']
+            0.33  # About 33% of the cube is scrambled
+        """
+        return compute_impacts(self)
 
     @property
     def min_cube_size(self) -> int:
@@ -240,23 +260,12 @@ class Algorithm(UserList[Move]):
         Creates a VCube, applies this algorithm to it, and displays the result
         with a mask showing which facelets are affected by the algorithm.
         """
-        from cubing_algs.vcube import VCube  # noqa: PLC0415
-
-        cube = VCube()
-        cube.rotate(self)
-
-        state_unique = ''.join([chr(ord('A') + i) for i in range(54)])
-        state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
-
-        impact_mask = ''.join(
-            '0' if f1 == f2 else '1'
-            for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
-        )
+        cube = self.impacts.cube
 
         cube.show(
             mode=mode,
             orientation=orientation,
-            mask=impact_mask,
+            mask=self.impacts.transformation_mask,
         )
 
         return cube

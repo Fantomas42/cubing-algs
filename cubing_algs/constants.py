@@ -370,12 +370,21 @@ SYMMETRY_TABLE = {
 }
 
 OPPOSITE_FACES = {
-    'F': 'B',
-    'R': 'L',
     'U': 'D',
-    'B': 'F',
-    'L': 'R',
+    'R': 'L',
+    'F': 'B',
     'D': 'U',
+    'L': 'R',
+    'B': 'F',
+}
+
+ADJACENT_FACES = {
+    'U': ('R', 'L', 'F', 'B'),
+    'R': ('F', 'B', 'U', 'D'),
+    'F': ('U', 'D', 'L', 'R'),
+    'D': ('R', 'L', 'F', 'B'),
+    'L': ('F', 'B', 'U', 'D'),
+    'B': ('U', 'D', 'L', 'R'),
 }
 
 FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
