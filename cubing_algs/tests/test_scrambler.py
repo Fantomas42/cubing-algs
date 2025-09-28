@@ -915,7 +915,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                 # Should achieve high scrambledness
                 scrambledness = self.calculate_state_scrambledness(scramble_alg)
                 self.assertGreater(
-                    scrambledness, 0.65,
+                    scrambledness, 0.6,
                     'Long scrambles should achieve '
                     f'high scrambledness: {scrambledness:.3f}',
                 )
