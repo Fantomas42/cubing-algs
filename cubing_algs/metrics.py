@@ -8,12 +8,30 @@ and algorithm composition analysis.
 """
 import operator
 from typing import TYPE_CHECKING
-from typing import Any
+from typing import NamedTuple
 
 from cubing_algs.move import Move
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
+
+
+class MetricsData(NamedTuple):
+    """
+    Container for algorithm metrics computation results.
+    """
+    pauses: int
+    rotations: int
+    outer_moves: int
+    inner_moves: int
+    htm: int
+    qtm: int
+    stm: int
+    etm: int
+    rtm: int
+    qstm: int
+    generators: list[str]
+
 
 # Dictionary mapping metric names to scoring rules for different move types
 MOVE_COUNTS = {
@@ -125,7 +143,7 @@ def regroup_moves(
     return pauses, rotations, outer_moves, inner_moves
 
 
-def compute_metrics(moves: 'Algorithm') -> dict[str, Any]:
+def compute_metrics(moves: 'Algorithm') -> MetricsData:
     """
     Calculate a comprehensive set of metrics for an algorithm.
 
@@ -135,8 +153,8 @@ def compute_metrics(moves: 'Algorithm') -> dict[str, Any]:
     - Generator analysis (most used faces)
 
     Returns:
-        dict[str, Any]: A dictionary containing all calculated metrics.
-        Keys include:
+        MetricsData: Namedtuple containing all calculated metrics:
+            - pauses: Number of pause moves
             - rotations: Number of rotation moves
             - outer_moves: Number of outer face moves
             - inner_moves: Number of inner slice moves
@@ -150,16 +168,16 @@ def compute_metrics(moves: 'Algorithm') -> dict[str, Any]:
     """
     pauses, rotations, outer_moves, inner_moves = regroup_moves(moves)
 
-    return {
-        'pauses': len(pauses),
-        'rotations': len(rotations),
-        'outer_moves': len(outer_moves),
-        'inner_moves': len(inner_moves),
-        'htm': compute_score('htm', rotations, outer_moves, inner_moves),
-        'qtm': compute_score('qtm', rotations, outer_moves, inner_moves),
-        'stm': compute_score('stm', rotations, outer_moves, inner_moves),
-        'etm': compute_score('etm', rotations, outer_moves, inner_moves),
-        'rtm': compute_score('rtm', rotations, outer_moves, inner_moves),
-        'qstm': compute_score('qstm', rotations, outer_moves, inner_moves),
-        'generators': compute_generators(moves),
-    }
+    return MetricsData(
+        pauses=len(pauses),
+        rotations=len(rotations),
+        outer_moves=len(outer_moves),
+        inner_moves=len(inner_moves),
+        htm=compute_score('htm', rotations, outer_moves, inner_moves),
+        qtm=compute_score('qtm', rotations, outer_moves, inner_moves),
+        stm=compute_score('stm', rotations, outer_moves, inner_moves),
+        etm=compute_score('etm', rotations, outer_moves, inner_moves),
+        rtm=compute_score('rtm', rotations, outer_moves, inner_moves),
+        qstm=compute_score('qstm', rotations, outer_moves, inner_moves),
+        generators=compute_generators(moves),
+    )
