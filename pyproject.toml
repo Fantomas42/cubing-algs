@@ -25,6 +25,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-subtests",
+    "nbval",
 ]
 notebooks = [
     "jupyterlab",
