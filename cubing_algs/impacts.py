@@ -6,10 +6,10 @@ on cube facelets, including which facelets are moved, how they move,
 and statistical analysis of the algorithm's effect on the cube.
 """
 from typing import TYPE_CHECKING
-from typing import Any
 from typing import NamedTuple
 
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.facelets import cubies_to_facelets
 
 if TYPE_CHECKING:
@@ -21,61 +21,26 @@ class ImpactData(NamedTuple):
     """
     Container for core impact computation results.
     """
-    impact_mask: str
-    movements: dict[int, int]
-    state_unique: str
-    state_unique_moved: str
     cube: 'VCube'
+    transformation_mask: str
 
+    fixed_count: int
+    mobilized_count: int
+    scrambled_percent: float
+    permutations: dict[int, int]
 
-def get_impact_data(algorithm: 'Algorithm') -> ImpactData:
-    """
-    Compute core impact data that other functions can reuse.
+    distances: dict[int, int]
+    distance_mean: float
+    distance_max: int
+    distance_sum: int
 
-    This is the fundamental computation that calculates:
-    - Which facelets move (impact mask)
-    - Where each facelet moves to (movements)
-    - The unique state representations
-
-    All other impact functions should use this as their base computation
-    to avoid redundancy.
-    """
-    from cubing_algs.vcube import VCube  # noqa: PLC0415
-
-    cube = VCube()
-    cube.rotate(algorithm)
-
-    # Create unique state with each facelet having a unique character
-    state_unique = ''.join([chr(ord('A') + i) for i in range(54)])
-    state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
-
-    # Compute impact mask
-    impact_mask = ''.join(
-        '0' if f1 == f2 else '1'
-        for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
-    )
-
-    # Compute movements
-    movements = {}
-    for original_pos in range(54):
-        original_char = state_unique[original_pos]
-        final_pos = state_unique_moved.find(original_char)
-
-        # Only record if facelet actually moved
-        if final_pos != original_pos:
-            movements[original_pos] = final_pos
-
-    return ImpactData(
-        impact_mask=impact_mask,
-        movements=movements,
-        state_unique=state_unique,
-        state_unique_moved=state_unique_moved,
-        cube=cube,
-    )
+    face_mobility: dict[str, int]
 
 
 def compute_face_impact(impact_mask: str) -> dict[str, int]:
-    """Calculate face impact from impact mask."""
+    """
+    Calculate face impact from impact mask.
+    """
     face_impact = {}
 
     for i, face_name in enumerate(FACE_ORDER):
@@ -87,18 +52,21 @@ def compute_face_impact(impact_mask: str) -> dict[str, int]:
     return face_impact
 
 
-def compute_displacement(original_pos: int, final_pos: int) -> int:
-    """Calculate displacement distance between two positions."""
-    # Convert to face coordinates
-    orig_face = original_pos // 9
-    orig_pos_in_face = original_pos % 9
-    orig_row = orig_pos_in_face // 3
-    orig_col = orig_pos_in_face % 3
+def compute_distance(original_pos: int, final_pos: int, cube: 'VCube') -> int:
+    """
+    Calculate displacement distance between two positions.
+    """
+    orig_face = original_pos // cube.face_size
+    orig_face_name = FACE_ORDER[orig_face]
+    orig_pos_in_face = original_pos % cube.face_size
+    orig_row = orig_pos_in_face // cube.size
+    orig_col = orig_pos_in_face % cube.size
 
-    final_face = final_pos // 9
-    final_pos_in_face = final_pos % 9
-    final_row = final_pos_in_face // 3
-    final_col = final_pos_in_face % 3
+    final_face = final_pos // cube.face_size
+    final_face_name = FACE_ORDER[final_face]
+    final_pos_in_face = final_pos % cube.face_size
+    final_row = final_pos_in_face // cube.size
+    final_col = final_pos_in_face % cube.size
 
     # Manhattan distance
     distance = abs(orig_row - final_row) + abs(orig_col - final_col)
@@ -106,55 +74,97 @@ def compute_displacement(original_pos: int, final_pos: int) -> int:
     if orig_face == final_face:
         return distance
 
-    return 3 + distance # TODO handle adjacent
+    factor = 1
+    if final_face_name == OPPOSITE_FACES[orig_face_name]:
+        factor = 2
+
+    return cube.size * factor + distance
 
 
-def compute_impacts(algorithm: 'Algorithm') -> dict[str, Any]:
+def compute_impacts(algorithm: 'Algorithm') -> ImpactData:
     """
     Compute comprehensive impact metrics for an algorithm.
 
     Returns:
-        dict: Dictionary containing various impact metrics:
-        Keys include:
-            - impact_mask: Binary mask of impacted facelets
-            - impacted_facelets: Total number of moved facelets
-            - invariant_facelets: Count of unmoved facelets
+        ImpactData: Namedtuple containing various impact metrics:
+        Metrics include:
+            - cube: The VCube impacted
+            - transformation_mask: Binary mask of impacted facelets
 
-            - average_displacement: Average movement distance
-            - max_displacement: Maximum movement distance
-            - face_impact: Impact breakdown by face
+            - fixed_count: Count of unmoved facelets
+            - mobilized_count: Total number of moved facelets
+            - scrambled_percent: Percent of moves facelets
+
+            - permutations: The permuted facelets
+
+            - distances: The moved facelets distances
+            - distance_mean: Average facelet distance done
+            - distance_max: Maximum facelet distance
+            - distance_sum: Sum of facelet distances
+
+            - face_mobility: Impact breakdown by face
     """
-    # TODO review
-    impact_data = get_impact_data(algorithm)
+    from cubing_algs.vcube import VCube  # noqa: PLC0415
 
-    displacements = {
-        original_pos: compute_displacement(original_pos, final_pos)
-        for original_pos, final_pos in impact_data.movements.items()
-    }
+    cube = VCube()
+    cube.rotate(algorithm)
 
-    displacement_values = list(displacements.values())
-    avg_displacement = (
-        sum(displacement_values) / len(displacement_values)
-        if displacement_values else 0
+    # Create unique state with each facelet having a unique character
+    state_unique = ''.join(
+        [
+            chr(ord('A') + i)
+            for i in range(cube.face_size * cube.face_number)
+        ],
     )
-    max_displacement = max(displacement_values) if displacement_values else 0
+    state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
 
-    face_fixed_count = impact_data.impact_mask.count('0')
-    face_mobilized_count = impact_data.impact_mask.count('1')
+    mask = ''.join(
+        '0' if f1 == f2 else '1'
+        for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
+    )
 
-    return {
-        'cube': impact_data.cube,
-        'transformation_mask': impact_data.impact_mask,
+    permutations = {}
+    for original_pos in range(54):
+        final_pos = state_unique_moved.find(
+            state_unique[original_pos],
+        )
 
-        'facelet_fixed_count': face_fixed_count,
-        'facelet_mobilized_count': face_mobilized_count,
-        'facelet_scrambled_percent': face_mobilized_count / 54,  # TODO fix 54
-        'facelet_permutations': impact_data.movements,
+        if final_pos != original_pos:
+            permutations[original_pos] = final_pos
 
-        'facelet_distances': displacements,
-        'facelet_distance_mean': avg_displacement,
-        'facelet_distance_max': max_displacement,
-        'facelet_distance_sum': sum(displacement_values),
-
-        'face_mobility': compute_face_impact(impact_data.impact_mask),
+    distances = {
+        original_pos: compute_distance(original_pos, final_pos, cube)
+        for original_pos, final_pos in permutations.items()
     }
+
+    distance_values = list(distances.values())
+    distance_sum = sum(distance_values)
+    distance_mean = (
+        distance_sum / len(distance_values)
+        if distance_values else 0
+    )
+    distance_max = max(distance_values) if distance_values else 0
+
+    fixed_count = mask.count('0')
+    mobilized_count = mask.count('1')
+    scrambled_percent = mobilized_count / len(state_unique)
+
+    face_mobility = compute_face_impact(mask)
+
+    return ImpactData(
+        cube=cube,
+        transformation_mask=mask,
+
+        fixed_count=fixed_count,
+        mobilized_count=mobilized_count,
+        scrambled_percent=scrambled_percent,
+
+        permutations=permutations,
+
+        distances=distances,
+        distance_mean=distance_mean,
+        distance_max=distance_max,
+        distance_sum=distance_sum,
+
+        face_mobility=face_mobility,
+    )

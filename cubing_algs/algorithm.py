@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
@@ -180,7 +181,7 @@ class Algorithm(UserList[Move]):
         return compute_cycles(self)
 
     @property
-    def impacts(self) -> dict:
+    def impacts(self) -> ImpactData:
         """
         Analyze the spatial impact of this algorithm on cube facelets.
 
@@ -191,9 +192,9 @@ class Algorithm(UserList[Move]):
         Example:
             >>> alg = Algorithm.parse_moves("R U R' U'")
             >>> impacts = alg.impacts
-            >>> impacts['facelet_mobilized_count']
+            >>> impacts['mobilized_count']
             18  # 18 out of 54 facelets are affected
-            >>> impacts['facelet_scrambled_percent']
+            >>> impacts['scrambled_percent']
             0.33  # About 33% of the cube is scrambled
         """
         return compute_impacts(self)
@@ -259,12 +260,12 @@ class Algorithm(UserList[Move]):
         Creates a VCube, applies this algorithm to it, and displays the result
         with a mask showing which facelets are affected by the algorithm.
         """
-        cube = self.impacts['cube']
+        cube = self.impacts.cube
 
         cube.show(
             mode=mode,
             orientation=orientation,
-            mask=self.impacts['transformation_mask'],
+            mask=self.impacts.transformation_mask,
         )
 
         return cube
