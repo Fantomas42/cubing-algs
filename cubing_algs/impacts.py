@@ -1,3 +1,4 @@
+# ruff: noqa: PLC0415
 """
 Impact analysis tools for Rubik's cube algorithms.
 
@@ -81,7 +82,7 @@ def compute_distance(original_pos: int, final_pos: int, cube: 'VCube') -> int:
     return cube.size * factor + distance
 
 
-def compute_impacts(algorithm: 'Algorithm') -> ImpactData:
+def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     """
     Compute comprehensive impact metrics for an algorithm.
 
@@ -104,7 +105,19 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:
 
             - face_mobility: Impact breakdown by face
     """
-    from cubing_algs.vcube import VCube  # noqa: PLC0415
+    from cubing_algs.transform.degrip import degrip_full_moves
+    from cubing_algs.transform.rotation import remove_final_rotations
+    from cubing_algs.transform.slice import unslice_rotation_moves
+    from cubing_algs.transform.wide import unwide_rotation_moves
+    from cubing_algs.vcube import VCube
+
+    if algorithm.has_rotations:
+        algorithm = algorithm.transform(
+            unwide_rotation_moves,
+            unslice_rotation_moves,
+            degrip_full_moves,
+            remove_final_rotations,
+        )
 
     cube = VCube()
     cube.rotate(algorithm)
@@ -124,7 +137,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:
     )
 
     permutations = {}
-    for original_pos in range(54):
+    for original_pos in range(len(state_unique)):
         final_pos = state_unique_moved.find(
             state_unique[original_pos],
         )
@@ -147,7 +160,8 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:
 
     fixed_count = mask.count('0')
     mobilized_count = mask.count('1')
-    scrambled_percent = mobilized_count / len(state_unique)
+    # Center facelets should not move
+    scrambled_percent = mobilized_count / (len(state_unique) - cube.face_number)
 
     face_mobility = compute_face_impact(mask, cube)
 

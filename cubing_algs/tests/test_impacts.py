@@ -282,7 +282,7 @@ class TestComputeImpacts(unittest.TestCase):
         self.assertGreater(result.mobilized_count, 0)
         self.assertLess(result.mobilized_count, 54)
         self.assertEqual(result.fixed_count + result.mobilized_count, 54)
-        expected_percent = result.mobilized_count / 54
+        expected_percent = result.mobilized_count / 48
         self.assertAlmostEqual(result.scrambled_percent, expected_percent)
 
         # Should have some permutations
@@ -371,13 +371,25 @@ class TestComputeImpacts(unittest.TestCase):
         self.assertGreater(result.mobilized_count, 0)
         self.assertEqual(result.fixed_count + result.mobilized_count, 54)
 
+    def test_algorithm_with_incomplete_rotations(self) -> None:
+        """Test impact of algorithm with cube rotations."""
+        algorithm = Algorithm.parse_moves("x R U R' U'")
+        result = compute_impacts(algorithm)
+
+        self.assertEqual(result.scrambled_percent, 0.375)
+
+        algorithm_no_x = Algorithm.parse_moves("R U R' U'")
+        result_no_x = compute_impacts(algorithm_no_x)
+
+        self.assertEqual(result_no_x.scrambled_percent, 0.375)
+
     def test_algorithm_with_single_rotation(self) -> None:
         """Test impact of algorithm with cube rotations."""
         algorithm = Algorithm.parse_moves('x')
         result = compute_impacts(algorithm)
 
-        # Actually all should be moved except L R centers
-        self.assertEqual(result.mobilized_count, 52)
+        # Rotations removed
+        self.assertEqual(result.mobilized_count, 0)
 
     def test_permutation_consistency(self) -> None:
         """Test that permutations are consistent with movement mask."""
@@ -442,7 +454,7 @@ class TestComputeImpacts(unittest.TestCase):
             self.assertLessEqual(result.scrambled_percent, 1.0)
 
             # Should match calculation
-            expected_percent = result.mobilized_count / 54
+            expected_percent = result.mobilized_count / 48
             self.assertAlmostEqual(result.scrambled_percent, expected_percent)
 
     def test_transformation_mask_length(self) -> None:
