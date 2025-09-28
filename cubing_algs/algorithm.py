@@ -4,9 +4,9 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from cubing_algs.constants import MAX_ITERATIONS
+from cubing_algs.cycles import compute_cycles
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import compute_impacts
-from cubing_algs.metrics import compute_cycles
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
