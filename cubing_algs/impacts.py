@@ -37,15 +37,15 @@ class ImpactData(NamedTuple):
     face_mobility: dict[str, int]
 
 
-def compute_face_impact(impact_mask: str) -> dict[str, int]:
+def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
     """
     Calculate face impact from impact mask.
     """
     face_impact = {}
 
     for i, face_name in enumerate(FACE_ORDER):
-        start_idx = i * 9
-        end_idx = start_idx + 9
+        start_idx = i * cube.face_size
+        end_idx = start_idx + cube.face_size
         face_mask = impact_mask[start_idx:end_idx]
         face_impact[face_name] = face_mask.count('1')
 
@@ -149,7 +149,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:
     mobilized_count = mask.count('1')
     scrambled_percent = mobilized_count / len(state_unique)
 
-    face_mobility = compute_face_impact(mask)
+    face_mobility = compute_face_impact(mask, cube)
 
     return ImpactData(
         cube=cube,
