@@ -8,6 +8,7 @@ from cubing_algs.cycles import compute_cycles
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
+from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 
@@ -151,7 +152,7 @@ class Algorithm(UserList[Move]):
         return mod_moves
 
     @property
-    def metrics(self) -> dict[str, int | list[str]]:
+    def metrics(self) -> MetricsData:
         """
         Calculate various metrics for this algorithm.
 
