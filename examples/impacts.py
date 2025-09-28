@@ -3,7 +3,7 @@ from pprint import pp
 from cubing_algs.algorithm import Algorithm
 
 
-def show_impact(algorithm: str):
+def show_impact(algorithm: str) -> None:
     print(algorithm)
     algo = Algorithm.parse_moves(algorithm)
     pp(algo.impacts._asdict())

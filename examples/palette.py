@@ -10,7 +10,7 @@ from cubing_algs.palettes import load_palette
 from cubing_algs.vcube import VCube
 
 
-def print_colorized(string, colors, line='-'):
+def print_colorized(string: str, colors: list[str], line: str = '-') -> None:
     result = '\n' if line == '-' else ''
     result += string + '\n'
 
@@ -23,7 +23,7 @@ def print_colorized(string, colors, line='-'):
     print(result)
 
 
-def show_cube_palette(palette_name):
+def show_cube_palette(palette_name: str) -> None:
     palette = load_palette(palette_name)
     colors = [
         '\x1b' + palette[face].split('\x1b')[1].replace('48', '38')
@@ -121,7 +121,7 @@ def show_cube_palette(palette_name):
     print()
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             'Display cube visualizations using different color palettes'

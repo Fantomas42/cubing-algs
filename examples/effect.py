@@ -2,7 +2,7 @@ from cubing_algs.effects import EFFECTS
 from cubing_algs.vcube import VCube
 
 
-def show_cube_effect(effect_name):
+def show_cube_effect(effect_name: str) -> None:
     print(effect_name.upper())
     print('=' * len(effect_name))
 
