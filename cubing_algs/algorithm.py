@@ -101,7 +101,7 @@ class Algorithm(UserList[Move]):
         result.extend(self.parse_moves(other))
         return result
 
-    def __setitem__(self, i, item) -> None:
+    def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def]
         """
         Set a move at a specific index in the algorithm.
         """
