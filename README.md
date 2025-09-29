@@ -169,8 +169,9 @@ from cubing_algs.parsing import parse_moves
 algo = parse_moves("R U R' U' R' F R2 U' R' U' R U R' F'")
 
 # Access metrics
-print(algo.metrics)
+print(algo.metrics._asdict())
 # {
+#   'pauses': 0,
 #   'rotations': 0,
 #   'outer_moves': 14,
 #   'inner_moves': 0,
@@ -183,12 +184,12 @@ print(algo.metrics)
 # }
 
 # Individual metrics
-print(f"HTM: {algo.metrics['htm']}")
-print(f"QTM: {algo.metrics['qtm']}")
-print(f"STM: {algo.metrics['stm']}")
-print(f"ETM: {algo.metrics['etm']}")
-print(f"QSTM: {algo.metrics['qstm']}")
-print(f"Generators: {', '.join(algo.metrics['generators'])}")
+print(f"HTM: {algo.metrics.htm}")
+print(f"QTM: {algo.metrics.qtm}")
+print(f"STM: {algo.metrics.stm}")
+print(f"ETM: {algo.metrics.etm}")
+print(f"QSTM: {algo.metrics.qstm}")
+print(f"Generators: {', '.join(algo.metrics.generators)}")
 ```
 
 ## Cube Patterns
@@ -545,7 +546,7 @@ cube = VCube()
 # Standard 3x3x3 scramble
 standard_scramble = scramble(3)
 cube.rotate(standard_scramble)
-print(f"Standard scramble ({standard_scramble.metrics['htm']} HTM): {standard_scramble}")
+print(f"Standard scramble ({standard_scramble.metrics.htm} HTM): {standard_scramble}")
 
 # Easy cross scramble for beginners
 cube = VCube()
@@ -585,8 +586,8 @@ m_symmetric = base_alg.transform(symmetry_m_moves)
 # Test on virtual cube
 cube = VCube()
 cube.rotate(base_alg)
-print(f"Original: {base_alg} ({base_alg.metrics['htm']} HTM)")
-print(f"Mirrored: {mirrored} ({mirrored.metrics['htm']} HTM)")
+print(f"Original: {base_alg} ({base_alg.metrics.htm} HTM)")
+print(f"Mirrored: {mirrored} ({mirrored.metrics.htm} HTM)")
 print(f"Is solved after: {cube.is_solved}")
 
 # Test algorithm on scrambled cube
