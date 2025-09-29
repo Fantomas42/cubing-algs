@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
+from cubing_algs.ergonomics import ErgonomicsData
+from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
@@ -152,16 +154,6 @@ class Algorithm(UserList[Move]):
         return mod_moves
 
     @property
-    def metrics(self) -> MetricsData:
-        """
-        Calculate various metrics for this algorithm.
-
-        Uses the compute_metrics function to analyze the algorithm's efficiency,
-        move types, and other characteristics.
-        """
-        return compute_metrics(self)
-
-    @property
     def cycles(self) -> int:
         """
         Get the number of times this algorithm must be applied
@@ -182,6 +174,32 @@ class Algorithm(UserList[Move]):
         return compute_cycles(self)
 
     @property
+    def metrics(self) -> MetricsData:
+        """
+        Calculate comprehensive metrics for analyzing algorithm efficiency
+        and characteristics.
+
+        Computes various standardized metrics including different move counting
+        systems (HTM, QTM, STM, ETM, RTM, QSTM), move type categorization,
+        and generator analysis to identify the most frequently used faces.
+
+        This is essential for comparing algorithm efficiency, analyzing solve
+        methods, and understanding algorithmic complexity across different
+        metric systems used in speedcubing competitions.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("R U R' U' R' F R F'")
+            >>> metrics = alg.metrics
+            >>> metrics.htm
+            8  # Half Turn Metric: 8 moves
+            >>> metrics.qtm
+            8  # Quarter Turn Metric: 8 quarter turns
+            >>> metrics.generators
+            ['R', 'U', 'F']  # Most used faces in order
+        """
+        return compute_metrics(self)
+
+    @property
     def impacts(self) -> ImpactData:
         """
         Analyze the spatial impact of this algorithm on cube facelets.
@@ -199,6 +217,33 @@ class Algorithm(UserList[Move]):
             0.33  # About 33% of the cube is scrambled
         """
         return compute_impacts(self)
+
+    @property
+    def ergonomics(self) -> ErgonomicsData:
+        """
+        Analyze the ergonomic properties and execution comfort
+        of this algorithm.
+
+        Computes comprehensive ergonomic metrics including hand balance,
+        fingertrick difficulty, regrip requirements, flow analysis, and
+        overall execution comfort. This analysis considers speedcubing
+        conventions for finger assignments and identifies awkward transitions.
+
+        This is valuable for evaluating algorithm suitability for speedsolving,
+        comparing alternative algorithms for the same case, and understanding
+        the physical demands of different move sequences.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("R U R' U' R' F R F'")
+            >>> ergo = alg.ergonomics
+            >>> ergo.comfort_score
+            72.5  # Comfort rating out of 100
+            >>> ergo.ergonomic_rating
+            'Good'  # Qualitative assessment
+            >>> ergo.hand_balance_ratio
+            0.4  # Hand balance (0.5 is perfect)
+        """
+        return compute_ergonomics(self)
 
     @property
     def min_cube_size(self) -> int:
