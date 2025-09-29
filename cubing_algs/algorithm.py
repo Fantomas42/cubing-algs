@@ -1,13 +1,19 @@
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from cubing_algs.constants import MAX_ITERATIONS
+from cubing_algs.cycles import compute_cycles
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.facelets import cubies_to_facelets
-from cubing_algs.metrics import compute_cycles
+from cubing_algs.impacts import ImpactData
+from cubing_algs.impacts import compute_impacts
+from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
+
+if TYPE_CHECKING:
+    from cubing_algs.vcube import VCube  # pragma: no cover
 
 
 class Algorithm(UserList[Move]):
@@ -25,7 +31,7 @@ class Algorithm(UserList[Move]):
             self.data.extend(initlist)
 
     @staticmethod
-    def parse_moves(items: str | list[str]) -> 'Algorithm':
+    def parse_moves(items: Iterable[Move | str] | str) -> 'Algorithm':
         """
         Parse a string or list of strings into an Algorithm object.
         """
@@ -34,30 +40,31 @@ class Algorithm(UserList[Move]):
         return parse_moves(items, secure=False)
 
     @staticmethod
-    def parse_move(item: str) -> Move:
+    def parse_move(item: Move | str) -> Move:
         """
         Parse a single move string into a Move object.
         """
-        move = Move(item)
+        move = item if isinstance(item, Move) else Move(item)
+
         if not move.is_valid:
             msg = f'{ item } is an invalid move'
             raise InvalidMoveError(msg)
 
         return move
 
-    def append(self, item) -> None:
+    def append(self, item: Move | str) -> None:
         """
         Add a move to the end of the algorithm.
         """
         self.data.append(self.parse_move(item))
 
-    def insert(self, i, item) -> None:
+    def insert(self, i: int, item: Move | str) -> None:
         """
         Insert a move at a specific position in the algorithm.
         """
         self.data.insert(i, self.parse_move(item))
 
-    def extend(self, other) -> None:
+    def extend(self, other: Iterable[Move | str]) -> None:
         """
         Extend the algorithm with moves from another sequence.
         """
@@ -66,14 +73,14 @@ class Algorithm(UserList[Move]):
         else:
             self.data.extend(self.parse_moves(other))
 
-    def __iadd__(self, other) -> 'Algorithm':
+    def __iadd__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
         """
         In-place addition operator (+=) for algorithms.
         """
         self.extend(other)
         return self
 
-    def __radd__(self, other) -> 'Algorithm':
+    def __radd__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
         """
         Right addition operator for algorithms.
         """
@@ -81,7 +88,7 @@ class Algorithm(UserList[Move]):
         result += self
         return result
 
-    def __add__(self, other) -> 'Algorithm':
+    def __add__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
         """
         Addition operator (+) for algorithms.
         """
@@ -94,7 +101,7 @@ class Algorithm(UserList[Move]):
         result.extend(self.parse_moves(other))
         return result
 
-    def __setitem__(self, i, item) -> None:
+    def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def]
         """
         Set a move at a specific index in the algorithm.
         """
@@ -118,7 +125,7 @@ class Algorithm(UserList[Move]):
 
     def transform(
             self,
-            *processes: Callable[[list[Move]], list[Move]],
+            *processes: Callable[['Algorithm'], 'Algorithm'],
             to_fixpoint: bool = False,
     ) -> 'Algorithm':
         """
@@ -142,10 +149,10 @@ class Algorithm(UserList[Move]):
                 break
             new_moves = mod_moves
 
-        return Algorithm(mod_moves)
+        return mod_moves
 
     @property
-    def metrics(self) -> dict[str, int | list[str]]:
+    def metrics(self) -> MetricsData:
         """
         Calculate various metrics for this algorithm.
 
@@ -168,11 +175,30 @@ class Algorithm(UserList[Move]):
         and their mathematical properties.
 
         Example:
-            >>> alg = Algorithm("R U R' U'")
+            >>> alg = Algorithm.parse_moves("R U R' U'")
             >>> alg.cycles
             6  # Meaning applying this 6 times returns to solved
         """
         return compute_cycles(self)
+
+    @property
+    def impacts(self) -> ImpactData:
+        """
+        Analyze the spatial impact of this algorithm on cube facelets.
+
+        Computes comprehensive metrics about how the algorithm affects
+        individual facelets on the cube, including movement patterns,
+        distances, and face-level statistics.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("R U R' U'")
+            >>> impacts = alg.impacts
+            >>> impacts['mobilized_count']
+            18  # 18 out of 54 facelets are affected
+            >>> impacts['scrambled_percent']
+            0.33  # About 33% of the cube is scrambled
+        """
+        return compute_impacts(self)
 
     @property
     def min_cube_size(self) -> int:
@@ -215,10 +241,7 @@ class Algorithm(UserList[Move]):
         """
         Check if algorithm contains rotations.
         """
-        return any(
-            m.is_wide_move or m.is_inner_move or m.is_rotation_move
-            for m in self
-        )
+        return any(m.is_rotational_move for m in self)
 
     @property
     def has_internal_rotations(self) -> bool:
@@ -231,30 +254,19 @@ class Algorithm(UserList[Move]):
             for m in self
         )
 
-    def show(self, mode: str = '', orientation: str = ''):
+    def show(self, mode: str = '', orientation: str = '') -> 'VCube':
         """
         Visualize the algorithm's effect on a cube.
 
         Creates a VCube, applies this algorithm to it, and displays the result
         with a mask showing which facelets are affected by the algorithm.
         """
-        from cubing_algs.vcube import VCube  # noqa: PLC0415
-
-        cube = VCube()
-        cube.rotate(self)
-
-        state_unique = ''.join([chr(ord('A') + i) for i in range(54)])
-        state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
-
-        impact_mask = ''.join(
-            '0' if f1 == f2 else '1'
-            for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
-        )
+        cube = self.impacts.cube
 
         cube.show(
             mode=mode,
             orientation=orientation,
-            mask=impact_mask,
+            mask=self.impacts.transformation_mask,
         )
 
         return cube

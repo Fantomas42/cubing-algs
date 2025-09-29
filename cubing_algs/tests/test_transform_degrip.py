@@ -1,51 +1,67 @@
 # ruff: noqa: E241 E501
 import unittest
+from collections.abc import Callable
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import INNER_MOVES
 from cubing_algs.constants import ROTATIONS
 from cubing_algs.move import Move
-from cubing_algs.parsing import split_moves
+from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.degrip import degrip_full_moves
 from cubing_algs.transform.degrip import degrip_x_moves
 from cubing_algs.transform.degrip import degrip_y_moves
 from cubing_algs.transform.degrip import degrip_z_moves
 from cubing_algs.transform.rotation import remove_final_rotations
 from cubing_algs.transform.size import compress_moves
+from cubing_algs.vcube import VCube
 
 
 class TransformDegripTestCase(unittest.TestCase):
     maxDiff = None
 
-    def check_basic_grip_degrip(self, provide, expect, dimension,
-                                function, invert):
+    def check_basic_grip_degrip(self, provide: Move, expect: Move, dimension: str,
+                                function: Callable[[Algorithm], Algorithm],
+                                *, invert: bool) -> None:
         if invert:
-            provide = split_moves(f"{ dimension }'{ provide }{ dimension }")
+            provide_algo = parse_moves(f"{ dimension }'{ provide }{ dimension }")
         else:
-            provide = split_moves(f"{ dimension }{ provide }{ dimension }'")
+            provide_algo = parse_moves(f"{ dimension }{ provide }{ dimension }'")
 
-        expect = [expect]
+        expect_algo = parse_moves(str(expect))
 
         with self.subTest(provide=provide, expect=expect):
             degripped = remove_final_rotations(
-                function(provide),
+                function(provide_algo),
             )
 
             self.assertEqual(
                 degripped,
                 remove_final_rotations(
-                    expect,
+                    expect_algo,
                 ),
             )
 
-    def check_degrip(self, provide, expect, function, name):
-        provide = split_moves(provide)
-        expect = split_moves(expect)
+            cube_provided = VCube()
+            cube_provided.rotate(provide_algo)
+            cube_expected = VCube()
+            cube_expected.rotate(expect_algo)
+
+            self.assertEqual(
+                cube_provided.state,
+                cube_expected.state,
+            )
+
+    def check_degrip(self, provide: str, expect: str,
+                     function: Callable[[Algorithm], Algorithm],
+                     name: str) -> None:
+        provide_algo = parse_moves(provide)
+        expect_algo = parse_moves(expect)
 
         with self.subTest(name=name, provide=provide, expect=expect):
 
             degripped = compress_moves(
                 remove_final_rotations(
-                    function(provide),
+                    function(provide_algo),
                 ),
             )
 
@@ -53,14 +69,24 @@ class TransformDegripTestCase(unittest.TestCase):
                 degripped,
                 compress_moves(
                     remove_final_rotations(
-                        expect,
+                        expect_algo,
                     ),
                 ),
             )
             for m in degripped:
                 self.assertTrue(isinstance(m, Move))
 
-    def test_basic_x_grip_degrip(self):
+            cube_provided = VCube()
+            cube_provided.rotate(provide_algo)
+            cube_expected = VCube()
+            cube_expected.rotate(expect_algo)
+
+            self.assertEqual(
+                cube_provided.state,
+                cube_expected.state,
+            )
+
+    def test_basic_x_grip_degrip(self) -> None:
         for _move, _expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('R', 'D', 'F', 'L', 'U', 'B', 'M', 'E', "S'", 'x', 'z', "y'"),
@@ -113,7 +139,7 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=True,
                 )
 
-    def test_basic_y_grip_degrip(self):
+    def test_basic_y_grip_degrip(self) -> None:
         for _move, _expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('B', 'R', 'U', 'F', 'L', 'D', 'S', "M'", 'E', "z'", 'y', 'x'),
@@ -164,7 +190,7 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=True,
                 )
 
-    def test_basic_z_grip_degrip(self):
+    def test_basic_z_grip_degrip(self) -> None:
         for _move, _expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('U', 'F', 'L', 'D', 'B', 'R', 'E', 'S', "M'", 'y', "x'", 'z'),
@@ -215,10 +241,10 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=True,
                 )
 
-    def test_start_degrip_x(self):
+    def test_start_degrip_x(self) -> None:
         basic_moves = 'RF'
         provide = 'x' + basic_moves
-        expect = 'RD'
+        expect = 'RDx'
 
         self.check_degrip(
             provide, expect,
@@ -226,10 +252,10 @@ class TransformDegripTestCase(unittest.TestCase):
             'Start Degrip X',
         )
 
-    def test_end_degrip_x(self):
+    def test_end_degrip_x(self) -> None:
         basic_moves = 'RF'
         provide = basic_moves + 'x'
-        expect = 'RF'
+        expect = 'RFx'
 
         self.check_degrip(
             provide, expect,
@@ -237,9 +263,9 @@ class TransformDegripTestCase(unittest.TestCase):
             'End Degrip X',
         )
 
-    def test_middle_degrip_x(self):
+    def test_middle_degrip_x(self) -> None:
         provide = 'R' + 'x' + 'F'
-        expect = 'RD'
+        expect = 'RDx'
 
         self.check_degrip(
             provide, expect,
@@ -247,7 +273,7 @@ class TransformDegripTestCase(unittest.TestCase):
             'Middle Degrip X',
         )
 
-    def test_degrip_x(self):
+    def test_degrip_x(self) -> None:
         base_algo = "RUR'U'"
 
         for prefix, suffix, expect, name in [
@@ -277,7 +303,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_degrip_y(self):
+    def test_degrip_y(self) -> None:
         base_algo = "RUR'U'"
 
         for prefix, suffix, expect, name in [
@@ -306,7 +332,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_degrip_z(self):
+    def test_degrip_z(self) -> None:
         base_algo = "RUR'U'"
 
         for prefix, suffix, expect, name in [
@@ -335,7 +361,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_multi_degrip_full_moves(self):
+    def test_multi_degrip_full_moves(self) -> None:
         self.check_degrip(
             ''.join(['y2', 'z2', 'M2', "D'", 'M2', 'D2', 'M2', "D'", 'M2', 'z2']),  # noqa: FLY002
             ''.join(['M2', "U'", 'M2', 'U2', 'M2', "U'", 'M2', 'z2', 'y2', 'z2']),  # noqa: FLY002
@@ -350,7 +376,7 @@ class TransformDegripTestCase(unittest.TestCase):
             'Multi move degrip KO',
         )
 
-    def test_degrip_full_moves(self):
+    def test_degrip_full_moves(self) -> None:
         for provide, expect, name in [
                 ("RUR'U'", "RUR'U'", 'No Degrip'),
                 ("R2U'R'URU'x'U'z'U'RU'R'U'rB", "R2U'R'URU'B'R'FR'F'R'fDz'y'", 'Complex 1'),
@@ -363,9 +389,21 @@ class TransformDegripTestCase(unittest.TestCase):
                 name,
             )
 
-    def test_degrip_big_moves(self):
-        provide = split_moves('z2 3R')
-        expect = split_moves('3L')
+    def test_degrip_full_moves_commutatives(self) -> None:
+        for provide, expect, name in [
+                ("y RUR'U'", "BUB'U' y", 'Com 1'),
+                ("y' z RUR'U'", "UBU'B' y' z", 'Com 2'),
+        ]:
+            self.check_degrip(
+                provide,
+                expect,
+                degrip_full_moves,
+                name,
+            )
+
+    def test_degrip_big_moves(self) -> None:
+        provide = parse_moves('z2 3R')
+        expect = parse_moves('3L')
 
         self.assertEqual(
             remove_final_rotations(
@@ -374,8 +412,8 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-        provide = split_moves("z2 3R'")
-        expect = split_moves("3L'")
+        provide = parse_moves("z2 3R'")
+        expect = parse_moves("3L'")
 
         self.assertEqual(
             remove_final_rotations(
@@ -384,8 +422,8 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-        provide = split_moves('z2 3R2')
-        expect = split_moves('3L2')
+        provide = parse_moves('z2 3R2')
+        expect = parse_moves('3L2')
 
         self.assertEqual(
             remove_final_rotations(
@@ -394,9 +432,9 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_degrip_big_moves_timed(self):
-        provide = split_moves('z2@100 3R@200')
-        expect = split_moves('3L@200')
+    def test_degrip_big_moves_timed(self) -> None:
+        provide = parse_moves('z2@100 3R@200')
+        expect = parse_moves('3L@200')
 
         self.assertEqual(
             remove_final_rotations(
@@ -405,8 +443,8 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-        provide = split_moves("z2@100 3R'@200")
-        expect = split_moves("3L'@200")
+        provide = parse_moves("z2@100 3R'@200")
+        expect = parse_moves("3L'@200")
 
         self.assertEqual(
             remove_final_rotations(
@@ -415,8 +453,8 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-        provide = split_moves('z2@100 3R2@200')
-        expect = split_moves('3L2@200')
+        provide = parse_moves('z2@100 3R2@200')
+        expect = parse_moves('3L2@200')
 
         self.assertEqual(
             remove_final_rotations(
@@ -425,9 +463,9 @@ class TransformDegripTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_degrip_big_moves_timed_paused(self):
-        provide = split_moves('z2@100 .@150 3R@200')
-        expect = split_moves('.@150 3L@200')
+    def test_degrip_big_moves_timed_paused(self) -> None:
+        provide = parse_moves('z2@100 .@150 3R@200')
+        expect = parse_moves('.@150 3L@200')
 
         self.assertEqual(
             remove_final_rotations(

@@ -16,7 +16,7 @@ from cubing_algs.vcube import VCube
 
 class CubiesToFaceletsTestCase(unittest.TestCase):
 
-    def test_cubies_to_facelets_solved(self):
+    def test_cubies_to_facelets_solved(self) -> None:
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
         co = [0, 0, 0, 0, 0, 0, 0, 0]
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -33,7 +33,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
             facelets,
         )
 
-    def test_cubies_to_facelets_solved_oriented(self):
+    def test_cubies_to_facelets_solved_oriented(self) -> None:
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
         co = [0, 0, 0, 0, 0, 0, 0, 0]
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -57,7 +57,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
             facelets,
         )
 
-    def test_cubies_to_facelets(self):
+    def test_cubies_to_facelets(self) -> None:
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
@@ -74,7 +74,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
             facelets,
         )
 
-    def test_cubies_to_facelets_oriented(self):
+    def test_cubies_to_facelets_oriented(self) -> None:
         cp = [4, 0, 1, 3, 7, 5, 6, 2]
         co = [2, 0, 0, 1, 1, 0, 0, 2]
         ep = [8, 0, 1, 2, 11, 5, 6, 7, 4, 9, 10, 3]
@@ -94,7 +94,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
 
 class FaceletsToCubiesTestCase(unittest.TestCase):
 
-    def test_facelets_to_cubies_solved(self):
+    def test_facelets_to_cubies_solved(self) -> None:
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
         co = [0, 0, 0, 0, 0, 0, 0, 0]
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -111,7 +111,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
             ),
         )
 
-    def test_facelets_to_cubies(self):
+    def test_facelets_to_cubies(self) -> None:
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
@@ -128,7 +128,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
             ),
         )
 
-    def test_facelets_to_cubies_oriented(self):
+    def test_facelets_to_cubies_oriented(self) -> None:
         cp = [4, 0, 1, 3, 7, 5, 6, 2]
         co = [2, 0, 0, 1, 1, 0, 0, 2]
         ep = [8, 0, 1, 2, 11, 5, 6, 7, 4, 9, 10, 3]
@@ -149,7 +149,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
 class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
     """Tests for the custom_state parameter in cubies_to_facelets function."""
 
-    def test_custom_state_basic_functionality(self):
+    def test_custom_state_basic_functionality(self) -> None:
         """Test that custom_state parameter works with basic cube states."""
         # Solved state
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
@@ -170,7 +170,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Should return the custom state since cube is solved
         self.assertEqual(result, custom_state)
 
-    def test_custom_state_vs_standard_solved(self):
+    def test_custom_state_vs_standard_solved(self) -> None:
         """Test that scheme=None behaves same as no scheme for solved cube."""
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
         co = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -186,7 +186,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result_standard, result_custom_none)
 
-    def test_custom_state_with_moves_r_turn(self):
+    def test_custom_state_with_moves_r_turn(self) -> None:
         """Test that moves applied to scheme produce correct transformations."""
         # Create a custom pattern with unique centers (54 chars)
         custom_state = 'UUURUUUUURRRURURRRFFFFFFFFFDDDLDDDDDLLLBLLLLLBBBFBBBBB'
@@ -209,7 +209,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_after_r)
 
-    def test_custom_state_with_moves_f_turn(self):
+    def test_custom_state_with_moves_f_turn(self) -> None:
         """Test F move on custom state."""
         # Use a pattern with clear face identification
         custom_state = (
@@ -239,7 +239,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_after_f)
 
-    def test_custom_state_with_moves_f_z2_turn(self):
+    def test_custom_state_with_moves_f_z2_turn(self) -> None:
         """Test F z2 moves on custom state."""
         # Use a pattern with clear face identification
         custom_state = (
@@ -269,7 +269,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_after_moves)
 
-    def test_custom_state_with_complex_moves_orientation(self):
+    def test_custom_state_with_complex_moves_orientation(self) -> None:
         """Test complex move on custom state."""
         # Use a pattern with clear face identification
         custom_state = (
@@ -299,7 +299,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_after_moves)
 
-    def test_custom_state_tracked_with_complex_moves_orientation(self):
+    def test_custom_state_tracked_with_complex_moves_orientation(self) -> None:
         """Test F move on custom state."""
         # Use a pattern with clear face identification
         custom_state = ''.join([chr(ord('A') + i) for i in range(54)])
@@ -322,7 +322,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_after_moves)
 
-    def test_custom_state_with_move_sequence(self):
+    def test_custom_state_with_move_sequence(self) -> None:
         """Test that a sequence of moves on scheme produces correct result."""
         # Use pattern for easy tracking with valid cube characters (54 chars)
         custom_state = 'UUURUUUUURRRURURRRFFFFFFFFFDDDLDDDDDLLLBLLLLLBBBFBBBBB'
@@ -346,7 +346,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_result)
 
-    def test_custom_state_mask_with_move_sequence(self):
+    def test_custom_state_mask_with_move_sequence(self) -> None:
         """Test that a sequence of moves on scheme produces correct result."""
         # Use mask for easy tracking with valid cube characters (54 chars)
         custom_state = F2L_MASK
@@ -370,7 +370,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_result)
 
-    def test_custom_state_with_complex_algorithm(self):
+    def test_custom_state_with_complex_algorithm(self) -> None:
         """Test custom_state with a more complex algorithm."""
         # Create a distinctive pattern with valid cube characters (54 chars)
         custom_state = 'UUURUUUUURRRURURRRFFFFFFFFFDDDLDDDDDLLLBLLLLLBBBFBBBBB'
@@ -396,7 +396,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected_result)
 
-    def test_custom_state_inverse_consistency(self):
+    def test_custom_state_inverse_consistency(self) -> None:
         """
         Test that applying moves and their inverse
         returns to original scheme.
@@ -426,7 +426,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         )
         self.assertEqual(result, custom_state)
 
-    def test_custom_state_scrambled_to_scrambled(self):
+    def test_custom_state_scrambled_to_scrambled(self) -> None:
         """Test transforming one custom state to another through moves."""
         # Start with one custom pattern (valid cube characters, 54 chars)
         scheme = 'UUURUUUUURRRURURRRFFFFFFFFFDDDLDDDDDLLLBLLLLLBBBFBBBBB'
@@ -457,16 +457,16 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
     """
 
     @staticmethod
-    def setUp():
+    def setUp() -> None:
         clear_cache()
         enable_cache()
 
     @staticmethod
-    def tearDown():
+    def tearDown() -> None:
         clear_cache()
         enable_cache()
 
-    def test_cache_management_functions(self):
+    def test_cache_management_functions(self) -> None:
         """Test all cache management utility functions."""
         # Test initial state
         info = get_cache_info()
@@ -509,7 +509,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         info = get_cache_info()
         self.assertTrue(info['enabled'])
 
-    def test_cache_eviction_facelets(self):
+    def test_cache_eviction_facelets(self) -> None:
         """
         Test cache eviction when max size is reached for facelets cache.
         """
@@ -539,7 +539,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         finally:
             _cache.max_size = original_max_size
 
-    def test_cache_eviction_cubies(self):
+    def test_cache_eviction_cubies(self) -> None:
         """Test cache eviction when max size is reached for cubies cache."""
         # Set a small cache size
         original_max_size = _cache.max_size
@@ -581,7 +581,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         finally:
             _cache.max_size = original_max_size
 
-    def test_corner_fallback_logic(self):
+    def test_corner_fallback_logic(self) -> None:
         """Test fallback logic for invalid corner states."""
         # Save original lookup
         original_lookup = _CORNER_LOOKUP.copy()
@@ -603,7 +603,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             _CORNER_LOOKUP.clear()
             _CORNER_LOOKUP.update(original_lookup)
 
-    def test_edge_fallback_logic(self):
+    def test_edge_fallback_logic(self) -> None:
         """Test fallback logic for invalid edge states."""
         # Save original lookup
         original_lookup = _EDGE_LOOKUP.copy()
@@ -625,7 +625,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             _EDGE_LOOKUP.clear()
             _EDGE_LOOKUP.update(original_lookup)
 
-    def test_edge_fallback_flipped_orientation(self):
+    def test_edge_fallback_flipped_orientation(self) -> None:
         """Test fallback logic for flipped edge orientation case."""
         # Create a cube with a flipped edge
         cube = VCube()
@@ -654,7 +654,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             _EDGE_LOOKUP.clear()
             _EDGE_LOOKUP.update(original_lookup)
 
-    def test_cache_hit_paths(self):
+    def test_cache_hit_paths(self) -> None:
         """Test cache hit paths explicitly."""
         # Clear cache first
         clear_cache()
@@ -685,18 +685,18 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         )
 
         # First call - cache miss
-        result1 = cubies_to_facelets(*cubies_args)
+        result3 = cubies_to_facelets(*cubies_args)
         info = get_cache_info()
         self.assertEqual(info['cubies_cached'], 1)
 
         # Second call - cache hit
-        result2 = cubies_to_facelets(*cubies_args)
-        self.assertEqual(result1, result2)
+        result4 = cubies_to_facelets(*cubies_args)
+        self.assertEqual(result3, result4)
 
         info = get_cache_info()
         self.assertEqual(info['cubies_cached'], 1)
 
-    def test_cubies_to_facelets_with_scheme(self):
+    def test_cubies_to_facelets_with_scheme(self) -> None:
         """Test cubies_to_facelets with custom scheme parameter."""
         cubies_args = (
             [0, 1, 2, 3, 4, 5, 6, 7],
@@ -716,7 +716,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         # Results should be different
         self.assertNotEqual(result1, result2)
 
-    def test_cache_disabled_paths(self):
+    def test_cache_disabled_paths(self) -> None:
         """
         Test that cache operations work correctly when caching is disabled.
         """
@@ -741,14 +741,14 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             [0, 1, 2, 3, 4, 5],
         )
 
-        result1 = cubies_to_facelets(*cubies_args)
-        result2 = cubies_to_facelets(*cubies_args)
+        result3 = cubies_to_facelets(*cubies_args)
+        result4 = cubies_to_facelets(*cubies_args)
 
-        self.assertEqual(result1, result2)
+        self.assertEqual(result3, result4)
         info = get_cache_info()
         self.assertEqual(info['cubies_cached'], 0)
 
-    def test_corner_orientation_modulo(self):
+    def test_corner_orientation_modulo(self) -> None:
         """Test corner orientation modulo operation in fallback logic."""
         # Create a state that will trigger the fallback logic
         # and test the ori % 3 operation

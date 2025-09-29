@@ -8,12 +8,30 @@ and algorithm composition analysis.
 """
 import operator
 from typing import TYPE_CHECKING
-from typing import Any
+from typing import NamedTuple
 
 from cubing_algs.move import Move
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
+
+
+class MetricsData(NamedTuple):
+    """
+    Container for algorithm metrics computation results.
+    """
+    pauses: int
+    rotations: int
+    outer_moves: int
+    inner_moves: int
+    htm: int
+    qtm: int
+    stm: int
+    etm: int
+    rtm: int
+    qstm: int
+    generators: list[str]
+
 
 # Dictionary mapping metric names to scoring rules for different move types
 MOVE_COUNTS = {
@@ -71,7 +89,7 @@ def compute_score(mode: str,
     )
 
 
-def compute_generators(moves: list[Move]) -> list[str]:
+def compute_generators(moves: 'Algorithm') -> list[str]:
     """
     Identify the most frequently used move faces in an algorithm.
 
@@ -99,7 +117,7 @@ def compute_generators(moves: list[Move]) -> list[str]:
 
 
 def regroup_moves(
-        moves: list[Move],
+        moves: 'Algorithm',
 ) -> tuple[list[Move], list[Move], list[Move], list[Move]]:
     """
     Categorize moves into pause, rotation, outer, and inner move types.
@@ -125,7 +143,7 @@ def regroup_moves(
     return pauses, rotations, outer_moves, inner_moves
 
 
-def compute_metrics(moves: list[Move]) -> dict[str, Any]:
+def compute_metrics(moves: 'Algorithm') -> MetricsData:
     """
     Calculate a comprehensive set of metrics for an algorithm.
 
@@ -135,8 +153,8 @@ def compute_metrics(moves: list[Move]) -> dict[str, Any]:
     - Generator analysis (most used faces)
 
     Returns:
-        dict[str, Any]: A dictionary containing all calculated metrics.
-        Keys include:
+        MetricsData: Namedtuple containing all calculated metrics:
+            - pauses: Number of pause moves
             - rotations: Number of rotation moves
             - outer_moves: Number of outer face moves
             - inner_moves: Number of inner slice moves
@@ -150,49 +168,16 @@ def compute_metrics(moves: list[Move]) -> dict[str, Any]:
     """
     pauses, rotations, outer_moves, inner_moves = regroup_moves(moves)
 
-    return {
-        'pauses': len(pauses),
-        'rotations': len(rotations),
-        'outer_moves': len(outer_moves),
-        'inner_moves': len(inner_moves),
-        'htm': compute_score('htm', rotations, outer_moves, inner_moves),
-        'qtm': compute_score('qtm', rotations, outer_moves, inner_moves),
-        'stm': compute_score('stm', rotations, outer_moves, inner_moves),
-        'etm': compute_score('etm', rotations, outer_moves, inner_moves),
-        'rtm': compute_score('rtm', rotations, outer_moves, inner_moves),
-        'qstm': compute_score('qstm', rotations, outer_moves, inner_moves),
-        'generators': compute_generators(moves),
-    }
-
-
-def compute_cycles(algorithm: 'Algorithm') -> int:
-    """
-    Calculate the number of times an algorithm must be applied
-    to return a cube to its solved state.
-
-    This function simulates applying the given sequence of moves
-    repeatedly on a solved cube until the cube returns to
-    its original solved state, counting how many applications are needed.
-
-    This is also known as the "order" of the algorithm in group theory.
-
-    Note:
-        The function has a safety limit of 100 iterations to prevent
-        infinite loops for algorithms that may have very high order
-        or don't return to solved state.
-    """
-    from cubing_algs.vcube import VCube  # noqa: PLC0415
-
-    if len(algorithm) == 0:
-        return 0
-
-    cube = VCube()
-
-    cycles = 1
-    cube.rotate(algorithm)
-
-    while not cube.is_solved and cycles < 100:
-        cube.rotate(algorithm)
-        cycles += 1
-
-    return cycles
+    return MetricsData(
+        pauses=len(pauses),
+        rotations=len(rotations),
+        outer_moves=len(outer_moves),
+        inner_moves=len(inner_moves),
+        htm=compute_score('htm', rotations, outer_moves, inner_moves),
+        qtm=compute_score('qtm', rotations, outer_moves, inner_moves),
+        stm=compute_score('stm', rotations, outer_moves, inner_moves),
+        etm=compute_score('etm', rotations, outer_moves, inner_moves),
+        rtm=compute_score('rtm', rotations, outer_moves, inner_moves),
+        qstm=compute_score('qstm', rotations, outer_moves, inner_moves),
+        generators=compute_generators(moves),
+    )

@@ -1,5 +1,6 @@
 import unittest
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
@@ -9,7 +10,7 @@ from cubing_algs.transform.optimize import optimize_triple_moves
 
 class TransformOptimizeTestCase(unittest.TestCase):
 
-    def test_optimize_repeat_three_moves(self):
+    def test_optimize_repeat_three_moves(self) -> None:
         provide = parse_moves('R R R')
         expect = parse_moves("R'")
 
@@ -87,9 +88,9 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_optimize_do_undo_moves(self):
+    def test_optimize_do_undo_moves(self) -> None:
         provide = parse_moves("R R'")
-        expect = []
+        expect = Algorithm()
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
@@ -164,9 +165,9 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_optimize_do_undo_double_moves(self):
+    def test_optimize_do_undo_double_moves(self) -> None:
         provide = parse_moves("R R R' R'")
-        expect = []
+        expect = Algorithm()
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
@@ -228,9 +229,9 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_optimize_do_undo_double_double_moves(self):
+    def test_optimize_do_undo_double_double_moves(self) -> None:
         provide = parse_moves('R2 R2')
-        expect = []
+        expect = Algorithm()
 
         self.assertEqual(
             optimize_do_undo_moves(provide),
@@ -285,7 +286,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_optimize_double_moves(self):
+    def test_optimize_double_moves(self) -> None:
         provide = parse_moves('R R')
         expect = parse_moves('R2')
 
@@ -371,7 +372,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
             provide,
         )
 
-    def test_optimize_double_moves_issue_1(self):
+    def test_optimize_double_moves_issue_1(self) -> None:
         provide = parse_moves('R R R2 F')
         expect = parse_moves('R2 R2 F')
 
@@ -380,7 +381,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
-    def test_optimize_triple_moves(self):
+    def test_optimize_triple_moves(self) -> None:
         provide = parse_moves('R R2')
         expect = parse_moves("R'")
 

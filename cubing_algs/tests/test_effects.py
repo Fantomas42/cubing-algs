@@ -36,7 +36,7 @@ from cubing_algs.effects import vintage
 class TestPositioningFunctions(unittest.TestCase):
     """Test positioning and utility functions."""
 
-    def test_face_positions_constant(self):
+    def test_face_positions_constant(self) -> None:
         """Test FACE_POSITIONS constant has correct structure."""
         self.assertEqual(len(FACE_POSITIONS), 6)
         for face_index in range(6):
@@ -45,14 +45,14 @@ class TestPositioningFunctions(unittest.TestCase):
             self.assertIsInstance(FACE_POSITIONS[face_index][0], int)
             self.assertIsInstance(FACE_POSITIONS[face_index][1], int)
 
-    def test_global_light_position_factor_basic(self):
+    def test_global_light_position_factor_basic(self) -> None:
         """Test global_light_position_factor with basic inputs."""
         result = global_light_position_factor(0, 3)
         self.assertIsInstance(result, float)
         self.assertGreaterEqual(result, 0.0)
         self.assertLessEqual(result, 1.0)
 
-    def test_global_light_position_factor_different_cube_sizes(self):
+    def test_global_light_position_factor_different_cube_sizes(self) -> None:
         """Test global_light_position_factor with different cube sizes."""
         for cube_size in [2, 3, 4, 5]:
             result = global_light_position_factor(0, cube_size)
@@ -60,7 +60,7 @@ class TestPositioningFunctions(unittest.TestCase):
             self.assertGreaterEqual(result, 0.0)
             self.assertLessEqual(result, 1.0)
 
-    def test_global_light_position_factor_all_faces(self):
+    def test_global_light_position_factor_all_faces(self) -> None:
         """Test global_light_position_factor across all faces."""
         cube_size = 3
         face_size = cube_size * cube_size
@@ -73,7 +73,7 @@ class TestPositioningFunctions(unittest.TestCase):
                 self.assertGreaterEqual(result, 0.0)
                 self.assertLessEqual(result, 1.0)
 
-    def test_global_light_position_factor_edge_cases(self):
+    def test_global_light_position_factor_edge_cases(self) -> None:
         """Test global_light_position_factor with edge cases."""
         # Minimum cube size
         result = global_light_position_factor(0, 1)
@@ -89,14 +89,14 @@ class TestPositioningFunctions(unittest.TestCase):
         self.assertGreaterEqual(result, 0.0)
         self.assertLessEqual(result, 1.0)
 
-    def test_get_position_factor_default_parameters(self):
+    def test_get_position_factor_default_parameters(self) -> None:
         """Test get_position_factor with default parameters."""
         result = get_position_factor(0, 3)
         self.assertIsInstance(result, float)
         self.assertGreaterEqual(result, 0.0)
         self.assertLessEqual(result, 1.0)
 
-    def test_get_position_factor_facelet_modes(self):
+    def test_get_position_factor_facelet_modes(self) -> None:
         """Test get_position_factor with different facelet modes."""
         facelet_index = 4
         cube_size = 3
@@ -113,7 +113,7 @@ class TestPositioningFunctions(unittest.TestCase):
         )
         self.assertIsInstance(result_global, float)
 
-    def test_get_position_factor_position_modes(self):
+    def test_get_position_factor_position_modes(self) -> None:
         """Test get_position_factor with different position modes."""
         facelet_index = 4
         cube_size = 3
@@ -130,7 +130,7 @@ class TestPositioningFunctions(unittest.TestCase):
         )
         self.assertIsInstance(result_light, float)
 
-    def test_get_position_factor_mode_combinations(self):
+    def test_get_position_factor_mode_combinations(self) -> None:
         """Test get_position_factor with all mode combinations."""
         facelet_index = 4
         cube_size = 3
@@ -148,16 +148,9 @@ class TestPositioningFunctions(unittest.TestCase):
             self.assertGreaterEqual(result, 0.0)
 
 
-class TestBasicEffects(unittest.TestCase):
-    """Test basic lighting and surface effects."""
+class RGBTestCase(unittest.TestCase):
 
-    def setUp(self):
-        """Set up common test data."""
-        self.test_rgb = (128, 64, 192)
-        self.facelet_index = 4
-        self.cube_size = 3
-
-    def _validate_rgb_output(self, rgb):
+    def _validate_rgb_output(self, rgb: tuple[int, int, int]) -> None:
         """Helper to validate RGB output is properly clamped."""
         self.assertIsInstance(rgb, tuple)
         self.assertEqual(len(rgb), 3)
@@ -166,12 +159,22 @@ class TestBasicEffects(unittest.TestCase):
             self.assertGreaterEqual(component, 0)
             self.assertLessEqual(component, 255)
 
-    def test_shine_basic(self):
+
+class TestBasicEffects(RGBTestCase):
+    """Test basic lighting and surface effects."""
+
+    def setUp(self) -> None:
+        """Set up common test data."""
+        self.test_rgb = (128, 64, 192)
+        self.facelet_index = 4
+        self.cube_size = 3
+
+    def test_shine_basic(self) -> None:
         """Test shine effect with basic parameters."""
         result = shine(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_shine_with_intensity(self):
+    def test_shine_with_intensity(self) -> None:
         """Test shine effect with different intensity values."""
         intensities = [0.0, 0.3, 0.5, 0.8, 1.0]
         for intensity in intensities:
@@ -183,12 +186,12 @@ class TestBasicEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_neon_basic(self):
+    def test_neon_basic(self) -> None:
         """Test neon effect with basic parameters."""
         result = neon(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_neon_with_parameters(self):
+    def test_neon_with_parameters(self) -> None:
         """Test neon effect with different parameters."""
         result = neon(
             self.test_rgb,
@@ -199,18 +202,18 @@ class TestBasicEffects(unittest.TestCase):
         )
         self._validate_rgb_output(result)
 
-    def test_neon_black_input(self):
+    def test_neon_black_input(self) -> None:
         """Test neon effect with black input (edge case)."""
         black_rgb = (0, 0, 0)
         result = neon(black_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_chrome_basic(self):
+    def test_chrome_basic(self) -> None:
         """Test chrome effect with basic parameters."""
         result = chrome(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_chrome_with_parameters(self):
+    def test_chrome_with_parameters(self) -> None:
         """Test chrome effect with different parameters."""
         result = chrome(
             self.test_rgb,
@@ -221,12 +224,12 @@ class TestBasicEffects(unittest.TestCase):
         )
         self._validate_rgb_output(result)
 
-    def test_gold_basic(self):
+    def test_gold_basic(self) -> None:
         """Test gold effect with basic parameters."""
         result = gold(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_gold_with_warmth(self):
+    def test_gold_with_warmth(self) -> None:
         """Test gold effect with different warmth values."""
         warmths = [0.0, 0.5, 1.0, 1.5]
         for warmth in warmths:
@@ -238,12 +241,12 @@ class TestBasicEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_silver_basic(self):
+    def test_silver_basic(self) -> None:
         """Test silver effect with basic parameters."""
         result = silver(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_silver_with_intensity(self):
+    def test_silver_with_intensity(self) -> None:
         """Test silver effect with different intensity values."""
         intensities = [0.1, 0.5, 0.9]
         for intensity in intensities:
@@ -255,12 +258,12 @@ class TestBasicEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_copper_basic(self):
+    def test_copper_basic(self) -> None:
         """Test copper effect with basic parameters."""
         result = copper(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_copper_with_parameters(self):
+    def test_copper_with_parameters(self) -> None:
         """Test copper effect with different parameters."""
         result = copper(
             self.test_rgb,
@@ -272,24 +275,15 @@ class TestBasicEffects(unittest.TestCase):
         self._validate_rgb_output(result)
 
 
-class TestPatternEffects(unittest.TestCase):
+class TestPatternEffects(RGBTestCase):
     """Test pattern-based effects."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up common test data."""
         self.test_rgb = (100, 150, 200)
         self.cube_size = 3
 
-    def _validate_rgb_output(self, rgb):
-        """Helper to validate RGB output is properly clamped."""
-        self.assertIsInstance(rgb, tuple)
-        self.assertEqual(len(rgb), 3)
-        for component in rgb:
-            self.assertIsInstance(component, int)
-            self.assertGreaterEqual(component, 0)
-            self.assertLessEqual(component, 255)
-
-    def test_diamond_sparkle_positions(self):
+    def test_diamond_sparkle_positions(self) -> None:
         """Test diamond effect at sparkle positions."""
         # Test specific sparkle positions
         sparkle_positions = [(0, 0), (1, 1), (2, 2), (0, 2), (2, 0)]
@@ -301,20 +295,20 @@ class TestPatternEffects(unittest.TestCase):
             # Sparkle positions should be brighter
             self.assertGreater(sum(result), sum(self.test_rgb))
 
-    def test_diamond_non_sparkle_positions(self):
+    def test_diamond_non_sparkle_positions(self) -> None:
         """Test diamond effect at non-sparkle positions."""
         # Test non-sparkle position
         facelet_index = 1 * self.cube_size + 0  # Position (1, 0)
         result = diamond(self.test_rgb, facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_rainbow_basic(self):
+    def test_rainbow_basic(self) -> None:
         """Test rainbow effect with basic parameters."""
         for facelet_index in range(9):  # Test all positions on a 3x3 face
             result = rainbow(self.test_rgb, facelet_index, self.cube_size)
             self._validate_rgb_output(result)
 
-    def test_checkerboard_pattern(self):
+    def test_checkerboard_pattern(self) -> None:
         """Test checkerboard effect creates alternating pattern."""
         results = []
         for facelet_index in range(9):  # Test all positions on a 3x3 face
@@ -328,7 +322,7 @@ class TestPatternEffects(unittest.TestCase):
         pos_01 = checkerboard(self.test_rgb, 1, self.cube_size)
         self.assertNotEqual(pos_00, pos_01)
 
-    def test_checkerboard_with_intensity(self):
+    def test_checkerboard_with_intensity(self) -> None:
         """Test checkerboard effect with different intensities."""
         intensities = [0.2, 0.5, 0.8]
         for intensity in intensities:
@@ -337,7 +331,7 @@ class TestPatternEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_stripes_directions(self):
+    def test_stripes_directions(self) -> None:
         """Test stripes effect with different directions."""
         directions = ['horizontal', 'vertical', 'diagonal']
         for direction in directions:
@@ -346,7 +340,7 @@ class TestPatternEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_stripes_with_parameters(self):
+    def test_stripes_with_parameters(self) -> None:
         """Test stripes effect with different parameters."""
         result = stripes(
             self.test_rgb,
@@ -358,13 +352,13 @@ class TestPatternEffects(unittest.TestCase):
         )
         self._validate_rgb_output(result)
 
-    def test_spiral_basic(self):
+    def test_spiral_basic(self) -> None:
         """Test spiral effect with basic parameters."""
         for facelet_index in range(9):
             result = spiral(self.test_rgb, facelet_index, self.cube_size)
             self._validate_rgb_output(result)
 
-    def test_spiral_with_intensity(self):
+    def test_spiral_with_intensity(self) -> None:
         """Test spiral effect with different intensities."""
         intensities = [0.1, 0.5, 0.9]
         for intensity in intensities:
@@ -373,13 +367,13 @@ class TestPatternEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_plasma_basic(self):
+    def test_plasma_basic(self) -> None:
         """Test plasma effect with basic parameters."""
         for facelet_index in range(9):
             result = plasma(self.test_rgb, facelet_index, self.cube_size)
             self._validate_rgb_output(result)
 
-    def test_plasma_with_intensity(self):
+    def test_plasma_with_intensity(self) -> None:
         """Test plasma effect with different intensities."""
         intensities = [0.2, 0.4, 0.8]
         for intensity in intensities:
@@ -389,38 +383,29 @@ class TestPatternEffects(unittest.TestCase):
             self._validate_rgb_output(result)
 
 
-class TestSurfaceEffects(unittest.TestCase):
+class TestSurfaceEffects(RGBTestCase):
     """Test surface finish effects."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up common test data."""
         self.test_rgb = (120, 80, 160)
         self.facelet_index = 4
         self.cube_size = 3
 
-    def _validate_rgb_output(self, rgb):
-        """Helper to validate RGB output is properly clamped."""
-        self.assertIsInstance(rgb, tuple)
-        self.assertEqual(len(rgb), 3)
-        for component in rgb:
-            self.assertIsInstance(component, int)
-            self.assertGreaterEqual(component, 0)
-            self.assertLessEqual(component, 255)
-
-    def test_matte_basic(self):
+    def test_matte_basic(self) -> None:
         """Test matte effect with basic parameters."""
         result = matte(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
         # Matte should reduce brightness
         self.assertLessEqual(sum(result), sum(self.test_rgb))
 
-    def test_matte_ignores_position(self):
+    def test_matte_ignores_position(self) -> None:
         """Test that matte effect ignores facelet position."""
         result1 = matte(self.test_rgb, 0, self.cube_size)
         result2 = matte(self.test_rgb, 8, self.cube_size)
         self.assertEqual(result1, result2)
 
-    def test_matte_with_reduction(self):
+    def test_matte_with_reduction(self) -> None:
         """Test matte effect with different reduction values."""
         reductions = [0.1, 0.3, 0.5, 0.8]
         for reduction in reductions:
@@ -432,12 +417,12 @@ class TestSurfaceEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_glossy_basic(self):
+    def test_glossy_basic(self) -> None:
         """Test glossy effect with basic parameters."""
         result = glossy(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_glossy_with_intensity(self):
+    def test_glossy_with_intensity(self) -> None:
         """Test glossy effect with different intensities."""
         intensities = [0.2, 0.5, 1.0]
         for intensity in intensities:
@@ -449,12 +434,12 @@ class TestSurfaceEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_frosted_basic(self):
+    def test_frosted_basic(self) -> None:
         """Test frosted effect with basic parameters."""
         result = frosted(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_frosted_with_intensity(self):
+    def test_frosted_with_intensity(self) -> None:
         """Test frosted effect with different intensities."""
         intensities = [0.1, 0.4, 0.7]
         for intensity in intensities:
@@ -466,12 +451,12 @@ class TestSurfaceEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_holographic_basic(self):
+    def test_holographic_basic(self) -> None:
         """Test holographic effect with basic parameters."""
         result = holographic(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_holographic_with_intensity(self):
+    def test_holographic_with_intensity(self) -> None:
         """Test holographic effect with different intensities."""
         intensities = [0.3, 0.6, 0.9]
         for intensity in intensities:
@@ -484,38 +469,29 @@ class TestSurfaceEffects(unittest.TestCase):
             self._validate_rgb_output(result)
 
 
-class TestAdjustmentEffects(unittest.TestCase):
+class TestAdjustmentEffects(RGBTestCase):
     """Test color adjustment effects."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up common test data."""
         self.test_rgb = (128, 128, 128)
         self.facelet_index = 4
         self.cube_size = 3
 
-    def _validate_rgb_output(self, rgb):
-        """Helper to validate RGB output is properly clamped."""
-        self.assertIsInstance(rgb, tuple)
-        self.assertEqual(len(rgb), 3)
-        for component in rgb:
-            self.assertIsInstance(component, int)
-            self.assertGreaterEqual(component, 0)
-            self.assertLessEqual(component, 255)
-
-    def test_dim_basic(self):
+    def test_dim_basic(self) -> None:
         """Test dim effect with basic parameters."""
         result = dim(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
         # Dim should reduce brightness
         self.assertLessEqual(sum(result), sum(self.test_rgb))
 
-    def test_dim_ignores_position(self):
+    def test_dim_ignores_position(self) -> None:
         """Test that dim effect ignores facelet position."""
         result1 = dim(self.test_rgb, 0, self.cube_size)
         result2 = dim(self.test_rgb, 8, self.cube_size)
         self.assertEqual(result1, result2)
 
-    def test_dim_with_factor(self):
+    def test_dim_with_factor(self) -> None:
         """Test dim effect with different factors."""
         factors = [0.1, 0.5, 0.7, 0.9]
         for factor in factors:
@@ -527,20 +503,20 @@ class TestAdjustmentEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_brighten_basic(self):
+    def test_brighten_basic(self) -> None:
         """Test brighten effect with basic parameters."""
         result = brighten(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
         # Brighten should increase brightness
         self.assertGreaterEqual(sum(result), sum(self.test_rgb))
 
-    def test_brighten_ignores_position(self):
+    def test_brighten_ignores_position(self) -> None:
         """Test that brighten effect ignores facelet position."""
         result1 = brighten(self.test_rgb, 0, self.cube_size)
         result2 = brighten(self.test_rgb, 8, self.cube_size)
         self.assertEqual(result1, result2)
 
-    def test_brighten_with_factor(self):
+    def test_brighten_with_factor(self) -> None:
         """Test brighten effect with different factors."""
         factors = [1.1, 1.3, 1.5, 2.0]
         for factor in factors:
@@ -552,18 +528,18 @@ class TestAdjustmentEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_contrast_basic(self):
+    def test_contrast_basic(self) -> None:
         """Test contrast effect with basic parameters."""
         result = contrast(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_contrast_ignores_position(self):
+    def test_contrast_ignores_position(self) -> None:
         """Test that contrast effect ignores facelet position."""
         result1 = contrast(self.test_rgb, 0, self.cube_size)
         result2 = contrast(self.test_rgb, 8, self.cube_size)
         self.assertEqual(result1, result2)
 
-    def test_contrast_with_factor(self):
+    def test_contrast_with_factor(self) -> None:
         """Test contrast effect with different factors."""
         factors = [0.5, 1.0, 1.5, 2.0]
         for factor in factors:
@@ -575,7 +551,7 @@ class TestAdjustmentEffects(unittest.TestCase):
             )
             self._validate_rgb_output(result)
 
-    def test_contrast_with_different_colors(self):
+    def test_contrast_with_different_colors(self) -> None:
         """Test contrast effect with colors above and below middle gray."""
         # Test with bright color
         bright_rgb = (200, 200, 200)
@@ -587,18 +563,18 @@ class TestAdjustmentEffects(unittest.TestCase):
         result_dark = contrast(dark_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result_dark)
 
-    def test_vintage_basic(self):
+    def test_vintage_basic(self) -> None:
         """Test vintage effect with basic parameters."""
         result = vintage(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_vintage_ignores_position(self):
+    def test_vintage_ignores_position(self) -> None:
         """Test that vintage effect ignores facelet position."""
         result1 = vintage(self.test_rgb, 0, self.cube_size)
         result2 = vintage(self.test_rgb, 8, self.cube_size)
         self.assertEqual(result1, result2)
 
-    def test_vintage_with_parameters(self):
+    def test_vintage_with_parameters(self) -> None:
         """Test vintage effect with different parameters."""
         result = vintage(
             self.test_rgb,
@@ -609,12 +585,12 @@ class TestAdjustmentEffects(unittest.TestCase):
         )
         self._validate_rgb_output(result)
 
-    def test_face_visible_basic(self):
+    def test_face_visible_basic(self) -> None:
         """Test face_visible effect with basic parameters."""
         result = face_visible(self.test_rgb, self.facelet_index, self.cube_size)
         self._validate_rgb_output(result)
 
-    def test_face_visible_front_vs_back(self):
+    def test_face_visible_front_vs_back(self) -> None:
         """Test face_visible effect treats front and back faces differently."""
         # Front face (face index 0, 1, 2)
         front_facelet = 4  # Face 0
@@ -636,18 +612,18 @@ class TestAdjustmentEffects(unittest.TestCase):
 class TestUtilityEffects(unittest.TestCase):
     """Test utility effects."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up common test data."""
         self.test_rgb = (100, 150, 200)
         self.facelet_index = 4
         self.cube_size = 3
 
-    def test_noop_returns_unchanged(self):
+    def test_noop_returns_unchanged(self) -> None:
         """Test that noop effect returns input unchanged."""
         result = noop(self.test_rgb, self.facelet_index, self.cube_size)
         self.assertEqual(result, self.test_rgb)
 
-    def test_noop_ignores_all_parameters(self):
+    def test_noop_ignores_all_parameters(self) -> None:
         """Test that noop effect ignores all parameters."""
         result1 = noop(self.test_rgb, 0, 2)
         result2 = noop(
@@ -657,19 +633,10 @@ class TestUtilityEffects(unittest.TestCase):
         self.assertEqual(result2, self.test_rgb)
 
 
-class TestEdgeCases(unittest.TestCase):
+class TestEdgeCases(RGBTestCase):
     """Test edge cases and boundary conditions."""
 
-    def _validate_rgb_output(self, rgb):
-        """Helper to validate RGB output is properly clamped."""
-        self.assertIsInstance(rgb, tuple)
-        self.assertEqual(len(rgb), 3)
-        for component in rgb:
-            self.assertIsInstance(component, int)
-            self.assertGreaterEqual(component, 0)
-            self.assertLessEqual(component, 255)
-
-    def test_rgb_clamping_white(self):
+    def test_rgb_clamping_white(self) -> None:
         """Test RGB clamping with white input."""
         white_rgb = (255, 255, 255)
         effects_to_test = [shine, neon, chrome, gold, silver, copper, brighten]
@@ -678,7 +645,7 @@ class TestEdgeCases(unittest.TestCase):
             result = effect(white_rgb, 0, 3)
             self._validate_rgb_output(result)
 
-    def test_rgb_clamping_black(self):
+    def test_rgb_clamping_black(self) -> None:
         """Test RGB clamping with black input."""
         black_rgb = (0, 0, 0)
         effects_to_test = [shine, neon, chrome, gold, silver, copper, dim]
@@ -687,7 +654,7 @@ class TestEdgeCases(unittest.TestCase):
             result = effect(black_rgb, 0, 3)
             self._validate_rgb_output(result)
 
-    def test_different_cube_sizes(self):
+    def test_different_cube_sizes(self) -> None:
         """Test effects with different cube sizes."""
         test_rgb = (128, 64, 192)
         cube_sizes = [1, 2, 3, 4, 5, 10]
@@ -697,7 +664,7 @@ class TestEdgeCases(unittest.TestCase):
                 result = shine(test_rgb, facelet_index, cube_size)
                 self._validate_rgb_output(result)
 
-    def test_large_facelet_indices(self):
+    def test_large_facelet_indices(self) -> None:
         """Test effects with large facelet indices within valid range."""
         test_rgb = (100, 100, 100)
         cube_size = 3
@@ -708,7 +675,7 @@ class TestEdgeCases(unittest.TestCase):
             result = diamond(test_rgb, facelet_index, cube_size)
             self._validate_rgb_output(result)
 
-    def test_extreme_parameter_values(self):
+    def test_extreme_parameter_values(self) -> None:
         """Test effects with extreme parameter values."""
         test_rgb = (128, 128, 128)
 
@@ -724,7 +691,7 @@ class TestEdgeCases(unittest.TestCase):
         result = dim(test_rgb, 0, 3, factor=-1.0)
         self._validate_rgb_output(result)
 
-    def test_minimum_cube_size(self):
+    def test_minimum_cube_size(self) -> None:
         """Test effects with minimum cube size of 1."""
         test_rgb = (128, 64, 192)
         cube_size = 1
@@ -763,7 +730,7 @@ class TestEdgeCases(unittest.TestCase):
 class TestEffectsConfiguration(unittest.TestCase):
     """Test the EFFECTS configuration dictionary."""
 
-    def test_effects_structure(self):
+    def test_effects_structure(self) -> None:
         """Test that EFFECTS dictionary has correct structure."""
         self.assertIsInstance(EFFECTS, dict)
         self.assertGreater(len(EFFECTS), 0)
@@ -774,7 +741,7 @@ class TestEffectsConfiguration(unittest.TestCase):
             self.assertIn('function', effect_config)
             self.assertTrue(callable(effect_config['function']))
 
-    def test_effects_have_expected_functions(self):
+    def test_effects_have_expected_functions(self) -> None:
         """Test that expected effects are present in EFFECTS."""
         expected_effects = [
             'shine',
@@ -808,7 +775,7 @@ class TestEffectsConfiguration(unittest.TestCase):
         for effect_name in expected_effects:
             self.assertIn(effect_name, EFFECTS)
 
-    def test_effects_parameters_structure(self):
+    def test_effects_parameters_structure(self) -> None:
         """Test that effects parameters are properly structured."""
         for _effect_name, effect_config in EFFECTS.items():
             if 'parameters' in effect_config:
@@ -821,7 +788,7 @@ class TestEffectsConfiguration(unittest.TestCase):
                     self.assertIsInstance(param_name, str)
                     self.assertIn(type(param_value), [int, float, str])
 
-    def test_stripe_variants(self):
+    def test_stripe_variants(self) -> None:
         """Test that stripe variants are properly configured."""
         stripe_variants = ['h-stripes', 'v-stripes', 'd-stripes']
         expected_directions = ['horizontal', 'vertical', 'diagonal']
@@ -835,7 +802,7 @@ class TestEffectsConfiguration(unittest.TestCase):
                 EFFECTS[variant]['parameters']['direction'], direction,
             )
 
-    def test_shine_variants(self):
+    def test_shine_variants(self) -> None:
         """Test that shine variants are properly configured."""
         shine_variants = ['shine', 'soft', 'gradient']
 
@@ -847,40 +814,42 @@ class TestEffectsConfiguration(unittest.TestCase):
 class TestLoadEffect(unittest.TestCase):
     """Test the load_effect function."""
 
-    def test_load_effect_valid_name(self):
+    def test_load_effect_valid_name(self) -> None:
         """Test load_effect with valid effect name."""
         effect_func = load_effect('shine', 'default')
         self.assertIsNotNone(effect_func)
         self.assertTrue(callable(effect_func))
 
-    def test_load_effect_invalid_name(self):
+    def test_load_effect_invalid_name(self) -> None:
         """Test load_effect with invalid effect name."""
         effect_func = load_effect('nonexistent', 'default')
         self.assertIsNone(effect_func)
 
-    def test_load_effect_empty_name(self):
+    def test_load_effect_empty_name(self) -> None:
         """Test load_effect with empty effect name."""
         effect_func = load_effect('', 'default')
         self.assertIsNone(effect_func)
 
-    def test_load_effect_none_name(self):
+    def test_load_effect_none_name(self) -> None:
         """Test load_effect with None as effect name."""
         effect_func = load_effect(None, 'default')
         self.assertIsNone(effect_func)
 
-    def test_load_effect_function_works(self):
+    def test_load_effect_function_works(self) -> None:
         """Test that loaded effect function works correctly."""
         effect_func = load_effect('noop', 'default')
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 150, 200)
         result = effect_func(test_rgb, 0, 3)
         self.assertEqual(result, test_rgb)
 
-    def test_load_effect_applies_parameters(self):
+    def test_load_effect_applies_parameters(self) -> None:
         """Test that loaded effect applies configured parameters."""
         effect_func = load_effect('dim', 'default')
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)
@@ -888,12 +857,13 @@ class TestLoadEffect(unittest.TestCase):
         # Should be dimmed according to default factor
         self.assertLess(sum(result), sum(test_rgb))
 
-    def test_load_effect_palette_override(self):
+    def test_load_effect_palette_override(self) -> None:
         """Test load_effect with palette-specific parameters."""
         # This tests the palette override mechanism even though
         # no palette overrides exist in current EFFECTS
         effect_func = load_effect('shine', 'custom')
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)
@@ -902,7 +872,7 @@ class TestLoadEffect(unittest.TestCase):
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
 
-    def test_load_effect_all_configured_effects(self):
+    def test_load_effect_all_configured_effects(self) -> None:
         """Test that all configured effects can be loaded."""
         for effect_name in EFFECTS:
             effect_func = load_effect(effect_name, 'default')
@@ -915,27 +885,27 @@ class TestLoadEffect(unittest.TestCase):
 class TestParameterParsing(unittest.TestCase):
     """Test parameter parsing functions."""
 
-    def test_parse_effect_parameters_empty(self):
+    def test_parse_effect_parameters_empty(self) -> None:
         """Test parsing empty parameter string."""
         result = parse_effect_parameters('')
         self.assertEqual(result, {})
 
-    def test_parse_effect_parameters_single_int(self):
+    def test_parse_effect_parameters_single_int(self) -> None:
         """Test parsing single integer parameter."""
         result = parse_effect_parameters('intensity=5')
         self.assertEqual(result, {'intensity': 5})
 
-    def test_parse_effect_parameters_single_float(self):
+    def test_parse_effect_parameters_single_float(self) -> None:
         """Test parsing single float parameter."""
         result = parse_effect_parameters('factor=0.75')
         self.assertEqual(result, {'factor': 0.75})
 
-    def test_parse_effect_parameters_single_string(self):
+    def test_parse_effect_parameters_single_string(self) -> None:
         """Test parsing single string parameter."""
         result = parse_effect_parameters('direction=horizontal')
         self.assertEqual(result, {'direction': 'horizontal'})
 
-    def test_parse_effect_parameters_quoted_string(self):
+    def test_parse_effect_parameters_quoted_string(self) -> None:
         """Test parsing quoted string parameter."""
         result = parse_effect_parameters('mode="light mode"')
         self.assertEqual(result, {'mode': 'light mode'})
@@ -943,7 +913,7 @@ class TestParameterParsing(unittest.TestCase):
         result = parse_effect_parameters("mode='dark mode'")
         self.assertEqual(result, {'mode': 'dark mode'})
 
-    def test_parse_effect_parameters_boolean(self):
+    def test_parse_effect_parameters_boolean(self) -> None:
         """Test parsing boolean parameters."""
         result = parse_effect_parameters('enabled=true')
         self.assertEqual(result, {'enabled': True})
@@ -951,7 +921,7 @@ class TestParameterParsing(unittest.TestCase):
         result = parse_effect_parameters('disabled=false')
         self.assertEqual(result, {'disabled': False})
 
-    def test_parse_effect_parameters_multiple(self):
+    def test_parse_effect_parameters_multiple(self) -> None:
         """Test parsing multiple parameters."""
         result = parse_effect_parameters(
             'intensity=0.8,factor=1.5,direction=vertical',
@@ -962,7 +932,7 @@ class TestParameterParsing(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_parse_effect_parameters_mixed_types(self):
+    def test_parse_effect_parameters_mixed_types(self) -> None:
         """Test parsing mixed parameter types."""
         result = parse_effect_parameters(
             'intensity=0.8,frequency=3,enabled=true,mode=glossy',
@@ -973,55 +943,55 @@ class TestParameterParsing(unittest.TestCase):
         }
         self.assertEqual(result, expected)
 
-    def test_parse_effect_parameters_negative_numbers(self):
+    def test_parse_effect_parameters_negative_numbers(self) -> None:
         """Test parsing negative numbers."""
         result = parse_effect_parameters('offset=-5,factor=-0.3')
         expected = {'offset': -5, 'factor': -0.3}
         self.assertEqual(result, expected)
 
-    def test_parse_effect_parameters_whitespace(self):
+    def test_parse_effect_parameters_whitespace(self) -> None:
         """Test parsing with extra whitespace."""
         result = parse_effect_parameters('  intensity = 0.8 , factor = 1.5  ')
         expected = {'intensity': 0.8, 'factor': 1.5}
         self.assertEqual(result, expected)
 
-    def test_parse_effect_parameters_invalid_format(self):
+    def test_parse_effect_parameters_invalid_format(self) -> None:
         """Test parsing with invalid parameter format."""
         result = parse_effect_parameters('intensity,factor=1.5')
         expected = {'factor': 1.5}  # Invalid param is ignored
         self.assertEqual(result, expected)
 
-    def test_parse_effect_name_simple(self):
+    def test_parse_effect_name_simple(self) -> None:
         """Test parsing simple effect name without parameters."""
         name, params = parse_effect_name('shine')
         self.assertEqual(name, 'shine')
         self.assertEqual(params, {})
 
-    def test_parse_effect_name_with_parameters(self):
+    def test_parse_effect_name_with_parameters(self) -> None:
         """Test parsing effect name with parameters."""
         name, params = parse_effect_name('shine(intensity=0.8)')
         self.assertEqual(name, 'shine')
         self.assertEqual(params, {'intensity': 0.8})
 
-    def test_parse_effect_name_with_multiple_parameters(self):
+    def test_parse_effect_name_with_multiple_parameters(self) -> None:
         """Test parsing effect name with multiple parameters."""
         name, params = parse_effect_name('chrome(intensity=0.7,metallic=0.9)')
         self.assertEqual(name, 'chrome')
         self.assertEqual(params, {'intensity': 0.7, 'metallic': 0.9})
 
-    def test_parse_effect_name_empty_parameters(self):
+    def test_parse_effect_name_empty_parameters(self) -> None:
         """Test parsing effect name with empty parameter list."""
         name, params = parse_effect_name('neon()')
         self.assertEqual(name, 'neon')
         self.assertEqual(params, {})
 
-    def test_parse_effect_name_whitespace(self):
+    def test_parse_effect_name_whitespace(self) -> None:
         """Test parsing effect name with whitespace."""
         name, params = parse_effect_name('  gold( intensity=0.6 ) ')
         self.assertEqual(name, 'gold')
         self.assertEqual(params, {'intensity': 0.6})
 
-    def test_parse_effect_name_invalid_syntax(self):
+    def test_parse_effect_name_invalid_syntax(self) -> None:
         """Test parsing effect name with invalid syntax triggers fallback."""
         # Test case with unmatched parentheses that won't match the regex
         name, params = parse_effect_name('shine(intensity=0.8')
@@ -1037,19 +1007,21 @@ class TestParameterParsing(unittest.TestCase):
 class TestEnhancedLoadEffect(unittest.TestCase):
     """Test enhanced load_effect function with chaining and parameters."""
 
-    def test_load_effect_single_effect(self):
+    def test_load_effect_single_effect(self) -> None:
         """Test loading single effect without changes."""
         effect_func = load_effect('noop', 'default')
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 150, 200)
         result = effect_func(test_rgb, 0, 3)
         self.assertEqual(result, test_rgb)
 
-    def test_load_effect_single_with_custom_params(self):
+    def test_load_effect_single_with_custom_params(self) -> None:
         """Test loading single effect with custom parameters."""
         effect_func = load_effect('dim(factor=0.5)', 'default')
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)
@@ -1058,10 +1030,11 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         expected = (50, 50, 50)
         self.assertEqual(result, expected)
 
-    def test_load_effect_chained_effects(self):
+    def test_load_effect_chained_effects(self) -> None:
         """Test loading chained effects."""
         effect_func = load_effect('brighten|dim', 'default')
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)
@@ -1070,13 +1043,14 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
 
-    def test_load_effect_chained_with_params(self):
+    def test_load_effect_chained_with_params(self) -> None:
         """Test loading chained effects with custom parameters."""
         effect_func = load_effect(
             'brighten(factor=2.0)|dim(factor=0.5)',
             'default',
         )
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)
@@ -1086,21 +1060,23 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         expected = (100, 100, 100)
         self.assertEqual(result, expected)
 
-    def test_load_effect_multiple_chained(self):
+    def test_load_effect_multiple_chained(self) -> None:
         """Test loading multiple chained effects."""
         effect_func = load_effect('noop|noop|noop', 'default')
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 150, 200)
         result = effect_func(test_rgb, 0, 3)
         # Chain of noops should return original
         self.assertEqual(result, test_rgb)
 
-    def test_load_effect_invalid_in_chain(self):
+    def test_load_effect_invalid_in_chain(self) -> None:
         """Test loading chain with invalid effect."""
         effect_func = load_effect('shine|invalid_effect|dim', 'default')
         # Should still work with valid effects
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)
@@ -1108,36 +1084,39 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
 
-    def test_load_effect_all_invalid_chain(self):
+    def test_load_effect_all_invalid_chain(self) -> None:
         """Test loading chain with all invalid effects."""
         effect_func = load_effect('invalid1|invalid2', 'default')
         self.assertIsNone(effect_func)
 
-    def test_load_effect_empty_chain(self):
+    def test_load_effect_empty_chain(self) -> None:
         """Test loading empty effect chain."""
         effect_func = load_effect('', 'default')
         self.assertIsNone(effect_func)
 
-    def test_load_effect_complex_params(self):
+    def test_load_effect_complex_params(self) -> None:
         """Test loading effect with complex parameter combinations."""
         effect_func = load_effect(
             'd-stripes(frequency=3,intensity=0.6)',
             'default',
         )
         self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, 0, 3)
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
 
-    def test_load_effect_parameter_override(self):
+    def test_load_effect_parameter_override(self) -> None:
         """Test that custom parameters override default ones."""
         # Load with very low intensity
         effect_func1 = load_effect('dim(factor=0.1)', 'default')
+        assert effect_func1 is not None  # noqa: S101
 
         # Load with very high intensity
         effect_func2 = load_effect('dim(factor=0.9)', 'default')
+        assert effect_func2 is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
         result1 = effect_func1(test_rgb, 0, 3)
@@ -1146,12 +1125,12 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         # Results should be different due to different factors
         self.assertNotEqual(result1, result2)
 
-    def test_load_effect_whitespace_handling(self):
+    def test_load_effect_whitespace_handling(self) -> None:
         """Test that whitespace in effect names is handled correctly."""
         effect_func = load_effect('  shine  |  dim  ', 'default')
         self.assertIsNotNone(effect_func)
 
-    def test_load_single_effect_palette_specific_params(self):
+    def test_load_single_effect_palette_specific_params(self) -> None:
         """Test load_single_effect with palette-specific parameters."""
         # Create a mock effect config with palette-specific parameters
         mock_effect_config = {
@@ -1166,6 +1145,7 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         ):
             effect_func = load_single_effect('test_effect', {}, 'default')
             self.assertIsNotNone(effect_func)
+            assert effect_func is not None  # noqa: S101
 
             # Test that the effect function works
             result = effect_func((100, 100, 100), 0, 3)
@@ -1176,7 +1156,7 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
 
-    def test_load_effect_real_world_combinations(self):
+    def test_load_effect_real_world_combinations(self) -> None:
         """Test real-world effect combinations."""
         combinations = [
             'shine(intensity=0.8)|chrome(metallic=0.7)',
@@ -1190,6 +1170,7 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         for combination in combinations:
             effect_func = load_effect(combination, 'default')
             self.assertIsNotNone(effect_func, f'Failed to load: {combination}')
+            assert effect_func is not None  # noqa: S101
 
             result = effect_func(test_rgb, 4, 3)
             self.assertIsInstance(result, tuple)

@@ -2,7 +2,7 @@ from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.vcube import VCube
 
 
-def show_cube_oriented(faces):
+def show_cube_oriented(faces: str) -> None:
     cube = VCube()
     cube.rotate("R U R' U'")
 

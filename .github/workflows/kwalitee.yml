@@ -36,3 +36,6 @@ jobs:
     - name: Running the tests
       run: |
         pytest cubing_algs
+    - name: Running the notebooks
+      run: |
+        pytest --nbval --nbval-sanitize-with ./notebooks/sanitize.cfg ./notebooks/

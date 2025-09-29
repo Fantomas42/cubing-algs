@@ -1,7 +1,9 @@
+from typing import Any
+
 from cubing_algs.parsing import parse_moves
 
 
-def show_algorithm(name, algorithm, **kw):
+def show_algorithm(name: str, algorithm: str, **kw: Any) -> None:
     algo = parse_moves(algorithm)
 
     print(f'{ name}: { algo }')

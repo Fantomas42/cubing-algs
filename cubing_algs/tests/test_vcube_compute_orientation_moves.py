@@ -16,11 +16,11 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
     - Verify correct orientation moves are computed
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures for each test method."""
         self.cube = VCube()
 
-    def test_compute_orientation_moves_solved_cube_all_faces(self):
+    def test_compute_orientation_moves_solved_cube_all_faces(self) -> None:
         """Test orientation computation on solved cube for all single faces."""
         expected_orientations = {
             'U': '',
@@ -36,7 +36,9 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
                 result = self.cube.compute_orientation_moves(face)
                 self.assertEqual(result, expected_moves)
 
-    def test_compute_orientation_moves_solved_cube_face_combinations(self):
+    def test_compute_orientation_moves_solved_cube_face_combinations(
+        self,
+    ) -> None:
         """Test orientation computation on solved cube for face combinations."""
         test_cases = [
             ('UF', ''),
@@ -70,7 +72,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
                 result = self.cube.compute_orientation_moves(faces)
                 self.assertEqual(result, expected_moves)
 
-    def test_compute_orientation_moves_after_basic_moves(self):
+    def test_compute_orientation_moves_after_basic_moves(self) -> None:
         """Test orientation computation after applying basic moves."""
         # Test case: Apply R move, then compute orientations
         self.cube.rotate('R')
@@ -84,7 +86,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         self.assertEqual(self.cube.compute_orientation_moves('UF'), '')
         self.assertEqual(self.cube.compute_orientation_moves('RF'), "z'")
 
-    def test_compute_orientation_moves_after_rotation_sequence(self):
+    def test_compute_orientation_moves_after_rotation_sequence(self) -> None:
         """Test orientation computation after cube rotations."""
         # Apply x rotation (cube rotated around x-axis)
         self.cube.rotate('x')
@@ -97,7 +99,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         self.assertEqual(self.cube.compute_orientation_moves('D'), 'x')
         self.assertEqual(self.cube.compute_orientation_moves('B'), 'z2')
 
-    def test_compute_orientation_moves_complex_rotation_sequence(self):
+    def test_compute_orientation_moves_complex_rotation_sequence(self) -> None:
         """Test orientation computation after complex rotation sequence."""
         # Apply y x z sequence
         self.cube.rotate('y x z')
@@ -110,7 +112,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         self.assertEqual(result_u, "x'")
         self.assertEqual(result_f, '')
 
-    def test_compute_orientation_moves_after_moves_and_rotation(self):
+    def test_compute_orientation_moves_after_moves_and_rotation(self) -> None:
         """Test pattern: apply moves, rotate, check, move, rotate, check."""
         # Step 1: Apply some moves
         self.cube.rotate("R U R'")
@@ -147,7 +149,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         self.assertEqual(final_orientation_u, "z'")
         self.assertEqual(final_orientation_f, '')
 
-    def test_compute_orientation_moves_scrambled_cube(self):
+    def test_compute_orientation_moves_scrambled_cube(self) -> None:
         """Test orientation computation on a well-scrambled cube."""
         scramble = "R U2 R' D' R U' R' D R' U R U' R' U R U2 R' U' R U' R'"
         self.cube.rotate(scramble)
@@ -165,7 +167,9 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
                 result = self.cube.compute_orientation_moves(faces)
                 self.assertIn(result, OFFSET_ORIENTATION_MAP.values())
 
-    def test_compute_orientation_moves_verification_with_oriented_copy(self):
+    def test_compute_orientation_moves_verification_with_oriented_copy(
+        self,
+    ) -> None:
         """
         Verify that compute_orientation_moves works correctly
         with oriented_copy.
@@ -194,7 +198,9 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
                     # Single face orientation
                     self.assertEqual(oriented_cube.state[4], orientation[0])
 
-    def test_compute_orientation_moves_consistency_after_operations(self):
+    def test_compute_orientation_moves_consistency_after_operations(
+        self,
+    ) -> None:
         """
         Test that orientation computation remains consistent
         after multiple operations.
@@ -226,7 +232,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         for orientation in orientations_history:
             self.assertIn(orientation, OFFSET_ORIENTATION_MAP.values())
 
-    def test_compute_orientation_moves_all_offset_map_values(self):
+    def test_compute_orientation_moves_all_offset_map_values(self) -> None:
         """Test that all values in OFFSET_ORIENTATION_MAP can be produced."""
         # This test verifies completeness of the orientation system
         found_orientations = set()
@@ -270,7 +276,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         # We should find at least 80% of the possible orientations
         self.assertGreater(coverage / len(expected_orientations), 0.8)
 
-    def test_compute_orientation_moves_edge_cases(self):
+    def test_compute_orientation_moves_edge_cases(self) -> None:
         """Test edge cases for compute_orientation_moves."""
         # Test empty string (should raise InvalidFaceError)
         with self.assertRaises(InvalidFaceError):
@@ -297,7 +303,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         with self.assertRaises(InvalidFaceError):
             self.cube.compute_orientation_moves('LR')
 
-    def test_compute_orientation_moves_state_preservation(self):
+    def test_compute_orientation_moves_state_preservation(self) -> None:
         """Test that compute_orientation_moves doesn't modify cube state."""
         # Apply some moves to create a non-trivial state
         initial_moves = "R U2 R' D' R U' R' D"
@@ -323,7 +329,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
                     OFFSET_ORIENTATION_MAP.values(),
                 )
 
-    def test_compute_orientation_moves_with_slice_moves(self):
+    def test_compute_orientation_moves_with_slice_moves(self) -> None:
         """Test orientation computation after slice moves."""
         # Apply slice moves
         self.cube.rotate('M E S')
@@ -341,7 +347,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         slice_orientation = self.cube.compute_orientation_moves('UB')
         self.assertEqual(slice_orientation, 'z')
 
-    def test_compute_orientation_moves_complex_algorithm_sequence(self):
+    def test_compute_orientation_moves_complex_algorithm_sequence(self) -> None:
         """Test orientation computation through a complex algorithm sequence."""
         # Simulate PLL algorithm (T-perm)
         t_perm = "R U R' F' R U R' U' R' F R2 U' R'"
@@ -374,11 +380,11 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
 class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
     """Integration tests focusing on interaction with other VCube methods."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures for each test method."""
         self.cube = VCube()
 
-    def test_integration_with_get_face_center_indexes(self):
+    def test_integration_with_get_face_center_indexes(self) -> None:
         """
         Test that compute_orientation_moves
         correctly uses face center information.
@@ -398,7 +404,7 @@ class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
                 # orienting to it should be empty or simple
                 self.assertIn(orientation, OFFSET_ORIENTATION_MAP.values())
 
-    def test_integration_with_get_face_index(self):
+    def test_integration_with_get_face_index(self) -> None:
         """Test integration with get_face_index method."""
         # Apply some rotations
         self.cube.rotate('y2 x')
@@ -422,7 +428,7 @@ class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
             new_face_index = test_cube.get_face_index(face_color)
             self.assertEqual(new_face_index, 0)
 
-    def test_integration_with_oriented_copy_consistency(self):
+    def test_integration_with_oriented_copy_consistency(self) -> None:
         """
         Test consistency between compute_orientation_moves and oriented_copy.
         """
@@ -449,7 +455,7 @@ class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
                 # Both should result in the same state
                 self.assertEqual(oriented_cube.state, manual_cube.state)
 
-    def test_integration_preserve_cube_validity(self):
+    def test_integration_preserve_cube_validity(self) -> None:
         """Test that orientation computation preserves cube validity."""
         # Start with a valid but scrambled cube
         scramble = "R U R' U' R' F R2 U' R' U' R U R' F'"

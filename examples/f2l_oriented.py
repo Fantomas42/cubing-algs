@@ -1,7 +1,7 @@
 from cubing_algs.vcube import VCube
 
 
-def show_f2l_oriented(orientation):
+def show_f2l_oriented(orientation: str) -> None:
     c = VCube()
 
     c.rotate(f"{ orientation } z2 R U' R' U R' F R F' U".strip())

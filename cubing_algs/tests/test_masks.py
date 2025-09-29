@@ -13,73 +13,73 @@ from cubing_algs.masks import union_masks
 
 class TestBinaryMasks(unittest.TestCase):
 
-    def test_union(self):
+    def test_union(self) -> None:
         self.assertEqual(union_masks('1010', '0110'), '1110')
         self.assertEqual(union_masks('1111', '0000'), '1111')
         self.assertEqual(union_masks('0000', '0000'), '0000')
 
-    def test_union_multiple(self):
+    def test_union_multiple(self) -> None:
         self.assertEqual(union_masks('1000', '0100', '0010', '0001'), '1111')
         self.assertEqual(union_masks('1010', '0101', '1100'), '1111')
 
-    def test_union_single(self):
+    def test_union_single(self) -> None:
         self.assertEqual(union_masks('1010'), '1010')
 
-    def test_union_empty(self):
+    def test_union_empty(self) -> None:
         self.assertEqual(union_masks(), '')
 
-    def test_intersection(self):
+    def test_intersection(self) -> None:
         self.assertEqual(intersection_masks('1010', '1100'), '1000')
         self.assertEqual(intersection_masks('1111', '0000'), '0000')
         self.assertEqual(intersection_masks('1111', '1111'), '1111')
 
-    def test_intersection_multiple(self):
+    def test_intersection_multiple(self) -> None:
         self.assertEqual(intersection_masks('1111', '1110', '1100'), '1100')
         self.assertEqual(intersection_masks('1010', '0110', '1100'), '0000')
 
-    def test_intersection_single(self):
+    def test_intersection_single(self) -> None:
         self.assertEqual(intersection_masks('1010'), '1010')
 
-    def test_intersection_empty(self):
+    def test_intersection_empty(self) -> None:
         self.assertEqual(intersection_masks(), '')
 
-    def test_negate(self):
+    def test_negate(self) -> None:
         self.assertEqual(negate_mask('1010'), '0101')
         self.assertEqual(negate_mask('0000'), '1111')
         self.assertEqual(negate_mask('1111'), '0000')
 
-    def test_negate_single_bit(self):
+    def test_negate_single_bit(self) -> None:
         self.assertEqual(negate_mask('1'), '0')
         self.assertEqual(negate_mask('0'), '1')
 
-    def test_negate_empty(self):
+    def test_negate_empty(self) -> None:
         self.assertEqual(negate_mask(''), '')
 
-    def test_facelets_masked_basic(self):
+    def test_facelets_masked_basic(self) -> None:
         facelets = 'ABCD'
         mask = '1010'
         expected = 'A-C-'
         self.assertEqual(facelets_masked(facelets, mask), expected)
 
-    def test_facelets_masked_all_ones(self):
+    def test_facelets_masked_all_ones(self) -> None:
         facelets = 'ABCD'
         mask = '1111'
         expected = 'ABCD'
         self.assertEqual(facelets_masked(facelets, mask), expected)
 
-    def test_facelets_masked_all_zeros(self):
+    def test_facelets_masked_all_zeros(self) -> None:
         facelets = 'ABCD'
         mask = '0000'
         expected = '----'
         self.assertEqual(facelets_masked(facelets, mask), expected)
 
-    def test_facelets_masked_empty(self):
+    def test_facelets_masked_empty(self) -> None:
         facelets = ''
         mask = ''
         expected = ''
         self.assertEqual(facelets_masked(facelets, mask), expected)
 
-    def test_facelets_masked_single_char(self):
+    def test_facelets_masked_single_char(self) -> None:
         facelets = 'X'
         mask = '1'
         expected = 'X'
@@ -90,25 +90,25 @@ class TestBinaryMasks(unittest.TestCase):
         expected = '-'
         self.assertEqual(facelets_masked(facelets, mask), expected)
 
-    def test_facelets_masked_real_cube_pattern(self):
+    def test_facelets_masked_real_cube_pattern(self) -> None:
         facelets = INITIAL_STATE[:9]
         mask = '101010101'
         expected = 'U-U-U-U-U'
         self.assertEqual(facelets_masked(facelets, mask), expected)
 
-    def test_state_masked_basic(self):
+    def test_state_masked_basic(self) -> None:
         mask = FULL_MASK
         result = state_masked(INITIAL_STATE, mask)
 
         self.assertEqual(result, INITIAL_STATE)
 
-    def test_state_masked_all_zeros(self):
+    def test_state_masked_all_zeros(self) -> None:
         mask = '0' * 54
         result = state_masked(INITIAL_STATE, mask)
 
         self.assertTrue(result.replace('0', '-'), mask)
 
-    def test_state_masked_partial(self):
+    def test_state_masked_partial(self) -> None:
         mask = '1' * 9 + '0' * 45
         result = state_masked(INITIAL_STATE, mask)
 
@@ -117,7 +117,7 @@ class TestBinaryMasks(unittest.TestCase):
             'UUUUUUUUU---------------------------------------------',
         )
 
-    def test_state_masked_different_state(self):
+    def test_state_masked_different_state(self) -> None:
         scrambled_state = (
             'LUULUUFFFLBBRRRRRRUUUFFDFFDRRBDDBDDBFFRLLDLLDLLDUBBUBB'
         )
@@ -129,7 +129,7 @@ class TestBinaryMasks(unittest.TestCase):
             '-UU-UUFFF---RRRRRRUUUFF-FF-RR-------FFR---------U--U--',
         )
 
-    def test_facelets_masked_cache_hit(self):
+    def test_facelets_masked_cache_hit(self) -> None:
         """Test cache hit path in optimized facelets_masked."""
         _MASK_CACHE.clear()
 
@@ -146,7 +146,7 @@ class TestBinaryMasks(unittest.TestCase):
         self.assertEqual(result2, 'A-C-')
         self.assertEqual(result1, result2)
 
-    def test_facelets_masked_cache_eviction(self):
+    def test_facelets_masked_cache_eviction(self) -> None:
         """Test cache eviction when size limit is reached."""
         _MASK_CACHE.clear()
 
@@ -180,7 +180,9 @@ class TestBinaryMasks(unittest.TestCase):
         expected_result = 'U' + '-' * 53
         self.assertEqual(result, expected_result)
 
-    def test_facelets_masked_cache_behavior_with_repeated_patterns(self):
+    def test_facelets_masked_cache_behavior_with_repeated_patterns(
+        self,
+    ) -> None:
         """Test cache behavior with realistic repeated mask usage."""
         _MASK_CACHE.clear()
 

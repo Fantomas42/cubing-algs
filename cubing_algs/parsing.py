@@ -7,6 +7,7 @@ Algorithm objects.
 """
 import logging
 import re
+from collections.abc import Iterable
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
@@ -24,6 +25,27 @@ CLEAN_PATTERNS = [
 ]
 
 CASE_FIXES = str.maketrans('mseXYZ', 'MSExyz')
+
+
+def clean_multiline_and_comments(text: str) -> str:
+    """
+    Preprocessing of multiline input with comment removal.
+
+    Removes comments starting with // and joins non-empty lines with spaces.
+    """
+    if '//' not in text and '\n' not in text:
+        return text
+
+    cleaned_parts = [
+        line[:line.find('//')] if '//' in line else line
+        for line in text.split('\n')
+    ]
+
+    return ' '.join(
+        part.strip()
+        for part in cleaned_parts
+        if part.strip()
+    )
 
 
 def clean_moves(moves: str) -> str:
@@ -90,7 +112,7 @@ def check_moves(moves: list[Move]) -> bool:
     return True
 
 
-def parse_moves(raw_moves: str | list[str] | Algorithm,
+def parse_moves(raw_moves: str | Iterable[Move | str] | Algorithm,
                 secure: bool = True) -> Algorithm:  # noqa: FBT001, FBT002
     """
     Parse raw move data into an Algorithm object.
@@ -101,22 +123,31 @@ def parse_moves(raw_moves: str | list[str] | Algorithm,
     - If raw_moves is a list, it's joined into a string
     - Strings are cleaned, split into moves, validated, and converted
       to an Algorithm
-
-    Now supports commutators [A, B] and conjugates [A: B].
+    - Supports multiline input and removes comments starting with //
+    - Supports commutators [A, B] and conjugates [A: B].
 
     Examples:
         [A, B] becomes A B A' B' (commutator)
         [A: B] becomes A B A' (conjugate)
         [[R: U], D] becomes R U R' D R U' R' D'
         [F: [U, R]] becomes F U R U' R' F'
+
+        Multiline with comments:
+
+        "R U R' U'  // first part
+         D' R D     // second part" becomes R U R' U' D' R D
     """
     if isinstance(raw_moves, Algorithm):
         return raw_moves
 
     if isinstance(raw_moves, list):
-        raw_moves = ''.join(str(m) for m in raw_moves)
+        raw_moves_str = ''.join(str(m) for m in raw_moves)
+    else:
+        raw_moves_str = str(raw_moves)
 
-    expanded_moves = expand_commutators_and_conjugates(raw_moves)
+    raw_moves_str = clean_multiline_and_comments(raw_moves_str)
+
+    expanded_moves = expand_commutators_and_conjugates(raw_moves_str)
 
     if not secure:
         moves = split_moves(clean_moves(expanded_moves))

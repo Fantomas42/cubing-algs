@@ -19,11 +19,13 @@ MOVES_EASY_CROSS = [
     'L',
 ]
 
-EXCLUDE_ODD_FACES = {'D', 'L', 'B'}
+EXCLUDE_ODD_FACES_RH = {'D', 'L', 'B'}
+EXCLUDE_ODD_FACES_LH = {'D', 'R', 'B'}
 
 
 def build_cube_move_set(cube_size: int, *,
-                        inner_layers: bool = False) -> list[str]:
+                        inner_layers: bool = False,
+                        right_handed: bool = True) -> list[str]:
     """
     Generate a set of moves appropriate for a given cube size.
 
@@ -31,6 +33,10 @@ def build_cube_move_set(cube_size: int, *,
     cubes of different sizes.
     """
     moves = []
+
+    exclude_odd_faces = EXCLUDE_ODD_FACES_RH
+    if not right_handed:
+        exclude_odd_faces = EXCLUDE_ODD_FACES_LH
 
     for face in OUTER_BASIC_MOVES:
         moves.extend(
@@ -46,7 +52,7 @@ def build_cube_move_set(cube_size: int, *,
             odd_cube = bool(cube_size % 2)
             even_cube = not odd_cube
 
-            if cube_size > 4 or face not in EXCLUDE_ODD_FACES:
+            if cube_size > 4 or face not in exclude_odd_faces:
                 moves.extend(
                     [
                         f'{ face }w',
@@ -58,7 +64,7 @@ def build_cube_move_set(cube_size: int, *,
             for i in range(3, center_floor + 1):
                 if (
                         even_cube
-                        and face in EXCLUDE_ODD_FACES
+                        and face in exclude_odd_faces
                         and i == center_floor
                 ):
                     continue
@@ -74,7 +80,7 @@ def build_cube_move_set(cube_size: int, *,
                 for i in range(2, center_ceil + 1):
                     if (
                             odd_cube
-                            and face in EXCLUDE_ODD_FACES
+                            and face in exclude_odd_faces
                             and i == center_ceil
                     ):
                         continue
@@ -140,7 +146,8 @@ def random_moves(cube_size: int,
 
 
 def scramble(cube_size: int, iterations: int = 0, *,
-             inner_layers: bool = False) -> Algorithm:
+             inner_layers: bool = False,
+             right_handed: bool = True) -> Algorithm:
     """
     Generate a random scramble for a cube of the specified size.
 
@@ -150,6 +157,7 @@ def scramble(cube_size: int, iterations: int = 0, *,
     move_set = build_cube_move_set(
         cube_size,
         inner_layers=inner_layers,
+        right_handed=right_handed,
     )
 
     return random_moves(cube_size, move_set, iterations)

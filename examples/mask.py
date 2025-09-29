@@ -17,7 +17,7 @@ from cubing_algs.masks import union_masks
 from cubing_algs.vcube import VCube
 
 
-def show_cube_masked(name, mask):
+def show_cube_masked(name: str, mask: str) -> None:
     c = VCube()
 
     print(name, '====>')

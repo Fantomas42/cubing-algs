@@ -6,6 +6,12 @@ LOADED_PALETTES: dict[str, dict[str, str]] = {}
 
 
 class PaletteConfig(TypedDict, total=False):
+    """
+    Configuration structure for cube face color palettes.
+
+    Defines the complete color scheme for a cube display, including face colors,
+    font settings, and various background states used in different contexts.
+    """
     faces: tuple[str | dict[str, str], ...]
     font: str
     masked_background: str

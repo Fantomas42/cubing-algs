@@ -5,12 +5,13 @@ from cubing_algs.vcube import VCube
 
 class TestExplicitMovePermutations(unittest.TestCase):
     @staticmethod
-    def create_numbered_cube():
+    def create_numbered_cube() -> VCube:
         state = ''.join([chr(ord('A') + i) for i in range(54)])
         return VCube(initial=state, check=False)
 
     @staticmethod
-    def get_permutations(initial_state, final_state):
+    def get_permutations(initial_state: str,
+                         final_state: str) -> dict[int, int]:
         permutations = {}
         for dest_pos in range(54):
             dest_char = final_state[dest_pos]
@@ -19,7 +20,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
                 permutations[dest_pos] = src_pos
         return permutations
 
-    def test_U_move_explicit_permutations(self):  # noqa: N802
+    def test_U_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move U."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -53,7 +54,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_U_prime_move_explicit_permutations(self):  # noqa: N802
+    def test_U_prime_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move U'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -87,7 +88,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_U_2_move_explicit_permutations(self):  # noqa: N802
+    def test_U_2_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move U2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -121,7 +122,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_R_move_explicit_permutations(self):  # noqa: N802
+    def test_R_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move R."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -155,7 +156,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_R_prime_move_explicit_permutations(self):  # noqa: N802
+    def test_R_prime_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move R'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -189,7 +190,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_R_2_move_explicit_permutations(self):  # noqa: N802
+    def test_R_2_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move R2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -223,7 +224,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_F_move_explicit_permutations(self):  # noqa: N802
+    def test_F_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move F."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -257,7 +258,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_F_prime_move_explicit_permutations(self):  # noqa: N802
+    def test_F_prime_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move F'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -291,7 +292,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_F_2_move_explicit_permutations(self):  # noqa: N802
+    def test_F_2_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move F2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -325,7 +326,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_D_move_explicit_permutations(self):  # noqa: N802
+    def test_D_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move D."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -359,7 +360,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_D_prime_move_explicit_permutations(self):  # noqa: N802
+    def test_D_prime_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move D'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -393,7 +394,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_D_2_move_explicit_permutations(self):  # noqa: N802
+    def test_D_2_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move D2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -427,7 +428,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_L_move_explicit_permutations(self):  # noqa: N802
+    def test_L_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move L."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -461,7 +462,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_L_prime_move_explicit_permutations(self):  # noqa: N802
+    def test_L_prime_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move L'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -495,7 +496,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_L_2_move_explicit_permutations(self):  # noqa: N802
+    def test_L_2_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move L2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -529,7 +530,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_B_move_explicit_permutations(self):  # noqa: N802
+    def test_B_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move B."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -563,7 +564,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_B_prime_move_explicit_permutations(self):  # noqa: N802
+    def test_B_prime_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move B'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -597,7 +598,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_B_2_move_explicit_permutations(self):  # noqa: N802
+    def test_B_2_move_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move B2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -631,7 +632,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_x_rotation_explicit_permutations(self):
+    def test_x_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move x."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -697,7 +698,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_x_prime_rotation_explicit_permutations(self):
+    def test_x_prime_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move x'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -763,7 +764,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_x_2_rotation_explicit_permutations(self):
+    def test_x_2_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move x2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -829,7 +830,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_y_rotation_explicit_permutations(self):
+    def test_y_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move y."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -895,7 +896,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_y_prime_rotation_explicit_permutations(self):
+    def test_y_prime_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move y'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -961,7 +962,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_y_2_rotation_explicit_permutations(self):
+    def test_y_2_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move y2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1027,7 +1028,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_z_rotation_explicit_permutations(self):
+    def test_z_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move z."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1093,7 +1094,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_z_prime_rotation_explicit_permutations(self):
+    def test_z_prime_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move z'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1159,7 +1160,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_z_2_rotation_explicit_permutations(self):
+    def test_z_2_rotation_explicit_permutations(self) -> None:
         """Test explicit permutations for move z2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1225,7 +1226,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_M_slice_explicit_permutations(self):  # noqa: N802
+    def test_M_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move M."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1251,7 +1252,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_M_prime_slice_explicit_permutations(self):  # noqa: N802
+    def test_M_prime_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move M'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1277,7 +1278,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_M_2_slice_explicit_permutations(self):  # noqa: N802
+    def test_M_2_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move M2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1303,7 +1304,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_E_slice_explicit_permutations(self):  # noqa: N802
+    def test_E_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move E."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1329,7 +1330,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_E_prime_slice_explicit_permutations(self):  # noqa: N802
+    def test_E_prime_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move E'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1355,7 +1356,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_E_2_slice_explicit_permutations(self):  # noqa: N802
+    def test_E_2_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move E2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1381,7 +1382,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_S_slice_explicit_permutations(self):  # noqa: N802
+    def test_S_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move S."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1407,7 +1408,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_S_prime_slice_explicit_permutations(self):  # noqa: N802
+    def test_S_prime_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move S'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1433,7 +1434,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_S_2_slice_explicit_permutations(self):  # noqa: N802
+    def test_S_2_slice_explicit_permutations(self) -> None:  # noqa: N802
         """Test explicit permutations for move S2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1459,7 +1460,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_u_wide_explicit_permutations(self):
+    def test_u_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move u."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1505,7 +1506,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_u_prime_wide_explicit_permutations(self):
+    def test_u_prime_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move u'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1551,7 +1552,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_u_2_wide_explicit_permutations(self):
+    def test_u_2_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move u2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1597,7 +1598,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_r_wide_explicit_permutations(self):
+    def test_r_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move r."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1643,7 +1644,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_r_prime_wide_explicit_permutations(self):
+    def test_r_prime_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move r'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1689,7 +1690,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_r_2_wide_explicit_permutations(self):
+    def test_r_2_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move r2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1735,7 +1736,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_f_wide_explicit_permutations(self):
+    def test_f_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move f."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1781,7 +1782,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_f_prime_wide_explicit_permutations(self):
+    def test_f_prime_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move f'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1827,7 +1828,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_f_2_wide_explicit_permutations(self):
+    def test_f_2_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move f2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1873,7 +1874,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_d_wide_explicit_permutations(self):
+    def test_d_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move d."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1919,7 +1920,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_d_prime_wide_explicit_permutations(self):
+    def test_d_prime_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move d'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -1965,7 +1966,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_d_2_wide_explicit_permutations(self):
+    def test_d_2_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move d2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -2011,7 +2012,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_l_wide_explicit_permutations(self):
+    def test_l_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move l."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -2057,7 +2058,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_l_prime_wide_explicit_permutations(self):
+    def test_l_prime_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move l'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -2103,7 +2104,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_l_2_wide_explicit_permutations(self):
+    def test_l_2_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move l2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -2149,7 +2150,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_b_wide_explicit_permutations(self):
+    def test_b_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move b."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -2195,7 +2196,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_b_prime_wide_explicit_permutations(self):
+    def test_b_prime_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move b'."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
@@ -2241,7 +2242,7 @@ class TestExplicitMovePermutations(unittest.TestCase):
 
         self.assertEqual(permutations, expected_perms)
 
-    def test_b_2_wide_explicit_permutations(self):
+    def test_b_2_wide_explicit_permutations(self) -> None:
         """Test explicit permutations for move b2."""
         cube = self.create_numbered_cube()
         initial_state = cube.state

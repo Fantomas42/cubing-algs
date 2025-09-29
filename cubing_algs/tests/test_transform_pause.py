@@ -8,7 +8,7 @@ from cubing_algs.transform.pause import unpause_moves
 
 class TransformUnpauseTestCase(unittest.TestCase):
 
-    def test_unpause_moves(self):
+    def test_unpause_moves(self) -> None:
         provide = parse_moves(
             "F@1 R@2 .@3 U2@4 F'@5",
         )
@@ -24,7 +24,7 @@ class TransformUnpauseTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_unpause_moves_untimed(self):
+    def test_unpause_moves_untimed(self) -> None:
         provide = parse_moves(
             "F@1 R . U2 F'@4",
         )
@@ -43,7 +43,7 @@ class TransformUnpauseTestCase(unittest.TestCase):
 
 class TransformPauseTestCase(unittest.TestCase):
 
-    def test_pause_moves(self):
+    def test_pause_moves(self) -> None:
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )
@@ -61,7 +61,7 @@ class TransformPauseTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_pause_moves_empty(self):
+    def test_pause_moves_empty(self) -> None:
         provide = parse_moves('')
 
         result = pause_moves()(provide)
@@ -74,7 +74,7 @@ class TransformPauseTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_pause_moves_untimed(self):
+    def test_pause_moves_untimed(self) -> None:
         provide = parse_moves(
             "F R U2 F'",
         )
@@ -92,7 +92,7 @@ class TransformPauseTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_pause_moves_untimed_partial(self):
+    def test_pause_moves_untimed_partial(self) -> None:
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'",
         )
@@ -113,7 +113,7 @@ class TransformPauseTestCase(unittest.TestCase):
 
 class TransformPauseConfigTestCase(unittest.TestCase):
 
-    def test_pause_moves(self):
+    def test_pause_moves(self) -> None:
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )
@@ -131,7 +131,7 @@ class TransformPauseConfigTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_pause_moves_configured(self):
+    def test_pause_moves_configured(self) -> None:
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )
@@ -149,7 +149,7 @@ class TransformPauseConfigTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_pause_moves_configured_multiple(self):
+    def test_pause_moves_configured_multiple(self) -> None:
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )

@@ -97,8 +97,8 @@ from cubing_algs.transform.sign import unsign_moves
 from cubing_algs.transform.rotation import remove_final_rotations
 from cubing_algs.transform.slice import reslice_moves
 from cubing_algs.transform.slice import unslice_wide_moves
-from cubing_algs.transform.fat import refat_moves
-from cubing_algs.transform.fat import unfat_rotation_moves
+from cubing_algs.transform.wide import rewide_moves
+from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.transform.symmetry import (
     symmetry_m_moves,
     symmetry_s_moves,
@@ -137,9 +137,9 @@ clean = algo.transform(remove_final_rotations)  # Remove trailing x, y, z moves
 wide = algo.transform(unslice_wide_moves)  # M -> r' R, S -> f F', E -> u' U
 resliced = algo.transform(reslice_moves)  # L' R -> M x, etc.
 
-# Fat moves
-rotation = algo.transform(unfat_rotation_moves)  # f r u -> B z L x D y
-refated = algo.transform(refat_moves)  # L x -> r, etc.
+# Wide moves
+rotation = algo.transform(unwide_rotation_moves)  # f r u -> B z L x D y
+rewided = algo.transform(rewide_moves)  # L x -> r, etc.
 
 # Symmetry
 m_sym = algo.transform(symmetry_m_moves)  # M-slice symmetry (L<->R)

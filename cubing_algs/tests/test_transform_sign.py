@@ -8,7 +8,7 @@ from cubing_algs.transform.sign import unsign_moves
 
 class TransformSignTestCase(unittest.TestCase):
 
-    def test_unsign_moves(self):
+    def test_unsign_moves(self) -> None:
         provide = parse_moves("R' F u' B r")
         expect = parse_moves("R' F Uw' B Rw")
 
@@ -22,7 +22,7 @@ class TransformSignTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_sign_moves(self):
+    def test_sign_moves(self) -> None:
         provide = parse_moves("R' F Uw' B Rw")
         expect = parse_moves("R' F u' B r")
 

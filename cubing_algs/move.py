@@ -217,6 +217,17 @@ class Move(UserString):
         return self.base_move in ROTATIONS
 
     @cached_property
+    def is_rotational_move(self) -> bool:
+        """
+        Check if this move include a rotation move.
+
+        Rotation moves include x, y, and z, which rotate the entire cube
+        and M S E moves which can be seen as rotate the cube and move 2 layers,
+        and wide modes like r f u, which rotate the cube and move 1 layer.
+        """
+        return self.is_rotation_move or self.is_inner_move or self.is_wide_move
+
+    @cached_property
     def is_face_move(self) -> bool:
         """
         Check if this is a face move.

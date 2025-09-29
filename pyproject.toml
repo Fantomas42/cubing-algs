@@ -25,6 +25,10 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-subtests",
+    "nbval",
+]
+notebooks = [
+    "jupyterlab",
 ]
 
 [tool.setuptools.packages.find]
@@ -118,7 +122,7 @@ allow-magic-value-types = ["str", "int"]
 
 [tool.mypy]
 disable_error_code = ["import-untyped"]
-exclude = ["tests", "poc"]
+exclude = ["poc"]
 python_version = 3.12
 
 [tool.pytest.ini_options]

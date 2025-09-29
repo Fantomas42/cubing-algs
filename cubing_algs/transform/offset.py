@@ -1,9 +1,10 @@
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import OFFSET_TABLE
 from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.move import Move
 
 
-def rotate(old_moves: list[Move], rotation: str) -> list[Move]:
+def rotate(old_moves: Algorithm, rotation: str) -> Algorithm:
     """
     Apply a rotation transformation to moves using the offset table.
 
@@ -35,14 +36,14 @@ def rotate(old_moves: list[Move], rotation: str) -> list[Move]:
 
         moves.append(new_move)
 
-    return moves
+    return Algorithm(moves)
 
 
 def offset_moves(
-        old_moves: list[Move],
+        old_moves: Algorithm,
         rotation: str,
         count: int = 1,
-) -> list[Move]:
+) -> Algorithm:
     """
     Apply a rotation transformation multiple times to an algorithm.
 
@@ -54,63 +55,63 @@ def offset_moves(
     return result
 
 
-def offset_x_moves(old_moves: list[Move]) -> list[Move]:
+def offset_x_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply x' rotation to moves.
     """
     return offset_moves(old_moves, "x'")
 
 
-def offset_x2_moves(old_moves: list[Move]) -> list[Move]:
+def offset_x2_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply x2 rotation to moves.
     """
     return offset_moves(old_moves, 'x', 2)
 
 
-def offset_xprime_moves(old_moves: list[Move]) -> list[Move]:
+def offset_xprime_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply x rotation to moves.
     """
     return offset_moves(old_moves, 'x')
 
 
-def offset_y_moves(old_moves: list[Move]) -> list[Move]:
+def offset_y_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply y' rotation to moves.
     """
     return offset_moves(old_moves, "y'")
 
 
-def offset_y2_moves(old_moves: list[Move]) -> list[Move]:
+def offset_y2_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply y2 rotation to moves.
     """
     return offset_moves(old_moves, 'y', 2)
 
 
-def offset_yprime_moves(old_moves: list[Move]) -> list[Move]:
+def offset_yprime_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply y rotation to moves.
     """
     return offset_moves(old_moves, 'y')
 
 
-def offset_z_moves(old_moves: list[Move]) -> list[Move]:
+def offset_z_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply z' rotation to moves.
     """
     return offset_moves(old_moves, "z'")
 
 
-def offset_z2_moves(old_moves: list[Move]) -> list[Move]:
+def offset_z2_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply z2 rotation to moves.
     """
     return offset_moves(old_moves, 'z', 2)
 
 
-def offset_zprime_moves(old_moves: list[Move]) -> list[Move]:
+def offset_zprime_moves(old_moves: Algorithm) -> Algorithm:
     """
     Apply z rotation to moves.
     """

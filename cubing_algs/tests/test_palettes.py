@@ -17,42 +17,42 @@ from cubing_algs.palettes import load_palette
 class TestHexToAnsi(unittest.TestCase):
     """Test HEX to ANSI conversion functions."""
 
-    def test_hex_to_ansi(self):
+    def test_hex_to_ansi(self) -> None:
         """Test basic hex to ANSI conversion."""
         result = hex_to_ansi('38', '#FF0000')
         self.assertEqual(result, '\x1b[38;2;255;0;0m')
 
-    def test_hex_to_rgb(self):
+    def test_hex_to_rgb(self) -> None:
         """Test basic hex to rgb conversion."""
         result = hex_to_rgb('#FF0000')
         self.assertEqual(result, (255, 0, 0))
 
-    def test_hex_compressed_to_rgb(self):
+    def test_hex_compressed_to_rgb(self) -> None:
         """Test compressed hex to rgb conversion."""
         result = hex_to_rgb('#F00')
         self.assertEqual(result, (255, 0, 0))
 
-    def test_hex_to_rgb_invalid_size(self):
+    def test_hex_to_rgb_invalid_size(self) -> None:
         """Test compressed hex to rgb invalid size."""
         with self.assertRaises(ValueError):
             hex_to_rgb('#F0')
 
-    def test_hex_to_rgb_invalid_value(self):
+    def test_hex_to_rgb_invalid_value(self) -> None:
         """Test compressed hex to rgb invalid value."""
         with self.assertRaises(ValueError):
             hex_to_rgb('#G00')
 
-    def test_background_hex_to_ansi(self):
+    def test_background_hex_to_ansi(self) -> None:
         """Test hex to background ANSI conversion."""
         result = background_hex_to_ansi('#808080')
         self.assertEqual(result, '\x1b[48;2;128;128;128m')
 
-    def test_foreground_hex_to_ansi(self):
+    def test_foreground_hex_to_ansi(self) -> None:
         """Test hex to foreground ANSI conversion."""
         result = foreground_hex_to_ansi('#FFF')
         self.assertEqual(result, '\x1b[38;2;255;255;255m')
 
-    def test_build_ansi_color(self):
+    def test_build_ansi_color(self) -> None:
         """Test building complete ANSI color scheme."""
         bg = '#F00'
         fg = '#FFF'
@@ -64,7 +64,7 @@ class TestHexToAnsi(unittest.TestCase):
 class TestBuildAnsiPalette(unittest.TestCase):
     """Test ANSI palette building."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test data used by multiple test methods."""
         self.faces_bg = (
             '#FFFFFF',  # U
@@ -76,7 +76,7 @@ class TestBuildAnsiPalette(unittest.TestCase):
         )
         self.faces = ['U', 'R', 'F', 'D', 'L', 'B']
 
-    def test_build_ansi_palette_minimal(self):
+    def test_build_ansi_palette_minimal(self) -> None:
         """Test building palette with minimal parameters."""
         palette = build_ansi_palette(self.faces_bg)
 
@@ -91,7 +91,7 @@ class TestBuildAnsiPalette(unittest.TestCase):
             self.assertIn(f'{face}_masked', palette)
             self.assertIn(f'{face}_adjacent', palette)
 
-    def test_build_ansi_palette_custom_parameters(self):
+    def test_build_ansi_palette_custom_parameters(self) -> None:
         """Test building palette with custom font, hidden, and masked colors."""
         custom_font = '#FFFF00'
         custom_masked = '#000000'
@@ -111,7 +111,7 @@ class TestBuildAnsiPalette(unittest.TestCase):
         # Check that masked faces use the custom masked background
         self.assertIn('\x1b[48;2;0;0;0m', palette['U_masked'])
 
-    def test_build_ansi_palette_with_face_overrides(self):
+    def test_build_ansi_palette_with_face_overrides(self) -> None:
         """Test building palette with per-face font color overrides."""
         # Mix simple hex values with extended face configurations
         faces_config = (
@@ -155,12 +155,12 @@ class TestBuildAnsiPalette(unittest.TestCase):
 class TestLoadPalette(unittest.TestCase):
     """Test palette loading functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Clear loaded palettes cache before each test."""
         LOADED_PALETTES.clear()
         self.faces = ['U', 'R', 'F', 'D', 'L', 'B']
 
-    def test_load_palette_existing(self):
+    def test_load_palette_existing(self) -> None:
         """Test loading an existing palette."""
         palette = load_palette('default')
 
@@ -172,7 +172,7 @@ class TestLoadPalette(unittest.TestCase):
             self.assertIn(f'{face}_masked', palette)
             self.assertIn(f'{face}_adjacent', palette)
 
-    def test_load_palette_nonexistent_fallback_to_env(self):
+    def test_load_palette_nonexistent_fallback_to_env(self) -> None:
         """Test loading nonexistent palette falls back to env var."""
         # This should cover the branch where palette_name not in PALETTES
         with patch.dict(os.environ, {'CUBING_ALGS_PALETTE': 'rgb'}):
@@ -182,7 +182,7 @@ class TestLoadPalette(unittest.TestCase):
             self.assertIsNotNone(palette)
             self.assertIn('U', palette)
 
-    def test_load_palette_nonexistent_fallback_to_default(self):
+    def test_load_palette_nonexistent_fallback_to_default(self) -> None:
         """
         Test loading nonexistent palette falls back to default
         when no env var.
@@ -195,7 +195,7 @@ class TestLoadPalette(unittest.TestCase):
             self.assertIsNotNone(palette)
             self.assertIn('U', palette)
 
-    def test_load_palette_caching(self):
+    def test_load_palette_caching(self) -> None:
         """Test that palettes are cached after first load."""
         # First load
         palette1 = load_palette('default')
@@ -206,7 +206,7 @@ class TestLoadPalette(unittest.TestCase):
         self.assertIs(palette1, palette2)  # Should be the same object (cached)
         self.assertIn('default', LOADED_PALETTES)
 
-    def test_load_all_predefined_palettes(self):
+    def test_load_all_predefined_palettes(self) -> None:
         """Test that all predefined palettes can be loaded."""
         for palette_name in PALETTES:
             palette = load_palette(palette_name)
@@ -214,7 +214,7 @@ class TestLoadPalette(unittest.TestCase):
             self.assertIn('U', palette)
             self.assertIn('reset', palette)
 
-    def test_palette_with_extra_colors(self):
+    def test_palette_with_extra_colors(self) -> None:
         """Test loading palettes that have extra colors defined."""
         # Test dracula palette which has extra colors
         palette = load_palette('dracula')
@@ -230,7 +230,7 @@ class TestLoadPalette(unittest.TestCase):
 class TestPaletteConstants(unittest.TestCase):
     """Test palette constants and structure."""
 
-    def test_palettes_structure(self):
+    def test_palettes_structure(self) -> None:
         """Test that all palettes have required structure."""
         for palette_name, palette_def in PALETTES.items():
             with self.subTest(palette=palette_name):

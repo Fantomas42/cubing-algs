@@ -1,3 +1,11 @@
+"""
+Constants and configuration values for the cubing-algs library.
+
+This module defines all the fundamental constants used throughout the library
+including move notations, facelet mappings, transformation tables, and
+algorithm patterns. These constants support cube manipulation, move parsing,
+transformations, and visual display.
+"""
 import re
 
 MAX_ITERATIONS = 50
@@ -234,7 +242,7 @@ RESLICE_MOVES.update(RESLICE_M_MOVES)
 RESLICE_MOVES.update(RESLICE_S_MOVES)
 RESLICE_MOVES.update(RESLICE_E_MOVES)
 
-UNFAT_ROTATION_MOVES = {
+UNWIDE_ROTATION_MOVES = {
     'r': ['L', 'x'],
     "r'": ["L'", "x'"],
     'r2': ['L2', 'x2'],
@@ -260,7 +268,7 @@ UNFAT_ROTATION_MOVES = {
     'd2': ['U2', 'y2'],
 }
 
-UNFAT_SLICE_MOVES = {
+UNWIDE_SLICE_MOVES = {
     'r': ['R', "M'"],
     "r'": ["R'", 'M'],
     'r2': ['R2', 'M2'],
@@ -286,26 +294,38 @@ UNFAT_SLICE_MOVES = {
     'd2': ['D2', 'E2'],
 }
 
-REFAT_MOVES = {
+REWIDE_MOVES = {
     ' '.join(v): k
-    for k, v in UNFAT_ROTATION_MOVES.items()
+    for k, v in UNWIDE_ROTATION_MOVES.items()
 }
-REFAT_MOVES.update(
+REWIDE_MOVES.update(
     {
         ' '.join(reversed(v)): k
-        for k, v in UNFAT_ROTATION_MOVES.items()
+        for k, v in UNWIDE_ROTATION_MOVES.items()
     },
 )
-REFAT_MOVES.update(
+REWIDE_MOVES.update(
     {
         ' '.join(v): k
-        for k, v in UNFAT_SLICE_MOVES.items()
+        for k, v in UNWIDE_SLICE_MOVES.items()
     },
 )
-REFAT_MOVES.update(
+REWIDE_MOVES.update(
     {
         ' '.join(reversed(v)): k
-        for k, v in UNFAT_SLICE_MOVES.items()
+        for k, v in UNWIDE_SLICE_MOVES.items()
+    },
+)
+UNWIDE_ROTATION_MOVES.update(
+    {
+        f'{ k.upper() }w' if len(k) == 1 else f'{ k[0].upper() }w{ k[1] }': v
+        for k, v in UNWIDE_ROTATION_MOVES.items()
+    },
+)
+UNWIDE_SLICE_MOVES.update(
+    {
+        f'{ k.upper() }w' if len(k) == 1 else f'{ k[0].upper() }w{ k[1] }': v
+        for k, v in UNWIDE_SLICE_MOVES.items()
     },
 )
 
@@ -350,12 +370,21 @@ SYMMETRY_TABLE = {
 }
 
 OPPOSITE_FACES = {
-    'F': 'B',
-    'R': 'L',
     'U': 'D',
-    'B': 'F',
-    'L': 'R',
+    'R': 'L',
+    'F': 'B',
     'D': 'U',
+    'L': 'R',
+    'B': 'F',
+}
+
+ADJACENT_FACES = {
+    'U': ('R', 'L', 'F', 'B'),
+    'R': ('F', 'B', 'U', 'D'),
+    'F': ('U', 'D', 'L', 'R'),
+    'D': ('R', 'L', 'F', 'B'),
+    'L': ('F', 'B', 'U', 'D'),
+    'B': ('U', 'D', 'L', 'R'),
 }
 
 FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
@@ -367,9 +396,7 @@ FACE_INDEXES = {
 
 FACES = ''.join(FACE_ORDER)
 
-INITIAL_STATE = ''
-for face in FACE_ORDER:
-    INITIAL_STATE += face * 9
+INITIAL_STATE = ''.join(face * 9 for face in FACE_ORDER)
 
 CORNER_FACELET_MAP = [
     [8, 9, 20],    # URF
@@ -454,3 +481,14 @@ OFFSET_ORIENTATION_MAP = {
     '4': 'z',
     '5': "x'",
 }
+
+ORIENTATIONS = [
+    'UF', 'UR', 'UL', 'UB',
+    'DF', 'DR', 'DL', 'DB',
+
+    'RF', 'RD', 'RB', 'RU',
+    'LF', 'LD', 'LB', 'LU',
+
+    'FD', 'FR', 'FU', 'FL',
+    'BD', 'BR', 'BU', 'BL',
+]
