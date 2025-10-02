@@ -185,6 +185,61 @@ class TestComputeFingerDistribution(unittest.TestCase):
         self.assertEqual(middle, 1)  # F
         self.assertEqual(ring, 0)
 
+    def test_ring_finger_moves_as_last_move(self) -> None:
+        """Test algorithm ending with ring finger move for branch coverage."""
+        alg = Algorithm.parse_moves('R U M')
+        thumb, index, middle, ring = compute_finger_distribution(alg)
+        self.assertEqual(thumb, 1)  # R
+        self.assertEqual(index, 1)  # U
+        self.assertEqual(middle, 0)
+        self.assertEqual(ring, 1)  # M
+
+    def test_single_ring_finger_move(self) -> None:
+        """Test algorithm with only ring finger move for branch coverage."""
+        alg = Algorithm.parse_moves('S')
+        thumb, index, middle, ring = compute_finger_distribution(alg)
+        self.assertEqual(thumb, 0)
+        self.assertEqual(index, 0)
+        self.assertEqual(middle, 0)
+        self.assertEqual(ring, 1)  # S
+
+    def test_algorithm_ending_with_ring_finger(self) -> None:
+        """Test for complete branch coverage with ring finger move at end."""
+        # Test different ring finger moves to ensure full branch coverage
+        for move_str in ['M', 'E', 'S', "M'", "E'", "S'", 'M2', 'E2', 'S2']:
+            alg = Algorithm.parse_moves(move_str)
+            thumb, index, middle, ring = compute_finger_distribution(alg)
+            self.assertEqual(ring, 1, f'Ring finger count wrong for {move_str}')
+            self.assertEqual(thumb + index + middle, 0,
+                           f'Other fingers should be 0 for {move_str}')
+
+    def test_multiple_ring_finger_moves(self) -> None:
+        """Test multiple consecutive ring finger moves for branch coverage."""
+        alg = Algorithm.parse_moves('M E S')
+        thumb, index, middle, ring = compute_finger_distribution(alg)
+        self.assertEqual(thumb, 0)
+        self.assertEqual(index, 0)
+        self.assertEqual(middle, 0)
+        self.assertEqual(ring, 3)
+
+    def test_empty_finger_distribution_for_coverage(self) -> None:
+        """Test edge case to ensure complete branch coverage."""
+        # This test targets potential edge cases in branch coverage
+
+        # Create algorithm with specific sequence that might hit missing branch
+        moves = [Move('M')]  # Single ring finger move as Move object
+        alg = Algorithm(moves)
+        thumb, index, middle, ring = compute_finger_distribution(alg)
+        self.assertEqual(ring, 1)
+
+        # Also test with empty algorithm
+        empty_alg = Algorithm([])
+        thumb, index, middle, ring = compute_finger_distribution(empty_alg)
+        self.assertEqual(thumb, 0)
+        self.assertEqual(index, 0)
+        self.assertEqual(middle, 0)
+        self.assertEqual(ring, 0)
+
 
 class TestComputeRegripCount(unittest.TestCase):
     """Test regrip count computation."""
