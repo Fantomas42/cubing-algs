@@ -43,12 +43,24 @@ def count_inversions(permutation: list[int]) -> int:
 class VCubeIntegrityChecker:
     """
     Check integrity of VCube
+
+    This is a mixin class that expects the following from subclasses:
+    - size, face_size, face_number, _state attributes
+    - get_face_center_indexes() method
     """
     size: int
     face_size: int
     face_number: int
 
     _state: str
+
+    def get_face_center_indexes(self) -> list[str]:
+        """
+        Return the center facelet characters for each face.
+
+        Must be implemented by subclass.
+        """
+        raise NotImplementedError
 
     def check_integrity(self) -> bool:
         """
@@ -116,7 +128,7 @@ class VCubeIntegrityChecker:
         """
         Validates that all face centers are unique and properly positioned.
         """
-        actual_centers = set(self.get_face_center_indexes())  # type: ignore[attr-defined]
+        actual_centers = set(self.get_face_center_indexes())
 
         if len(actual_centers) != self.face_number:
             msg = 'Face centers must be unique'

@@ -19,7 +19,7 @@ from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACES
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
-from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
+from cubing_algs.extensions import rotate
 
 
 def _build_corner_lookup_table() -> dict[tuple[int, int], int]:
