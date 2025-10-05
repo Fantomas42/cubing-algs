@@ -2,7 +2,6 @@
 import math
 import re
 from collections.abc import Callable
-from typing import Any
 from typing import TypedDict
 from typing import Unpack
 
@@ -32,6 +31,15 @@ class EffectParams(TypedDict, total=False):
     factor: float
     lighten: float
     darken: float
+
+
+class EffectConfig(TypedDict, total=False):
+    """Configuration for a visual effect, including function and parameters."""
+    function: Callable[
+        [tuple[int, int, int], int, int],
+        tuple[int, int, int],
+    ]
+    parameters: dict[str, float | int | str | bool]
 
 
 # Positioning
@@ -594,7 +602,7 @@ def noop(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 # Configuration
 
 
-EFFECTS: dict[str, dict[str, object]] = {
+EFFECTS: dict[str, EffectConfig] = {
     'shine': {
         'function': shine,
         'parameters': {
@@ -852,14 +860,20 @@ def load_single_effect(
     if not effect_name or effect_name not in EFFECTS:
         return None
 
-    effect_config: dict[str, Any] = EFFECTS[effect_name]
+    effect_config: EffectConfig = EFFECTS[effect_name]
     effect_function: Callable[..., tuple[int, int, int]] = effect_config[
         'function'
     ]
-    effect_parameters = effect_config.get('parameters', {}).copy()
+    effect_parameters: dict[str, float | int | str | bool] = (
+        effect_config.get('parameters', {}).copy()
+    )
 
+    # Check for palette-specific parameter overrides
+    # (EffectConfig may have additional keys beyond the typed ones)
     if palette_name in effect_config:
-        effect_parameters.update(effect_config[palette_name])
+        palette_override = effect_config.get(palette_name)
+        if isinstance(palette_override, dict):
+            effect_parameters.update(palette_override)
 
     effect_parameters.update(custom_params)
 
