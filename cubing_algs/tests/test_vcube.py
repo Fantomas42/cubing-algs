@@ -8,6 +8,7 @@ from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
@@ -455,6 +456,20 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             cube.state,
             initial,
         )
+
+    def test_get_face_center_indexes_not_implemented(self) -> None:
+        """Test that get_face_center_indexes raises NotImplementedError."""
+        class IncompleteVCube(VCubeIntegrityChecker):
+            """Incomplete implementation for testing."""
+            size = 3
+            face_size = 9
+            face_number = 6
+            _state = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB'
+
+        incomplete_cube = IncompleteVCube()
+
+        with self.assertRaises(NotImplementedError):
+            incomplete_cube.get_face_center_indexes()
 
     def test_invalid_length_no_check(self) -> None:
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'

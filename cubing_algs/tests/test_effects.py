@@ -1156,6 +1156,27 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
 
+    def test_load_single_effect_palette_override_non_dict(self) -> None:
+        """Test load_single_effect with non-dict palette override."""
+        # Create a mock effect config with a non-dict palette override
+        mock_effect_config = {
+            'function': noop,
+            'parameters': {'base_param': 1.0},
+            'default': 'not_a_dict',  # Non-dict value that should be ignored
+        }
+
+        with patch.dict(
+                'cubing_algs.effects.EFFECTS',
+                {'test_effect': mock_effect_config},
+        ):
+            effect_func = load_single_effect('test_effect', {}, 'default')
+            self.assertIsNotNone(effect_func)
+            assert effect_func is not None  # noqa: S101
+
+            # Test that the effect function works
+            result = effect_func((100, 100, 100), 0, 3)
+            self.assertEqual(result, (100, 100, 100))  # noop returns unchanged
+
     def test_load_effect_real_world_combinations(self) -> None:
         """Test real-world effect combinations."""
         combinations = [

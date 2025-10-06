@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
@@ -239,6 +240,48 @@ class TestComputeFingerDistribution(unittest.TestCase):
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
+
+    def test_rotation_moves_default_to_index(self) -> None:
+        """Test that rotation moves default to index finger."""
+        # Rotation moves are not in FINGER_ASSIGNMENTS, should default to index
+        alg = Algorithm.parse_moves('x y z')
+        thumb, index, middle, ring = compute_finger_distribution(alg)
+        self.assertEqual(thumb, 0)
+        self.assertEqual(index, 3)  # All rotations default to index
+        self.assertEqual(middle, 0)
+        self.assertEqual(ring, 0)
+
+    def test_wide_moves_default_to_index(self) -> None:
+        """Test that wide moves default to index finger."""
+        # Wide moves are not in FINGER_ASSIGNMENTS, should default to index
+        alg = Algorithm.parse_moves('Rw Uw Fw')
+        thumb, index, middle, ring = compute_finger_distribution(alg)
+        self.assertEqual(thumb, 0)
+        self.assertEqual(index, 3)  # All wide moves default to index
+        self.assertEqual(middle, 0)
+        self.assertEqual(ring, 0)
+
+    def test_ring_finger_not_last_move(self) -> None:
+        """Test ring move followed by another for branch coverage."""
+        # This test ensures the branch from ring finger check back to loop
+        alg = Algorithm.parse_moves('M R')  # ring finger then thumb
+        thumb, index, middle, ring = compute_finger_distribution(alg)
+        self.assertEqual(thumb, 1)
+        self.assertEqual(index, 0)
+        self.assertEqual(middle, 0)
+        self.assertEqual(ring, 1)
+
+    def test_unknown_finger_type_not_counted(self) -> None:
+        """Test that unknown finger types don't increment any counter."""
+        # Mock FINGER_ASSIGNMENTS to return an unknown finger type
+        with patch('cubing_algs.ergonomics.FINGER_ASSIGNMENTS', {'R': 'pinky'}):
+            alg = Algorithm.parse_moves('R')
+            thumb, index, middle, ring = compute_finger_distribution(alg)
+            # Unknown finger type should not increment any counter
+            self.assertEqual(thumb, 0)
+            self.assertEqual(index, 0)
+            self.assertEqual(middle, 0)
+            self.assertEqual(ring, 0)
 
 
 class TestComputeRegripCount(unittest.TestCase):
