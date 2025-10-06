@@ -5,7 +5,7 @@ from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.extensions import rotate  # type: ignore[attr-defined]
+from cubing_algs.extensions import rotate
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.integrity import VCubeIntegrityChecker

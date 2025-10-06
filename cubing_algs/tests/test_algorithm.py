@@ -2,6 +2,7 @@
 import unittest
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
@@ -743,3 +744,31 @@ class AlgorithmShowTestCase(unittest.TestCase):
         result = algo.show()
 
         self.assertIsInstance(result, VCube)
+
+
+class AlgorithmErgonomicsTestCase(unittest.TestCase):
+    """Test cases for the Algorithm.ergonomics property."""
+
+    def test_ergonomics_property_returns_ergonomics_data(self) -> None:
+        """Test ergonomics property returns ErgonomicsData."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        ergo = algo.ergonomics
+
+        self.assertIsInstance(ergo, ErgonomicsData)
+
+    def test_ergonomics_property_has_expected_fields(self) -> None:
+        """Test ergonomics property returns data with expected fields."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        ergo = algo.ergonomics
+
+        # Check that all expected fields are present
+        self.assertIsNotNone(ergo.comfort_score)
+        self.assertIsNotNone(ergo.ergonomic_rating)
+        self.assertIsNotNone(ergo.hand_balance_ratio)
+
+    def test_ergonomics_property_empty_algorithm(self) -> None:
+        """Test ergonomics property with empty algorithm."""
+        algo = Algorithm()
+        ergo = algo.ergonomics
+
+        self.assertIsInstance(ergo, ErgonomicsData)

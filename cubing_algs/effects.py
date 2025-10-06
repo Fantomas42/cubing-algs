@@ -2,7 +2,8 @@
 import math
 import re
 from collections.abc import Callable
-from typing import Any
+from typing import TypedDict
+from typing import Unpack
 
 FACE_POSITIONS = {
     0: [0, 1],
@@ -12,6 +13,34 @@ FACE_POSITIONS = {
     4: [1, 0],
     5: [1, 3],
 }
+
+
+class EffectParams(TypedDict, total=False):
+    """Parameters for visual effects on cube facelets."""
+    intensity: float
+    facelet_mode: str
+    position_mode: str
+    saturation: float
+    metallic: float
+    warmth: float
+    reduction: float
+    direction: str
+    frequency: int
+    sepia: float
+    desaturation: float
+    factor: float
+    lighten: float
+    darken: float
+
+
+class EffectConfig(TypedDict, total=False):
+    """Configuration for a visual effect, including function and parameters."""
+    function: Callable[
+        [tuple[int, int, int], int, int],
+        tuple[int, int, int],
+    ]
+    parameters: dict[str, float | int | str | bool]
+
 
 # Positioning
 
@@ -41,7 +70,8 @@ def global_light_position_factor(facelet_index: int, cube_size: int) -> float:
     return max(min(pos / 12, 1.0), 0)
 
 
-def get_position_factor(facelet_index: int, cube_size: int, **kw: Any) -> float:
+def get_position_factor(facelet_index: int, cube_size: int,
+                        **kw: Unpack[EffectParams]) -> float:
     """
     Calculate position factor for effect application
     based on mode and facelet location.
@@ -74,7 +104,7 @@ def get_position_factor(facelet_index: int, cube_size: int, **kw: Any) -> float:
 
 
 def shine(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-          **kw: Any) -> tuple[int, int, int]:
+          **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply shine effect with smooth brightness variation across the surface.
     """
@@ -96,7 +126,7 @@ def shine(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def neon(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-         **kw: Any) -> tuple[int, int, int]:
+         **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply neon glow effect with saturated colors and bright highlights.
     """
@@ -120,7 +150,7 @@ def neon(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def chrome(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-           **kw: Any) -> tuple[int, int, int]:
+           **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply chrome effect with metallic highlights and reflective appearance.
     """
@@ -150,7 +180,7 @@ def chrome(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def gold(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-         **kw: Any) -> tuple[int, int, int]:
+         **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply golden metallic effect with warm yellow highlights.
     """
@@ -173,7 +203,7 @@ def gold(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def silver(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-           **kw: Any) -> tuple[int, int, int]:
+           **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply silver metallic effect with cool highlights.
     """
@@ -196,7 +226,7 @@ def silver(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def copper(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-           **kw: Any) -> tuple[int, int, int]:
+           **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply copper metallic effect with warm red-orange tints.
     """
@@ -217,7 +247,7 @@ def copper(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def diamond(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-            **kw: Any) -> tuple[int, int, int]:
+            **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply diamond effect with bright sparkle points at specific positions.
     """
@@ -246,7 +276,7 @@ def diamond(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def rainbow(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-            **kw: Any) -> tuple[int, int, int]:
+            **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply rainbow prismatic effect with color shifting based on position.
     """
@@ -282,7 +312,7 @@ def rainbow(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def matte(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-          **kw: Any) -> tuple[int, int, int]:
+          **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply matte effect by reducing brightness for a flat,
     non-reflective appearance.
@@ -300,7 +330,7 @@ def matte(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def glossy(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-           **kw: Any) -> tuple[int, int, int]:
+           **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply glossy effect with sharp highlights like polished plastic.
     """
@@ -320,7 +350,7 @@ def glossy(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def frosted(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-            **kw: Any) -> tuple[int, int, int]:
+            **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply frosted effect with soft, diffused lighting.
     """
@@ -340,7 +370,7 @@ def frosted(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def checkerboard(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-                 **kw: Any) -> tuple[int, int, int]:
+                 **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply checkerboard pattern with alternating light and dark squares.
     """
@@ -362,7 +392,7 @@ def checkerboard(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def stripes(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-            **kw: Any) -> tuple[int, int, int]:
+            **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply stripe pattern in horizontal, vertical, or diagonal directions.
     """
@@ -392,7 +422,7 @@ def stripes(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def spiral(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-           **kw: Any) -> tuple[int, int, int]:
+           **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply spiral pattern radiating from the center of each face.
     """
@@ -422,7 +452,7 @@ def spiral(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def plasma(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-           **kw: Any) -> tuple[int, int, int]:
+           **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply plasma effect with multiple interference wave patterns.
     """
@@ -449,7 +479,7 @@ def plasma(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def holographic(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-                **kw: Any) -> tuple[int, int, int]:
+                **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply holographic effect with color shifting
     that simulates viewing angle changes.
@@ -472,7 +502,7 @@ def holographic(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def dim(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-        **kw: Any) -> tuple[int, int, int]:
+        **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Reduce brightness uniformly across all color channels.
     """
@@ -489,7 +519,7 @@ def dim(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def brighten(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-             **kw: Any) -> tuple[int, int, int]:
+             **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Increase brightness uniformly across all color channels.
     """
@@ -505,7 +535,7 @@ def brighten(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def contrast(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-             **kw: Any) -> tuple[int, int, int]:
+             **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Enhance contrast by amplifying differences from middle gray.
     """
@@ -522,7 +552,7 @@ def contrast(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-             **kw: Any) -> tuple[int, int, int]:
+             **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Adjust brightness based on face visibility
     with front faces brighter than back faces.
@@ -539,7 +569,7 @@ def face_visible(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def vintage(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-            **kw: Any) -> tuple[int, int, int]:
+            **kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     Apply vintage effect with desaturation and sepia tinting.
     """
@@ -563,7 +593,7 @@ def vintage(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 
 
 def noop(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
-         **_kw: Any) -> tuple[int, int, int]:
+         **_kw: Unpack[EffectParams]) -> tuple[int, int, int]:
     """
     No-operation effect that returns the input color unchanged.
     """
@@ -572,7 +602,7 @@ def noop(rgb: tuple[int, int, int], facelet_index: int, cube_size: int,
 # Configuration
 
 
-EFFECTS: dict[str, dict[str, Any]] = {
+EFFECTS: dict[str, EffectConfig] = {
     'shine': {
         'function': shine,
         'parameters': {
@@ -830,14 +860,20 @@ def load_single_effect(
     if not effect_name or effect_name not in EFFECTS:
         return None
 
-    effect_config: dict[str, Any] = EFFECTS[effect_name]
+    effect_config: EffectConfig = EFFECTS[effect_name]
     effect_function: Callable[..., tuple[int, int, int]] = effect_config[
         'function'
     ]
-    effect_parameters = effect_config.get('parameters', {}).copy()
+    effect_parameters: dict[str, float | int | str | bool] = (
+        effect_config.get('parameters', {}).copy()
+    )
 
+    # Check for palette-specific parameter overrides
+    # (EffectConfig may have additional keys beyond the typed ones)
     if palette_name in effect_config:
-        effect_parameters.update(effect_config[palette_name])
+        palette_override = effect_config.get(palette_name)
+        if isinstance(palette_override, dict):
+            effect_parameters.update(palette_override)
 
     effect_parameters.update(custom_params)
 

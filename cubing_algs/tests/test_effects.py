@@ -143,7 +143,7 @@ class TestPositioningFunctions(unittest.TestCase):
         ]
 
         for kwargs in modes:
-            result = get_position_factor(facelet_index, cube_size, **kwargs)
+            result = get_position_factor(facelet_index, cube_size, **kwargs)  # type: ignore[arg-type]
             self.assertIsInstance(result, float)
             self.assertGreaterEqual(result, 0.0)
 
@@ -627,7 +627,7 @@ class TestUtilityEffects(unittest.TestCase):
         """Test that noop effect ignores all parameters."""
         result1 = noop(self.test_rgb, 0, 2)
         result2 = noop(
-            self.test_rgb, 100, 10, intensity=5.0, random_param='test',
+            self.test_rgb, 100, 10, intensity=5.0, random_param='test',  # type: ignore[call-arg]
         )
         self.assertEqual(result1, self.test_rgb)
         self.assertEqual(result2, self.test_rgb)
@@ -779,12 +779,10 @@ class TestEffectsConfiguration(unittest.TestCase):
         """Test that effects parameters are properly structured."""
         for _effect_name, effect_config in EFFECTS.items():
             if 'parameters' in effect_config:
-                self.assertIsInstance(effect_config['parameters'], dict)
-
+                params = effect_config['parameters']
                 # Check that parameter values are reasonable types
-                for param_name, param_value in effect_config[
-                    'parameters'
-                ].items():
+                assert isinstance(params, dict)  # noqa: S101
+                for param_name, param_value in params.items():
                     self.assertIsInstance(param_name, str)
                     self.assertIn(type(param_value), [int, float, str])
 
@@ -798,8 +796,10 @@ class TestEffectsConfiguration(unittest.TestCase):
         ):
             self.assertIn(variant, EFFECTS)
             self.assertEqual(EFFECTS[variant]['function'], stripes)
+            params = EFFECTS[variant]['parameters']
+            assert isinstance(params, dict)  # noqa: S101
             self.assertEqual(
-                EFFECTS[variant]['parameters']['direction'], direction,
+                params['direction'], direction,
             )
 
     def test_shine_variants(self) -> None:
@@ -1155,6 +1155,27 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         result = effect_func(test_rgb, 0, 3)
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
+
+    def test_load_single_effect_palette_override_non_dict(self) -> None:
+        """Test load_single_effect with non-dict palette override."""
+        # Create a mock effect config with a non-dict palette override
+        mock_effect_config = {
+            'function': noop,
+            'parameters': {'base_param': 1.0},
+            'default': 'not_a_dict',  # Non-dict value that should be ignored
+        }
+
+        with patch.dict(
+                'cubing_algs.effects.EFFECTS',
+                {'test_effect': mock_effect_config},
+        ):
+            effect_func = load_single_effect('test_effect', {}, 'default')
+            self.assertIsNotNone(effect_func)
+            assert effect_func is not None  # noqa: S101
+
+            # Test that the effect function works
+            result = effect_func((100, 100, 100), 0, 3)
+            self.assertEqual(result, (100, 100, 100))  # noop returns unchanged
 
     def test_load_effect_real_world_combinations(self) -> None:
         """Test real-world effect combinations."""

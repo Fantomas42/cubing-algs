@@ -1,7 +1,7 @@
 from collections.abc import Callable
-from typing import Any
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.move import Move
 from cubing_algs.transform.offset import offset_x2_moves
 from cubing_algs.transform.offset import offset_x_moves
 from cubing_algs.transform.offset import offset_xprime_moves
@@ -40,29 +40,31 @@ DEGRIP_FULL.update(DEGRIP_Z)
 def has_grip(
         old_moves: Algorithm,
         config: dict[str, Callable[[Algorithm], Algorithm]],
-) -> tuple[bool, Any, Any, Any]:
+) -> tuple[bool, Algorithm, Algorithm, str]:
     """
     Check if an algorithm contains grip moves according to config.
     """
     i = 0
     prefix = Algorithm()
     suffix = Algorithm()
+    gripper_move = ''
 
     while i < len(old_moves) - 1:
-        move = old_moves[i].untimed
+        move_str = str(old_moves[i].untimed)
 
-        if move in config:
+        if move_str in config:
             suffix = old_moves[i + 1:]
             prefix = old_moves[:i]
+            gripper_move = move_str
             break
 
         i += 1
 
     config_keys = set(config.keys())
-    if suffix and any(move not in config_keys for move in suffix):
-        return True, prefix, suffix, move
+    if suffix and any(str(m.untimed) not in config_keys for m in suffix):
+        return True, prefix, suffix, gripper_move
 
-    return False, False, False, False
+    return False, Algorithm(), Algorithm(), ''
 
 
 def degrip(
@@ -75,7 +77,7 @@ def degrip(
     _gripped, prefix, suffix, gripper = has_grip(old_moves, config)
 
     if suffix:
-        degripped = Algorithm([*config[gripper](suffix), gripper])
+        degripped = Algorithm([*config[gripper](suffix), Move(gripper)])
 
         if has_grip(degripped, config)[0]:
             return degrip(prefix + degripped, config)
