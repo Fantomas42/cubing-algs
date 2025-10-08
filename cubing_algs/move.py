@@ -127,13 +127,13 @@ class Move(UserString):
         return self.layer_move_modifier_time[3]
 
     @cached_property
-    def timed(self) -> int | None:
+    def timed(self) -> int:
         """
         Integer version of the timed move
         """
         if self.time:
             return int(self.time[1:])
-        return None
+        return 0
 
     # Validation
 

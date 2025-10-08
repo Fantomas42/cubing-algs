@@ -330,10 +330,10 @@ class MoveTestCase(unittest.TestCase):
 
     def test_timed(self) -> None:
         self.assertEqual(Move('R').time, '')
-        self.assertEqual(Move('R').timed, None)
+        self.assertEqual(Move('R').timed, 0)
 
         self.assertEqual(Move('.').time, '')
-        self.assertEqual(Move('.').timed, None)
+        self.assertEqual(Move('.').timed, 0)
 
         self.assertEqual(Move('R@1500').time, '@1500')
         self.assertEqual(Move('R@1500').timed, 1500)
