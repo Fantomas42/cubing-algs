@@ -311,7 +311,7 @@ class Algorithm(UserList[Move]):
         cube.show(
             mode=mode,
             orientation=orientation,
-            mask=self.impacts.transformation_mask,
+            mask=self.impacts.facelets_transformation_mask,
         )
 
         return cube
