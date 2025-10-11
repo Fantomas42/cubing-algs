@@ -252,9 +252,7 @@ def detect_move_cancellations(
 def classify_commutator(
     setup: 'Algorithm',
     action: 'Algorithm',
-    inverse_cache: (
-        dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'] | None
-    ) = None,
+    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
 ) -> str:
     """
     Classify a commutator based on speedcubing taxonomy.
@@ -268,11 +266,8 @@ def classify_commutator(
     Args:
         setup: The A part of the commutator
         action: The B part of the commutator
-        inverse_cache: Optional cache for inverse sequences (key: str(pattern))
+        inverse_cache: Cache for inverse sequences (key: str(pattern))
     """
-    # Use regular dict if no cache provided (backwards compatibility)
-    if inverse_cache is None:
-        inverse_cache = {}
 
     setup_len = len(setup)
     action_len = len(action)
@@ -347,10 +342,7 @@ def is_inverse_at(
     algo: 'Algorithm',
     start: int,
     pattern: 'Algorithm',
-    inverse_cache: (
-        dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'] | None
-    ) = None,
-    string_cache: dict[int, str] | BoundedCache[int, str] | None = None,
+    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
 ) -> bool:
     """
     Check if the inverse of pattern appears at the given position.
@@ -359,28 +351,16 @@ def is_inverse_at(
         algo: The algorithm to check
         start: Position to check
         pattern: The pattern to invert and match
-        inverse_cache: Optional cache for inverse sequences (key: str(pattern))
-        string_cache: Optional cache for string representations (key: id(algo))
+        inverse_cache: Cache for inverse sequences (key: str(pattern))
     """
     if start + len(pattern) > len(algo):
         return False
 
-    # Use cache if available (cache by string representation)
-    if inverse_cache is not None:
-        # Get cached string representation
-        pattern_id = id(pattern)
-        if string_cache is not None and pattern_id in string_cache:
-            pattern_key = string_cache[pattern_id]
-        else:
-            pattern_key = str(pattern)
-            if string_cache is not None:
-                string_cache[pattern_id] = pattern_key
-
-        if pattern_key not in inverse_cache:
-            inverse_cache[pattern_key] = inverse_sequence(pattern)
-        inverse = inverse_cache[pattern_key]
-    else:
-        inverse = inverse_sequence(pattern)
+    # Use cache (cache by string representation)
+    pattern_key = str(pattern)
+    if pattern_key not in inverse_cache:
+        inverse_cache[pattern_key] = inverse_sequence(pattern)
+    inverse = inverse_cache[pattern_key]
 
     # Vectorized comparison: slice comparison is faster than element-by-element
     return algo[start:start + len(inverse)] == inverse
@@ -418,10 +398,7 @@ def detect_conjugate(
     algo: 'Algorithm',
     start: int,
     max_setup_len: int,
-    inverse_cache: (
-        dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'] | None
-    ) = None,
-    string_cache: dict[int, str] | BoundedCache[int, str] | None = None,
+    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
 ) -> Structure | None:
     """
     Detect a conjugate pattern [A: B] = A B A' starting at the given position.
@@ -430,16 +407,10 @@ def detect_conjugate(
         algo: The algorithm to search
         start: Starting position
         max_setup_len: Maximum setup length
-        inverse_cache: Optional cache for inverse sequences (key: str(algo))
-        string_cache: Optional cache for string representations (key: id(algo))
+        inverse_cache: Cache for inverse sequences (key: str(algo))
 
     Returns the best conjugate found or None.
     """
-    # Use regular dicts if no cache provided (backwards compatibility)
-    if inverse_cache is None:
-        inverse_cache = {}
-    if string_cache is None:
-        string_cache = {}
 
     best_structure: Structure | None = None
 
@@ -470,7 +441,7 @@ def detect_conjugate(
 
             # Check if A' appears after B (uses cached inverse)
             if is_inverse_at(
-                algo, action_end, setup, inverse_cache, string_cache,
+                algo, action_end, setup, inverse_cache,
             ):
                 score = score_structure(setup, action)
 
@@ -500,14 +471,11 @@ def detect_conjugate(
     return best_structure
 
 
-def detect_commutator(  # noqa: PLR0912
+def detect_commutator(
     algo: 'Algorithm',
     start: int,
     max_part_len: int,
-    inverse_cache: (
-        dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'] | None
-    ) = None,
-    string_cache: dict[int, str] | BoundedCache[int, str] | None = None,
+    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
 ) -> Structure | None:
     """
     Detect a commutator pattern [A, B] = A B A' B'.
@@ -516,16 +484,10 @@ def detect_commutator(  # noqa: PLR0912
         algo: The algorithm to search
         start: Starting position
         max_part_len: Maximum length for A and B parts
-        inverse_cache: Optional cache for inverse sequences (key: str(algo))
-        string_cache: Optional cache for string representations (key: id(algo))
+        inverse_cache: Cache for inverse sequences (key: str(algo))
 
     Returns the best commutator found or None.
     """
-    # Use regular dicts if no cache provided (backwards compatibility)
-    if inverse_cache is None:
-        inverse_cache = {}
-    if string_cache is None:
-        string_cache = {}
 
     best_structure: Structure | None = None
 
@@ -557,23 +519,17 @@ def detect_commutator(  # noqa: PLR0912
             # Check if A' B' appears after A B (uses cached inverses)
             if (
                 is_inverse_at(
-                    algo, b_end, a_part, inverse_cache, string_cache,
+                    algo, b_end, a_part, inverse_cache,
                 )
                 and is_inverse_at(
-                    algo, b_end + a_len, b_part, inverse_cache, string_cache,
+                    algo, b_end + a_len, b_part, inverse_cache,
                 )
             ):
                 score = score_structure(a_part, b_part)
 
                 if best_structure is None or score > best_structure.score:
                     # Get/compute inverse for cancellation check
-                    a_part_id = id(a_part)
-                    if a_part_id in string_cache:
-                        a_part_key = string_cache[a_part_id]
-                    else:
-                        a_part_key = str(a_part)
-                        string_cache[a_part_id] = a_part_key
-
+                    a_part_key = str(a_part)
                     if a_part_key not in inverse_cache:
                         inverse_cache[a_part_key] = inverse_sequence(a_part)
                     a_part_inv = inverse_cache[a_part_key]
@@ -640,11 +596,11 @@ def detect_structures(
     if min_score is None:
         min_score = calculate_min_score(algo_len)
 
-    # Create bounded caches for performance optimization
+    # Create single shared cache for both commutator and conjugate detection
+    # Now safe because we eliminated the string_cache with id() keys
     inverse_cache: BoundedCache[str, Algorithm] = BoundedCache(
         MAX_INVERSE_CACHE_SIZE,
     )
-    string_cache: BoundedCache[int, str] = BoundedCache(MAX_STRING_CACHE_SIZE)
 
     structures: list[Structure] = []
     i = 0
@@ -652,12 +608,12 @@ def detect_structures(
     while i < len(algo):
         # Try to detect commutator first (more specific)
         commutator = detect_commutator(
-            algo, i, max_setup_len, inverse_cache, string_cache,
+            algo, i, max_setup_len, inverse_cache,
         )
 
-        # Try to detect conjugate
+        # Try to detect conjugate (shares same cache)
         conjugate = detect_conjugate(
-            algo, i, max_setup_len, inverse_cache, string_cache,
+            algo, i, max_setup_len, inverse_cache,
         )
 
         # Pick the best one
@@ -681,7 +637,7 @@ def detect_structures(
     return structures
 
 
-def compress_recursive(  # noqa: PLR0912
+def compress_recursive(
     algo: 'Algorithm',
     structures: list[Structure],
     offset: int = 0,
@@ -711,8 +667,8 @@ def compress_recursive(  # noqa: PLR0912
                 break
 
         if found:
-            # For nested compression, detect structures within setup/action
-            # Use cache to avoid redundant detection (reuse string keys)
+            # Recursively compress nested structures in setup and action
+            # Use cache to avoid redundant detection
             setup_key = str(found.setup)
             if setup_key not in structure_cache:
                 structure_cache[setup_key] = detect_structures(found.setup)
@@ -724,20 +680,19 @@ def compress_recursive(  # noqa: PLR0912
             action_structures = structure_cache[action_key]
 
             # Recursively compress if nested structures found
-            # Reuse string keys to avoid redundant str() calls
             if setup_structures:
                 setup_str = compress_recursive(
                     found.setup, setup_structures, 0, structure_cache,
                 )
             else:
-                setup_str = setup_key  # Reuse already-computed string
+                setup_str = setup_key
 
             if action_structures:
                 action_str = compress_recursive(
                     found.action, action_structures, 0, structure_cache,
                 )
             else:
-                action_str = action_key  # Reuse already-computed string
+                action_str = action_key
 
             if found.type == 'conjugate':
                 result.append(f'[{setup_str}: {action_str}]')

@@ -944,8 +944,9 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action)
+        classification = classify_commutator(setup, action, cache)
         self.assertEqual(classification, 'pure')
 
     def test_classify_a9_commutator_with_cancellation(self) -> None:
@@ -955,8 +956,9 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # Setup ends with R, action starts with R -> cancellation
         setup = Algorithm.parse_moves('U R')
         action = Algorithm.parse_moves('R F D')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action)
+        classification = classify_commutator(setup, action, cache)
         # Total moves = 2*2 + 3*2 = 10, has cancellation at R/R
         self.assertEqual(classification, 'A9')
 
@@ -966,8 +968,9 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # 10 moves total (2+3+2+3), no cancellation
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D L')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action)
+        classification = classify_commutator(setup, action, cache)
         self.assertEqual(classification, 'orthogonal')
 
     def test_classify_extended_commutator(self) -> None:
@@ -975,8 +978,9 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
         setup = Algorithm.parse_moves('R U F')
         action = Algorithm.parse_moves('D L B')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action)
+        classification = classify_commutator(setup, action, cache)
         # Total moves = 3*2 + 3*2 = 12 moves
         self.assertEqual(classification, 'extended')
 
@@ -986,8 +990,9 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # Less than 8 moves
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action)
+        classification = classify_commutator(setup, action, cache)
         # Total moves = 1*2 + 1*2 = 4 moves (not pure, not 10)
         self.assertEqual(classification, 'other')
 
@@ -1138,27 +1143,30 @@ class IsInverseAtTestCase(unittest.TestCase):
 
         algo = Algorithm.parse_moves("R U U' R'")
         pattern = Algorithm.parse_moves('R')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
         # R' should appear at position 3
-        self.assertTrue(is_inverse_at(algo, 3, pattern))
+        self.assertTrue(is_inverse_at(algo, 3, pattern, cache))
 
     def test_is_inverse_at_not_inverse(self) -> None:
         """Test when pattern is not inverse at position."""
 
         algo = Algorithm.parse_moves('R U F D')
         pattern = Algorithm.parse_moves('R')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
         # U is not R' at position 1
-        self.assertFalse(is_inverse_at(algo, 1, pattern))
+        self.assertFalse(is_inverse_at(algo, 1, pattern, cache))
 
     def test_is_inverse_at_out_of_bounds(self) -> None:
         """Test inverse detection when position is out of bounds."""
 
         algo = Algorithm.parse_moves('R U')
         pattern = Algorithm.parse_moves('R U F')
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
         # Not enough space for 3-move inverse
-        self.assertFalse(is_inverse_at(algo, 0, pattern))
+        self.assertFalse(is_inverse_at(algo, 0, pattern, cache))
 
     def test_is_inverse_at_with_cache(self) -> None:
         """Test inverse detection with caching."""
@@ -1170,19 +1178,17 @@ class IsInverseAtTestCase(unittest.TestCase):
         pattern = Algorithm.parse_moves('R U')
 
         inverse_cache: BoundedCache[str, Algorithm] = BoundedCache(10)
-        string_cache: BoundedCache[int, str] = BoundedCache(10)
 
         # First call should populate cache
         # Inverse of "R U" is "U' R'" at position 2
-        result = is_inverse_at(algo, 2, pattern, inverse_cache, string_cache)
+        result = is_inverse_at(algo, 2, pattern, inverse_cache)
         self.assertTrue(result)
 
         # Cache should be populated
         self.assertGreater(len(inverse_cache), 0)
-        self.assertGreater(len(string_cache), 0)
 
         # Second call should use cache
-        result2 = is_inverse_at(algo, 2, pattern, inverse_cache, string_cache)
+        result2 = is_inverse_at(algo, 2, pattern, inverse_cache)
         self.assertTrue(result2)
 
     def test_is_inverse_at_empty_pattern(self) -> None:
@@ -1190,9 +1196,10 @@ class IsInverseAtTestCase(unittest.TestCase):
 
         algo = Algorithm.parse_moves('R U')
         pattern = Algorithm([])
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
         # Empty pattern has zero length, should match at position 0
-        self.assertTrue(is_inverse_at(algo, 0, pattern))
+        self.assertTrue(is_inverse_at(algo, 0, pattern, cache))
 
 
 class EfficiencyRatingTestCase(unittest.TestCase):
