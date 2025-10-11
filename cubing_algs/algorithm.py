@@ -13,6 +13,8 @@ from cubing_algs.impacts import compute_impacts
 from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
+from cubing_algs.structure import StructureData
+from cubing_algs.structure import compute_structure
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
@@ -244,6 +246,33 @@ class Algorithm(UserList[Move]):
             0.4  # Hand balance (0.5 is perfect)
         """
         return compute_ergonomics(self)
+
+    @property
+    def structure(self) -> StructureData:
+        """
+        Analyze the structural composition of this algorithm.
+
+        Computes comprehensive structural metrics including detection of
+        conjugate and commutator patterns, nesting analysis, compression
+        ratios, and coverage statistics.
+
+        This analysis helps understand algorithm composition, identify
+        patterns for memorization, and evaluate the mathematical structure
+        of move sequences.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("F R U R' U' F'")
+            >>> struct = alg.structure
+            >>> struct.compressed
+            '[F: [R, U]]'
+            >>> struct.total_structures
+            2  # One conjugate, one commutator
+            >>> struct.conjugate_count
+            1
+            >>> struct.commutator_count
+            1
+        """
+        return compute_structure(self)
 
     @property
     def min_cube_size(self) -> int:
