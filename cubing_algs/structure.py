@@ -637,7 +637,7 @@ def detect_structures(
     return structures
 
 
-def compress_recursive(
+def compress_recursive(  # noqa: PLR0912
     algo: 'Algorithm',
     structures: list[Structure],
     offset: int = 0,
