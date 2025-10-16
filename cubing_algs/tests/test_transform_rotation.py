@@ -671,3 +671,109 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_compress_final_rotations_only(self) -> None:
+        provide = parse_moves('y')
+        expect = parse_moves('y')
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("y y'")
+        expect = parse_moves('')
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("y' y")
+        expect = parse_moves('')
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("y y' y")
+        expect = parse_moves('y')
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_compress_final_rotations_timed_only(self) -> None:
+        provide = parse_moves("y'@0")
+        expect = parse_moves("y'@0")
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("y'@0 y@3630")
+        expect = parse_moves('')
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("y'@0 y@3630 y'@5970")
+        expect = parse_moves("y'@5970")
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("y'@0 y@3630 y'@5970 y@6600")
+        expect = parse_moves('')
+
+        result = compress_final_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
