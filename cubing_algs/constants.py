@@ -211,7 +211,7 @@ RESLICE_E_MOVES = {
     # 2-move patterns (sorted form is canonical)
     "D' U": ['E', 'y'],
     "D U'": ["E'", "y'"],
-    'D2 U2': ['E2'],
+    'D2 U2': ['E2 y2'],
 
     # 3-move patterns with rotation (sorted form is canonical)
     "D' U y'": ['E'],

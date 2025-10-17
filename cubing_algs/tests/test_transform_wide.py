@@ -1,5 +1,6 @@
 import unittest
 
+from cubing_algs.constants import REWIDE_MOVES
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.degrip import degrip_full_moves
@@ -9,6 +10,7 @@ from cubing_algs.transform.wide import rewide_moves
 from cubing_algs.transform.wide import rewide_timed_moves
 from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.transform.wide import unwide_slice_moves
+from cubing_algs.vcube import VCube
 
 
 class TransformWideTestCase(unittest.TestCase):
@@ -408,3 +410,17 @@ class TransformWideTimedTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+
+class TransformWideEquivalenceTestCase(unittest.TestCase):
+
+    def test_equivalences(self) -> None:
+        for moves, equivalence in REWIDE_MOVES.items():
+            with self.subTest(moves=moves, equivalence=equivalence):
+                cube_a = VCube()
+                cube_a.rotate(parse_moves(moves))
+
+                cube_b = VCube()
+                cube_b.rotate(parse_moves(equivalence))
+
+                self.assertEqual(cube_a.state, cube_b.state)
