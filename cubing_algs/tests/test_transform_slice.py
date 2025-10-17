@@ -467,6 +467,30 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_reslice_m_complete_timed_moves_alt(self) -> None:
+        expect = parse_moves('M@0 F@70')
+        move_tests = [
+            ["L'@0 R@30 x'@60 F@70"],
+            ["R@0 L'@30 x'@60 F@70"],
+            ["x'@0 L'@30 R@60 F@70"],
+            ["x'@0 R@30 L'@60 F@70"],
+            ["L'@0 x'@30 R@60 F@70"],
+            ["R@0 x'@30 L'@60 F@70"],
+        ]
+
+        for moves in move_tests:
+            provide = parse_moves(moves)
+
+            result = reslice_m_timed_moves(50)(provide)
+
+            self.assertEqual(
+                result,
+                expect,
+            )
+
+            for m in result:
+                self.assertTrue(isinstance(m, Move))
+
     def test_reslice_m_complete_timed_moves_failed(self) -> None:
         provide = parse_moves("L'@0 R@30 x'@60 F@70")
 
