@@ -166,75 +166,63 @@ UNSLICE_ROTATION_MOVES = {
 }
 
 RESLICE_M_MOVES = {
-    "R L'": ['M', 'x'],
+    # 2-move patterns (sorted form is canonical)
     "L' R": ['M', 'x'],
-    "R' L": ["M'", "x'"],
     "L R'": ["M'", "x'"],
-    'R2 L2': ['M2', 'x2'],
     'L2 R2': ['M2', 'x2'],
 
-    "r' R": ['M'],
-    "R r'": ['M'],
-    "l L'": ['M'],
+    # 3-move patterns with rotation (sorted form is canonical)
+    "L' R x'": ['M'],
+    "L R' x": ["M'"],
+    'L2 R2 x2': ['M2'],
+
+    # Wide move patterns (sorted form is canonical)
     "L' l": ['M'],
-
-    "r R'": ["M'"],
-    "R' r": ["M'"],
-    "l' L": ["M'"],
+    "R r'": ['M'],
     "L l'": ["M'"],
-
-    'R2 r2': ['M2'],
-    'r2 R2': ['M2'],
+    "R' r": ["M'"],
     'L2 l2': ['M2'],
-    'l2 L2': ['M2'],
+    'R2 r2': ['M2'],
 }
 
 RESLICE_S_MOVES = {
-    "F' B": ['S', "z'"],
+    # 2-move patterns (sorted form is canonical)
     "B F'": ['S', "z'"],
-    "F B'": ["S'", 'z'],
     "B' F": ["S'", 'z'],
     'B2 F2': ['S2', 'z2'],
-    'F2 B2': ['S2', 'z2'],
 
-    "f F'": ['S'],
+    # 3-move patterns with rotation (sorted form is canonical)
+    "B F' z": ['S'],
+    "B' F z'": ["S'"],
+    'B2 F2 z2': ['S2'],
+
+    # Wide move patterns (sorted form is canonical)
     "F' f": ['S'],
-    "b' B": ['S'],
     "B b'": ['S'],
-
-    "f' F": ["S'"],
     "F f'": ["S'"],
-    "b B'": ["S'"],
     "B' b": ["S'"],
-
-    'F2 f2': ['S2'],
-    'f2 F2': ['S2'],
     'B2 b2': ['S2'],
-    'b2 B2': ['S2'],
+    'F2 f2': ['S2'],
 }
 
 RESLICE_E_MOVES = {
-    "U D'": ['E', 'y'],
+    # 2-move patterns (sorted form is canonical)
     "D' U": ['E', 'y'],
-    "U' D": ["E'", "y'"],
     "D U'": ["E'", "y'"],
-    'U2 D2': ['E2'],
     'D2 U2': ['E2'],
 
-    "u' U": ['E'],
+    # 3-move patterns with rotation (sorted form is canonical)
+    "D' U y'": ['E'],
+    "D U' y": ["E'"],
+    'D2 U2 y2': ['E2'],
+
+    # Wide move patterns (sorted form is canonical)
     "U u'": ['E'],
-    "d D'": ['E'],
     "D' d": ['E'],
-
-    "u U'": ["E'"],
     "U' u": ["E'"],
-    "d' D": ["E'"],
     "D d'": ["E'"],
-
-    'U2 u2': ['E2'],
-    'u2 U2': ['E2'],
     'D2 d2': ['E2'],
-    'u2 D2': ['E2'],
+    'U2 u2': ['E2'],
 }
 
 RESLICE_MOVES = {}

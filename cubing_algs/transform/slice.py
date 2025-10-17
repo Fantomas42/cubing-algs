@@ -55,6 +55,74 @@ def unslice_rotation_moves(old_moves: Algorithm) -> Algorithm:
     return unslice(old_moves, UNSLICE_ROTATION_MOVES)
 
 
+def try_match_pattern(
+        pattern: str,
+        config: dict[str, list[str]]) -> list[str] | None:
+    """
+    Try to match a pattern against the config, checking both the original
+    pattern and its normalized (sorted) form.
+    """
+    # First try exact match
+    if pattern in config:
+        return config[pattern]
+
+    # Try normalized match (sorted alphabetically)
+    moves = pattern.split()
+    normalized = ' '.join(sorted(moves))
+    if normalized in config:
+        return config[normalized]
+
+    return None
+
+
+def is_within_threshold(
+        moves_to_check: list[Move],
+        threshold: int) -> bool:
+    """
+    Check if consecutive moves are within the threshold time.
+
+    Returns True if threshold is 0, or if all consecutive moves
+    are within the threshold time.
+    """
+    if not threshold:
+        return True
+
+    for i in range(len(moves_to_check) - 1):
+        current = moves_to_check[i]
+        next_move = moves_to_check[i + 1]
+        if (
+            current.is_timed
+            and next_move.is_timed
+            and abs(next_move.timed - current.timed) > threshold
+        ):
+            return False
+
+    return True
+
+
+def try_match_n_moves(
+        old_moves: Algorithm,
+        start_index: int,
+        n: int,
+        config: dict[str, list[str]],
+        threshold: int) -> list[str] | None:
+    """
+    Try to match n consecutive moves starting at start_index.
+
+    Returns the matched replacement moves if found, None otherwise.
+    """
+    if start_index + n > len(old_moves):
+        return None
+
+    moves_to_check = [old_moves[i] for i in range(start_index, start_index + n)]
+
+    if not is_within_threshold(moves_to_check, threshold):
+        return None
+
+    pattern = ' '.join(str(move.untimed) for move in moves_to_check)
+    return try_match_pattern(pattern, config)
+
+
 def reslice(
         old_moves: Algorithm,
         config: dict[str, list[str]],
@@ -63,6 +131,9 @@ def reslice(
 ) -> Algorithm:
     """
     Convert move combinations back to slice moves using configuration.
+
+    Patterns are matched in an order-independent way, so the config only
+    needs to store one canonical ordering of each pattern.
     """
     if max_depth <= 0:
         return old_moves
@@ -71,31 +142,22 @@ def reslice(
     moves: list[Move] = []
     changed = False
 
-    while i < len(old_moves) - 1:
-        current_move = old_moves[i]
-        next_move = old_moves[i + 1]
-
-        sliced = f'{ current_move.untimed } { next_move.untimed }'
-        valid_threshold = True
-        if (
-                threshold
-                and current_move.timed
-                and next_move.timed
-                and next_move.timed - current_move.timed > threshold
-        ):
-            valid_threshold = False
-
-        if valid_threshold and sliced in config:
-            for move in config[sliced]:
-                moves.append(Move(move + old_moves[i].time))
-            changed = True
-            i += 2
+    while i < len(old_moves):
+        # Try 3-move pattern first, then 2-move pattern
+        for pattern_length in (3, 2):
+            matched = try_match_n_moves(
+                old_moves, i, pattern_length, config, threshold,
+            )
+            if matched:
+                for move in matched:
+                    moves.append(Move(move + old_moves[i].time))
+                changed = True
+                i += pattern_length
+                break
         else:
+            # No pattern matched, just add the current move
             moves.append(old_moves[i])
             i += 1
-
-    if i < len(old_moves):
-        moves.append(old_moves[i])
 
     if changed:
         return reslice(

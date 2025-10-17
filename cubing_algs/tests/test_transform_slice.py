@@ -190,6 +190,20 @@ class TransformSliceTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_reslice_m_moves_complete_timed(self) -> None:
+        provide = parse_moves("L'@100 R@200 x'@300 F@400")
+        expect = parse_moves('M@100 F@400')
+
+        result = reslice_m_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_reslice_m_moves_big(self) -> None:
         provide = parse_moves("L' R 2F")
         expect = parse_moves('M x 2F')
@@ -395,6 +409,57 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         self.assertEqual(
             result,
             expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_reslice_m_complete_timed_moves(self) -> None:
+        provide = parse_moves("L'@0 R@30 x'@60 F@70")
+        expect = parse_moves('M@0 F@70')
+
+        result = reslice_m_timed_moves(50)(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("L'@0 x'@30 R@60 F@70")
+
+        result = reslice_m_timed_moves(50)(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves("x'@0 L'@30 R@60 F@70")
+
+        result = reslice_m_timed_moves(50)(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_reslice_m_complete_timed_moves_failed(self) -> None:
+        provide = parse_moves("L'@0 R@30 x'@60 F@70")
+
+        result = reslice_m_timed_moves(10)(provide)
+
+        self.assertEqual(
+            result,
+            provide,
         )
 
         for m in result:
