@@ -128,6 +128,7 @@ def reslice(
         config: dict[str, list[str]],
         max_depth: int = MAX_ITERATIONS,
         threshold: int = 0,
+        pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Algorithm:
     """
     Convert move combinations back to slice moves using configuration.
@@ -143,8 +144,8 @@ def reslice(
     changed = False
 
     while i < len(old_moves):
-        # Try 3-move pattern first, then 2-move pattern
-        for pattern_length in (3, 2):
+        # Try pattern lengths in the specified order
+        for pattern_length in pattern_lengths:
             matched = try_match_n_moves(
                 old_moves, i, pattern_length, config, threshold,
             )
@@ -162,7 +163,7 @@ def reslice(
     if changed:
         return reslice(
             Algorithm(moves), config,
-            max_depth - 1, threshold,
+            max_depth - 1, threshold, pattern_lengths,
         )
 
     return Algorithm(moves)
@@ -198,44 +199,60 @@ def reslice_moves(old_moves: Algorithm) -> Algorithm:
 
 def reslice_m_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
+        pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Callable[[Algorithm], Algorithm]:
     """
     Create a timed M-slice reslicing function with configurable threshold.
     """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
-        return reslice(old_moves, RESLICE_M_MOVES, threshold=threshold)
+        return reslice(
+            old_moves, RESLICE_M_MOVES,
+            threshold=threshold,
+            pattern_lengths=pattern_lengths,
+        )
 
     return _reslice_timed_moves
 
 
 def reslice_s_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
+        pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Callable[[Algorithm], Algorithm]:
     """
     Create a timed S-slice reslicing function with configurable threshold.
     """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
-        return reslice(old_moves, RESLICE_S_MOVES, threshold=threshold)
+        return reslice(
+            old_moves, RESLICE_S_MOVES,
+            threshold=threshold,
+            pattern_lengths=pattern_lengths,
+        )
 
     return _reslice_timed_moves
 
 
 def reslice_e_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
+        pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Callable[[Algorithm], Algorithm]:
     """
     Create a timed E-slice reslicing function with configurable threshold.
     """
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
-        return reslice(old_moves, RESLICE_E_MOVES, threshold=threshold)
+        return reslice(
+            old_moves, RESLICE_E_MOVES,
+            threshold=threshold,
+            pattern_lengths=pattern_lengths,
+        )
 
     return _reslice_timed_moves
 
 
 def reslice_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
+        pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Callable[[Algorithm], Algorithm]:
     """
     Create a timed reslicing function
@@ -243,6 +260,10 @@ def reslice_timed_moves(
     """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
-        return reslice(old_moves, RESLICE_MOVES, threshold=threshold)
+        return reslice(
+            old_moves, RESLICE_MOVES,
+            threshold=threshold,
+            pattern_lengths=pattern_lengths,
+        )
 
     return _reslice_timed_moves
