@@ -6,6 +6,7 @@ from cubing_algs.transform.degrip import degrip_full_moves
 from cubing_algs.transform.rotation import remove_final_rotations
 from cubing_algs.transform.wide import rewide
 from cubing_algs.transform.wide import rewide_moves
+from cubing_algs.transform.wide import rewide_timed_moves
 from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.transform.wide import unwide_slice_moves
 
@@ -350,3 +351,60 @@ class TransformWideTestCase(unittest.TestCase):
             rewide(provide, {}, 0),
             provide,
         )
+
+
+class TransformWideTimedTestCase(unittest.TestCase):
+
+    def test_rewide_timed_moves(self) -> None:
+        provide = parse_moves('L@0 x@30 F')
+        expect = parse_moves('r@0 F')
+
+        result = rewide_timed_moves(50)(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_rewide_timed_moves_alt(self) -> None:
+        provide = parse_moves('x@0 L@30 F')
+        expect = parse_moves('r@0 F')
+
+        result = rewide_timed_moves(50)(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_rewide_timed_moves_failed(self) -> None:
+        provide = parse_moves('L@10 x@30 F')
+
+        result = rewide_timed_moves(10)(provide)
+
+        self.assertEqual(
+            result,
+            provide,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_rewide_timed_moves_failed_zero_move(self) -> None:
+        provide = parse_moves('L@0 x@30 F')
+
+        result = rewide_timed_moves(10)(provide)
+
+        self.assertEqual(
+            result,
+            provide,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))

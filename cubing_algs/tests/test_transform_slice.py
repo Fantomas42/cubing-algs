@@ -324,6 +324,19 @@ class TransformSliceTimedTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_reslice_timed_moves_failed_zero_move(self) -> None:
+        provide = parse_moves("U'@0 D@150")
+
+        result = reslice_timed_moves(10)(provide)
+
+        self.assertEqual(
+            result,
+            provide,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_reslice_timed_moves_chained(self) -> None:
         provide = parse_moves(
             "F@21031 "
