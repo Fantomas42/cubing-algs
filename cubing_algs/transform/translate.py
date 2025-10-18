@@ -38,8 +38,10 @@ def translate_pov_moves(old_moves: Algorithm) -> Algorithm:
 
     for i, move in enumerate(old_moves):
         if move.is_rotation_move:
-            new_moves[i:] = translate_moves(
-                Algorithm([move.untimed]),
-            )(new_moves[i:])
+            new_moves[i:] = [
+                move, *translate_moves(
+                    Algorithm([move.untimed]),
+                )(new_moves[i + 1:]),
+            ]
 
     return new_moves

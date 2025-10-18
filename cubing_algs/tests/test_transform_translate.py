@@ -135,9 +135,9 @@ class TransformTranslatePOVTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_translate_pov_z2_y(self) -> None:
-        provide = parse_moves("z2 L D L' D' y' F D F' D'")
-        expect = parse_moves("z2 R U R' U' y R U R' U'")
+    def test_translate_pov_y_middle(self) -> None:
+        provide = parse_moves("R U R' U' y B U B' U'")
+        expect = parse_moves("R U R' U' y R U R' U'")
 
         result = translate_pov_moves(provide)
 
