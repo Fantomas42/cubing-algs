@@ -4,6 +4,7 @@ from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.translate import translate_moves
+from cubing_algs.transform.translate import translate_pov_moves
 
 
 class TransformTranslateTestCase(unittest.TestCase):
@@ -112,6 +113,51 @@ class TransformTranslateTestCase(unittest.TestCase):
         self.assertEqual(
             result,
             provide,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+
+class TransformTranslatePOVTestCase(unittest.TestCase):
+
+    def test_translate_pov_z2(self) -> None:
+        provide = parse_moves("z2 L D L' D'")
+        expect = parse_moves("z2 R U R' U'")
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_translate_pov_z2_y(self) -> None:
+        provide = parse_moves("z2 L D L' D' y' F D F' D'")
+        expect = parse_moves("z2 R U R' U' y R U R' U'")
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_translate_pov_z2_timed(self) -> None:
+        provide = parse_moves("z2@0 L@10 D@20 L'@30 D'@40")
+        expect = parse_moves("z2@0 R@10 U@20 R'@30 U'@40")
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
         )
 
         for m in result:

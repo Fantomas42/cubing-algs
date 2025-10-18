@@ -12,18 +12,34 @@ def translate_moves(
     Translate moves from a list of rotation moves.
     """
 
-    def _translate_moves(algorithm: Algorithm) -> Algorithm:
-        if not orientation_moves or not algorithm:
-            return algorithm
+    def _translate_moves(old_moves: Algorithm) -> Algorithm:
+        if not orientation_moves or not old_moves:
+            return old_moves
 
         for orientation_move in orientation_moves:
             if not orientation_move.is_rotation_move:
                 msg = f'{ orientation_move } is not a rotation move'
                 raise InvalidMoveError(msg)
 
+        new_moves = old_moves.copy()
         for orientation_move in orientation_moves:
-            algorithm = DEGRIP_FULL[str(orientation_move.inverted)](algorithm)
+            new_moves = DEGRIP_FULL[str(orientation_move.inverted)](new_moves)
 
-        return algorithm
+        return new_moves
 
     return _translate_moves
+
+
+def translate_pov_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Translate moves to match user POV.
+    """
+    new_moves = old_moves.copy()
+
+    for i, move in enumerate(old_moves):
+        if move.is_rotation_move:
+            new_moves[i:] = translate_moves(
+                Algorithm([move.untimed]),
+            )(new_moves[i:])
+
+    return new_moves
