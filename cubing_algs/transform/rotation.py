@@ -9,7 +9,41 @@ from cubing_algs.transform.optimize import optimize_triple_moves
 CANCEL_TRIPLET: set[str | Move] = {'x2', 'y2', 'z2'}
 
 
-def remove_final_rotations(old_moves: Algorithm) -> Algorithm:
+def remove_rotations(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove rotations from an algorithm.
+
+    Strips rotation moves while preserving the core face moves.
+    """
+    moves: list[Move] = []
+
+    for move in old_moves:
+        if not move.is_rotation_move:
+            moves.append(move)
+
+    return Algorithm(moves)
+
+
+def remove_starting_rotations(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove starting rotations and pauses from an algorithm.
+
+    Strips rotation moves and pauses from the beginning of the algorithm
+    while preserving the core face moves.
+    """
+    moves: list[Move] = []
+
+    rotation = True
+    for move in old_moves:
+        if rotation and (move.is_rotation_move or move.is_pause):
+            continue
+        rotation = False
+        moves.append(move)
+
+    return Algorithm(moves)
+
+
+def remove_ending_rotations(old_moves: Algorithm) -> Algorithm:
     """
     Remove trailing rotations and pauses from an algorithm.
 
@@ -134,11 +168,11 @@ def optimize_conjugate_rotations(
     return moves
 
 
-def split_moves_final_rotations(
+def split_moves_ending_rotations(
         old_moves: Algorithm,
 ) -> tuple[Algorithm, Algorithm]:
     """
-    Split an algorithm into core moves and final rotations.
+    Split an algorithm into core moves and ending rotations.
 
     Separates the algorithm into two parts: the main moves and
     the trailing rotations and pauses.
@@ -195,14 +229,14 @@ def compress_rotations(
     return moves
 
 
-def compress_final_rotations(old_moves: Algorithm) -> Algorithm:
+def compress_ending_rotations(old_moves: Algorithm) -> Algorithm:
     """
-    Optimize final rotations in an algorithm.
+    Optimize ending rotations in an algorithm.
 
-    Separates core moves from final rotations, optimizes the rotations,
+    Separates core moves from ending rotations, optimizes the rotations,
     and recombines them for a more efficient algorithm.
     """
-    moves, rotations = split_moves_final_rotations(old_moves)
+    moves, rotations = split_moves_ending_rotations(old_moves)
 
     if len(rotations) > 1:
         rotations = compress_rotations(rotations)

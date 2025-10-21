@@ -4,7 +4,7 @@ from cubing_algs.constants import REWIDE_MOVES
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.degrip import degrip_full_moves
-from cubing_algs.transform.rotation import remove_final_rotations
+from cubing_algs.transform.rotation import remove_ending_rotations
 from cubing_algs.transform.wide import rewide
 from cubing_algs.transform.wide import rewide_moves
 from cubing_algs.transform.wide import rewide_timed_moves
@@ -103,7 +103,7 @@ class TransformWideTestCase(unittest.TestCase):
         provide = parse_moves('f r u')
         expect = parse_moves('B D B')
 
-        result = remove_final_rotations(
+        result = remove_ending_rotations(
             degrip_full_moves(
                 unwide_rotation_moves(
                     provide,
@@ -123,7 +123,7 @@ class TransformWideTestCase(unittest.TestCase):
         provide = parse_moves('b l d')
         expect = parse_moves('F D B')
 
-        result = remove_final_rotations(
+        result = remove_ending_rotations(
             degrip_full_moves(
                 unwide_rotation_moves(
                     provide,

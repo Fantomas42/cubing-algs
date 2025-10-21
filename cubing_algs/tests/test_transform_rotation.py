@@ -3,22 +3,24 @@ import unittest
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.rotation import compress_final_rotations
+from cubing_algs.transform.rotation import compress_ending_rotations
 from cubing_algs.transform.rotation import compress_rotations
 from cubing_algs.transform.rotation import optimize_conjugate_rotations
 from cubing_algs.transform.rotation import optimize_double_rotations
 from cubing_algs.transform.rotation import optimize_triple_rotations
-from cubing_algs.transform.rotation import remove_final_rotations
-from cubing_algs.transform.rotation import split_moves_final_rotations
+from cubing_algs.transform.rotation import remove_ending_rotations
+from cubing_algs.transform.rotation import remove_rotations
+from cubing_algs.transform.rotation import remove_starting_rotations
+from cubing_algs.transform.rotation import split_moves_ending_rotations
 
 
-class TransformRemoveFinalRotationsTestCase(unittest.TestCase):
+class TransformRemoveEndingRotationsTestCase(unittest.TestCase):
 
-    def test_remove_final_rotations(self) -> None:
+    def test_remove_ending_rotations(self) -> None:
         provide = parse_moves('R2 F U x y2')
         expect = parse_moves('R2 F U')
 
-        result = remove_final_rotations(provide)
+        result = remove_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -28,11 +30,11 @@ class TransformRemoveFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_remove_final_rotations_timed(self) -> None:
+    def test_remove_ending_rotations_timed(self) -> None:
         provide = parse_moves('R2@1 F@2 U@3 x@4 y2@5')
         expect = parse_moves('R2@1 F@2 U@3')
 
-        result = remove_final_rotations(provide)
+        result = remove_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -42,11 +44,25 @@ class TransformRemoveFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_remove_final_rotations_timed_paused(self) -> None:
+    def test_remove_ending_rotations_timed_preserve_starting(self) -> None:
+        provide = parse_moves('x@0 R2@1 F@2 U@3 x@4 y2@5')
+        expect = parse_moves('x@0 R2@1 F@2 U@3')
+
+        result = remove_ending_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_remove_ending_rotations_timed_paused(self) -> None:
         provide = parse_moves('R2@1 F@2 U@3 x@4 .@5 y2@6')
         expect = parse_moves('R2@1 F@2 U@3')
 
-        result = remove_final_rotations(provide)
+        result = remove_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -59,7 +75,7 @@ class TransformRemoveFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves('R2@1 F@2 U@3 .@4 x@5 .@6 y2@7')
         expect = parse_moves('R2@1 F@2 U@3')
 
-        result = remove_final_rotations(provide)
+        result = remove_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -70,13 +86,143 @@ class TransformRemoveFinalRotationsTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
 
-class SplitMovesFinalRotationsTestCase(unittest.TestCase):
+class TransformRemoveStartingRotationsTestCase(unittest.TestCase):
 
-    def test_split_moves_final_rotations(self) -> None:
+    def test_remove_starting_rotations(self) -> None:
+        provide = parse_moves('x y2 R2 F U')
+        expect = parse_moves('R2 F U')
+
+        result = remove_starting_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_remove_starting_rotations_timed(self) -> None:
+        provide = parse_moves('x@1 y2@2 R2@3 F@4 U@5')
+        expect = parse_moves('R2@3 F@4 U@5')
+
+        result = remove_starting_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_remove_starting_rotations_timed_preserve_ending(self) -> None:
+        provide = parse_moves('x@1 y2@2 R2@3 F@4 U@5 x@6')
+        expect = parse_moves('R2@3 F@4 U@5 x@6')
+
+        result = remove_starting_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_remove_starting_rotations_timed_paused(self) -> None:
+        provide = parse_moves('z@0 . x2@1 R2@2 F@3 U@4')
+        expect = parse_moves('R2@2 F@3 U@4')
+
+        result = remove_starting_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves('.@0 x@1 .@3 .@4 R2@5 F@6 U@7')
+        expect = parse_moves('R2@5 F@6 U@7')
+
+        result = remove_starting_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+
+class TransformRemoveRotationsTestCase(unittest.TestCase):
+
+    def test_remove_rotations(self) -> None:
+        provide = parse_moves('z R2 F U x y2')
+        expect = parse_moves('R2 F U')
+
+        result = remove_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_remove_rotations_timed(self) -> None:
+        provide = parse_moves('y@0 R2@1 F@2 U@3 x@4 y2@5')
+        expect = parse_moves('R2@1 F@2 U@3')
+
+        result = remove_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_remove_rotations_timed_paused(self) -> None:
+        provide = parse_moves('x@0 R2@1 F@2 U@3 x@4 .@5 y2@6')
+        expect = parse_moves('R2@1 F@2 U@3 .@5')
+
+        result = remove_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+        provide = parse_moves('R2@1 F@2 U@3 .@4 x@5 .@6 y2@7')
+        expect = parse_moves('R2@1 F@2 U@3 .@4 .@6')
+
+        result = remove_rotations(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+
+class SplitMovesEndingRotationsTestCase(unittest.TestCase):
+
+    def test_split_moves_ending_rotations(self) -> None:
         provide = parse_moves("R2 F x x x'")
         expect = (parse_moves('R2 F'), parse_moves("x x x'"))
 
-        result = split_moves_final_rotations(provide)
+        result = split_moves_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -86,22 +232,22 @@ class SplitMovesFinalRotationsTestCase(unittest.TestCase):
         for m in result[1]:
             self.assertTrue(isinstance(m, Move))
 
-    def test_split_moves_final_rotations_empty(self) -> None:
+    def test_split_moves_ending_rotations_empty(self) -> None:
         provide = parse_moves('R2 F')
         expect = (parse_moves('R2 F'), Algorithm())
 
-        result = split_moves_final_rotations(provide)
+        result = split_moves_ending_rotations(provide)
 
         self.assertEqual(
             result,
             expect,
         )
 
-    def test_split_moves_final_rotations_start(self) -> None:
+    def test_split_moves_ending_rotations_start(self) -> None:
         provide = parse_moves('x R2 F')
         expect = (parse_moves('x R2 F'), Algorithm())
 
-        result = split_moves_final_rotations(provide)
+        result = split_moves_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -478,13 +624,13 @@ class TransformCompressRotationsTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
 
-class TransformCompressFinalRotationsTestCase(unittest.TestCase):
+class TransformCompressEndingRotationsTestCase(unittest.TestCase):
 
-    def test_compress_final_rotations(self) -> None:
+    def test_compress_ending_rotations(self) -> None:
         provide = parse_moves("R2 F x x x' x x x")
         expect = parse_moves('R2 F')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -494,11 +640,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_empty(self) -> None:
+    def test_compress_ending_rotations_empty(self) -> None:
         provide = parse_moves('R2 F')
         expect = parse_moves('R2 F')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -508,11 +654,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_timed(self) -> None:
+    def test_compress_ending_rotations_timed(self) -> None:
         provide = parse_moves("R2@1 F@2 x'@3 x@4")
         expect = parse_moves('R2@1 F@2')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -522,11 +668,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_impair(self) -> None:
+    def test_compress_ending_rotations_impair(self) -> None:
         provide = parse_moves("R2 F x' x x'")
         expect = parse_moves("R2 F x'")
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -536,11 +682,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_double_double(self) -> None:
+    def test_compress_ending_rotations_double_double(self) -> None:
         provide = parse_moves('R2 F x2 z2')
         expect = parse_moves('R2 F y2')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -553,7 +699,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves('R2 F x2 y2')
         expect = parse_moves('R2 F z2')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -566,7 +712,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves('R2 F y2 z2')
         expect = parse_moves('R2 F x2')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -576,11 +722,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_trible_double(self) -> None:
+    def test_compress_ending_rotations_trible_double(self) -> None:
         provide = parse_moves('R2 F x2 z2 y2')
         expect = parse_moves('R2 F')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -590,11 +736,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_trible_double_failed(self) -> None:
+    def test_compress_ending_rotations_trible_double_failed(self) -> None:
         provide = parse_moves('R2 F x2 z2 y')
         expect = parse_moves("R2 F y'")
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -604,11 +750,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_simple_double_simple(self) -> None:
+    def test_compress_ending_rotations_simple_double_simple(self) -> None:
         provide = parse_moves("R2 F x z2 x'")
         expect = parse_moves('R2 F y2')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -621,7 +767,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("R2 F x' z2 x")
         expect = parse_moves('R2 F y2')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -631,11 +777,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_simple_double_simple_clear(self) -> None:
+    def test_compress_ending_rotations_simple_double_simple_clear(self) -> None:
         provide = parse_moves("R2 F x z2 x' y2")
         expect = parse_moves('R2 F')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -648,7 +794,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("R2 F x' z2 x y2")
         expect = parse_moves('R2 F')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -658,11 +804,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_complex(self) -> None:
+    def test_compress_ending_rotations_complex(self) -> None:
         provide = parse_moves("R2 F z2 x z2 x' y2 x x y2")
         expect = parse_moves('R2 F')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -672,11 +818,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_only(self) -> None:
+    def test_compress_ending_rotations_only(self) -> None:
         provide = parse_moves('y')
         expect = parse_moves('y')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -689,7 +835,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("y y'")
         expect = parse_moves('')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -702,7 +848,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("y' y")
         expect = parse_moves('')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -715,7 +861,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("y y' y")
         expect = parse_moves('y')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -725,11 +871,11 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_compress_final_rotations_timed_only(self) -> None:
+    def test_compress_ending_rotations_timed_only(self) -> None:
         provide = parse_moves("y'@0")
         expect = parse_moves("y'@0")
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -742,7 +888,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("y'@0 y@3630")
         expect = parse_moves('')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -755,7 +901,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("y'@0 y@3630 y'@5970")
         expect = parse_moves("y'@5970")
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,
@@ -768,7 +914,7 @@ class TransformCompressFinalRotationsTestCase(unittest.TestCase):
         provide = parse_moves("y'@0 y@3630 y'@5970 y@6600")
         expect = parse_moves('')
 
-        result = compress_final_rotations(provide)
+        result = compress_ending_rotations(provide)
 
         self.assertEqual(
             result,

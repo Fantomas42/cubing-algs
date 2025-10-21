@@ -11,7 +11,7 @@ from cubing_algs.transform.degrip import degrip_full_moves
 from cubing_algs.transform.degrip import degrip_x_moves
 from cubing_algs.transform.degrip import degrip_y_moves
 from cubing_algs.transform.degrip import degrip_z_moves
-from cubing_algs.transform.rotation import remove_final_rotations
+from cubing_algs.transform.rotation import remove_ending_rotations
 from cubing_algs.transform.size import compress_moves
 from cubing_algs.vcube import VCube
 
@@ -30,13 +30,13 @@ class TransformDegripTestCase(unittest.TestCase):
         expect_algo = parse_moves(str(expect))
 
         with self.subTest(provide=provide, expect=expect):
-            degripped = remove_final_rotations(
+            degripped = remove_ending_rotations(
                 function(provide_algo),
             )
 
             self.assertEqual(
                 degripped,
-                remove_final_rotations(
+                remove_ending_rotations(
                     expect_algo,
                 ),
             )
@@ -60,7 +60,7 @@ class TransformDegripTestCase(unittest.TestCase):
         with self.subTest(name=name, provide=provide, expect=expect):
 
             degripped = compress_moves(
-                remove_final_rotations(
+                remove_ending_rotations(
                     function(provide_algo),
                 ),
             )
@@ -68,7 +68,7 @@ class TransformDegripTestCase(unittest.TestCase):
             self.assertEqual(
                 degripped,
                 compress_moves(
-                    remove_final_rotations(
+                    remove_ending_rotations(
                         expect_algo,
                     ),
                 ),
@@ -406,7 +406,7 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = parse_moves('3L')
 
         self.assertEqual(
-            remove_final_rotations(
+            remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
             expect,
@@ -416,7 +416,7 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = parse_moves("3L'")
 
         self.assertEqual(
-            remove_final_rotations(
+            remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
             expect,
@@ -426,7 +426,7 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = parse_moves('3L2')
 
         self.assertEqual(
-            remove_final_rotations(
+            remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
             expect,
@@ -437,7 +437,7 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = parse_moves('3L@200')
 
         self.assertEqual(
-            remove_final_rotations(
+            remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
             expect,
@@ -447,7 +447,7 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = parse_moves("3L'@200")
 
         self.assertEqual(
-            remove_final_rotations(
+            remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
             expect,
@@ -457,7 +457,7 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = parse_moves('3L2@200')
 
         self.assertEqual(
-            remove_final_rotations(
+            remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
             expect,
@@ -468,7 +468,7 @@ class TransformDegripTestCase(unittest.TestCase):
         expect = parse_moves('.@150 3L@200')
 
         self.assertEqual(
-            remove_final_rotations(
+            remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
             expect,
