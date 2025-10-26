@@ -617,11 +617,11 @@ class TestComputeQtmDistance(unittest.TestCase):
 
         # Corner on U face to corner on D face (opposite faces)
         distance = compute_qtm_distance(0, 27, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 2)
 
         # Corner on F face to corner on B face (opposite faces)
         distance = compute_qtm_distance(18, 45, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 2)
 
     def test_cross_face_edge_to_edge_placeholder(self) -> None:
         """
@@ -636,11 +636,11 @@ class TestComputeQtmDistance(unittest.TestCase):
 
         # Edge on U face to edge on D face (opposite faces)
         distance = compute_qtm_distance(1, 28, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 2)
 
         # Edge on L face to edge on R face (opposite faces)
         distance = compute_qtm_distance(37, 10, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 2)
 
     def test_cross_face_adjacent_faces_placeholder(self) -> None:
         """
@@ -660,23 +660,23 @@ class TestComputeQtmDistance(unittest.TestCase):
         distance = compute_qtm_distance(6, 20, self.cube)
         self.assertEqual(distance, 0)
 
-    def test_cross_face_opposite_faces_placeholder(self) -> None:
+    def test_cross_face_opposite_faces(self) -> None:
         """
-        Test cross-face movements between opposite faces return 0 (placeholder).
+        Test cross-face movements between opposite faces return 0.
 
         Opposite face pairs: U-D, R-L, F-B
         """
         # U to D
         distance = compute_qtm_distance(0, 35, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 4)
 
         # R to L
         distance = compute_qtm_distance(9, 44, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 4)
 
         # F to B
         distance = compute_qtm_distance(26, 45, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 4)
 
     def test_boundary_positions_to_themselves(self) -> None:
         """Test boundary positions (first and last) to themselves."""
@@ -810,6 +810,381 @@ class TestComputeQtmDistance(unittest.TestCase):
         # Cross face (placeholder - returns 0)
         distance = compute_qtm_distance(1, 19, self.cube)
         self.assertEqual(distance, 0)
+
+    def test_qtm_distance_same_face_all_positions(self) -> None:
+        """
+        Test QTM distance for all 81 position pairs on the same face.
+
+        Face layout (3x3 grid):
+        0 1 2    (corners: 0,2,6,8  edges: 1,3,5,7  center: 4)
+        3 4 5
+        6 7 8
+
+        Expected distances based on geometry:
+        - Same position: 0 QTM
+        - Center to center: 0 QTM
+        - Adjacent positions (1 step around face): 1 QTM
+        - Opposite positions (diagonal across face): 2 QTM
+
+        Geometric reasoning:
+        - Adjacent corners (e.g., 0→2, 2→8, 8→6, 6→0): 1 QTM (90° rotation)
+        - Opposite corners (e.g., 0→8, 2→6): 2 QTM (180° rotation)
+        - Adjacent edges (e.g., 1→3, 3→7, 7→5, 5→1): 1 QTM (90° rotation)
+        - Opposite edges (e.g., 1→7, 3→5): 2 QTM (180° rotation)
+        """
+        # Test on U face (positions 0-8)
+        test_cases = [
+            # Same position (distance = 0)
+            (0, 0, 0), (1, 1, 0), (2, 2, 0), (3, 3, 0), (4, 4, 0),
+            (5, 5, 0), (6, 6, 0), (7, 7, 0), (8, 8, 0),
+
+            # Corner to corner movements
+            # Adjacent corners (1 QTM - 90° rotation)
+            (0, 2, 1), (2, 0, 1),  # top-left to top-right
+            (2, 8, 1), (8, 2, 1),  # top-right to bottom-right
+            (8, 6, 1), (6, 8, 1),  # bottom-right to bottom-left
+            (6, 0, 1), (0, 6, 1),  # bottom-left to top-left
+            # Opposite corners (2 QTM - 180° rotation)
+            (0, 8, 2), (8, 0, 2),  # top-left to bottom-right (diagonal)
+            (2, 6, 2), (6, 2, 2),  # top-right to bottom-left (diagonal)
+
+            # Edge to edge movements
+            # Adjacent edges (1 QTM - 90° rotation)
+            (1, 3, 1), (3, 1, 1),  # top to left
+            (3, 7, 1), (7, 3, 1),  # left to bottom
+            (7, 5, 1), (5, 7, 1),  # bottom to right
+            (5, 1, 1), (1, 5, 1),  # right to top
+            # Opposite edges (2 QTM - 180° rotation)
+            (1, 7, 2), (7, 1, 2),  # top to bottom
+            (3, 5, 2), (5, 3, 2),  # left to right
+
+            # Center to center (same position)
+            (4, 4, 0),
+
+            # Corner to edge movements (1 QTM - adjacent positions)
+            (0, 1, 1), (1, 0, 1),  # top-left corner to top edge
+            (0, 3, 1), (3, 0, 1),  # top-left corner to left edge
+            (2, 1, 1), (1, 2, 1),  # top-right corner to top edge
+            (2, 5, 1), (5, 2, 1),  # top-right corner to right edge
+            (6, 3, 1), (3, 6, 1),  # bottom-left corner to left edge
+            (6, 7, 1), (7, 6, 1),  # bottom-left corner to bottom edge
+            (8, 5, 1), (5, 8, 1),  # bottom-right corner to right edge
+            (8, 7, 1), (7, 8, 1),  # bottom-right corner to bottom edge
+        ]
+
+        for orig_pos, final_pos, expected_distance in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                distance = compute_qtm_distance(orig_pos, final_pos, self.cube)
+                self.assertEqual(
+                    distance, expected_distance,
+                    f'Distance from { orig_pos } to { final_pos } should be '
+                    f'{ expected_distance } QTM but got { distance }',
+                )
+
+    def test_qtm_distance_opposite_faces_corners_comprehensive(self) -> None:
+        """
+        Test QTM distance for all corner-to-corner pairs between opposite faces.
+
+        Opposite face pairs: U-D (0-27), R-L (9-36), F-B (18-45)
+        Corner positions: 0, 2, 6, 8 (relative to face start)
+
+        Geometric reasoning for opposite faces:
+        - Aligned corners (same relative position): 2 QTM
+          Example: U corner 0 → D corner 0 (both top-left in their orientation)
+        - 90° rotated: 3 QTM
+          Example: U corner 0 → D corner 2 (requires rotation + flip)
+        - 180° rotated (fully opposite): 4 QTM
+          Example: U corner 0 → D corner 8 (diagonal opposite)
+
+        Cube physics constraint: Corners can only move to corner positions.
+        """
+        # U face to D face (opposite faces)
+        # U corners: 0, 2, 6, 8  |  D corners: 27, 29, 33, 35
+        test_cases = [
+            # Aligned positions (2 QTM)
+            (0, 27, 2), (27, 0, 2),  # top-left to top-left
+            (2, 29, 2), (29, 2, 2),  # top-right to top-right
+            (6, 33, 2), (33, 6, 2),  # bottom-left to bottom-left
+            (8, 35, 2), (35, 8, 2),  # bottom-right to bottom-right
+
+            # 90° rotated positions (3 QTM)
+            (0, 29, 3), (29, 0, 3),  # top-left to top-right
+            (0, 33, 3), (33, 0, 3),  # top-left to bottom-left
+            (2, 27, 3), (27, 2, 3),  # top-right to top-left
+            (2, 35, 3), (35, 2, 3),  # top-right to bottom-right
+            (6, 27, 3), (27, 6, 3),  # bottom-left to top-left
+            (6, 35, 3), (35, 6, 3),  # bottom-left to bottom-right
+            (8, 29, 3), (29, 8, 3),  # bottom-right to top-right
+            (8, 33, 3), (33, 8, 3),  # bottom-right to bottom-left
+
+            # 180° rotated positions (4 QTM - diagonal opposite)
+            (0, 35, 4), (35, 0, 4),  # top-left to bottom-right
+            (2, 33, 4), (33, 2, 4),  # top-right to bottom-left
+            (6, 29, 4), (29, 6, 4),  # bottom-left to top-right
+            (8, 27, 4), (27, 8, 4),  # bottom-right to top-left
+        ]
+
+        # R face to L face (opposite faces)
+        # R corners: 9, 11, 15, 17  |  L corners: 36, 38, 42, 44
+        test_cases.extend([
+            # Aligned positions (2 QTM)
+            (9, 36, 2), (36, 9, 2),
+            (11, 38, 2), (38, 11, 2),
+            (15, 42, 2), (42, 15, 2),
+            (17, 44, 2), (44, 17, 2),
+
+            # 90° rotated positions (3 QTM)
+            (9, 38, 3), (38, 9, 3),
+            (9, 42, 3), (42, 9, 3),
+            (11, 36, 3), (36, 11, 3),
+            (11, 44, 3), (44, 11, 3),
+            (15, 36, 3), (36, 15, 3),
+            (15, 44, 3), (44, 15, 3),
+            (17, 38, 3), (38, 17, 3),
+            (17, 42, 3), (42, 17, 3),
+
+            # 180° rotated positions (4 QTM)
+            (9, 44, 4), (44, 9, 4),
+            (11, 42, 4), (42, 11, 4),
+            (15, 38, 4), (38, 15, 4),
+            (17, 36, 4), (36, 17, 4),
+        ])
+
+        # F face to B face (opposite faces)
+        # F corners: 18, 20, 24, 26  |  B corners: 45, 47, 51, 53
+        test_cases.extend([
+            # Aligned positions (2 QTM)
+            (18, 45, 2), (45, 18, 2),
+            (20, 47, 2), (47, 20, 2),
+            (24, 51, 2), (51, 24, 2),
+            (26, 53, 2), (53, 26, 2),
+
+            # 90° rotated positions (3 QTM)
+            (18, 47, 3), (47, 18, 3),
+            (18, 51, 3), (51, 18, 3),
+            (20, 45, 3), (45, 20, 3),
+            (20, 53, 3), (53, 20, 3),
+            (24, 45, 3), (45, 24, 3),
+            (24, 53, 3), (53, 24, 3),
+            (26, 47, 3), (47, 26, 3),
+            (26, 51, 3), (51, 26, 3),
+
+            # 180° rotated positions (4 QTM)
+            (18, 53, 4), (53, 18, 4),
+            (20, 51, 4), (51, 20, 4),
+            (24, 47, 4), (47, 24, 4),
+            (26, 45, 4), (45, 26, 4),
+        ])
+
+        for orig_pos, final_pos, expected_distance in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                distance = compute_qtm_distance(orig_pos, final_pos, self.cube)
+                self.assertEqual(
+                    distance, expected_distance,
+                    f'Corner distance from { orig_pos } to { final_pos } '
+                    f'should be { expected_distance } QTM but got { distance }',
+                )
+
+    def test_qtm_distance_opposite_faces_edges_comprehensive(self) -> None:
+        """
+        Test QTM distance for all edge-to-edge pairs between opposite faces.
+
+        Opposite face pairs: U-D (0-27), R-L (9-36), F-B (18-45)
+        Edge positions: 1, 3, 5, 7 (relative to face start)
+
+        Geometric reasoning for opposite faces:
+        - Aligned edges (same relative position): 2 QTM
+          Example: U edge 1 → D edge 1 (both top edge in their orientation)
+        - 90° rotated: 3 QTM
+          Example: U edge 1 → D edge 3 (requires rotation + flip)
+        - 180° rotated (fully opposite): 4 QTM
+          Example: U edge 1 → D edge 7 (opposite edge)
+
+        Cube physics constraint: Edges can only move to edge positions.
+        """
+        # U face to D face (opposite faces)
+        # U edges: 1, 3, 5, 7  |  D edges: 28, 30, 32, 34
+        test_cases = [
+            # Aligned positions (2 QTM)
+            (1, 28, 2), (28, 1, 2),  # top to top
+            (7, 34, 2), (34, 7, 2),  # bottom to bottom
+            (3, 32, 2), (32, 3, 2),  # left to right
+            (5, 30, 2), (30, 5, 2),  # right to left
+
+            # 90° rotated positions (3 QTM)
+            (1, 30, 3), (30, 1, 3),  # top to left
+            (1, 32, 3), (32, 1, 3),  # top to right
+            (3, 28, 3), (28, 3, 3),  # left to top
+            (3, 34, 3), (34, 3, 3),  # left to bottom
+            (5, 28, 3), (28, 5, 3),  # right to top
+            (5, 34, 3), (34, 5, 3),  # right to bottom
+            (7, 30, 3), (30, 7, 3),  # bottom to left
+            (7, 32, 3), (32, 7, 3),  # bottom to right
+
+            # 180° rotated positions (4 QTM - opposite edge)
+            (1, 34, 4), (34, 1, 4),  # top to bottom
+            (7, 28, 4), (28, 7, 4),  # bottom to top
+            (3, 30, 4), (30, 3, 4),  # left to left
+            (5, 32, 4), (32, 5, 4),  # right to right
+        ]
+
+        # R face to L face (opposite faces)
+        # R edges: 10, 12, 14, 16  |  L edges: 37, 39, 41, 43
+        test_cases.extend([
+            # Aligned positions (2 QTM)
+            (10, 37, 2), (37, 10, 2),
+            (16, 43, 2), (43, 16, 2),
+            (12, 41, 2), (41, 12, 2),
+            (14, 39, 2), (39, 14, 2),
+
+            # 90° rotated positions (3 QTM)
+            (10, 39, 3), (39, 10, 3),
+            (10, 41, 3), (41, 10, 3),
+            (12, 37, 3), (37, 12, 3),
+            (12, 43, 3), (43, 12, 3),
+            (14, 37, 3), (37, 14, 3),
+            (14, 43, 3), (43, 14, 3),
+            (16, 39, 3), (39, 16, 3),
+            (16, 41, 3), (41, 16, 3),
+
+            # 180° rotated positions (4 QTM)
+            (10, 43, 4), (43, 10, 4),
+            (16, 37, 4), (37, 16, 4),
+            (12, 39, 4), (39, 12, 4),
+            (14, 41, 4), (41, 14, 4),
+        ])
+
+        # F face to B face (opposite faces)
+        # F edges: 19, 21, 23, 25  |  B edges: 46, 48, 50, 52
+        test_cases.extend([
+            # Aligned positions (2 QTM)
+            (19, 46, 2), (46, 19, 2),
+            (25, 52, 2), (52, 25, 2),
+            (21, 50, 2), (50, 21, 2),
+            (23, 48, 2), (48, 23, 2),
+
+            # 90° rotated positions (3 QTM)
+            (19, 48, 3), (48, 19, 3),
+            (19, 50, 3), (50, 19, 3),
+            (21, 46, 3), (46, 21, 3),
+            (21, 52, 3), (52, 21, 3),
+            (23, 46, 3), (46, 23, 3),
+            (23, 52, 3), (52, 23, 3),
+            (25, 48, 3), (48, 25, 3),
+            (25, 50, 3), (50, 25, 3),
+
+            # 180° rotated positions (4 QTM)
+            (19, 52, 4), (52, 19, 4),
+            (25, 46, 4), (46, 25, 4),
+            (21, 48, 4), (48, 21, 4),
+            (23, 50, 4), (50, 23, 4),
+        ])
+
+        for orig_pos, final_pos, expected_distance in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                distance = compute_qtm_distance(orig_pos, final_pos, self.cube)
+                self.assertEqual(
+                    distance, expected_distance,
+                    f'Edge distance from { orig_pos } to { final_pos } '
+                    f'should be { expected_distance } QTM but got { distance }',
+                )
+
+    def test_qtm_distance_opposite_faces_center(self) -> None:
+        """
+        Test QTM distance for center-to-center between opposite faces.
+
+        Center position: 4 (relative to face start)
+
+        Geometric reasoning:
+        - Center to center on opposite faces: 2 QTM
+          (flip the cube along that axis)
+
+        Note: Centers don't have rotation orientation like corners/edges,
+        so there's only one distance value (2 QTM) for opposite face centers.
+        """
+        test_cases = [
+            # U face (4) to D face (31) - opposite faces
+            (4, 31, 2), (31, 4, 2),
+
+            # R face (13) to L face (40) - opposite faces
+            (13, 40, 2), (40, 13, 2),
+
+            # F face (22) to B face (49) - opposite faces
+            (22, 49, 2), (49, 22, 2),
+        ]
+
+        for orig_pos, final_pos, expected_distance in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                distance = compute_qtm_distance(orig_pos, final_pos, self.cube)
+                self.assertEqual(
+                    distance, expected_distance,
+                    f'Center distance from { orig_pos } to { final_pos } '
+                    f'should be { expected_distance } QTM but got { distance }',
+                )
+
+    def test_qtm_distance_center_to_center_same_face(self) -> None:
+        """
+        Test center to center on the same face (always 0 QTM).
+
+        Each face has only one center position, so center to center
+        on the same face is the same position.
+        """
+        # Test center to center on each face
+        face_centers = [4, 13, 22, 31, 40, 49]  # U, R, F, D, L, B
+
+        for center_pos in face_centers:
+            with self.subTest(face_center=center_pos):
+                distance = compute_qtm_distance(
+                    center_pos, center_pos, self.cube,
+                )
+                self.assertEqual(
+                    distance, 0,
+                    f'Center to itself should be 0 QTM but got { distance }',
+                )
+
+    def test_qtm_distance_all_faces_consistency(self) -> None:
+        """
+        Test that QTM distance logic is consistent across all faces.
+
+        Verifies that the same relative position movements produce the same
+        distances regardless of which face they're on.
+        """
+        face_starts = [0, 9, 18, 27, 36, 45]  # U, R, F, D, L, B
+
+        for face_start in face_starts:
+            with self.subTest(face_start=face_start):
+                # Test a few representative patterns
+                # Adjacent corners: 1 QTM
+                self.assertEqual(
+                    compute_qtm_distance(
+                        face_start + 0,
+                        face_start + 2, self.cube,
+                    ), 1,
+                )
+                # Opposite corners: 2 QTM
+                self.assertEqual(
+                    compute_qtm_distance(
+                        face_start + 0,
+                        face_start + 8,
+                        self.cube,
+                    ), 2,
+                )
+                # Adjacent edges: 1 QTM
+                self.assertEqual(
+                    compute_qtm_distance(
+                        face_start + 1,
+                        face_start + 3,
+                        self.cube,
+                    ), 1,
+                )
+                # Opposite edges: 2 QTM
+                self.assertEqual(
+                    compute_qtm_distance(
+                        face_start + 1,
+                        face_start + 7,
+                        self.cube,
+                    ), 2,
+                )
 
 
 class TestRotationOnlyAlgorithms(unittest.TestCase):
@@ -2195,23 +2570,23 @@ class TestOrientationInvariance(unittest.TestCase):
             self.assertEqual(
                 result['sum'],
                 base_result['sum'],
-                f"{metric_name} sum differs between "
-                f"{base_result['orientation']} and {result['orientation']}",
+                f'{ metric_name } sum differs between '
+                f"{ base_result['orientation'] } and { result['orientation'] }",
             )
 
-            self.assertAlmostEqual(
+            self.assertEqual(
                 result['mean'],
                 base_result['mean'],
-                10,
-                f"{metric_name} mean differs between "
-                f"{base_result['orientation']} and {result['orientation']}",
+                f'{ metric_name } mean differs between '
+                f"{ base_result['orientation'] } "
+                f"and { result['orientation'] }",
             )
 
             self.assertEqual(
                 result['max'],
                 base_result['max'],
-                f"{metric_name} max differs between "
-                f"{base_result['orientation']} and {result['orientation']}",
+                f'{ metric_name } max differs between '
+                f"{ base_result['orientation'] } and { result['orientation'] }",
             )
 
     def test_manhattan_distance_invariant_under_pre_orientation(self) -> None:

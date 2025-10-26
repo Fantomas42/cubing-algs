@@ -149,7 +149,7 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
 
     # Add cross-face distance
     factor = 1
-    if final.face_name == OPPOSITE_FACES[orig.face_name]:
+    if orig.face_name == OPPOSITE_FACES[final.face_name]:
         factor = 2
 
     return cube.size * factor + distance
@@ -189,6 +189,30 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
 
         # Any other movement on the same face is 1 quarter turn
         return 1
+
+    if orig.face_name == OPPOSITE_FACES[final.face_name]:
+        if orig.face_position == 4:
+            return 2
+
+        position_pair = (orig.face_position, final.face_position)
+
+        opposite_pairs_simple = {
+            (1, 1), (7, 7),  # Top edge <-> Bottom edge
+            (3, 5), (5, 3),  # Left edge <-> Right edge
+            (0, 0), (2, 2),  # Top-left corner + Top-right corner
+            (6, 6), (8, 8),  # Bottom-left corner + Bottom-right corner
+        }
+        opposite_pairs_double = {
+            (1, 7), (7, 1),  # Top edge <-> Bottom edge
+            (3, 3), (5, 5),  # Left edge <-> Right edge
+            (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
+            (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
+        }
+        if position_pair in opposite_pairs_simple:
+            return 2
+        if position_pair in opposite_pairs_double:
+            return 4
+        return 3
 
     # Placeholder implementation
     return 0
