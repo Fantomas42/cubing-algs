@@ -44,6 +44,7 @@ class FaceletPosition(NamedTuple):
     """Parsed facelet position information."""
     face_index: int
     face_name: str
+    face_position: int
     row: int
     col: int
 
@@ -116,13 +117,14 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
     """
     face_index = position // cube.face_size
     face_name = FACE_ORDER[face_index]
-    pos_in_face = position % cube.face_size
-    row = pos_in_face // cube.size
-    col = pos_in_face % cube.size
+    position_in_face = position % cube.face_size
+    row = position_in_face // cube.size
+    col = position_in_face % cube.size
 
     return FaceletPosition(
         face_index=face_index,
         face_name=face_name,
+        face_position=position_in_face,
         row=row,
         col=col,
     )
@@ -133,6 +135,9 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
     """
     Calculate Manhattan displacement distance between two positions.
     """
+    if original_pos == final_pos:
+        return 0
+
     orig = parse_facelet_position(original_pos, cube)
     final = parse_facelet_position(final_pos, cube)
 
@@ -158,11 +163,32 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     QTM distance represents the minimum number of quarter turns needed
     to move a facelet from its original position to its final position.
     """
+    if original_pos == final_pos:
+        return 0
+
     # TODO(me): Implement QTM distance calculation
     # This should calculate the minimum number of quarter turns
     # needed to move the facelet from original_pos to final_pos
     orig = parse_facelet_position(original_pos, cube)
     final = parse_facelet_position(final_pos, cube)
+
+    if orig.face_index == final.face_index:
+        # Same face movements
+        # Opposite positions (corners or edges) require 2 quarter turns
+        # Adjacent positions require 1 quarter turn
+        opposite_pairs = {
+            (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
+            (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
+            (1, 7), (7, 1),  # Top edge <-> Bottom edge
+            (3, 5), (5, 3),  # Left edge <-> Right edge
+        }
+
+        position_pair = (orig.face_position, final.face_position)
+        if position_pair in opposite_pairs:
+            return 2
+
+        # Any other movement on the same face is 1 quarter turn
+        return 1
 
     # Placeholder implementation
     return 0

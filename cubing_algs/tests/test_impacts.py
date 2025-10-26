@@ -13,6 +13,7 @@ from cubing_algs.impacts import compute_face_to_face_matrix
 from cubing_algs.impacts import compute_impacts
 from cubing_algs.impacts import compute_manhattan_distance
 from cubing_algs.impacts import compute_parity
+from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
 from cubing_algs.impacts import find_permutation_cycles
 from cubing_algs.vcube import VCube
@@ -394,6 +395,421 @@ class TestComputeManhattanDistance(unittest.TestCase):
         # but both should be positive when positions differ
         self.assertEqual(distance1, 4)
         self.assertEqual(distance2, 4)
+
+
+class TestComputeQtmDistance(unittest.TestCase):
+    """Test the compute_qtm_distance function."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.cube = VCube()
+
+    def test_same_position_returns_zero(self) -> None:
+        """Test that distance from a position to itself is zero."""
+        # Test corner positions
+        distance = compute_qtm_distance(0, 0, self.cube)
+        self.assertEqual(distance, 0)
+
+        distance = compute_qtm_distance(8, 8, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Test edge positions
+        distance = compute_qtm_distance(1, 1, self.cube)
+        self.assertEqual(distance, 0)
+
+        distance = compute_qtm_distance(7, 7, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Test across different faces
+        distance = compute_qtm_distance(26, 26, self.cube)
+        self.assertEqual(distance, 0)
+
+        distance = compute_qtm_distance(53, 53, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_same_face_opposite_corners_return_two(self) -> None:
+        """
+        Test that opposite corner positions on same face return 2.
+
+        Opposite corner pairs: (0, 8), (8, 0), (2, 6), (6, 2)
+        """
+        # U face (positions 0-8)
+        distance = compute_qtm_distance(0, 8, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(8, 0, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(2, 6, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(6, 2, self.cube)
+        self.assertEqual(distance, 2)
+
+    def test_same_face_opposite_edges_return_two(self) -> None:
+        """
+        Test that opposite edge positions on same face return 2.
+
+        Opposite edge pairs: (1, 7), (7, 1), (3, 5), (5, 3)
+        """
+        # U face (positions 0-8)
+        distance = compute_qtm_distance(1, 7, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(7, 1, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(3, 5, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(5, 3, self.cube)
+        self.assertEqual(distance, 2)
+
+    def test_same_face_adjacent_corners_return_one(self) -> None:
+        """
+        Test that adjacent corner positions on same face return 1.
+
+        Corner positions on a face: 0, 2, 6, 8
+        Adjacent pairs: (0,2), (2,8), (8,6), (6,0)
+        """
+        # U face adjacent corners
+        distance = compute_qtm_distance(0, 2, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(2, 0, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(2, 8, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(8, 2, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(8, 6, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(6, 8, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(6, 0, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(0, 6, self.cube)
+        self.assertEqual(distance, 1)
+
+    def test_same_face_adjacent_edges_return_one(self) -> None:
+        """
+        Test that adjacent edge positions on same face return 1.
+
+        Edge positions on a face: 1, 3, 5, 7
+        Adjacent pairs: (1,3), (3,7), (7,5), (5,1)
+        """
+        # U face adjacent edges
+        distance = compute_qtm_distance(1, 3, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(3, 1, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(3, 7, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(7, 3, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(7, 5, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(5, 7, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(5, 1, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(1, 5, self.cube)
+        self.assertEqual(distance, 1)
+
+    def test_same_face_opposite_corners_on_r_face(self) -> None:
+        """Test opposite corners on R face (positions 9-17)."""
+        # R face starts at position 9
+        distance = compute_qtm_distance(9, 17, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(17, 9, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(11, 15, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(15, 11, self.cube)
+        self.assertEqual(distance, 2)
+
+    def test_same_face_opposite_edges_on_f_face(self) -> None:
+        """Test opposite edges on F face (positions 18-26)."""
+        # F face starts at position 18
+        distance = compute_qtm_distance(19, 25, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(25, 19, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(21, 23, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(23, 21, self.cube)
+        self.assertEqual(distance, 2)
+
+    def test_same_face_adjacent_corners_on_d_face(self) -> None:
+        """Test adjacent corners on D face (positions 27-35)."""
+        # D face starts at position 27
+        distance = compute_qtm_distance(27, 29, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(29, 35, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(35, 33, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(33, 27, self.cube)
+        self.assertEqual(distance, 1)
+
+    def test_same_face_adjacent_edges_on_l_face(self) -> None:
+        """Test adjacent edges on L face (positions 36-44)."""
+        # L face starts at position 36
+        distance = compute_qtm_distance(37, 39, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(39, 43, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(43, 41, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(41, 37, self.cube)
+        self.assertEqual(distance, 1)
+
+    def test_same_face_opposite_corners_on_b_face(self) -> None:
+        """Test opposite corners on B face (positions 45-53)."""
+        # B face starts at position 45
+        distance = compute_qtm_distance(45, 53, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(53, 45, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(47, 51, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(51, 47, self.cube)
+        self.assertEqual(distance, 2)
+
+    def test_cross_face_corner_to_corner_placeholder(self) -> None:
+        """
+        Test cross-face corner movements currently return 0 (placeholder).
+
+        This tests the current implementation which has not yet implemented
+        cross-face QTM distance calculations.
+        """
+        # Corner on U face to corner on R face
+        distance = compute_qtm_distance(0, 9, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Corner on U face to corner on D face (opposite faces)
+        distance = compute_qtm_distance(0, 27, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Corner on F face to corner on B face (opposite faces)
+        distance = compute_qtm_distance(18, 45, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_cross_face_edge_to_edge_placeholder(self) -> None:
+        """
+        Test cross-face edge movements currently return 0 (placeholder).
+
+        This tests the current implementation which has not yet implemented
+        cross-face QTM distance calculations.
+        """
+        # Edge on U face to edge on R face
+        distance = compute_qtm_distance(1, 10, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Edge on U face to edge on D face (opposite faces)
+        distance = compute_qtm_distance(1, 28, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Edge on L face to edge on R face (opposite faces)
+        distance = compute_qtm_distance(37, 10, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_cross_face_adjacent_faces_placeholder(self) -> None:
+        """
+        Test cross-face movements between adjacent faces return 0 (placeholder).
+
+        Adjacent faces share an edge (e.g., U-R, U-F, R-F).
+        """
+        # U to R (adjacent faces)
+        distance = compute_qtm_distance(2, 9, self.cube)
+        self.assertEqual(distance, 0)
+
+        # R to F (adjacent faces)
+        distance = compute_qtm_distance(17, 18, self.cube)
+        self.assertEqual(distance, 0)
+
+        # U to F (adjacent faces)
+        distance = compute_qtm_distance(6, 20, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_cross_face_opposite_faces_placeholder(self) -> None:
+        """
+        Test cross-face movements between opposite faces return 0 (placeholder).
+
+        Opposite face pairs: U-D, R-L, F-B
+        """
+        # U to D
+        distance = compute_qtm_distance(0, 35, self.cube)
+        self.assertEqual(distance, 0)
+
+        # R to L
+        distance = compute_qtm_distance(9, 44, self.cube)
+        self.assertEqual(distance, 0)
+
+        # F to B
+        distance = compute_qtm_distance(26, 45, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_boundary_positions_to_themselves(self) -> None:
+        """Test boundary positions (first and last) to themselves."""
+        # First corner position
+        distance = compute_qtm_distance(0, 0, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Last corner position
+        distance = compute_qtm_distance(53, 53, self.cube)
+        self.assertEqual(distance, 0)
+
+        # First edge position on U face
+        distance = compute_qtm_distance(1, 1, self.cube)
+        self.assertEqual(distance, 0)
+
+        # Last edge position on B face
+        distance = compute_qtm_distance(52, 52, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_first_to_last_position_cross_face(self) -> None:
+        """Test distance from first cube position to last cube position."""
+        # Position 0 (U face top-left corner) to position 53
+        # (B face bottom-right corner)
+        # This is a cross-face movement (placeholder implementation)
+        distance = compute_qtm_distance(0, 53, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_all_faces_have_same_logic(self) -> None:
+        """
+        Test that the same-face logic works consistently across all faces.
+
+        Verify opposite corners return 2 on each face.
+        """
+        # Test opposite corners on each face
+        face_starts = [0, 9, 18, 27, 36, 45]  # U, R, F, D, L, B
+
+        for face_start in face_starts:
+            # Opposite corners (0,8) and (2,6)
+            distance = compute_qtm_distance(
+                face_start + 0, face_start + 8, self.cube,
+            )
+            self.assertEqual(distance, 2)
+
+            distance = compute_qtm_distance(
+                face_start + 2, face_start + 6, self.cube,
+            )
+            self.assertEqual(distance, 2)
+
+    def test_all_faces_adjacent_edges_logic(self) -> None:
+        """
+        Test that adjacent edge logic works consistently across all faces.
+
+        Verify adjacent edges return 1 on each face.
+        """
+        # Test adjacent edges on each face
+        face_starts = [0, 9, 18, 27, 36, 45]  # U, R, F, D, L, B
+
+        for face_start in face_starts:
+            # Adjacent edges (1,3), (3,7), (5,7), (1,5)
+            distance = compute_qtm_distance(
+                face_start + 1, face_start + 3, self.cube,
+            )
+            self.assertEqual(distance, 1)
+
+            distance = compute_qtm_distance(
+                face_start + 3, face_start + 7, self.cube,
+            )
+            self.assertEqual(distance, 1)
+
+            distance = compute_qtm_distance(
+                face_start + 5, face_start + 7, self.cube,
+            )
+            self.assertEqual(distance, 1)
+
+            distance = compute_qtm_distance(
+                face_start + 1, face_start + 5, self.cube,
+            )
+            self.assertEqual(distance, 1)
+
+    def test_all_faces_opposite_edges_logic(self) -> None:
+        """
+        Test that opposite edge logic works consistently across all faces.
+
+        Verify opposite edges return 2 on each face.
+        """
+        # Test opposite edges on each face
+        face_starts = [0, 9, 18, 27, 36, 45]  # U, R, F, D, L, B
+
+        for face_start in face_starts:
+            # Opposite edges (1,7) and (3,5)
+            distance = compute_qtm_distance(
+                face_start + 1, face_start + 7, self.cube,
+            )
+            self.assertEqual(distance, 2)
+
+            distance = compute_qtm_distance(
+                face_start + 3, face_start + 5, self.cube,
+            )
+            self.assertEqual(distance, 2)
+
+    def test_corner_movements_across_multiple_faces(self) -> None:
+        """
+        Test corner to corner movements work correctly across different faces.
+        """
+        # Same face corner movements
+        distance = compute_qtm_distance(0, 2, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(9, 17, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(27, 33, self.cube)
+        self.assertEqual(distance, 1)
+
+        # Cross face (placeholder - returns 0)
+        distance = compute_qtm_distance(0, 11, self.cube)
+        self.assertEqual(distance, 0)
+
+    def test_edge_movements_across_multiple_faces(self) -> None:
+        """Test edge to edge movements work correctly across different faces."""
+        # Same face edge movements
+        distance = compute_qtm_distance(1, 5, self.cube)
+        self.assertEqual(distance, 1)
+
+        distance = compute_qtm_distance(19, 25, self.cube)
+        self.assertEqual(distance, 2)
+
+        distance = compute_qtm_distance(37, 43, self.cube)
+        self.assertEqual(distance, 2)
+
+        # Cross face (placeholder - returns 0)
+        distance = compute_qtm_distance(1, 19, self.cube)
+        self.assertEqual(distance, 0)
 
 
 class TestComputeImpacts(unittest.TestCase):
