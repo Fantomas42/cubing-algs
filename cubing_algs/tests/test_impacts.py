@@ -812,6 +812,116 @@ class TestComputeQtmDistance(unittest.TestCase):
         self.assertEqual(distance, 0)
 
 
+class TestRotationOnlyAlgorithms(unittest.TestCase):
+    """Test that rotation-only algorithms have zero facelet displacement."""
+
+    def test_all_single_rotations_zero_displacement(self) -> None:
+        """Test all single rotation axes have zero displacement."""
+        rotations = [
+            'x', 'y', 'z',
+            "x'", "y'", "z'",
+            'x2', 'y2', 'z2',
+            'x y', 'y z', 'x z',
+        ]
+
+        for rotation_str in rotations:
+            with self.subTest(rotation=rotation_str):
+                algorithm = Algorithm.parse_moves(rotation_str)
+                result = compute_impacts(algorithm)
+
+                self.assertEqual(
+                    result.facelets_manhattan_distance.sum, 0,
+                    f"Rotation '{rotation_str}' should have zero "
+                    "Manhattan displacement",
+                )
+                self.assertEqual(
+                    result.facelets_qtm_distance.sum, 0,
+                    f"Rotation '{rotation_str}' should have zero "
+                    "QTM displacement",
+                )
+                self.assertEqual(
+                    result.facelets_mobilized_count, 0,
+                    f"Rotation '{rotation_str}' should have zero "
+                    "mobilized facelets",
+                )
+
+    def test_rotation_plus_moves_same_distance_as_moves_only(self) -> None:
+        """Test that rotation + moves has same distance as moves only."""
+        # Test with a simple scramble
+        scramble = "R U R' U'"
+        rotations = ['x', 'y', 'z', 'x2', 'y2', 'z2']
+
+        # Get baseline distance (no rotation)
+        baseline_algo = Algorithm.parse_moves(scramble)
+        baseline_result = compute_impacts(baseline_algo)
+
+        for rotation_str in rotations:
+            with self.subTest(rotation=rotation_str):
+                # Apply rotation before scramble
+                rotated_algo = Algorithm.parse_moves(
+                    f'{ rotation_str } { scramble }',
+                )
+                rotated_result = compute_impacts(rotated_algo)
+
+                # Distance metrics should be identical
+                self.assertEqual(
+                    rotated_result.facelets_manhattan_distance.sum,
+                    baseline_result.facelets_manhattan_distance.sum,
+                    'Manhattan distance should be same with pre-rotation '
+                    f"{ rotation_str }'",
+                )
+                self.assertEqual(
+                    rotated_result.facelets_qtm_distance.sum,
+                    baseline_result.facelets_qtm_distance.sum,
+                    'QTM distance should be same with pre-rotation '
+                    f"'{ rotation_str }'",
+                )
+                self.assertEqual(
+                    rotated_result.facelets_mobilized_count,
+                    baseline_result.facelets_mobilized_count,
+                    'Mobilized count should be same with pre-rotation '
+                    f"'{ rotation_str }'",
+                )
+
+    def test_moves_plus_rotation_same_distance_as_moves_only(self) -> None:
+        """Test that moves + rotation has same distance as moves only."""
+        # Test with a simple scramble
+        scramble = "R U R' U'"
+        rotations = ['x', 'y', 'z', 'x2', 'y2', 'z2']
+
+        # Get baseline distance (no rotation)
+        baseline_algo = Algorithm.parse_moves(scramble)
+        baseline_result = compute_impacts(baseline_algo)
+
+        for rotation_str in rotations:
+            with self.subTest(rotation=rotation_str):
+                # Apply rotation after scramble
+                rotated_algo = Algorithm.parse_moves(
+                    f'{scramble} {rotation_str}',
+                )
+                rotated_result = compute_impacts(rotated_algo)
+
+                # Distance metrics should be identical
+                self.assertEqual(
+                    rotated_result.facelets_manhattan_distance.sum,
+                    baseline_result.facelets_manhattan_distance.sum,
+                    'Manhattan distance should be same with post-rotation '
+                    f"'{ rotation_str }'",
+                )
+                self.assertEqual(
+                    rotated_result.facelets_qtm_distance.sum,
+                    baseline_result.facelets_qtm_distance.sum,
+                    'QTM distance should be same with post-rotation '
+                    f"'{ rotation_str }'",
+                )
+                self.assertEqual(
+                    rotated_result.facelets_mobilized_count,
+                    baseline_result.facelets_mobilized_count,
+                    'Mobilized count should be same with post-rotation'
+                    f"'{ rotation_str }'",
+                )
+
+
 class TestComputeImpacts(unittest.TestCase):
     """Test the compute_impacts function."""
 
