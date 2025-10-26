@@ -604,16 +604,13 @@ class TestComputeQtmDistance(unittest.TestCase):
         distance = compute_qtm_distance(51, 47, self.cube)
         self.assertEqual(distance, 2)
 
-    def test_cross_face_corner_to_corner_placeholder(self) -> None:
+    def test_cross_face_corner_to_corner(self) -> None:
         """
-        Test cross-face corner movements currently return 0 (placeholder).
-
-        This tests the current implementation which has not yet implemented
-        cross-face QTM distance calculations.
+        Test cross-face corner movements.
         """
         # Corner on U face to corner on R face
         distance = compute_qtm_distance(0, 9, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 2)
 
         # Corner on U face to corner on D face (opposite faces)
         distance = compute_qtm_distance(0, 27, self.cube)
@@ -623,16 +620,13 @@ class TestComputeQtmDistance(unittest.TestCase):
         distance = compute_qtm_distance(18, 45, self.cube)
         self.assertEqual(distance, 2)
 
-    def test_cross_face_edge_to_edge_placeholder(self) -> None:
+    def test_cross_face_edge_to_edge(self) -> None:
         """
-        Test cross-face edge movements currently return 0 (placeholder).
-
-        This tests the current implementation which has not yet implemented
-        cross-face QTM distance calculations.
+        Test cross-face edge movements.
         """
         # Edge on U face to edge on R face
         distance = compute_qtm_distance(1, 10, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 2)
 
         # Edge on U face to edge on D face (opposite faces)
         distance = compute_qtm_distance(1, 28, self.cube)
@@ -642,23 +636,23 @@ class TestComputeQtmDistance(unittest.TestCase):
         distance = compute_qtm_distance(37, 10, self.cube)
         self.assertEqual(distance, 2)
 
-    def test_cross_face_adjacent_faces_placeholder(self) -> None:
+    def test_cross_face_adjacent_faces(self) -> None:
         """
-        Test cross-face movements between adjacent faces return 0 (placeholder).
+        Test cross-face movements between adjacent faces.
 
         Adjacent faces share an edge (e.g., U-R, U-F, R-F).
         """
         # U to R (adjacent faces)
         distance = compute_qtm_distance(2, 9, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 3)
 
         # R to F (adjacent faces)
         distance = compute_qtm_distance(17, 18, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 3)
 
         # U to F (adjacent faces)
         distance = compute_qtm_distance(6, 20, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 3)
 
     def test_cross_face_opposite_faces(self) -> None:
         """
@@ -700,9 +694,8 @@ class TestComputeQtmDistance(unittest.TestCase):
         """Test distance from first cube position to last cube position."""
         # Position 0 (U face top-left corner) to position 53
         # (B face bottom-right corner)
-        # This is a cross-face movement (placeholder implementation)
         distance = compute_qtm_distance(0, 53, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 1)
 
     def test_all_faces_have_same_logic(self) -> None:
         """
@@ -791,9 +784,9 @@ class TestComputeQtmDistance(unittest.TestCase):
         distance = compute_qtm_distance(27, 33, self.cube)
         self.assertEqual(distance, 1)
 
-        # Cross face (placeholder - returns 0)
+        # Cross right face
         distance = compute_qtm_distance(0, 11, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 1)
 
     def test_edge_movements_across_multiple_faces(self) -> None:
         """Test edge to edge movements work correctly across different faces."""
@@ -807,9 +800,9 @@ class TestComputeQtmDistance(unittest.TestCase):
         distance = compute_qtm_distance(37, 43, self.cube)
         self.assertEqual(distance, 2)
 
-        # Cross face (placeholder - returns 0)
+        # Cross front face
         distance = compute_qtm_distance(1, 19, self.cube)
-        self.assertEqual(distance, 0)
+        self.assertEqual(distance, 2)
 
     def test_qtm_distance_same_face_all_positions(self) -> None:
         """
@@ -1096,21 +1089,21 @@ class TestComputeQtmDistance(unittest.TestCase):
         Center position: 4 (relative to face start)
 
         Geometric reasoning:
-        - Center to center on opposite faces: 2 QTM
-          (flip the cube along that axis)
+        - Center to center on opposite faces: 4 QTM
+          (flip the cube along that axis, with M2, S2 or E2)
 
         Note: Centers don't have rotation orientation like corners/edges,
-        so there's only one distance value (2 QTM) for opposite face centers.
+        so there's only one distance value (4 QTM) for opposite face centers.
         """
         test_cases = [
             # U face (4) to D face (31) - opposite faces
-            (4, 31, 2), (31, 4, 2),
+            (4, 31, 4), (31, 4, 4),
 
             # R face (13) to L face (40) - opposite faces
-            (13, 40, 2), (40, 13, 2),
+            (13, 40, 4), (40, 13, 4),
 
             # F face (22) to B face (49) - opposite faces
-            (22, 49, 2), (49, 22, 2),
+            (22, 49, 4), (49, 22, 4),
         ]
 
         for orig_pos, final_pos, expected_distance in test_cases:

@@ -192,7 +192,7 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
 
     if orig.face_name == OPPOSITE_FACES[final.face_name]:
         if orig.face_position == 4:
-            return 2
+            return 4  # Slice move like M2 or S2
 
         position_pair = (orig.face_position, final.face_position)
 
@@ -214,8 +214,127 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
             return 4
         return 3
 
-    # Placeholder implementation
-    return 0
+    def offset_right(position):
+        return {
+            0: 6,
+            1: 3,
+            2: 0,
+            3: 7,
+            4: 4,
+            5: 1,
+            6: 8,
+            7: 5,
+            8: 2,
+        }[position]
+
+    def offset_left(position):
+        return {
+            0: 2,
+            1: 5,
+            2: 8,
+            3: 1,
+            4: 4,
+            5: 7,
+            6: 0,
+            7: 3,
+            8: 6,
+        }[position]
+
+    def offset_up(position):
+        return {
+            0: 8,
+            1: 7,
+            2: 6,
+            3: 5,
+            4: 4,
+            5: 3,
+            6: 2,
+            7: 1,
+            8: 0,
+        }[position]
+
+    def offset_down(position):
+        return {
+            0: 0,
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4,
+            5: 5,
+            6: 6,
+            7: 7,
+            8: 8,
+        }[position]
+
+    ADJACENT_FACES = {
+        'U': {
+            'R': offset_right,
+            'L': offset_left,
+            'F': offset_down,
+            'B': offset_up,
+        },
+        'R': {
+            'F': offset_left,
+            'B': offset_right,
+            'U': offset_up,
+            'D': offset_down,
+        },
+        'F': {
+            'U': offset_up,
+            'D': offset_down,
+            'L': offset_left,
+            'R': offset_right,
+        },
+        'D': {
+            'R': offset_left,
+            'L': offset_right,
+            'F': offset_down,
+            'B': offset_up,
+        },
+        'L': {
+            'F': offset_right,
+            'B': offset_left,
+            'U': offset_up,
+            'D': offset_down,
+        },
+        'B': {
+            'U': offset_up,
+            'D': offset_down,
+            'L': offset_right,
+            'R': offset_left,
+        },
+    }
+
+    translated_position = ADJACENT_FACES.get(
+        orig.face_name,
+    ).get(
+        final.face_name,
+    )(final.face_position)
+
+    if orig.face_position == 4:
+        return 2  # Slice move like M or S
+
+    if translated_position == orig.face_position:
+        if {0, 2, 6, 8}:  # Corners
+            return 1
+        if orig.row == final.row or orig.col == final.col:
+            return 2
+        return 1
+
+    opposite_pairs = {
+        (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
+        (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
+        (1, 7), (7, 1),  # Top edge <-> Bottom edge
+        (3, 5), (5, 3),  # Left edge <-> Right edge
+    }
+
+    position_pair = (orig.face_position, translated_position)
+    if position_pair in opposite_pairs:
+        if orig.face_position in {1, 3, 5, 7}:  # Edges
+            return 4
+        return 3
+
+    return 2
 
 
 def compute_distance_metrics(
