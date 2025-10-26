@@ -646,12 +646,12 @@ class TestComputeQtmDistance(unittest.TestCase):
         distance = compute_qtm_distance(2, 9, self.cube)
         self.assertEqual(distance, 3)
 
-        # R to F (adjacent faces)
-        distance = compute_qtm_distance(17, 18, self.cube)
-        self.assertEqual(distance, 3)
-
         # U to F (adjacent faces)
         distance = compute_qtm_distance(6, 20, self.cube)
+        self.assertEqual(distance, 3)
+
+        # R to F (adjacent faces)
+        distance = compute_qtm_distance(17, 18, self.cube)
         self.assertEqual(distance, 3)
 
     def test_cross_face_opposite_faces(self) -> None:

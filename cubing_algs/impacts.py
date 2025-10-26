@@ -315,10 +315,12 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
         return 2  # Slice move like M or S
 
     if translated_position == orig.face_position:
-        if {0, 2, 6, 8}:  # Corners
+        if orig.face_position in {0, 2, 6, 8}:  # Corners
             return 1
+
         if orig.row == final.row or orig.col == final.col:
             return 2
+
         return 1
 
     opposite_pairs = {
