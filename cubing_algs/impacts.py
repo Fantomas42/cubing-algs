@@ -618,14 +618,19 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
             - facelets_mobilized_count: Total number of moved facelets
             - facelets_scrambled_percent: Percent of moved facelets
             - facelets_permutations: Mapping of original to final positions
-            - facelets_manhattan_distances: Manhattan distance each facelet traveled
-            - facelets_manhattan_distance_mean: Average Manhattan facelet displacement
-            - facelets_manhattan_distance_max: Maximum Manhattan facelet displacement
-            - facelets_manhattan_distance_sum: Total Manhattan displacement across all facelets
+            - facelets_manhattan_distances: Manhattan distance each facelet
+              traveled
+            - facelets_manhattan_distance_mean: Average Manhattan facelet
+              displacement
+            - facelets_manhattan_distance_max: Maximum Manhattan facelet
+              displacement
+            - facelets_manhattan_distance_sum: Total Manhattan displacement
+              across all facelets
             - facelets_qtm_distances: QTM distance each facelet traveled
             - facelets_qtm_distance_mean: Average QTM facelet displacement
             - facelets_qtm_distance_max: Maximum QTM facelet displacement
-            - facelets_qtm_distance_sum: Total QTM displacement across all facelets
+            - facelets_qtm_distance_sum: Total QTM displacement across all
+              facelets
             - facelets_face_mobility: Impact breakdown by face
 
         Cubie metrics (piece-level impact):
