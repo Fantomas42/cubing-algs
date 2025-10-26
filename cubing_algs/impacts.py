@@ -50,10 +50,14 @@ class ImpactData(NamedTuple):
     facelets_mobilized_count: int
     facelets_scrambled_percent: float
     facelets_permutations: dict[int, int]
-    facelets_distances: dict[int, int]
-    facelets_distance_mean: float
-    facelets_distance_max: int
-    facelets_distance_sum: int
+    facelets_manhattan_distances: dict[int, int]
+    facelets_manhattan_distance_mean: float
+    facelets_manhattan_distance_max: int
+    facelets_manhattan_distance_sum: int
+    facelets_qtm_distances: dict[int, int]
+    facelets_qtm_distance_mean: float
+    facelets_qtm_distance_max: int
+    facelets_qtm_distance_sum: int
     facelets_face_mobility: dict[str, int]
     facelets_face_to_face_matrix: dict[str, dict[str, int]]
     facelets_symmetry: dict[str, bool]
@@ -95,9 +99,9 @@ def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
     return face_impact
 
 
-def compute_distance(original_pos: int, final_pos: int, cube: 'VCube') -> int:
+def compute_manhattan_distance(original_pos: int, final_pos: int, cube: 'VCube') -> int:
     """
-    Calculate displacement distance between two positions.
+    Calculate Manhattan displacement distance between two positions.
     """
     orig_face = original_pos // cube.face_size
     orig_face_name = FACE_ORDER[orig_face]
@@ -122,6 +126,28 @@ def compute_distance(original_pos: int, final_pos: int, cube: 'VCube') -> int:
         factor = 2
 
     return cube.size * factor + distance
+
+
+def compute_qtm_distance(original_pos: int, final_pos: int, cube: 'VCube') -> int:
+    """
+    Calculate QTM (Quarter Turn Metric) distance between two positions.
+    """
+    # TODO: Implement QTM distance calculation
+    # This should calculate the minimum number of quarter turns
+    # needed to move the facelet from original_pos to final_pos
+    orig_face = original_pos // cube.face_size
+    orig_face_name = FACE_ORDER[orig_face]
+    orig_pos_in_face = original_pos % cube.face_size
+    orig_row = orig_pos_in_face // cube.size
+    orig_col = orig_pos_in_face % cube.size
+
+    final_face = final_pos // cube.face_size
+    final_face_name = FACE_ORDER[final_face]
+    final_pos_in_face = final_pos % cube.face_size
+    final_row = final_pos_in_face // cube.size
+    final_col = final_pos_in_face % cube.size
+
+    return 0
 
 
 def find_permutation_cycles(permutation: list[int]) -> list[list[int]]:
@@ -519,10 +545,14 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
             - facelets_mobilized_count: Total number of moved facelets
             - facelets_scrambled_percent: Percent of moved facelets
             - facelets_permutations: Mapping of original to final positions
-            - facelets_distances: Distance each facelet traveled
-            - facelets_distance_mean: Average facelet displacement
-            - facelets_distance_max: Maximum facelet displacement
-            - facelets_distance_sum: Total displacement across all facelets
+            - facelets_manhattan_distances: Manhattan distance each facelet traveled
+            - facelets_manhattan_distance_mean: Average Manhattan facelet displacement
+            - facelets_manhattan_distance_max: Maximum Manhattan facelet displacement
+            - facelets_manhattan_distance_sum: Total Manhattan displacement across all facelets
+            - facelets_qtm_distances: QTM distance each facelet traveled
+            - facelets_qtm_distance_mean: Average QTM facelet displacement
+            - facelets_qtm_distance_max: Maximum QTM facelet displacement
+            - facelets_qtm_distance_sum: Total QTM displacement across all facelets
             - facelets_face_mobility: Impact breakdown by face
 
         Cubie metrics (piece-level impact):
@@ -575,18 +605,31 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
         if final_pos != original_pos:
             permutations[original_pos] = final_pos
 
-    distances = {
-        original_pos: compute_distance(original_pos, final_pos, cube)
+    manhattan_distances = {
+        original_pos: compute_manhattan_distance(original_pos, final_pos, cube)
         for original_pos, final_pos in permutations.items()
     }
 
-    distance_values = list(distances.values())
-    distance_sum = sum(distance_values)
-    distance_mean = (
-        distance_sum / len(distance_values)
-        if distance_values else 0
+    manhattan_distance_values = list(manhattan_distances.values())
+    manhattan_distance_sum = sum(manhattan_distance_values)
+    manhattan_distance_mean = (
+        manhattan_distance_sum / len(manhattan_distance_values)
+        if manhattan_distance_values else 0
     )
-    distance_max = max(distance_values) if distance_values else 0
+    manhattan_distance_max = max(manhattan_distance_values) if manhattan_distance_values else 0
+
+    qtm_distances = {
+        original_pos: compute_qtm_distance(original_pos, final_pos, cube)
+        for original_pos, final_pos in permutations.items()
+    }
+
+    qtm_distance_values = list(qtm_distances.values())
+    qtm_distance_sum = sum(qtm_distance_values)
+    qtm_distance_mean = (
+        qtm_distance_sum / len(qtm_distance_values)
+        if qtm_distance_values else 0
+    )
+    qtm_distance_max = max(qtm_distance_values) if qtm_distance_values else 0
 
     fixed_count = mask.count('0')
     mobilized_count = mask.count('1')
@@ -640,10 +683,14 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
         facelets_mobilized_count=mobilized_count,
         facelets_scrambled_percent=scrambled_percent,
         facelets_permutations=permutations,
-        facelets_distances=distances,
-        facelets_distance_mean=distance_mean,
-        facelets_distance_max=distance_max,
-        facelets_distance_sum=distance_sum,
+        facelets_manhattan_distances=manhattan_distances,
+        facelets_manhattan_distance_mean=manhattan_distance_mean,
+        facelets_manhattan_distance_max=manhattan_distance_max,
+        facelets_manhattan_distance_sum=manhattan_distance_sum,
+        facelets_qtm_distances=qtm_distances,
+        facelets_qtm_distance_mean=qtm_distance_mean,
+        facelets_qtm_distance_max=qtm_distance_max,
+        facelets_qtm_distance_sum=qtm_distance_sum,
         facelets_face_mobility=face_mobility,
         facelets_face_to_face_matrix=face_to_face_matrix,
         facelets_symmetry=symmetry,
