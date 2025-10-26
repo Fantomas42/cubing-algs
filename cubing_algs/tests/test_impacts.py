@@ -2032,3 +2032,98 @@ class TestComputeCubieComplexity(unittest.TestCase):
             approach,
             'Complex case - multi-stage solving approach recommended',
         )
+
+
+class TestOrientationInvariance(unittest.TestCase):
+    """
+    Test that distance metrics are invariant under cube orientation.
+
+    When applying the same scramble to differently oriented cubes,
+    the distances statistics (sum, mean, max) should be identical
+    because the physical movement of pieces is the same regardless of
+    how we label the faces.
+    """
+
+    SCRAMBLE = "R U R' U' L' B L B' R2 D F2 D' R' U2 L U L' B2 R F"
+    ORIENTATIONS = ('', 'z2', 'x', 'x y')
+
+    def check_orientation_invariance(
+            self,
+            metric_type: str,
+            *, pre_orientation: bool,
+    ) -> None:
+        """
+        Check that distance metrics are invariant under orientation.
+        """
+        algorithm = Algorithm.parse_moves(self.SCRAMBLE)
+        metric_name = metric_type.title()
+        results = []
+
+        for orientation in self.ORIENTATIONS:
+            if pre_orientation:
+                oriented_algo = orientation + algorithm
+            else:
+                oriented_algo = algorithm + orientation
+
+            impacts = compute_impacts(oriented_algo)
+            distance_metrics = (
+                impacts.facelets_manhattan_distance
+                if metric_type == 'manhattan'
+                else impacts.facelets_qtm_distance
+            )
+
+            results.append({
+                'orientation': orientation,
+                'sum': distance_metrics.sum,
+                'mean': distance_metrics.mean,
+                'max': distance_metrics.max,
+            })
+
+        # Assert all orientations have identical metrics
+        base_result = results[0]
+        for result in results[1:]:
+            self.assertEqual(
+                result['sum'],
+                base_result['sum'],
+                f"{metric_name} sum differs between "
+                f"{base_result['orientation']} and {result['orientation']}",
+            )
+
+            self.assertAlmostEqual(
+                result['mean'],
+                base_result['mean'],
+                10,
+                f"{metric_name} mean differs between "
+                f"{base_result['orientation']} and {result['orientation']}",
+            )
+
+            self.assertEqual(
+                result['max'],
+                base_result['max'],
+                f"{metric_name} max differs between "
+                f"{base_result['orientation']} and {result['orientation']}",
+            )
+
+    def test_manhattan_distance_invariant_under_pre_orientation(self) -> None:
+        """
+        Test Manhattan distance metrics are same across pre orientations.
+        """
+        self.check_orientation_invariance('manhattan', pre_orientation=True)
+
+    def test_manhattan_distance_invariant_under_post_orientation(self) -> None:
+        """
+        Test Manhattan distance metrics are same across post orientations.
+        """
+        self.check_orientation_invariance('manhattan', pre_orientation=False)
+
+    def test_qtm_distance_invariant_under_pre_orientation(self) -> None:
+        """
+        Test that QTM distance metrics remain the same across pre orientations.
+        """
+        self.check_orientation_invariance('qtm', pre_orientation=True)
+
+    def test_qtm_distance_invariant_under_post_orientation(self) -> None:
+        """
+        Test that QTM distance metrics remain the same across post orientations.
+        """
+        self.check_orientation_invariance('qtm', pre_orientation=False)
