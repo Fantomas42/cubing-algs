@@ -167,9 +167,6 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     if original_pos == final_pos:
         return 0
 
-    # TODO(me): Implement QTM distance calculation
-    # This should calculate the minimum number of quarter turns
-    # needed to move the facelet from original_pos to final_pos
     orig = parse_facelet_position(original_pos, cube)
     final = parse_facelet_position(final_pos, cube)
 
@@ -215,32 +212,106 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
             return 4
         return 3
 
-    translated_position = transform_position(
-        orig.face_name,
-        final.face_name,
-        final.face_position,
-    )
-
-    print(
-        'Origin face_position',
-        orig.face_position,
-        'Final face_position',
-        final.face_position,
-        'Translated position',
-        translated_position,
-    )
+    # Adjacent face
 
     if orig.face_position == 4:
         return 2  # Slice move like M or S
 
-    if translated_position == orig.face_position:
-        if orig.face_position in {0, 2, 6, 8}:  # Corners
+    translated = parse_facelet_position(
+        transform_position(
+            orig.face_name,
+            final.face_name,
+            final.face_position,
+        ),
+        cube,
+    )
+
+    EDGES = {1, 3, 5, 7}
+    CORNERS = {0, 2, 6, 8}
+
+    if translated.face_position == orig.face_position:
+        if orig.face_position in CORNERS:
             return 1
+
+        if orig.face_position in EDGES:
+            # When translated position equals original position for edges,
+            # check the relationship based on which faces are involved
+            position_diff = abs(orig.face_position - final.face_position)
+
+            # The pattern depends on the face pair orientation:
+            # For U/D to R/L (side faces): positions 1,7 (vertical) -> 1 QTM, positions 3,5 (horizontal) -> varies
+            # For U/D to F/B (front/back): positions 3,5 (horizontal) -> 1 QTM, positions 1,7 (vertical) -> varies
+
+            # Determine if this involves a side face (R/L) or front/back face (F/B)
+            front_back_faces = {'F', 'B'}
+            side_faces = {'R', 'L'}
+
+            # Check if either face is in front/back or side
+            involves_front_back = (final.face_name in front_back_faces or
+                                  orig.face_name in front_back_faces)
+            involves_side = (final.face_name in side_faces or
+                           orig.face_name in side_faces)
+
+            if position_diff == 0:
+                # Same edge position on both faces
+                if involves_front_back:
+                    # U/D <-> F/B: horizontal edges (3,5) are 1 QTM
+                    if orig.row == 1:  # Horizontal edge
+                        return 1
+                    else:  # Vertical edge
+                        return 2
+                else:
+                    # U/D <-> R/L or other combinations: vertical edges (1,7) are 1 QTM
+                    if orig.col == 1:  # Vertical edge
+                        return 1
+                    else:  # Horizontal edge
+                        return 2
+            elif position_diff == 2:
+                # Check face pair to determine if this is 1 or 2 QTM
+                if involves_side:
+                    # U/D <-> R/L: diff=2 depends on whether U/D edge is vertical or horizontal
+                    top_bottom_faces = {'U', 'D'}
+                    if orig.face_name in top_bottom_faces:
+                        # Check U/D face: if col==1 (vertical), return 1; if row==1 (horizontal), return 2
+                        if orig.col == 1:  # Vertical edge on U/D
+                            return 1
+                        else:  # Horizontal edge on U/D
+                            return 2
+                    else:
+                        # Final is U/D, check final position
+                        if final.col == 1:  # Vertical edge on U/D
+                            return 1
+                        else:  # Horizontal edge on U/D
+                            return 2
+                else:
+                    # U/D <-> F/B or other: diff=2 is typically 2 QTM
+                    return 2
+            elif position_diff == 4:
+                # Check face pair
+                if involves_side:
+                    # U/D <-> R/L: diff=4 depends on whether U/D edge is vertical or horizontal
+                    # Determine which face is U/D
+                    top_bottom_faces = {'U', 'D'}
+                    if orig.face_name in top_bottom_faces:
+                        # Check U/D face: if col==1 (vertical), return 1; if row==1 (horizontal), return 2
+                        if orig.col == 1:  # Vertical edge on U/D
+                            return 1
+                        else:  # Horizontal edge on U/D
+                            return 2
+                    else:
+                        # Final is U/D, check final position
+                        if final.col == 1:  # Vertical edge on U/D
+                            return 1
+                        else:  # Horizontal edge on U/D
+                            return 2
+                else:
+                    # U/D <-> F/B: diff=4 is typically 1 QTM
+                    return 1
 
         if orig.row == final.row or orig.col == final.col:
             return 2
 
-        return 1
+        return 3
 
     opposite_pairs = {
         (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
@@ -249,10 +320,9 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
         (3, 5), (5, 3),  # Left edge <-> Right edge
     }
 
-    position_pair = (orig.face_position, translated_position)
+    position_pair = (orig.face_position, translated.face_position)
     if position_pair in opposite_pairs:
-        if orig.face_position in {1, 3, 5, 7}:  # Edges
-            return 4
+        # Adjacent faces: both edges and corners in opposite positions require 3 QTM
         return 3
 
     return 2
