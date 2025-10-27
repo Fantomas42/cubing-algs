@@ -1600,33 +1600,31 @@ class TestComputeQtmDistance(unittest.TestCase):
             (7, 43, 2), (43, 7, 2),  # bottom U to bottom L
         ])
 
-        # # U face (0-8) to B face (45-53) - adjacent faces
-        # # U edges: 1, 3, 5, 7  |  B edges: 46, 48, 50, 52
-        # # U edge 1 and B edge 46 share physical edge (top U, top B)
-        # test_cases.extend([
-        #     # Shared edge
-        #     (1, 46, 1), (46, 1, 1),  # top U to top B (shared)
+        # U face (0-8) to B face (45-53) - adjacent faces
+        # U edges: 1, 3, 5, 7  |  B edges: 46, 48, 50, 52
+        # U edge 1 and B edge 46 share physical edge (top U, top B)
+        test_cases.extend([
+            # Adjacent edges
+            (1, 46, 3), (46, 1, 3),  # top U to top B
+            (1, 48, 2), (48, 1, 2),  # top U to left B
+            (1, 50, 2), (50, 1, 2),  # top U to right B
+            (1, 52, 2), (52, 1, 2),  # top U to bottom B
 
-        #     # Adjacent edges
-        #     (1, 48, 2), (48, 1, 2),  # top U to left B
-        #     (1, 50, 2), (50, 1, 2),  # top U to right B
-        #     (1, 52, 2), (52, 1, 2),  # top U to bottom B
+            (3, 46, 2), (46, 3, 2),  # left U to top B
+            (3, 48, 3), (48, 3, 3),  # left U to left B
+            (3, 50, 1), (50, 3, 1),  # left U to right B
+            (3, 52, 2), (52, 3, 2),  # left U to bottom B
 
-        #     (3, 46, 2), (46, 3, 2),  # left U to top B
-        #     (3, 48, 2), (48, 3, 2),  # left U to left B
-        #     (3, 50, 3), (50, 3, 3),  # left U to right B
-        #     (3, 52, 3), (52, 3, 3),  # left U to bottom B
+            (5, 46, 2), (46, 5, 2),  # right U to top B
+            (5, 48, 1), (48, 5, 1),  # right U to left B
+            (5, 50, 3), (50, 5, 3),  # right U to right B
+            (5, 52, 2), (52, 5, 2),  # right U to bottom B
 
-        #     (5, 46, 2), (46, 5, 2),  # right U to top B
-        #     (5, 48, 3), (48, 5, 3),  # right U to left B
-        #     (5, 50, 2), (50, 5, 2),  # right U to right B
-        #     (5, 52, 3), (52, 5, 3),  # right U to bottom B
-
-        #     (7, 46, 2), (46, 7, 2),  # bottom U to top B
-        #     (7, 48, 3), (48, 7, 3),  # bottom U to left B
-        #     (7, 50, 3), (50, 7, 3),  # bottom U to right B
-        #     (7, 52, 3), (52, 7, 3),  # bottom U to bottom B
-        # ])
+            (7, 46, 2), (46, 7, 2),  # bottom U to top B
+            (7, 48, 2), (48, 7, 2),  # bottom U to left B
+            (7, 50, 2), (50, 7, 2),  # bottom U to right B
+            (7, 52, 3), (52, 7, 3),  # bottom U to bottom B
+        ])
 
         # # R face (9-17) to F face (18-26) - adjacent faces
         # # R edges: 10, 12, 14, 16  |  F edges: 19, 21, 23, 25

@@ -235,77 +235,51 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
 
         if orig.face_position in EDGES:
             # When translated position equals original position for edges,
-            # check the relationship based on which faces are involved
+            # use geometric data to determine QTM distance
+            from cubing_algs.face_transforms import EDGE_ORIENTATION_PRIORITY
+
             position_diff = abs(orig.face_position - final.face_position)
+            orientation = EDGE_ORIENTATION_PRIORITY.get((orig.face_name, final.face_name))
 
-            # The pattern depends on the face pair orientation:
-            # For U/D to R/L (side faces): positions 1,7 (vertical) -> 1 QTM, positions 3,5 (horizontal) -> varies
-            # For U/D to F/B (front/back): positions 3,5 (horizontal) -> 1 QTM, positions 1,7 (vertical) -> varies
+            if orientation is None:
+                # Unknown face pair, use fallback
+                return 2
 
-            # Determine if this involves a side face (R/L) or front/back face (F/B)
-            front_back_faces = {'F', 'B'}
-            side_faces = {'R', 'L'}
-
-            # Check if either face is in front/back or side
-            involves_front_back = (final.face_name in front_back_faces or
-                                  orig.face_name in front_back_faces)
-            involves_side = (final.face_name in side_faces or
-                           orig.face_name in side_faces)
+            top_bottom_faces = {'U', 'D'}
 
             if position_diff == 0:
                 # Same edge position on both faces
-                if involves_front_back:
-                    # U/D <-> F/B: horizontal edges (3,5) are 1 QTM
-                    if orig.row == 1:  # Horizontal edge
-                        return 1
-                    else:  # Vertical edge
-                        return 2
-                else:
-                    # U/D <-> R/L or other combinations: vertical edges (1,7) are 1 QTM
-                    if orig.col == 1:  # Vertical edge
-                        return 1
-                    else:  # Horizontal edge
-                        return 2
+                if orientation == 'horizontal':
+                    # Horizontal edges (row==1) are prioritized
+                    return 1 if orig.row == 1 else 2
+                else:  # vertical
+                    # Vertical edges (col==1) are prioritized
+                    return 1 if orig.col == 1 else 2
+
             elif position_diff == 2:
-                # Check face pair to determine if this is 1 or 2 QTM
-                if involves_side:
-                    # U/D <-> R/L: diff=2 depends on whether U/D edge is vertical or horizontal
-                    top_bottom_faces = {'U', 'D'}
+                # Parallel edges
+                if orientation == 'vertical':
+                    # Check U/D face if applicable
                     if orig.face_name in top_bottom_faces:
-                        # Check U/D face: if col==1 (vertical), return 1; if row==1 (horizontal), return 2
-                        if orig.col == 1:  # Vertical edge on U/D
-                            return 1
-                        else:  # Horizontal edge on U/D
-                            return 2
+                        return 1 if orig.col == 1 else 2
                     else:
-                        # Final is U/D, check final position
-                        if final.col == 1:  # Vertical edge on U/D
-                            return 1
-                        else:  # Horizontal edge on U/D
-                            return 2
-                else:
-                    # U/D <-> F/B or other: diff=2 is typically 2 QTM
-                    return 2
+                        return 1 if final.col == 1 else 2
+                else:  # horizontal
+                    # Check if both are on the prioritized edge (row==1)
+                    if orig.row == 1 and final.row == 1:
+                        return 1
+                    else:
+                        return 2
+
             elif position_diff == 4:
-                # Check face pair
-                if involves_side:
-                    # U/D <-> R/L: diff=4 depends on whether U/D edge is vertical or horizontal
-                    # Determine which face is U/D
-                    top_bottom_faces = {'U', 'D'}
+                # Perpendicular edges
+                if orientation == 'vertical':
+                    # Check U/D face if applicable
                     if orig.face_name in top_bottom_faces:
-                        # Check U/D face: if col==1 (vertical), return 1; if row==1 (horizontal), return 2
-                        if orig.col == 1:  # Vertical edge on U/D
-                            return 1
-                        else:  # Horizontal edge on U/D
-                            return 2
+                        return 1 if orig.col == 1 else 2
                     else:
-                        # Final is U/D, check final position
-                        if final.col == 1:  # Vertical edge on U/D
-                            return 1
-                        else:  # Horizontal edge on U/D
-                            return 2
-                else:
-                    # U/D <-> F/B: diff=4 is typically 1 QTM
+                        return 1 if final.col == 1 else 2
+                else:  # horizontal
                     return 1
 
         if orig.row == final.row or orig.col == final.col:
