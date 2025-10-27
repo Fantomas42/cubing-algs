@@ -138,3 +138,14 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
         'R': offset_left,
     },
 }
+
+
+def transform_position(original_face_name: str, destination_face_name: str,
+                       face_position: int) -> int:
+    return ADJACENT_FACE_TRANSFORMATIONS[
+        original_face_name
+    ][
+        destination_face_name
+    ](
+        face_position,
+    )

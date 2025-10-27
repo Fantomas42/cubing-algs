@@ -5,6 +5,7 @@ from cubing_algs.face_transforms import offset_down
 from cubing_algs.face_transforms import offset_left
 from cubing_algs.face_transforms import offset_right
 from cubing_algs.face_transforms import offset_up
+from cubing_algs.face_transforms import transform_position
 
 
 class TestOffsetRight(unittest.TestCase):
@@ -461,3 +462,94 @@ class TestTransformationEdgeCases(unittest.TestCase):
         for transform in transforms:
             with self.subTest(transform=transform.__name__):
                 self.assertEqual(transform(4), 4)
+
+
+class TestTransformPosition(unittest.TestCase):
+    """Test the transform_position helper function."""
+
+    def test_transform_position_uses_correct_transformation(self) -> None:
+        """Test that transform_position applies the correct transformation."""
+        # U -> R uses offset_right
+        self.assertEqual(transform_position('U', 'R', 0), 6)
+        self.assertEqual(transform_position('U', 'R', 1), 3)
+
+        # U -> L uses offset_left
+        self.assertEqual(transform_position('U', 'L', 0), 2)
+        self.assertEqual(transform_position('U', 'L', 1), 5)
+
+        # U -> F uses offset_down (identity)
+        self.assertEqual(transform_position('U', 'F', 0), 0)
+        self.assertEqual(transform_position('U', 'F', 5), 5)
+
+        # U -> B uses offset_up
+        self.assertEqual(transform_position('U', 'B', 0), 8)
+        self.assertEqual(transform_position('U', 'B', 1), 7)
+
+    def test_transform_position_all_faces(self) -> None:
+        """Test transform_position works for all face pairs."""
+        test_cases = [
+            ('R', 'F', 0, offset_up(0)),
+            ('R', 'B', 0, offset_down(0)),
+            ('R', 'U', 0, offset_right(0)),
+            ('R', 'D', 0, offset_left(0)),
+            ('F', 'U', 0, offset_up(0)),
+            ('F', 'D', 0, offset_down(0)),
+            ('F', 'L', 0, offset_left(0)),
+            ('F', 'R', 0, offset_right(0)),
+            ('D', 'R', 0, offset_left(0)),
+            ('D', 'L', 0, offset_right(0)),
+            ('D', 'F', 0, offset_down(0)),
+            ('D', 'B', 0, offset_up(0)),
+            ('L', 'F', 0, offset_right(0)),
+            ('L', 'B', 0, offset_left(0)),
+            ('L', 'U', 0, offset_up(0)),
+            ('L', 'D', 0, offset_down(0)),
+            ('B', 'U', 0, offset_up(0)),
+            ('B', 'D', 0, offset_down(0)),
+            ('B', 'L', 0, offset_right(0)),
+            ('B', 'R', 0, offset_left(0)),
+        ]
+
+        for orig_face, dest_face, position, expected in test_cases:
+            with self.subTest(orig=orig_face, dest=dest_face, pos=position):
+                result = transform_position(orig_face, dest_face, position)
+                self.assertEqual(result, expected)
+
+    def test_transform_position_center_invariant(self) -> None:
+        """Test center position (4) stays at 4 for all transformations."""
+        all_faces = ['U', 'R', 'F', 'D', 'L', 'B']
+
+        for orig_face in all_faces:
+            for dest_face in ADJACENT_FACE_TRANSFORMATIONS[orig_face]:
+                with self.subTest(orig=orig_face, dest=dest_face):
+                    result = transform_position(orig_face, dest_face, 4)
+                    self.assertEqual(result, 4)
+
+    def test_transform_position_consistency_with_direct_calls(self) -> None:
+        """Test transform_position matches calling offset functions."""
+        # Test a few examples to ensure consistency
+        self.assertEqual(
+            transform_position('U', 'R', 2),
+            offset_right(2),
+        )
+        self.assertEqual(
+            transform_position('F', 'L', 7),
+            offset_left(7),
+        )
+        self.assertEqual(
+            transform_position('R', 'F', 3),
+            offset_up(3),
+        )
+        self.assertEqual(
+            transform_position('F', 'D', 8),
+            offset_down(8),
+        )
+
+    def test_transform_position_all_positions(self) -> None:
+        """Test transform_position works for all positions 0-8."""
+        # Use U -> R as test case (offset_right)
+        for position in range(9):
+            with self.subTest(position=position):
+                result = transform_position('U', 'R', position)
+                expected = offset_right(position)
+                self.assertEqual(result, expected)
