@@ -1,0 +1,140 @@
+"""
+Face position transformation utilities.
+
+This module provides functions to transform facelet positions when moving
+between adjacent faces on a Rubik's cube. These transformations account for
+the rotation and orientation changes that occur when a facelet moves from
+one face to another.
+"""
+
+from collections.abc import Callable
+
+
+def offset_right(position: int) -> int:
+    """
+    Transform a position as if rotating it 90° clockwise (right).
+
+    Maps positions as follows (in 3x3 grid):
+    0 1 2    6 3 0
+    3 4 5 -> 7 4 1
+    6 7 8    8 5 2
+    """
+    return {
+        0: 6,
+        1: 3,
+        2: 0,
+        3: 7,
+        4: 4,
+        5: 1,
+        6: 8,
+        7: 5,
+        8: 2,
+    }[position]
+
+
+def offset_left(position: int) -> int:
+    """
+    Transform a position as if rotating it 90° counter-clockwise (left).
+
+    Maps positions as follows (in 3x3 grid):
+    0 1 2    2 5 8
+    3 4 5 -> 1 4 7
+    6 7 8    0 3 6
+    """
+    return {
+        0: 2,
+        1: 5,
+        2: 8,
+        3: 1,
+        4: 4,
+        5: 7,
+        6: 0,
+        7: 3,
+        8: 6,
+    }[position]
+
+
+def offset_up(position: int) -> int:
+    """
+    Transform a position as if flipping it vertically (up).
+
+    Maps positions as follows (in 3x3 grid):
+    0 1 2    8 7 6
+    3 4 5 -> 5 4 3
+    6 7 8    2 1 0
+    """
+    return {
+        0: 8,
+        1: 7,
+        2: 6,
+        3: 5,
+        4: 4,
+        5: 3,
+        6: 2,
+        7: 1,
+        8: 0,
+    }[position]
+
+
+def offset_down(position: int) -> int:
+    """
+    Transform a position with no change (identity transformation).
+
+    Maps positions as follows (in 3x3 grid):
+    0 1 2    0 1 2
+    3 4 5 -> 3 4 5
+    6 7 8    6 7 8
+    """
+    return {
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5,
+        6: 6,
+        7: 7,
+        8: 8,
+    }[position]
+
+
+# Mapping of how positions transform when moving between adjacent faces
+# For each origin face, maps destination faces to the appropriate transformation
+ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
+    'U': {
+        'R': offset_right,
+        'L': offset_left,
+        'F': offset_down,
+        'B': offset_up,
+    },
+    'R': {
+        'F': offset_up,
+        'B': offset_down,
+        'U': offset_right,
+        'D': offset_left,
+    },
+    'F': {
+        'U': offset_up,
+        'D': offset_down,
+        'L': offset_left,
+        'R': offset_right,
+    },
+    'D': {
+        'R': offset_left,
+        'L': offset_right,
+        'F': offset_down,
+        'B': offset_up,
+    },
+    'L': {
+        'F': offset_right,
+        'B': offset_left,
+        'U': offset_up,
+        'D': offset_down,
+    },
+    'B': {
+        'U': offset_up,
+        'D': offset_down,
+        'L': offset_right,
+        'R': offset_left,
+    },
+}
