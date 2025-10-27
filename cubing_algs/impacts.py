@@ -13,6 +13,7 @@ from typing import TypedDict
 
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.face_transforms import transform_position
 from cubing_algs.facelets import cubies_to_facelets
 
 if TYPE_CHECKING:
@@ -214,102 +215,20 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
             return 4
         return 3
 
-    def offset_right(position):
-        return {
-            0: 6,
-            1: 3,
-            2: 0,
-            3: 7,
-            4: 4,
-            5: 1,
-            6: 8,
-            7: 5,
-            8: 2,
-        }[position]
-
-    def offset_left(position):
-        return {
-            0: 2,
-            1: 5,
-            2: 8,
-            3: 1,
-            4: 4,
-            5: 7,
-            6: 0,
-            7: 3,
-            8: 6,
-        }[position]
-
-    def offset_up(position):
-        return {
-            0: 8,
-            1: 7,
-            2: 6,
-            3: 5,
-            4: 4,
-            5: 3,
-            6: 2,
-            7: 1,
-            8: 0,
-        }[position]
-
-    def offset_down(position):
-        return {
-            0: 0,
-            1: 1,
-            2: 2,
-            3: 3,
-            4: 4,
-            5: 5,
-            6: 6,
-            7: 7,
-            8: 8,
-        }[position]
-
-    ADJACENT_FACES = {
-        'U': {
-            'R': offset_right,
-            'L': offset_left,
-            'F': offset_down,
-            'B': offset_up,
-        },
-        'R': {
-            'F': offset_left,
-            'B': offset_right,
-            'U': offset_up,
-            'D': offset_down,
-        },
-        'F': {
-            'U': offset_up,
-            'D': offset_down,
-            'L': offset_left,
-            'R': offset_right,
-        },
-        'D': {
-            'R': offset_left,
-            'L': offset_right,
-            'F': offset_down,
-            'B': offset_up,
-        },
-        'L': {
-            'F': offset_right,
-            'B': offset_left,
-            'U': offset_up,
-            'D': offset_down,
-        },
-        'B': {
-            'U': offset_up,
-            'D': offset_down,
-            'L': offset_right,
-            'R': offset_left,
-        },
-    }
-
-    translated_position = ADJACENT_FACES.get(
+    translated_position = transform_position(
         orig.face_name,
-    ).get(
         final.face_name,
-    )(final.face_position)
+        final.face_position,
+    )
+
+    print(
+        'Origin face_position',
+        orig.face_position,
+        'Final face_position',
+        final.face_position,
+        'Translated position',
+        translated_position,
+    )
 
     if orig.face_position == 4:
         return 2  # Slice move like M or S
