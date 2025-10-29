@@ -120,8 +120,8 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
         'R': offset_down,
     },
     'D': {
-        'R': offset_right,
-        'L': offset_left,
+        'L': offset_right,
+        'R': offset_left,
         'F': offset_down,
         'B': offset_up,
     },
