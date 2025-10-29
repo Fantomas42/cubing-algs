@@ -15,6 +15,10 @@ from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_EDGES_INDEX
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.constants import QTM_OPPOSITE_EDGE_OFFSETS
+from cubing_algs.constants import QTM_OPPOSITE_FACE_DOUBLE_PAIRS
+from cubing_algs.constants import QTM_OPPOSITE_FACE_SIMPLE_PAIRS
+from cubing_algs.constants import QTM_SAME_FACE_OPPOSITE_PAIRS
 from cubing_algs.face_transforms import transform_position
 from cubing_algs.facelets import cubies_to_facelets
 
@@ -158,6 +162,102 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
     return cube.size * factor + distance
 
 
+def check_same_face_qtm_distance(pos_pair: tuple[int, int]) -> int:
+    """Calculate QTM distance for positions on the same face."""
+    if pos_pair in QTM_SAME_FACE_OPPOSITE_PAIRS:
+        return 2
+    return 1
+
+
+def check_opposite_face_qtm_distance(pos: int,
+                                     pos_pair: tuple[int, int]) -> int:
+    """Calculate QTM distance for positions on opposite faces."""
+    if pos == 4:
+        return 4  # Center: slice move like M2 or S2
+
+    if pos_pair in QTM_OPPOSITE_FACE_SIMPLE_PAIRS:
+        return 2
+    if pos_pair in QTM_OPPOSITE_FACE_DOUBLE_PAIRS:
+        return 4
+    return 3
+
+
+def is_edge_in_same_piece(pos1: int, pos2: int) -> bool:
+    """Check if two positions belong to the same edge piece."""
+    for edge_map in EDGE_FACELET_MAP:
+        if pos1 in edge_map and pos2 in edge_map:
+            return True
+    return False
+
+
+def check_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
+                                          orig_face_pos: int,
+                                          final_face_pos: int) -> int | None:
+    """
+    Calculate QTM distance for edge pieces on adjacent faces.
+
+    Returns None if distance cannot be determined by edge analysis.
+    """
+    # Same edge piece requires 3 quarter turns (opposite sides of piece)
+    if is_edge_in_same_piece(original_pos, final_pos):
+        return 3
+
+    # Check if opposite edge is same piece as final
+    opposite_edge_pos = original_pos + QTM_OPPOSITE_EDGE_OFFSETS[orig_face_pos]
+    if is_edge_in_same_piece(opposite_edge_pos, final_pos):
+        return 2
+
+    # Check symmetric case: opposite of final position
+    opposite_final_pos = final_pos + QTM_OPPOSITE_EDGE_OFFSETS[final_face_pos]
+    if is_edge_in_same_piece(opposite_final_pos, original_pos):
+        return 2
+
+    return None
+
+
+def check_adjacent_face_qtm_distance(
+    original_pos: int,
+    final_pos: int,
+    orig: FaceletPosition,
+    final: FaceletPosition,
+    cube: 'VCube',
+) -> int:
+    """Calculate QTM distance for positions on adjacent faces."""
+    if orig.face_position == 4:
+        return 2  # Center: slice move like M or S
+
+    # Special handling for edge pieces on adjacent faces
+    if orig.face_position in FACE_EDGES_INDEX:
+        edge_distance = check_adjacent_face_edge_qtm_distance(
+            original_pos,
+            final_pos,
+            orig.face_position,
+            final.face_position,
+        )
+        if edge_distance is not None:
+            return edge_distance
+
+    # General adjacent face handling via transformation
+    translated = parse_facelet_position(
+        transform_position(
+            final.face_name,
+            orig.face_name,
+            orig.face_position,
+        ),
+        cube,
+    )
+
+    if translated.face_position == final.face_position:
+        return 1
+
+    # Check distance after one transformation
+    pos_pair = (translated.face_position, final.face_position)
+    if pos_pair in QTM_SAME_FACE_OPPOSITE_PAIRS:
+        return 3
+
+    return 2
+
+
 def compute_qtm_distance(original_pos: int, final_pos: int,
                          cube: 'VCube') -> int:
     """
@@ -172,107 +272,20 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     orig = parse_facelet_position(original_pos, cube)
     final = parse_facelet_position(final_pos, cube)
 
+    # Case 1: Same face movements
     if orig.face_index == final.face_index:
-        # Same face movements
-        # Opposite positions (corners or edges) require 2 quarter turns
-        # Adjacent positions require 1 quarter turn
-        opposite_pairs = {
-            (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
-            (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
-            (1, 7), (7, 1),  # Top edge <-> Bottom edge
-            (3, 5), (5, 3),  # Left edge <-> Right edge
-        }
+        pos_pair = (orig.face_position, final.face_position)
+        return check_same_face_qtm_distance(pos_pair)
 
-        position_pair = (orig.face_position, final.face_position)
-        if position_pair in opposite_pairs:
-            return 2
-
-        # Any other movement on the same face is 1 quarter turn
-        return 1
-
+    # Case 2: Opposite faces
     if orig.face_name == OPPOSITE_FACES[final.face_name]:
-        if orig.face_position == 4:
-            return 4  # Slice move like M2 or S2
+        pos_pair = (orig.face_position, final.face_position)
+        return check_opposite_face_qtm_distance(orig.face_position, pos_pair)
 
-        position_pair = (orig.face_position, final.face_position)
-
-        opposite_pairs_simple = {
-            (1, 1), (7, 7),  # Top edge <-> Bottom edge
-            (3, 5), (5, 3),  # Left edge <-> Right edge
-            (0, 0), (2, 2),  # Top-left corner + Top-right corner
-            (6, 6), (8, 8),  # Bottom-left corner + Bottom-right corner
-        }
-        opposite_pairs_double = {
-            (1, 7), (7, 1),  # Top edge <-> Bottom edge
-            (3, 3), (5, 5),  # Left edge <-> Right edge
-            (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
-            (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
-        }
-        if position_pair in opposite_pairs_simple:
-            return 2
-        if position_pair in opposite_pairs_double:
-            return 4
-        return 3
-
-    # Adjacent face
-
-    if orig.face_position == 4:
-        return 2  # Slice move like M or S
-
-    opposite_edges = {
-        1: 6,
-        7: -6,
-        3: 2,
-        5: -2,
-    }
-
-    is_edge = orig.face_position in FACE_EDGES_INDEX
-    if is_edge:
-        for edge_map in EDGE_FACELET_MAP:
-            if original_pos in edge_map and final_pos in edge_map:
-                return 3
-
-        opposite_edge = original_pos + opposite_edges[orig.face_position]
-
-        for edge_map in EDGE_FACELET_MAP:
-            if opposite_edge in edge_map and final_pos in edge_map:
-                return 2
-
-        # Check symmetric case: opposite of final position
-        opposite_final = final_pos + opposite_edges[final.face_position]
-        for edge_map in EDGE_FACELET_MAP:
-            if opposite_final in edge_map and original_pos in edge_map:
-                return 2
-
-    translated = parse_facelet_position(
-        transform_position(
-            final.face_name,
-            orig.face_name,
-            orig.face_position,
-        ),
-        cube,
+    # Case 3: Adjacent faces
+    return check_adjacent_face_qtm_distance(
+        original_pos, final_pos, orig, final, cube,
     )
-
-    # If translated position matches final position, they're 1 QTM apart
-    if translated.face_position == final.face_position:
-        return 1
-
-    # Same face movements
-    # Opposite positions (corners or edges) require 2 quarter turns
-    # Adjacent positions require 1 quarter turn
-    opposite_pairs = {
-        (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
-        (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
-        (1, 7), (7, 1),  # Top edge <-> Bottom edge
-        (3, 5), (5, 3),  # Left edge <-> Right edge
-    }
-
-    position_pair = (translated.face_position, final.face_position)
-
-    if position_pair in opposite_pairs:
-        return 3
-
-    return 2
 
 
 def compute_distance_metrics(
