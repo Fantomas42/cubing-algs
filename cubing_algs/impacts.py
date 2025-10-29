@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 from typing import NamedTuple
 from typing import TypedDict
 
+from cubing_algs.constants import EDGE_FACELET_MAP
+from cubing_algs.constants import FACE_EDGES_INDEX
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.face_transforms import transform_position
@@ -217,12 +219,6 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     if orig.face_position == 4:
         return 2  # Slice move like M or S
 
-    EDGES = {1, 3, 5, 7}
-    CORNERS = {0, 2, 6, 8}
-
-    from cubing_algs.constants import EDGE_FACELET_MAP
-    from cubing_algs.constants import CORNER_FACELET_MAP
-
     opposite_edges = {
         1: 6,
         7: -6,
@@ -230,14 +226,11 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
         5: -2,
     }
 
-    value = 1
-
-    is_edge = orig.face_position in EDGES
+    is_edge = orig.face_position in FACE_EDGES_INDEX
     if is_edge:
         for edge_map in EDGE_FACELET_MAP:
             if original_pos in edge_map and final_pos in edge_map:
-                value += 2
-                return value
+                return 3
 
         opposite_edge = original_pos + opposite_edges[orig.face_position]
 
@@ -251,14 +244,6 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
             if opposite_final in edge_map and original_pos in edge_map:
                 return 2
 
-    else:
-        pass
-        # Corner handling
-        # for corner_map in CORNER_FACELET_MAP:
-        #     if original_pos in corner_map and final_pos in corner_map:
-        #         value += 2
-        #         return value
-
     translated = parse_facelet_position(
         transform_position(
             final.face_name,
@@ -270,7 +255,7 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
 
     # If translated position matches final position, they're 1 QTM apart
     if translated.face_position == final.face_position:
-        return value
+        return 1
 
     # Same face movements
     # Opposite positions (corners or edges) require 2 quarter turns
@@ -285,10 +270,9 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     position_pair = (translated.face_position, final.face_position)
 
     if position_pair in opposite_pairs:
-        value += 2
-        return value
+        return 3
 
-    return value + 1
+    return 2
 
 
 def compute_distance_metrics(

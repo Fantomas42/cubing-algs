@@ -482,3 +482,7 @@ ORIENTATIONS = [
     'FD', 'FR', 'FU', 'FL',
     'BD', 'BR', 'BU', 'BL',
 ]
+
+FACE_EDGES_INDEX = {1, 3, 5, 7}
+
+FACE_CORNERS_INDEX = {0, 2, 6, 8}
