@@ -288,8 +288,8 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
         d_transforms = ADJACENT_FACE_TRANSFORMATIONS['D']
 
         self.assertEqual(set(d_transforms.keys()), {'R', 'L', 'F', 'B'})
-        self.assertIs(d_transforms['R'], offset_right)
-        self.assertIs(d_transforms['L'], offset_left)
+        self.assertIs(d_transforms['R'], offset_left)
+        self.assertIs(d_transforms['L'], offset_right)
         self.assertIs(d_transforms['F'], offset_down)
         self.assertIs(d_transforms['B'], offset_up)
 
@@ -532,12 +532,12 @@ class TestTransformPosition(unittest.TestCase):
         self.assertEqual(transform_position('D', 'B', 1), 7)
 
         # D -> L
-        self.assertEqual(transform_position('D', 'L', 0), 2)
-        self.assertEqual(transform_position('D', 'L', 1), 5)
+        self.assertEqual(transform_position('D', 'L', 0), 6)
+        self.assertEqual(transform_position('D', 'L', 1), 3)
 
         # D -> R
-        self.assertEqual(transform_position('D', 'R', 0), 6)
-        self.assertEqual(transform_position('D', 'R', 1), 3)
+        self.assertEqual(transform_position('D', 'R', 0), 2)
+        self.assertEqual(transform_position('D', 'R', 1), 5)
 
     def test_transform_position_uses_correct_transformation_l(self) -> None:
         """Test that transform_position applies the correct transformation."""
