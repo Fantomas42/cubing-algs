@@ -217,15 +217,6 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     if orig.face_position == 4:
         return 2  # Slice move like M or S
 
-    translated = parse_facelet_position(
-        transform_position(
-            orig.face_name,
-            final.face_name,
-            final.face_position,
-        ),
-        cube,
-    )
-
     EDGES = {1, 3, 5, 7}
     CORNERS = {0, 2, 6, 8}
 
@@ -261,11 +252,12 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
                 return 2
 
     else:
+        pass
         # Corner handling
-        for corner_map in CORNER_FACELET_MAP:
-            if original_pos in corner_map and final_pos in corner_map:
-                value += 2
-                return value
+        # for corner_map in CORNER_FACELET_MAP:
+        #     if original_pos in corner_map and final_pos in corner_map:
+        #         value += 2
+        #         return value
 
     translated = parse_facelet_position(
         transform_position(

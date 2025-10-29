@@ -1183,7 +1183,10 @@ class TestComputeQtmDistance(unittest.TestCase):
         """
         Test QTM distance for all corner-to-corner pairs between adjacent faces.
 
-        Adjacent face pairs: U-R, U-F, U-L, U-B, R-F, R-B, F-L, F-D, L-B, L-D, B-D, D-R
+        Adjacent face pairs:
+          U-R, U-F, U-L, U-B,
+          R-F, R-B, F-L, F-D,
+          L-B, L-D, B-D, D-R
 
         Geometric reasoning for adjacent faces:
         - Corners on adjacent faces can share a physical corner piece
@@ -1196,30 +1199,28 @@ class TestComputeQtmDistance(unittest.TestCase):
 
         # U face (0-8) to R face (9-17) - adjacent faces (share right edge)
         # U corners: 0, 2, 6, 8  |  R corners: 9, 11, 15, 17
-        # U corner 2 and R corner 9 share physical corner (top-right U, top-left R)
-        # U corner 8 and R corner 15 share physical corner (bottom-right U, bottom-left R)
+        # U corner 2 and R corner 9 share physical corner
+        # U corner 8 and R corner 15 share physical corner
         test_cases.extend([
-            # Shared corners (should be shortest distance)
-            (2, 9, 1), (9, 2, 1),    # top-right U to top-left R (shared)
-            (8, 15, 1), (15, 8, 1),  # bottom-right U to bottom-left R (shared)
-
-            # Adjacent to shared (one rotation away)
             (0, 9, 2), (9, 0, 2),    # top-left U to top-left R
-            (2, 11, 2), (11, 2, 2),  # top-right U to top-right R
-            (6, 15, 2), (15, 6, 2),  # bottom-left U to bottom-left R
-            (8, 17, 2), (17, 8, 2),  # bottom-right U to bottom-right R
-
-            # Diagonal relationships
-            (0, 11, 3), (11, 0, 3),  # top-left U to top-right R
+            (0, 11, 1), (11, 0, 1),  # top-left U to top-right R
             (0, 15, 3), (15, 0, 3),  # top-left U to bottom-left R
-            (0, 17, 3), (17, 0, 3),  # top-left U to bottom-right R
-            (2, 15, 3), (15, 2, 3),  # top-right U to bottom-left R
-            (2, 17, 3), (17, 2, 3),  # top-right U to bottom-right R
-            (6, 9, 3), (9, 6, 3),    # bottom-left U to top-left R
-            (6, 11, 3), (11, 6, 3),  # bottom-left U to top-right R
+            (0, 17, 2), (17, 0, 2),  # top-left U to bottom-right R
+
+            (2, 9, 3), (9, 2, 3),    # top-right U to top-left R
+            (2, 11, 2), (11, 2, 2),  # top-right U to top-right R
+            (2, 15, 2), (15, 2, 2),  # top-right U to bottom-left R
+            (2, 17, 1), (17, 2, 1),  # top-right U to bottom-right R
+
+            (6, 9, 1), (9, 6, 1),    # bottom-left U to top-left R
+            (6, 11, 2), (11, 6, 2),  # bottom-left U to top-right R
+            (6, 15, 2), (15, 6, 2),  # bottom-left U to bottom-left R
             (6, 17, 3), (17, 6, 3),  # bottom-left U to bottom-right R
-            (8, 9, 3), (9, 8, 3),    # bottom-right U to top-left R
+
+            (8, 9, 2), (9, 8, 2),    # bottom-right U to top-left R
             (8, 11, 3), (11, 8, 3),  # bottom-right U to top-right R
+            (8, 15, 1), (15, 8, 1),  # bottom-right U to bottom-left R
+            (8, 17, 2), (17, 8, 2),  # bottom-right U to bottom-right R
         ])
 
         # U face (0-8) to F face (18-26) - adjacent faces (share front edge)
@@ -1227,27 +1228,25 @@ class TestComputeQtmDistance(unittest.TestCase):
         # U corner 6 and F corner 18 share physical corner
         # U corner 8 and F corner 20 share physical corner
         test_cases.extend([
-            # Shared corners
-            (6, 18, 1), (18, 6, 1),  # bottom-left U to top-left F (shared)
-            (8, 20, 1), (20, 8, 1),  # bottom-right U to top-right F (shared)
-
-            # Adjacent to shared
-            (0, 18, 2), (18, 0, 2),  # top-left U to top-left F
-            (2, 20, 2), (20, 2, 2),  # top-right U to top-right F
-            (6, 20, 2), (20, 6, 2),  # bottom-left U to top-right F
-            (8, 18, 2), (18, 8, 2),  # bottom-right U to top-left F
-
-            # Other relationships
-            (0, 20, 3), (20, 0, 3),  # top-left U to top-right F
-            (0, 24, 3), (24, 0, 3),  # top-left U to bottom-left F
+            (0, 18, 1), (18, 0, 1),  # top-left U to top-left F
+            (0, 20, 2), (20, 0, 2),  # top-left U to top-right F
+            (0, 24, 2), (24, 0, 2),  # top-left U to bottom-left F
             (0, 26, 3), (26, 0, 3),  # top-left U to bottom-right F
-            (2, 18, 3), (18, 2, 3),  # top-right U to top-left F
+
+            (2, 18, 2), (18, 2, 2),  # top-right U to top-left F
+            (2, 20, 1), (20, 2, 1),  # top-right U to top-right F
             (2, 24, 3), (24, 2, 3),  # top-right U to bottom-left F
-            (2, 26, 3), (26, 2, 3),  # top-right U to bottom-right F
-            (6, 24, 3), (24, 6, 3),  # bottom-left U to bottom-left F
-            (6, 26, 3), (26, 6, 3),  # bottom-left U to bottom-right F
-            (8, 24, 3), (24, 8, 3),  # bottom-right U to bottom-left F
-            (8, 26, 3), (26, 8, 3),  # bottom-right U to bottom-right F
+            (2, 26, 2), (26, 2, 2),  # top-right U to bottom-right F
+
+            (6, 18, 2), (18, 6, 2),  # bottom-left U to top-left F
+            (6, 20, 3), (20, 6, 3),  # bottom-left U to top-right F
+            (6, 24, 1), (24, 6, 1),  # bottom-left U to bottom-left F
+            (6, 26, 2), (26, 6, 2),  # bottom-left U to bottom-right F
+
+            (8, 18, 3), (18, 8, 3),  # bottom-right U to top-left F
+            (8, 20, 2), (20, 8, 2),  # bottom-right U to top-right F
+            (8, 24, 2), (24, 8, 2),  # bottom-right U to bottom-left F
+            (8, 26, 1), (26, 8, 1),  # bottom-right U to bottom-right F
         ])
 
         # U face (0-8) to L face (36-44) - adjacent faces (share left edge)
@@ -1255,27 +1254,25 @@ class TestComputeQtmDistance(unittest.TestCase):
         # U corner 0 and L corner 38 share physical corner
         # U corner 6 and L corner 44 share physical corner
         test_cases.extend([
-            # Shared corners
-            (0, 38, 1), (38, 0, 1),  # top-left U to top-right L (shared)
-            (6, 44, 1), (44, 6, 1),  # bottom-left U to bottom-right L (shared)
-
-            # Adjacent to shared
             (0, 36, 2), (36, 0, 2),  # top-left U to top-left L
-            (0, 42, 2), (42, 0, 2),  # top-left U to bottom-left L
+            (0, 38, 3), (38, 0, 3),  # top-left U to top-right L
+            (0, 42, 1), (42, 0, 1),  # top-left U to bottom-left L
             (0, 44, 2), (44, 0, 2),  # top-left U to bottom-right L
+
+            (2, 36, 1), (36, 2, 1),  # top-right U to top-left L
             (2, 38, 2), (38, 2, 2),  # top-right U to top-right L
-            (6, 36, 2), (36, 6, 2),  # bottom-left U to top-left L
+            (2, 42, 2), (42, 2, 2),  # top-right U to bottom-left L
+            (2, 44, 3), (44, 2, 3),  # top-right U to bottom-right L
+
+            (6, 36, 3), (36, 6, 3),  # bottom-left U to top-left L
             (6, 38, 2), (38, 6, 2),  # bottom-left U to top-right L
             (6, 42, 2), (42, 6, 2),  # bottom-left U to bottom-left L
-            (8, 44, 2), (44, 8, 2),  # bottom-right U to bottom-right L
+            (6, 44, 1), (44, 6, 1),  # bottom-left U to bottom-right L
 
-            # Other relationships
-            (2, 36, 3), (36, 2, 3),  # top-right U to top-left L
-            (2, 42, 3), (42, 2, 3),  # top-right U to bottom-left L
-            (2, 44, 3), (44, 2, 3),  # top-right U to bottom-right L
-            (8, 36, 3), (36, 8, 3),  # bottom-right U to top-left L
-            (8, 38, 3), (38, 8, 3),  # bottom-right U to top-right L
+            (8, 36, 2), (36, 8, 2),  # bottom-right U to top-left L
+            (8, 38, 1), (38, 8, 1),  # bottom-right U to top-right L
             (8, 42, 3), (42, 8, 3),  # bottom-right U to bottom-left L
+            (8, 44, 2), (44, 8, 2),  # bottom-right U to bottom-right L
         ])
 
         # U face (0-8) to B face (45-53) - adjacent faces (share back edge)
@@ -1283,26 +1280,24 @@ class TestComputeQtmDistance(unittest.TestCase):
         # U corner 0 and B corner 47 share physical corner
         # U corner 2 and B corner 45 share physical corner
         test_cases.extend([
-            # Shared corners
-            (0, 47, 1), (47, 0, 1),  # top-left U to top-right B (shared)
-            (2, 45, 1), (45, 2, 1),  # top-right U to top-left B (shared)
-
-            # Adjacent to shared
-            (0, 45, 2), (45, 0, 2),  # top-left U to top-left B
+            (0, 45, 3), (45, 0, 3),  # top-left U to top-left B
+            (0, 47, 2), (47, 0, 2),  # top-left U to top-right B
             (0, 51, 2), (51, 0, 2),  # top-left U to bottom-left B
-            (0, 53, 2), (53, 0, 2),  # top-left U to bottom-right B
-            (2, 47, 2), (47, 2, 2),  # top-right U to top-right B
-            (2, 51, 2), (51, 2, 2),  # top-right U to bottom-left B
+            (0, 53, 1), (53, 0, 1),  # top-left U to bottom-right B
+
+            (2, 45, 2), (45, 2, 2),  # top-right U to top-left B
+            (2, 47, 3), (47, 2, 3),  # top-right U to top-right B
+            (2, 51, 1), (51, 2, 1),  # top-right U to bottom-left B
             (2, 53, 2), (53, 2, 2),  # top-right U to bottom-right B
 
-            # Other relationships
-            (6, 45, 3), (45, 6, 3),  # bottom-left U to top-left B
-            (6, 47, 3), (47, 6, 3),  # bottom-left U to top-right B
+            (6, 45, 2), (45, 6, 2),  # bottom-left U to top-left B
+            (6, 47, 1), (47, 6, 1),  # bottom-left U to top-right B
             (6, 51, 3), (51, 6, 3),  # bottom-left U to bottom-left B
-            (6, 53, 3), (53, 6, 3),  # bottom-left U to bottom-right B
-            (8, 45, 3), (45, 8, 3),  # bottom-right U to top-left B
-            (8, 47, 3), (47, 8, 3),  # bottom-right U to top-right B
-            (8, 51, 3), (51, 8, 3),  # bottom-right U to bottom-left B
+            (6, 53, 2), (53, 6, 2),  # bottom-left U to bottom-right B
+
+            (8, 45, 1), (45, 8, 1),  # bottom-right U to top-left B
+            (8, 47, 2), (47, 8, 2),  # bottom-right U to top-right B
+            (8, 51, 2), (51, 8, 2),  # bottom-right U to bottom-left B
             (8, 53, 3), (53, 8, 3),  # bottom-right U to bottom-right B
         ])
 
@@ -1311,193 +1306,193 @@ class TestComputeQtmDistance(unittest.TestCase):
         # R corner 17 and F corner 20 share physical corner
         # R corner 15 and F corner 26 share physical corner
         test_cases.extend([
-            # Shared corners
-            (17, 20, 1), (20, 17, 1),  # bottom-right R to top-right F (shared)
-            (15, 26, 1), (26, 15, 1),  # bottom-left R to bottom-right F (shared)
-
-            # Adjacent and other relationships
-            (9, 18, 2), (18, 9, 2),
+            (9, 18, 1), (18, 9, 1),
             (9, 20, 2), (20, 9, 2),
-            (9, 24, 3), (24, 9, 3),
+            (9, 24, 2), (24, 9, 2),
             (9, 26, 3), (26, 9, 3),
-            (11, 18, 3), (18, 11, 3),
-            (11, 20, 3), (20, 11, 3),
+
+            (11, 18, 2), (18, 11, 2),
+            (11, 20, 1), (20, 11, 1),
             (11, 24, 3), (24, 11, 3),
-            (11, 26, 3), (26, 11, 3),
-            (15, 18, 3), (18, 15, 3),
+            (11, 26, 2), (26, 11, 2),
+
+            (15, 18, 2), (18, 15, 2),
             (15, 20, 3), (20, 15, 3),
-            (15, 24, 2), (24, 15, 2),
+            (15, 24, 1), (24, 15, 1),
+            (15, 26, 2), (26, 15, 2),
+
             (17, 18, 3), (18, 17, 3),
-            (17, 24, 3), (24, 17, 3),
-            (17, 26, 2), (26, 17, 2),
+            (17, 20, 2), (20, 17, 2),
+            (17, 24, 2), (24, 17, 2),
+            (17, 26, 1), (26, 17, 1),
         ])
 
         # R face (9-17) to B face (45-53) - adjacent faces
         # R corners: 9, 11, 15, 17  |  B corners: 45, 47, 51, 53
         test_cases.extend([
-            # Shared corners
-            (11, 45, 1), (45, 11, 1),  # top-right R to top-left B (shared)
-            (17, 51, 1), (51, 17, 1),  # bottom-right R to bottom-left B (shared)
-
-            # Adjacent and other relationships
-            (9, 45, 2), (45, 9, 2),
+            (9, 45, 1), (45, 9, 1),
             (9, 47, 2), (47, 9, 2),
-            (9, 51, 3), (51, 9, 3),
+            (9, 51, 2), (51, 9, 2),
             (9, 53, 3), (53, 9, 3),
-            (11, 47, 2), (47, 11, 2),
-            (11, 51, 2), (51, 11, 2),
-            (11, 53, 3), (53, 11, 3),
-            (15, 45, 3), (45, 15, 3),
+
+            (11, 45, 2), (45, 11, 2),
+            (11, 47, 1), (47, 11, 1),
+            (11, 51, 3), (51, 11, 3),
+            (11, 53, 2), (53, 11, 2),
+
+            (15, 45, 2), (45, 15, 2),
             (15, 47, 3), (47, 15, 3),
-            (15, 51, 2), (51, 15, 2),
+            (15, 51, 1), (51, 15, 1),
             (15, 53, 2), (53, 15, 2),
+
             (17, 45, 3), (45, 17, 3),
-            (17, 47, 3), (47, 17, 3),
-            (17, 53, 2), (53, 17, 2),
+            (17, 47, 2), (47, 17, 2),
+            (17, 51, 2), (51, 17, 2),
+            (17, 53, 1), (53, 17, 1),
         ])
 
         # F face (18-26) to L face (36-44) - adjacent faces
         # F corners: 18, 20, 24, 26  |  L corners: 36, 38, 42, 44
         test_cases.extend([
-            # Shared corners
-            (18, 42, 1), (42, 18, 1),  # top-left F to bottom-left L (shared)
-            (24, 44, 1), (44, 24, 1),  # bottom-left F to bottom-right L (shared)
-
-            # Adjacent and other relationships
-            (18, 36, 3), (36, 18, 3),
+            (18, 36, 1), (36, 18, 1),
             (18, 38, 2), (38, 18, 2),
-            (18, 44, 2), (44, 18, 2),
-            (20, 36, 3), (36, 20, 3),
-            (20, 38, 3), (38, 20, 3),
+            (18, 42, 2), (42, 18, 2),
+            (18, 44, 3), (44, 18, 3),
+
+            (20, 36, 2), (36, 20, 2),
+            (20, 38, 1), (38, 20, 1),
             (20, 42, 3), (42, 20, 3),
-            (20, 44, 3), (44, 20, 3),
-            (24, 36, 3), (36, 24, 3),
+            (20, 44, 2), (44, 20, 2),
+
+            (24, 36, 2), (36, 24, 2),
             (24, 38, 3), (38, 24, 3),
-            (24, 42, 2), (42, 24, 2),
+            (24, 42, 1), (42, 24, 1),
+            (24, 44, 2), (44, 24, 2),
+
             (26, 36, 3), (36, 26, 3),
-            (26, 38, 3), (38, 26, 3),
-            (26, 42, 3), (42, 26, 3),
-            (26, 44, 2), (44, 26, 2),
+            (26, 38, 2), (38, 26, 2),
+            (26, 42, 2), (42, 26, 2),
+            (26, 44, 1), (44, 26, 1),
         ])
 
         # D face (27-35) to R face (9-17) - adjacent faces
         # D corners: 27, 29, 33, 35  |  R corners: 9, 11, 15, 17
         test_cases.extend([
-            # Shared corners
-            (29, 15, 1), (15, 29, 1),  # top-right D to bottom-left R (shared)
-            (35, 17, 1), (17, 35, 1),  # bottom-right D to bottom-right R (shared)
-
-            # Adjacent and other relationships
-            (27, 9, 3), (9, 27, 3),
+            (27, 9, 2), (9, 27, 2),
             (27, 11, 3), (11, 27, 3),
-            (27, 15, 2), (15, 27, 2),
+            (27, 15, 1), (15, 27, 1),
             (27, 17, 2), (17, 27, 2),
-            (29, 9, 3), (9, 29, 3),
-            (29, 11, 3), (11, 29, 3),
-            (29, 17, 2), (17, 29, 2),
-            (33, 9, 2), (9, 33, 2),
-            (33, 11, 3), (11, 33, 3),
-            (33, 15, 3), (15, 33, 3),
-            (33, 17, 3), (17, 33, 3),
+
+            (29, 9, 1), (9, 29, 1),
+            (29, 11, 2), (11, 29, 2),
+            (29, 15, 2), (15, 29, 2),
+            (29, 17, 3), (17, 29, 3),
+
+            (33, 9, 3), (9, 33, 3),
+            (33, 11, 2), (11, 33, 2),
+            (33, 15, 2), (15, 33, 2),
+            (33, 17, 1), (17, 33, 1),
+
             (35, 9, 2), (9, 35, 2),
-            (35, 11, 3), (11, 35, 3),
-            (35, 15, 2), (15, 35, 2),
+            (35, 11, 1), (11, 35, 1),
+            (35, 15, 3), (15, 35, 3),
+            (35, 17, 2), (17, 35, 2),
         ])
 
         # D face (27-35) to F face (18-26) - adjacent faces
         # D corners: 27, 29, 33, 35  |  F corners: 18, 20, 24, 26
         test_cases.extend([
-            # Shared corners
-            (27, 24, 1), (24, 27, 1),  # top-left D to bottom-left F (shared)
-            (29, 26, 1), (26, 29, 1),  # top-right D to bottom-right F (shared)
+            (27, 18, 1), (18, 27, 1),
+            (27, 20, 2), (20, 27, 2),
+            (27, 24, 2), (24, 27, 2),
+            (27, 26, 3), (26, 27, 3),
 
-            # Adjacent and other relationships
-            (27, 18, 3), (18, 27, 3),
-            (27, 20, 3), (20, 27, 3),
-            (27, 26, 2), (26, 27, 2),
-            (29, 18, 3), (18, 29, 3),
-            (29, 20, 3), (20, 29, 3),
-            (29, 24, 2), (24, 29, 2),
+            (29, 18, 2), (18, 29, 2),
+            (29, 20, 1), (20, 29, 1),
+            (29, 24, 3), (24, 29, 3),
+            (29, 26, 2), (26, 29, 2),
+
             (33, 18, 2), (18, 33, 2),
             (33, 20, 3), (20, 33, 3),
-            (33, 24, 3), (24, 33, 3),
-            (33, 26, 3), (26, 33, 3),
+            (33, 24, 1), (24, 33, 1),
+            (33, 26, 2), (26, 33, 2),
+
             (35, 18, 3), (18, 35, 3),
             (35, 20, 2), (20, 35, 2),
-            (35, 24, 3), (24, 35, 3),
-            (35, 26, 3), (26, 35, 3),
+            (35, 24, 2), (24, 35, 2),
+            (35, 26, 1), (26, 35, 1),
         ])
 
         # D face (27-35) to L face (36-44) - adjacent faces
         # D corners: 27, 29, 33, 35  |  L corners: 36, 38, 42, 44
         test_cases.extend([
-            # Shared corners
-            (27, 42, 1), (42, 27, 1),  # top-left D to bottom-left L (shared)
-            (33, 36, 1), (36, 33, 1),  # bottom-left D to top-left L (shared)
-
-            # Adjacent and other relationships
             (27, 36, 2), (36, 27, 2),
-            (27, 38, 3), (38, 27, 3),
-            (27, 44, 3), (44, 27, 3),
+            (27, 38, 1), (38, 27, 1),
+            (27, 42, 3), (42, 27, 3),
+            (27, 44, 2), (44, 27, 2),
+
             (29, 36, 3), (36, 29, 3),
-            (29, 38, 3), (38, 29, 3),
-            (29, 42, 3), (42, 29, 3),
-            (29, 44, 3), (44, 29, 3),
+            (29, 38, 2), (38, 29, 2),
+            (29, 42, 2), (42, 29, 2),
+            (29, 44, 1), (44, 29, 1),
+
+            (33, 36, 1), (36, 33, 1),
             (33, 38, 2), (38, 33, 2),
             (33, 42, 2), (42, 33, 2),
             (33, 44, 3), (44, 33, 3),
-            (35, 36, 3), (36, 35, 3),
+
+            (35, 36, 2), (36, 35, 2),
             (35, 38, 3), (38, 35, 3),
-            (35, 42, 3), (42, 35, 3),
-            (35, 44, 3), (44, 35, 3),
+            (35, 42, 1), (42, 35, 1),
+            (35, 44, 2), (44, 35, 2),
         ])
 
         # D face (27-35) to B face (45-53) - adjacent faces
         # D corners: 27, 29, 33, 35  |  B corners: 45, 47, 51, 53
         test_cases.extend([
-            # Shared corners
-            (33, 51, 1), (51, 33, 1),  # bottom-left D to bottom-left B (shared)
-            (35, 53, 1), (53, 35, 1),  # bottom-right D to bottom-right B (shared)
-
-            # Adjacent and other relationships
             (27, 45, 3), (45, 27, 3),
-            (27, 47, 3), (47, 27, 3),
+            (27, 47, 2), (47, 27, 2),
             (27, 51, 2), (51, 27, 2),
-            (27, 53, 2), (53, 27, 2),
-            (29, 45, 3), (45, 29, 3),
+            (27, 53, 1), (53, 27, 1),
+
+            (29, 45, 2), (45, 29, 2),
             (29, 47, 3), (47, 29, 3),
-            (29, 51, 2), (51, 29, 2),
+            (29, 51, 1), (51, 29, 1),
             (29, 53, 2), (53, 29, 2),
+
             (33, 45, 2), (45, 33, 2),
-            (33, 47, 3), (47, 33, 3),
+            (33, 47, 1), (47, 33, 1),
+            (33, 51, 3), (51, 33, 3),
             (33, 53, 2), (53, 33, 2),
-            (35, 45, 3), (45, 35, 3),
+
+            (35, 45, 1), (45, 35, 1),
             (35, 47, 2), (47, 35, 2),
             (35, 51, 2), (51, 35, 2),
+            (35, 53, 3), (53, 35, 3),
         ])
 
         # L face (36-44) to B face (45-53) - adjacent faces
         # L corners: 36, 38, 42, 44  |  B corners: 45, 47, 51, 53
         test_cases.extend([
-            # Shared corners
-            (36, 47, 1), (47, 36, 1),  # top-left L to top-right B (shared)
-            (42, 53, 1), (53, 42, 1),  # bottom-left L to bottom-right B (shared)
+            (36, 45, 1), (45, 36, 1),
+            (36, 47, 2), (47, 36, 2),
+            (36, 51, 2), (51, 36, 2),
+            (36, 53, 3), (53, 36, 3),
 
-            # Adjacent and other relationships
-            (36, 45, 2), (45, 36, 2),
-            (36, 51, 3), (51, 36, 3),
-            (36, 53, 2), (53, 36, 2),
             (38, 45, 2), (45, 38, 2),
-            (38, 47, 2), (47, 38, 2),
+            (38, 47, 1), (47, 38, 1),
             (38, 51, 3), (51, 38, 3),
-            (38, 53, 3), (53, 38, 3),
-            (42, 45, 3), (45, 42, 3),
-            (42, 47, 2), (47, 42, 2),
-            (42, 51, 2), (51, 42, 2),
+            (38, 53, 2), (53, 38, 2),
+
+            (42, 45, 2), (45, 42, 2),
+            (42, 47, 3), (47, 42, 3),
+            (42, 51, 1), (51, 42, 1),
+            (42, 53, 2), (53, 42, 2),
+
             (44, 45, 3), (45, 44, 3),
-            (44, 47, 3), (47, 44, 3),
+            (44, 47, 2), (47, 44, 2),
             (44, 51, 2), (51, 44, 2),
-            (44, 53, 2), (53, 44, 2),
+            (44, 53, 1), (53, 44, 1),
         ])
 
         for orig_pos, final_pos, expected_distance in test_cases:
