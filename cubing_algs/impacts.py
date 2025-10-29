@@ -229,64 +229,60 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     EDGES = {1, 3, 5, 7}
     CORNERS = {0, 2, 6, 8}
 
-    if translated.face_position == orig.face_position:
-        if orig.face_position in CORNERS:
-            return 1
+    from cubing_algs.constants import EDGE_FACELET_MAP
+    from cubing_algs.constants import CORNER_FACELET_MAP
 
-        if orig.face_position in EDGES:
-            # When translated position equals original position for edges,
-            # use geometric data to determine QTM distance
-            from cubing_algs.face_transforms import EDGE_ORIENTATION_PRIORITY
+    opposite_edges = {
+        1: 6,
+        7: -6,
+        3: 2,
+        5: -2,
+    }
 
-            position_diff = abs(orig.face_position - final.face_position)
-            orientation = EDGE_ORIENTATION_PRIORITY.get((orig.face_name, final.face_name))
+    value = 1
 
-            if orientation is None:
-                # Unknown face pair, use fallback
+    is_edge = orig.face_position in EDGES
+    if is_edge:
+        for edge_map in EDGE_FACELET_MAP:
+            if original_pos in edge_map and final_pos in edge_map:
+                value += 2
+                return value
+
+        opposite_edge = original_pos + opposite_edges[orig.face_position]
+
+        for edge_map in EDGE_FACELET_MAP:
+            if opposite_edge in edge_map and final_pos in edge_map:
                 return 2
 
-            top_bottom_faces = {'U', 'D'}
+        # Check symmetric case: opposite of final position
+        opposite_final = final_pos + opposite_edges[final.face_position]
+        for edge_map in EDGE_FACELET_MAP:
+            if opposite_final in edge_map and original_pos in edge_map:
+                return 2
 
-            if position_diff == 0:
-                # Same edge position on both faces
-                if orientation == 'horizontal':
-                    # Horizontal edges (row==1) are prioritized
-                    return 1 if orig.row == 1 else 2
-                else:  # vertical
-                    # Vertical edges (col==1) are prioritized
-                    return 1 if orig.col == 1 else 2
+    else:
+        # Corner handling
+        for corner_map in CORNER_FACELET_MAP:
+            if original_pos in corner_map and final_pos in corner_map:
+                value += 2
+                return value
 
-            elif position_diff == 2:
-                # Parallel edges
-                if orientation == 'vertical':
-                    # Check U/D face if applicable
-                    if orig.face_name in top_bottom_faces:
-                        return 1 if orig.col == 1 else 2
-                    else:
-                        return 1 if final.col == 1 else 2
-                else:  # horizontal
-                    # Check if both are on the prioritized edge (row==1)
-                    if orig.row == 1 and final.row == 1:
-                        return 1
-                    else:
-                        return 2
+    translated = parse_facelet_position(
+        transform_position(
+            final.face_name,
+            orig.face_name,
+            orig.face_position,
+        ),
+        cube,
+    )
 
-            elif position_diff == 4:
-                # Perpendicular edges
-                if orientation == 'vertical':
-                    # Check U/D face if applicable
-                    if orig.face_name in top_bottom_faces:
-                        return 1 if orig.col == 1 else 2
-                    else:
-                        return 1 if final.col == 1 else 2
-                else:  # horizontal
-                    return 1
+    # If translated position matches final position, they're 1 QTM apart
+    if translated.face_position == final.face_position:
+        return value
 
-        if orig.row == final.row or orig.col == final.col:
-            return 2
-
-        return 3
-
+    # Same face movements
+    # Opposite positions (corners or edges) require 2 quarter turns
+    # Adjacent positions require 1 quarter turn
     opposite_pairs = {
         (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
         (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
@@ -294,12 +290,13 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
         (3, 5), (5, 3),  # Left edge <-> Right edge
     }
 
-    position_pair = (orig.face_position, translated.face_position)
-    if position_pair in opposite_pairs:
-        # Adjacent faces: both edges and corners in opposite positions require 3 QTM
-        return 3
+    position_pair = (translated.face_position, final.face_position)
 
-    return 2
+    if position_pair in opposite_pairs:
+        value += 2
+        return value
+
+    return value + 1
 
 
 def compute_distance_metrics(
