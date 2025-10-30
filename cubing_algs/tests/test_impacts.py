@@ -334,19 +334,23 @@ class TestComputeManhattanDistance(unittest.TestCase):
         distance = compute_manhattan_distance(0, 8, self.cube)
         self.assertEqual(distance, 4)
 
-    def test_different_face_distance(self) -> None:
-        """Test distance between adjacent faces using transformations."""
-        # From U face (position 0) to R face (position 9)
-        # U(0,0) needs to move to U(0,2) then cross to R(0,0)
-        # Transformed position is U(0,2), distance = 2
-        distance = compute_manhattan_distance(0, 9, self.cube)
-        self.assertEqual(distance, 5)
+    def test_adjacent_face_distance(self) -> None:
+        """Test distance between adjacent faces."""
+        test_cases = [
+            (0, 9, 5), (2, 11, 1), (0, 36, 1),
+            (0, 11, 2), (0, 38, 3), (0, 42, 3),
+        ]
 
-        # From U face top-right (2) to R face top-right (11)
-        # U(0,2) transforms to U(0,0), R(0,2) is at R(0,2)
-        # Distance after transform = 2
-        distance = compute_manhattan_distance(2, 11, self.cube)
-        self.assertEqual(distance, 1)
+        for orig_pos, final_pos, expected_distance in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                distance = compute_manhattan_distance(
+                    orig_pos, final_pos, self.cube,
+                )
+                self.assertEqual(
+                    distance, expected_distance,
+                    f'Distance from { orig_pos } to { final_pos } should be '
+                    f'{ expected_distance } Manhattan but got { distance }',
+                )
 
     def test_opposite_face_distance(self) -> None:
         """Test distance between opposite faces."""
@@ -378,25 +382,23 @@ class TestComputeManhattanDistance(unittest.TestCase):
     def test_edge_cases_positions(self) -> None:
         """Test edge cases with extreme positions."""
         # First position to last position
-        # U(0,0) to D(2,2) - these are on opposite side faces
+        # U pos 0 and B pos 53 are on the same corner piece
         distance = compute_manhattan_distance(0, 53, self.cube)
-        self.assertEqual(distance, 6)
+        self.assertEqual(distance, 3)
 
         # Cross face movement
-        # U(2,2) to R(0,0) - adjacent faces
+        # U pos 8 and R pos 9 are on the same corner piece
         distance = compute_manhattan_distance(8, 9, self.cube)
         self.assertEqual(distance, 1)
 
     def test_distance_symmetry_property(self) -> None:
         """Test distance calculation handles position ordering correctly."""
-        # Distance should be based on relative positions, not order
+        # Distance should be symmetric
         distance1 = compute_manhattan_distance(0, 10, self.cube)
         distance2 = compute_manhattan_distance(10, 0, self.cube)
 
-        # Note: This is not necessarily symmetric due to the algorithm design
-        # but both should be positive when positions differ
-        self.assertEqual(distance1, 4)
-        self.assertEqual(distance2, 4)
+        self.assertEqual(distance1, 3)
+        self.assertEqual(distance2, 3)
 
 
 class TestComputeQtmDistance(unittest.TestCase):
@@ -3234,10 +3236,10 @@ class TestOrientationInvariance(unittest.TestCase):
     # These values are based on the transformation-based distance calculations
     MANHATTAN_PRE_ORIENTATION_EXPECTED: ClassVar[
         dict[str, dict[str, int | float]]] = {
-            '': {'sum': 223, 'mean': 4.65, 'max': 10},
-            'z2': {'sum': 223, 'mean': 4.65, 'max': 10},
-            'x': {'sum': 227, 'mean': 4.73, 'max': 10},
-            'x y': {'sum': 223, 'mean': 4.65, 'max': 8},
+            '': {'sum': 167, 'mean': 3.48, 'max': 10},
+            'z2': {'sum': 167, 'mean': 3.48, 'max': 10},
+            'x': {'sum': 169, 'mean': 3.52, 'max': 10},
+            'x y': {'sum': 165, 'mean': 3.44, 'max': 8},
         }
 
     QTM_PRE_ORIENTATION_EXPECTED: ClassVar[
