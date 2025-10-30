@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from typing import NamedTuple
 from typing import TypedDict
 
+from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_EDGES_INDEX
 from cubing_algs.constants import FACE_ORDER
@@ -165,6 +166,26 @@ def compute_opposite_face_manhattan_distance(
     return cross_face_distance + within_face_distance
 
 
+def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
+    """
+    Check if two positions are on the same physical piece (edge or corner).
+
+    Returns True if the positions are on the same edge or corner piece,
+    meaning they are the same physical location viewed from different faces.
+    """
+    # Check if they're on the same edge piece
+    for edge_map in EDGE_FACELET_MAP:
+        if original_pos in edge_map and final_pos in edge_map:
+            return True
+
+    # Check if they're on the same corner piece
+    for corner_map in CORNER_FACELET_MAP:
+        if original_pos in corner_map and final_pos in corner_map:
+            return True
+
+    return False
+
+
 def compute_adjacent_face_manhattan_distance(
     orig: FaceletPosition,
     final: FaceletPosition,
@@ -248,14 +269,6 @@ def compute_opposite_face_qtm_distance(pos: int,
     return 3
 
 
-def is_edge_in_same_piece(pos1: int, pos2: int) -> bool:
-    """Check if two positions belong to the same edge piece."""
-    for edge_map in EDGE_FACELET_MAP:
-        if pos1 in edge_map and pos2 in edge_map:
-            return True
-    return False
-
-
 def compute_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
                                           orig_face_pos: int,
                                           final_face_pos: int) -> int | None:
@@ -265,17 +278,17 @@ def compute_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
     Returns None if distance cannot be determined by edge analysis.
     """
     # Same edge piece requires 3 quarter turns (opposite sides of piece)
-    if is_edge_in_same_piece(original_pos, final_pos):
+    if positions_on_same_piece(original_pos, final_pos):
         return 3
 
     # Check if opposite edge is same piece as final
     opposite_edge_pos = original_pos + QTM_OPPOSITE_EDGE_OFFSETS[orig_face_pos]
-    if is_edge_in_same_piece(opposite_edge_pos, final_pos):
+    if positions_on_same_piece(opposite_edge_pos, final_pos):
         return 2
 
     # Check symmetric case: opposite of final position
     opposite_final_pos = final_pos + QTM_OPPOSITE_EDGE_OFFSETS[final_face_pos]
-    if is_edge_in_same_piece(opposite_final_pos, original_pos):
+    if positions_on_same_piece(opposite_final_pos, original_pos):
         return 2
 
     return None
