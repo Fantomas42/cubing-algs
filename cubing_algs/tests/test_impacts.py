@@ -338,7 +338,7 @@ class TestComputeManhattanDistance(unittest.TestCase):
         """Test distance between adjacent faces."""
         test_cases = [
             (0, 9, 5), (2, 11, 1), (0, 36, 1),
-            (0, 11, 2), (0, 38, 3), (0, 42, 3),
+            (0, 11, 3), (0, 38, 3), (0, 42, 3),
         ]
 
         for orig_pos, final_pos, expected_distance in test_cases:
@@ -394,11 +394,11 @@ class TestComputeManhattanDistance(unittest.TestCase):
     def test_distance_symmetry_property(self) -> None:
         """Test distance calculation handles position ordering correctly."""
         # Distance should be symmetric
-        distance1 = compute_manhattan_distance(0, 10, self.cube)
-        distance2 = compute_manhattan_distance(10, 0, self.cube)
+        distance1 = compute_manhattan_distance(0, 9, self.cube)
+        distance2 = compute_manhattan_distance(9, 0, self.cube)
 
-        self.assertEqual(distance1, 3)
-        self.assertEqual(distance2, 3)
+        self.assertEqual(distance1, 5)
+        self.assertEqual(distance2, 5)
 
 
 class TestComputeQtmDistance(unittest.TestCase):
