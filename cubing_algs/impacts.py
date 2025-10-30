@@ -137,10 +137,78 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
     )
 
 
+def compute_within_face_manhattan_distance(
+    orig: FaceletPosition,
+    final: FaceletPosition,
+) -> int:
+    """Calculate Manhattan distance for positions on the same face."""
+    return abs(orig.row - final.row) + abs(orig.col - final.col)
+
+
+def compute_opposite_face_manhattan_distance(
+    orig: FaceletPosition,
+    final: FaceletPosition,
+    cube: 'VCube',
+) -> int:
+    """
+    Calculate Manhattan distance for positions on opposite faces.
+
+    Distance = 2 * cube_size + within-face distance on destination
+    The factor of 2 accounts for crossing through the cube's interior.
+    """
+    # Distance to cross from one face to the opposite face
+    cross_face_distance = cube.size * 2
+
+    # Add the within-face distance on the destination face
+    within_face_distance = abs(final.row - orig.row) + abs(final.col - orig.col)
+
+    return cross_face_distance + within_face_distance
+
+
+def compute_adjacent_face_manhattan_distance(
+    orig: FaceletPosition,
+    final: FaceletPosition,
+    cube: 'VCube',
+) -> int:
+    """
+    Calculate Manhattan distance for positions on adjacent faces.
+
+    Uses face transformation to determine the aligned position,
+    then calculates the shortest path accounting for edge crossing.
+    """
+    # Transform original position to destination face coordinate system
+    translated = parse_facelet_position(
+        transform_position(
+            final.face_name,
+            orig.face_name,
+            orig.face_position,
+        ),
+        cube,
+    )
+
+    # Distance components:
+    # 1. Distance to reach the edge (minimum distance to any edge position)
+    # 2. Distance from edge to final position
+    #
+    # For adjacent faces, we add cube.size as the cross-face component
+    # plus the within-face distance between transformed and final positions
+    within_face_distance = abs(
+        translated.row - final.row,
+    ) + abs(
+        translated.col - final.col,
+    )
+
+    return cube.size + within_face_distance
+
+
 def compute_manhattan_distance(original_pos: int, final_pos: int,
                                cube: 'VCube') -> int:
     """
     Calculate Manhattan displacement distance between two positions.
+
+    Manhattan distance measures the sum of absolute differences in row and
+    column coordinates, extended across faces. For cross-face movements,
+    it accounts for the minimum path through adjacent or opposite faces.
     """
     if original_pos == final_pos:
         return 0
@@ -148,28 +216,26 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
     orig = parse_facelet_position(original_pos, cube)
     final = parse_facelet_position(final_pos, cube)
 
-    # Manhattan distance within the face
-    distance = abs(orig.row - final.row) + abs(orig.col - final.col)
-
+    # Case 1: Same face movements
     if orig.face_index == final.face_index:
-        return distance
+        return compute_within_face_manhattan_distance(orig, final)
 
-    # Add cross-face distance
-    factor = 1
+    # Case 2: Opposite faces
     if orig.face_name == OPPOSITE_FACES[final.face_name]:
-        factor = 2
+        return compute_opposite_face_manhattan_distance(orig, final, cube)
 
-    return cube.size * factor + distance
+    # Case 3: Adjacent faces
+    return compute_adjacent_face_manhattan_distance(orig, final, cube)
 
 
-def check_same_face_qtm_distance(pos_pair: tuple[int, int]) -> int:
+def compute_within_face_qtm_distance(pos_pair: tuple[int, int]) -> int:
     """Calculate QTM distance for positions on the same face."""
     if pos_pair in QTM_SAME_FACE_OPPOSITE_PAIRS:
         return 2
     return 1
 
 
-def check_opposite_face_qtm_distance(pos: int,
+def compute_opposite_face_qtm_distance(pos: int,
                                      pos_pair: tuple[int, int]) -> int:
     """Calculate QTM distance for positions on opposite faces."""
     if pos == 4:
@@ -190,7 +256,7 @@ def is_edge_in_same_piece(pos1: int, pos2: int) -> bool:
     return False
 
 
-def check_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
+def compute_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
                                           orig_face_pos: int,
                                           final_face_pos: int) -> int | None:
     """
@@ -215,7 +281,7 @@ def check_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
     return None
 
 
-def check_adjacent_face_qtm_distance(
+def compute_adjacent_face_qtm_distance(
     original_pos: int,
     final_pos: int,
     orig: FaceletPosition,
@@ -228,7 +294,7 @@ def check_adjacent_face_qtm_distance(
 
     # Special handling for edge pieces on adjacent faces
     if orig.face_position in FACE_EDGES_INDEX:
-        edge_distance = check_adjacent_face_edge_qtm_distance(
+        edge_distance = compute_adjacent_face_edge_qtm_distance(
             original_pos,
             final_pos,
             orig.face_position,
@@ -275,15 +341,15 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
     # Case 1: Same face movements
     if orig.face_index == final.face_index:
         pos_pair = (orig.face_position, final.face_position)
-        return check_same_face_qtm_distance(pos_pair)
+        return compute_within_face_qtm_distance(pos_pair)
 
     # Case 2: Opposite faces
     if orig.face_name == OPPOSITE_FACES[final.face_name]:
         pos_pair = (orig.face_position, final.face_position)
-        return check_opposite_face_qtm_distance(orig.face_position, pos_pair)
+        return compute_opposite_face_qtm_distance(orig.face_position, pos_pair)
 
     # Case 3: Adjacent faces
-    return check_adjacent_face_qtm_distance(
+    return compute_adjacent_face_qtm_distance(
         original_pos, final_pos, orig, final, cube,
     )
 
