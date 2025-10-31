@@ -349,7 +349,7 @@ def compute_adjacent_face_qtm_distance(
 
     # Special handling for edge pieces on adjacent faces
     if orig.face_position in FACE_EDGES_INDEX:
-        edge_distance = compute_adjacent_face_edge_qtm_distance(  # TODO remove
+        edge_distance = compute_adjacent_face_edge_qtm_distance(
             original_pos,
             final_pos,
             orig.face_position,
