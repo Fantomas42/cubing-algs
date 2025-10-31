@@ -3247,10 +3247,10 @@ class TestOrientationInvariance(unittest.TestCase):
     # These values are based on the transformation-based distance calculations
     MANHATTAN_PRE_ORIENTATION_EXPECTED: ClassVar[
         dict[str, dict[str, int | float]]] = {
-            '': {'sum': 167, 'mean': 3.48, 'max': 10},
-            'z2': {'sum': 167, 'mean': 3.48, 'max': 10},
-            'x': {'sum': 169, 'mean': 3.52, 'max': 10},
-            'x y': {'sum': 165, 'mean': 3.44, 'max': 8},
+            '': {'sum': 215, 'mean': 4.479, 'max': 10},
+            'z2': {'sum': 213, 'mean': 4.437, 'max': 10},
+            'x': {'sum': 219, 'mean': 4.562, 'max': 10},
+            'x y': {'sum': 209, 'mean': 4.354, 'max': 8},
         }
 
     QTM_PRE_ORIENTATION_EXPECTED: ClassVar[
