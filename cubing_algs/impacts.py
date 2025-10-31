@@ -186,6 +186,35 @@ def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
     return False
 
 
+def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
+    """
+    Check if two positions are on corners that share an edge.
+
+    Adjacent corners share exactly 2 faces (they're connected by an edge).
+    """
+    corner1 = None
+    corner2 = None
+
+    for corner in CORNER_FACELET_MAP:
+        if pos1 in corner:
+            corner1 = corner
+        if pos2 in corner:
+            corner2 = corner
+
+    if corner1 is None or corner2 is None:
+        return False
+
+    if corner1 == corner2:  # Same corner
+        return False
+
+    # Get the faces for each corner
+    faces1 = {p // cube.face_size for p in corner1}
+    faces2 = {p // cube.face_size for p in corner2}
+
+    # Adjacent corners share exactly 2 faces (an edge)
+    return len(faces1 & faces2) == 2
+
+
 def compute_adjacent_face_manhattan_distance(
         original_pos: int,
         final_pos: int,
@@ -202,17 +231,19 @@ def compute_adjacent_face_manhattan_distance(
     if positions_on_same_piece(original_pos, final_pos):
         return 1
 
-    # Transform original position to destination face coordinate system
-    translated = parse_facelet_position(
-        transform_position(
-            final.face_name,
-            orig.face_name,
-            orig.face_position,
-        ),
-        cube,
-    )
+    # Check if positions are on adjacent corners (corners sharing an edge)
+    if positions_on_adjacent_corners(original_pos, final_pos, cube):
+        return 3
 
-    if positions_on_same_piece(translated.face_position, final_pos):
+    # Transform original position to destination face coordinate system
+    translated_pos = transform_position(
+        final.face_name,
+        orig.face_name,
+        orig.face_position,
+    )
+    translated = parse_facelet_position(translated_pos, cube)
+
+    if positions_on_same_piece(translated_pos, final_pos):
         return 3
 
     # Distance components:
