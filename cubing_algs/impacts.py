@@ -187,9 +187,11 @@ def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
 
 
 def compute_adjacent_face_manhattan_distance(
-    orig: FaceletPosition,
-    final: FaceletPosition,
-    cube: 'VCube',
+        original_pos: int,
+        final_pos: int,
+        orig: FaceletPosition,
+        final: FaceletPosition,
+        cube: 'VCube',
 ) -> int:
     """
     Calculate Manhattan distance for positions on adjacent faces.
@@ -197,6 +199,9 @@ def compute_adjacent_face_manhattan_distance(
     Uses face transformation to determine the aligned position,
     then calculates the shortest path accounting for edge crossing.
     """
+    if positions_on_same_piece(original_pos, final_pos):
+        return 1
+
     # Transform original position to destination face coordinate system
     translated = parse_facelet_position(
         transform_position(
@@ -206,6 +211,9 @@ def compute_adjacent_face_manhattan_distance(
         ),
         cube,
     )
+
+    if positions_on_same_piece(translated.face_position, final_pos):
+        return 3
 
     # Distance components:
     # 1. Distance to reach the edge (minimum distance to any edge position)
@@ -246,7 +254,10 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
         return compute_opposite_face_manhattan_distance(orig, final, cube)
 
     # Case 3: Adjacent faces
-    return compute_adjacent_face_manhattan_distance(orig, final, cube)
+    return compute_adjacent_face_manhattan_distance(
+        original_pos, final_pos,
+        orig, final, cube,
+    )
 
 
 def compute_within_face_qtm_distance(pos_pair: tuple[int, int]) -> int:
@@ -295,11 +306,11 @@ def compute_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
 
 
 def compute_adjacent_face_qtm_distance(
-    original_pos: int,
-    final_pos: int,
-    orig: FaceletPosition,
-    final: FaceletPosition,
-    cube: 'VCube',
+        original_pos: int,
+        final_pos: int,
+        orig: FaceletPosition,
+        final: FaceletPosition,
+        cube: 'VCube',
 ) -> int:
     """Calculate QTM distance for positions on adjacent faces."""
     if orig.face_position == 4:
@@ -307,7 +318,7 @@ def compute_adjacent_face_qtm_distance(
 
     # Special handling for edge pieces on adjacent faces
     if orig.face_position in FACE_EDGES_INDEX:
-        edge_distance = compute_adjacent_face_edge_qtm_distance(
+        edge_distance = compute_adjacent_face_edge_qtm_distance(  # TODO remove
             original_pos,
             final_pos,
             orig.face_position,

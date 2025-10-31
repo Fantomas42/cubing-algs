@@ -337,8 +337,19 @@ class TestComputeManhattanDistance(unittest.TestCase):
     def test_adjacent_face_distance(self) -> None:
         """Test distance between adjacent faces."""
         test_cases = [
-            (0, 9, 5), (2, 11, 1), (0, 36, 1),
-            (0, 11, 3), (0, 38, 3), (0, 42, 3),
+            (0, 9, 5), (9, 0, 5),
+            (2, 11, 1), (11, 2, 1),
+            (0, 36, 1), (36, 0, 1),
+            (0, 11, 3), (11, 0, 3),
+            (0, 38, 3), (38, 0, 3),
+            (0, 42, 3), (42, 0, 3),
+            (1, 19, 3), (19, 1, 3),
+            (0, 18, 3), (18, 0, 3),
+            (8, 26, 3), (26, 8, 3),
+            (9, 18, 3), (18, 9, 3),
+            (9, 45, 3), (45, 9, 3),
+            (11, 47, 3), (47, 11, 3),
+            (11, 51, 3), (51, 11, 3),
         ]
 
         for orig_pos, final_pos, expected_distance in test_cases:
