@@ -8,6 +8,8 @@ from cubing_algs.transform.optimize import optimize_double_moves
 
 
 class MetricsTestCase(unittest.TestCase):
+    """Tests for algorithm metrics computation."""
+
     maxDiff = None
 
     def test_metrics(self) -> None:

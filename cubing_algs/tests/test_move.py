@@ -6,6 +6,7 @@ from cubing_algs.move import Move
 
 
 class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for the Move class and its properties."""
 
     def test_base_move(self) -> None:
         self.assertEqual(Move('U').base_move, 'U')

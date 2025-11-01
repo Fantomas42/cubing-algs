@@ -9,6 +9,7 @@ from cubing_algs.transform.pause import unpause_moves
 
 
 class TransformUnpauseTestCase(unittest.TestCase):
+    """Tests for removing pauses from algorithms."""
 
     def test_unpause_moves(self) -> None:
         provide = parse_moves(
@@ -44,6 +45,7 @@ class TransformUnpauseTestCase(unittest.TestCase):
 
 
 class TransformPauseTestCase(unittest.TestCase):
+    """Tests for adding pauses to algorithms based on timing."""
 
     def test_pause_moves(self) -> None:
         provide = parse_moves(
@@ -114,6 +116,7 @@ class TransformPauseTestCase(unittest.TestCase):
 
 
 class TransformPauseConfigTestCase(unittest.TestCase):
+    """Tests for pause configuration with custom thresholds."""
 
     def test_pause_moves(self) -> None:
         provide = parse_moves(

@@ -7,6 +7,7 @@ from cubing_algs.vcube import VCube
 
 
 class TestMovePermutations(unittest.TestCase):
+    """Tests for move permutation calculations."""
 
     @staticmethod
     def create_numbered_cube() -> VCube:

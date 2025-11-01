@@ -10,6 +10,7 @@ from cubing_algs.vcube import VCube
 
 
 class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
+    """Tests for VCube display rendering and formatting."""
 
     def setUp(self) -> None:
         self.cube = VCube()
@@ -537,6 +538,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
 
 class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
+    """Tests for extended net display format."""
 
     def setUp(self) -> None:
         self.cube = VCube()

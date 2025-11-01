@@ -8,6 +8,7 @@ from cubing_algs.transform.auf import remove_auf_moves
 
 
 class TransformRemoveAUFTestCase(unittest.TestCase):
+    """Tests for AUF removal transformation."""
 
     def test_remove_auf_moves_pre_one(self) -> None:
         provide = parse_moves('U F R B')

@@ -14,6 +14,7 @@ from cubing_algs.masks import union_masks
 
 
 class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
+    """Tests for binary mask operations on cube states."""
 
     def test_union(self) -> None:
         self.assertEqual(union_masks('1010', '0110'), '1110')

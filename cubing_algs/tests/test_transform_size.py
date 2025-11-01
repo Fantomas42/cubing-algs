@@ -9,6 +9,7 @@ from cubing_algs.transform.size import expand_moves
 
 
 class TransformCompressTestCase(unittest.TestCase):
+    """Tests for algorithm compression transformations."""
 
     def test_compress_moves(self) -> None:
         provide = parse_moves(
@@ -175,6 +176,7 @@ class TransformCompressTestCase(unittest.TestCase):
 
 
 class TransformExpandTestCase(unittest.TestCase):
+    """Tests for algorithm expansion transformations."""
 
     def test_expand_moves(self) -> None:
         provide = parse_moves('R2 F U')

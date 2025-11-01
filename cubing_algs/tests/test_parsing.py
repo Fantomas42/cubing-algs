@@ -15,6 +15,7 @@ from cubing_algs.parsing import split_moves
 
 
 class CleanMovesTestCase(unittest.TestCase):
+    """Tests for the clean_moves function."""
 
     def test_clean_moves(self) -> None:
         moves = "R2 L2  (y):F B2' e U R` U’  "  # noqa: RUF001
@@ -23,6 +24,7 @@ class CleanMovesTestCase(unittest.TestCase):
 
 
 class SplitMovesTestCase(unittest.TestCase):
+    """Tests for the split_moves function."""
 
     def test_split_moves(self) -> None:
         moves = "R2L2yFB2EU'R'U'"
@@ -55,6 +57,7 @@ class SplitMovesTestCase(unittest.TestCase):
 
 
 class CheckMovesTestCase(unittest.TestCase):
+    """Tests for the check_moves function."""
 
     def test_check_moves(self) -> None:
         moves = split_moves('R2 L2')
@@ -94,6 +97,7 @@ class CheckMovesTestCase(unittest.TestCase):
 
 
 class ParseMovesTestCase(unittest.TestCase):
+    """Tests for the parse_moves function."""
 
     def test_parse_moves(self) -> None:
         moves = 'R2 L2'
@@ -315,6 +319,7 @@ class ParseMovesTestCase(unittest.TestCase):
 
 
 class ParseMovesCFOPTestCase(unittest.TestCase):
+    """Tests for the parse_moves_cfop function."""
 
     def test_parse_moves_cfop(self) -> None:
         moves = 'R2 L2'
@@ -334,6 +339,7 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
 
 
 class CleanMultilineAndCommentsTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for cleaning multiline text and removing comments."""
 
     def test_simple_text_without_comments_or_newlines_fast_path(self) -> None:
         """Test the fast path when no comments or newlines are present."""
@@ -486,6 +492,7 @@ class CleanMultilineAndCommentsTestCase(unittest.TestCase):  # noqa: PLR0904
 
 
 class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
+    """Tests for multiline move parsing integration."""
 
     def test_parse_moves_multiline_basic(self) -> None:
         """Test basic multiline parsing integration."""

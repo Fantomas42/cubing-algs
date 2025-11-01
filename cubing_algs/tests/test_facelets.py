@@ -17,6 +17,7 @@ from cubing_algs.vcube import VCube
 
 
 class CubiesToFaceletsTestCase(unittest.TestCase):
+    """Tests for converting cubie representation to facelet representation."""
 
     def test_cubies_to_facelets_solved(self) -> None:
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
@@ -95,6 +96,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
 
 
 class FaceletsToCubiesTestCase(unittest.TestCase):
+    """Tests for converting facelet representation to cubie representation."""
 
     def test_facelets_to_cubies_solved(self) -> None:
         cp = [0, 1, 2, 3, 4, 5, 6, 7]

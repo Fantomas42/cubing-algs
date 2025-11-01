@@ -16,6 +16,7 @@ from cubing_algs.vcube import VCube
 
 
 class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for wide move transformations."""
 
     def test_unwide_rotation_moves(self) -> None:
         provide = parse_moves('f r u')
@@ -358,6 +359,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
 
 
 class TransformWideTimedTestCase(unittest.TestCase):
+    """Tests for timed wide move transformations."""
 
     def test_rewide_timed_moves(self) -> None:
         provide = parse_moves('L@0 x@30 F')
@@ -415,6 +417,7 @@ class TransformWideTimedTestCase(unittest.TestCase):
 
 
 class TransformWideEquivalenceTestCase(unittest.TestCase):
+    """Tests for wide move equivalence verification."""
 
     def test_equivalences(self) -> None:
         for moves, equivalence in REWIDE_MOVES.items():

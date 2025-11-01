@@ -16,6 +16,7 @@ from cubing_algs.vcube import VCube
 
 
 class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for the Algorithm class core functionality."""
 
     def test_init_empty(self) -> None:
         algo = Algorithm()

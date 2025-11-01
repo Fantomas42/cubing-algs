@@ -151,6 +151,7 @@ class TestPositioningFunctions(unittest.TestCase):
 
 
 class RGBTestCase(unittest.TestCase):
+    """Tests for RGB color manipulation and transformation effects."""
 
     def _validate_rgb_output(self, rgb: tuple[int, int, int]) -> None:
         """Help to validate RGB output is properly clamped."""

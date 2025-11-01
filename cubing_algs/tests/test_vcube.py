@@ -19,6 +19,8 @@ from cubing_algs.vcube import VCube
 
 
 class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for core VCube functionality including state and rotation."""
+
     maxDiff = None
 
     def test_state(self) -> None:
@@ -310,6 +312,8 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
 
 
 class VCubeOrientedCopyTestCase(unittest.TestCase):
+    """Tests for oriented cube copying with different face configurations."""
+
     maxDiff = None
 
     def test_oriented_copy_faces(self) -> None:
@@ -447,7 +451,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
 
 
 class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
-    """Tests pour les nouvelles vérifications de check_integrity."""
+    """Tests for cube state integrity verification."""
 
     def test_initial(self) -> None:
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB'
@@ -693,6 +697,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
 
 
 class VCubeRotateTestCase(unittest.TestCase):
+    """Tests for cube rotation with various move types."""
 
     def test_rotate_types(self) -> None:
         cube = VCube()
@@ -1002,6 +1007,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
 
 class VCubeRotateWideSiGNTestCase(unittest.TestCase):
+    """Tests for wide move rotation using SiGN notation."""
 
     def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
@@ -1046,6 +1052,7 @@ class VCubeRotateWideSiGNTestCase(unittest.TestCase):
 
 
 class VCubeRotateWideStandardTestCase(unittest.TestCase):
+    """Tests for wide move rotation using standard notation."""
 
     def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
@@ -1090,6 +1097,7 @@ class VCubeRotateWideStandardTestCase(unittest.TestCase):
 
 
 class VCubeRotateWideCancelTestCase(unittest.TestCase):
+    """Tests for wide move cancellation behavior."""
 
     def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
@@ -1137,6 +1145,7 @@ class VCubeRotateWideCancelTestCase(unittest.TestCase):
 
 
 class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
+    """Tests for double wide move cancellation behavior."""
 
     def check_rotate(self, raw_move: str) -> None:
         move = Move(raw_move).doubled
@@ -1189,6 +1198,7 @@ class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
 
 
 class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
+    """Tests for advanced wide move scenarios."""
 
     def check_rotate(self, raw_move: str) -> None:
         base_move = Move(raw_move)
@@ -1235,6 +1245,7 @@ class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
 
 
 class TestVCubeShow(unittest.TestCase):
+    """Tests for cube visualization and display functionality."""
 
     def setUp(self) -> None:
         self.cube = VCube()
@@ -1324,6 +1335,7 @@ class TestVCubeShow(unittest.TestCase):
 
 
 class TestVCubeIsEqual(unittest.TestCase):
+    """Tests for cube equality comparison."""
 
     def setUp(self) -> None:
         self.cube1 = VCube()
@@ -1463,6 +1475,7 @@ class TestVCubeIsEqual(unittest.TestCase):
 
 
 class TestVCubeOrientation(unittest.TestCase):
+    """Tests for cube orientation computation and handling."""
 
     def setUp(self) -> None:
         self.cube = VCube()

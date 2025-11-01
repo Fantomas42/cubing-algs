@@ -16,6 +16,7 @@ from cubing_algs.transform.offset import offset_zprime_moves
 
 
 class TransformOffsetTestCase(unittest.TestCase):
+    """Tests for offset transformations that apply cube rotations."""
 
     def test_offset_x_moves(self) -> None:
         provide = parse_moves("R U R' U'")

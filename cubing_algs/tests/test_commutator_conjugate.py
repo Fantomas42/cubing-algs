@@ -12,6 +12,7 @@ from cubing_algs.exceptions import InvalidOperatorError
 
 
 class TestFindInnermostBrackets(unittest.TestCase):
+    """Tests for finding innermost brackets in notation strings."""
 
     def test_no_brackets(self) -> None:
         """Should return None when no brackets are present."""
@@ -52,6 +53,7 @@ class TestFindInnermostBrackets(unittest.TestCase):
 
 
 class TestSplitOnSeparator(unittest.TestCase):
+    """Tests for splitting notation strings on separators."""
 
     def test_no_separator(self) -> None:
         """Should return None when separator is not found."""
@@ -92,6 +94,7 @@ class TestSplitOnSeparator(unittest.TestCase):
 
 
 class TestInvertMoves(unittest.TestCase):
+    """Tests for inverting move sequences."""
 
     def test_invert_moves(self) -> None:
         """
@@ -104,6 +107,7 @@ class TestInvertMoves(unittest.TestCase):
 
 
 class TestExpandCommutatorsAndConjugates(unittest.TestCase):
+    """Tests for expanding commutator and conjugate notation."""
 
     def test_simple_commutator(self) -> None:
         """Should expand simple commutator [A, B] to A B A' B'."""
@@ -174,6 +178,7 @@ class TestExpandCommutatorsAndConjugates(unittest.TestCase):
 
 
 class TestEdgeCases(unittest.TestCase):
+    """Tests for edge cases in commutator and conjugate parsing."""
 
     def test_empty_string(self) -> None:
         """Should handle empty strings gracefully."""

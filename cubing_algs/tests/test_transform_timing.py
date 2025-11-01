@@ -8,6 +8,7 @@ from cubing_algs.transform.timing import untime_moves
 
 
 class TransformUntimeTestCase(unittest.TestCase):
+    """Tests for removing timing information from algorithms."""
 
     def test_untime_moves(self) -> None:
         provide = parse_moves(

@@ -22,6 +22,7 @@ from cubing_algs.structure import score_structure
 
 
 class SimpleConjugatesTestCase(unittest.TestCase):
+    """Tests for simple conjugate detection."""
 
     def test_basic_conjugate(self) -> None:
         algo = Algorithm.parse_moves("R U R'")
@@ -70,6 +71,7 @@ class SimpleConjugatesTestCase(unittest.TestCase):
 
 
 class SimpleCommutatorsTestCase(unittest.TestCase):
+    """Tests for simple commutator detection."""
 
     def test_basic_commutator(self) -> None:
         algo = Algorithm.parse_moves("R U R' U'")
@@ -104,6 +106,7 @@ class SimpleCommutatorsTestCase(unittest.TestCase):
 
 
 class NestedStructuresTestCase(unittest.TestCase):
+    """Tests for nested structure detection."""
 
     def test_conjugate_with_commutator_action(self) -> None:
         algo = Algorithm.parse_moves("F R U R' U' F'")
@@ -131,6 +134,7 @@ class NestedStructuresTestCase(unittest.TestCase):
 
 
 class ComplexAlgorithmsTestCase(unittest.TestCase):
+    """Tests for complex algorithm structure detection."""
 
     def test_sexy_move(self) -> None:
         algo = Algorithm.parse_moves("R U R' U'")
@@ -179,6 +183,7 @@ class ComplexAlgorithmsTestCase(unittest.TestCase):
 
 
 class CompressionQualityTestCase(unittest.TestCase):
+    """Tests for compression quality metrics."""
 
     def test_no_false_positives(self) -> None:
         algo = Algorithm.parse_moves('R U F D L B')
@@ -212,6 +217,7 @@ class CompressionQualityTestCase(unittest.TestCase):
 
 
 class EdgeCasesTestCase(unittest.TestCase):
+    """Tests for edge cases in structure detection."""
 
     def test_empty_algorithm(self) -> None:
         algo = Algorithm([])
@@ -257,6 +263,7 @@ class EdgeCasesTestCase(unittest.TestCase):
 
 
 class CompressTestCase(unittest.TestCase):
+    """Tests for structure compression."""
 
     def test_compress_basic(self) -> None:
         algo = Algorithm.parse_moves("R U R' U'")
@@ -288,6 +295,7 @@ class CompressTestCase(unittest.TestCase):
 
 
 class StructureDataclassTestCase(unittest.TestCase):
+    """Tests for structure data class."""
 
     def test_structure_str_conjugate(self) -> None:
         setup = Algorithm.parse_moves('R')
@@ -319,6 +327,7 @@ class StructureDataclassTestCase(unittest.TestCase):
 
 
 class RealWorldExamplesTestCase(unittest.TestCase):
+    """Tests with real-world algorithm examples."""
 
     def test_f2l_pair_1(self) -> None:
         algo = Algorithm.parse_moves("U R U' R'")
@@ -353,6 +362,7 @@ class RealWorldExamplesTestCase(unittest.TestCase):
 
 
 class ComputeStructureTestCase(unittest.TestCase):
+    """Tests for structure computation."""
 
     def test_compute_structure_basic(self) -> None:
         algo = Algorithm.parse_moves("R U R' U'")
@@ -518,6 +528,7 @@ class ComputeStructureTestCase(unittest.TestCase):
 
 
 class StructureClassificationsTestCase(unittest.TestCase):
+    """Tests for structure classification."""
 
     def test_pure_commutator_detection(self) -> None:
         algo = Algorithm.parse_moves("R U R' U' R U R' U'")

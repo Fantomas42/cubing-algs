@@ -10,6 +10,7 @@ from cubing_algs.transform.translate import translate_pov_moves
 
 
 class TransformTranslateTestCase(unittest.TestCase):
+    """Tests for algorithm translation across orientations."""
 
     def test_translate_z2(self) -> None:
         # z2 (DR) is symmetric: should be easy
@@ -122,6 +123,7 @@ class TransformTranslateTestCase(unittest.TestCase):
 
 
 class TransformTranslatePOVTestCase(unittest.TestCase):
+    """Tests for POV-based algorithm translation."""
 
     def test_translate_pov_z2(self) -> None:
         provide = parse_moves("z2 L D L' D'")

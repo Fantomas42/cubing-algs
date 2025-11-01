@@ -18,6 +18,7 @@ from cubing_algs.vcube import VCube
 
 
 class TestValidNextMove(unittest.TestCase):
+    """Tests for valid next move generation in scrambling."""
 
     def test_is_valid_next_move_valid(self) -> None:
         """Test that valid next moves are recognized."""
@@ -50,6 +51,8 @@ class TestValidNextMove(unittest.TestCase):
 
 
 class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
+    """Tests for cube move set definitions and validation."""
+
     maxDiff = None
 
     def test_build_cube_move_set_2x2x2(self) -> None:
@@ -587,6 +590,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
 
 
 class TestRandomMoves(unittest.TestCase):
+    """Tests for random move sequence generation."""
 
     def test_random_moves_2x2x2(self) -> None:
         moves = random_moves(2, ['F', 'R', 'U'], 0)
@@ -615,6 +619,7 @@ class TestRandomMoves(unittest.TestCase):
 
 
 class TestScramble(unittest.TestCase):
+    """Tests for scramble generation."""
 
     def test_scramble_3x3x3(self) -> None:
         moves = scramble(3)
@@ -636,6 +641,7 @@ class TestScramble(unittest.TestCase):
 
 
 class TestScrambleEasyCross(unittest.TestCase):
+    """Tests for easy cross scramble generation."""
 
     def test_scramble_easy_cross(self) -> None:
         moves = scramble_easy_cross()

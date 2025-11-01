@@ -8,6 +8,7 @@ from cubing_algs.transform.mirror import mirror_moves
 
 
 class TransformMirrorTestCase(unittest.TestCase):
+    """Tests for mirror transformation that reflects algorithms."""
 
     def test_mirror_moves(self) -> None:
         provide = parse_moves(

@@ -11,6 +11,7 @@ from cubing_algs.transform.symmetry import symmetry_s_moves
 
 
 class TransformSymmetryTestCase(unittest.TestCase):
+    """Tests for symmetry transformations."""
 
     def test_symmetry_c_moves(self) -> None:
         provide = parse_moves("U R U' R'")

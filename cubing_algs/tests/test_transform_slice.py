@@ -20,6 +20,7 @@ from cubing_algs.vcube import VCube
 
 
 class TransformSliceTestCase(unittest.TestCase):
+    """Tests for slice move transformations."""
 
     def test_unslice_rotation_moves(self) -> None:
         provide = parse_moves('M2 U S E')
@@ -300,6 +301,7 @@ class TransformSliceTestCase(unittest.TestCase):
 
 
 class TransformSliceTimedTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for timed slice move transformations."""
 
     def test_reslice_timed_moves(self) -> None:
         provide = parse_moves("U'@100 D@150")
@@ -846,6 +848,7 @@ class TransformSliceTimedTestCase(unittest.TestCase):  # noqa: PLR0904
 
 
 class TransformSliceEquivalenceTestCase(unittest.TestCase):
+    """Tests for slice move equivalence verification."""
 
     def test_equivalences(self) -> None:
         for moves, equivalence in RESLICE_MOVES.items():

@@ -17,6 +17,7 @@ from cubing_algs.transform.rotation import split_moves_ending_rotations
 
 
 class TransformRemoveEndingRotationsTestCase(unittest.TestCase):
+    """Tests for removing ending rotations from algorithms."""
 
     def test_remove_ending_rotations(self) -> None:
         provide = parse_moves('R2 F U x y2')
@@ -89,6 +90,7 @@ class TransformRemoveEndingRotationsTestCase(unittest.TestCase):
 
 
 class TransformRemoveStartingRotationsTestCase(unittest.TestCase):
+    """Tests for removing starting rotations from algorithms."""
 
     def test_remove_starting_rotations(self) -> None:
         provide = parse_moves('x y2 R2 F U')
@@ -161,6 +163,7 @@ class TransformRemoveStartingRotationsTestCase(unittest.TestCase):
 
 
 class TransformRemoveRotationsTestCase(unittest.TestCase):
+    """Tests for removing all rotations from algorithms."""
 
     def test_remove_rotations(self) -> None:
         provide = parse_moves('z R2 F U x y2')
@@ -219,6 +222,7 @@ class TransformRemoveRotationsTestCase(unittest.TestCase):
 
 
 class SplitMovesEndingRotationsTestCase(unittest.TestCase):
+    """Tests for splitting moves and ending rotations."""
 
     def test_split_moves_ending_rotations(self) -> None:
         provide = parse_moves("R2 F x x x'")
@@ -258,6 +262,7 @@ class SplitMovesEndingRotationsTestCase(unittest.TestCase):
 
 
 class TransformOptimizeTripleRotationsTestCase(unittest.TestCase):
+    """Tests for optimizing triple rotation sequences."""
 
     def test_optimize_triple_rotations(self) -> None:
         provide = parse_moves('x2 y2 z2')
@@ -339,6 +344,7 @@ class TransformOptimizeTripleRotationsTestCase(unittest.TestCase):
 
 
 class TransformOptimizeDoubleRotationsTestCase(unittest.TestCase):
+    """Tests for optimizing double rotation sequences."""
 
     def test_optimize_double_rotations(self) -> None:
         provide = parse_moves('x2 y2')
@@ -448,6 +454,7 @@ class TransformOptimizeDoubleRotationsTestCase(unittest.TestCase):
 
 
 class TransformOptimizeConjugateRotationsTestCase(unittest.TestCase):
+    """Tests for optimizing conjugate rotation patterns."""
 
     def test_optimize_conjugate_rotations(self) -> None:
         provide = parse_moves("y x2 y'")
@@ -570,6 +577,7 @@ class TransformOptimizeConjugateRotationsTestCase(unittest.TestCase):
 
 
 class TransformCompressRotationsTestCase(unittest.TestCase):
+    """Tests for compressing rotation sequences."""
 
     def test_compress_rotations(self) -> None:
         provide = parse_moves("x' z2 x y x2 y'")
@@ -627,6 +635,7 @@ class TransformCompressRotationsTestCase(unittest.TestCase):
 
 
 class TransformCompressEndingRotationsTestCase(unittest.TestCase):
+    """Tests for compressing ending rotation sequences."""
 
     def test_compress_ending_rotations(self) -> None:
         provide = parse_moves("R2 F x x x' x x x")

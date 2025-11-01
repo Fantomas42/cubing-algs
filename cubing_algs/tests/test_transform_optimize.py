@@ -11,6 +11,7 @@ from cubing_algs.transform.optimize import optimize_triple_moves
 
 
 class TransformOptimizeTestCase(unittest.TestCase):
+    """Tests for move optimization transformations."""
 
     def test_optimize_repeat_three_moves(self) -> None:
         provide = parse_moves('R R R')

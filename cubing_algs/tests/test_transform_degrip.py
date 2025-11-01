@@ -19,6 +19,8 @@ from cubing_algs.vcube import VCube
 
 
 class TransformDegripTestCase(unittest.TestCase):
+    """Tests for degrip transformations that remove cube rotations."""
+
     maxDiff = None
 
     def check_basic_grip_degrip(self, provide: Move, expect: Move, dimension: str,

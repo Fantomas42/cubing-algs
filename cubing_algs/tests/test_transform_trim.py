@@ -8,6 +8,7 @@ from cubing_algs.transform.trim import trim_moves
 
 
 class TransformTrimTestCase(unittest.TestCase):
+    """Tests for trimming moves from algorithm start and end."""
 
     def test_trim(self) -> None:
         provide = parse_moves('U F R B U')

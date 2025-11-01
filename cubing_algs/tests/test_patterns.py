@@ -8,6 +8,7 @@ from cubing_algs.patterns import get_pattern
 
 
 class PatternsTestCase(unittest.TestCase):
+    """Tests for cube pattern recognition and generation."""
 
     def test_patterns_size(self) -> None:
         self.assertEqual(

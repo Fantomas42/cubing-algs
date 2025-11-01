@@ -9,6 +9,7 @@ from cubing_algs.transform.sign import unsign_moves
 
 
 class TransformSignTestCase(unittest.TestCase):
+    """Tests for SiGN notation transformations."""
 
     def test_unsign_moves(self) -> None:
         provide = parse_moves("R' F u' B r")
