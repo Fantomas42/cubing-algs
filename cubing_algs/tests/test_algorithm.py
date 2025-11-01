@@ -1,5 +1,7 @@
 # ruff: noqa: PLR6104 RUF005
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
@@ -727,21 +729,27 @@ class AlgorithmShowTestCase(unittest.TestCase):
     def test_show_method_basic(self) -> None:
         """Test show method returns VCube instance."""
         algo = Algorithm.parse_moves("R U R'")
-        result = algo.show()
+
+        with redirect_stdout(StringIO()):
+            result = algo.show()
 
         self.assertIsInstance(result, VCube)
 
     def test_show_method_with_parameters(self) -> None:
         """Test show method with mode and orientation parameters."""
         algo = Algorithm.parse_moves("R U R'")
-        result = algo.show(mode='oll', orientation='FU')
+
+        with redirect_stdout(StringIO()):
+            result = algo.show(mode='oll', orientation='FU')
 
         self.assertIsInstance(result, VCube)
 
     def test_show_method_empty_algorithm(self) -> None:
         """Test show method with empty algorithm."""
         algo = Algorithm()
-        result = algo.show()
+
+        with redirect_stdout(StringIO()):
+            result = algo.show()
 
         self.assertIsInstance(result, VCube)
 

@@ -482,3 +482,36 @@ ORIENTATIONS = [
     'FD', 'FR', 'FU', 'FL',
     'BD', 'BR', 'BU', 'BL',
 ]
+
+FACE_EDGES_INDEX = {1, 3, 5, 7}
+
+FACE_CORNERS_INDEX = {0, 2, 6, 8}
+
+# QTM distance calculation constants
+QTM_SAME_FACE_OPPOSITE_PAIRS = {
+    (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
+    (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
+    (1, 7), (7, 1),  # Top edge <-> Bottom edge
+    (3, 5), (5, 3),  # Left edge <-> Right edge
+}
+
+QTM_OPPOSITE_FACE_SIMPLE_PAIRS = {
+    (1, 1), (7, 7),  # Top edge <-> Bottom edge
+    (3, 5), (5, 3),  # Left edge <-> Right edge
+    (0, 0), (2, 2),  # Top-left corner + Top-right corner
+    (6, 6), (8, 8),  # Bottom-left corner + Bottom-right corner
+}
+
+QTM_OPPOSITE_FACE_DOUBLE_PAIRS = {
+    (1, 7), (7, 1),  # Top edge <-> Bottom edge
+    (3, 3), (5, 5),  # Left edge <-> Right edge
+    (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
+    (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
+}
+
+QTM_OPPOSITE_EDGE_OFFSETS = {
+    1: 6,
+    7: -6,
+    3: 2,
+    5: -2,
+}

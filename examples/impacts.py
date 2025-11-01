@@ -18,10 +18,14 @@ def show_impact(algorithm: str) -> None:  # noqa PLR0915
     print(f'  Fixed facelets:          { impacts.facelets_fixed_count }/54')
     print(f'  Mobilized facelets:      { impacts.facelets_mobilized_count }/54')
     print(f'  Scrambled percent:       { impacts.facelets_scrambled_percent:.1%}')  # noqa: E501
-    print('\n  Distance metrics:')
-    print(f'    Mean displacement:     { impacts.facelets_distance_mean:.2f}')
-    print(f'    Max displacement:      { impacts.facelets_distance_max }')
-    print(f'    Total displacement:    { impacts.facelets_distance_sum }')
+    print('\n  Manhattan distance metrics:')
+    print(f'    Mean displacement:     { impacts.facelets_manhattan_distance.mean:.2f}')  # noqa: E501
+    print(f'    Max displacement:      { impacts.facelets_manhattan_distance.max }')  # noqa: E501
+    print(f'    Total displacement:    { impacts.facelets_manhattan_distance.sum }')  # noqa: E501
+    print('\n  QTM distance metrics:')
+    print(f'    Mean displacement:     { impacts.facelets_qtm_distance.mean:.2f}')  # noqa: E501
+    print(f'    Max displacement:      { impacts.facelets_qtm_distance.max }')
+    print(f'    Total displacement:    { impacts.facelets_qtm_distance.sum }')
     print('\n  Face mobility:')
     for face, count in impacts.facelets_face_mobility.items():
         print(f'    {face} face:               {count}/9 facelets moved')
