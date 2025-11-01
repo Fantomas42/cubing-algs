@@ -47,7 +47,7 @@ class TestValidNextMove(unittest.TestCase):
         self.assertFalse(is_valid_next_move('Fw', 'B'))
 
 
-class TestCubeMoveSet(unittest.TestCase):
+class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
     maxDiff = None
 
     def test_build_cube_move_set_2x2x2(self) -> None:

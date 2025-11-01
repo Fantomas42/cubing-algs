@@ -412,7 +412,7 @@ class TestComputeManhattanDistance(unittest.TestCase):
         self.assertEqual(distance2, 5)
 
 
-class TestComputeQtmDistance(unittest.TestCase):
+class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
     """Test the compute_qtm_distance function."""
 
     def setUp(self) -> None:
@@ -2856,7 +2856,7 @@ class TestAnalyzeCycles(unittest.TestCase):
         self.assertEqual(result['four_plus_cycles'], 1)
 
 
-class TestClassifyPattern(unittest.TestCase):
+class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
     """Test the classify_pattern function."""
 
     def test_solved_state(self) -> None:

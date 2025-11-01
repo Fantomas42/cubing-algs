@@ -13,7 +13,7 @@ from cubing_algs.transform.optimize import optimize_double_moves
 from cubing_algs.vcube import VCube
 
 
-class AlgorithmTestCase(unittest.TestCase):
+class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
     def test_init_empty(self) -> None:
         algo = Algorithm()

@@ -3,7 +3,7 @@ import unittest
 from cubing_algs.vcube import VCube
 
 
-class TestExplicitMovePermutations(unittest.TestCase):
+class TestExplicitMovePermutations(unittest.TestCase):  # noqa: PLR0904
     @staticmethod
     def create_numbered_cube() -> VCube:
         state = ''.join([chr(ord('A') + i) for i in range(54)])

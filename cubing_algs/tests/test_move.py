@@ -3,7 +3,7 @@ import unittest
 from cubing_algs.move import Move
 
 
-class MoveTestCase(unittest.TestCase):
+class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
 
     def test_base_move(self) -> None:
         self.assertEqual(Move('U').base_move, 'U')

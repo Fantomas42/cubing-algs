@@ -11,7 +11,7 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.structure import compress
 
 
-class CompressionRoundTripTestCase(unittest.TestCase):
+class CompressionRoundTripTestCase(unittest.TestCase):  # noqa: PLR0904
     """Test that compressed algorithms round-trip correctly."""
 
     def test_simple_commutator_roundtrip(self) -> None:

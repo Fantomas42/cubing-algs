@@ -16,7 +16,7 @@ from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.vcube import VCube
 
 
-class VCubeTestCase(unittest.TestCase):
+class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
     maxDiff = None
 
     def test_state(self) -> None:
@@ -444,7 +444,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
                 )
 
 
-class VCubeCheckIntegrityTestCase(unittest.TestCase):
+class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
     """Tests pour les nouvelles vérifications de check_integrity"""
 
     def test_initial(self) -> None:

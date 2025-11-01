@@ -297,7 +297,7 @@ class TransformSliceTestCase(unittest.TestCase):
         )
 
 
-class TransformSliceTimedTestCase(unittest.TestCase):
+class TransformSliceTimedTestCase(unittest.TestCase):  # noqa: PLR0904
 
     def test_reslice_timed_moves(self) -> None:
         provide = parse_moves("U'@100 D@150")

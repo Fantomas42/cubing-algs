@@ -19,7 +19,7 @@ from cubing_algs.constants import ROTATIONS
 from cubing_algs.constants import WIDE_CHAR
 
 
-class Move(UserString):
+class Move(UserString):  # noqa: PLR0904
     """
     Represents a single move in a Rubik's cube algorithm.
 

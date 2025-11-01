@@ -18,7 +18,7 @@ from cubing_algs.move import Move
 logger = logging.getLogger(__name__)
 
 CLEAN_PATTERNS = [
-    (re.compile(r'[`’]'), "'"),  # # noqa RUF001
+    (re.compile(r'[`’]'), "'"),  # # noqa: RUF001
     (re.compile(r'[():,\[\]]'), ' '),
     (re.compile(r'\s+'), ' '),
     (re.compile(r"2'"), '2'),

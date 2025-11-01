@@ -15,7 +15,7 @@ from cubing_algs.parsing import split_moves
 class CleanMovesTestCase(unittest.TestCase):
 
     def test_clean_moves(self) -> None:
-        moves = "R2 L2  (y):F B2' e U R` U’  "  # noqa RUF001
+        moves = "R2 L2  (y):F B2' e U R` U’  "  # noqa: RUF001
         expect = "R2 L2 y F B2 E U R' U'"
         self.assertEqual(clean_moves(moves), expect)
 
@@ -331,7 +331,7 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
         )
 
 
-class CleanMultilineAndCommentsTestCase(unittest.TestCase):
+class CleanMultilineAndCommentsTestCase(unittest.TestCase):  # noqa: PLR0904
 
     def test_simple_text_without_comments_or_newlines_fast_path(self) -> None:
         """

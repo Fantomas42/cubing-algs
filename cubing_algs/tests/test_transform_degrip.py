@@ -294,7 +294,7 @@ class TransformDegripTestCase(unittest.TestCase):
                 ("FRUx'", "x'F'R'U'",  "FRURBR'B2R'D'x2",    'Enclosed Bis Double'),
                 ('Rx', "x'FRUxFRU",    'R2FUDRFx',           'Triple'),
                 ("Rx'", "x'FRUx'FRU",  'R2BD2RFx',           'Triple Bis'),
-        ]: # noqa E241
+        ]:
             algo = f'{ prefix }{ base_algo }{ suffix }'
             self.check_degrip(
                 algo,

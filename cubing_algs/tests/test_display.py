@@ -7,7 +7,7 @@ from cubing_algs.display import VCubeDisplay
 from cubing_algs.vcube import VCube
 
 
-class TestVCubeDisplay(unittest.TestCase):
+class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
     def setUp(self) -> None:
         self.cube = VCube()
@@ -20,7 +20,7 @@ class TestVCubeDisplay(unittest.TestCase):
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_with_colors(self) -> None:
-        with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', True):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U')
             expected = 'm U \x1b[0;0m'
@@ -28,14 +28,14 @@ class TestVCubeDisplay(unittest.TestCase):
 
     @patch.dict(os.environ, {'TERM': 'other'})
     def test_display_facelet_without_colors(self) -> None:
-        with patch('cubing_algs.display.USE_COLORS', False):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', False):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U')
             self.assertEqual(result, ' U ')
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_hidden(self) -> None:
-        with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', True):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U', '0')
             expected = 'm U \x1b[0;0m'
@@ -43,7 +43,7 @@ class TestVCubeDisplay(unittest.TestCase):
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_invalid(self) -> None:
-        with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', True):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('X')  # Invalid facelet
             expected = 'm X \x1b[0;0m'
@@ -55,7 +55,7 @@ class TestVCubeDisplay(unittest.TestCase):
         Test display_facelet with an effect to cover
         position_based_effect call.
         """
-        with patch('cubing_algs.display.USE_COLORS', True):  # noqa FBT003
+        with patch('cubing_algs.display.USE_COLORS', True):  # noqa: FBT003
             printer = VCubeDisplay(self.cube, effect_name='shine')
             result = printer.display_facelet('U', facelet_index=0)
             # Should call position_based_effect since effect is set
@@ -531,14 +531,14 @@ class TestVCubeDisplay(unittest.TestCase):
             self.assertEqual(result.count('U'), len(indexes))
 
 
-class TestVCubeDisplayExtendedNet(unittest.TestCase):
+class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
 
     def setUp(self) -> None:
         self.cube = VCube()
         self.printer = VCubeDisplay(self.cube)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_solved_cube_all_visible(self) -> None:
         """Test extended net display with solved cube and all faces visible."""
         faces = self.printer.split_faces(self.cube.state)
@@ -565,7 +565,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertEqual(result, expected)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_scrambled_cube_all_visible(self) -> None:
         """
         Test extended net display with scrambled cube
@@ -597,7 +597,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertGreater(len(face_chars), 10)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_partial_masking(self) -> None:
         """Test extended net display with partial face masking."""
         faces = self.printer.split_faces(self.cube.state)
@@ -627,7 +627,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertIn('D', result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_all_faces_masked(self) -> None:
         """Test extended net display with all faces masked (all zeros)."""
         faces = self.printer.split_faces(self.cube.state)
@@ -648,7 +648,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertIn('D', result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_single_face_state(self) -> None:
         """Test extended net display with non-standard single face state."""
         # Create cube with all facelets as 'X' for testing edge case
@@ -667,7 +667,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertGreater(x_count, 54)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_specific_rotation_state(self) -> None:
         """Test extended net display after specific rotation."""
         # Apply F move to create known state
@@ -689,7 +689,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertGreaterEqual(len(unique_faces), 6)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_complex_masking_pattern(self) -> None:
         """Test extended net display with complex masking pattern."""
         faces = self.printer.split_faces(self.cube.state)
@@ -715,7 +715,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertIn(face_char, result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_line_structure(self) -> None:
         """Test that extended net display has correct line structure."""
         faces = self.printer.split_faces(self.cube.state)
@@ -764,7 +764,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertEqual(lines[13], '')
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_empty_faces_list(self) -> None:
         """Test extended net display with empty faces list."""
         # This should raise an IndexError or similar
@@ -772,7 +772,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.printer.display_extended_net([], [])
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_mismatched_faces_masks(self) -> None:
         """Test extended net display with mismatched faces and masks lengths."""
         faces = self.printer.split_faces(self.cube.state)
@@ -784,7 +784,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.printer.display_extended_net(faces, faces_mask)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_extended_net_face_character_counts(self) -> None:
         """Test that extended net contains expected character counts."""
         faces = self.printer.split_faces(self.cube.state)
@@ -806,7 +806,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertGreaterEqual(face_counts[face], 9)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_solved_cube(self) -> None:
         """Test display_linear with solved cube state."""
         faces = self.printer.split_faces(self.cube.state)
@@ -827,7 +827,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertEqual(result, expected)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_scrambled_cube(self) -> None:
         """Test display_linear with scrambled cube state."""
         self.cube.rotate("R U R' U'")
@@ -850,7 +850,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertEqual(lines[3], '')
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_with_masking(self) -> None:
         """Test display_linear with different masking patterns."""
         faces = self.printer.split_faces(self.cube.state)
@@ -877,7 +877,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertIn(face, result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_all_faces_masked(self) -> None:
         """Test display_linear with all faces masked."""
         faces = self.printer.split_faces(self.cube.state)
@@ -895,7 +895,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertIn(face, result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_structure_and_spacing(self) -> None:
         """Test that display_linear has correct structure and spacing."""
         faces = self.printer.split_faces(self.cube.state)
@@ -921,7 +921,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertEqual(lines[3], '')
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_face_order_consistency(self) -> None:
         """Test that display_linear maintains consistent face order."""
         faces = self.printer.split_faces(self.cube.state)
@@ -947,7 +947,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
                 self.assertEqual(face_group[0], expected_face)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_with_complex_state(self) -> None:
         """Test display_linear with complex mixed face state."""
         # Create a cube state with mixed face characters
@@ -978,7 +978,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertEqual(len(face_chars), 18)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_with_invalid_face_characters(self) -> None:
         """Test display_linear with invalid face characters."""
         # Create state with invalid characters
@@ -1039,7 +1039,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertIn(face, result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_empty_faces_error_handling(self) -> None:
         """Test display_linear error handling with empty faces list."""
         # Should raise IndexError when trying to access faces
@@ -1047,7 +1047,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.printer.display_linear([], [])
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_mismatched_faces_masks_lengths(self) -> None:
         """Test display_linear with mismatched faces and masks lengths."""
         faces = self.printer.split_faces(self.cube.state)
@@ -1059,7 +1059,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.printer.display_linear(faces, faces_mask)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_insufficient_face_data(self) -> None:
         """Test display_linear with insufficient face data."""
         # Create faces with insufficient data
@@ -1071,7 +1071,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.printer.display_linear(short_faces, short_masks)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_boundary_cube_sizes(self) -> None:
         """Test display_linear behavior with current cube size assumptions."""
         # This test verifies the method works with the current cube_size (3)
@@ -1094,7 +1094,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertGreater(len(line.strip()), 0)
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
-    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa: FBT003
     def test_display_linear_with_colors_enabled(self) -> None:
         """Test display_linear with colors enabled."""
         faces = self.printer.split_faces(self.cube.state)
@@ -1110,7 +1110,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
         self.assertEqual(len(lines), 4)
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
-    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa: FBT003
     def test_display_linear_with_effects_enabled(self) -> None:
         """Test display_linear with visual effects enabled."""
         printer = VCubeDisplay(self.cube, effect_name='shine')
@@ -1131,7 +1131,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertIn(face, result)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_character_counting(self) -> None:
         """Test that display_linear produces expected character counts."""
         faces = self.printer.split_faces(self.cube.state)
@@ -1151,7 +1151,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):
             self.assertEqual(face_counts[face], 9)
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_linear_spacing_consistency(self) -> None:
         """Test that display_linear maintains consistent spacing."""
         faces = self.printer.split_faces(self.cube.state)
@@ -1230,7 +1230,7 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         self.assertEqual(printer.facelet_size, 3)  # Default size when unknown
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
-    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa: FBT003
     def test_display_facelet_unlettered_type(self) -> None:
         """Test display_facelet with unlettered facelet_type."""
         printer = VCubeDisplay(self.cube, facelet_type='unlettered')
@@ -1243,7 +1243,7 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         self.assertNotIn(' U ', result)  # Should not contain letter
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
-    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa: FBT003
     def test_display_facelet_compact_type(self) -> None:
         """Test display_facelet with compact facelet_type."""
         printer = VCubeDisplay(self.cube, facelet_type='compact')
@@ -1256,7 +1256,7 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         self.assertNotIn(' U ', result)  # Should not contain letter
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
-    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa: FBT003
     def test_display_facelet_condensed_type(self) -> None:
         """Test display_facelet with condensed facelet_type."""
         printer = VCubeDisplay(self.cube, facelet_type='condensed')
@@ -1273,7 +1273,7 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         self.assertLess(len(result), len(compact_result))
 
     @patch.dict(os.environ, {'TERM': 'other'})
-    @patch('cubing_algs.display.USE_COLORS', False)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003
     def test_display_facelet_types_without_colors(self) -> None:
         """Test all facelet_types behave correctly when colors are disabled."""
         # When colors are disabled, all facelet types should return " U "
@@ -1284,7 +1284,7 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
                 self.assertEqual(result, ' U ')
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
-    @patch('cubing_algs.display.USE_COLORS', True)  # noqa FBT003
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa: FBT003
     def test_display_facelet_no_color_type(self) -> None:
         """Test display_facelet with no-color facelet_type."""
         printer = VCubeDisplay(self.cube, facelet_type='no-color')

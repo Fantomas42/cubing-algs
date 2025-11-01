@@ -13,7 +13,7 @@ from cubing_algs.transform.wide import unwide_slice_moves
 from cubing_algs.vcube import VCube
 
 
-class TransformWideTestCase(unittest.TestCase):
+class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
 
     def test_unwide_rotation_moves(self) -> None:
         provide = parse_moves('f r u')

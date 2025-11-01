@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
 
 
-class Algorithm(UserList[Move]):
+class Algorithm(UserList[Move]):  # noqa: PLR0904
     """
     Represents a sequence of Rubik's cube moves.
 
