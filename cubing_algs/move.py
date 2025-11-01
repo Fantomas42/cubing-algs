@@ -35,9 +35,7 @@ class Move(UserString):  # noqa: PLR0904
 
     @cached_property
     def layer_move_modifier_time(self) -> tuple[str, str, str, str]:
-        """
-        Parse the move string into its component parts.
-        """
+        """Parse the move string into its component parts."""
         layer = ''
         move = ''
         modifier = ''
@@ -63,16 +61,12 @@ class Move(UserString):  # noqa: PLR0904
 
     @cached_property
     def layer(self) -> str:
-        """
-        Extract the layers impacted.
-        """
+        """Extract the layers impacted."""
         return self.layer_move_modifier_time[0]
 
     @cached_property
     def layers(self) -> list[int]:
-        """
-        List of impacted layers, 0-indexed.
-        """
+        """List of impacted layers, 0-indexed."""
         if not self.layer:
             if self.is_wide_move:
                 return [0, 1]
@@ -121,16 +115,12 @@ class Move(UserString):  # noqa: PLR0904
 
     @cached_property
     def time(self) -> str:
-        """
-        Extract the time part of the move.
-        """
+        """Extract the time part of the move."""
         return self.layer_move_modifier_time[3]
 
     @cached_property
     def timed(self) -> int:
-        """
-        Integer version of the timed move
-        """
+        """Integer version of the timed move."""
         if self.time:
             return int(self.time[1:])
         return 0
@@ -287,9 +277,7 @@ class Move(UserString):  # noqa: PLR0904
 
     @cached_property
     def is_standard_move(self) -> bool:
-        """
-        Determine if this move uses Standard notation.
-        """
+        """Determine if this move uses Standard notation."""
         return not self.is_sign_move
 
     @cached_property

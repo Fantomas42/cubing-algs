@@ -6,9 +6,7 @@ def optimize_repeat_three_moves(
         old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
 ) -> Algorithm:
-    """
-    R, R, R --> R'
-    """
+    """R, R, R --> R'."""
     if max_depth <= 0:
         return old_moves
 
@@ -39,7 +37,7 @@ def optimize_do_undo_moves(
     """
     R R' --> <nothing>
     R2 R2 --> <nothing>
-    R R R' R' --> <nothing>
+    R R R' R' --> <nothing>.
     """
     if max_depth <= 0:
         return old_moves
@@ -72,9 +70,7 @@ def optimize_double_moves(
         old_moves: Algorithm,
         max_depth: int = MAX_ITERATIONS,
 ) -> Algorithm:
-    """
-    R, R --> R2
-    """
+    """R, R --> R2."""
     if max_depth <= 0:
         return old_moves
 
@@ -106,7 +102,7 @@ def optimize_triple_moves(
     """
     R, R2 --> R'
     R2, R --> R'
-    R', R2 --> R
+    R', R2 --> R.
     """
     if max_depth <= 0:
         return old_moves

@@ -19,6 +19,7 @@ def compute_cycles(algorithm: 'Algorithm') -> int:
         The function has a safety limit of 100 iterations to prevent
         infinite loops for algorithms that may have very high order
         or don't return to solved state.
+
     """
     from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
     from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415

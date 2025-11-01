@@ -151,7 +151,7 @@ class TestPositioningFunctions(unittest.TestCase):
 class RGBTestCase(unittest.TestCase):
 
     def _validate_rgb_output(self, rgb: tuple[int, int, int]) -> None:
-        """Helper to validate RGB output is properly clamped."""
+        """Help to validate RGB output is properly clamped."""
         self.assertIsInstance(rgb, tuple)
         self.assertEqual(len(rgb), 3)
         for component in rgb:

@@ -445,7 +445,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
 
 
 class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
-    """Tests pour les nouvelles vérifications de check_integrity"""
+    """Tests pour les nouvelles vérifications de check_integrity."""
 
     def test_initial(self) -> None:
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB'
@@ -461,6 +461,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
         """Test that get_face_center_indexes raises NotImplementedError."""
         class IncompleteVCube(VCubeIntegrityChecker):
             """Incomplete implementation for testing."""
+
             size = 3
             face_size = 9
             face_number = 6

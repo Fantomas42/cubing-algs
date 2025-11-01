@@ -69,7 +69,7 @@ def optimize_triple_rotations(
     """
     x2, y2, z2 --> <nothing>
     x2, z2, y2 --> <nothing>
-    z2, x2, y2 --> <nothing>
+    z2, x2, y2 --> <nothing>.
     """
     if max_depth <= 0:
         return old_moves
@@ -99,7 +99,7 @@ def optimize_double_rotations(
     """
     x2, y2 --> z2
     x2, z2 --> y2
-    y2, z2 --> x2
+    y2, z2 --> x2.
     """
     if max_depth <= 0:
         return old_moves
@@ -136,7 +136,7 @@ def optimize_conjugate_rotations(
     x, y2, x' --> z2
     x', y2, x --> z2
     x, z2, x' --> y2
-    y, z2, y' --> x2
+    y, z2, y' --> x2.
     """
     if max_depth <= 0:
         return old_moves

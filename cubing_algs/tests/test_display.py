@@ -294,7 +294,8 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(result, '')
 
     def test_display_top_down_adjacent_facelets_no_break_line(self) -> None:
-        """Test display_top_down_adjacent_facelets with break_line=False.
+        """
+        Test display_top_down_adjacent_facelets with break_line=False.
 
         This test covers the missing branch line 292->295 where break_line=False
         and no newline is added to the result.
@@ -318,7 +319,8 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(face_count, 3)
 
     def test_display_top_down_adjacent_facelets_with_break_line(self) -> None:
-        """Test display_top_down_adjacent_facelets with break_line=True.
+        """
+        Test display_top_down_adjacent_facelets with break_line=True.
 
         This ensures the default behavior still works correctly.
         """
@@ -383,7 +385,8 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
     def test_position_based_effect_no_effect_set(self) -> None:
         """
-        Test position_based_effect when no effect is set raises AssertionError.
+        Test position_based_effect
+        when no effect is set raises AssertionError.
         """
         # Create printer without effect
         printer = VCubeDisplay(self.cube, effect_name='')

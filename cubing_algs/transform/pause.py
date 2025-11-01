@@ -6,9 +6,7 @@ from cubing_algs.move import Move
 
 
 def unpause_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Remove all pause moves from an algorithm.
-    """
+    """Remove all pause moves from an algorithm."""
     moves: list[Move] = [move for move in old_moves if not move.is_pause]
 
     return Algorithm(moves)
@@ -18,9 +16,7 @@ def pause_moves(
         speed: int = 200, factor: int = 2,
         *, multiple: bool = False,
 ) -> Callable[[Algorithm], Algorithm]:
-    """
-    Create a configurable pause_moves function.
-    """
+    """Create a configurable pause_moves function."""
     def _pause_moves(old_moves: Algorithm) -> Algorithm:
         if not old_moves:
             return old_moves

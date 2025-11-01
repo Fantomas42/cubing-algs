@@ -1,3 +1,1 @@
-"""
-Tests for cubing_algs.
-"""
+"""Tests for cubing_algs."""

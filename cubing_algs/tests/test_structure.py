@@ -670,7 +670,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_basic_operations(self) -> None:
         """Test basic cache operations."""
-
         cache: BoundedCache[str, int] = BoundedCache(3)
 
         cache['a'] = 1
@@ -684,7 +683,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_lru_eviction(self) -> None:
         """Test LRU eviction when capacity is reached."""
-
         cache: BoundedCache[str, int] = BoundedCache(3)
 
         cache['a'] = 1
@@ -702,7 +700,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_access_updates_lru(self) -> None:
         """Test that accessing an item moves it to end (most recently used)."""
-
         cache: BoundedCache[str, int] = BoundedCache(3)
 
         cache['a'] = 1
@@ -722,7 +719,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_update_existing_key(self) -> None:
         """Test updating an existing key moves it to end."""
-
         cache: BoundedCache[str, int] = BoundedCache(3)
 
         cache['a'] = 1
@@ -742,7 +738,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_delete(self) -> None:
         """Test deleting items from cache."""
-
         cache: BoundedCache[str, int] = BoundedCache(3)
 
         cache['a'] = 1
@@ -756,7 +751,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_iteration(self) -> None:
         """Test iterating over cache keys."""
-
         cache: BoundedCache[str, int] = BoundedCache(3)
 
         cache['a'] = 1
@@ -771,7 +765,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_size_one(self) -> None:
         """Test cache with size 1."""
-
         cache: BoundedCache[str, int] = BoundedCache(1)
 
         cache['a'] = 1
@@ -783,7 +776,6 @@ class BoundedCacheTestCase(unittest.TestCase):
 
     def test_bounded_cache_key_error(self) -> None:
         """Test accessing non-existent key raises KeyError."""
-
         cache: BoundedCache[str, int] = BoundedCache(3)
 
         with self.assertRaises(KeyError):
@@ -795,7 +787,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_calculate_max_setup_length_short_algo(self) -> None:
         """Test max setup length for very short algorithms."""
-
         # For algo of length 3, max setup should be 2 (minimum)
         self.assertEqual(calculate_max_setup_length(3), 2)
         self.assertEqual(calculate_max_setup_length(4), 2)
@@ -803,7 +794,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_calculate_max_setup_length_medium_algo(self) -> None:
         """Test max setup length for medium algorithms."""
-
         # For algo of length 9, max setup should be 3
         self.assertEqual(calculate_max_setup_length(9), 3)
         # For algo of length 12, max setup should be 4
@@ -811,13 +801,11 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_calculate_max_setup_length_long_algo(self) -> None:
         """Test max setup length for long algorithms."""
-
         # For algo of length 30, max setup should be 10
         self.assertEqual(calculate_max_setup_length(30), 10)
 
     def test_calculate_max_setup_length_boundary(self) -> None:
         """Test boundary cases for max setup length."""
-
         # Length 0 should still return minimum
         self.assertEqual(calculate_max_setup_length(0), 2)
         # Length 1 should still return minimum
@@ -825,14 +813,12 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_calculate_min_score_short_algo(self) -> None:
         """Test min score for short algorithms."""
-
         # Algorithms < 6 moves should have very low threshold
         self.assertEqual(calculate_min_score(3), 0.1)
         self.assertEqual(calculate_min_score(5), 0.1)
 
     def test_calculate_min_score_medium_algo(self) -> None:
         """Test min score for medium algorithms."""
-
         # Algorithms 6-12 moves should have medium threshold
         self.assertEqual(calculate_min_score(6), 3.0)
         self.assertEqual(calculate_min_score(10), 3.0)
@@ -840,14 +826,12 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_calculate_min_score_long_algo(self) -> None:
         """Test min score for long algorithms."""
-
         # Algorithms > 12 moves should have high threshold
         self.assertEqual(calculate_min_score(13), 5.0)
         self.assertEqual(calculate_min_score(20), 5.0)
 
     def test_calculate_min_score_boundary(self) -> None:
         """Test boundary cases for min score."""
-
         # Test exact boundary values
         self.assertEqual(calculate_min_score(0), 0.1)
         self.assertEqual(calculate_min_score(6), 3.0)
@@ -856,7 +840,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_inverse_sequence_basic(self) -> None:
         """Test inverse sequence for basic algorithm."""
-
         algo = Algorithm.parse_moves('R U')
         inverse = inverse_sequence(algo)
 
@@ -864,7 +847,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_inverse_sequence_complex(self) -> None:
         """Test inverse sequence for complex algorithm."""
-
         algo = Algorithm.parse_moves("R U R' U'")
         inverse = inverse_sequence(algo)
 
@@ -872,7 +854,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_inverse_sequence_double_moves(self) -> None:
         """Test inverse sequence with double moves."""
-
         algo = Algorithm.parse_moves('R2 U2')
         inverse = inverse_sequence(algo)
 
@@ -880,7 +861,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_inverse_sequence_empty(self) -> None:
         """Test inverse of empty algorithm."""
-
         algo = Algorithm([])
         inverse = inverse_sequence(algo)
 
@@ -888,7 +868,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_detect_move_cancellations_same_face(self) -> None:
         """Test cancellation detection for same face moves."""
-
         algo1 = Algorithm.parse_moves('R')
         algo2 = Algorithm.parse_moves("R'")
 
@@ -896,7 +875,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_detect_move_cancellations_different_face(self) -> None:
         """Test no cancellation for different face moves."""
-
         algo1 = Algorithm.parse_moves('R')
         algo2 = Algorithm.parse_moves('U')
 
@@ -904,7 +882,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_detect_move_cancellations_empty_first(self) -> None:
         """Test cancellation detection with empty first sequence."""
-
         algo1 = Algorithm([])
         algo2 = Algorithm.parse_moves('R')
 
@@ -912,7 +889,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_detect_move_cancellations_empty_second(self) -> None:
         """Test cancellation detection with empty second sequence."""
-
         algo1 = Algorithm.parse_moves('R')
         algo2 = Algorithm([])
 
@@ -920,7 +896,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_detect_move_cancellations_both_empty(self) -> None:
         """Test cancellation detection with both sequences empty."""
-
         algo1 = Algorithm([])
         algo2 = Algorithm([])
 
@@ -928,7 +903,6 @@ class HelperFunctionTestCase(unittest.TestCase):
 
     def test_detect_move_cancellations_double_move(self) -> None:
         """Test cancellation detection with double moves."""
-
         algo1 = Algorithm.parse_moves('R2')
         algo2 = Algorithm.parse_moves('R')
 
@@ -941,7 +915,6 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
     def test_classify_pure_commutator(self) -> None:
         """Test classification of pure 8-move commutator (2+2+2+2)."""
-
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D')
         cache: BoundedCache[str, Algorithm] = BoundedCache(10)
@@ -951,7 +924,6 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
     def test_classify_a9_commutator_with_cancellation(self) -> None:
         """Test classification of A9 (10 moves with cancellation)."""
-
         # This would be 10 moves (2+3+2+3) with actual cancellation
         # Setup ends with R, action starts with R -> cancellation
         setup = Algorithm.parse_moves('U R')
@@ -964,7 +936,6 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
     def test_classify_orthogonal_commutator(self) -> None:
         """Test classification of orthogonal 10-move without cancellation."""
-
         # 10 moves total (2+3+2+3), no cancellation
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D L')
@@ -975,7 +946,6 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
     def test_classify_extended_commutator(self) -> None:
         """Test classification of extended commutator (>10 moves)."""
-
         setup = Algorithm.parse_moves('R U F')
         action = Algorithm.parse_moves('D L B')
         cache: BoundedCache[str, Algorithm] = BoundedCache(10)
@@ -986,7 +956,6 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
     def test_classify_commutator_other(self) -> None:
         """Test classification of other commutator types."""
-
         # Less than 8 moves
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
@@ -998,7 +967,6 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
 
     def test_classify_commutator_with_cache(self) -> None:
         """Test commutator classification with cache."""
-
         cache: BoundedCache[str, Algorithm] = BoundedCache(10)
         # Use a non-pure commutator to trigger cancellation check
         # and cache usage
@@ -1017,7 +985,6 @@ class ClassifyConjugateTestCase(unittest.TestCase):
 
     def test_classify_simple_conjugate(self) -> None:
         """Test classification of simple conjugate (1-2 move setup)."""
-
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U D F')
 
@@ -1026,7 +993,6 @@ class ClassifyConjugateTestCase(unittest.TestCase):
 
     def test_classify_simple_conjugate_two_moves(self) -> None:
         """Test classification of simple conjugate with 2-move setup."""
-
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D L')
 
@@ -1035,7 +1001,6 @@ class ClassifyConjugateTestCase(unittest.TestCase):
 
     def test_classify_nested_conjugate(self) -> None:
         """Test classification of nested conjugate."""
-
         setup = Algorithm.parse_moves('F')
         # Action contains a commutator [R, U]
         action = Algorithm.parse_moves("R U R' U'")
@@ -1045,7 +1010,6 @@ class ClassifyConjugateTestCase(unittest.TestCase):
 
     def test_classify_multi_setup_conjugate(self) -> None:
         """Test classification of multi-setup conjugate (3+ move setup)."""
-
         setup = Algorithm.parse_moves('R U F')
         action = Algorithm.parse_moves('D L')
 
@@ -1054,7 +1018,6 @@ class ClassifyConjugateTestCase(unittest.TestCase):
 
     def test_classify_standard_conjugate(self) -> None:
         """Test classification of standard conjugate."""
-
         # This case doesn't fit other categories - not very common
         # Would need a 3+ move setup that doesn't contain nested structures
         # and the action doesn't contain structures either
@@ -1071,7 +1034,6 @@ class ScoreStructureTestCase(unittest.TestCase):
 
     def test_score_structure_basic(self) -> None:
         """Test basic structure scoring."""
-
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
 
@@ -1080,7 +1042,6 @@ class ScoreStructureTestCase(unittest.TestCase):
 
     def test_score_structure_zero_setup(self) -> None:
         """Test score with zero-length setup."""
-
         setup = Algorithm([])
         action = Algorithm.parse_moves('U')
 
@@ -1089,7 +1050,6 @@ class ScoreStructureTestCase(unittest.TestCase):
 
     def test_score_structure_zero_action(self) -> None:
         """Test score with zero-length action."""
-
         setup = Algorithm.parse_moves('R')
         action = Algorithm([])
 
@@ -1098,7 +1058,6 @@ class ScoreStructureTestCase(unittest.TestCase):
 
     def test_score_structure_both_zero(self) -> None:
         """Test score with both zero-length."""
-
         setup = Algorithm([])
         action = Algorithm([])
 
@@ -1107,7 +1066,6 @@ class ScoreStructureTestCase(unittest.TestCase):
 
     def test_score_structure_longer_action_better(self) -> None:
         """Test that longer actions score better."""
-
         setup = Algorithm.parse_moves('R')
         action1 = Algorithm.parse_moves('U')
         action2 = Algorithm.parse_moves('U F D')
@@ -1119,7 +1077,6 @@ class ScoreStructureTestCase(unittest.TestCase):
 
     def test_score_structure_setup_penalty(self) -> None:
         """Test that long setups relative to action are penalized."""
-
         # Short setup, long action
         setup1 = Algorithm.parse_moves('R')
         action1 = Algorithm.parse_moves('U F D L')
@@ -1140,7 +1097,6 @@ class IsInverseAtTestCase(unittest.TestCase):
 
     def test_is_inverse_at_basic(self) -> None:
         """Test basic inverse detection."""
-
         algo = Algorithm.parse_moves("R U U' R'")
         pattern = Algorithm.parse_moves('R')
         cache: BoundedCache[str, Algorithm] = BoundedCache(10)
@@ -1150,7 +1106,6 @@ class IsInverseAtTestCase(unittest.TestCase):
 
     def test_is_inverse_at_not_inverse(self) -> None:
         """Test when pattern is not inverse at position."""
-
         algo = Algorithm.parse_moves('R U F D')
         pattern = Algorithm.parse_moves('R')
         cache: BoundedCache[str, Algorithm] = BoundedCache(10)
@@ -1160,7 +1115,6 @@ class IsInverseAtTestCase(unittest.TestCase):
 
     def test_is_inverse_at_out_of_bounds(self) -> None:
         """Test inverse detection when position is out of bounds."""
-
         algo = Algorithm.parse_moves('R U')
         pattern = Algorithm.parse_moves('R U F')
         cache: BoundedCache[str, Algorithm] = BoundedCache(10)
@@ -1170,7 +1124,6 @@ class IsInverseAtTestCase(unittest.TestCase):
 
     def test_is_inverse_at_with_cache(self) -> None:
         """Test inverse detection with caching."""
-
         # Create an algorithm where we can find the inverse
         # Pattern: R U, Inverse: U' R'
         # Algorithm: R U U' R' (pattern followed by its inverse)
@@ -1193,7 +1146,6 @@ class IsInverseAtTestCase(unittest.TestCase):
 
     def test_is_inverse_at_empty_pattern(self) -> None:
         """Test inverse detection with empty pattern."""
-
         algo = Algorithm.parse_moves('R U')
         pattern = Algorithm([])
         cache: BoundedCache[str, Algorithm] = BoundedCache(10)
@@ -1207,40 +1159,34 @@ class EfficiencyRatingTestCase(unittest.TestCase):
 
     def test_efficiency_rating_na(self) -> None:
         """Test N/A rating when no structures."""
-
         rating = calculate_efficiency_rating(0, 0, 0.0, 0)
         self.assertEqual(rating, 'N/A')
 
     def test_efficiency_rating_excellent(self) -> None:
         """Test Excellent rating for pure/A9 commutators."""
-
         # 75% pure/A9, avg 8 moves
         rating = calculate_efficiency_rating(3, 1, 8.0, 4)
         self.assertEqual(rating, 'Excellent')
 
     def test_efficiency_rating_good(self) -> None:
         """Test Good rating for mix of efficient structures."""
-
         rating = calculate_efficiency_rating(1, 1, 10.0, 4)
         self.assertEqual(rating, 'Good')
 
     def test_efficiency_rating_good_by_avg_moves(self) -> None:
         """Test Good rating based on low average moves."""
-
         # Only 25% pure/A9 but very low avg moves
         rating = calculate_efficiency_rating(1, 0, 9.0, 4)
         self.assertEqual(rating, 'Good')
 
     def test_efficiency_rating_fair(self) -> None:
         """Test Fair rating for average efficiency."""
-
         # Low pure/A9 ratio but reasonable avg moves
         rating = calculate_efficiency_rating(0, 1, 11.0, 4)
         self.assertEqual(rating, 'Fair')
 
     def test_efficiency_rating_poor(self) -> None:
         """Test Poor rating for inefficient structures."""
-
         # No pure/A9, high avg moves
         rating = calculate_efficiency_rating(0, 0, 15.0, 4)
         self.assertEqual(rating, 'Poor')
@@ -1298,7 +1244,6 @@ class CountAllStructuresTestCase(unittest.TestCase):
 
     def test_count_all_structures_max_depth_limit(self) -> None:
         """Test that max depth limit is respected."""
-
         algo = Algorithm.parse_moves("F R U R' U' F'")
         structures = detect_structures(algo, min_score=0)
 
@@ -1313,7 +1258,6 @@ class CountAllStructuresTestCase(unittest.TestCase):
 
     def test_count_all_structures_empty_list(self) -> None:
         """Test counting with empty structure list."""
-
         total, conj, comm = count_all_structures([])
 
         self.assertEqual(total, 0)
@@ -1322,7 +1266,6 @@ class CountAllStructuresTestCase(unittest.TestCase):
 
     def test_count_all_structures_with_cache(self) -> None:
         """Test counting with cache."""
-
         algo = Algorithm.parse_moves("F R U R' U' F'")
         structures = detect_structures(algo, min_score=0)
 
@@ -1341,7 +1284,6 @@ class CalculateNestingDepthTestCase(unittest.TestCase):
 
     def test_calculate_nesting_depth_simple(self) -> None:
         """Test nesting depth for simple non-nested structure."""
-
         algo = Algorithm.parse_moves("R U R' U'")
         structures = detect_structures(algo, min_score=0)
 
@@ -1353,7 +1295,6 @@ class CalculateNestingDepthTestCase(unittest.TestCase):
 
     def test_calculate_nesting_depth_nested(self) -> None:
         """Test nesting depth for nested structure."""
-
         algo = Algorithm.parse_moves("F R U R' U' F'")
         structures = detect_structures(algo, min_score=0)
 
@@ -1365,7 +1306,6 @@ class CalculateNestingDepthTestCase(unittest.TestCase):
 
     def test_calculate_nesting_depth_empty(self) -> None:
         """Test nesting depth for empty structure list."""
-
         max_depth, nested_count = calculate_nesting_depth([])
 
         self.assertEqual(max_depth, 0)
@@ -1373,7 +1313,6 @@ class CalculateNestingDepthTestCase(unittest.TestCase):
 
     def test_calculate_nesting_depth_with_cache(self) -> None:
         """Test nesting depth calculation with cache."""
-
         algo = Algorithm.parse_moves("F R U R' U' F'")
         structures = detect_structures(algo, min_score=0)
 

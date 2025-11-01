@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
 class CycleAnalysis(TypedDict):
     """Analysis of permutation cycle structure."""
+
     cycle_count: int
     cycle_lengths: list[int]
     min_cycle_length: int
@@ -42,6 +43,7 @@ class CycleAnalysis(TypedDict):
 
 class DistanceMetrics(NamedTuple):
     """Container for distance calculation results."""
+
     distances: dict[int, int]
     mean: float
     max: int
@@ -50,6 +52,7 @@ class DistanceMetrics(NamedTuple):
 
 class FaceletPosition(NamedTuple):
     """Parsed facelet position information."""
+
     face_index: int
     face_name: str
     face_position: int
@@ -67,6 +70,7 @@ class ImpactData(NamedTuple):
     Facelet metrics track visual changes on the cube surface.
     Cubie metrics track the underlying piece movements and orientations.
     """
+
     cube: 'VCube'
 
     # Facelet analysis (visual/spatial impact)
@@ -105,9 +109,7 @@ class ImpactData(NamedTuple):
 
 
 def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
-    """
-    Calculate face impact from impact mask.
-    """
+    """Calculate face impact from impact mask."""
     face_impact = {}
 
     for i, face_name in enumerate(FACE_ORDER):
@@ -120,9 +122,7 @@ def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
 
 
 def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
-    """
-    Parse a facelet position into face, row, and column components.
-    """
+    """Parse a facelet position into face, row, and column components."""
     face_index = position // cube.face_size
     face_name = FACE_ORDER[face_index]
     position_in_face = position % cube.face_size
@@ -414,9 +414,7 @@ def compute_distance_metrics(
     cube: 'VCube',
     distance_fn: Callable[[int, int, 'VCube'], int],
 ) -> DistanceMetrics:
-    """
-    Compute distance metrics for a set of permutations.
-    """
+    """Compute distance metrics for a set of permutations."""
     distances = {
         original_pos: distance_fn(original_pos, final_pos, cube)
         for original_pos, final_pos in permutations.items()
@@ -568,9 +566,7 @@ def analyze_layers(
 
 
 def compute_parity(permutation: list[int]) -> int:
-    """
-    Compute the parity of a permutation.
-    """
+    """Compute the parity of a permutation."""
     parity = 0
     visited = [False] * len(permutation)
 
@@ -593,9 +589,7 @@ def compute_parity(permutation: list[int]) -> int:
 
 
 def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
-    """
-    Analyze cycle structure in detail.
-    """
+    """Analyze cycle structure in detail."""
     if not cycles:
         return {
             'cycle_count': 0,
@@ -857,6 +851,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
             - cubies_edge_cycles: Permutation cycles in edge arrangement
             - cubies_complexity_score: Overall solving complexity estimate
             - cubies_suggested_approach: Recommended solving strategy
+
     """
     from cubing_algs.transform.degrip import degrip_full_moves
     from cubing_algs.transform.rotation import remove_ending_rotations

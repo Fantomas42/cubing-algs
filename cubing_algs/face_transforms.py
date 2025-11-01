@@ -142,9 +142,7 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
 
 def transform_position(original_face_name: str, destination_face_name: str,
                        destination_face_position: int) -> int:
-    """
-    Transform destination face position to original face position.
-    """
+    """Transform destination face position to original face position."""
     return ADJACENT_FACE_TRANSFORMATIONS[
         original_face_name
     ][

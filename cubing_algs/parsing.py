@@ -136,6 +136,7 @@ def parse_moves(raw_moves: str | Iterable[Move | str] | Algorithm,
 
         "R U R' U'  // first part
          D' R D     // second part" becomes R U R' U' D' R D
+
     """
     if isinstance(raw_moves, Algorithm):
         return raw_moves

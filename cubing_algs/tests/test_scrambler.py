@@ -658,18 +658,14 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        """
-        Set up test fixtures.
-        """
+        """Set up test fixtures."""
         self.test_lengths = [5, 10, 15, 20, 25, 30, 50]
         self.sample_size = 100  # Number of scrambles to test per length
         self.small_sample_size = 20  # For performance tests
 
     @staticmethod
     def get_face_from_move(move: str) -> str:
-        """
-        Extract the face character from a move string.
-        """
+        """Extract the face character from a move string."""
         for face in FACE_ORDER:
             if move.startswith((face, face.lower())):
                 return face
@@ -678,9 +674,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
     @staticmethod
     def calculate_move_distribution(algorithm: Algorithm) -> dict[
             str, float]:
-        """
-        Calculate the distribution of face moves in an algorithm.
-        """
+        """Calculate the distribution of face moves in an algorithm."""
         face_counts: Counter[str] = Counter()
         total_moves = len(algorithm)
 
@@ -722,7 +716,8 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
     @staticmethod
     def has_consecutive_same_or_opposite_faces(algorithm: Algorithm) -> bool:
         """
-        Check if algorithm has consecutive moves on same or opposite faces.
+        Check if algorithm has consecutive moves on same
+        or opposite faces.
         """
         moves = [str(move) for move in algorithm]
 
@@ -745,9 +740,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
         return False
 
     def test_scramble_length_consistency(self) -> None:
-        """
-        Test that scrambles generate the requested length consistently.
-        """
+        """Test that scrambles generate the requested length consistently."""
         for length in self.test_lengths:
             with self.subTest(length=length):
                 for _ in range(10):  # Test multiple samples
@@ -758,9 +751,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                     )
 
     def test_move_distribution_randomness(self) -> None:
-        """
-        Test that move distributions approach uniform across face types.
-        """
+        """Test that move distributions approach uniform across face types."""
         for length in [15, 25, 50]:  # Test representative lengths
             with self.subTest(length=length):
                 all_distributions = []
@@ -800,9 +791,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                         )
 
     def test_state_space_coverage_by_length(self) -> None:
-        """
-        Test that longer scrambles achieve better state space coverage.
-        """
+        """Test that longer scrambles achieve better state space coverage."""
         scrambledness_by_length = {}
 
         for length in self.test_lengths:
@@ -835,9 +824,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
             )
 
     def test_no_consecutive_invalid_moves(self) -> None:
-        """
-        Test that scrambles never contain consecutive invalid moves.
-        """
+        """Test that scrambles never contain consecutive invalid moves."""
         for length in self.test_lengths:
             with self.subTest(length=length):
                 for _ in range(self.sample_size):
@@ -849,9 +836,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                     )
 
     def test_scramble_uniqueness(self) -> None:
-        """
-        Test that repeated scramble calls produce different results.
-        """
+        """Test that repeated scramble calls produce different results."""
         for length in [15, 25]:
             with self.subTest(length=length):
                 scrambles = set()
@@ -869,9 +854,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                 )
 
     def test_very_short_scrambles(self) -> None:
-        """
-        Test edge cases with very short scrambles (1-5 moves).
-        """
+        """Test edge cases with very short scrambles (1-5 moves)."""
         for length in range(1, 6):
             with self.subTest(length=length):
                 scramble_alg = scramble(3, length)
@@ -895,9 +878,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                     )
 
     def test_very_long_scrambles(self) -> None:
-        """
-        Test edge cases with very long scrambles (50+ moves).
-        """
+        """Test edge cases with very long scrambles (50+ moves)."""
         long_lengths = [50, 75, 100]
 
         for length in long_lengths:
@@ -921,9 +902,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                 )
 
     def test_scramble_performance_by_length(self) -> None:
-        """
-        Test performance characteristics of scramble generation.
-        """
+        """Test performance characteristics of scramble generation."""
         performance_results = {}
 
         for length in [10, 25, 50, 100]:
@@ -949,7 +928,8 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
 
     def test_scramble_consistency_across_runs(self) -> None:
         """
-        Test that scramble quality metrics are consistent across multiple runs.
+        Test that scramble quality metrics are consistent
+        across multiple runs.
         """
         length = 25  # Test with a representative length
 

@@ -15,9 +15,8 @@ if TYPE_CHECKING:
 
 
 class ErgonomicsData(NamedTuple):
-    """
-    Container for ergonomics computation results.
-    """
+    """Container for ergonomics computation results."""
+
     total_moves: int
 
     # Hand balance metrics
@@ -170,9 +169,7 @@ def get_move_key(move: Move) -> str:
 
 
 def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
-    """
-    Calculate hand balance metrics for the algorithm.
-    """
+    """Calculate hand balance metrics for the algorithm."""
     right_count = 0
     left_count = 0
     both_count = 0
@@ -204,9 +201,7 @@ def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
 
 def compute_finger_distribution(moves: 'Algorithm') -> tuple[
         int, int, int, int]:
-    """
-    Calculate finger usage distribution for the algorithm.
-    """
+    """Calculate finger usage distribution for the algorithm."""
     thumb_count = 0
     index_count = 0
     middle_count = 0
@@ -358,9 +353,7 @@ def compute_comfort_score(
 
 
 def get_ergonomic_rating(comfort_score: float) -> str:
-    """
-    Convert comfort score to ergonomic rating.
-    """
+    """Convert comfort score to ergonomic rating."""
     if comfort_score >= 80:
         return 'Excellent'
     if comfort_score >= 65:
@@ -401,6 +394,7 @@ def compute_ergonomics(algorithm: 'Algorithm') -> ErgonomicsData:  # noqa: PLR09
             - ring_finger_moves: Moves primarily using ring finger
             - comfort_score: Overall comfort rating (0-100)
             - ergonomic_rating: Qualitative comfort assessment
+
     """
     # Filter out pauses for most calculations
     non_pause_moves = [move for move in algorithm if not move.is_pause]

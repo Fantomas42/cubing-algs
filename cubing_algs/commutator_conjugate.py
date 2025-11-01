@@ -5,9 +5,7 @@ from cubing_algs.transform.mirror import mirror_moves
 
 
 def find_innermost_brackets(text: str) -> tuple[int, int] | None:
-    """
-    Find the position of the innermost (deepest nested) brackets.
-    """
+    """Find the position of the innermost (deepest nested) brackets."""
     max_depth = 0
     current_depth = 0
     innermost_start = -1
@@ -49,9 +47,7 @@ def split_on_separator(text: str, separator: str) -> tuple[str, str] | None:
 
 
 def invert_moves(old_moves: str) -> str:
-    """
-    Invert an algorithm string (reverse order and invert each move).
-    """
+    """Invert an algorithm string (reverse order and invert each move)."""
     algo = Algorithm.parse_moves(old_moves)
 
     return str(algo.transform(mirror_moves))

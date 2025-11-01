@@ -510,9 +510,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         self.assertTrue(info['enabled'])
 
     def test_cache_eviction_facelets(self) -> None:
-        """
-        Test cache eviction when max size is reached for facelets cache.
-        """
+        """Test cache eviction when max size is reached for facelets cache."""
         # Set a small cache size
         original_max_size = _cache.max_size
         _cache.max_size = 2
@@ -718,7 +716,8 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
 
     def test_cache_disabled_paths(self) -> None:
         """
-        Test that cache operations work correctly when caching is disabled.
+        Test that cache operations work correctly
+        when caching is disabled.
         """
         disable_cache()
 

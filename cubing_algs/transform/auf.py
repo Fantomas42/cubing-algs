@@ -17,9 +17,7 @@ OFFSET_MAP = {
 
 
 def get_move_score(move: Move) -> int:
-    """
-    Calculate the numeric score for a move for AUF calculations.
-    """
+    """Calculate the numeric score for a move for AUF calculations."""
     if move.is_double:
         return 2
     if move.is_counter_clockwise:
@@ -30,16 +28,12 @@ def get_move_score(move: Move) -> int:
 
 
 def is_auf_or_pause(move: Move) -> bool:
-    """
-    Check if a move is an AUF move or pause.
-    """
+    """Check if a move is an AUF move or pause."""
     return move.base_move == AUF_CHAR or move.is_pause
 
 
 def calculate_auf_score(moves: Iterable[Move]) -> int:
-    """
-    Calculate the total AUF score for a sequence of moves.
-    """
+    """Calculate the total AUF score for a sequence of moves."""
     return sum(
         get_move_score(move)
         for move in takewhile(is_auf_or_pause, moves)
@@ -47,9 +41,7 @@ def calculate_auf_score(moves: Iterable[Move]) -> int:
 
 
 def remove_auf_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Remove AUF (Adjust Upper Face) moves from an algorithm.
-    """
+    """Remove AUF (Adjust Upper Face) moves from an algorithm."""
     if not old_moves:
         return old_moves
 

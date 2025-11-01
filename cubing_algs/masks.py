@@ -5,7 +5,7 @@ from cubing_algs.facelets import facelets_to_cubies
 
 def union_masks(*masks: str) -> str:
     """
-    Performs the union (logical OR) of multiple binary masks.
+    Perform the union (logical OR) of multiple binary masks.
 
     Returns '1' if at least one mask has '1' at that position.
     """
@@ -23,7 +23,7 @@ def union_masks(*masks: str) -> str:
 
 def intersection_masks(*masks: str) -> str:
     """
-    Performs the intersection (logical AND) of multiple binary masks.
+    Perform the intersection (logical AND) of multiple binary masks.
 
     Returns '1' only if all masks have '1' at that position.
     """
@@ -41,7 +41,7 @@ def intersection_masks(*masks: str) -> str:
 
 def negate_mask(mask: str) -> str:
     """
-    Inverts a binary mask (logical NOT).
+    Invert a binary mask (logical NOT).
 
     '0' becomes '1' and '1' becomes '0'.
     """
@@ -63,7 +63,7 @@ _CACHE_SIZE_LIMIT = 1000  # Prevent unbounded memory growth
 
 def facelets_masked(facelets: str, mask: str) -> str:
     """
-    Applies a binary mask to a facelets string.
+    Apply a binary mask to a facelets string.
 
     Returns a new facelets string where positions with '0' in the mask
     are replaced with '-', and positions with '1' retain their original value.
@@ -97,7 +97,7 @@ def facelets_masked(facelets: str, mask: str) -> str:
 
 def state_masked(state: str, mask: str) -> str:
     """
-    Applies a binary mask to a cube state.
+    Apply a binary mask to a cube state.
 
     Converts the state to cubies, applies the mask
     to the initial state facelets, then converts back

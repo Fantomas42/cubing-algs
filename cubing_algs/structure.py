@@ -113,9 +113,7 @@ class BoundedCache[K, V](MutableMapping[K, V]):
 
 @dataclass
 class Structure:
-    """
-    Represents a detected structure (conjugate or commutator).
-    """
+    """Represents a detected structure (conjugate or commutator)."""
 
     type: str  # 'conjugate' or 'commutator'
     setup: 'Algorithm'  # The A part
@@ -136,9 +134,8 @@ class Structure:
 
 
 class StructureData(NamedTuple):
-    """
-    Container for comprehensive structure analysis results.
-    """
+    """Container for comprehensive structure analysis results."""
+
     # Original algorithm representation
     original: str
     compressed: str
@@ -198,6 +195,7 @@ def calculate_max_setup_length(algo_length: int) -> int:
 
     Returns:
         Maximum reasonable setup length
+
     """
     return max(MIN_SETUP_LENGTH, algo_length // SETUP_LENGTH_DIVISOR)
 
@@ -214,6 +212,7 @@ def calculate_min_score(algo_length: int) -> float:
 
     Returns:
         Minimum score threshold
+
     """
     if algo_length < SHORT_ALGO_THRESHOLD:
         return SHORT_ALGO_MIN_SCORE
@@ -267,8 +266,8 @@ def classify_commutator(
         setup: The A part of the commutator
         action: The B part of the commutator
         inverse_cache: Cache for inverse sequences (key: str(pattern))
-    """
 
+    """
     setup_len = len(setup)
     action_len = len(action)
     total_moves = setup_len * 2 + action_len * 2
@@ -352,6 +351,7 @@ def is_inverse_at(
         start: Position to check
         pattern: The pattern to invert and match
         inverse_cache: Cache for inverse sequences (key: str(pattern))
+
     """
     if start + len(pattern) > len(algo):
         return False
@@ -410,8 +410,8 @@ def detect_conjugate(
         inverse_cache: Cache for inverse sequences (key: str(algo))
 
     Returns the best conjugate found or None.
-    """
 
+    """
     best_structure: Structure | None = None
 
     # Cache algorithm length to avoid repeated calls
@@ -487,8 +487,8 @@ def detect_commutator(
         inverse_cache: Cache for inverse sequences (key: str(algo))
 
     Returns the best commutator found or None.
-    """
 
+    """
     best_structure: Structure | None = None
 
     # Cache algorithm length to avoid repeated calls
@@ -588,6 +588,7 @@ def detect_structures(
 
     Returns:
         List of detected structures, sorted by position
+
     """
     # Use heuristics if parameters not provided
     algo_len = len(algo)
@@ -651,6 +652,7 @@ def compress_recursive(  # noqa: C901, PLR0912
         structures: List of structures detected in the original algorithm
         offset: Offset to map positions from algo to original algorithm
         structure_cache: Cache for detected structures (key: str(algo))
+
     """
     if structure_cache is None:
         structure_cache = {}
@@ -740,6 +742,7 @@ def compress(
         >>> algo = Algorithm.parse_moves("F R U R' U' F'")
         >>> compress(algo)
         '[F: [R, U]]'
+
     """
     structures = detect_structures(algo, max_setup_len, min_score)
 
@@ -782,6 +785,7 @@ def count_all_structures(
 
     Returns:
         (total_count, conjugate_count, commutator_count)
+
     """
     if structure_cache is None:
         structure_cache = {}
@@ -852,6 +856,7 @@ def calculate_nesting_depth(
     Args:
         structures: List of structures to analyze
         structure_cache: Cache for detected structures (key: str(algo))
+
     """
     if structure_cache is None:
         structure_cache = {}
@@ -967,6 +972,7 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
             - average_action_length: Average action sequence length
             - coverage_percent: Percentage of moves covered by structures
             - uncovered_moves: Number of moves not in any structure
+
     """
     original_str = str(algo)
     structures = detect_structures(algo, max_setup_len, min_score)

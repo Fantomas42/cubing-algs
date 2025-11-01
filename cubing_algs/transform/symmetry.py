@@ -57,29 +57,21 @@ def symmetry_type_moves(
 
 
 def symmetry_m_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Apply M-slice symmetry transformation to moves.
-    """
+    """Apply M-slice symmetry transformation to moves."""
     return symmetry_type_moves(old_moves, 'M')
 
 
 def symmetry_s_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Apply S-slice symmetry transformation to moves.
-    """
+    """Apply S-slice symmetry transformation to moves."""
     return symmetry_type_moves(old_moves, 'S')
 
 
 def symmetry_e_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Apply E-slice symmetry transformation to moves.
-    """
+    """Apply E-slice symmetry transformation to moves."""
     return symmetry_type_moves(old_moves, 'E')
 
 
 def symmetry_c_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Apply combined symmetry transformation using M and S symmetries.
-    """
+    """Apply combined symmetry transformation using M and S symmetries."""
     moves = symmetry_m_moves(old_moves)
     return symmetry_s_moves(moves)

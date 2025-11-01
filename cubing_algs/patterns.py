@@ -1,5 +1,5 @@
 """
-Collection of cool patterns on 3x3x3
+Collection of cool patterns on 3x3x3.
 
 https://ruwix.com/the-rubiks-cube/rubiks-cube-patterns-algorithms/more-rubiks-patterns/
 """
@@ -80,7 +80,5 @@ PATTERNS = {
 
 
 def get_pattern(pattern_name: str) -> Algorithm:
-    """
-    Get an algorithm for a specific cube pattern by name.
-    """
+    """Get an algorithm for a specific cube pattern by name."""
     return parse_moves(PATTERNS.get(pattern_name, ''))

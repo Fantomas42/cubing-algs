@@ -1,13 +1,9 @@
 class InvalidFaceError(Exception):
-    """
-    Exception raised when an invalid face is encountered.
-    """
+    """Exception raised when an invalid face is encountered."""
 
 
 class InvalidCubeStateError(Exception):
-    """
-    Exception raised when an invalid cube is encountered.
-    """
+    """Exception raised when an invalid cube is encountered."""
 
 
 class InvalidMoveError(Exception):
@@ -20,12 +16,8 @@ class InvalidMoveError(Exception):
 
 
 class InvalidBracketError(InvalidMoveError):
-    """
-    Exception raised when an invalid bracket formation is encountered.
-    """
+    """Exception raised when an invalid bracket formation is encountered."""
 
 
 class InvalidOperatorError(InvalidMoveError):
-    """
-    Exception raised when an invalid operator is encountered.
-    """
+    """Exception raised when an invalid operator is encountered."""

@@ -36,6 +36,7 @@ class VCubeDisplay:
     Provides methods to render cube states with different display modes,
     color palettes, and visual effects for terminal output.
     """
+
     facelet_size = 3
 
     def __init__(self, cube: 'VCube',

@@ -620,9 +620,7 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(distance, 2)
 
     def test_cross_face_corner_to_corner(self) -> None:
-        """
-        Test cross-face corner movements.
-        """
+        """Test cross-face corner movements."""
         # Corner on U face to corner on R face
         distance = compute_qtm_distance(0, 9, self.cube)
         self.assertEqual(distance, 2)
@@ -636,9 +634,7 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(distance, 2)
 
     def test_cross_face_edge_to_edge(self) -> None:
-        """
-        Test cross-face edge movements.
-        """
+        """Test cross-face edge movements."""
         # Edge on U face to edge on R face
         distance = compute_qtm_distance(1, 10, self.cube)
         self.assertEqual(distance, 2)
@@ -787,7 +783,8 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
 
     def test_corner_movements_across_multiple_faces(self) -> None:
         """
-        Test corner to corner movements work correctly across different faces.
+        Test corner to corner movements work correctly
+        across different faces.
         """
         # Same face corner movements
         distance = compute_qtm_distance(0, 2, self.cube)
@@ -3372,9 +3369,7 @@ class TestOrientationInvariance(unittest.TestCase):
             )
 
     def test_manhattan_distance_invariant_under_post_orientation(self) -> None:
-        """
-        Test Manhattan distance metrics are same across post orientations.
-        """
+        """Test Manhattan distance metrics are same across post orientations."""
         self.check_post_orientation_invariance('manhattan')
 
     def test_manhattan_distance_consistent_under_pre_orientation(self) -> None:
@@ -3388,7 +3383,8 @@ class TestOrientationInvariance(unittest.TestCase):
 
     def test_qtm_distance_invariant_under_post_orientation(self) -> None:
         """
-        Test that QTM distance metrics remain the same across post orientations.
+        Test that QTM distance metrics remain the same
+        across post orientations.
         """
         self.check_post_orientation_invariance('qtm')
 

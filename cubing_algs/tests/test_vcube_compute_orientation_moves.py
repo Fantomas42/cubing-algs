@@ -430,7 +430,8 @@ class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
 
     def test_integration_with_oriented_copy_consistency(self) -> None:
         """
-        Test consistency between compute_orientation_moves and oriented_copy.
+        Test consistency between compute_orientation_moves
+        and oriented_copy.
         """
         scramble = "F R U' R' U' R U R' F' R U R' U' R' F R F'"
         self.cube.rotate(scramble)

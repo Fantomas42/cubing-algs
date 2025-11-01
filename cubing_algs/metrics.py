@@ -17,9 +17,8 @@ if TYPE_CHECKING:
 
 
 class MetricsData(NamedTuple):
-    """
-    Container for algorithm metrics computation results.
-    """
+    """Container for algorithm metrics computation results."""
+
     pauses: int
     rotations: int
     outer_moves: int
@@ -165,6 +164,7 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
             - rtm: Rotation Turn Metric score
             - qstm: Quarter Slice Turn Metric score
             - generators: List of most frequently used faces
+
     """
     pauses, rotations, outer_moves, inner_moves = regroup_moves(moves)
 

@@ -19,6 +19,7 @@ class VCube(VCubeIntegrityChecker):
     Represents a Rubik's cube state using a 54-character string
     where each character represents a facelet color.
     """
+
     size = 3
     face_number = 6
     face_size = size * size
@@ -26,9 +27,7 @@ class VCube(VCubeIntegrityChecker):
     def __init__(self, initial: str | None = None, *,
                  check: bool = True,
                  history: list[str] | None = None) -> None:
-        """
-        Initialize a virtual cube with optional initial state and history.
-        """
+        """Initialize a virtual cube with optional initial state and history."""
         if initial:
             self._state = initial
             if check:
@@ -40,9 +39,7 @@ class VCube(VCubeIntegrityChecker):
 
     @property
     def state(self) -> str:
-        """
-        Get the current state of the cube as a facelet string.
-        """
+        """Get the current state of the cube as a facelet string."""
         return self._state
 
     @staticmethod
@@ -50,9 +47,7 @@ class VCube(VCubeIntegrityChecker):
                     ep: list[int], eo: list[int],
                     so: list[int],
                     scheme: str | None = None) -> 'VCube':
-        """
-        Create a VCube from cubie representation.
-        """
+        """Create a VCube from cubie representation."""
         return VCube(
             cubies_to_facelets(cp, co, ep, eo, so, scheme),
             check=not bool(scheme),
@@ -62,16 +57,12 @@ class VCube(VCubeIntegrityChecker):
     def to_cubies(self) -> tuple[
             list[int], list[int], list[int], list[int], list[int],
     ]:
-        """
-        Convert the cube state to cubie representation.
-        """
+        """Convert the cube state to cubie representation."""
         return facelets_to_cubies(self._state)
 
     @property
     def is_solved(self) -> bool:
-        """
-        Check if the cube is in a solved state.
-        """
+        """Check if the cube is in a solved state."""
         return all(face * self.face_size in self.state for face in FACE_ORDER)
 
     def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
@@ -103,9 +94,7 @@ class VCube(VCubeIntegrityChecker):
 
     def rotate(self, moves: Algorithm | Move | str, *,
                history: bool = True) -> str:
-        """
-        Apply a sequence of moves to the cube.
-        """
+        """Apply a sequence of moves to the cube."""
         moves_str = str(moves)
 
         if not moves_str:
@@ -117,9 +106,7 @@ class VCube(VCubeIntegrityChecker):
         return self._state
 
     def rotate_move(self, move: str, *, history: bool = True) -> str:
-        """
-        Apply a single move to the cube.
-        """
+        """Apply a single move to the cube."""
         try:
             self._state = rotate.rotate_move(self._state, move)
         except ValueError as e:
@@ -130,9 +117,7 @@ class VCube(VCubeIntegrityChecker):
             return self._state
 
     def copy(self, *, full: bool = False) -> 'VCube':
-        """
-        Create a copy of the cube with optional history preservation.
-        """
+        """Create a copy of the cube with optional history preservation."""
         history = None
         if full:
             history = list(self.history)
@@ -144,9 +129,7 @@ class VCube(VCubeIntegrityChecker):
         )
 
     def compute_orientation_moves(self, faces: str) -> str:
-        """
-        Calculate the moves needed to orient the cube to specific faces.
-        """
+        """Calculate the moves needed to orient the cube to specific faces."""
         top_face, front_face = self.check_face_orientations(faces)
 
         orientation_key = str(self.get_face_index(top_face))
@@ -157,9 +140,7 @@ class VCube(VCubeIntegrityChecker):
         return OFFSET_ORIENTATION_MAP[orientation_key]
 
     def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
-        """
-        Create a copy of the cube oriented to specific faces.
-        """
+        """Create a copy of the cube oriented to specific faces."""
         cube = self.copy(full=full)
 
         moves = self.compute_orientation_moves(faces)
@@ -172,9 +153,7 @@ class VCube(VCubeIntegrityChecker):
     def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
                 mask: str = '', palette: str = '',
                 effect: str = '', facelet: str = '') -> str:
-        """
-        Generate a visual representation of the cube.
-        """
+        """Generate a visual representation of the cube."""
         return VCubeDisplay(self, palette, effect, facelet).display(
             mode, orientation, mask,
         )
@@ -182,9 +161,7 @@ class VCube(VCubeIntegrityChecker):
     def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
              mask: str = '', palette: str = '',
              effect: str = '', facelet: str = '') -> None:
-        """
-        Print a visual representation of the cube.
-        """
+        """Print a visual representation of the cube."""
         print(  # noqa: T201
             self.display(
                 mode, orientation, mask,
@@ -194,36 +171,26 @@ class VCube(VCubeIntegrityChecker):
         )
 
     def get_face(self, face: str) -> str:
-        """
-        Get the facelets of a specific face by face letter.
-        """
+        """Get the facelets of a specific face by face letter."""
         index = FACE_INDEXES[face]
         return self._state[index * self.face_size: (index + 1) * self.face_size]
 
     def get_face_center_indexes(self) -> list[str]:
-        """
-        Get the center facelet colors for all faces.
-        """
+        """Get the center facelet colors for all faces."""
         return [self.state[(i * self.face_size) + 4] for i in range(6)]
 
     def get_face_index(self, face: str) -> int:
-        """
-        Get the index of a face by its center color.
-        """
+        """Get the index of a face by its center color."""
         return self.get_face_center_indexes().index(face)
 
     def get_face_by_center(self, face: str) -> str:
-        """
-        Get the facelets of a face by its center color.
-        """
+        """Get the facelets of a face by its center color."""
         index = self.get_face_index(face)
 
         return self._state[index * self.face_size: (index + 1) * self.face_size]
 
     def __str__(self) -> str:
-        """
-        Return the facelets of the cube
-        """
+        """Return the facelets of the cube."""
         faces = [f'{ face }: { self.get_face(face)}' for face in FACE_ORDER]
 
         return '\n'.join(faces)

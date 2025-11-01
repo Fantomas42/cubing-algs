@@ -30,9 +30,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
     """
 
     def __init__(self, initlist: Iterable[Move] | None = None) -> None:
-        """
-        Initialize an Algorithm with an optional sequence of Move objects.
-        """
+        """Initialize an Algorithm with an optional sequence of Move objects."""
         super().__init__()
 
         if initlist is not None:
@@ -40,18 +38,14 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
     @staticmethod
     def parse_moves(items: Iterable[Move | str] | str) -> 'Algorithm':
-        """
-        Parse a string or list of strings into an Algorithm object.
-        """
+        """Parse a string or list of strings into an Algorithm object."""
         from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
         return parse_moves(items, secure=False)
 
     @staticmethod
     def parse_move(item: Move | str) -> Move:
-        """
-        Parse a single move string into a Move object.
-        """
+        """Parse a single move string into a Move object."""
         move = item if isinstance(item, Move) else Move(item)
 
         if not move.is_valid:
@@ -61,45 +55,33 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         return move
 
     def append(self, item: Move | str) -> None:
-        """
-        Add a move to the end of the algorithm.
-        """
+        """Add a move to the end of the algorithm."""
         self.data.append(self.parse_move(item))
 
     def insert(self, i: int, item: Move | str) -> None:
-        """
-        Insert a move at a specific position in the algorithm.
-        """
+        """Insert a move at a specific position in the algorithm."""
         self.data.insert(i, self.parse_move(item))
 
     def extend(self, other: Iterable[Move | str]) -> None:
-        """
-        Extend the algorithm with moves from another sequence.
-        """
+        """Extend the algorithm with moves from another sequence."""
         if isinstance(other, Algorithm):
             self.data.extend(other)
         else:
             self.data.extend(self.parse_moves(other))
 
     def __iadd__(self, other: Iterable[Move | str] | str) -> Self:
-        """
-        In-place addition operator (+=) for algorithms.
-        """
+        """In-place addition operator (+=) for algorithms."""
         self.extend(other)
         return self
 
     def __radd__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
-        """
-        Right addition operator for algorithms.
-        """
+        """Right addition operator for algorithms."""
         result = self.parse_moves(other)
         result += self
         return result
 
     def __add__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
-        """
-        Addition operator (+) for algorithms.
-        """
+        """Addition operator (+) for algorithms."""
         if isinstance(other, Algorithm):
             result = self.copy()
             result.extend(other)
@@ -110,18 +92,14 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         return result
 
     def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def] # noqa: ANN001
-        """
-        Set a move at a specific index in the algorithm.
-        """
+        """Set a move at a specific index in the algorithm."""
         if isinstance(item, Move):
             self.data[i] = item
         else:
             self.data[i] = self.parse_moves(item)
 
     def __str__(self) -> str:
-        """
-        Convert the algorithm to a human-readable string.
-        """
+        """Convert the algorithm to a human-readable string."""
         return ' '.join([str(m) for m in self])
 
     def __repr__(self) -> str:
@@ -176,6 +154,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             >>> alg = Algorithm.parse_moves("R U R' U'")
             >>> alg.cycles
             6  # Meaning applying this 6 times returns to solved
+
         """
         return compute_cycles(self)
 
@@ -202,6 +181,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             8  # Quarter Turn Metric: 8 quarter turns
             >>> metrics.generators
             ['R', 'U', 'F']  # Most used faces in order
+
         """
         return compute_metrics(self)
 
@@ -221,6 +201,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             18  # 18 out of 54 facelets are affected
             >>> impacts['scrambled_percent']
             0.33  # About 33% of the cube is scrambled
+
         """
         return compute_impacts(self)
 
@@ -248,6 +229,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             'Good'  # Qualitative assessment
             >>> ergo.hand_balance_ratio
             0.4  # Hand balance (0.5 is perfect)
+
         """
         return compute_ergonomics(self)
 
@@ -275,6 +257,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             1
             >>> struct.commutator_count
             1
+
         """
         return compute_structure(self)
 
@@ -302,23 +285,17 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
     @property
     def is_standard(self) -> bool:
-        """
-        Check if algorithm is in standard notations.
-        """
+        """Check if algorithm is in standard notations."""
         return not self.is_sign
 
     @property
     def is_sign(self) -> bool:
-        """
-        Check if algorithm contains SiGN notations.
-        """
+        """Check if algorithm contains SiGN notations."""
         return any(m.is_sign_move for m in self)
 
     @property
     def has_rotations(self) -> bool:
-        """
-        Check if algorithm contains rotations.
-        """
+        """Check if algorithm contains rotations."""
         return any(m.is_rotational_move for m in self)
 
     @property

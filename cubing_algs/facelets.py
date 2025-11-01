@@ -58,7 +58,8 @@ class ConversionCache:
 
     def __init__(self, max_size: int = 512) -> None:
         """
-        Initialize a conversion cache with configurable size and FIFO eviction.
+        Initialize a conversion cache with configurable size
+        and FIFO eviction.
         """
         self.max_size = max_size
         self.facelets_cache: dict[
@@ -173,6 +174,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913, PLR0917
 
     Returns:
         Cube state in the Kociemba facelets representation string
+
     """
     if so != [0, 1, 2, 3, 4, 5] and scheme:
         rotations = OFFSET_ORIENTATION_MAP[str(so[0]) + str(so[2])]
@@ -240,6 +242,7 @@ def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 1, 2, 3, 4, 5],
         )
+
     """
     cached_result = _cache.get_cubies(facelets)
     if cached_result is not None:

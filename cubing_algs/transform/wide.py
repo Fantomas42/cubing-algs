@@ -13,9 +13,7 @@ def unwide(
         old_moves: Algorithm,
         config: dict[str, list[str]],
 ) -> Algorithm:
-    """
-    Expand wide moves using the provided configuration mapping.
-    """
+    """Expand wide moves using the provided configuration mapping."""
     moves: list[Move] = []
 
     move_cache: dict[Move, list[Move]] = {}
@@ -42,16 +40,12 @@ def unwide(
 
 
 def unwide_slice_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Expand wide moves into outer face and slice moves.
-    """
+    """Expand wide moves into outer face and slice moves."""
     return unwide(old_moves, UNWIDE_SLICE_MOVES)
 
 
 def unwide_rotation_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Expand wide moves into outer face and rotation moves.
-    """
+    """Expand wide moves into outer face and rotation moves."""
     return unwide(old_moves, UNWIDE_ROTATION_MOVES)
 
 
@@ -61,9 +55,7 @@ def rewide(
         max_depth: int = MAX_ITERATIONS,
         threshold: int = 0,
 ) -> Algorithm:
-    """
-    Convert sequences of moves back into wide moves using configuration.
-    """
+    """Convert sequences of moves back into wide moves using configuration."""
     if max_depth <= 0:
         return old_moves
 
@@ -106,9 +98,7 @@ def rewide(
 
 
 def rewide_moves(old_moves: Algorithm) -> Algorithm:
-    """
-    Convert move sequences back into wide moves where possible.
-    """
+    """Convert move sequences back into wide moves where possible."""
     return rewide(old_moves, REWIDE_MOVES)
 
 
