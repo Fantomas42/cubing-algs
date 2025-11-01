@@ -1,6 +1,4 @@
 """Tests for the Algorithm class."""
-
-# ruff: noqa: PLR6104 RUF005
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -135,13 +133,13 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
 
-        algo = algo + ['F2', 'B']
+        algo = algo + ['F2', 'B']  # noqa: RUF005, PLR6104
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:
             self.assertIsInstance(m, Move)
 
-        algo = algo + 'F R'
+        algo = algo + 'F R'  # noqa: PLR6104
         self.assertEqual(str(algo), 'R2 U F2 B F R')
 
         for m in algo:
@@ -182,13 +180,13 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         for m in algo:
             self.assertIsInstance(m, Move)
 
-        algo = ['R2', 'L'] + algo
+        algo = ['R2', 'L'] + algo  # noqa: RUF005
         self.assertEqual(str(algo), 'R2 L F2 R2 D2 U')
 
         for m in algo:
             self.assertIsInstance(m, Move)
 
-        algo = [Move('D'), Move('U')] + algo
+        algo = [Move('D'), Move('U')] + algo  # noqa: RUF005
         self.assertEqual(str(algo), 'D U R2 L F2 R2 D2 U')
 
         for m in algo:
@@ -248,7 +246,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo = parse_moves('R2 U')
         self.assertEqual(str(algo), 'R2 U')
 
-        algo = algo + parse_moves('F2 B')
+        algo = algo + parse_moves('F2 B')  # noqa: PLR6104
         self.assertEqual(str(algo), 'R2 U F2 B')
 
         for m in algo:

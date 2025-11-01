@@ -1,6 +1,5 @@
 """Tests for degrip transformation functions."""
-
-# ruff: noqa: E241 E501
+# ruff: noqa: E241, E501
 import unittest
 from collections.abc import Callable
 

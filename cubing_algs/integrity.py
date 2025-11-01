@@ -6,7 +6,6 @@ to ensure they represent valid, solvable cube configurations.
 Checks include permutation validity, orientation constraints,
 color combinations, and mathematical consistency.
 """
-# ruff: noqa: PLR6301
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_ORDER
@@ -105,7 +104,8 @@ class VCubeIntegrityChecker:
             msg = f'State string must be { expected_length } characters long'
             raise InvalidCubeStateError(msg)
 
-    def check_characters(self, color_counts: dict[str, int]) -> None:
+    @staticmethod
+    def check_characters(color_counts: dict[str, int]) -> None:
         """Validate that only valid face characters are used in the state."""
         if set(color_counts.keys()) - set(FACE_ORDER):
             msg = (
@@ -134,7 +134,8 @@ class VCubeIntegrityChecker:
             msg = 'Face centers must be unique'
             raise InvalidCubeStateError(msg)
 
-    def check_corner_permutations(self, cp: list[int]) -> None:
+    @staticmethod
+    def check_corner_permutations(cp: list[int]) -> None:
         """
         Validate corner permutation contains exactly
         one of each corner piece.
@@ -146,7 +147,8 @@ class VCubeIntegrityChecker:
             )
             raise InvalidCubeStateError(msg)
 
-    def check_corner_orientations(self, co: list[int]) -> None:
+    @staticmethod
+    def check_corner_orientations(co: list[int]) -> None:
         """Validate corner orientations are all valid values (0, 1, or 2)."""
         if len(co) != CORNER_NUMBER or any(
                 orientation not in CORNER_VALID_ORIENTATIONS
@@ -155,7 +157,8 @@ class VCubeIntegrityChecker:
             msg = 'Corner orientation must be 0, 1, or 2 for each corner'
             raise InvalidCubeStateError(msg)
 
-    def check_corner_sum(self, co: list[int]) -> None:
+    @staticmethod
+    def check_corner_sum(co: list[int]) -> None:
         """Validate corner orientation sum is divisible by 3."""
         if sum(co) % 3:
             msg = 'Sum of corner orientations must be divisible by 3'
@@ -187,7 +190,8 @@ class VCubeIntegrityChecker:
                         )
                         raise InvalidCubeStateError(msg)
 
-    def check_edge_permutations(self, ep: list[int]) -> None:
+    @staticmethod
+    def check_edge_permutations(ep: list[int]) -> None:
         """
         Validate edge permutation contains exactly
         one of each edge piece.
@@ -199,7 +203,8 @@ class VCubeIntegrityChecker:
             )
             raise InvalidCubeStateError(msg)
 
-    def check_edge_orientations(self, eo: list[int]) -> None:
+    @staticmethod
+    def check_edge_orientations(eo: list[int]) -> None:
         """Validate edge orientations are all valid values (0 or 1)."""
         if len(eo) != EDGE_NUMBER or any(
                 orientation not in EDGE_VALID_ORIENTATIONS
@@ -208,7 +213,8 @@ class VCubeIntegrityChecker:
             msg = 'Edge orientation must be 0 or 1 for each edge'
             raise InvalidCubeStateError(msg)
 
-    def check_edge_sum(self, eo: list[int]) -> None:
+    @staticmethod
+    def check_edge_sum(eo: list[int]) -> None:
         """Validate edge orientation sum is even."""
         if sum(eo) % 2:
             msg = 'Sum of edge orientations must be even'
@@ -236,7 +242,8 @@ class VCubeIntegrityChecker:
                 )
                 raise InvalidCubeStateError(msg)
 
-    def check_permutation_parity(self, cp: list[int], ep: list[int]) -> None:
+    @staticmethod
+    def check_permutation_parity(cp: list[int], ep: list[int]) -> None:
         """Validate corner and edge permutation parities match."""
         corner_parity = count_inversions(cp) % 2
         edge_parity = count_inversions(ep) % 2
@@ -259,7 +266,8 @@ class VCubeIntegrityChecker:
             )
             raise InvalidCubeStateError(msg)
 
-    def check_face_orientations(self, faces: str) -> tuple[str, str]:
+    @staticmethod
+    def check_face_orientations(faces: str) -> tuple[str, str]:
         """Validate and parses face orientation specification."""
         if not faces:
             msg = 'Specify at leat one face to orient'
