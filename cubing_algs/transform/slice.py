@@ -150,8 +150,10 @@ def reslice(
                 old_moves, i, pattern_length, config, threshold,
             )
             if matched:
-                for move in matched:
-                    moves.append(Move(move + old_moves[i].time))
+                moves.extend(
+                    Move(move + old_moves[i].time)
+                    for move in matched
+                )
                 changed = True
                 i += pattern_length
                 break

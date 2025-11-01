@@ -204,12 +204,7 @@ class VCube(VCubeIntegrityChecker):
         """
         Get the center facelet colors for all faces.
         """
-        face_centers = []
-
-        for i in range(6):
-            face_centers.append(self.state[(i * self.face_size) + 4])
-
-        return face_centers
+        return [self.state[(i * self.face_size) + 4] for i in range(6)]
 
     def get_face_index(self, face: str) -> int:
         """
@@ -229,9 +224,7 @@ class VCube(VCubeIntegrityChecker):
         """
         Return the facelets of the cube
         """
-        faces = []
-        for face in FACE_ORDER:
-            faces.append(f'{ face }: { self.get_face(face)}')
+        faces = [f'{ face }: { self.get_face(face)}' for face in FACE_ORDER]
 
         return '\n'.join(faces)
 

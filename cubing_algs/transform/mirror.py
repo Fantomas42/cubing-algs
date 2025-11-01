@@ -13,9 +13,6 @@ def mirror_moves(old_moves: Algorithm) -> Algorithm:
     Reverses the order of moves and inverts each move to create
     the sequence that undoes the original algorithm.
     """
-    moves: list[Move] = []
-
-    for move in reversed(old_moves):
-        moves.append(move.inverted)
+    moves: list[Move] = [move.inverted for move in reversed(old_moves)]
 
     return Algorithm(moves)

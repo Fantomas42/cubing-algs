@@ -9,11 +9,7 @@ def unpause_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove all pause moves from an algorithm.
     """
-    moves: list[Move] = []
-
-    for move in old_moves:
-        if not move.is_pause:
-            moves.append(move)
+    moves: list[Move] = [move for move in old_moves if not move.is_pause]
 
     return Algorithm(moves)
 

@@ -10,9 +10,6 @@ def untime_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove timing information from all moves in an algorithm.
     """
-    moves: list[Move] = []
-
-    for move in old_moves:
-        moves.append(move.untimed)
+    moves: list[Move] = [move.untimed for move in old_moves]
 
     return Algorithm(moves)

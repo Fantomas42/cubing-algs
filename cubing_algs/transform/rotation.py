@@ -15,11 +15,11 @@ def remove_rotations(old_moves: Algorithm) -> Algorithm:
 
     Strips rotation moves while preserving the core face moves.
     """
-    moves: list[Move] = []
-
-    for move in old_moves:
-        if not move.is_rotation_move:
-            moves.append(move)
+    moves: list[Move] = [
+        move
+        for move in old_moves
+        if not move.is_rotation_move
+    ]
 
     return Algorithm(moves)
 

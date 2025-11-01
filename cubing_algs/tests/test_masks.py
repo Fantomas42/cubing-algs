@@ -191,18 +191,14 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
         common_masks = [FULL_MASK, '0' * 54, '1' * 27 + '0' * 27]
 
         # First round - populate cache
-        results1 = []
-        for mask in common_masks:
-            results1.append(facelets_masked(facelets, mask))
+        results1 = [facelets_masked(facelets, mask) for mask in common_masks]
 
         # Verify all masks are cached
         for mask in common_masks:
             self.assertIn(mask, _MASK_CACHE)
 
         # Second round - should hit cache
-        results2 = []
-        for mask in common_masks:
-            results2.append(facelets_masked(facelets, mask))
+        results2 = [facelets_masked(facelets, mask) for mask in common_masks]
 
         # Results should be identical
         self.assertEqual(results1, results2)
