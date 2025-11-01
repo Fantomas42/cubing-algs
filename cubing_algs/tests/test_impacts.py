@@ -265,7 +265,7 @@ class TestComputeFaceImpact(unittest.TestCase):
         result = compute_face_impact(mask, self.cube)
 
         # Each face should have 4 or 5 ones (depending on the face position)
-        for _face, count in result.items():
+        for count in result.values():
             self.assertIn(count, [4, 5])
 
         # Total should be 27
@@ -2440,7 +2440,7 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
         result = compute_impacts(algorithm)
 
         # All face mobility should be 0
-        for _face, mobility in result.facelets_face_mobility.items():
+        for mobility in result.facelets_face_mobility.values():
             self.assertEqual(mobility, 0)
 
     def test_algorithm_commutativity_check(self) -> None:

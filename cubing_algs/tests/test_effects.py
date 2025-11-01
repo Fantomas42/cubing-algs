@@ -777,7 +777,7 @@ class TestEffectsConfiguration(unittest.TestCase):
 
     def test_effects_parameters_structure(self) -> None:
         """Test that effects parameters are properly structured."""
-        for _effect_name, effect_config in EFFECTS.items():
+        for effect_config in EFFECTS.values():
             if 'parameters' in effect_config:
                 params = effect_config['parameters']
                 # Check that parameter values are reasonable types

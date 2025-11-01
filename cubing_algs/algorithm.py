@@ -2,6 +2,7 @@ from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
+from typing import Self
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
@@ -28,7 +29,10 @@ class Algorithm(UserList[Move]):
     providing methods to manipulate and analyze the algorithm.
     """
 
-    def __init__(self, initlist: Iterable[Move] | None = None):
+    def __init__(self, initlist: Iterable[Move] | None = None) -> None:
+        """
+        Initialize an Algorithm with an optional sequence of Move objects.
+        """
         super().__init__()
 
         if initlist is not None:
@@ -77,7 +81,7 @@ class Algorithm(UserList[Move]):
         else:
             self.data.extend(self.parse_moves(other))
 
-    def __iadd__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
+    def __iadd__(self, other: Iterable[Move | str] | str) -> Self:
         """
         In-place addition operator (+=) for algorithms.
         """
@@ -105,7 +109,7 @@ class Algorithm(UserList[Move]):
         result.extend(self.parse_moves(other))
         return result
 
-    def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def]
+    def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def] # noqa: ANN001
         """
         Set a move at a specific index in the algorithm.
         """

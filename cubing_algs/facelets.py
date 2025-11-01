@@ -56,7 +56,10 @@ _FACE_TO_INDEX = _build_face_lookup_table()
 class ConversionCache:
     """Simple cache for facelets conversions with LRU-like behavior."""
 
-    def __init__(self, max_size: int = 512):
+    def __init__(self, max_size: int = 512) -> None:
+        """
+        Initialize a conversion cache with configurable size and FIFO eviction.
+        """
         self.max_size = max_size
         self.facelets_cache: dict[
             str, tuple[
@@ -209,7 +212,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913, PLR0917
     return result
 
 
-def facelets_to_cubies(facelets: str) -> tuple[  # noqa: PLR0912, PLR0914
+def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
         list[int], list[int], list[int], list[int], list[int],
 ]:
     """

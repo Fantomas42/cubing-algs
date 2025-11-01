@@ -1,5 +1,9 @@
+from typing import TYPE_CHECKING
+
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.move import Move
+
+if TYPE_CHECKING:
+    from cubing_algs.move import Move  # pragma: no cover
 
 
 def sign_moves(old_moves: Algorithm) -> Algorithm:

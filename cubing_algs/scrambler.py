@@ -1,7 +1,7 @@
 import math
 import re
-from random import choice
 from random import randint
+from secrets import choice
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
@@ -133,7 +133,7 @@ def random_moves(cube_size: int,
 
     if not iterations:
         iterations_range = ITERATIONS_BY_CUBE_SIZE[min(cube_size, 7)]
-        iterations = randint(*iterations_range)
+        iterations = randint(*iterations_range)  # noqa: S311
 
     while len(moves) < iterations:
         while not is_valid_next_move(value, previous):

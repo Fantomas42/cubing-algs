@@ -637,7 +637,7 @@ def detect_structures(
     return structures
 
 
-def compress_recursive(  # noqa: PLR0912
+def compress_recursive(  # noqa: C901, PLR0912
     algo: 'Algorithm',
     structures: list[Structure],
     offset: int = 0,
@@ -921,7 +921,7 @@ def calculate_efficiency_rating(
     return 'Poor'
 
 
-def compute_structure(  # noqa: PLR0914, PLR0912, PLR0915
+def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,

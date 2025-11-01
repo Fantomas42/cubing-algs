@@ -24,13 +24,6 @@ def pause_moves(
 ) -> Callable[[Algorithm], Algorithm]:
     """
     Create a configurable pause_moves function.
-
-    Args:
-        speed: Base speed in milliseconds (default: 200)
-        factor: Multiplier for threshold calculation (default: 2)
-
-    Returns:
-        A function that can be used with transform() or called directly.
     """
     def _pause_moves(old_moves: Algorithm) -> Algorithm:
         if not old_moves:

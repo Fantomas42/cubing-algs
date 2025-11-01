@@ -1,6 +1,6 @@
 import unittest
 from io import StringIO
-from typing import Any
+from unittest.mock import Mock
 from unittest.mock import patch
 
 from cubing_algs.constants import FACES
@@ -601,7 +601,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_permutation_parity(cp, ep)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_corner_same_colors(self, *_: Any) -> None:
+    def test_invalid_corner_same_colors(self, *_: Mock) -> None:
         invalid_state_list = list(INITIAL_STATE)
         # Corner URF: same color on the 2 faces
         invalid_state_list[8] = invalid_state_list[9]
@@ -614,7 +614,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_edge_same_colors(self, *_: Any) -> None:
+    def test_invalid_edge_same_colors(self, *_: Mock) -> None:
         invalid_state_list = list(INITIAL_STATE)
         # Edge UR: same color on the 2 faces
         invalid_state_list[5] = invalid_state_list[10]
@@ -627,7 +627,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_corner_opposite_colors(self, *_: Any) -> None:
+    def test_invalid_corner_opposite_colors(self, *_: Mock) -> None:
         invalid_state_list = list(INITIAL_STATE)
         invalid_state_list[8] = 'U'  # Face U
         invalid_state_list[9] = 'D'  # Opposite face D
@@ -642,7 +642,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_edge_opposite_colors(self, *_: Any) -> None:
+    def test_invalid_edge_opposite_colors(self, *_: Mock) -> None:
         invalid_state_list = list(INITIAL_STATE)
         invalid_state_list[5] = 'F'
         invalid_state_list[10] = 'B'  # Opposite color

@@ -622,7 +622,7 @@ def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
     }
 
 
-def classify_pattern(  # noqa: PLR0912, PLR0915, PLR0914
+def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
         cp: list[int], co: list[int],
         ep: list[int], eo: list[int],
 ) -> list[str]:

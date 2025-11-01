@@ -25,7 +25,7 @@ class VCube(VCubeIntegrityChecker):
 
     def __init__(self, initial: str | None = None, *,
                  check: bool = True,
-                 history: list[str] | None = None):
+                 history: list[str] | None = None) -> None:
         """
         Initialize a virtual cube with optional initial state and history.
         """
@@ -185,7 +185,7 @@ class VCube(VCubeIntegrityChecker):
         """
         Print a visual representation of the cube.
         """
-        print(
+        print(  # noqa: T201
             self.display(
                 mode, orientation, mask,
                 palette, effect, facelet,
