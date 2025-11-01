@@ -1,3 +1,5 @@
+"""Symmetry transformations for applying cube symmetry operations."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import SYMMETRY_TABLE
 from cubing_algs.constants import WIDE_CHAR

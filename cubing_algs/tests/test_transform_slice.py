@@ -1,3 +1,5 @@
+"""Tests for slice move transformation functions."""
+
 import unittest
 
 from cubing_algs.constants import RESLICE_MOVES

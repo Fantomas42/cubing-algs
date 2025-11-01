@@ -1,3 +1,5 @@
+"""Tests for move optimization transformation functions."""
+
 import unittest
 
 from cubing_algs.algorithm import Algorithm

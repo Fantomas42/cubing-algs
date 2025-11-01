@@ -1,3 +1,5 @@
+"""Binary masks for identifying and manipulating cube regions and pieces."""
+
 from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies

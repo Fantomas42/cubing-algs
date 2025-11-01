@@ -1,3 +1,5 @@
+"""Virtual 3x3 cube implementation for simulating moves and tracking state."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER

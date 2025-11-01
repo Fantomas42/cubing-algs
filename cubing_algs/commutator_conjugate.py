@@ -1,3 +1,5 @@
+"""Parsing and expansion functions for commutator and conjugate notation."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.exceptions import InvalidBracketError
 from cubing_algs.exceptions import InvalidOperatorError

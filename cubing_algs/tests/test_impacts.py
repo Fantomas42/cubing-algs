@@ -1,3 +1,5 @@
+"""Tests for algorithm impact analysis."""
+
 import unittest
 from typing import ClassVar
 

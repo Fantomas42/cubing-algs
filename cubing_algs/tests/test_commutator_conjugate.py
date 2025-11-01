@@ -1,3 +1,5 @@
+"""Tests for commutator and conjugate notation parsing."""
+
 import unittest
 from unittest.mock import patch
 

@@ -1,3 +1,5 @@
+"""Tests for wide move transformation functions."""
+
 import unittest
 
 from cubing_algs.constants import REWIDE_MOVES

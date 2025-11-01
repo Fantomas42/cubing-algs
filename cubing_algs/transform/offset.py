@@ -1,3 +1,5 @@
+"""Cube rotation offset transformations for reorienting algorithms."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import OFFSET_TABLE
 from cubing_algs.constants import WIDE_CHAR

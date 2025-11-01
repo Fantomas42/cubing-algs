@@ -1,3 +1,5 @@
+"""Move trimming transformations for removing moves from algorithm ends."""
+
 from collections.abc import Callable
 from itertools import dropwhile
 

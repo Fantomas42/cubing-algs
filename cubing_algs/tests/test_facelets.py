@@ -1,3 +1,5 @@
+"""Tests for facelet and cubie conversion functions."""
+
 import unittest
 
 from cubing_algs.constants import INITIAL_STATE

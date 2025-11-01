@@ -1,3 +1,5 @@
+"""Tests for the VCube class."""
+
 import unittest
 from io import StringIO
 from unittest.mock import Mock

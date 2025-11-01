@@ -1,3 +1,5 @@
+"""Tests for binary mask operations."""
+
 import unittest
 
 from cubing_algs.constants import INITIAL_STATE

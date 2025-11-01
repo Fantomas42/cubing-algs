@@ -1,3 +1,5 @@
+"""Tests for cube pattern recognition and generation."""
+
 import unittest
 
 from cubing_algs.move import Move

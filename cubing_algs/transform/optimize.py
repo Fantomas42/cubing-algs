@@ -1,3 +1,5 @@
+"""Move optimization functions for reducing algorithm length and complexity."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
 

@@ -1,3 +1,5 @@
+"""Tests for algorithm parsing functions."""
+
 import unittest
 
 from cubing_algs.exceptions import InvalidBracketError

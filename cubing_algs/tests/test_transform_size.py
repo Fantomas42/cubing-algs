@@ -1,3 +1,5 @@
+"""Tests for algorithm compression and expansion functions."""
+
 import unittest
 
 from cubing_algs.move import Move

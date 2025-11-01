@@ -1,3 +1,8 @@
+"""
+Core Algorithm class for representing and manipulating
+sequences of cube moves.
+"""
+
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable

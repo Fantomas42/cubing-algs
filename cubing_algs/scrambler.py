@@ -1,3 +1,5 @@
+"""Random scramble generation for Rubik's cubes of various sizes."""
+
 import math
 import re
 from random import randint

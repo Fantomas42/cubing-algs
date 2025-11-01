@@ -1,3 +1,5 @@
+"""Visual effects and color transformations for cube display rendering."""
+
 # ruff: noqa: ARG001
 import math
 import re

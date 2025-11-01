@@ -1,3 +1,5 @@
+"""Tests for cube orientation move computation."""
+
 import unittest
 
 from cubing_algs.constants import FACE_ORDER

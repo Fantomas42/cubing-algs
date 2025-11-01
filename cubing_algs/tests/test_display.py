@@ -1,3 +1,5 @@
+"""Tests for VCubeDisplay rendering and formatting."""
+
 import os
 import unittest
 from unittest.mock import patch

@@ -1,3 +1,5 @@
+"""Tests for algorithm structure analysis."""
+
 import unittest
 
 from cubing_algs.algorithm import Algorithm

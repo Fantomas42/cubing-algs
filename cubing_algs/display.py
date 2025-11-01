@@ -1,3 +1,5 @@
+"""Visual representation and display formatting for virtual cube states."""
+
 import os
 import re
 from typing import TYPE_CHECKING

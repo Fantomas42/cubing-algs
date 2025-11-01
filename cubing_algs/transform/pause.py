@@ -1,3 +1,5 @@
+"""Pause insertion and removal transformations for timed algorithms."""
+
 from collections.abc import Callable
 
 from cubing_algs.algorithm import Algorithm

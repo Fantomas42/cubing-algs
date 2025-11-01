@@ -1,3 +1,5 @@
+"""Slice move expansion and contraction transformations."""
+
 from collections.abc import Callable
 
 from cubing_algs.algorithm import Algorithm

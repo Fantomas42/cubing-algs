@@ -1,3 +1,5 @@
+"""Rotation move removal and manipulation transformations."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.move import Move

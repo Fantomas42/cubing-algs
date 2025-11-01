@@ -1,3 +1,6 @@
+"""Custom exception classes for cube algorithm parsing and manipulation."""
+
+
 class InvalidFaceError(Exception):
     """Exception raised when an invalid face is encountered."""
 

@@ -1,3 +1,5 @@
+"""Tests for scramble generation."""
+
 import time
 import unittest
 from collections import Counter

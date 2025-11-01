@@ -1,3 +1,5 @@
+"""Tests for the Algorithm class."""
+
 # ruff: noqa: PLR6104 RUF005
 import unittest
 from contextlib import redirect_stdout

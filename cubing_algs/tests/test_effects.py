@@ -1,3 +1,5 @@
+"""Tests for visual effects and color transformations."""
+
 import unittest
 from unittest.mock import patch
 

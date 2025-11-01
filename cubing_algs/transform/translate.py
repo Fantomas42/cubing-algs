@@ -1,3 +1,5 @@
+"""Algorithm translation transformations based on cube orientation changes."""
+
 from collections.abc import Callable
 
 from cubing_algs.algorithm import Algorithm

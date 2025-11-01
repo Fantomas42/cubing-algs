@@ -1,3 +1,5 @@
+"""Tests for pause transformation functions."""
+
 import unittest
 
 from cubing_algs.move import Move

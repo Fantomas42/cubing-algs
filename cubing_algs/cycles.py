@@ -1,3 +1,5 @@
+"""Calculates the cycle order of algorithms on a cube."""
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

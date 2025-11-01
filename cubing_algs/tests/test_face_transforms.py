@@ -1,3 +1,5 @@
+"""Tests for face transformation computations."""
+
 import unittest
 
 from cubing_algs.face_transforms import ADJACENT_FACE_TRANSFORMATIONS
