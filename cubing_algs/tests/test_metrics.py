@@ -80,6 +80,14 @@ class MetricsTestCase(unittest.TestCase):
         for move, score in zip(moves, scores, strict=True):
             self.assertEqual(parse_moves(move).metrics.rtm, score)
 
+    def test_obtm(self) -> None:
+        """Test obtm."""
+        moves = ['R', 'R2', 'M', 'M2', 'x y z']
+        scores = [1, 1, 2, 2, 0]
+
+        for move, score in zip(moves, scores, strict=True):
+            self.assertEqual(parse_moves(move).metrics.obtm, score)
+
     def test_issue_11(self) -> None:
         """Test issue 11."""
         moves = "R U F' B R' U F' U' F D F' D' F' D' F D' L D L' R D' R' D' B D' B' D' D' R D' D' R' D B' D' B D' D' F D' F' D F D F' D' D D' D' L D B D' B' L' D R F D F' D' R' R F D' F' D' F D F' R' F D F' D' F' R F R' D"  # noqa: E501
@@ -180,3 +188,22 @@ class MetricsTestCase(unittest.TestCase):
                 qstm=3,
             ),
         )
+
+    def test_obtm_alias(self) -> None:
+        """Test OBTM alias for HTM."""
+        # OBTM should always equal HTM
+        test_cases = [
+            "R U R' U'",       # Simple algorithm
+            'M2 U M2 U2',      # With slice moves
+            "R U2 F' D2",      # With double moves
+            "Rw U Rw' U'",     # With wide moves
+            "x R U R' U' x'",  # With rotations
+        ]
+
+        for moves_str in test_cases:
+            algo = parse_moves(moves_str)
+            self.assertEqual(
+                algo.metrics.obtm,
+                algo.metrics.htm,
+                f'OBTM should equal HTM for { moves_str }',
+            )
