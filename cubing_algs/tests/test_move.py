@@ -147,6 +147,10 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertTrue(Move('R').is_outer_move)
         self.assertTrue(Move('r2').is_outer_move)
         self.assertFalse(Move('.').is_outer_move)
+        self.assertFalse(Move('2L').is_outer_move)
+        self.assertFalse(Move('2-3Lw').is_outer_move)
+        self.assertTrue(Move('1-3Lw').is_outer_move)
+        self.assertTrue(Move('0-3Lw').is_outer_move)
 
     def test_is_wide_move(self) -> None:
         """Test is wide move."""

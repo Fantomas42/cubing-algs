@@ -247,7 +247,7 @@ class Move(UserString):  # noqa: PLR0904
         Outer face moves include U, D, L, R, F, and B,
         which turn the outer faces.
         """
-        return self.base_move in OUTER_MOVES
+        return self.base_move in OUTER_MOVES and not self.is_inner_move
 
     @cached_property
     def is_wide_move(self) -> bool:
