@@ -20,6 +20,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
     """Tests for converting cubie representation to facelet representation."""
 
     def test_cubies_to_facelets_solved(self) -> None:
+        """Test cubies to facelets solved."""
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
         co = [0, 0, 0, 0, 0, 0, 0, 0]
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -37,6 +38,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
         )
 
     def test_cubies_to_facelets_solved_oriented(self) -> None:
+        """Test cubies to facelets solved oriented."""
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
         co = [0, 0, 0, 0, 0, 0, 0, 0]
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -61,6 +63,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
         )
 
     def test_cubies_to_facelets(self) -> None:
+        """Test cubies to facelets."""
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
@@ -78,6 +81,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
         )
 
     def test_cubies_to_facelets_oriented(self) -> None:
+        """Test cubies to facelets oriented."""
         cp = [4, 0, 1, 3, 7, 5, 6, 2]
         co = [2, 0, 0, 1, 1, 0, 0, 2]
         ep = [8, 0, 1, 2, 11, 5, 6, 7, 4, 9, 10, 3]
@@ -99,6 +103,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
     """Tests for converting facelet representation to cubie representation."""
 
     def test_facelets_to_cubies_solved(self) -> None:
+        """Test facelets to cubies solved."""
         cp = [0, 1, 2, 3, 4, 5, 6, 7]
         co = [0, 0, 0, 0, 0, 0, 0, 0]
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -116,6 +121,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
         )
 
     def test_facelets_to_cubies(self) -> None:
+        """Test facelets to cubies."""
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
@@ -133,6 +139,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
         )
 
     def test_facelets_to_cubies_oriented(self) -> None:
+        """Test facelets to cubies oriented."""
         cp = [4, 0, 1, 3, 7, 5, 6, 2]
         co = [2, 0, 0, 1, 1, 0, 0, 2]
         ep = [8, 0, 1, 2, 11, 5, 6, 7, 4, 9, 10, 3]
@@ -462,11 +469,13 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
 
     @staticmethod
     def setUp() -> None:
+        """Set up test fixtures."""
         clear_cache()
         enable_cache()
 
     @staticmethod
     def tearDown() -> None:
+        """Clean up after tests."""
         clear_cache()
         enable_cache()
 

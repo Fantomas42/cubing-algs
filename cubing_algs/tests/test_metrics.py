@@ -13,6 +13,7 @@ class MetricsTestCase(unittest.TestCase):
     maxDiff = None
 
     def test_metrics(self) -> None:
+        """Test metrics."""
         algo = parse_moves("yM2UMU2M'UM2")
         self.assertEqual(
             algo.metrics,
@@ -32,6 +33,7 @@ class MetricsTestCase(unittest.TestCase):
         )
 
     def test_htm(self) -> None:
+        """Test htm."""
         moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
         scores = [1, 1, 2, 2, 0, 1]
 
@@ -39,6 +41,7 @@ class MetricsTestCase(unittest.TestCase):
             self.assertEqual(parse_moves(move).metrics.htm, score)
 
     def test_qtm(self) -> None:
+        """Test qtm."""
         moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
         scores = [1, 2, 2, 4, 0, 1]
 
@@ -46,6 +49,7 @@ class MetricsTestCase(unittest.TestCase):
             self.assertEqual(parse_moves(move).metrics.qtm, score)
 
     def test_stm(self) -> None:
+        """Test stm."""
         moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
         scores = [1, 1, 1, 1, 0, 1]
 
@@ -53,6 +57,7 @@ class MetricsTestCase(unittest.TestCase):
             self.assertEqual(parse_moves(move).metrics.stm, score)
 
     def test_etm(self) -> None:
+        """Test etm."""
         moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
         scores = [1, 1, 1, 1, 1, 1]
 
@@ -60,6 +65,7 @@ class MetricsTestCase(unittest.TestCase):
             self.assertEqual(parse_moves(move).metrics.etm, score)
 
     def test_qstm(self) -> None:
+        """Test qstm."""
         moves = ['R', 'R2', 'M', 'M2', 'x2', "f'"]
         scores = [1, 2, 1, 2, 0, 1]
 
@@ -67,6 +73,7 @@ class MetricsTestCase(unittest.TestCase):
             self.assertEqual(parse_moves(move).metrics.qstm, score)
 
     def test_rtm(self) -> None:
+        """Test rtm."""
         moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'x y2']
         scores = [0, 0, 0, 0, 2, 0, 3]
 
@@ -74,6 +81,7 @@ class MetricsTestCase(unittest.TestCase):
             self.assertEqual(parse_moves(move).metrics.rtm, score)
 
     def test_issue_11(self) -> None:
+        """Test issue 11."""
         moves = "R U F' B R' U F' U' F D F' D' F' D' F D' L D L' R D' R' D' B D' B' D' D' R D' D' R' D B' D' B D' D' F D' F' D F D F' D' D D' D' L D B D' B' L' D R F D F' D' R' R F D' F' D' F D F' R' F D F' D' F' R F R' D"  # noqa: E501
 
         algo = parse_moves(moves)
@@ -114,6 +122,7 @@ class MetricsTestCase(unittest.TestCase):
         )
 
     def test_metrics_wide_sign(self) -> None:
+        """Test metrics wide sign."""
         algo = parse_moves('RFu')
         self.assertEqual(
             algo.metrics,
@@ -133,6 +142,7 @@ class MetricsTestCase(unittest.TestCase):
         )
 
     def test_metrics_wide_standard(self) -> None:
+        """Test metrics wide standard."""
         algo = parse_moves('RFUw')
         self.assertEqual(
             algo.metrics,
@@ -152,6 +162,7 @@ class MetricsTestCase(unittest.TestCase):
         )
 
     def test_metrics_pauses(self) -> None:
+        """Test metrics pauses."""
         algo = parse_moves('R..Fu.')
         self.assertEqual(
             algo.metrics,

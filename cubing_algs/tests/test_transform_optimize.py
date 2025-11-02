@@ -14,6 +14,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
     """Tests for move optimization transformations."""
 
     def test_optimize_repeat_three_moves(self) -> None:
+        """Test optimize repeat three moves."""
         provide = parse_moves('R R R')
         expect = parse_moves("R'")
 
@@ -92,6 +93,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
     def test_optimize_do_undo_moves(self) -> None:
+        """Test optimize do undo moves."""
         provide = parse_moves("R R'")
         expect = Algorithm()
 
@@ -169,6 +171,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
     def test_optimize_do_undo_double_moves(self) -> None:
+        """Test optimize do undo double moves."""
         provide = parse_moves("R R R' R'")
         expect = Algorithm()
 
@@ -233,6 +236,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
     def test_optimize_do_undo_double_double_moves(self) -> None:
+        """Test optimize do undo double double moves."""
         provide = parse_moves('R2 R2')
         expect = Algorithm()
 
@@ -290,6 +294,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
     def test_optimize_double_moves(self) -> None:
+        """Test optimize double moves."""
         provide = parse_moves('R R')
         expect = parse_moves('R2')
 
@@ -376,6 +381,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
     def test_optimize_double_moves_issue_1(self) -> None:
+        """Test optimize double moves issue 1."""
         provide = parse_moves('R R R2 F')
         expect = parse_moves('R2 R2 F')
 
@@ -385,6 +391,7 @@ class TransformOptimizeTestCase(unittest.TestCase):
         )
 
     def test_optimize_triple_moves(self) -> None:
+        """Test optimize triple moves."""
         provide = parse_moves('R R2')
         expect = parse_moves("R'")
 

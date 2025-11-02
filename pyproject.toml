@@ -51,7 +51,6 @@ show-fixes = true
 preview = true
 fixable = ["ALL"]
 select = ["ALL"]
-
 ignore = [
     "PT009",
     "PT027",

@@ -19,6 +19,7 @@ class TransformOffsetTestCase(unittest.TestCase):
     """Tests for offset transformations that apply cube rotations."""
 
     def test_offset_x_moves(self) -> None:
+        """Test offset x moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("R B R' B'")
 
@@ -33,6 +34,7 @@ class TransformOffsetTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_offset_x_moves_wide_standard(self) -> None:
+        """Test offset x moves wide standard."""
         provide = parse_moves("R U Rw' Uw'")
         expect = parse_moves("R B Rw' Bw'")
 
@@ -47,6 +49,7 @@ class TransformOffsetTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_offset_x_moves_wide_sign(self) -> None:
+        """Test offset x moves wide sign."""
         provide = parse_moves("R U r' u'")
         expect = parse_moves("R B r' b'")
 
@@ -61,6 +64,7 @@ class TransformOffsetTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_offset_x2_moves(self) -> None:
+        """Test offset x2 moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("R D R' D'")
 
@@ -70,6 +74,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_xprime_moves(self) -> None:
+        """Test offset xprime moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("R F R' F'")
 
@@ -79,6 +84,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_y_moves(self) -> None:
+        """Test offset y moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("F U F' U'")
 
@@ -88,6 +94,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_y2_moves(self) -> None:
+        """Test offset y2 moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("L U L' U'")
 
@@ -97,6 +104,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_yprime_moves(self) -> None:
+        """Test offset yprime moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("B U B' U'")
 
@@ -106,6 +114,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_z_moves(self) -> None:
+        """Test offset z moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("D R D' R'")
 
@@ -115,6 +124,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_z2_moves(self) -> None:
+        """Test offset z2 moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("L D L' D'")
 
@@ -124,6 +134,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_zprime_moves(self) -> None:
+        """Test offset zprime moves."""
         provide = parse_moves("R U R' U'")
         expect = parse_moves("U L U' L'")
 
@@ -133,6 +144,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_big_moves(self) -> None:
+        """Test offset big moves."""
         provide = parse_moves('3R')
         expect = parse_moves('3L')
 
@@ -158,6 +170,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_big_moves_timed(self) -> None:
+        """Test offset big moves timed."""
         provide = parse_moves('3R@100')
         expect = parse_moves('3L@100')
 
@@ -183,6 +196,7 @@ class TransformOffsetTestCase(unittest.TestCase):
         )
 
     def test_offset_big_moves_timed_with_pauses(self) -> None:
+        """Test offset big moves timed with pauses."""
         provide = parse_moves('.@50 3R@100 .@150')
         expect = parse_moves('.@50 3L@100 .@150')
 

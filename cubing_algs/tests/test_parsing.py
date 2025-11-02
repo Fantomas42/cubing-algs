@@ -18,6 +18,7 @@ class CleanMovesTestCase(unittest.TestCase):
     """Tests for the clean_moves function."""
 
     def test_clean_moves(self) -> None:
+        """Test clean moves."""
         moves = "R2 L2  (y):F B2' e U R` U’  "  # noqa: RUF001
         expect = "R2 L2 y F B2 E U R' U'"
         self.assertEqual(clean_moves(moves), expect)
@@ -27,11 +28,13 @@ class SplitMovesTestCase(unittest.TestCase):
     """Tests for the split_moves function."""
 
     def test_split_moves(self) -> None:
+        """Test split moves."""
         moves = "R2L2yFB2EU'R'U'"
         expect = ['R2', 'L2', 'y', 'F', 'B2', 'E', "U'", "R'", "U'"]
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_big_moves(self) -> None:
+        """Test split big moves."""
         moves = "3R 3Uw' 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'", '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
@@ -41,16 +44,19 @@ class SplitMovesTestCase(unittest.TestCase):
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_timed_moves(self) -> None:
+        """Test split timed moves."""
         moves = "3R 3Uw'@1500 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'@1500", '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_timed_pauses(self) -> None:
+        """Test split timed pauses."""
         moves = "3R 3Uw'@1500 .@2000 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'@1500", '.@2000', '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_timed_moves_with_pauses(self) -> None:
+        """Test split timed moves with pauses."""
         moves = "3R 3Uw'@1500 . 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'@1500", '.', '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
@@ -60,14 +66,17 @@ class CheckMovesTestCase(unittest.TestCase):
     """Tests for the check_moves function."""
 
     def test_check_moves(self) -> None:
+        """Test check moves."""
         moves = split_moves('R2 L2')
         self.assertTrue(check_moves(moves))
 
     def test_check_moves_invalid_move(self) -> None:
+        """Test check moves invalid move."""
         moves = [Move('T2'), Move('R')]
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_wide_standard_move(self) -> None:
+        """Test check moves invalid wide standard move."""
         moves = [Move('Rw')]
         self.assertTrue(check_moves(moves))
         moves = [Move('Rw3')]
@@ -76,6 +85,7 @@ class CheckMovesTestCase(unittest.TestCase):
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_wide_sign_move(self) -> None:
+        """Test check moves invalid wide sign move."""
         moves = [Move('r')]
         self.assertTrue(check_moves(moves))
         moves = [Move('r3')]
@@ -84,14 +94,17 @@ class CheckMovesTestCase(unittest.TestCase):
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_modifier(self) -> None:
+        """Test check moves invalid modifier."""
         moves = [Move('R5')]
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_too_long(self) -> None:
+        """Test check moves invalid too long."""
         moves = [Move("R2'")]
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_layer(self) -> None:
+        """Test check moves invalid layer."""
         moves = [Move('2-4R')]
         self.assertFalse(check_moves(moves))
 
@@ -100,6 +113,7 @@ class ParseMovesTestCase(unittest.TestCase):
     """Tests for the parse_moves function."""
 
     def test_parse_moves(self) -> None:
+        """Test parse moves."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -108,6 +122,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_with_pauses(self) -> None:
+        """Test parse moves with pauses."""
         moves = 'R2 . L2 .'
         expect = ['R2', '.', 'L2', '.']
         self.assertEqual(
@@ -123,6 +138,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_list(self) -> None:
+        """Test parse list."""
         moves = ['R2 L2']
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -138,6 +154,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_invalid(self) -> None:
+        """Test parse moves invalid."""
         moves = 'R2 T2'
         self.assertRaises(
             InvalidMoveError,
@@ -146,6 +163,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_invalid_case_but_corrected(self) -> None:
+        """Test parse moves invalid case but corrected."""
         moves = ['R2', 'X2']
         expect = ['R2', 'x2']
         self.assertEqual(
@@ -161,6 +179,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_list_moves(self) -> None:
+        """Test parse moves list moves."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -169,6 +188,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_algorithm(self) -> None:
+        """Test parse moves algorithm."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -177,6 +197,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate(self) -> None:
+        """Test parse moves conjugate."""
         moves = 'F [R, U] F'
         expect = ['F', 'R', 'U', "R'", "U'", 'F']
         self.assertEqual(
@@ -191,6 +212,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate_malformed(self) -> None:
+        """Test parse moves conjugate malformed."""
         moves = 'F [R, U F'
 
         self.assertRaises(
@@ -200,6 +222,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate_invalid_moves(self) -> None:
+        """Test parse moves conjugate invalid moves."""
         moves = 'F [T, U] F'
 
         self.assertRaises(
@@ -215,6 +238,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate_nested(self) -> None:
+        """Test parse moves conjugate nested."""
         moves = 'F [[R, U], B] F'
         expect = [
             'F',
@@ -230,6 +254,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator(self) -> None:
+        """Test parse moves commutator."""
         moves = 'F [R: U] F'
         expect = ['F', 'R', 'U', "R'", 'F']
         self.assertEqual(
@@ -244,6 +269,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator_malformed(self) -> None:
+        """Test parse moves commutator malformed."""
         moves = 'F [R: U F'
 
         self.assertRaises(
@@ -253,6 +279,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator_invalid_moves(self) -> None:
+        """Test parse moves commutator invalid moves."""
         moves = 'F [T: U] F'
 
         self.assertRaises(
@@ -268,6 +295,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator_nested(self) -> None:
+        """Test parse moves commutator nested."""
         moves = 'F [[R: U]: B] F'
         expect = [
             'F',
@@ -282,6 +310,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_invalid_operator(self) -> None:
+        """Test parse moves invalid operator."""
         moves = 'F [R; U] F'
 
         self.assertRaises(
@@ -291,6 +320,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_complex_1(self) -> None:
+        """Test parse moves complex 1."""
         moves = '[[R: U], D] B [F: [U, R]]'
         expect = [
             'R', 'U', "R'", 'D',
@@ -304,6 +334,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_complex_2(self) -> None:
+        """Test parse moves complex 2."""
         moves = '[[R F: U L], D] B'
         expect = [
             'R', 'F', 'U', 'L', "F'", "R'",
@@ -322,6 +353,7 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
     """Tests for the parse_moves_cfop function."""
 
     def test_parse_moves_cfop(self) -> None:
+        """Test parse moves cfop."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -330,6 +362,7 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_cfop_cleaned(self) -> None:
+        """Test parse moves cfop cleaned."""
         moves = 'U R2 L2 y'
         expect = ['R2', 'L2']
         self.assertEqual(

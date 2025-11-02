@@ -25,6 +25,7 @@ class SimpleConjugatesTestCase(unittest.TestCase):
     """Tests for simple conjugate detection."""
 
     def test_basic_conjugate(self) -> None:
+        """Test basic conjugate."""
         algo = Algorithm.parse_moves("R U R'")
         structures = detect_structures(algo, min_score=0)
 
@@ -34,6 +35,7 @@ class SimpleConjugatesTestCase(unittest.TestCase):
         self.assertEqual(str(structures[0].action), 'U')
 
     def test_conjugate_with_longer_setup(self) -> None:
+        """Test conjugate with longer setup."""
         algo = Algorithm.parse_moves("R U R U' U R' U'")
         structures = detect_structures(algo, min_score=0)
 
@@ -43,6 +45,7 @@ class SimpleConjugatesTestCase(unittest.TestCase):
         )
 
     def test_conjugate_with_longer_action(self) -> None:
+        """Test conjugate with longer action."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         structures = detect_structures(algo, min_score=0)
 
@@ -52,6 +55,7 @@ class SimpleConjugatesTestCase(unittest.TestCase):
         self.assertEqual(str(structures[0].action), "R U R' U'")
 
     def test_conjugate_double_setup(self) -> None:
+        """Test conjugate double setup."""
         algo = Algorithm.parse_moves('R2 U R2')
         structures = detect_structures(algo, min_score=0)
 
@@ -61,6 +65,7 @@ class SimpleConjugatesTestCase(unittest.TestCase):
         self.assertEqual(str(structures[0].action), 'U')
 
     def test_conjugate_prime_setup(self) -> None:
+        """Test conjugate prime setup."""
         algo = Algorithm.parse_moves("R' U R")
         structures = detect_structures(algo, min_score=0)
 
@@ -74,6 +79,7 @@ class SimpleCommutatorsTestCase(unittest.TestCase):
     """Tests for simple commutator detection."""
 
     def test_basic_commutator(self) -> None:
+        """Test basic commutator."""
         algo = Algorithm.parse_moves("R U R' U'")
         structures = detect_structures(algo, min_score=0)
 
@@ -83,12 +89,14 @@ class SimpleCommutatorsTestCase(unittest.TestCase):
         self.assertEqual(str(structures[0].action), 'U')
 
     def test_commutator_longer_parts(self) -> None:
+        """Test commutator longer parts."""
         algo = Algorithm.parse_moves("R U R' U' R U' R' U")
         structures = detect_structures(algo, min_score=0)
 
         self.assertGreaterEqual(len(structures), 1)
 
     def test_commutator_niklas(self) -> None:
+        """Test commutator niklas."""
         algo = Algorithm.parse_moves("R U' L' U R' U' L U")
         structures = detect_structures(algo, min_score=0)
 
@@ -96,6 +104,7 @@ class SimpleCommutatorsTestCase(unittest.TestCase):
         self.assertTrue(any(s.type == 'commutator' for s in structures))
 
     def test_commutator_double_moves(self) -> None:
+        """Test commutator double moves."""
         algo = Algorithm.parse_moves("R2 U R2 U'")
         structures = detect_structures(algo, min_score=0)
 
@@ -109,24 +118,28 @@ class NestedStructuresTestCase(unittest.TestCase):
     """Tests for nested structure detection."""
 
     def test_conjugate_with_commutator_action(self) -> None:
+        """Test conjugate with commutator action."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         compressed = compress(algo, min_score=0)
 
         self.assertIn('[', compressed)
 
     def test_commutator_with_conjugate_parts(self) -> None:
+        """Test commutator with conjugate parts."""
         algo = Algorithm.parse_moves("R U R' D R U' R' D'")
         structures = detect_structures(algo, min_score=0)
 
         self.assertGreaterEqual(len(structures), 1)
 
     def test_repeated_commutator(self) -> None:
+        """Test repeated commutator."""
         algo = Algorithm.parse_moves("R U R' U' R U R' U'")
         structures = detect_structures(algo, min_score=0)
 
         self.assertGreaterEqual(len(structures), 1)
 
     def test_double_nested_conjugate(self) -> None:
+        """Test double nested conjugate."""
         algo = Algorithm.parse_moves("R U D U' R'")
         compressed = compress(algo, min_score=0)
 
@@ -137,6 +150,7 @@ class ComplexAlgorithmsTestCase(unittest.TestCase):
     """Tests for complex algorithm structure detection."""
 
     def test_sexy_move(self) -> None:
+        """Test sexy move."""
         algo = Algorithm.parse_moves("R U R' U'")
         structures = detect_structures(algo, min_score=0)
 
@@ -147,6 +161,7 @@ class ComplexAlgorithmsTestCase(unittest.TestCase):
         self.assertIn(']', compressed)
 
     def test_sledgehammer(self) -> None:
+        """Test sledgehammer."""
         algo = Algorithm.parse_moves("R' F R F'")
         structures = detect_structures(algo, min_score=0)
 
@@ -157,18 +172,21 @@ class ComplexAlgorithmsTestCase(unittest.TestCase):
         self.assertIn(']', compressed)
 
     def test_t_perm(self) -> None:
+        """Test t perm."""
         algo = Algorithm.parse_moves("R U R' U' R' F R2 U' R' U' R U R' F'")
         compressed = compress(algo, min_score=5)
 
         self.assertGreater(len(compressed), 0)
 
     def test_sune(self) -> None:
+        """Test sune."""
         algo = Algorithm.parse_moves("R U R' U R U2 R'")
         structures = detect_structures(algo, min_score=0)
 
         self.assertGreaterEqual(len(structures), 1)
 
     def test_y_perm(self) -> None:
+        """Test y perm."""
         algo = Algorithm.parse_moves(
             "F R U' R' U' R U R' F' R U R' U' R' F R F'",
         )
@@ -177,6 +195,7 @@ class ComplexAlgorithmsTestCase(unittest.TestCase):
         self.assertGreater(len(compressed), 0)
 
     def test_jb_perm(self) -> None:
+        """Test jb perm."""
         algo = Algorithm.parse_moves("R U R' F' R U R' U' R' F R2 U' R'")
         compressed = compress(algo, min_score=5)
         self.assertGreater(len(compressed), 0)
@@ -186,12 +205,14 @@ class CompressionQualityTestCase(unittest.TestCase):
     """Tests for compression quality metrics."""
 
     def test_no_false_positives(self) -> None:
+        """Test no false positives."""
         algo = Algorithm.parse_moves('R U F D L B')
         structures = detect_structures(algo, min_score=5)
 
         self.assertEqual(len(structures), 0)
 
     def test_compression_shorter(self) -> None:
+        """Test compression shorter."""
         test_cases = [
             "R U R'",
             "R U R' U'",
@@ -207,6 +228,7 @@ class CompressionQualityTestCase(unittest.TestCase):
                 self.assertGreater(len(compressed), 0)
 
     def test_score_quality(self) -> None:
+        """Test score quality."""
         algo1 = Algorithm.parse_moves("F R U R' U' F'")
         structures1 = detect_structures(algo1, min_score=0)
 
@@ -220,6 +242,7 @@ class EdgeCasesTestCase(unittest.TestCase):
     """Tests for edge cases in structure detection."""
 
     def test_empty_algorithm(self) -> None:
+        """Test empty algorithm."""
         algo = Algorithm([])
         structures = detect_structures(algo)
 
@@ -227,6 +250,7 @@ class EdgeCasesTestCase(unittest.TestCase):
         self.assertEqual(compress(algo), '')
 
     def test_single_move(self) -> None:
+        """Test single move."""
         algo = Algorithm.parse_moves('R')
         structures = detect_structures(algo)
 
@@ -234,12 +258,14 @@ class EdgeCasesTestCase(unittest.TestCase):
         self.assertEqual(compress(algo), 'R')
 
     def test_two_moves(self) -> None:
+        """Test two moves."""
         algo = Algorithm.parse_moves('R U')
         structures = detect_structures(algo)
 
         self.assertEqual(len(structures), 0)
 
     def test_max_setup_length(self) -> None:
+        """Test max setup length."""
         algo = Algorithm.parse_moves("R U F D L B R' U' F' D' L' B'")
         structures1 = detect_structures(algo, max_setup_len=3)
         structures2 = detect_structures(algo, max_setup_len=10)
@@ -247,6 +273,7 @@ class EdgeCasesTestCase(unittest.TestCase):
         self.assertGreaterEqual(len(structures2), len(structures1))
 
     def test_min_score_filter(self) -> None:
+        """Test min score filter."""
         algo = Algorithm.parse_moves("R U R' U'")
         structures_low = detect_structures(algo, min_score=0)
         structures_high = detect_structures(algo, min_score=50)
@@ -254,6 +281,7 @@ class EdgeCasesTestCase(unittest.TestCase):
         self.assertLessEqual(len(structures_high), len(structures_low))
 
     def test_non_overlapping(self) -> None:
+        """Test non overlapping."""
         algo = Algorithm.parse_moves("R U R' U' F D F' D'")
         structures = detect_structures(algo, min_score=0)
 
@@ -266,6 +294,7 @@ class CompressTestCase(unittest.TestCase):
     """Tests for structure compression."""
 
     def test_compress_basic(self) -> None:
+        """Test compress basic."""
         algo = Algorithm.parse_moves("R U R' U'")
         result = compress(algo, min_score=0)
 
@@ -274,6 +303,7 @@ class CompressTestCase(unittest.TestCase):
         self.assertIn(']', result)
 
     def test_compress_conjugate(self) -> None:
+        """Test compress conjugate."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         result = compress(algo, min_score=0)
 
@@ -281,6 +311,7 @@ class CompressTestCase(unittest.TestCase):
         self.assertIn(']', result)
 
     def test_compress_with_extra_moves(self) -> None:
+        """Test compress with extra moves."""
         algo = Algorithm.parse_moves("D R U R' U' D'")
         result = compress(algo, min_score=0)
 
@@ -288,6 +319,7 @@ class CompressTestCase(unittest.TestCase):
         self.assertTrue('D' in result or '[' in result)
 
     def test_compress_multiple_structures(self) -> None:
+        """Test compress multiple structures."""
         algo = Algorithm.parse_moves("R U R' U' F D F' D'")
         result = compress(algo, min_score=0)
 
@@ -298,6 +330,7 @@ class StructureDataclassTestCase(unittest.TestCase):
     """Tests for structure data class."""
 
     def test_structure_str_conjugate(self) -> None:
+        """Test structure str conjugate."""
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
         struct = Structure(
@@ -312,6 +345,7 @@ class StructureDataclassTestCase(unittest.TestCase):
         self.assertEqual(str(struct), '[R: U]')
 
     def test_structure_str_commutator(self) -> None:
+        """Test structure str commutator."""
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
         struct = Structure(
@@ -330,24 +364,28 @@ class RealWorldExamplesTestCase(unittest.TestCase):
     """Tests with real-world algorithm examples."""
 
     def test_f2l_pair_1(self) -> None:
+        """Test f2l pair 1."""
         algo = Algorithm.parse_moves("U R U' R'")
         compressed = compress(algo, min_score=0)
 
         self.assertGreater(len(compressed), 0)
 
     def test_f2l_pair_2(self) -> None:
+        """Test f2l pair 2."""
         algo = Algorithm.parse_moves("R U R' U' R U R'")
         structures = detect_structures(algo, min_score=0)
 
         self.assertGreaterEqual(len(structures), 1)
 
     def test_oll_algorithm(self) -> None:
+        """Test oll algorithm."""
         algo = Algorithm.parse_moves("R U2 R' U' R U' R'")
         compressed = compress(algo, min_score=5)
 
         self.assertGreater(len(compressed), 0)
 
     def test_edge_flip(self) -> None:
+        """Test edge flip."""
         algo = Algorithm.parse_moves("M U M' U'")
         structures = detect_structures(algo, min_score=0)
 
@@ -355,6 +393,7 @@ class RealWorldExamplesTestCase(unittest.TestCase):
         self.assertEqual(structures[0].type, 'commutator')
 
     def test_corner_twist(self) -> None:
+        """Test corner twist."""
         algo = Algorithm.parse_moves("R' D' R D R' D' R D")
         structures = detect_structures(algo, min_score=0)
 
@@ -365,6 +404,7 @@ class ComputeStructureTestCase(unittest.TestCase):
     """Tests for structure computation."""
 
     def test_compute_structure_basic(self) -> None:
+        """Test compute structure basic."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -374,6 +414,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertGreaterEqual(struct.commutator_count, 1)
 
     def test_compute_structure_empty(self) -> None:
+        """Test compute structure empty."""
         algo = Algorithm([])
         struct = compute_structure(algo)
 
@@ -386,6 +427,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertEqual(struct.compression_ratio, 0.0)
 
     def test_compute_structure_no_structure(self) -> None:
+        """Test compute structure no structure."""
         algo = Algorithm.parse_moves('R U F')
         struct = compute_structure(algo, min_score=50)
 
@@ -394,6 +436,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertEqual(struct.coverage_percent, 0.0)
 
     def test_compute_structure_conjugate(self) -> None:
+        """Test compute structure conjugate."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         struct = compute_structure(algo, min_score=0)
 
@@ -403,6 +446,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertIn(':', struct.compressed)
 
     def test_compute_structure_commutator(self) -> None:
+        """Test compute structure commutator."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -412,6 +456,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertIn(',', struct.compressed)
 
     def test_compute_structure_compression_ratio(self) -> None:
+        """Test compute structure compression ratio."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         struct = compute_structure(algo, min_score=0)
 
@@ -419,6 +464,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertLessEqual(struct.compression_ratio, 1.0)
 
     def test_compute_structure_scores(self) -> None:
+        """Test compute structure scores."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         struct = compute_structure(algo, min_score=0)
 
@@ -431,6 +477,7 @@ class ComputeStructureTestCase(unittest.TestCase):
             )
 
     def test_compute_structure_setup_action_lengths(self) -> None:
+        """Test compute structure setup action lengths."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         struct = compute_structure(algo, min_score=0)
 
@@ -464,6 +511,7 @@ class ComputeStructureTestCase(unittest.TestCase):
             )
 
     def test_compute_structure_coverage(self) -> None:
+        """Test compute structure coverage."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -473,6 +521,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertLessEqual(struct.uncovered_moves, struct.original_length)
 
     def test_compute_structure_nesting(self) -> None:
+        """Test compute structure nesting."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         struct = compute_structure(algo, min_score=0)
 
@@ -480,6 +529,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertGreaterEqual(struct.nested_structure_count, 0)
 
     def test_compute_structure_structures_list(self) -> None:
+        """Test compute structure structures list."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -492,6 +542,7 @@ class ComputeStructureTestCase(unittest.TestCase):
                 self.assertGreater(s.score, 0.0)
 
     def test_algorithm_structure_property(self) -> None:
+        """Test algorithm structure property."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = algo.structure
 
@@ -501,6 +552,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertEqual(struct.original, "R U R' U'")
 
     def test_structure_t_perm(self) -> None:
+        """Test structure t perm."""
         algo = Algorithm.parse_moves("R U R' U' R' F R2 U' R' U' R U R' F'")
         struct = compute_structure(algo, min_score=5)
 
@@ -509,6 +561,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertIsNotNone(struct.compressed)
 
     def test_structure_count_accuracy(self) -> None:
+        """Test structure count accuracy."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -517,6 +570,7 @@ class ComputeStructureTestCase(unittest.TestCase):
         ))
 
     def test_structure_multiple_patterns(self) -> None:
+        """Test structure multiple patterns."""
         algo = Algorithm.parse_moves("R U R' U' F D F' D'")
         struct = compute_structure(algo, min_score=0)
 
@@ -531,6 +585,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
     """Tests for structure classification."""
 
     def test_pure_commutator_detection(self) -> None:
+        """Test pure commutator detection."""
         algo = Algorithm.parse_moves("R U R' U' R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -540,6 +595,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
                 self.assertGreaterEqual(struct.pure_commutator_count, 1)
 
     def test_classification_fields(self) -> None:
+        """Test classification fields."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -551,6 +607,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
                 self.assertIsInstance(s.is_pure, bool)
 
     def test_nested_conjugate_detection(self) -> None:
+        """Test nested conjugate detection."""
         algo = Algorithm.parse_moves("F R U R' U' F'")
         struct = compute_structure(algo, min_score=0)
 
@@ -558,6 +615,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
             self.assertIsInstance(struct.nested_conjugate_count, int)
 
     def test_simple_conjugate_detection(self) -> None:
+        """Test simple conjugate detection."""
         algo = Algorithm.parse_moves("R U R'")
         struct = compute_structure(algo, min_score=0)
 
@@ -565,6 +623,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
             self.assertIsInstance(struct.simple_conjugate_count, int)
 
     def test_cancellation_detection(self) -> None:
+        """Test cancellation detection."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -572,6 +631,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
         self.assertGreaterEqual(struct.structures_with_cancellations, 0)
 
     def test_efficiency_rating(self) -> None:
+        """Test efficiency rating."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -580,6 +640,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
         ])
 
     def test_average_move_count(self) -> None:
+        """Test average move count."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -588,6 +649,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
             self.assertGreater(struct.average_move_count, 0)
 
     def test_new_structure_data_fields(self) -> None:
+        """Test new structure data fields."""
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
@@ -600,6 +662,7 @@ class StructureClassificationsTestCase(unittest.TestCase):
         self.assertTrue(hasattr(struct, 'efficiency_rating'))
 
     def test_structure_object_new_fields(self) -> None:
+        """Test structure object new fields."""
         algo = Algorithm.parse_moves("R U R' U'")
         structures = detect_structures(algo, min_score=0)
 

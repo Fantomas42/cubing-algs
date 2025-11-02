@@ -13,16 +13,19 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
     """Tests for VCube display rendering and formatting."""
 
     def setUp(self) -> None:
+        """Set up test fixtures."""
         self.cube = VCube()
         self.printer = VCubeDisplay(self.cube)
 
     def test_init_default_parameters(self) -> None:
+        """Test init default parameters."""
         self.assertEqual(self.printer.cube, self.cube)
         self.assertEqual(self.printer.cube_size, 3)
         self.assertEqual(self.printer.face_size, 9)
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_with_colors(self) -> None:
+        """Test display facelet with colors."""
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U')
@@ -31,6 +34,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
     @patch.dict(os.environ, {'TERM': 'other'})
     def test_display_facelet_without_colors(self) -> None:
+        """Test display facelet without colors."""
         with patch('cubing_algs.display.USE_COLORS', False):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U')
@@ -38,6 +42,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_hidden(self) -> None:
+        """Test display facelet hidden."""
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('U', '0')
@@ -46,6 +51,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_invalid(self) -> None:
+        """Test display facelet invalid."""
         with patch('cubing_algs.display.USE_COLORS', True):  # noqa: FBT003
             printer = VCubeDisplay(self.cube)
             result = printer.display_facelet('X')  # Invalid facelet
@@ -78,6 +84,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertIn('\x1b[', result)  # Should contain ANSI codes
 
     def test_display_top_down_face(self) -> None:
+        """Test display top down face."""
         face = 'UUUUUUUUU'
 
         result = self.printer.display_top_down_face(face, '111111111', 0)
@@ -91,6 +98,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
             self.assertEqual(line.count('U'), 3)
 
     def test_display_without_orientation(self) -> None:
+        """Test display without orientation."""
         result = self.printer.display()
 
         lines = result.split('\n')
@@ -101,6 +109,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
             self.assertIn(face, result)
 
     def test_display_with_orientation(self) -> None:
+        """Test display with orientation."""
         initial_state = self.cube.state
 
         result = self.printer.display(orientation='DF')
@@ -110,6 +119,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(lines), 10)
 
     def test_display_oll(self) -> None:
+        """Test display oll."""
         self.cube.rotate("z2 F U F' R' F R U' R' F' R z2")
 
         initial_state = self.cube.state
@@ -121,6 +131,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(lines), 6)
 
     def test_display_pll(self) -> None:
+        """Test display pll."""
         self.cube.rotate("z2 L2 U' L2 D F2 R2 U R2 D' F2 z2")
 
         initial_state = self.cube.state
@@ -132,6 +143,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(lines), 6)
 
     def test_display_f2l(self) -> None:
+        """Test display f2l."""
         self.cube.rotate("z2 R U R' U' z2")
 
         result = self.printer.display(mode='f2l')
@@ -139,6 +151,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(lines), 10)
 
     def test_display_af2l(self) -> None:
+        """Test display af2l."""
         self.cube.rotate("z2 B' U' B F U F' U2")
 
         result = self.printer.display(mode='af2l')
@@ -146,11 +159,13 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(lines), 10)
 
     def test_display_f2l_initial_no_reorientation(self) -> None:
+        """Test display f2l initial no reorientation."""
         result = self.printer.display(mode='f2l', orientation='UF')
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
 
     def test_display_cross(self) -> None:
+        """Test display cross."""
         self.cube.rotate('B L F L F R F L B R')
 
         result = self.printer.display(mode='cross')
@@ -170,6 +185,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertGreater(len(lines), 10)
 
     def test_display_structure(self) -> None:
+        """Test display structure."""
         result = self.printer.display()
 
         lines = [line for line in result.split('\n') if line.strip()]
@@ -184,6 +200,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
                 self.assertGreater(len(middle_line), len(top_line))
 
     def test_display_face_order(self) -> None:
+        """Test display face order."""
         result = self.printer.display()
         lines = result.split('\n')
 
@@ -200,6 +217,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
             self.assertIn(face, middle_section)
 
     def test_split_faces(self) -> None:
+        """Test split faces."""
         self.assertEqual(
             self.printer.split_faces(self.cube.state),
             [
@@ -221,6 +239,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
             self.assertEqual(len(face), 9)
 
     def test_compute_mask(self) -> None:
+        """Test compute mask."""
         base_mask = (
             '000000000'
             '111111111'
@@ -239,6 +258,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_compute_mask_moves(self) -> None:
+        """Test compute mask moves."""
         self.cube.rotate('R U F')
 
         base_mask = (
@@ -264,12 +284,14 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_compute_no_mask(self) -> None:
+        """Test compute no mask."""
         self.assertEqual(
             self.printer.compute_mask(self.cube, ''),
             54 * '1',
         )
 
     def test_compute_f2l_front_face(self) -> None:
+        """Test compute f2l front face."""
         cube = VCube()
         cube.rotate("z2 R U R' U' z2")
 
@@ -541,6 +563,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
     """Tests for extended net display format."""
 
     def setUp(self) -> None:
+        """Set up test fixtures."""
         self.cube = VCube()
         self.printer = VCubeDisplay(self.cube)
 
@@ -1206,6 +1229,7 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
     """Test different facelet_type configurations and their display behavior."""
 
     def setUp(self) -> None:
+        """Set up test fixtures."""
         self.cube = VCube()
 
     def test_facelet_type_compact_initialization(self) -> None:

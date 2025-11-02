@@ -11,6 +11,7 @@ class TransformMirrorTestCase(unittest.TestCase):
     """Tests for mirror transformation that reflects algorithms."""
 
     def test_mirror_moves(self) -> None:
+        """Test mirror moves."""
         provide = parse_moves(
             "F R U2 F'",
         )
@@ -27,6 +28,7 @@ class TransformMirrorTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_mirror_big_moves(self) -> None:
+        """Test mirror big moves."""
         provide = parse_moves(
             "2Fw R 3U2 3f'",
         )
@@ -43,6 +45,7 @@ class TransformMirrorTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_timed_moves(self) -> None:
+        """Test timed moves."""
         provide = parse_moves(
             "F@1 R@2 U2@3 F'@4",
         )
@@ -59,6 +62,7 @@ class TransformMirrorTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_timed_moves_with_pauses(self) -> None:
+        """Test timed moves with pauses."""
         provide = parse_moves(
             "F@1 .@2 R@3 U2@4 F'@5",
         )

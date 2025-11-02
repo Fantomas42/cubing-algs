@@ -11,6 +11,7 @@ class TransformTrimTestCase(unittest.TestCase):
     """Tests for trimming moves from algorithm start and end."""
 
     def test_trim(self) -> None:
+        """Test trim."""
         provide = parse_moves('U F R B U')
         expect = parse_moves('F R B')
 
@@ -25,6 +26,7 @@ class TransformTrimTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_trim_multiple(self) -> None:
+        """Test trim multiple."""
         provide = parse_moves("U U' F R B U2")
         expect = parse_moves('F R B')
 
@@ -39,6 +41,7 @@ class TransformTrimTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_trim_multiple_paused(self) -> None:
+        """Test trim multiple paused."""
         provide = parse_moves("U' . U2 F R B U . . U'")
         expect = parse_moves('F R B')
 
@@ -53,6 +56,7 @@ class TransformTrimTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_trim_start(self) -> None:
+        """Test trim start."""
         provide = parse_moves('U F R B U')
         expect = parse_moves('F R B U')
 
@@ -67,6 +71,7 @@ class TransformTrimTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_trim_end(self) -> None:
+        """Test trim end."""
         provide = parse_moves('U F R B U')
         expect = parse_moves('U F R B')
 
@@ -81,6 +86,7 @@ class TransformTrimTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_trim_empty(self) -> None:
+        """Test trim empty."""
         provide = parse_moves('')
 
         result = trim_moves('U', start=False)(provide)

@@ -12,6 +12,7 @@ class TransformUnpauseTestCase(unittest.TestCase):
     """Tests for removing pauses from algorithms."""
 
     def test_unpause_moves(self) -> None:
+        """Test unpause moves."""
         provide = parse_moves(
             "F@1 R@2 .@3 U2@4 F'@5",
         )
@@ -28,6 +29,7 @@ class TransformUnpauseTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_unpause_moves_untimed(self) -> None:
+        """Test unpause moves untimed."""
         provide = parse_moves(
             "F@1 R . U2 F'@4",
         )
@@ -48,6 +50,7 @@ class TransformPauseTestCase(unittest.TestCase):
     """Tests for adding pauses to algorithms based on timing."""
 
     def test_pause_moves(self) -> None:
+        """Test pause moves."""
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )
@@ -66,6 +69,7 @@ class TransformPauseTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_pause_moves_empty(self) -> None:
+        """Test pause moves empty."""
         provide = parse_moves('')
 
         result = pause_moves()(provide)
@@ -79,6 +83,7 @@ class TransformPauseTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_pause_moves_untimed(self) -> None:
+        """Test pause moves untimed."""
         provide = parse_moves(
             "F R U2 F'",
         )
@@ -97,6 +102,7 @@ class TransformPauseTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_pause_moves_untimed_partial(self) -> None:
+        """Test pause moves untimed partial."""
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'",
         )
@@ -119,6 +125,7 @@ class TransformPauseConfigTestCase(unittest.TestCase):
     """Tests for pause configuration with custom thresholds."""
 
     def test_pause_moves(self) -> None:
+        """Test pause moves."""
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )
@@ -137,6 +144,7 @@ class TransformPauseConfigTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_pause_moves_configured(self) -> None:
+        """Test pause moves configured."""
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )
@@ -155,6 +163,7 @@ class TransformPauseConfigTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_pause_moves_configured_multiple(self) -> None:
+        """Test pause moves configured multiple."""
         provide = parse_moves(
             "F@0 R@300 U2@1300 F'@1450",
         )

@@ -19,6 +19,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
     """Tests for wide move transformations."""
 
     def test_unwide_rotation_moves(self) -> None:
+        """Test unwide rotation moves."""
         provide = parse_moves('f r u')
         expect = parse_moves('B z L x D y')
 
@@ -33,6 +34,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_rotation_moves_standard(self) -> None:
+        """Test unwide rotation moves standard."""
         provide = parse_moves('Fw Rw Uw')
         expect = parse_moves('B z L x D y')
 
@@ -47,6 +49,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_rotation_moves_part_two(self) -> None:
+        """Test unwide rotation moves part two."""
         provide = parse_moves('b l d')
         expect = parse_moves("F z' R x' U y'")
 
@@ -61,6 +64,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_rotation_moves_part_two_standard(self) -> None:
+        """Test unwide rotation moves part two standard."""
         provide = parse_moves('Bw Lw Dw')
         expect = parse_moves("F z' R x' U y'")
 
@@ -75,6 +79,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_rotation_moves_part_three(self) -> None:
+        """Test unwide rotation moves part three."""
         provide = parse_moves('r F u b')
         expect = parse_moves("L x F D y F z'")
 
@@ -89,6 +94,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_rotation_moves_part_three_standard(self) -> None:
+        """Test unwide rotation moves part three standard."""
         provide = parse_moves('Rw F Uw b')
         expect = parse_moves("L x F D y F z'")
 
@@ -103,6 +109,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_rotation_moves_cleaned(self) -> None:
+        """Test unwide rotation moves cleaned."""
         provide = parse_moves('f r u')
         expect = parse_moves('B D B')
 
@@ -123,6 +130,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_rotation_moves_cleaned_part_two(self) -> None:
+        """Test unwide rotation moves cleaned part two."""
         provide = parse_moves('b l d')
         expect = parse_moves('F D B')
 
@@ -143,6 +151,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_slice_moves(self) -> None:
+        """Test unwide slice moves."""
         provide = parse_moves('f r u')
         expect = parse_moves("F S R M' U E'")
 
@@ -157,6 +166,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_slice_moves_standard(self) -> None:
+        """Test unwide slice moves standard."""
         provide = parse_moves('Fw Rw Uw')
         expect = parse_moves("F S R M' U E'")
 
@@ -171,6 +181,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_slice_moves_part_two(self) -> None:
+        """Test unwide slice moves part two."""
         provide = parse_moves('b l d')
         expect = parse_moves("B S' L M D E")
 
@@ -185,6 +196,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_slice_moves_part_three(self) -> None:
+        """Test unwide slice moves part three."""
         provide = parse_moves('r F u b')
         expect = parse_moves("R M' F U E' B S'")
 
@@ -199,6 +211,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_timed_moves(self) -> None:
+        """Test unwide timed moves."""
         provide = parse_moves('f@1 r@2 u@3')
         expect = parse_moves('B@1 z@1 L@2 x@2 D@3 y@3')
 
@@ -213,6 +226,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_unwide_timed_pauses(self) -> None:
+        """Test unwide timed pauses."""
         provide = parse_moves('f@1 .@2 r@3 u@4')
         expect = parse_moves('B@1 z@1 .@2 L@3 x@3 D@4 y@4')
 
@@ -227,6 +241,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_moves(self) -> None:
+        """Test rewide moves."""
         provide = parse_moves('L x')
         expect = parse_moves('r')
 
@@ -241,6 +256,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_moves_alt(self) -> None:
+        """Test rewide moves alt."""
         provide = parse_moves('x L')
         expect = parse_moves('r')
 
@@ -255,6 +271,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_moves_mixed(self) -> None:
+        """Test rewide moves mixed."""
         provide = parse_moves('L x f')
         expect = parse_moves('r f')
 
@@ -269,6 +286,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_moves_mixed_big_moves(self) -> None:
+        """Test rewide moves mixed big moves."""
         provide = parse_moves('L x 2F')
         expect = parse_moves('r 2F')
 
@@ -296,6 +314,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_moves_mixed_timed_moves(self) -> None:
+        """Test rewide moves mixed timed moves."""
         provide = parse_moves('L@1 x@2 F@3')
         expect = parse_moves('r@1 F@3')
 
@@ -323,6 +342,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_moves_mixed_timed_moves_timed_pauses(self) -> None:
+        """Test rewide moves mixed timed moves timed pauses."""
         provide = parse_moves('L@1 x@2 .@3 F@4')
         expect = parse_moves('r@1 .@3 F@4')
 
@@ -350,6 +370,7 @@ class TransformWideTestCase(unittest.TestCase):  # noqa: PLR0904
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_max(self) -> None:
+        """Test rewide max."""
         provide = parse_moves('L x')
 
         self.assertEqual(
@@ -362,6 +383,7 @@ class TransformWideTimedTestCase(unittest.TestCase):
     """Tests for timed wide move transformations."""
 
     def test_rewide_timed_moves(self) -> None:
+        """Test rewide timed moves."""
         provide = parse_moves('L@0 x@30 F')
         expect = parse_moves('r@0 F')
 
@@ -376,6 +398,7 @@ class TransformWideTimedTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_timed_moves_alt(self) -> None:
+        """Test rewide timed moves alt."""
         provide = parse_moves('x@0 L@30 F')
         expect = parse_moves('r@0 F')
 
@@ -390,6 +413,7 @@ class TransformWideTimedTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_timed_moves_failed(self) -> None:
+        """Test rewide timed moves failed."""
         provide = parse_moves('L@10 x@30 F')
 
         result = rewide_timed_moves(10)(provide)
@@ -403,6 +427,7 @@ class TransformWideTimedTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_rewide_timed_moves_failed_zero_move(self) -> None:
+        """Test rewide timed moves failed zero move."""
         provide = parse_moves('L@0 x@30 F')
 
         result = rewide_timed_moves(10)(provide)
@@ -420,6 +445,7 @@ class TransformWideEquivalenceTestCase(unittest.TestCase):
     """Tests for wide move equivalence verification."""
 
     def test_equivalences(self) -> None:
+        """Test equivalences."""
         for moves, equivalence in REWIDE_MOVES.items():
             with self.subTest(moves=moves, equivalence=equivalence):
                 cube_a = VCube()

@@ -56,6 +56,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
     maxDiff = None
 
     def test_build_cube_move_set_2x2x2(self) -> None:
+        """Test build cube move set 2x2x2."""
         self.assertEqual(
             build_cube_move_set(2),
             [
@@ -69,6 +70,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_2x2x2_inner_layers(self) -> None:
+        """Test build cube move set 2x2x2 inner layers."""
         self.assertEqual(
             build_cube_move_set(2, inner_layers=True),
             [
@@ -82,6 +84,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_3x3x3(self) -> None:
+        """Test build cube move set 3x3x3."""
         self.assertEqual(
             build_cube_move_set(3),
             [
@@ -95,6 +98,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_3x3x3_inner_layers(self) -> None:
+        """Test build cube move set 3x3x3 inner layers."""
         self.assertEqual(
             build_cube_move_set(3, inner_layers=True),
             [
@@ -108,6 +112,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_4x4x4(self) -> None:
+        """Test build cube move set 4x4x4."""
         self.assertEqual(
             build_cube_move_set(4),
             [
@@ -121,6 +126,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_4x4x4_left_handed(self) -> None:
+        """Test build cube move set 4x4x4 left handed."""
         self.assertEqual(
             build_cube_move_set(4, right_handed=False),
             [
@@ -134,6 +140,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_4x4x4_inner_layers(self) -> None:
+        """Test build cube move set 4x4x4 inner layers."""
         self.assertEqual(
             build_cube_move_set(4, inner_layers=True),
             [
@@ -153,6 +160,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_4x4x4_inner_layers_left_handed(self) -> None:
+        """Test build cube move set 4x4x4 inner layers left handed."""
         self.assertEqual(
             build_cube_move_set(4, inner_layers=True, right_handed=False),
             [
@@ -172,6 +180,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_5x5x5(self) -> None:
+        """Test build cube move set 5x5x5."""
         self.assertEqual(
             build_cube_move_set(5),
             [
@@ -185,6 +194,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_5x5x5_left_handed(self) -> None:
+        """Test build cube move set 5x5x5 left handed."""
         self.assertEqual(
             build_cube_move_set(5, right_handed=False),
             [
@@ -198,6 +208,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_5x5x5_inner_layers(self) -> None:
+        """Test build cube move set 5x5x5 inner layers."""
         self.assertEqual(
             build_cube_move_set(5, inner_layers=True),
             [
@@ -222,6 +233,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_5x5x5_inner_layers_left_handed(self) -> None:
+        """Test build cube move set 5x5x5 inner layers left handed."""
         self.assertEqual(
             build_cube_move_set(5, inner_layers=True, right_handed=False),
             [
@@ -246,6 +258,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_6x6x6(self) -> None:
+        """Test build cube move set 6x6x6."""
         self.assertEqual(
             build_cube_move_set(6),
             [
@@ -267,6 +280,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_6x6x6_inner_layers(self) -> None:
+        """Test build cube move set 6x6x6 inner layers."""
         self.assertEqual(
             build_cube_move_set(6, inner_layers=True),
             [
@@ -300,6 +314,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_6x6x6_left_handed(self) -> None:
+        """Test build cube move set 6x6x6 left handed."""
         self.assertEqual(
             build_cube_move_set(6, right_handed=False),
             [
@@ -321,6 +336,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_6x6x6_inner_layers_left_handed(self) -> None:
+        """Test build cube move set 6x6x6 inner layers left handed."""
         self.assertEqual(
             build_cube_move_set(6, inner_layers=True, right_handed=False),
             [
@@ -354,6 +370,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_7x7x7(self) -> None:
+        """Test build cube move set 7x7x7."""
         self.assertEqual(
             build_cube_move_set(7),
             [
@@ -378,6 +395,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_7x7x7_inner_layers(self) -> None:
+        """Test build cube move set 7x7x7 inner layers."""
         self.assertEqual(
             build_cube_move_set(7, inner_layers=True),
             [
@@ -417,6 +435,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_8x8x8(self) -> None:
+        """Test build cube move set 8x8x8."""
         self.assertEqual(
             build_cube_move_set(8),
             [
@@ -444,6 +463,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_8x8x8_inner_layers(self) -> None:
+        """Test build cube move set 8x8x8 inner layers."""
         self.assertEqual(
             build_cube_move_set(8, inner_layers=True),
             [
@@ -489,6 +509,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_9x9x9(self) -> None:
+        """Test build cube move set 9x9x9."""
         self.assertEqual(
             build_cube_move_set(9),
             [
@@ -519,6 +540,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_cube_move_set_9x9x9_inner_layers(self) -> None:
+        """Test build cube move set 9x9x9 inner layers."""
         self.assertEqual(
             build_cube_move_set(9, inner_layers=True),
             [
@@ -570,6 +592,7 @@ class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
         )
 
     def test_build_big_cube_move_set_no_options(self) -> None:
+        """Test build big cube move set no options."""
         self.assertEqual(
             build_cube_move_set(6),
             [
@@ -593,6 +616,7 @@ class TestRandomMoves(unittest.TestCase):
     """Tests for random move sequence generation."""
 
     def test_random_moves_2x2x2(self) -> None:
+        """Test random moves 2x2x2."""
         moves = random_moves(2, ['F', 'R', 'U'], 0)
 
         self.assertGreaterEqual(
@@ -604,6 +628,7 @@ class TestRandomMoves(unittest.TestCase):
         )
 
     def test_random_moves_2x2x2_iterations(self) -> None:
+        """Test random moves 2x2x2 iterations."""
         moves = random_moves(2, ['F', 'R', 'U'], 5)
 
         self.assertEqual(
@@ -611,6 +636,7 @@ class TestRandomMoves(unittest.TestCase):
         )
 
     def test_random_moves_50x50x50(self) -> None:
+        """Test random moves 50x50x50."""
         moves = random_moves(50, ['F', 'R', 'U'])
 
         self.assertEqual(
@@ -622,6 +648,7 @@ class TestScramble(unittest.TestCase):
     """Tests for scramble generation."""
 
     def test_scramble_3x3x3(self) -> None:
+        """Test scramble 3x3x3."""
         moves = scramble(3)
 
         self.assertGreaterEqual(
@@ -633,6 +660,7 @@ class TestScramble(unittest.TestCase):
         )
 
     def test_scramble_3x3x3_iterations(self) -> None:
+        """Test scramble 3x3x3 iterations."""
         moves = scramble(3, 5)
 
         self.assertEqual(
@@ -644,6 +672,7 @@ class TestScrambleEasyCross(unittest.TestCase):
     """Tests for easy cross scramble generation."""
 
     def test_scramble_easy_cross(self) -> None:
+        """Test scramble easy cross."""
         moves = scramble_easy_cross()
 
         self.assertEqual(

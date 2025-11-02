@@ -13,6 +13,7 @@ class TransformTranslateTestCase(unittest.TestCase):
     """Tests for algorithm translation across orientations."""
 
     def test_translate_z2(self) -> None:
+        """Test translate z2."""
         # z2 (DR) is symmetric: should be easy
         orientation = parse_moves('z2')
         provide = parse_moves("L D L' D'")
@@ -29,6 +30,7 @@ class TransformTranslateTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_translate_y_z2(self) -> None:
+        """Test translate y z2."""
         # y z2 (DR)
         orientation = parse_moves('y z2')
         provide = parse_moves("F D F' D'")
@@ -45,6 +47,7 @@ class TransformTranslateTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_translate_z_y(self) -> None:
+        """Test translate z y."""
         # z y (LU)
         orientation = parse_moves('z y')
         provide = parse_moves("L B2 L' U' F U' L'")
@@ -61,6 +64,7 @@ class TransformTranslateTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_translate_x_y(self) -> None:
+        """Test translate x y."""
         # x y (FR)
         orientation = parse_moves('x y')
         provide = parse_moves("R U R'")
@@ -71,6 +75,7 @@ class TransformTranslateTestCase(unittest.TestCase):
         self.assertEqual(result, expect)
 
     def test_translate_z2_with_pause(self) -> None:
+        """Test translate z2 with pause."""
         orientation = parse_moves('z2')
         provide = parse_moves("L . D L' . D'")
         expect = parse_moves("R . U R' . U'")
@@ -86,6 +91,7 @@ class TransformTranslateTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_translate_z2_timed(self) -> None:
+        """Test translate z2 timed."""
         orientation = parse_moves('z2')
         provide = parse_moves("L@10 .@20 D@30 L'@40 .@50 D'@60")
         expect = parse_moves("R@10 .@20 U@30 R'@40 .@50 U'@60")
@@ -101,6 +107,7 @@ class TransformTranslateTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_translate_invalid_orientation(self) -> None:
+        """Test translate invalid orientation."""
         orientation = parse_moves('x F')
         provide = parse_moves("L D L' D'")
 
@@ -108,6 +115,7 @@ class TransformTranslateTestCase(unittest.TestCase):
             translate_moves(orientation)(provide)
 
     def test_translate_no_orientation(self) -> None:
+        """Test translate no orientation."""
         orientation = parse_moves('')
         provide = parse_moves("L D L' D'")
 
@@ -126,6 +134,7 @@ class TransformTranslatePOVTestCase(unittest.TestCase):
     """Tests for POV-based algorithm translation."""
 
     def test_translate_pov_z2(self) -> None:
+        """Test translate pov z2."""
         provide = parse_moves("z2 L D L' D'")
         expect = parse_moves("z2 R U R' U'")
 
@@ -140,6 +149,7 @@ class TransformTranslatePOVTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_translate_pov_y_middle(self) -> None:
+        """Test translate pov y middle."""
         provide = parse_moves("R U R' U' y B U B' U'")
         expect = parse_moves("R U R' U' y R U R' U'")
 
@@ -154,6 +164,7 @@ class TransformTranslatePOVTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_translate_pov_z2_timed(self) -> None:
+        """Test translate pov z2 timed."""
         provide = parse_moves("z2@0 L@10 D@20 L'@30 D'@40")
         expect = parse_moves("z2@0 R@10 U@20 R'@30 U'@40")
 

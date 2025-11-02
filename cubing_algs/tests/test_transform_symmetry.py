@@ -14,6 +14,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
     """Tests for symmetry transformations."""
 
     def test_symmetry_c_moves(self) -> None:
+        """Test symmetry c moves."""
         provide = parse_moves("U R U' R'")
         expect = parse_moves("U L U' L'")
 
@@ -36,6 +37,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_e_moves(self) -> None:
+        """Test symmetry e moves."""
         provide = parse_moves("U R U' R'")
         expect = parse_moves("D' R' D R")
 
@@ -53,6 +55,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_m_moves(self) -> None:
+        """Test symmetry m moves."""
         provide = parse_moves("U R U' R'")
         expect = parse_moves("U' L' U L")
 
@@ -78,6 +81,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_m_moves_sign(self) -> None:
+        """Test symmetry m moves sign."""
         provide = parse_moves("U R u' r'")
         expect = parse_moves("U' L' u l")
 
@@ -87,6 +91,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_m_moves_wide_standard(self) -> None:
+        """Test symmetry m moves wide standard."""
         provide = parse_moves("U R Uw' Rw'")
         expect = parse_moves("U' L' Uw Lw")
 
@@ -96,6 +101,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_s_moves(self) -> None:
+        """Test symmetry s moves."""
         provide = parse_moves("U R U' R'")
         expect = parse_moves("U' R' U R")
 
@@ -113,6 +119,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_m_moves_big_moves(self) -> None:
+        """Test symmetry m moves big moves."""
         provide = parse_moves("U R 2Uw' 3Rw'")
         expect = parse_moves("U' L' 2Uw 3Lw")
 
@@ -122,6 +129,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_m_moves_big_moves_timed(self) -> None:
+        """Test symmetry m moves big moves timed."""
         provide = parse_moves("U R 2Uw'@300 3Rw'")
         expect = parse_moves("U' L' 2Uw@300 3Lw")
 
@@ -131,6 +139,7 @@ class TransformSymmetryTestCase(unittest.TestCase):
         )
 
     def test_symmetry_m_moves_big_moves_timed_paused(self) -> None:
+        """Test symmetry m moves big moves timed paused."""
         provide = parse_moves("U R .@200 2Uw'@300 3Rw'")
         expect = parse_moves("U' L' .@200 2Uw@300 3Lw")
 
