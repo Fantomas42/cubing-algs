@@ -133,8 +133,12 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
     def test_is_inner_move(self) -> None:
         """Test is inner move."""
         self.assertFalse(Move('R').is_inner_move)
-        self.assertTrue(Move('M').is_inner_move)
         self.assertFalse(Move('.').is_inner_move)
+        self.assertTrue(Move('M').is_inner_move)
+        self.assertTrue(Move('2L').is_inner_move)
+        self.assertTrue(Move('2-3Lw').is_inner_move)
+        self.assertFalse(Move('1-3Lw').is_inner_move)
+        self.assertFalse(Move('0-3Lw').is_inner_move)
 
     def test_is_outer_move(self) -> None:
         """Test is outer move."""

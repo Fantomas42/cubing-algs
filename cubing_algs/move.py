@@ -232,9 +232,12 @@ class Move(UserString):  # noqa: PLR0904
         """
         Check if this is an inner slice move.
 
-        Inner slice moves include M, E, and S, which turn the middle slices.
+        Inner slice moves include M, E, and S, which turn the middle slices and
+        layered moves which do not include outer layer.
         """
-        return self.base_move in INNER_MOVES
+        return self.base_move in INNER_MOVES or (
+            0 not in self.layers
+        )
 
     @cached_property
     def is_outer_move(self) -> bool:
