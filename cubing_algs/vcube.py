@@ -108,7 +108,13 @@ class VCube(VCubeIntegrityChecker):
         return self._state
 
     def rotate_move(self, move: str, *, history: bool = True) -> str:
-        """Apply a single move to the cube."""
+        """
+        Apply a single move to the cube.
+
+        Raises:
+            InvalidMoveError: If the move is invalid.
+
+        """
         try:
             self._state = rotate.rotate_move(self._state, move)
         except ValueError as e:

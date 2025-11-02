@@ -95,8 +95,11 @@ class VCubeIntegrityChecker:
 
     def check_length(self) -> None:
         """
-        Validate that the state string has
-        the correct number of characters.
+        Validate that the state string has the correct number of characters.
+
+        Raises:
+            InvalidCubeStateError: If state string length is incorrect.
+
         """
         expected_length = self.face_number * self.face_size
 
@@ -106,7 +109,13 @@ class VCubeIntegrityChecker:
 
     @staticmethod
     def check_characters(color_counts: dict[str, int]) -> None:
-        """Validate that only valid face characters are used in the state."""
+        """
+        Validate that only valid face characters are used in the state.
+
+        Raises:
+            InvalidCubeStateError: If invalid characters are found in state.
+
+        """
         if set(color_counts.keys()) - set(FACE_ORDER):
             msg = (
                 'State string can only '
@@ -116,8 +125,11 @@ class VCubeIntegrityChecker:
 
     def check_colors(self, color_counts: dict[str, int]) -> None:
         """
-        Validate that each color appears exactly
-        the expected number of times.
+        Validate that each color appears exactly the expected number of times.
+
+        Raises:
+            InvalidCubeStateError: If color counts are incorrect.
+
         """
         if not all(count == self.face_size for count in color_counts.values()):
             msg = f'State string must have { self.face_size } of each color'
@@ -125,8 +137,11 @@ class VCubeIntegrityChecker:
 
     def check_centers(self) -> None:
         """
-        Validate that all face centers are unique
-        and properly positioned.
+        Validate that all face centers are unique and properly positioned.
+
+        Raises:
+            InvalidCubeStateError: If centers are not unique.
+
         """
         actual_centers = set(self.get_face_center_indexes())
 
@@ -137,8 +152,11 @@ class VCubeIntegrityChecker:
     @staticmethod
     def check_corner_permutations(cp: list[int]) -> None:
         """
-        Validate corner permutation contains exactly
-        one of each corner piece.
+        Validate corner permutation contains exactly one of each corner piece.
+
+        Raises:
+            InvalidCubeStateError: If corner permutation is invalid.
+
         """
         if len(cp) != CORNER_NUMBER or set(cp) != set(range(CORNER_NUMBER)):
             msg = (
@@ -149,7 +167,13 @@ class VCubeIntegrityChecker:
 
     @staticmethod
     def check_corner_orientations(co: list[int]) -> None:
-        """Validate corner orientations are all valid values (0, 1, or 2)."""
+        """
+        Validate corner orientations are all valid values (0, 1, or 2).
+
+        Raises:
+            InvalidCubeStateError: If corner orientations are invalid.
+
+        """
         if len(co) != CORNER_NUMBER or any(
                 orientation not in CORNER_VALID_ORIENTATIONS
                 for orientation in co
@@ -159,13 +183,25 @@ class VCubeIntegrityChecker:
 
     @staticmethod
     def check_corner_sum(co: list[int]) -> None:
-        """Validate corner orientation sum is divisible by 3."""
+        """
+        Validate corner orientation sum is divisible by 3.
+
+        Raises:
+            InvalidCubeStateError: If corner orientation sum is invalid.
+
+        """
         if sum(co) % 3:
             msg = 'Sum of corner orientations must be divisible by 3'
             raise InvalidCubeStateError(msg)
 
     def check_corner_colors(self, cp: list[int], co: list[int]) -> None:
-        """Validate corner pieces have valid color combinations."""
+        """
+        Validate corner pieces have valid color combinations.
+
+        Raises:
+            InvalidCubeStateError: If corner colors are invalid.
+
+        """
         for i, (corner_pos, _corner_ori) in enumerate(zip(cp, co, strict=True)):
             corner_facelets = [
                 self._state[facelet]
@@ -193,8 +229,11 @@ class VCubeIntegrityChecker:
     @staticmethod
     def check_edge_permutations(ep: list[int]) -> None:
         """
-        Validate edge permutation contains exactly
-        one of each edge piece.
+        Validate edge permutation contains exactly one of each edge piece.
+
+        Raises:
+            InvalidCubeStateError: If edge permutation is invalid.
+
         """
         if len(ep) != EDGE_NUMBER or set(ep) != set(range(EDGE_NUMBER)):
             msg = (
@@ -205,7 +244,13 @@ class VCubeIntegrityChecker:
 
     @staticmethod
     def check_edge_orientations(eo: list[int]) -> None:
-        """Validate edge orientations are all valid values (0 or 1)."""
+        """
+        Validate edge orientations are all valid values (0 or 1).
+
+        Raises:
+            InvalidCubeStateError: If edge orientations are invalid.
+
+        """
         if len(eo) != EDGE_NUMBER or any(
                 orientation not in EDGE_VALID_ORIENTATIONS
                 for orientation in eo
@@ -215,13 +260,25 @@ class VCubeIntegrityChecker:
 
     @staticmethod
     def check_edge_sum(eo: list[int]) -> None:
-        """Validate edge orientation sum is even."""
+        """
+        Validate edge orientation sum is even.
+
+        Raises:
+            InvalidCubeStateError: If edge orientation sum is invalid.
+
+        """
         if sum(eo) % 2:
             msg = 'Sum of edge orientations must be even'
             raise InvalidCubeStateError(msg)
 
     def check_edge_colors(self, ep: list[int], eo: list[int]) -> None:
-        """Validate edge pieces have valid color combinations."""
+        """
+        Validate edge pieces have valid color combinations.
+
+        Raises:
+            InvalidCubeStateError: If edge colors are invalid.
+
+        """
         for i, (edge_pos, _edge_ori) in enumerate(zip(ep, eo, strict=True)):
             edge_facelets = [
                 self._state[facelet]
@@ -244,7 +301,13 @@ class VCubeIntegrityChecker:
 
     @staticmethod
     def check_permutation_parity(cp: list[int], ep: list[int]) -> None:
-        """Validate corner and edge permutation parities match."""
+        """
+        Validate corner and edge permutation parities match.
+
+        Raises:
+            InvalidCubeStateError: If permutation parities do not match.
+
+        """
         corner_parity = count_inversions(cp) % 2
         edge_parity = count_inversions(ep) % 2
 
@@ -253,7 +316,13 @@ class VCubeIntegrityChecker:
             raise InvalidCubeStateError(msg)
 
     def check_center_orientations(self, so: list[int]) -> None:
-        """Validate center orientations are all valid values."""
+        """
+        Validate center orientations are all valid values.
+
+        Raises:
+            InvalidCubeStateError: If center orientations are invalid.
+
+        """
         valid_orientations = set(range(self.face_number))
 
         if len(so) != self.face_number or any(
@@ -268,7 +337,13 @@ class VCubeIntegrityChecker:
 
     @staticmethod
     def check_face_orientations(faces: str) -> tuple[str, str]:
-        """Validate and parses face orientation specification."""
+        """
+        Validate and parses face orientation specification.
+
+        Raises:
+            InvalidFaceError: If face orientation specification is invalid.
+
+        """
         if not faces:
             msg = 'Specify at leat one face to orient'
             raise InvalidFaceError(msg)

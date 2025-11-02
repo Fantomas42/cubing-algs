@@ -61,6 +61,11 @@ def expand_commutators_and_conjugates(moves: str) -> str:
 
     Commutator [A, B] = A B A' B'
     Conjugate [A: B] = A B A'
+
+    Raises:
+        InvalidBracketError: If brackets are malformed.
+        InvalidOperatorError: If an invalid operator is used in brackets.
+
     """
     result = moves
 

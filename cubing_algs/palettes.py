@@ -23,7 +23,13 @@ class PaletteConfig(TypedDict, total=False):
 
 
 def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
-    """Convert hexadecimal color string to RGB tuple."""
+    """
+    Convert hexadecimal color string to RGB tuple.
+
+    Raises:
+        ValueError: If hex color format is invalid.
+
+    """
     hex_color = hex_color.lstrip('#')
 
     if len(hex_color) == 3:

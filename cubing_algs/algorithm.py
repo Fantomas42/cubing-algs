@@ -50,7 +50,13 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
     @staticmethod
     def parse_move(item: Move | str) -> Move:
-        """Parse a single move string into a Move object."""
+        """
+        Parse a single move string into a Move object.
+
+        Raises:
+            InvalidMoveError: If the move is not valid.
+
+        """
         move = item if isinstance(item, Move) else Move(item)
 
         if not move.is_valid:
