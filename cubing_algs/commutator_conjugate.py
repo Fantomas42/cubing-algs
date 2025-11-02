@@ -7,7 +7,17 @@ from cubing_algs.transform.mirror import mirror_moves
 
 
 def find_innermost_brackets(text: str) -> tuple[int, int] | None:
-    """Find the position of the innermost (deepest nested) brackets."""
+    """
+    Find the position of the innermost (deepest nested) brackets.
+
+    Args:
+        text: A string potentially containing nested brackets.
+
+    Returns:
+        A tuple of (start_index, end_index) for the innermost brackets,
+        or None if no brackets found.
+
+    """
     max_depth = 0
     current_depth = 0
     innermost_start = -1
@@ -34,6 +44,15 @@ def split_on_separator(text: str, separator: str) -> tuple[str, str] | None:
     """
     Split text on separator, but only if the separator is at the top level
     (not inside nested brackets).
+
+    Args:
+        text: The string to split.
+        separator: The character to split on.
+
+    Returns:
+        A tuple of (before_separator, after_separator), or None if
+        separator not found at top level.
+
     """
     bracket_depth = 0
 
@@ -49,7 +68,16 @@ def split_on_separator(text: str, separator: str) -> tuple[str, str] | None:
 
 
 def invert_moves(old_moves: str) -> str:
-    """Invert an algorithm string (reverse order and invert each move)."""
+    """
+    Invert an algorithm string (reverse order and invert each move).
+
+    Args:
+        old_moves: A string representing a sequence of moves.
+
+    Returns:
+        The inverted algorithm string.
+
+    """
     algo = Algorithm.parse_moves(old_moves)
 
     return str(algo.transform(mirror_moves))
@@ -61,6 +89,13 @@ def expand_commutators_and_conjugates(moves: str) -> str:
 
     Commutator [A, B] = A B A' B'
     Conjugate [A: B] = A B A'
+
+    Args:
+        moves: A string containing move sequences with commutator and/or
+            conjugate notation.
+
+    Returns:
+        The expanded move string with all commutators and conjugates resolved.
 
     Raises:
         InvalidBracketError: If brackets are malformed.

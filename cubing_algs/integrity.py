@@ -28,6 +28,13 @@ def count_inversions(permutation: list[int]) -> int:
     An inversion occurs when a larger element appears before
     a smaller element in the sequence. This is used to determine
     permutation parity for cube state validation.
+
+    Args:
+        permutation: List of integers representing a permutation.
+
+    Returns:
+        Number of inversions in the permutation.
+
     """
     inversions = 0
 
@@ -63,7 +70,13 @@ class VCubeIntegrityChecker:
         raise NotImplementedError
 
     def check_integrity(self) -> bool:
-        """Perform comprehensive integrity checks on the cube state."""
+        """
+        Perform comprehensive integrity checks on the cube state.
+
+        Returns:
+            True if all integrity checks pass.
+
+        """
         self.check_length()
 
         color_counts: dict[str, int] = {}
@@ -339,6 +352,12 @@ class VCubeIntegrityChecker:
     def check_face_orientations(faces: str) -> tuple[str, str]:
         """
         Validate and parses face orientation specification.
+
+        Args:
+            faces: Face orientation string (1-2 characters).
+
+        Returns:
+            Tuple of (top_face, front_face) or (top_face, '') if one face.
 
         Raises:
             InvalidFaceError: If face orientation specification is invalid.

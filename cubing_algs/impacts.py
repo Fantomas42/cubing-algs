@@ -109,7 +109,17 @@ class ImpactData(NamedTuple):
 
 
 def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
-    """Calculate face impact from impact mask."""
+    """
+    Calculate face impact from impact mask.
+
+    Args:
+        impact_mask: Binary mask indicating affected facelets.
+        cube: The virtual cube to analyze.
+
+    Returns:
+        Dictionary mapping face names to counts of affected facelets.
+
+    """
     face_impact = {}
 
     for i, face_name in enumerate(FACE_ORDER):
@@ -122,7 +132,17 @@ def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
 
 
 def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
-    """Parse a facelet position into face, row, and column components."""
+    """
+    Parse a facelet position into face, row, and column components.
+
+    Args:
+        position: The facelet position index (0-53).
+        cube: The virtual cube for size context.
+
+    Returns:
+        FaceletPosition with parsed components.
+
+    """
     face_index = position // cube.face_size
     face_name = FACE_ORDER[face_index]
     position_in_face = position % cube.face_size
@@ -142,7 +162,17 @@ def compute_within_face_manhattan_distance(
     orig: FaceletPosition,
     final: FaceletPosition,
 ) -> int:
-    """Calculate Manhattan distance for positions on the same face."""
+    """
+    Calculate Manhattan distance for positions on the same face.
+
+    Args:
+        orig: The original facelet position.
+        final: The final facelet position.
+
+    Returns:
+        Manhattan distance in grid units.
+
+    """
     return abs(orig.row - final.row) + abs(orig.col - final.col)
 
 
@@ -156,6 +186,15 @@ def compute_opposite_face_manhattan_distance(
 
     Distance = 2 * cube_size + within-face distance on destination
     The factor of 2 accounts for crossing through the cube's interior.
+
+    Args:
+        orig: The original facelet position.
+        final: The final facelet position.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Manhattan distance across opposite faces.
+
     """
     # Distance to cross from one face to the opposite face
     cross_face_distance = cube.size * 2
@@ -172,6 +211,14 @@ def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
 
     Returns True if the positions are on the same edge or corner piece,
     meaning they are the same physical location viewed from different faces.
+
+    Args:
+        original_pos: The original facelet position index.
+        final_pos: The final facelet position index.
+
+    Returns:
+        True if both positions are on the same physical piece.
+
     """
     # Check if they're on the same edge piece
     for edge_map in EDGE_FACELET_MAP:
@@ -191,6 +238,15 @@ def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
     Check if two positions are on corners that share an edge.
 
     Adjacent corners share exactly 2 faces (they're connected by an edge).
+
+    Args:
+        pos1: The first facelet position index.
+        pos2: The second facelet position index.
+        cube: The virtual cube (unused but kept for API consistency).
+
+    Returns:
+        True if positions are on adjacent corners.
+
     """
     corner1 = None
     corner2 = None
@@ -227,6 +283,17 @@ def compute_adjacent_face_manhattan_distance(
 
     Uses face transformation to determine the aligned position,
     then calculates the shortest path accounting for edge crossing.
+
+    Args:
+        original_pos: The original facelet position index.
+        final_pos: The final facelet position index.
+        orig: The parsed original facelet position.
+        final: The parsed final facelet position.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Manhattan distance across adjacent faces.
+
     """
     if positions_on_same_piece(original_pos, final_pos):
         return 1
@@ -269,6 +336,15 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
     Manhattan distance measures the sum of absolute differences in row and
     column coordinates, extended across faces. For cross-face movements,
     it accounts for the minimum path through adjacent or opposite faces.
+
+    Args:
+        original_pos: The original facelet position index.
+        final_pos: The final facelet position index.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Manhattan distance between the positions.
+
     """
     if original_pos == final_pos:
         return 0
@@ -292,7 +368,16 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
 
 
 def compute_within_face_qtm_distance(pos_pair: tuple[int, int]) -> int:
-    """Calculate QTM distance for positions on the same face."""
+    """
+    Calculate QTM distance for positions on the same face.
+
+    Args:
+        pos_pair: Tuple of (original_position, final_position) on same face.
+
+    Returns:
+        QTM distance (1 or 2 quarter turns).
+
+    """
     if pos_pair in QTM_SAME_FACE_OPPOSITE_PAIRS:
         return 2
     return 1
@@ -300,7 +385,17 @@ def compute_within_face_qtm_distance(pos_pair: tuple[int, int]) -> int:
 
 def compute_opposite_face_qtm_distance(pos: int,
                                      pos_pair: tuple[int, int]) -> int:
-    """Calculate QTM distance for positions on opposite faces."""
+    """
+    Calculate QTM distance for positions on opposite faces.
+
+    Args:
+        pos: The position on the face (0-8).
+        pos_pair: Tuple of (original_position, final_position).
+
+    Returns:
+        QTM distance (2-4 quarter turns).
+
+    """
     if pos == 4:
         return 4  # Center: slice move like M2 or S2
 
@@ -318,6 +413,16 @@ def compute_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
     Calculate QTM distance for edge pieces on adjacent faces.
 
     Returns None if distance cannot be determined by edge analysis.
+
+    Args:
+        original_pos: The original facelet position index.
+        final_pos: The final facelet position index.
+        orig_face_pos: Position on the original face (0-8).
+        final_face_pos: Position on the final face (0-8).
+
+    Returns:
+        QTM distance, or None if cannot be determined.
+
     """
     # Same edge piece requires 3 quarter turns (opposite sides of piece)
     if positions_on_same_piece(original_pos, final_pos):
@@ -343,7 +448,20 @@ def compute_adjacent_face_qtm_distance(
         final: FaceletPosition,
         cube: 'VCube',
 ) -> int:
-    """Calculate QTM distance for positions on adjacent faces."""
+    """
+    Calculate QTM distance for positions on adjacent faces.
+
+    Args:
+        original_pos: The original facelet position index.
+        final_pos: The final facelet position index.
+        orig: The parsed original facelet position.
+        final: The parsed final facelet position.
+        cube: The virtual cube for size context.
+
+    Returns:
+        QTM distance in quarter turns.
+
+    """
     if orig.face_position == 4:
         return 2  # Center: slice move like M or S
 
@@ -386,6 +504,15 @@ def compute_qtm_distance(original_pos: int, final_pos: int,
 
     QTM distance represents the minimum number of quarter turns needed
     to move a facelet from its original position to its final position.
+
+    Args:
+        original_pos: The original facelet position index.
+        final_pos: The final facelet position index.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Minimum number of quarter turns required.
+
     """
     if original_pos == final_pos:
         return 0
@@ -414,7 +541,18 @@ def compute_distance_metrics(
     cube: 'VCube',
     distance_fn: Callable[[int, int, 'VCube'], int],
 ) -> DistanceMetrics:
-    """Compute distance metrics for a set of permutations."""
+    """
+    Compute distance metrics for a set of permutations.
+
+    Args:
+        permutations: Dictionary mapping original to final positions.
+        cube: The virtual cube for size context.
+        distance_fn: Function to compute distance between two positions.
+
+    Returns:
+        DistanceMetrics containing distances, mean, max, and sum.
+
+    """
     distances = {
         original_pos: distance_fn(original_pos, final_pos, cube)
         for original_pos, final_pos in permutations.items()
@@ -443,6 +581,13 @@ def find_permutation_cycles(permutation: list[int]) -> list[list[int]]:
     A cycle is a sequence of positions where each position maps to the next,
     forming a closed loop. For example, [1, 2, 0] contains the cycle [0, 1, 2]
     meaning position 0 goes to 1, 1 goes to 2, and 2 goes back to 0.
+
+    Args:
+        permutation: List where permutation[i] is the destination of position i.
+
+    Returns:
+        List of cycles, each cycle is a list of position indices.
+
     """
     visited = [False] * len(permutation)
     cycles = []
@@ -469,6 +614,14 @@ def compute_face_to_face_matrix(
     Compute face-to-face movement matrix.
 
     Tracks how many facelets from each face end up on each other face.
+
+    Args:
+        permutations: Dictionary mapping original to final positions.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Nested dictionary: matrix[orig_face][dest_face] = count.
+
     """
     matrix: dict[str, dict[str, int]] = {
         face: dict.fromkeys(FACE_ORDER, 0)
@@ -488,6 +641,15 @@ def detect_symmetry(mask: str, cube: 'VCube') -> dict[str, bool]:
     Detect symmetry patterns in the transformation mask.
 
     Checks for rotational and mirror symmetries in the impact pattern.
+
+    Args:
+        mask: Binary mask string indicating affected facelets.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Dictionary with symmetry flags (all_faces_same,
+        opposite_faces_symmetric, etc).
+
     """
     # Extract face masks
     faces = []
@@ -526,6 +688,14 @@ def analyze_layers(
     Analyze impact by cube layers.
 
     Separates facelets into outer layer (edges/corners) and center pieces.
+
+    Args:
+        permutations: Dictionary mapping original to final positions.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Dictionary with layer counts (centers_moved, outer_layer_moved, etc).
+
     """
     # Center of each face (position 4 in 3x3 grid)
     center_indices = {i * cube.face_size + 4 for i in range(6)}
@@ -566,7 +736,16 @@ def analyze_layers(
 
 
 def compute_parity(permutation: list[int]) -> int:
-    """Compute the parity of a permutation."""
+    """
+    Compute the parity of a permutation.
+
+    Args:
+        permutation: List where permutation[i] is the destination of position i.
+
+    Returns:
+        Parity value (0 for even, 1 for odd).
+
+    """
     parity = 0
     visited = [False] * len(permutation)
 
@@ -589,7 +768,16 @@ def compute_parity(permutation: list[int]) -> int:
 
 
 def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
-    """Analyze cycle structure in detail."""
+    """
+    Analyze cycle structure in detail.
+
+    Args:
+        cycles: List of cycles, each cycle is a list of position indices.
+
+    Returns:
+        CycleAnalysis with detailed cycle statistics.
+
+    """
     if not cycles:
         return {
             'cycle_count': 0,
@@ -624,6 +812,16 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
     Comprehensive pattern classification for speedcubing.
 
     Identifies specific cube states and patterns useful for solving.
+
+    Args:
+        cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
+
+    Returns:
+        List of pattern names identifying the cube state.
+
     """
     patterns = []
 
@@ -794,6 +992,16 @@ def compute_cubie_complexity(
 
     Based on the pattern recognition approach from the notebook's
     "Optimization with Cubies" section.
+
+    Args:
+        corners_moved: Number of corners out of place.
+        corners_twisted: Number of corners incorrectly oriented.
+        edges_moved: Number of edges out of place.
+        edges_flipped: Number of edges incorrectly oriented.
+
+    Returns:
+        Tuple of (complexity_score, suggested_approach).
+
     """
     complexity = corners_moved + corners_twisted + edges_moved + edges_flipped
 

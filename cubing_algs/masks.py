@@ -10,6 +10,13 @@ def union_masks(*masks: str) -> str:
     Perform the union (logical OR) of multiple binary masks.
 
     Returns '1' if at least one mask has '1' at that position.
+
+    Args:
+        *masks: Variable number of binary mask strings.
+
+    Returns:
+        The union of all masks as a binary string.
+
     """
     if not masks:
         return ''
@@ -28,6 +35,13 @@ def intersection_masks(*masks: str) -> str:
     Perform the intersection (logical AND) of multiple binary masks.
 
     Returns '1' only if all masks have '1' at that position.
+
+    Args:
+        *masks: Variable number of binary mask strings.
+
+    Returns:
+        The intersection of all masks as a binary string.
+
     """
     if not masks:
         return ''
@@ -46,6 +60,13 @@ def negate_mask(mask: str) -> str:
     Invert a binary mask (logical NOT).
 
     '0' becomes '1' and '1' becomes '0'.
+
+    Args:
+        mask: The binary mask string to invert.
+
+    Returns:
+        The inverted mask as a binary string.
+
     """
     if not mask:
         return ''
@@ -71,6 +92,14 @@ def facelets_masked(facelets: str, mask: str) -> str:
     are replaced with '-', and positions with '1' retain their original value.
 
     Optimized for high-frequency usage with caching and fast string operations.
+
+    Args:
+        facelets: The facelets string to mask.
+        mask: The binary mask string.
+
+    Returns:
+        The masked facelets string with '-' for masked positions.
+
     """
     if mask in _MASK_CACHE:
         translation = _MASK_CACHE[mask]
@@ -104,6 +133,14 @@ def state_masked(state: str, mask: str) -> str:
     Converts the state to cubies, applies the mask
     to the initial state facelets, then converts back
     to a facelets representation showing only the masked pieces.
+
+    Args:
+        state: The cube state string to mask.
+        mask: The binary mask string.
+
+    Returns:
+        The masked cube state as a facelets string.
+
     """
     return cubies_to_facelets(
         *facelets_to_cubies(state),

@@ -16,6 +16,15 @@ def symmetry_moves(
 
     Transforms each move according to the provided symmetry mapping,
     preserving move modifiers and notation style.
+
+    Args:
+        old_moves: Algorithm to transform.
+        ignore_moves: Set of move names to leave unchanged.
+        symmetry_table: Mapping of move names to their symmetry transformations.
+
+    Returns:
+        Algorithm with symmetry transformation applied.
+
     """
     moves: list[Move] = []
 
@@ -53,27 +62,71 @@ def symmetry_type_moves(
     Apply a specific type of symmetry transformation to moves.
 
     Uses predefined symmetry tables to transform the algorithm.
+
+    Args:
+        old_moves: Algorithm to transform.
+        symmetry_type: Type of symmetry to apply (M, S, E, or C).
+
+    Returns:
+        Algorithm with specified symmetry transformation applied.
+
     """
     ignore_moves, symmetry_table = SYMMETRY_TABLE[symmetry_type]
     return symmetry_moves(old_moves, ignore_moves, symmetry_table)
 
 
 def symmetry_m_moves(old_moves: Algorithm) -> Algorithm:
-    """Apply M-slice symmetry transformation to moves."""
+    """
+    Apply M-slice symmetry transformation to moves.
+
+    Args:
+        old_moves: Algorithm to transform.
+
+    Returns:
+        Algorithm with M-slice symmetry applied.
+
+    """
     return symmetry_type_moves(old_moves, 'M')
 
 
 def symmetry_s_moves(old_moves: Algorithm) -> Algorithm:
-    """Apply S-slice symmetry transformation to moves."""
+    """
+    Apply S-slice symmetry transformation to moves.
+
+    Args:
+        old_moves: Algorithm to transform.
+
+    Returns:
+        Algorithm with S-slice symmetry applied.
+
+    """
     return symmetry_type_moves(old_moves, 'S')
 
 
 def symmetry_e_moves(old_moves: Algorithm) -> Algorithm:
-    """Apply E-slice symmetry transformation to moves."""
+    """
+    Apply E-slice symmetry transformation to moves.
+
+    Args:
+        old_moves: Algorithm to transform.
+
+    Returns:
+        Algorithm with E-slice symmetry applied.
+
+    """
     return symmetry_type_moves(old_moves, 'E')
 
 
 def symmetry_c_moves(old_moves: Algorithm) -> Algorithm:
-    """Apply combined symmetry transformation using M and S symmetries."""
+    """
+    Apply combined symmetry transformation using M and S symmetries.
+
+    Args:
+        old_moves: Algorithm to transform.
+
+    Returns:
+        Algorithm with combined M and S symmetry applied.
+
+    """
     moves = symmetry_m_moves(old_moves)
     return symmetry_s_moves(moves)

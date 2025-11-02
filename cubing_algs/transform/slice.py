@@ -15,7 +15,17 @@ from cubing_algs.move import Move
 
 
 def unslice(old_moves: Algorithm, config: dict[str, list[str]]) -> Algorithm:
-    """Convert slice moves to their component moves using configuration."""
+    """
+    Convert slice moves to their component moves using configuration.
+
+    Args:
+        old_moves: Algorithm to process.
+        config: Mapping of slice moves to their component move sequences.
+
+    Returns:
+        Algorithm with slice moves expanded to component moves.
+
+    """
     moves: list[Move] = []
 
     move_cache: dict[Move, list[Move]] = {}
@@ -42,12 +52,30 @@ def unslice(old_moves: Algorithm, config: dict[str, list[str]]) -> Algorithm:
 
 
 def unslice_wide_moves(old_moves: Algorithm) -> Algorithm:
-    """Convert slice moves to wide moves."""
+    """
+    Convert slice moves to wide moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with slice moves converted to wide moves.
+
+    """
     return unslice(old_moves, UNSLICE_WIDE_MOVES)
 
 
 def unslice_rotation_moves(old_moves: Algorithm) -> Algorithm:
-    """Convert slice moves to outer face and rotation moves."""
+    """
+    Convert slice moves to outer face and rotation moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with slice moves converted to face and rotation moves.
+
+    """
     return unslice(old_moves, UNSLICE_ROTATION_MOVES)
 
 
@@ -57,6 +85,14 @@ def try_match_pattern(
     """
     Try to match a pattern against the config, checking both the original
     pattern and its normalized (sorted) form.
+
+    Args:
+        pattern: Move pattern string to match.
+        config: Configuration dictionary mapping patterns to replacements.
+
+    Returns:
+        List of replacement move strings if match found, None otherwise.
+
     """
     # First try exact match
     if pattern in config:
@@ -79,6 +115,14 @@ def is_within_threshold(
 
     Returns True if threshold is 0, or if all consecutive moves
     are within the threshold time.
+
+    Args:
+        moves_to_check: List of moves to check.
+        threshold: Maximum allowed time difference between consecutive moves.
+
+    Returns:
+        True if moves are within threshold, False otherwise.
+
     """
     if not threshold:
         return True
@@ -106,6 +150,17 @@ def try_match_n_moves(
     Try to match n consecutive moves starting at start_index.
 
     Returns the matched replacement moves if found, None otherwise.
+
+    Args:
+        old_moves: Algorithm to search in.
+        start_index: Index to start matching from.
+        n: Number of consecutive moves to match.
+        config: Configuration dictionary mapping patterns to replacements.
+        threshold: Maximum time difference between consecutive moves.
+
+    Returns:
+        List of replacement move strings if match found, None otherwise.
+
     """
     if start_index + n > len(old_moves):
         return None
@@ -131,6 +186,17 @@ def reslice(
 
     Patterns are matched in an order-independent way, so the config only
     needs to store one canonical ordering of each pattern.
+
+    Args:
+        old_moves: Algorithm to process.
+        config: Configuration mapping move patterns to slice moves.
+        max_depth: Maximum recursion depth for optimization.
+        threshold: Maximum time difference for grouping moves.
+        pattern_lengths: Tuple of pattern lengths to try matching.
+
+    Returns:
+        Algorithm with move combinations converted to slice moves.
+
     """
     if max_depth <= 0:
         return old_moves
@@ -168,22 +234,58 @@ def reslice(
 
 
 def reslice_m_moves(old_moves: Algorithm) -> Algorithm:
-    """Convert move combinations back to M slice moves."""
+    """
+    Convert move combinations back to M slice moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with M-slice move patterns consolidated.
+
+    """
     return reslice(old_moves, RESLICE_M_MOVES)
 
 
 def reslice_s_moves(old_moves: Algorithm) -> Algorithm:
-    """Convert move combinations back to S slice moves."""
+    """
+    Convert move combinations back to S slice moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with S-slice move patterns consolidated.
+
+    """
     return reslice(old_moves, RESLICE_S_MOVES)
 
 
 def reslice_e_moves(old_moves: Algorithm) -> Algorithm:
-    """Convert move combinations back to E slice moves."""
+    """
+    Convert move combinations back to E slice moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with E-slice move patterns consolidated.
+
+    """
     return reslice(old_moves, RESLICE_E_MOVES)
 
 
 def reslice_moves(old_moves: Algorithm) -> Algorithm:
-    """Convert move combinations back to all slice moves."""
+    """
+    Convert move combinations back to all slice moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with all slice move patterns consolidated.
+
+    """
     return reslice(old_moves, RESLICE_MOVES)
 
 
@@ -191,7 +293,17 @@ def reslice_m_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
         pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Callable[[Algorithm], Algorithm]:
-    """Create a timed M-slice reslicing function with configurable threshold."""
+    """
+    Create a timed M-slice reslicing function with configurable threshold.
+
+    Args:
+        threshold: Maximum time difference for grouping moves.
+        pattern_lengths: Tuple of pattern lengths to try matching.
+
+    Returns:
+        Function that applies M-slice reslicing with timing constraints.
+
+    """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
         return reslice(
@@ -207,7 +319,17 @@ def reslice_s_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
         pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Callable[[Algorithm], Algorithm]:
-    """Create a timed S-slice reslicing function with configurable threshold."""
+    """
+    Create a timed S-slice reslicing function with configurable threshold.
+
+    Args:
+        threshold: Maximum time difference for grouping moves.
+        pattern_lengths: Tuple of pattern lengths to try matching.
+
+    Returns:
+        Function that applies S-slice reslicing with timing constraints.
+
+    """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
         return reslice(
@@ -223,7 +345,17 @@ def reslice_e_timed_moves(
         threshold: int = RESLICE_THRESHOLD,
         pattern_lengths: tuple[int, ...] = (3, 2),
 ) -> Callable[[Algorithm], Algorithm]:
-    """Create a timed E-slice reslicing function with configurable threshold."""
+    """
+    Create a timed E-slice reslicing function with configurable threshold.
+
+    Args:
+        threshold: Maximum time difference for grouping moves.
+        pattern_lengths: Tuple of pattern lengths to try matching.
+
+    Returns:
+        Function that applies E-slice reslicing with timing constraints.
+
+    """
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:
         return reslice(
             old_moves, RESLICE_E_MOVES,
@@ -241,6 +373,14 @@ def reslice_timed_moves(
     """
     Create a timed reslicing function
     for all slice moves with configurable threshold.
+
+    Args:
+        threshold: Maximum time difference for grouping moves.
+        pattern_lengths: Tuple of pattern lengths to try matching.
+
+    Returns:
+        Function that applies reslicing for all slices with timing constraints.
+
     """
 
     def _reslice_timed_moves(old_moves: Algorithm) -> Algorithm:

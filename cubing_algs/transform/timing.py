@@ -9,7 +9,16 @@ if TYPE_CHECKING:
 
 
 def untime_moves(old_moves: Algorithm) -> Algorithm:
-    """Remove timing information from all moves in an algorithm."""
+    """
+    Remove timing information from all moves in an algorithm.
+
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        A new Algorithm with timing information removed from all moves.
+
+    """
     moves: list[Move] = [move.untimed for move in old_moves]
 
     return Algorithm(moves)

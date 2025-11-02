@@ -23,7 +23,13 @@ from cubing_algs.extensions import rotate
 
 
 def _build_corner_lookup_table() -> dict[tuple[int, int], int]:
-    """Build corner piece lookup table for faster corner identification."""
+    """
+    Build corner piece lookup table for faster corner identification.
+
+    Returns:
+        Dictionary mapping (color1, color2) tuples to corner piece indices.
+
+    """
     lookup = {}
     for j in range(8):
         col1 = CORNER_FACELET_MAP[j][1] // 9
@@ -33,7 +39,14 @@ def _build_corner_lookup_table() -> dict[tuple[int, int], int]:
 
 
 def _build_edge_lookup_table() -> dict[tuple[int, int], tuple[int, int]]:
-    """Build edge piece lookup table for faster edge identification."""
+    """
+    Build edge piece lookup table for faster edge identification.
+
+    Returns:
+        Dictionary mapping (color1, color2) tuples to (piece_index,
+        orientation) tuples.
+
+    """
     lookup = {}
     for j in range(12):
         col1 = EDGE_FACELET_MAP[j][0] // 9
@@ -44,7 +57,13 @@ def _build_edge_lookup_table() -> dict[tuple[int, int], tuple[int, int]]:
 
 
 def _build_face_lookup_table() -> dict[str, int]:
-    """Build face character to index lookup table."""
+    """
+    Build face character to index lookup table.
+
+    Returns:
+        Dictionary mapping face characters to their indices.
+
+    """
     return {face: idx for idx, face in enumerate(FACES)}
 
 
@@ -78,7 +97,16 @@ class ConversionCache:
 
     def get_cubies(self, facelets: str) -> tuple[
             list[int], list[int], list[int], list[int], list[int]] | None:
-        """Get cubies from cache or compute and cache."""
+        """
+        Get cubies from cache or compute and cache.
+
+        Args:
+            facelets: The facelets string to look up.
+
+        Returns:
+            Cached cubies tuple if found, None otherwise.
+
+        """
         if not self._enabled or facelets not in self.facelets_cache:
             return None
         return self.facelets_cache[facelets]
@@ -100,7 +128,16 @@ class ConversionCache:
             tuple[int, ...], tuple[int, ...], tuple[int, ...],
             tuple[int, ...], tuple[int, ...], str | None,
     ]) -> str | None:
-        """Get facelets from cache."""
+        """
+        Get facelets from cache.
+
+        Args:
+            key: The cache key tuple.
+
+        Returns:
+            Cached facelets string if found, None otherwise.
+
+        """
         if not self._enabled or key not in self.cubies_cache:
             return None
         return self.cubies_cache[key]
@@ -335,7 +372,13 @@ def enable_cache() -> None:
 
 
 def get_cache_info() -> dict[str, int]:
-    """Get information about the current cache state."""
+    """
+    Get information about the current cache state.
+
+    Returns:
+        Dictionary with cache statistics including sizes and status.
+
+    """
     return {
         'facelets_cached': len(_cache.facelets_cache),
         'cubies_cached': len(_cache.cubies_cache),

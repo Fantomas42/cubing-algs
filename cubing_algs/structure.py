@@ -85,7 +85,16 @@ class BoundedCache[K, V](MutableMapping[K, V]):
         self._maxsize = maxsize
 
     def __getitem__(self, key: K) -> V:
-        """Get item from cache and mark as recently used."""
+        """
+        Get item from cache and mark as recently used.
+
+        Args:
+            key: Cache key to retrieve.
+
+        Returns:
+            Cached value for the given key.
+
+        """
         value = self._cache[key]
         self._cache.move_to_end(key)
         return value
@@ -103,11 +112,23 @@ class BoundedCache[K, V](MutableMapping[K, V]):
         del self._cache[key]
 
     def __iter__(self) -> typing.Iterator[K]:
-        """Iterate over cache keys."""
+        """
+        Iterate over cache keys.
+
+        Returns:
+            Iterator over cache keys.
+
+        """
         return iter(self._cache)
 
     def __len__(self) -> int:
-        """Return number of items in cache."""
+        """
+        Return number of items in cache.
+
+        Returns:
+            Number of cached items.
+
+        """
         return len(self._cache)
 
 
@@ -127,7 +148,13 @@ class Structure:
     is_pure: bool = False  # Pure commutator (8 moves)
 
     def __str__(self) -> str:
-        """Return the compressed notation for this structure."""
+        """
+        Return the compressed notation for this structure.
+
+        Returns:
+            Compressed notation string ([A: B] or [A, B]).
+
+        """
         if self.type == 'conjugate':
             return f'[{self.setup}: {self.action}]'
         return f'[{self.setup}, {self.action}]'
@@ -222,7 +249,16 @@ def calculate_min_score(algo_length: int) -> float:
 
 
 def inverse_sequence(algo: 'Algorithm') -> 'Algorithm':
-    """Return the inverse of an algorithm (reversed with inverted moves)."""
+    """
+    Return the inverse of an algorithm (reversed with inverted moves).
+
+    Args:
+        algo: The algorithm to invert.
+
+    Returns:
+        The inverted algorithm.
+
+    """
     from cubing_algs.transform.mirror import mirror_moves  # noqa: PLC0415
 
     return algo.transform(mirror_moves)
@@ -237,6 +273,14 @@ def detect_move_cancellations(
 
     Checks if the last move of first and first move of second
     are on the same face and can cancel.
+
+    Args:
+        first: The first algorithm sequence.
+        second: The second algorithm sequence.
+
+    Returns:
+        True if moves can cancel, False otherwise.
+
     """
     if not first or not second:
         return False
@@ -266,6 +310,9 @@ def classify_commutator(
         setup: The A part of the commutator
         action: The B part of the commutator
         inverse_cache: Cache for inverse sequences (key: str(pattern))
+
+    Returns:
+        Classification string (pure, A9, orthogonal, extended, or other).
 
     """
     setup_len = len(setup)
@@ -312,6 +359,14 @@ def classify_conjugate(setup: 'Algorithm', action: 'Algorithm') -> str:
     - 'nested': Action contains a structure
     - 'multi-setup': Long setup (3+ moves)
     - 'standard': Regular conjugate pattern
+
+    Args:
+        setup: The setup (A) part of the conjugate.
+        action: The action (B) part of the conjugate.
+
+    Returns:
+        Classification string (simple, nested, multi-setup, or standard).
+
     """
     setup_len = len(setup)
 
@@ -352,6 +407,9 @@ def is_inverse_at(
         pattern: The pattern to invert and match
         inverse_cache: Cache for inverse sequences (key: str(pattern))
 
+    Returns:
+        True if the inverse appears at the position, False otherwise.
+
     """
     if start + len(pattern) > len(algo):
         return False
@@ -374,6 +432,14 @@ def score_structure(setup: 'Algorithm', action: 'Algorithm') -> float:
     - Shorter setups relative to actions
     - Non-trivial actions (longer is better)
     - Overall compression benefit
+
+    Args:
+        setup: The setup (A) part of the structure.
+        action: The action (B) part of the structure.
+
+    Returns:
+        Quality score (higher is better, 0-100+ range).
+
     """
     if len(setup) == 0 or len(action) == 0:
         return 0.0
@@ -409,7 +475,8 @@ def detect_conjugate(
         max_setup_len: Maximum setup length
         inverse_cache: Cache for inverse sequences (key: str(algo))
 
-    Returns the best conjugate found or None.
+    Returns:
+        Best conjugate structure found, or None if no valid structure exists.
 
     """
     best_structure: Structure | None = None
@@ -486,7 +553,8 @@ def detect_commutator(
         max_part_len: Maximum length for A and B parts
         inverse_cache: Cache for inverse sequences (key: str(algo))
 
-    Returns the best commutator found or None.
+    Returns:
+        Best commutator structure found, or None if no valid structure exists.
 
     """
     best_structure: Structure | None = None
@@ -652,6 +720,9 @@ def compress_recursive(  # noqa: C901, PLR0912
         structures: List of structures detected in the original algorithm
         offset: Offset to map positions from algo to original algorithm
         structure_cache: Cache for detected structures (key: str(algo))
+
+    Returns:
+        Compressed algorithm string with bracket notation.
 
     """
     if structure_cache is None:
@@ -857,6 +928,9 @@ def calculate_nesting_depth(
         structures: List of structures to analyze
         structure_cache: Cache for detected structures (key: str(algo))
 
+    Returns:
+        Tuple of (maximum nesting depth, number of nested structures).
+
     """
     if structure_cache is None:
         structure_cache = {}
@@ -909,6 +983,16 @@ def calculate_efficiency_rating(
     - 'Good': Mix of efficient structures
     - 'Fair': Average efficiency
     - 'Poor': Mostly inefficient structures
+
+    Args:
+        pure_count: Number of pure commutators.
+        a9_count: Number of A9 commutators.
+        avg_moves: Average move count per structure.
+        total_structures: Total number of structures.
+
+    Returns:
+        Efficiency rating string (Excellent, Good, Fair, Poor, or N/A).
+
     """
     if total_structures == 0:
         return 'N/A'

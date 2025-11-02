@@ -80,5 +80,14 @@ PATTERNS = {
 
 
 def get_pattern(pattern_name: str) -> Algorithm:
-    """Get an algorithm for a specific cube pattern by name."""
+    """
+    Get an algorithm for a specific cube pattern by name.
+
+    Args:
+        pattern_name: Name of the cube pattern to retrieve.
+
+    Returns:
+        Algorithm object representing the pattern moves.
+
+    """
     return parse_moves(PATTERNS.get(pattern_name, ''))

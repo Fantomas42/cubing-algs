@@ -15,7 +15,17 @@ def unwide(
         old_moves: Algorithm,
         config: dict[str, list[str]],
 ) -> Algorithm:
-    """Expand wide moves using the provided configuration mapping."""
+    """
+    Expand wide moves using the provided configuration mapping.
+
+    Args:
+        old_moves: Algorithm to process.
+        config: Mapping of wide moves to their component move sequences.
+
+    Returns:
+        Algorithm with wide moves expanded to component moves.
+
+    """
     moves: list[Move] = []
 
     move_cache: dict[Move, list[Move]] = {}
@@ -42,12 +52,30 @@ def unwide(
 
 
 def unwide_slice_moves(old_moves: Algorithm) -> Algorithm:
-    """Expand wide moves into outer face and slice moves."""
+    """
+    Expand wide moves into outer face and slice moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with wide moves converted to face and slice moves.
+
+    """
     return unwide(old_moves, UNWIDE_SLICE_MOVES)
 
 
 def unwide_rotation_moves(old_moves: Algorithm) -> Algorithm:
-    """Expand wide moves into outer face and rotation moves."""
+    """
+    Expand wide moves into outer face and rotation moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with wide moves converted to face and rotation moves.
+
+    """
     return unwide(old_moves, UNWIDE_ROTATION_MOVES)
 
 
@@ -57,7 +85,19 @@ def rewide(
         max_depth: int = MAX_ITERATIONS,
         threshold: int = 0,
 ) -> Algorithm:
-    """Convert sequences of moves back into wide moves using configuration."""
+    """
+    Convert sequences of moves back into wide moves using configuration.
+
+    Args:
+        old_moves: Algorithm to process.
+        config: Configuration mapping move pairs to wide moves.
+        max_depth: Maximum recursion depth for optimization.
+        threshold: Maximum time difference for grouping moves.
+
+    Returns:
+        Algorithm with move sequences converted to wide moves.
+
+    """
     if max_depth <= 0:
         return old_moves
 
@@ -100,7 +140,16 @@ def rewide(
 
 
 def rewide_moves(old_moves: Algorithm) -> Algorithm:
-    """Convert move sequences back into wide moves where possible."""
+    """
+    Convert move sequences back into wide moves where possible.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with wide move patterns consolidated.
+
+    """
     return rewide(old_moves, REWIDE_MOVES)
 
 
@@ -110,6 +159,13 @@ def rewide_timed_moves(
     """
     Create a timed reslicing function
     for all slice moves with configurable threshold.
+
+    Args:
+        threshold: Maximum time difference for grouping moves.
+
+    Returns:
+        Function that applies rewide with timing constraints.
+
     """
 
     def _rewide_timed_moves(old_moves: Algorithm) -> Algorithm:

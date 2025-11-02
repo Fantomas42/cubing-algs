@@ -32,6 +32,13 @@ def clean_multiline_and_comments(text: str) -> str:
     Preprocessing of multiline input with comment removal.
 
     Removes comments starting with // and joins non-empty lines with spaces.
+
+    Args:
+        text: Input text potentially containing multiple lines and comments.
+
+    Returns:
+        Cleaned single-line text with comments removed.
+
     """
     if '//' not in text and '\n' not in text:
         return text
@@ -56,6 +63,13 @@ def clean_moves(moves: str) -> str:
     - Removing whitespace and unnecessary characters
     - Converting alternative notations to standard ones
     - Standardizing the casing of slice moves
+
+    Args:
+        moves: A string of moves to clean.
+
+    Returns:
+        The cleaned and normalized move string.
+
     """
     moves = moves.strip()
 
@@ -71,6 +85,13 @@ def split_moves(moves: str) -> list[Move]:
 
     Uses the MOVE_SPLIT pattern from constants to identify boundaries
     between individual moves in the string.
+
+    Args:
+        moves: A string containing one or more moves.
+
+    Returns:
+        A list of Move objects parsed from the string.
+
     """
     return [
         Move(x.strip())
@@ -85,6 +106,13 @@ def check_moves(moves: list[Move]) -> bool:
 
     Checks that each move has a valid base move, layer, and modifier.
     Logs detailed error messages for any invalid moves found.
+
+    Args:
+        moves: A list of Move objects to validate.
+
+    Returns:
+        True if all moves are valid, False otherwise.
+
     """
     for move in moves:
         if not (move.is_valid_move
@@ -125,6 +153,13 @@ def parse_moves(raw_moves: str | Iterable[Move | str] | Algorithm,
       to an Algorithm
     - Supports multiline input and removes comments starting with //
     - Supports commutators [A, B] and conjugates [A: B].
+
+    Args:
+        raw_moves: The moves to parse, as a string, iterable, or Algorithm.
+        secure: If True, skip cleaning and validation steps.
+
+    Returns:
+        An Algorithm object containing the parsed moves.
 
     Examples:
         [A, B] becomes A B A' B' (commutator)
@@ -173,6 +208,13 @@ def parse_moves_cfop(moves: str) -> Algorithm:
     moves (y and U rotations) from the beginning and end of the algorithm.
     This is useful for standardizing CFOP algorithms, which often include
     such moves for convenience.
+
+    Args:
+        moves: A string of moves to parse.
+
+    Returns:
+        An Algorithm with leading/trailing y and U moves removed.
+
     """
     algo = parse_moves(moves, secure=False)
 

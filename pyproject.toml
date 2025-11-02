@@ -58,7 +58,6 @@ ignore = [
     "D203",
     "D205",
     "D212",
-    "DOC",
 ]
 
 [tool.ruff.format]

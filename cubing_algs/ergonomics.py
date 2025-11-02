@@ -154,6 +154,13 @@ def get_move_key(move: Move) -> str:
 
     Handles SiGN notation and layered moves by converting them
     to their base equivalents.
+
+    Args:
+        move: Move object to get key for.
+
+    Returns:
+        Standardized string key for move lookup.
+
     """
     if move.is_pause or move.is_rotation_move:
         return str(move)
@@ -169,7 +176,16 @@ def get_move_key(move: Move) -> str:
 
 
 def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
-    """Calculate hand balance metrics for the algorithm."""
+    """
+    Calculate hand balance metrics for the algorithm.
+
+    Args:
+        moves: Algorithm to analyze.
+
+    Returns:
+        Tuple of (right_count, left_count, both_count, balance_ratio).
+
+    """
     right_count = 0
     left_count = 0
     both_count = 0
@@ -201,7 +217,16 @@ def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
 
 def compute_finger_distribution(moves: 'Algorithm') -> tuple[
         int, int, int, int]:
-    """Calculate finger usage distribution for the algorithm."""
+    """
+    Calculate finger usage distribution for the algorithm.
+
+    Args:
+        moves: Algorithm to analyze.
+
+    Returns:
+        Tuple of (thumb_count, index_count, middle_count, ring_count).
+
+    """
     thumb_count = 0
     index_count = 0
     middle_count = 0
@@ -231,6 +256,13 @@ def compute_regrip_count(moves: 'Algorithm') -> int:
     Estimate the number of regrips required for the algorithm.
 
     Based on moves that typically require grip changes.
+
+    Args:
+        moves: Algorithm to analyze.
+
+    Returns:
+        Number of estimated regrips required.
+
     """
     regrip_count = 0
 
@@ -250,6 +282,13 @@ def compute_flow_breaks(moves: 'Algorithm') -> int:
     Count awkward transitions that break the flow of execution.
 
     Based on move sequences that are difficult to execute smoothly.
+
+    Args:
+        moves: Algorithm to analyze.
+
+    Returns:
+        Number of awkward transitions detected.
+
     """
     if len(moves) < 2:
         return 0
@@ -279,6 +318,13 @@ def compute_fingertrick_difficulty(moves: 'Algorithm') -> float:
     Calculate overall fingertrick difficulty score.
 
     Based on individual move difficulties and sequence complexity.
+
+    Args:
+        moves: Algorithm to analyze.
+
+    Returns:
+        Average difficulty score across all moves.
+
     """
     if not moves:
         return 0.0
@@ -304,6 +350,14 @@ def compute_estimated_execution_time(moves: 'Algorithm',
     Estimate algorithm execution time in seconds.
 
     Based on average move times and regrip penalties.
+
+    Args:
+        moves: Algorithm to analyze.
+        regrip_count: Number of regrips in the algorithm.
+
+    Returns:
+        Estimated execution time in seconds.
+
     """
     if not moves:
         return 0.0
@@ -328,6 +382,18 @@ def compute_comfort_score(
     Calculate overall comfort score (0-100, higher is better).
 
     Combines various ergonomic factors into a single score.
+
+    Args:
+        hand_balance_ratio: Hand balance ratio from compute_hand_balance.
+        fingertrick_difficulty: Difficulty score from
+            compute_fingertrick_difficulty.
+        regrip_count: Number of regrips in the algorithm.
+        flow_breaks: Number of awkward transitions.
+        total_moves: Total number of moves in the algorithm.
+
+    Returns:
+        Comfort score from 0 to 100 (higher is more comfortable).
+
     """
     if total_moves == 0:
         return 100.0
@@ -353,7 +419,16 @@ def compute_comfort_score(
 
 
 def get_ergonomic_rating(comfort_score: float) -> str:
-    """Convert comfort score to ergonomic rating."""
+    """
+    Convert comfort score to ergonomic rating.
+
+    Args:
+        comfort_score: Comfort score from 0 to 100.
+
+    Returns:
+        Human-readable rating string (Excellent, Good, Fair, Poor, Very Poor).
+
+    """
     if comfort_score >= 80:
         return 'Excellent'
     if comfort_score >= 65:

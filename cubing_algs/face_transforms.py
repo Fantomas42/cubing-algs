@@ -18,6 +18,13 @@ def offset_right(position: int) -> int:
     0 1 2    6 3 0
     3 4 5 -> 7 4 1
     6 7 8    8 5 2
+
+    Args:
+        position: The original position (0-8).
+
+    Returns:
+        The transformed position after 90° clockwise rotation.
+
     """
     return {
         0: 6,
@@ -40,6 +47,13 @@ def offset_left(position: int) -> int:
     0 1 2    2 5 8
     3 4 5 -> 1 4 7
     6 7 8    0 3 6
+
+    Args:
+        position: The original position (0-8).
+
+    Returns:
+        The transformed position after 90° counter-clockwise rotation.
+
     """
     return {
         0: 2,
@@ -62,6 +76,13 @@ def offset_up(position: int) -> int:
     0 1 2    8 7 6
     3 4 5 -> 5 4 3
     6 7 8    2 1 0
+
+    Args:
+        position: The original position (0-8).
+
+    Returns:
+        The transformed position after vertical flip.
+
     """
     return {
         0: 8,
@@ -84,6 +105,13 @@ def offset_down(position: int) -> int:
     0 1 2    0 1 2
     3 4 5 -> 3 4 5
     6 7 8    6 7 8
+
+    Args:
+        position: The original position (0-8).
+
+    Returns:
+        The same position unchanged.
+
     """
     return {
         0: 0,
@@ -142,7 +170,18 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
 
 def transform_position(original_face_name: str, destination_face_name: str,
                        destination_face_position: int) -> int:
-    """Transform destination face position to original face position."""
+    """
+    Transform destination face position to original face position.
+
+    Args:
+        original_face_name: The original face identifier (U/R/F/D/L/B).
+        destination_face_name: The destination face identifier.
+        destination_face_position: Position on the destination face (0-8).
+
+    Returns:
+        The corresponding position on the original face.
+
+    """
     return ADJACENT_FACE_TRANSFORMATIONS[
         original_face_name
     ][

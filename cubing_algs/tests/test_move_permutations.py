@@ -11,14 +11,30 @@ class TestMovePermutations(unittest.TestCase):
 
     @staticmethod
     def create_numbered_cube() -> VCube:
-        """Create a cube with numbered positions for tracking permutations."""
+        """
+        Create a cube with numbered positions for tracking permutations.
+
+        Returns:
+            VCube with unique character positions for permutation tracking.
+
+        """
         state = ''.join([chr(ord('A') + i) for i in range(54)])
         return VCube(initial=state, check=False)
 
     @staticmethod
     def get_permutations(initial_state: str,
                          final_state: str) -> dict[int, int]:
-        """Get position permutations between initial and final states."""
+        """
+        Get position permutations between initial and final states.
+
+        Args:
+            initial_state: Initial cube state string.
+            final_state: Final cube state string.
+
+        Returns:
+            Dictionary mapping destination positions to source positions.
+
+        """
         permutations = {}
         for dest_pos in range(54):
             dest_char = final_state[dest_pos]
@@ -52,7 +68,16 @@ class TestMovePermutations(unittest.TestCase):
             )
 
     def analyze_move_permutations(self, move_name: str) -> dict[str, Any]:
-        """Analyze permutations and cycles produced by a move."""
+        """
+        Analyze permutations and cycles produced by a move.
+
+        Args:
+            move_name: Name of the move to analyze.
+
+        Returns:
+            Dictionary containing move analysis data.
+
+        """
         cube = self.create_numbered_cube()
         initial_state = cube.state
 
@@ -69,7 +94,16 @@ class TestMovePermutations(unittest.TestCase):
 
     @staticmethod
     def find_cycles(permutations: dict[int, int]) -> list[list[int]]:
-        """Find cycles in permutation mapping."""
+        """
+        Find cycles in permutation mapping.
+
+        Args:
+            permutations: Dictionary mapping positions to their sources.
+
+        Returns:
+            List of cycles, where each cycle is a list of positions.
+
+        """
         visited = set()
         cycles = []
 

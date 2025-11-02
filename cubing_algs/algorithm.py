@@ -43,7 +43,17 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
     @staticmethod
     def parse_moves(items: Iterable[Move | str] | str) -> 'Algorithm':
-        """Parse a string or list of strings into an Algorithm object."""
+        """
+        Parse a string or list of strings into an Algorithm object.
+
+        Args:
+            items: A string or iterable of Move objects or strings
+                representing moves.
+
+        Returns:
+            An Algorithm object containing the parsed moves.
+
+        """
         from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
         return parse_moves(items, secure=False)
@@ -52,6 +62,12 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
     def parse_move(item: Move | str) -> Move:
         """
         Parse a single move string into a Move object.
+
+        Args:
+            item: A Move object or string representing a single move.
+
+        Returns:
+            A validated Move object.
 
         Raises:
             InvalidMoveError: If the move is not valid.
@@ -81,18 +97,48 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             self.data.extend(self.parse_moves(other))
 
     def __iadd__(self, other: Iterable[Move | str] | str) -> Self:
-        """In-place addition operator (+=) for algorithms."""
+        """
+        In-place addition operator (+=) for algorithms.
+
+        Args:
+            other: A string, Move, or iterable of moves to add to this
+                algorithm.
+
+        Returns:
+            This algorithm object after modification.
+
+        """
         self.extend(other)
         return self
 
     def __radd__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
-        """Right addition operator for algorithms."""
+        """
+        Right addition operator for algorithms.
+
+        Args:
+            other: A string, Move, or iterable of moves to add before this
+                algorithm.
+
+        Returns:
+            A new Algorithm with other followed by this algorithm.
+
+        """
         result = self.parse_moves(other)
         result += self
         return result
 
     def __add__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
-        """Addition operator (+) for algorithms."""
+        """
+        Addition operator (+) for algorithms.
+
+        Args:
+            other: A string, Move, or iterable of moves to add to this
+                algorithm.
+
+        Returns:
+            A new Algorithm combining this algorithm with other.
+
+        """
         if isinstance(other, Algorithm):
             result = self.copy()
             result.extend(other)
@@ -110,13 +156,23 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             self.data[i] = self.parse_moves(item)
 
     def __str__(self) -> str:
-        """Convert the algorithm to a human-readable string."""
+        """
+        Convert the algorithm to a human-readable string.
+
+        Returns:
+            A space-separated string of all moves in the algorithm.
+
+        """
         return ' '.join([str(m) for m in self])
 
     def __repr__(self) -> str:
         """
         Return a string representation that can be used
         to recreate the algorithm.
+
+        Returns:
+            A Python expression that can recreate this Algorithm object.
+
         """
         return f'Algorithm("{ "".join([str(m) for m in self]) }")'
 
@@ -130,6 +186,14 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         This method enables chaining multiple transformations together, such as
         simplification, optimization, or conversion between notations.
+
+        Args:
+            *processes: One or more transformation functions to apply.
+            to_fixpoint: If True, repeat transformations until no changes occur.
+
+        Returns:
+            A new Algorithm with all transformations applied.
+
         """
         new_moves = self.copy()
         mod_moves = self.copy()
@@ -326,6 +390,14 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         Creates a VCube, applies this algorithm to it, and displays the result
         with a mask showing which facelets are affected by the algorithm.
+
+        Args:
+            mode: Display mode for the cube visualization.
+            orientation: Orientation of the cube for display.
+
+        Returns:
+            A VCube object with the algorithm applied.
+
         """
         cube = self.impacts.cube
 

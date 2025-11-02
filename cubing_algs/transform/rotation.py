@@ -16,6 +16,13 @@ def remove_rotations(old_moves: Algorithm) -> Algorithm:
     Remove rotations from an algorithm.
 
     Strips rotation moves while preserving the core face moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with rotation moves removed.
+
     """
     moves: list[Move] = [
         move
@@ -32,6 +39,13 @@ def remove_starting_rotations(old_moves: Algorithm) -> Algorithm:
 
     Strips rotation moves and pauses from the beginning of the algorithm
     while preserving the core face moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with starting rotations and pauses removed.
+
     """
     moves: list[Move] = []
 
@@ -51,6 +65,13 @@ def remove_ending_rotations(old_moves: Algorithm) -> Algorithm:
 
     Strips rotation moves and pauses from the end of the algorithm
     while preserving the core face moves.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with ending rotations and pauses removed.
+
     """
     moves: list[Move] = []
 
@@ -72,6 +93,14 @@ def optimize_triple_rotations(
     x2, y2, z2 --> <nothing>
     x2, z2, y2 --> <nothing>
     z2, x2, y2 --> <nothing>.
+
+    Args:
+        old_moves: Algorithm to optimize.
+        max_depth: Maximum recursion depth for optimization.
+
+    Returns:
+        Optimized algorithm with triple rotation sets removed.
+
     """
     if max_depth <= 0:
         return old_moves
@@ -102,6 +131,14 @@ def optimize_double_rotations(
     x2, y2 --> z2
     x2, z2 --> y2
     y2, z2 --> x2.
+
+    Args:
+        old_moves: Algorithm to optimize.
+        max_depth: Maximum recursion depth for optimization.
+
+    Returns:
+        Optimized algorithm with double rotation pairs combined.
+
     """
     if max_depth <= 0:
         return old_moves
@@ -139,6 +176,14 @@ def optimize_conjugate_rotations(
     x', y2, x --> z2
     x, z2, x' --> y2
     y, z2, y' --> x2.
+
+    Args:
+        old_moves: Algorithm to optimize.
+        max_depth: Maximum recursion depth for optimization.
+
+    Returns:
+        Optimized algorithm with conjugate rotation patterns simplified.
+
     """
     if max_depth <= 0:
         return old_moves
@@ -178,6 +223,13 @@ def split_moves_ending_rotations(
 
     Separates the algorithm into two parts: the main moves and
     the trailing rotations and pauses.
+
+    Args:
+        old_moves: Algorithm to split.
+
+    Returns:
+        Tuple of (core moves, ending rotations).
+
     """
     moves: list[Move] = []
     rotations: list[Move] = []
@@ -208,6 +260,14 @@ def compress_rotations(
 
     Applies various optimization functions specifically designed
     for rotation moves to reduce redundancy.
+
+    Args:
+        old_moves: Algorithm to compress.
+        max_iterations: Maximum number of optimization iterations.
+
+    Returns:
+        Compressed algorithm with optimized rotations.
+
     """
     moves = old_moves.copy()
 
@@ -237,6 +297,13 @@ def compress_ending_rotations(old_moves: Algorithm) -> Algorithm:
 
     Separates core moves from ending rotations, optimizes the rotations,
     and recombines them for a more efficient algorithm.
+
+    Args:
+        old_moves: Algorithm to process.
+
+    Returns:
+        Algorithm with optimized ending rotations.
+
     """
     moves, rotations = split_moves_ending_rotations(old_moves)
 

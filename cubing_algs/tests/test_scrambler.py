@@ -702,7 +702,16 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
 
     @staticmethod
     def get_face_from_move(move: str) -> str:
-        """Extract the face character from a move string."""
+        """
+        Extract the face character from a move string.
+
+        Args:
+            move: Move string to extract face from.
+
+        Returns:
+            Face character (U, R, F, D, L, B) or empty string.
+
+        """
         for face in FACE_ORDER:
             if move.startswith((face, face.lower())):
                 return face
@@ -711,7 +720,16 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
     @staticmethod
     def calculate_move_distribution(algorithm: Algorithm) -> dict[
             str, float]:
-        """Calculate the distribution of face moves in an algorithm."""
+        """
+        Calculate the distribution of face moves in an algorithm.
+
+        Args:
+            algorithm: Algorithm to analyze.
+
+        Returns:
+            Dictionary mapping face names to their percentage distribution.
+
+        """
         face_counts: Counter[str] = Counter()
         total_moves = len(algorithm)
 
@@ -734,6 +752,13 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
         Calculate how scrambled a cube becomes after applying an algorithm.
 
         Returns a value between 0.0 (solved) and 1.0 (maximally scrambled).
+
+        Args:
+            algorithm: Algorithm to evaluate.
+
+        Returns:
+            Scrambledness score between 0.0 and 1.0.
+
         """
         # Count how many facelets are not in their original position
         cube = VCube()
@@ -755,6 +780,13 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
         """
         Check if algorithm has consecutive moves on same
         or opposite faces.
+
+        Args:
+            algorithm: Algorithm to check.
+
+        Returns:
+            True if consecutive same or opposite face moves found.
+
         """
         moves = [str(move) for move in algorithm]
 

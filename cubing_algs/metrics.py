@@ -49,6 +49,13 @@ def amount(move: Move) -> int:
 
     Double moves (like U2) count as 2, while single moves count as 1.
     This is used for quarter-turn metrics.
+
+    Args:
+        move: The move to evaluate.
+
+    Returns:
+        2 for double moves, 1 for single moves.
+
     """
     if move.is_double:
         return 2
@@ -62,6 +69,15 @@ def move_score(mode: str, field: str,
 
     Uses the MOVE_COUNTS dictionary to determine how to score each move
     based on the metric mode and move type.
+
+    Args:
+        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm).
+        field: The move field type (rotation, outer, inner).
+        moves: List of moves to score.
+
+    Returns:
+        The total score for the moves under the specified metric.
+
     """
     datas = MOVE_COUNTS[mode][field]
 
@@ -80,6 +96,16 @@ def compute_score(mode: str,
 
     Combines scores from all move types (rotations, outer, and inner moves)
     according to the rules of the specified metric.
+
+    Args:
+        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm).
+        rotations: List of rotation moves.
+        outer: List of outer face moves.
+        inner: List of inner slice moves.
+
+    Returns:
+        The total score combining all move types.
+
     """
     return (
         move_score(mode, 'rotation', rotations)
@@ -96,6 +122,13 @@ def compute_generators(moves: 'Algorithm') -> list[str]:
     direction and whether it's a single or double turn) and returns them in
     order of frequency.
     Rotations are excluded from this analysis.
+
+    Args:
+        moves: The algorithm to analyze.
+
+    Returns:
+        List of face names sorted by frequency (most frequent first).
+
     """
     count: dict[str, int] = {}
     for move in moves:
@@ -123,6 +156,13 @@ def regroup_moves(
 
     This separation is necessary for accurate metric calculations, as different
     move types are counted differently depending on the metric.
+
+    Args:
+        moves: The algorithm to categorize.
+
+    Returns:
+        Tuple of (pauses, rotations, outer_moves, inner_moves) lists.
+
     """
     pauses = []
     rotations = []

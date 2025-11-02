@@ -10,14 +10,30 @@ class TestExplicitMovePermutations(unittest.TestCase):  # noqa: PLR0904
 
     @staticmethod
     def create_numbered_cube() -> VCube:
-        """Create a cube with numbered positions for tracking permutations."""
+        """
+        Create a cube with numbered positions for tracking permutations.
+
+        Returns:
+            VCube with unique character positions for permutation tracking.
+
+        """
         state = ''.join([chr(ord('A') + i) for i in range(54)])
         return VCube(initial=state, check=False)
 
     @staticmethod
     def get_permutations(initial_state: str,
                          final_state: str) -> dict[int, int]:
-        """Get position permutations between initial and final states."""
+        """
+        Get position permutations between initial and final states.
+
+        Args:
+            initial_state: Initial cube state string.
+            final_state: Final cube state string.
+
+        Returns:
+            Dictionary mapping destination positions to source positions.
+
+        """
         permutations = {}
         for dest_pos in range(54):
             dest_char = final_state[dest_pos]
