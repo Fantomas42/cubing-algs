@@ -34,59 +34,87 @@ class MetricsTestCase(unittest.TestCase):
 
     def test_htm(self) -> None:
         """Test htm."""
-        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw']
-        scores = [1, 1, 2, 2, 0, 1, 1]
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2',
+        ]
+        scores = [1, 1, 2, 2, 0, 1, 1, 2, 2, 2]
 
         for move, score in zip(moves, scores, strict=True):
-            self.assertEqual(parse_moves(move).metrics.htm, score)
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.htm, score)
 
     def test_qtm(self) -> None:
         """Test qtm."""
-        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw']
-        scores = [1, 2, 2, 4, 0, 1, 1]
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2',
+        ]
+        scores = [1, 2, 2, 4, 0, 1, 1, 2, 2, 4]
 
         for move, score in zip(moves, scores, strict=True):
-            self.assertEqual(parse_moves(move).metrics.qtm, score)
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.qtm, score)
 
     def test_stm(self) -> None:
         """Test stm."""
-        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw']
-        scores = [1, 1, 1, 1, 0, 1, 1]
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2',
+        ]
+        scores = [1, 1, 1, 1, 0, 1, 1, 1, 1, 1]
 
         for move, score in zip(moves, scores, strict=True):
-            self.assertEqual(parse_moves(move).metrics.stm, score)
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.stm, score)
 
     def test_etm(self) -> None:
         """Test etm."""
-        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw']
-        scores = [1, 1, 1, 1, 1, 1, 1]
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2',
+        ]
+        scores = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         for move, score in zip(moves, scores, strict=True):
-            self.assertEqual(parse_moves(move).metrics.etm, score)
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.etm, score)
 
     def test_qstm(self) -> None:
         """Test qstm."""
-        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw']
-        scores = [1, 2, 1, 2, 0, 1, 1]
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2',
+        ]
+        scores = [1, 2, 1, 2, 0, 1, 1, 1, 1, 2]
 
         for move, score in zip(moves, scores, strict=True):
-            self.assertEqual(parse_moves(move).metrics.qstm, score)
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.qstm, score)
 
     def test_rtm(self) -> None:
         """Test rtm."""
-        moves = ['R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw', 'x y2']
-        scores = [0, 0, 0, 0, 2, 0, 0, 3]
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2', 'x y2',
+        ]
+        scores = [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3]
 
         for move, score in zip(moves, scores, strict=True):
-            self.assertEqual(parse_moves(move).metrics.rtm, score)
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.rtm, score)
 
     def test_obtm(self) -> None:
         """Test obtm."""
-        moves = ['R', 'R2', 'M', 'M2', "f'", 'Fw', 'x y z']
-        scores = [1, 1, 2, 2, 1, 1, 0]
+        moves = [
+            'R', 'R2', 'M', 'M2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2', 'x y z',
+        ]
+        scores = [1, 1, 2, 2, 1, 1, 2, 2, 2, 0]
 
         for move, score in zip(moves, scores, strict=True):
-            self.assertEqual(parse_moves(move).metrics.obtm, score)
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.obtm, score)
 
     def test_issue_11(self) -> None:
         """Test issue 11."""
