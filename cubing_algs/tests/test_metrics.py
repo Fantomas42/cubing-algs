@@ -260,6 +260,45 @@ class MetricsTestCase(unittest.TestCase):
                 f'OBTM should equal HTM for { moves_str }',
             )
 
+    def test_obqtm_alias(self) -> None:
+        """Test OBQTM alias for QTM."""
+        # OBQTM should always equal QTM
+        test_cases = [
+            "R U R' U'",       # Simple algorithm
+            'M2 U M2 U2',      # With slice moves
+            "R U2 F' D2",      # With double moves
+            "Rw U Rw' U'",     # With wide moves
+            "x R U R' U' x'",  # With rotations
+        ]
+
+        for moves_str in test_cases:
+            algo = parse_moves(moves_str)
+            self.assertEqual(
+                algo.metrics.obqtm,
+                algo.metrics.qtm,
+                f'OBQTM should equal QTM for { moves_str }',
+            )
+
+    def test_rbtm_alias(self) -> None:
+        """Test RBTM alias for STM."""
+        # RBTM should always equal STM
+        test_cases = [
+            "R U R' U'",       # Simple algorithm
+            'M2 U M2 U2',      # With slice moves
+            "R U2 F' D2",      # With double moves
+            "Rw U Rw' U'",     # With wide moves
+            "x R U R' U' x'",  # With rotations
+            '2R 2-3Rw U',      # Big cube moves
+        ]
+
+        for moves_str in test_cases:
+            algo = parse_moves(moves_str)
+            self.assertEqual(
+                algo.metrics.rbtm,
+                algo.metrics.stm,
+                f'RBTM should equal STM for { moves_str }',
+            )
+
     def test_btm_equals_stm(self) -> None:
         """Test BTM equals STM for 3x3x3."""
         # BTM should equal STM for 3x3x3 cubes

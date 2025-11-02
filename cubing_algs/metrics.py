@@ -90,12 +90,19 @@ class MetricsData(NamedTuple):
             moves (Rw, Uw, etc.).
         inner_moves: Number of inner slice moves (M, E, S).
         htm: Half Turn Metric score (also known as OBTM).
-        qtm: Quarter Turn Metric score.
-        stm: Slice Turn Metric score (also known as BTM).
+        qtm: Quarter Turn Metric score (also known as OBQTM).
+        stm: Slice Turn Metric score (also known as BTM, RBTM).
         etm: Execution Turn Metric score (includes rotations).
         rtm: Rotation Turn Metric score (only rotations).
         qstm: Quarter Slice Turn Metric score (also known as BQTM).
         generators: List of face names sorted by usage frequency.
+
+    Properties (aliases):
+        obtm: Alias for htm (Outer Block Turn Metric).
+        obqtm: Alias for qtm (Outer Block Quantum Turn Metric).
+        rbtm: Alias for stm (Range Block Turn Metric).
+        btm: Alias for stm (Block Turn Metric).
+        bqtm: Alias for qstm (Block Quarter Turn Metric).
 
     """
 
@@ -117,6 +124,8 @@ class MetricsData(NamedTuple):
         Outer Block Turn Metric (OBTM) - alias for HTM.
 
         OBTM is the official WCA metric and is identical to HTM.
+        Inner block moves count as 2 turns, outer block moves as 1,
+        rotations as 0.
 
         Returns:
             The HTM/OBTM score.
@@ -125,15 +134,44 @@ class MetricsData(NamedTuple):
         return self.htm
 
     @property
+    def obqtm(self) -> int:
+        """
+        Outer Block Quantum Turn Metric (OBQTM) - alias for QTM.
+
+        OBQTM uses quarter-turn counting for outer block moves.
+        Inner block moves count as 2 turns per quantum, outer block
+        moves count as 1 turn per quantum, rotations count as 0.
+
+        Returns:
+            The QTM/OBQTM score.
+
+        """
+        return self.qtm
+
+    @property
+    def rbtm(self) -> int:
+        """
+        Range Block Turn Metric (RBTM) - alias for STM.
+
+        RBTM counts any layer turn as 1 move regardless of whether
+        it's inner or outer. Identical counting rules to STM.
+
+        Returns:
+            The STM/RBTM score.
+
+        """
+        return self.stm
+
+    @property
     def btm(self) -> int:
         """
         Block Turn Metric (BTM) - alias for STM.
 
         BTM is used for big cubes and counts any contiguous block of layers
-        as a single move. It uses identical counting rules to STM.
+        as a single move. It uses identical counting rules to STM and RBTM.
 
         Returns:
-            The STM/BTM score.
+            The STM/BTM/RBTM score.
 
         """
         return self.stm
@@ -366,7 +404,7 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
 
     This is the main entry point for algorithm analysis. It computes:
     - Move counts by type (rotations, outer moves, inner moves, pauses)
-    - All standard metrics (HTM/OBTM, QTM, STM/BTM, QSTM/BQTM, ETM, RTM)
+    - All standard metrics with their various aliases
     - Generator analysis (most frequently used faces)
 
     Args:
@@ -378,16 +416,18 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
             - rotations: Number of rotation moves (x, y, z)
             - outer_moves: Number of outer face moves (R, U, F, Rw, etc.)
             - inner_moves: Number of inner slice moves (M, E, S)
-            - htm: Half Turn Metric score (also OBTM)
+            - htm: Half Turn Metric score
             - qtm: Quarter Turn Metric score
-            - stm: Slice Turn Metric score (also BTM)
+            - stm: Slice Turn Metric score
             - etm: Execution Turn Metric score
             - rtm: Rotation Turn Metric score
-            - qstm: Quarter Slice Turn Metric score (also BQTM)
+            - qstm: Quarter Slice Turn Metric score
             - generators: List of most frequently used faces
-            - obtm: Property alias for htm
-            - btm: Property alias for stm
-            - bqtm: Property alias for qstm
+            - obtm: Property alias for htm (Outer Block Turn Metric)
+            - obqtm: Property alias for qtm (Outer Block Quantum Turn Metric)
+            - rbtm: Property alias for stm (Range Block Turn Metric)
+            - btm: Property alias for stm (Block Turn Metric)
+            - bqtm: Property alias for qstm (Block Quarter Turn Metric)
 
     Examples:
         >>> algo = parse_moves("R U R' U'")
