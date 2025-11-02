@@ -19,6 +19,7 @@ from cubing_algs.impacts import compute_parity
 from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
 from cubing_algs.impacts import find_permutation_cycles
+from cubing_algs.impacts import positions_on_adjacent_corners
 from cubing_algs.vcube import VCube
 
 
@@ -3398,3 +3399,44 @@ class TestOrientationInvariance(unittest.TestCase):
         remain consistent and predictable for each orientation.
         """
         self.check_pre_orientation_consistency('qtm')
+
+
+class TestPositionsOnAdjacentCorners(unittest.TestCase):
+    """Test the positions_on_adjacent_corners helper function."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.cube = VCube()
+
+    def test_same_corner_positions_are_not_adjacent(self) -> None:
+        """Test that two positions on the same corner return False."""
+        # URF corner has positions [8, 9, 20]
+        # Test all combinations within the same corner
+        result = positions_on_adjacent_corners(8, 9, self.cube)
+        self.assertFalse(result)
+
+        result = positions_on_adjacent_corners(8, 20, self.cube)
+        self.assertFalse(result)
+
+        result = positions_on_adjacent_corners(9, 20, self.cube)
+        self.assertFalse(result)
+
+        # Test reverse order
+        result = positions_on_adjacent_corners(9, 8, self.cube)
+        self.assertFalse(result)
+
+    def test_adjacent_corners_return_true(self) -> None:
+        """Test that positions on adjacent corners return True."""
+        # URF [8, 9, 20] and UBR [2, 45, 11] share edge UR
+        result = positions_on_adjacent_corners(8, 2, self.cube)
+        self.assertTrue(result)
+
+        # URF [8, 9, 20] and DFR [29, 26, 15] share edge FR
+        result = positions_on_adjacent_corners(9, 29, self.cube)
+        self.assertTrue(result)
+
+    def test_non_adjacent_corners_return_false(self) -> None:
+        """Test that positions on non-adjacent corners return False."""
+        # URF [8, 9, 20] and DBL [33, 53, 42] don't share an edge
+        result = positions_on_adjacent_corners(8, 33, self.cube)
+        self.assertFalse(result)
