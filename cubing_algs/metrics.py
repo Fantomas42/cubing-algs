@@ -49,6 +49,20 @@ Supported Metrics
 
     - Example: x y2 z = 1+2+1 = 4 RTM
 
+**BTM (Block Turn Metric)**
+    Any group of contiguous slices moving the same way counts as 1 move.
+    Designed for big cubes (4x4x4, 5x5x5, etc.) where multiple layers can move
+    together. Identical to STM for counting purposes.
+
+    - Example: R U2 F M2 = 1+1+1+1 = 4 BTM
+    - Big cube example: 2R 3Rw U 2-3r = 1+1+1+1 = 4 BTM
+
+**BQTM (Block Quarter Turn Metric)**
+    Same as BTM but 90-degree turns count as 1, 180-degree turns count as 2.
+    Quarter-turn variant of BTM for big cubes.
+
+    - Example: R U2 F M2 = 1+2+1+2 = 6 BQTM
+
 References
 ----------
 - https://www.speedsolving.com/wiki/index.php?title=Metric
@@ -77,10 +91,10 @@ class MetricsData(NamedTuple):
         inner_moves: Number of inner slice moves (M, E, S).
         htm: Half Turn Metric score (also known as OBTM).
         qtm: Quarter Turn Metric score.
-        stm: Slice Turn Metric score.
+        stm: Slice Turn Metric score (also known as BTM).
         etm: Execution Turn Metric score (includes rotations).
         rtm: Rotation Turn Metric score (only rotations).
-        qstm: Quarter Slice Turn Metric score.
+        qstm: Quarter Slice Turn Metric score (also known as BQTM).
         generators: List of face names sorted by usage frequency.
 
     """
@@ -109,6 +123,34 @@ class MetricsData(NamedTuple):
 
         """
         return self.htm
+
+    @property
+    def btm(self) -> int:
+        """
+        Block Turn Metric (BTM) - alias for STM.
+
+        BTM is used for big cubes and counts any contiguous block of layers
+        as a single move. It uses identical counting rules to STM.
+
+        Returns:
+            The STM/BTM score.
+
+        """
+        return self.stm
+
+    @property
+    def bqtm(self) -> int:
+        """
+        Block Quarter Turn Metric (BQTM) - alias for QSTM.
+
+        BQTM is the quarter-turn variant of BTM for big cubes. It uses
+        identical counting rules to QSTM.
+
+        Returns:
+            The QSTM/BQTM score.
+
+        """
+        return self.qstm
 
 
 # Dictionary mapping metric names to scoring rules for different move types.
@@ -324,7 +366,7 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
 
     This is the main entry point for algorithm analysis. It computes:
     - Move counts by type (rotations, outer moves, inner moves, pauses)
-    - All standard metrics (HTM/OBTM, QTM, STM, QSTM, ETM, RTM)
+    - All standard metrics (HTM/OBTM, QTM, STM/BTM, QSTM/BQTM, ETM, RTM)
     - Generator analysis (most frequently used faces)
 
     Args:
@@ -338,11 +380,14 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
             - inner_moves: Number of inner slice moves (M, E, S)
             - htm: Half Turn Metric score (also OBTM)
             - qtm: Quarter Turn Metric score
-            - stm: Slice Turn Metric score
+            - stm: Slice Turn Metric score (also BTM)
             - etm: Execution Turn Metric score
             - rtm: Rotation Turn Metric score
-            - qstm: Quarter Slice Turn Metric score
+            - qstm: Quarter Slice Turn Metric score (also BQTM)
             - generators: List of most frequently used faces
+            - obtm: Property alias for htm
+            - btm: Property alias for stm
+            - bqtm: Property alias for qstm
 
     Examples:
         >>> algo = parse_moves("R U R' U'")
@@ -358,8 +403,12 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
         6
         >>> metrics.stm  # M2 counts as 1
         4
+        >>> metrics.btm  # M2 counts as 1 (same as STM)
+        4
         >>> metrics.qtm  # M2 counts as 4, U2 counts as 2
         11
+        >>> metrics.bqtm  # M2 counts as 2, U2 counts as 2 (same as QSTM)
+        6
 
         >>> algo = parse_moves("x R U R' U' x'")
         >>> metrics = compute_metrics(algo)
@@ -373,6 +422,10 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
     Note:
         The MetricsData.obtm property returns the same value as htm,
         as OBTM is an alias for HTM and represents the official WCA metric.
+
+        BTM and STM produce identical counts for 3x3x3 cubes. The distinction
+        becomes meaningful on big cubes where BTM treats any contiguous block
+        of layers as a single move.
 
     """
     pauses, rotations, outer_moves, inner_moves = regroup_moves(moves)

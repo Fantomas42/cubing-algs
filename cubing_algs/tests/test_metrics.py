@@ -116,6 +116,30 @@ class MetricsTestCase(unittest.TestCase):
             with self.subTest(move=move, score=score):
                 self.assertEqual(parse_moves(move).metrics.obtm, score)
 
+    def test_btm(self) -> None:
+        """Test btm."""
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2',
+        ]
+        scores = [1, 1, 1, 1, 0, 1, 1, 1, 1, 1]
+
+        for move, score in zip(moves, scores, strict=True):
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.btm, score)
+
+    def test_bqtm(self) -> None:
+        """Test bqtm."""
+        moves = [
+            'R', 'R2', 'M', 'M2', 'x2', "f'", 'Fw',
+            '2R', '2-3Rw', '2-3Rw2',
+        ]
+        scores = [1, 2, 1, 2, 0, 1, 1, 1, 1, 2]
+
+        for move, score in zip(moves, scores, strict=True):
+            with self.subTest(move=move, score=score):
+                self.assertEqual(parse_moves(move).metrics.bqtm, score)
+
     def test_issue_11(self) -> None:
         """Test issue 11."""
         moves = "R U F' B R' U F' U' F D F' D' F' D' F D' L D L' R D' R' D' B D' B' D' D' R D' D' R' D B' D' B D' D' F D' F' D F D F' D' D D' D' L D B D' B' L' D R F D F' D' R' R F D' F' D' F D F' R' F D F' D' F' R F R' D"  # noqa: E501
@@ -234,4 +258,44 @@ class MetricsTestCase(unittest.TestCase):
                 algo.metrics.obtm,
                 algo.metrics.htm,
                 f'OBTM should equal HTM for { moves_str }',
+            )
+
+    def test_btm_equals_stm(self) -> None:
+        """Test BTM equals STM for 3x3x3."""
+        # BTM should equal STM for 3x3x3 cubes
+        test_cases = [
+            "R U R' U'",       # Simple algorithm
+            'M2 U M2 U2',      # With slice moves
+            "R U2 F' D2",      # With double moves
+            "Rw U Rw' U'",     # With wide moves
+            "x R U R' U' x'",  # With rotations
+            '2R 2-3Rw U',      # Big cube moves
+        ]
+
+        for moves_str in test_cases:
+            algo = parse_moves(moves_str)
+            self.assertEqual(
+                algo.metrics.btm,
+                algo.metrics.stm,
+                f'BTM should equal STM for { moves_str }',
+            )
+
+    def test_bqtm_equals_qstm(self) -> None:
+        """Test BQTM equals QSTM for 3x3x3."""
+        # BQTM should equal QSTM for 3x3x3 cubes
+        test_cases = [
+            "R U R' U'",       # Simple algorithm
+            'M2 U M2 U2',      # With slice moves
+            "R U2 F' D2",      # With double moves
+            "Rw U Rw' U'",     # With wide moves
+            "x R U R' U' x'",  # With rotations
+            '2R 2-3Rw U',      # Big cube moves
+        ]
+
+        for moves_str in test_cases:
+            algo = parse_moves(moves_str)
+            self.assertEqual(
+                algo.metrics.bqtm,
+                algo.metrics.qstm,
+                f'BQTM should equal QSTM for { moves_str }',
             )
