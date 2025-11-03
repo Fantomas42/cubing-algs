@@ -3353,18 +3353,13 @@ class TestComputeCubieComplexity(unittest.TestCase):
 
 
 class TestOrientationInvariance(unittest.TestCase):
-    """
-    Test that distance metrics behave correctly with cube rotations.
+    """Test that distance metrics behave correctly with cube rotations."""
 
-    Post-orientation (rotations at the end) should preserve distance metrics
-    since they only change the final viewing angle, not the actual moves.
-
-    Pre-orientation changes the initial face configuration, which affects
-    distance calculations in transformation-based metrics. These tests verify
-    that the distances are consistent and predictable for each orientation.
-    """
-
-    SCRAMBLE = "R U R' U' L' B L B' R2 D F2 D' R' U2 L U L' B2 R F"
+    SCRAMBLES = (
+        'U R',
+        "R U R' U' R' F R2 U' R' U' R U R' F'",
+        "R U R' U' L' B L B' R2 D F2 D' R' U2 L U L' B2 R F",
+    )
     ORIENTATIONS = ('', 'z2', 'x', 'x y')
 
     def check_orientation_invariance(
@@ -3378,54 +3373,60 @@ class TestOrientationInvariance(unittest.TestCase):
         Orientations only change the viewing angle or execution angle,
         not the actual facelet movements, so distance metrics should be equal.
         """
-        algorithm = Algorithm.parse_moves(self.SCRAMBLE)
-        metric_name = metric_type.title()
-        results = []
+        for scramble in self.SCRAMBLES:
+            with self.subTest(scramble=scramble, metric=metric_type, pre=pre):
+                algorithm = Algorithm.parse_moves(scramble)
+                metric_name = metric_type.title()
+                results = []
 
-        for orientation in self.ORIENTATIONS:
-            if pre:
-                oriented_algo = orientation + algorithm
-            else:
-                oriented_algo = algorithm + orientation
+                for orientation in self.ORIENTATIONS:
+                    if pre:
+                        oriented_algo = orientation + algorithm
+                    else:
+                        oriented_algo = algorithm + orientation
 
-            impacts = compute_impacts(oriented_algo)
-            distance_metrics = (
-                impacts.facelets_manhattan_distance
-                if metric_type == 'manhattan'
-                else impacts.facelets_qtm_distance
-            )
+                    impacts = compute_impacts(oriented_algo)
+                    distance_metrics = (
+                        impacts.facelets_manhattan_distance
+                        if metric_type == 'manhattan'
+                        else impacts.facelets_qtm_distance
+                    )
 
-            results.append({
-                'orientation': orientation,
-                'sum': distance_metrics.sum,
-                'mean': distance_metrics.mean,
-                'max': distance_metrics.max,
-            })
+                    results.append(
+                        {
+                            'orientation': orientation,
+                            'sum': distance_metrics.sum,
+                            'mean': distance_metrics.mean,
+                            'max': distance_metrics.max,
+                        },
+                    )
 
-        # Assert all orientations have identical metrics
-        base_result = results[0]
-        for result in results[1:]:
-            self.assertEqual(
-                result['sum'],
-                base_result['sum'],
-                f'{ metric_name } sum differs between '
-                f"{ base_result['orientation'] } and { result['orientation'] }",
-            )
+                # Assert all orientations have identical metrics
+                base_result = results[0]
+                for result in results[1:]:
+                    self.assertEqual(
+                        result['sum'],
+                        base_result['sum'],
+                        f'{ metric_name } sum differs between '
+                        f"{ base_result['orientation'] } "
+                        f"and { result['orientation'] }",
+                    )
 
-            self.assertEqual(
-                result['mean'],
-                base_result['mean'],
-                f'{ metric_name } mean differs between '
-                f"{ base_result['orientation'] } "
-                f"and { result['orientation'] }",
-            )
+                    self.assertEqual(
+                        result['mean'],
+                        base_result['mean'],
+                        f'{ metric_name } mean differs between '
+                        f"{ base_result['orientation'] } "
+                        f"and { result['orientation'] }",
+                    )
 
-            self.assertEqual(
-                result['max'],
-                base_result['max'],
-                f'{ metric_name } max differs between '
-                f"{ base_result['orientation'] } and { result['orientation'] }",
-            )
+                    self.assertEqual(
+                        result['max'],
+                        base_result['max'],
+                        f'{ metric_name } max differs between '
+                        f"{ base_result['orientation'] } "
+                        f"and { result['orientation'] }",
+                    )
 
     def test_manhattan_distance_invariant_under_pre_orientation(self) -> None:
         """Test Manhattan distance metrics are same across pre orientations."""
