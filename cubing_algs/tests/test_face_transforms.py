@@ -7,6 +7,7 @@ from cubing_algs.face_transforms import offset_left
 from cubing_algs.face_transforms import offset_right
 from cubing_algs.face_transforms import offset_up
 from cubing_algs.face_transforms import transform_adjacent_position
+from cubing_algs.face_transforms import transform_opposite_position
 
 
 class TestOffsetRight(unittest.TestCase):
@@ -465,7 +466,7 @@ class TestTransformationEdgeCases(unittest.TestCase):
                 self.assertEqual(transform(4), 4)
 
 
-class TestTransformPosition(unittest.TestCase):
+class TestTransformAdjacentPosition(unittest.TestCase):
     """Test the transform_adjacent_position helper function."""
 
     def test_transform_adjacent_position_uses_correct_transformation_u(
@@ -593,3 +594,31 @@ class TestTransformPosition(unittest.TestCase):
                         orig_face, dest_face, 4,
                     )
                     self.assertEqual(result, 4)
+
+
+class TestTransformOppositePosition(unittest.TestCase):
+    """Test the transform_opposite_position helper function."""
+
+    def test_transform_opposite_position_u(self) -> None:
+        """Test transform opposite on U face."""
+        self.assertEqual(transform_opposite_position('U', 0), 6)
+        self.assertEqual(transform_opposite_position('U', 1), 7)
+        self.assertEqual(transform_opposite_position('U', 2), 8)
+        self.assertEqual(transform_opposite_position('U', 3), 3)
+        self.assertEqual(transform_opposite_position('U', 4), 4)
+        self.assertEqual(transform_opposite_position('U', 5), 5)
+        self.assertEqual(transform_opposite_position('U', 6), 0)
+        self.assertEqual(transform_opposite_position('U', 7), 1)
+        self.assertEqual(transform_opposite_position('U', 8), 2)
+
+    def test_transform_opposite_position_r(self) -> None:
+        """Test transform opposite on R face."""
+        self.assertEqual(transform_opposite_position('R', 0), 2)
+        self.assertEqual(transform_opposite_position('R', 1), 1)
+        self.assertEqual(transform_opposite_position('R', 2), 0)
+        self.assertEqual(transform_opposite_position('R', 3), 5)
+        self.assertEqual(transform_opposite_position('R', 4), 4)
+        self.assertEqual(transform_opposite_position('R', 5), 3)
+        self.assertEqual(transform_opposite_position('R', 6), 8)
+        self.assertEqual(transform_opposite_position('R', 7), 7)
+        self.assertEqual(transform_opposite_position('R', 8), 6)

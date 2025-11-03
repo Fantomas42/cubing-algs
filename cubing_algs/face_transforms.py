@@ -126,6 +126,66 @@ def offset_down(position: int) -> int:
     }[position]
 
 
+def offset_horizontal_mirror(position: int) -> int:
+    """
+    Transform a position as horizontal mirror.
+
+    Maps positions as follows (in 3x3 grid):
+    0 1 2    6 7 8
+    3 4 5 -> 3 4 5
+    6 7 8    0 1 2
+
+    Args:
+        position: The original position (0-8).
+
+    Returns:
+        The same position unchanged.
+        The transformed position after horizontal mirroring.
+
+    """
+    return {
+        0: 6,
+        1: 7,
+        2: 8,
+        3: 3,
+        4: 4,
+        5: 5,
+        6: 0,
+        7: 1,
+        8: 2,
+    }[position]
+
+
+def offset_vertical_mirror(position: int) -> int:
+    """
+    Transform a position as vertical mirror.
+
+    Maps positions as follows (in 3x3 grid):
+    0 1 2    2 1 0
+    3 4 5 -> 5 4 3
+    6 7 8    8 7 6
+
+    Args:
+        position: The original position (0-8).
+
+    Returns:
+        The same position unchanged.
+        The transformed position after vertical mirroring.
+
+    """
+    return {
+        0: 2,
+        1: 1,
+        2: 0,
+        3: 5,
+        4: 4,
+        5: 3,
+        6: 8,
+        7: 7,
+        8: 6,
+    }[position]
+
+
 # Mapping of how positions transform when moving between adjacent faces
 # For each origin face, maps destination faces to the appropriate transformation
 ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
@@ -167,6 +227,17 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
     },
 }
 
+# Mapping of how positions transform when moving between opposite faces
+# For each origin face, maps destination faces to the appropriate transformation
+OPPOSITE_FACE_TRANSFORMATIONS: dict[str, Callable[[int], int]] = {
+    'U': offset_horizontal_mirror,
+    'R': offset_vertical_mirror,
+    'F': offset_vertical_mirror,
+    'D': offset_horizontal_mirror,
+    'L': offset_vertical_mirror,
+    'B': offset_vertical_mirror,
+}
+
 
 def transform_adjacent_position(
         original_face_name: str,
@@ -190,4 +261,23 @@ def transform_adjacent_position(
         destination_face_name
     ](
         destination_face_position,
+    )
+
+
+def transform_opposite_position(face_name: str, face_position: int) -> int:
+    """
+    Transform opposite destination face position to original face position.
+
+    Args:
+        face_name: The original face identifier (U/R/F/D/L/B).
+        face_position: Position on the destination face (0-8).
+
+    Returns:
+        The corresponding position on the original face.
+
+    """
+    return OPPOSITE_FACE_TRANSFORMATIONS[
+        face_name
+    ](
+        face_position,
     )
