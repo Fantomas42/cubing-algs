@@ -1,6 +1,5 @@
 """Tests for algorithm impact analysis."""
 import unittest
-from typing import ClassVar
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
@@ -3368,30 +3367,15 @@ class TestOrientationInvariance(unittest.TestCase):
     SCRAMBLE = "R U R' U' L' B L B' R2 D F2 D' R' U2 L U L' B2 R F"
     ORIENTATIONS = ('', 'z2', 'x', 'x y')
 
-    # Expected values for pre-orientation tests
-    # These values are based on the transformation-based distance calculations
-    MANHATTAN_PRE_ORIENTATION_EXPECTED: ClassVar[
-        dict[str, dict[str, int | float]]] = {
-            '': {'sum': 215, 'mean': 4.479, 'max': 10},
-            'z2': {'sum': 213, 'mean': 4.437, 'max': 10},
-            'x': {'sum': 219, 'mean': 4.562, 'max': 10},
-            'x y': {'sum': 209, 'mean': 4.354, 'max': 8},
-        }
-
-    QTM_PRE_ORIENTATION_EXPECTED: ClassVar[
-        dict[str, dict[str, int | float]]] = {
-            '': {'sum': 100, 'mean': 2.08, 'max': 4},
-            'z2': {'sum': 100, 'mean': 2.08, 'max': 4},
-            'x': {'sum': 94, 'mean': 1.96, 'max': 4},
-            'x y': {'sum': 92, 'mean': 1.92, 'max': 4},
-        }
-
-    def check_post_orientation_invariance(
-            self, metric_type: str) -> None:
+    def check_orientation_invariance(
+            self,
+            metric_type: str,
+            *, pre: bool,
+    ) -> None:
         """
-        Check that distance metrics are invariant under post-orientation.
+        Check that distance metrics are invariant under orientation.
 
-        Post-orientations (rotations at the end) only change the viewing angle,
+        Orientations only change the viewing angle or execution angle,
         not the actual facelet movements, so distance metrics should be equal.
         """
         algorithm = Algorithm.parse_moves(self.SCRAMBLE)
@@ -3399,7 +3383,10 @@ class TestOrientationInvariance(unittest.TestCase):
         results = []
 
         for orientation in self.ORIENTATIONS:
-            oriented_algo = algorithm + orientation
+            if pre:
+                oriented_algo = orientation + algorithm
+            else:
+                oriented_algo = algorithm + orientation
 
             impacts = compute_impacts(oriented_algo)
             distance_metrics = (
@@ -3440,90 +3427,21 @@ class TestOrientationInvariance(unittest.TestCase):
                 f"{ base_result['orientation'] } and { result['orientation'] }",
             )
 
-    def check_pre_orientation_consistency(
-            self,
-            metric_type: str,
-    ) -> None:
-        """
-        Check pre-orientation produces consistent, predictable distance values.
-
-        Pre-orientation changes which faces are adjacent/opposite, affecting
-        transformation-based distance calculations. This test verifies that
-        each orientation produces the expected, consistent distance values.
-        """
-        algorithm = Algorithm.parse_moves(self.SCRAMBLE)
-        metric_name = metric_type.title()
-
-        expected_values = (
-            self.MANHATTAN_PRE_ORIENTATION_EXPECTED
-            if metric_type == 'manhattan'
-            else self.QTM_PRE_ORIENTATION_EXPECTED
-        )
-
-        for orientation in self.ORIENTATIONS:
-            if orientation:
-                oriented_algo = Algorithm.parse_moves(orientation) + algorithm
-            else:
-                oriented_algo = algorithm
-
-            impacts = compute_impacts(oriented_algo)
-            distance_metrics = (
-                impacts.facelets_manhattan_distance
-                if metric_type == 'manhattan'
-                else impacts.facelets_qtm_distance
-            )
-
-            expected = expected_values[orientation]
-            self.assertEqual(
-                distance_metrics.sum,
-                expected['sum'],
-                f'{ metric_name } sum for orientation "{ orientation }" '
-                f'expected { expected["sum"] }, got { distance_metrics.sum }',
-            )
-
-            self.assertAlmostEqual(
-                distance_metrics.mean,
-                expected['mean'],
-                places=2,
-                msg=f'{ metric_name } mean for orientation "{ orientation }" '
-                f'expected { expected["mean"] }, got { distance_metrics.mean }',
-            )
-
-            self.assertEqual(
-                distance_metrics.max,
-                expected['max'],
-                f'{ metric_name } max for orientation "{ orientation }" '
-                f'expected { expected["max"] }, got { distance_metrics.max }',
-            )
+    def test_manhattan_distance_invariant_under_pre_orientation(self) -> None:
+        """Test Manhattan distance metrics are same across pre orientations."""
+        self.check_orientation_invariance('manhattan', pre=True)
 
     def test_manhattan_distance_invariant_under_post_orientation(self) -> None:
         """Test Manhattan distance metrics are same across post orientations."""
-        self.check_post_orientation_invariance('manhattan')
+        self.check_orientation_invariance('manhattan', pre=False)
 
-    def test_manhattan_distance_consistent_under_pre_orientation(self) -> None:
-        """
-        Test Manhattan distance metrics are consistent across pre orientations.
-
-        Pre-orientation changes face relationships, so distances vary but
-        remain consistent and predictable for each orientation.
-        """
-        self.check_pre_orientation_consistency('manhattan')
+    def test_qtm_distance_invariant_under_pre_orientation(self) -> None:
+        """Test that QTM distance metrics are same across pre orientations."""
+        self.check_orientation_invariance('qtm', pre=True)
 
     def test_qtm_distance_invariant_under_post_orientation(self) -> None:
-        """
-        Test that QTM distance metrics remain the same
-        across post orientations.
-        """
-        self.check_post_orientation_invariance('qtm')
-
-    def test_qtm_distance_consistent_under_pre_orientation(self) -> None:
-        """
-        Test QTM distance metrics are consistent across pre orientations.
-
-        Pre-orientation changes face relationships, so distances vary but
-        remain consistent and predictable for each orientation.
-        """
-        self.check_pre_orientation_consistency('qtm')
+        """Test that QTM distance metrics are same across post orientations."""
+        self.check_orientation_invariance('qtm', pre=False)
 
 
 class TestPositionsOnAdjacentCorners(unittest.TestCase):
