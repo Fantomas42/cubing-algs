@@ -1,5 +1,4 @@
 """Tests for algorithm impact analysis."""
-
 import unittest
 from typing import ClassVar
 
@@ -15,10 +14,12 @@ from cubing_algs.impacts import compute_face_impact
 from cubing_algs.impacts import compute_face_to_face_matrix
 from cubing_algs.impacts import compute_impacts
 from cubing_algs.impacts import compute_manhattan_distance
+from cubing_algs.impacts import compute_opposite_face_manhattan_distance
 from cubing_algs.impacts import compute_parity
 from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
 from cubing_algs.impacts import find_permutation_cycles
+from cubing_algs.impacts import parse_facelet_position
 from cubing_algs.impacts import positions_on_adjacent_corners
 from cubing_algs.vcube import VCube
 
@@ -369,9 +370,18 @@ class TestComputeManhattanDistance(unittest.TestCase):
     def test_opposite_face_distance(self) -> None:
         """Test distance between opposite faces."""
         test_cases = [
+            # Center
             (4, 31, 6), (31, 4, 6),
-            (12, 41, 4), (41, 12, 4),
-            (6, 29, 6), (29, 6, 6),
+            # Edges
+            (1, 28, 6), (28, 1, 6),
+            (1, 30, 6), (30, 1, 6),
+            (1, 32, 6), (32, 1, 6),
+            (1, 34, 4), (34, 1, 4),
+            # Corners
+            (0, 29, 8), (29, 0, 8),
+            (0, 27, 6), (27, 0, 6),
+            (0, 33, 4), (33, 0, 4),
+            (0, 35, 6), (35, 0, 6),
         ]
 
         for orig_pos, final_pos, expected_distance in test_cases:
@@ -421,6 +431,113 @@ class TestComputeManhattanDistance(unittest.TestCase):
 
         self.assertEqual(distance1, 5)
         self.assertEqual(distance2, 5)
+
+
+class TestComputeOppositeFaceManhattanDistance(unittest.TestCase):
+    """Comprehensive tests for compute_opposite_face_manhattan_distance."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.cube = VCube()
+
+    def test_u_to_d_face_distances(self) -> None:
+        """Test distances from U face positions to all D face positions."""
+        # Test one corner (0) and one edge (1) from U to all D positions
+        test_cases = [
+            # Center
+            (4, 31, 6), (31, 4, 6),
+            # Edges (from position 1 on U to all D positions)
+            (1, 28, 6), (28, 1, 6),
+            (1, 30, 6), (30, 1, 6),
+            (1, 32, 6), (32, 1, 6),
+            (1, 34, 4), (34, 1, 4),
+            # Corners (from position 0 on U to all D positions)
+            (0, 29, 8), (29, 0, 8),
+            (0, 27, 6), (27, 0, 6),
+            (0, 33, 4), (33, 0, 4),
+            (0, 35, 6), (35, 0, 6),
+        ]
+
+        for orig_pos, final_pos, expected in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                orig = parse_facelet_position(orig_pos, self.cube)
+                final = parse_facelet_position(final_pos, self.cube)
+
+                distance = compute_opposite_face_manhattan_distance(
+                    orig, final, self.cube,
+                )
+
+                self.assertEqual(
+                    distance, expected,
+                    f'Distance from {orig_pos} to {final_pos} '
+                    f'should be {expected}, got {distance}',
+                )
+
+    def test_r_to_l_face_distances(self) -> None:
+        """Test distances from R face positions to all L face positions."""
+        # Test one corner (9) and one edge (10) from R to all L positions
+        test_cases = [
+            # Center
+            (13, 40, 6), (40, 13, 6),
+            # Edges (from position 10 on R to all L positions)
+            (10, 37, 4), (37, 10, 4),
+            (10, 39, 6), (39, 10, 6),
+            (10, 41, 6), (41, 10, 6),
+            (10, 43, 6), (43, 10, 6),
+            # Corners (from position 9 on R to all L positions)
+            (9, 36, 6), (36, 9, 6),
+            (9, 38, 4), (38, 9, 4),
+            (9, 42, 8), (42, 9, 8),
+            (9, 44, 6), (44, 9, 6),
+        ]
+
+        for orig_pos, final_pos, expected in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                orig = parse_facelet_position(orig_pos, self.cube)
+                final = parse_facelet_position(final_pos, self.cube)
+
+                distance = compute_opposite_face_manhattan_distance(
+                    orig, final, self.cube,
+                )
+
+                self.assertEqual(
+                    distance, expected,
+                    f'Distance from {orig_pos} to {final_pos} '
+                    f'should be {expected}, got {distance}',
+                )
+
+    def test_f_to_b_face_distances(self) -> None:
+        """Test distances from F face positions to all B face positions."""
+        # Test one corner (18) and one edge (19) from F to all B positions
+        test_cases = [
+            # Center
+            (22, 49, 6), (49, 22, 6),
+            # Edges (from position 19 on F to all B positions)
+            (19, 46, 4), (46, 19, 4),
+            (19, 48, 6), (48, 19, 6),
+            (19, 50, 6), (50, 19, 6),
+            (19, 52, 6), (52, 19, 6),
+            # Corners (from position 18 on F to all B positions)
+            (18, 45, 6), (45, 18, 6),
+            (18, 47, 4), (47, 18, 4),
+            (18, 51, 8), (51, 18, 8),
+            (18, 53, 6), (53, 18, 6),
+        ]
+
+        for orig_pos, final_pos, expected in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                orig = parse_facelet_position(orig_pos, self.cube)
+                final = parse_facelet_position(final_pos, self.cube)
+
+                distance = compute_opposite_face_manhattan_distance(
+                    orig, final, self.cube,
+                )
+
+                self.assertEqual(
+                    distance, expected,
+                    f'Distance from {orig_pos} to {final_pos} '
+                    f'should be {expected}, got {distance}',
+                )
 
 
 class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904

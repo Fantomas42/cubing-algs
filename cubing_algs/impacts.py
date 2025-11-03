@@ -21,6 +21,7 @@ from cubing_algs.constants import QTM_OPPOSITE_FACE_DOUBLE_PAIRS
 from cubing_algs.constants import QTM_OPPOSITE_FACE_SIMPLE_PAIRS
 from cubing_algs.constants import QTM_SAME_FACE_OPPOSITE_PAIRS
 from cubing_algs.face_transforms import transform_adjacent_position
+from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
 
 if TYPE_CHECKING:
@@ -161,53 +162,6 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
     )
 
 
-def compute_within_face_manhattan_distance(
-    orig: FaceletPosition,
-    final: FaceletPosition,
-) -> int:
-    """
-    Calculate Manhattan distance for positions on the same face.
-
-    Args:
-        orig: The original facelet position.
-        final: The final facelet position.
-
-    Returns:
-        Manhattan distance in grid units.
-
-    """
-    return abs(orig.row - final.row) + abs(orig.col - final.col)
-
-
-def compute_opposite_face_manhattan_distance(
-    orig: FaceletPosition,
-    final: FaceletPosition,
-    cube: 'VCube',
-) -> int:
-    """
-    Calculate Manhattan distance for positions on opposite faces.
-
-    Distance = 2 * cube_size + within-face distance on destination
-    The factor of 2 accounts for crossing through the cube's interior.
-
-    Args:
-        orig: The original facelet position.
-        final: The final facelet position.
-        cube: The virtual cube for size context.
-
-    Returns:
-        Manhattan distance across opposite faces.
-
-    """
-    # Distance to cross from one face to the opposite face
-    cross_face_distance = cube.size * 2
-
-    # Add the within-face distance on the destination face
-    within_face_distance = abs(final.row - orig.row) + abs(final.col - orig.col)
-
-    return cross_face_distance + within_face_distance
-
-
 def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
     """
     Check if two positions are on the same physical piece (edge or corner).
@@ -272,6 +226,66 @@ def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
 
     # Adjacent corners share exactly 2 faces (an edge)
     return len(faces1 & faces2) == 2
+
+
+def compute_within_face_manhattan_distance(
+        orig: FaceletPosition,
+        final: FaceletPosition,
+) -> int:
+    """
+    Calculate Manhattan distance for positions on the same face.
+
+    Args:
+        orig: The original facelet position.
+        final: The final facelet position.
+
+    Returns:
+        Manhattan distance in grid units.
+
+    """
+    return abs(orig.row - final.row) + abs(orig.col - final.col)
+
+
+def compute_opposite_face_manhattan_distance(
+        orig: FaceletPosition,
+        final: FaceletPosition,
+        cube: 'VCube',
+) -> int:
+    """
+    Calculate Manhattan distance for positions on opposite faces.
+
+    Uses position transformation to determine the aligned reference point
+    on the destination face, then calculates cross-face and within-face
+    components of the distance.
+
+    For centers: Returns 2 * cube_size (6 for 3x3x3).
+    For others: Base cross-face distance (4) + within-face distance.
+
+    Args:
+        orig: The original facelet position.
+        final: The final facelet position.
+        cube: The virtual cube for size context.
+
+    Returns:
+        Manhattan distance across opposite faces.
+
+    """
+    if orig.face_position == 4:
+        return cube.size * 2
+
+    translated_pos = transform_opposite_position(
+        final.face_name,
+        final.face_position,
+    )
+    translated = parse_facelet_position(translated_pos, cube)
+
+    within_face_distance = abs(
+        translated.row - orig.row,
+    ) + abs(
+        translated.col - orig.col,
+    )
+
+    return within_face_distance + cube.size + 1
 
 
 def compute_adjacent_face_manhattan_distance(
@@ -387,7 +401,7 @@ def compute_within_face_qtm_distance(pos_pair: tuple[int, int]) -> int:
 
 
 def compute_opposite_face_qtm_distance(pos: int,
-                                     pos_pair: tuple[int, int]) -> int:
+                                       pos_pair: tuple[int, int]) -> int:
     """
     Calculate QTM distance for positions on opposite faces.
 
@@ -410,8 +424,8 @@ def compute_opposite_face_qtm_distance(pos: int,
 
 
 def compute_adjacent_face_edge_qtm_distance(original_pos: int, final_pos: int,
-                                          orig_face_pos: int,
-                                          final_face_pos: int) -> int | None:
+                                            orig_face_pos: int,
+                                            final_face_pos: int) -> int | None:
     """
     Calculate QTM distance for edge pieces on adjacent faces.
 
