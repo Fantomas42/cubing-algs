@@ -59,6 +59,8 @@ class FaceletPosition(NamedTuple):
     row: int
     col: int
 
+    original: int
+
 
 class ImpactData(NamedTuple):
     """
@@ -155,6 +157,7 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
         face_position=position_in_face,
         row=row,
         col=col,
+        original=position,
     )
 
 
