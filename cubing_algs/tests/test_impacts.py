@@ -368,14 +368,22 @@ class TestComputeManhattanDistance(unittest.TestCase):
 
     def test_opposite_face_distance(self) -> None:
         """Test distance between opposite faces."""
-        # U and D are opposite faces
-        u_center = 4  # U face center (1,1)
-        d_center = 31  # D face center (27 + 4) = (1,1)
+        test_cases = [
+            (4, 31, 6), (31, 4, 6),
+            (12, 41, 4), (41, 12, 4),
+            (6, 29, 6), (29, 6, 6),
+        ]
 
-        distance = compute_manhattan_distance(u_center, d_center, self.cube)
-        # Opposite faces: cube_size * 2 + within-face distance
-        # U(1,1) to D(1,1): 2*3 + 0 = 6
-        self.assertEqual(distance, 6)
+        for orig_pos, final_pos, expected_distance in test_cases:
+            with self.subTest(orig=orig_pos, final=final_pos):
+                distance = compute_manhattan_distance(
+                    orig_pos, final_pos, self.cube,
+                )
+                self.assertEqual(
+                    distance, expected_distance,
+                    f'Distance from { orig_pos } to { final_pos } should be '
+                    f'{ expected_distance } Manhattan but got { distance }',
+                )
 
     def test_face_boundaries(self) -> None:
         """Test distance calculations at face boundaries."""
