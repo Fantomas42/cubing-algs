@@ -168,10 +168,12 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
 }
 
 
-def transform_position(original_face_name: str, destination_face_name: str,
-                       destination_face_position: int) -> int:
+def transform_adjacent_position(
+        original_face_name: str,
+        destination_face_name: str,
+        destination_face_position: int) -> int:
     """
-    Transform destination face position to original face position.
+    Transform adjacent destination face position to original face position.
 
     Args:
         original_face_name: The original face identifier (U/R/F/D/L/B).

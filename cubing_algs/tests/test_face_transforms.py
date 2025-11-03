@@ -1,5 +1,4 @@
 """Tests for face transformation computations."""
-
 import unittest
 
 from cubing_algs.face_transforms import ADJACENT_FACE_TRANSFORMATIONS
@@ -7,7 +6,7 @@ from cubing_algs.face_transforms import offset_down
 from cubing_algs.face_transforms import offset_left
 from cubing_algs.face_transforms import offset_right
 from cubing_algs.face_transforms import offset_up
-from cubing_algs.face_transforms import transform_position
+from cubing_algs.face_transforms import transform_adjacent_position
 
 
 class TestOffsetRight(unittest.TestCase):
@@ -467,122 +466,130 @@ class TestTransformationEdgeCases(unittest.TestCase):
 
 
 class TestTransformPosition(unittest.TestCase):
-    """Test the transform_position helper function."""
+    """Test the transform_adjacent_position helper function."""
 
-    def test_transform_position_uses_correct_transformation_u(self) -> None:
-        """Test that transform_position applies the correct transformation."""
+    def test_transform_adjacent_position_uses_correct_transformation_u(
+            self) -> None:
+        """Test that applies the correct transformation."""
         # U -> R uses offset_right
-        self.assertEqual(transform_position('U', 'R', 0), 6)
-        self.assertEqual(transform_position('U', 'R', 1), 3)
+        self.assertEqual(transform_adjacent_position('U', 'R', 0), 6)
+        self.assertEqual(transform_adjacent_position('U', 'R', 1), 3)
 
         # U -> L uses offset_left
-        self.assertEqual(transform_position('U', 'L', 0), 2)
-        self.assertEqual(transform_position('U', 'L', 1), 5)
+        self.assertEqual(transform_adjacent_position('U', 'L', 0), 2)
+        self.assertEqual(transform_adjacent_position('U', 'L', 1), 5)
 
         # U -> F uses offset_down (identity)
-        self.assertEqual(transform_position('U', 'F', 0), 0)
-        self.assertEqual(transform_position('U', 'F', 1), 1)
+        self.assertEqual(transform_adjacent_position('U', 'F', 0), 0)
+        self.assertEqual(transform_adjacent_position('U', 'F', 1), 1)
 
         # U -> B uses offset_up
-        self.assertEqual(transform_position('U', 'B', 0), 8)
-        self.assertEqual(transform_position('U', 'B', 1), 7)
+        self.assertEqual(transform_adjacent_position('U', 'B', 0), 8)
+        self.assertEqual(transform_adjacent_position('U', 'B', 1), 7)
 
-    def test_transform_position_uses_correct_transformation_r(self) -> None:
-        """Test that transform_position applies the correct transformation."""
+    def test_transform_adjacent_position_uses_correct_transformation_r(
+            self) -> None:
+        """Test that applies the correct transformation."""
         # R -> U
-        self.assertEqual(transform_position('R', 'U', 0), 2)
-        self.assertEqual(transform_position('R', 'U', 1), 5)
+        self.assertEqual(transform_adjacent_position('R', 'U', 0), 2)
+        self.assertEqual(transform_adjacent_position('R', 'U', 1), 5)
 
         # R -> D
-        self.assertEqual(transform_position('R', 'D', 0), 6)
-        self.assertEqual(transform_position('R', 'D', 1), 3)
+        self.assertEqual(transform_adjacent_position('R', 'D', 0), 6)
+        self.assertEqual(transform_adjacent_position('R', 'D', 1), 3)
 
         # R -> F
-        self.assertEqual(transform_position('R', 'F', 0), 0)
-        self.assertEqual(transform_position('R', 'F', 1), 1)
+        self.assertEqual(transform_adjacent_position('R', 'F', 0), 0)
+        self.assertEqual(transform_adjacent_position('R', 'F', 1), 1)
 
         # R -> B
-        self.assertEqual(transform_position('R', 'B', 0), 0)
-        self.assertEqual(transform_position('R', 'B', 1), 1)
+        self.assertEqual(transform_adjacent_position('R', 'B', 0), 0)
+        self.assertEqual(transform_adjacent_position('R', 'B', 1), 1)
 
-    def test_transform_position_uses_correct_transformation_f(self) -> None:
-        """Test that transform_position applies the correct transformation."""
+    def test_transform_adjacent_position_uses_correct_transformation_f(
+            self) -> None:
+        """Test that applies the correct transformation."""
         # F -> U
-        self.assertEqual(transform_position('F', 'U', 0), 0)
-        self.assertEqual(transform_position('F', 'U', 1), 1)
+        self.assertEqual(transform_adjacent_position('F', 'U', 0), 0)
+        self.assertEqual(transform_adjacent_position('F', 'U', 1), 1)
 
         # F -> D
-        self.assertEqual(transform_position('F', 'D', 0), 0)
-        self.assertEqual(transform_position('F', 'D', 1), 1)
+        self.assertEqual(transform_adjacent_position('F', 'D', 0), 0)
+        self.assertEqual(transform_adjacent_position('F', 'D', 1), 1)
 
         # F -> L
-        self.assertEqual(transform_position('F', 'L', 0), 0)
-        self.assertEqual(transform_position('F', 'L', 1), 1)
+        self.assertEqual(transform_adjacent_position('F', 'L', 0), 0)
+        self.assertEqual(transform_adjacent_position('F', 'L', 1), 1)
 
         # F -> R
-        self.assertEqual(transform_position('F', 'R', 0), 0)
-        self.assertEqual(transform_position('F', 'R', 1), 1)
+        self.assertEqual(transform_adjacent_position('F', 'R', 0), 0)
+        self.assertEqual(transform_adjacent_position('F', 'R', 1), 1)
 
-    def test_transform_position_uses_correct_transformation_d(self) -> None:
-        """Test that transform_position applies the correct transformation."""
+    def test_transform_adjacent_position_uses_correct_transformation_d(
+            self) -> None:
+        """Test that applies the correct transformation."""
         # D -> F
-        self.assertEqual(transform_position('D', 'F', 0), 0)
-        self.assertEqual(transform_position('D', 'F', 1), 1)
+        self.assertEqual(transform_adjacent_position('D', 'F', 0), 0)
+        self.assertEqual(transform_adjacent_position('D', 'F', 1), 1)
 
         # D -> B
-        self.assertEqual(transform_position('D', 'B', 0), 8)
-        self.assertEqual(transform_position('D', 'B', 1), 7)
+        self.assertEqual(transform_adjacent_position('D', 'B', 0), 8)
+        self.assertEqual(transform_adjacent_position('D', 'B', 1), 7)
 
         # D -> L
-        self.assertEqual(transform_position('D', 'L', 0), 6)
-        self.assertEqual(transform_position('D', 'L', 1), 3)
+        self.assertEqual(transform_adjacent_position('D', 'L', 0), 6)
+        self.assertEqual(transform_adjacent_position('D', 'L', 1), 3)
 
         # D -> R
-        self.assertEqual(transform_position('D', 'R', 0), 2)
-        self.assertEqual(transform_position('D', 'R', 1), 5)
+        self.assertEqual(transform_adjacent_position('D', 'R', 0), 2)
+        self.assertEqual(transform_adjacent_position('D', 'R', 1), 5)
 
-    def test_transform_position_uses_correct_transformation_l(self) -> None:
-        """Test that transform_position applies the correct transformation."""
+    def test_transform_adjacent_position_uses_correct_transformation_l(
+            self) -> None:
+        """Test that applies the correct transformation."""
         # L -> F
-        self.assertEqual(transform_position('L', 'F', 0), 0)
-        self.assertEqual(transform_position('L', 'F', 1), 1)
+        self.assertEqual(transform_adjacent_position('L', 'F', 0), 0)
+        self.assertEqual(transform_adjacent_position('L', 'F', 1), 1)
 
         # L -> B
-        self.assertEqual(transform_position('L', 'B', 0), 0)
-        self.assertEqual(transform_position('L', 'B', 1), 1)
+        self.assertEqual(transform_adjacent_position('L', 'B', 0), 0)
+        self.assertEqual(transform_adjacent_position('L', 'B', 1), 1)
 
         # L -> U
-        self.assertEqual(transform_position('L', 'U', 0), 6)
-        self.assertEqual(transform_position('L', 'U', 1), 3)
+        self.assertEqual(transform_adjacent_position('L', 'U', 0), 6)
+        self.assertEqual(transform_adjacent_position('L', 'U', 1), 3)
 
         # L -> D
-        self.assertEqual(transform_position('L', 'D', 0), 2)
-        self.assertEqual(transform_position('L', 'D', 1), 5)
+        self.assertEqual(transform_adjacent_position('L', 'D', 0), 2)
+        self.assertEqual(transform_adjacent_position('L', 'D', 1), 5)
 
-    def test_transform_position_uses_correct_transformation_b(self) -> None:
-        """Test that transform_position applies the correct transformation."""
+    def test_transform_adjacent_position_uses_correct_transformation_b(
+            self) -> None:
+        """Test that applies the correct transformation."""
         # B -> L
-        self.assertEqual(transform_position('B', 'L', 0), 0)
-        self.assertEqual(transform_position('B', 'L', 1), 1)
+        self.assertEqual(transform_adjacent_position('B', 'L', 0), 0)
+        self.assertEqual(transform_adjacent_position('B', 'L', 1), 1)
 
         # B -> R
-        self.assertEqual(transform_position('B', 'R', 0), 0)
-        self.assertEqual(transform_position('B', 'R', 1), 1)
+        self.assertEqual(transform_adjacent_position('B', 'R', 0), 0)
+        self.assertEqual(transform_adjacent_position('B', 'R', 1), 1)
 
         # B -> U
-        self.assertEqual(transform_position('B', 'U', 0), 8)
-        self.assertEqual(transform_position('B', 'U', 1), 7)
+        self.assertEqual(transform_adjacent_position('B', 'U', 0), 8)
+        self.assertEqual(transform_adjacent_position('B', 'U', 1), 7)
 
         # B -> D
-        self.assertEqual(transform_position('B', 'D', 0), 8)
-        self.assertEqual(transform_position('B', 'D', 1), 7)
+        self.assertEqual(transform_adjacent_position('B', 'D', 0), 8)
+        self.assertEqual(transform_adjacent_position('B', 'D', 1), 7)
 
-    def test_transform_position_center_invariant(self) -> None:
+    def test_transform_adjacent_position_center_invariant(self) -> None:
         """Test center position (4) stays at 4 for all transformations."""
         all_faces = ['U', 'R', 'F', 'D', 'L', 'B']
 
         for orig_face in all_faces:
             for dest_face in ADJACENT_FACE_TRANSFORMATIONS[orig_face]:
                 with self.subTest(orig=orig_face, dest=dest_face):
-                    result = transform_position(orig_face, dest_face, 4)
+                    result = transform_adjacent_position(
+                        orig_face, dest_face, 4,
+                    )
                     self.assertEqual(result, 4)

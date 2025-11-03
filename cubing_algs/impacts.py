@@ -20,7 +20,7 @@ from cubing_algs.constants import QTM_OPPOSITE_EDGE_OFFSETS
 from cubing_algs.constants import QTM_OPPOSITE_FACE_DOUBLE_PAIRS
 from cubing_algs.constants import QTM_OPPOSITE_FACE_SIMPLE_PAIRS
 from cubing_algs.constants import QTM_SAME_FACE_OPPOSITE_PAIRS
-from cubing_algs.face_transforms import transform_position
+from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.facelets import cubies_to_facelets
 
 if TYPE_CHECKING:
@@ -303,7 +303,7 @@ def compute_adjacent_face_manhattan_distance(
         return 3
 
     # Transform original position to destination face coordinate system
-    translated_pos = transform_position(
+    translated_pos = transform_adjacent_position(
         final.face_name,
         orig.face_name,
         orig.face_position,
@@ -478,7 +478,7 @@ def compute_adjacent_face_qtm_distance(
 
     # General adjacent face handling via transformation
     translated = parse_facelet_position(
-        transform_position(
+        transform_adjacent_position(
             final.face_name,
             orig.face_name,
             orig.face_position,
