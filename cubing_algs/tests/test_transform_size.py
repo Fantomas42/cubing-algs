@@ -1,3 +1,5 @@
+"""Tests for algorithm compression and expansion functions."""
+
 import unittest
 
 from cubing_algs.move import Move
@@ -7,8 +9,10 @@ from cubing_algs.transform.size import expand_moves
 
 
 class TransformCompressTestCase(unittest.TestCase):
+    """Tests for algorithm compression transformations."""
 
     def test_compress_moves(self) -> None:
+        """Test compress moves."""
         provide = parse_moves(
             "U (R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R') "
@@ -28,6 +32,7 @@ class TransformCompressTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_compress_big_moves(self) -> None:
+        """Test compress big moves."""
         provide = parse_moves(
             "3-4Uw (R U2 R' U' R U' 2R') "
             "(2R U2 R' U' R U' R') "
@@ -47,6 +52,7 @@ class TransformCompressTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_compress_moves_timed(self) -> None:
+        """Test compress moves timed."""
         provide = parse_moves(
             "U@1 (R@2 U2@3 R'@4 U'@5 R@6 U'@7 R'@8) "
             "(R@9 U2@10 R'@11 U'@12 R@13 U'@14 R'@15) "
@@ -71,6 +77,7 @@ class TransformCompressTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_compress_moves_timed_paused(self) -> None:
+        """Test compress moves timed paused."""
         provide = parse_moves(
             "U@0 .@1 (R@2 U2@3 R'@4 U'@5 R@6 U'@7 R'@8) "
             "(R@9 U2@10 R'@11 U'@12 R@13 U'@14 R'@15) "
@@ -95,6 +102,7 @@ class TransformCompressTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_compress_moves_timed_paused_middle(self) -> None:
+        """Test compress moves timed paused middle."""
         provide = parse_moves(
             "U@1 (R@2 U2@3 R'@4 U'@5 R@6 U'@7 R'@8) "
             "(R@9 .@9 U2@10 R'@11 U'@12 R@13 U'@14 R'@15) "
@@ -119,6 +127,7 @@ class TransformCompressTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_compress_pauses(self) -> None:
+        """Test compress pauses."""
         provide = parse_moves(
             'U . . . U',
         )
@@ -138,6 +147,7 @@ class TransformCompressTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_compress_pauses_timed(self) -> None:
+        """Test compress pauses timed."""
         provide = parse_moves(
             'U@1 .@2 .@3 .@4 U@5',
         )
@@ -157,6 +167,7 @@ class TransformCompressTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_compress_moves_max(self) -> None:
+        """Test compress moves max."""
         provide = parse_moves(
             "U (R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R') "
@@ -173,8 +184,10 @@ class TransformCompressTestCase(unittest.TestCase):
 
 
 class TransformExpandTestCase(unittest.TestCase):
+    """Tests for algorithm expansion transformations."""
 
     def test_expand_moves(self) -> None:
+        """Test expand moves."""
         provide = parse_moves('R2 F U')
         expect = parse_moves('R R F U')
 
@@ -189,6 +202,7 @@ class TransformExpandTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_expand_big_moves(self) -> None:
+        """Test expand big moves."""
         provide = parse_moves('2R2 F U')
         expect = parse_moves('2R 2R F U')
 
@@ -203,6 +217,7 @@ class TransformExpandTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_expand_timed_moves(self) -> None:
+        """Test expand timed moves."""
         provide = parse_moves('2R2@1 F@2 U@3')
         expect = parse_moves('2R@1 2R@1 F@2 U@3')
 
@@ -217,6 +232,7 @@ class TransformExpandTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
     def test_expand_timed_moves_paused(self) -> None:
+        """Test expand timed moves paused."""
         provide = parse_moves('2R2@1 .@2 F@3 U@4')
         expect = parse_moves('2R@1 2R@1 .@2 F@3 U@4')
 

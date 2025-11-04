@@ -1,3 +1,5 @@
+"""Tests for scramble generation."""
+
 import time
 import unittest
 from collections import Counter
@@ -16,6 +18,7 @@ from cubing_algs.vcube import VCube
 
 
 class TestValidNextMove(unittest.TestCase):
+    """Tests for valid next move generation in scrambling."""
 
     def test_is_valid_next_move_valid(self) -> None:
         """Test that valid next moves are recognized."""
@@ -47,10 +50,13 @@ class TestValidNextMove(unittest.TestCase):
         self.assertFalse(is_valid_next_move('Fw', 'B'))
 
 
-class TestCubeMoveSet(unittest.TestCase):
+class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904
+    """Tests for cube move set definitions and validation."""
+
     maxDiff = None
 
     def test_build_cube_move_set_2x2x2(self) -> None:
+        """Test build cube move set 2x2x2."""
         self.assertEqual(
             build_cube_move_set(2),
             [
@@ -64,6 +70,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_2x2x2_inner_layers(self) -> None:
+        """Test build cube move set 2x2x2 inner layers."""
         self.assertEqual(
             build_cube_move_set(2, inner_layers=True),
             [
@@ -77,6 +84,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_3x3x3(self) -> None:
+        """Test build cube move set 3x3x3."""
         self.assertEqual(
             build_cube_move_set(3),
             [
@@ -90,6 +98,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_3x3x3_inner_layers(self) -> None:
+        """Test build cube move set 3x3x3 inner layers."""
         self.assertEqual(
             build_cube_move_set(3, inner_layers=True),
             [
@@ -103,6 +112,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_4x4x4(self) -> None:
+        """Test build cube move set 4x4x4."""
         self.assertEqual(
             build_cube_move_set(4),
             [
@@ -116,6 +126,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_4x4x4_left_handed(self) -> None:
+        """Test build cube move set 4x4x4 left handed."""
         self.assertEqual(
             build_cube_move_set(4, right_handed=False),
             [
@@ -129,6 +140,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_4x4x4_inner_layers(self) -> None:
+        """Test build cube move set 4x4x4 inner layers."""
         self.assertEqual(
             build_cube_move_set(4, inner_layers=True),
             [
@@ -148,6 +160,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_4x4x4_inner_layers_left_handed(self) -> None:
+        """Test build cube move set 4x4x4 inner layers left handed."""
         self.assertEqual(
             build_cube_move_set(4, inner_layers=True, right_handed=False),
             [
@@ -167,6 +180,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_5x5x5(self) -> None:
+        """Test build cube move set 5x5x5."""
         self.assertEqual(
             build_cube_move_set(5),
             [
@@ -180,6 +194,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_5x5x5_left_handed(self) -> None:
+        """Test build cube move set 5x5x5 left handed."""
         self.assertEqual(
             build_cube_move_set(5, right_handed=False),
             [
@@ -193,6 +208,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_5x5x5_inner_layers(self) -> None:
+        """Test build cube move set 5x5x5 inner layers."""
         self.assertEqual(
             build_cube_move_set(5, inner_layers=True),
             [
@@ -217,6 +233,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_5x5x5_inner_layers_left_handed(self) -> None:
+        """Test build cube move set 5x5x5 inner layers left handed."""
         self.assertEqual(
             build_cube_move_set(5, inner_layers=True, right_handed=False),
             [
@@ -241,6 +258,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_6x6x6(self) -> None:
+        """Test build cube move set 6x6x6."""
         self.assertEqual(
             build_cube_move_set(6),
             [
@@ -262,6 +280,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_6x6x6_inner_layers(self) -> None:
+        """Test build cube move set 6x6x6 inner layers."""
         self.assertEqual(
             build_cube_move_set(6, inner_layers=True),
             [
@@ -295,6 +314,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_6x6x6_left_handed(self) -> None:
+        """Test build cube move set 6x6x6 left handed."""
         self.assertEqual(
             build_cube_move_set(6, right_handed=False),
             [
@@ -316,6 +336,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_6x6x6_inner_layers_left_handed(self) -> None:
+        """Test build cube move set 6x6x6 inner layers left handed."""
         self.assertEqual(
             build_cube_move_set(6, inner_layers=True, right_handed=False),
             [
@@ -349,6 +370,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_7x7x7(self) -> None:
+        """Test build cube move set 7x7x7."""
         self.assertEqual(
             build_cube_move_set(7),
             [
@@ -373,6 +395,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_7x7x7_inner_layers(self) -> None:
+        """Test build cube move set 7x7x7 inner layers."""
         self.assertEqual(
             build_cube_move_set(7, inner_layers=True),
             [
@@ -412,6 +435,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_8x8x8(self) -> None:
+        """Test build cube move set 8x8x8."""
         self.assertEqual(
             build_cube_move_set(8),
             [
@@ -439,6 +463,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_8x8x8_inner_layers(self) -> None:
+        """Test build cube move set 8x8x8 inner layers."""
         self.assertEqual(
             build_cube_move_set(8, inner_layers=True),
             [
@@ -484,6 +509,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_9x9x9(self) -> None:
+        """Test build cube move set 9x9x9."""
         self.assertEqual(
             build_cube_move_set(9),
             [
@@ -514,6 +540,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_cube_move_set_9x9x9_inner_layers(self) -> None:
+        """Test build cube move set 9x9x9 inner layers."""
         self.assertEqual(
             build_cube_move_set(9, inner_layers=True),
             [
@@ -565,6 +592,7 @@ class TestCubeMoveSet(unittest.TestCase):
         )
 
     def test_build_big_cube_move_set_no_options(self) -> None:
+        """Test build big cube move set no options."""
         self.assertEqual(
             build_cube_move_set(6),
             [
@@ -585,8 +613,10 @@ class TestCubeMoveSet(unittest.TestCase):
 
 
 class TestRandomMoves(unittest.TestCase):
+    """Tests for random move sequence generation."""
 
     def test_random_moves_2x2x2(self) -> None:
+        """Test random moves 2x2x2."""
         moves = random_moves(2, ['F', 'R', 'U'], 0)
 
         self.assertGreaterEqual(
@@ -598,6 +628,7 @@ class TestRandomMoves(unittest.TestCase):
         )
 
     def test_random_moves_2x2x2_iterations(self) -> None:
+        """Test random moves 2x2x2 iterations."""
         moves = random_moves(2, ['F', 'R', 'U'], 5)
 
         self.assertEqual(
@@ -605,6 +636,7 @@ class TestRandomMoves(unittest.TestCase):
         )
 
     def test_random_moves_50x50x50(self) -> None:
+        """Test random moves 50x50x50."""
         moves = random_moves(50, ['F', 'R', 'U'])
 
         self.assertEqual(
@@ -613,8 +645,10 @@ class TestRandomMoves(unittest.TestCase):
 
 
 class TestScramble(unittest.TestCase):
+    """Tests for scramble generation."""
 
     def test_scramble_3x3x3(self) -> None:
+        """Test scramble 3x3x3."""
         moves = scramble(3)
 
         self.assertGreaterEqual(
@@ -626,6 +660,7 @@ class TestScramble(unittest.TestCase):
         )
 
     def test_scramble_3x3x3_iterations(self) -> None:
+        """Test scramble 3x3x3 iterations."""
         moves = scramble(3, 5)
 
         self.assertEqual(
@@ -634,8 +669,10 @@ class TestScramble(unittest.TestCase):
 
 
 class TestScrambleEasyCross(unittest.TestCase):
+    """Tests for easy cross scramble generation."""
 
     def test_scramble_easy_cross(self) -> None:
+        """Test scramble easy cross."""
         moves = scramble_easy_cross()
 
         self.assertEqual(
@@ -658,9 +695,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        """
-        Set up test fixtures.
-        """
+        """Set up test fixtures."""
         self.test_lengths = [5, 10, 15, 20, 25, 30, 50]
         self.sample_size = 100  # Number of scrambles to test per length
         self.small_sample_size = 20  # For performance tests
@@ -669,6 +704,13 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
     def get_face_from_move(move: str) -> str:
         """
         Extract the face character from a move string.
+
+        Args:
+            move: Move string to extract face from.
+
+        Returns:
+            Face character (U, R, F, D, L, B) or empty string.
+
         """
         for face in FACE_ORDER:
             if move.startswith((face, face.lower())):
@@ -680,6 +722,13 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
             str, float]:
         """
         Calculate the distribution of face moves in an algorithm.
+
+        Args:
+            algorithm: Algorithm to analyze.
+
+        Returns:
+            Dictionary mapping face names to their percentage distribution.
+
         """
         face_counts: Counter[str] = Counter()
         total_moves = len(algorithm)
@@ -703,6 +752,13 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
         Calculate how scrambled a cube becomes after applying an algorithm.
 
         Returns a value between 0.0 (solved) and 1.0 (maximally scrambled).
+
+        Args:
+            algorithm: Algorithm to evaluate.
+
+        Returns:
+            Scrambledness score between 0.0 and 1.0.
+
         """
         # Count how many facelets are not in their original position
         cube = VCube()
@@ -722,7 +778,15 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
     @staticmethod
     def has_consecutive_same_or_opposite_faces(algorithm: Algorithm) -> bool:
         """
-        Check if algorithm has consecutive moves on same or opposite faces.
+        Check if algorithm has consecutive moves on same
+        or opposite faces.
+
+        Args:
+            algorithm: Algorithm to check.
+
+        Returns:
+            True if consecutive same or opposite face moves found.
+
         """
         moves = [str(move) for move in algorithm]
 
@@ -745,9 +809,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
         return False
 
     def test_scramble_length_consistency(self) -> None:
-        """
-        Test that scrambles generate the requested length consistently.
-        """
+        """Test that scrambles generate the requested length consistently."""
         for length in self.test_lengths:
             with self.subTest(length=length):
                 for _ in range(10):  # Test multiple samples
@@ -758,9 +820,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                     )
 
     def test_move_distribution_randomness(self) -> None:
-        """
-        Test that move distributions approach uniform across face types.
-        """
+        """Test that move distributions approach uniform across face types."""
         for length in [15, 25, 50]:  # Test representative lengths
             with self.subTest(length=length):
                 all_distributions = []
@@ -800,9 +860,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                         )
 
     def test_state_space_coverage_by_length(self) -> None:
-        """
-        Test that longer scrambles achieve better state space coverage.
-        """
+        """Test that longer scrambles achieve better state space coverage."""
         scrambledness_by_length = {}
 
         for length in self.test_lengths:
@@ -835,9 +893,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
             )
 
     def test_no_consecutive_invalid_moves(self) -> None:
-        """
-        Test that scrambles never contain consecutive invalid moves.
-        """
+        """Test that scrambles never contain consecutive invalid moves."""
         for length in self.test_lengths:
             with self.subTest(length=length):
                 for _ in range(self.sample_size):
@@ -849,9 +905,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                     )
 
     def test_scramble_uniqueness(self) -> None:
-        """
-        Test that repeated scramble calls produce different results.
-        """
+        """Test that repeated scramble calls produce different results."""
         for length in [15, 25]:
             with self.subTest(length=length):
                 scrambles = set()
@@ -869,9 +923,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                 )
 
     def test_very_short_scrambles(self) -> None:
-        """
-        Test edge cases with very short scrambles (1-5 moves).
-        """
+        """Test edge cases with very short scrambles (1-5 moves)."""
         for length in range(1, 6):
             with self.subTest(length=length):
                 scramble_alg = scramble(3, length)
@@ -895,9 +947,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                     )
 
     def test_very_long_scrambles(self) -> None:
-        """
-        Test edge cases with very long scrambles (50+ moves).
-        """
+        """Test edge cases with very long scrambles (50+ moves)."""
         long_lengths = [50, 75, 100]
 
         for length in long_lengths:
@@ -921,9 +971,7 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                 )
 
     def test_scramble_performance_by_length(self) -> None:
-        """
-        Test performance characteristics of scramble generation.
-        """
+        """Test performance characteristics of scramble generation."""
         performance_results = {}
 
         for length in [10, 25, 50, 100]:
@@ -949,7 +997,8 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
 
     def test_scramble_consistency_across_runs(self) -> None:
         """
-        Test that scramble quality metrics are consistent across multiple runs.
+        Test that scramble quality metrics are consistent
+        across multiple runs.
         """
         length = 25  # Test with a representative length
 

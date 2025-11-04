@@ -1,6 +1,8 @@
+"""Tests for the VCube class."""
+
 import unittest
 from io import StringIO
-from typing import Any
+from unittest.mock import Mock
 from unittest.mock import patch
 
 from cubing_algs.constants import FACES
@@ -16,10 +18,13 @@ from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.vcube import VCube
 
 
-class VCubeTestCase(unittest.TestCase):
+class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for core VCube functionality including state and rotation."""
+
     maxDiff = None
 
     def test_state(self) -> None:
+        """Test cube state property and rotation state updates."""
         cube = VCube()
 
         self.assertEqual(
@@ -39,6 +44,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_is_solved(self) -> None:
+        """Test is_solved property on solved and scrambled cube."""
         cube = VCube()
 
         self.assertTrue(
@@ -51,12 +57,14 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_is_solved_oriented(self) -> None:
+        """Test is_solved returns true for oriented solved cube."""
         cube = VCube()
         cube.rotate('z2')
 
         self.assertTrue(cube.is_solved)
 
     def test_rotate_history(self) -> None:
+        """Test history tracking with rotate method."""
         cube = VCube()
         cube.rotate('R')
 
@@ -67,6 +75,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(cube.history, ['R'])
 
     def test_rotate_move_history(self) -> None:
+        """Test history tracking with rotate_move method."""
         cube = VCube()
         cube.rotate_move('R')
 
@@ -77,6 +86,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(cube.history, ['R'])
 
     def test_copy(self) -> None:
+        """Test cube copy without history preservation."""
         cube = VCube()
         cube.rotate('R2 F2 D2 B')
         copy = cube.copy()
@@ -88,6 +98,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertFalse(copy.history)
 
     def test_full_copy(self) -> None:
+        """Test cube copy with history preservation."""
         cube = VCube()
         cube.rotate('R2 F2 D2 B')
         copy = cube.copy(full=True)
@@ -99,6 +110,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertTrue(copy.history)
 
     def test_from_cubies(self) -> None:
+        """Test creating cube from cubie representation."""
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
@@ -115,6 +127,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(cube.state, facelets)
 
     def test_from_cubies_scheme(self) -> None:
+        """Test from cubies scheme."""
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
@@ -134,6 +147,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(cube.state, facelets)
 
     def test_to_cubies(self) -> None:
+        """Test to cubies."""
         cp = [0, 5, 2, 1, 7, 4, 6, 3]
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
@@ -151,6 +165,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_from_cubies_equality(self) -> None:
+        """Test from cubies equality."""
         cube = VCube()
         cube.rotate('F R')
         n_cube = VCube.from_cubies(*cube.to_cubies)
@@ -161,6 +176,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_from_cubies_oriented_equality(self) -> None:
+        """Test from cubies oriented equality."""
         cube = VCube()
         cube.rotate('F R x')
         n_cube = VCube.from_cubies(*cube.to_cubies)
@@ -171,6 +187,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_display(self) -> None:
+        """Test display."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -182,6 +199,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(len(cube.history), 3)
 
     def test_display_orientation_restore(self) -> None:
+        """Test display orientation restore."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -195,6 +213,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertEqual(state, cube.state)
 
     def test_display_orientation_different(self) -> None:
+        """Test display orientation different."""
         cube_1 = VCube()
         cube_2 = VCube()
 
@@ -204,6 +223,7 @@ class VCubeTestCase(unittest.TestCase):
         self.assertNotEqual(view_1, view_2)
 
     def test_get_face(self) -> None:
+        """Test get face."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -220,6 +240,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_get_face_by_center(self) -> None:
+        """Test get face by center."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -236,6 +257,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_get_face_center(self) -> None:
+        """Test get face center."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -252,6 +274,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_get_face_index(self) -> None:
+        """Test get face index."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -268,6 +291,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_get_face_center_indexes(self) -> None:
+        """Test get face center indexes."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -284,6 +308,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_str(self) -> None:
+        """Test str."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -298,6 +323,7 @@ class VCubeTestCase(unittest.TestCase):
         )
 
     def test_repr(self) -> None:
+        """Test repr."""
         cube = VCube()
         cube.rotate('F R U')
 
@@ -308,9 +334,12 @@ class VCubeTestCase(unittest.TestCase):
 
 
 class VCubeOrientedCopyTestCase(unittest.TestCase):
+    """Tests for oriented cube copying with different face configurations."""
+
     maxDiff = None
 
     def test_oriented_copy_faces(self) -> None:
+        """Test oriented copy faces."""
         cube = VCube()
 
         self.assertNotEqual(
@@ -319,6 +348,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
         )
 
     def test_oriented_copy_top_only(self) -> None:
+        """Test oriented copy top only."""
         cube = VCube()
 
         self.assertNotEqual(
@@ -327,6 +357,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
         )
 
     def test_oriented_copy_faces_stable(self) -> None:
+        """Test oriented copy faces stable."""
         cube = VCube()
         base_state = cube.state
         cube.oriented_copy('UF')
@@ -337,36 +368,42 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
         )
 
     def test_oriented_copy_invalid_empty(self) -> None:
+        """Test oriented copy invalid empty."""
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
             cube.oriented_copy('')
 
     def test_oriented_copy_invalid_too_much(self) -> None:
+        """Test oriented copy invalid too much."""
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
             cube.oriented_copy('FRU')
 
     def test_oriented_copy_invalid_top_face(self) -> None:
+        """Test oriented copy invalid top face."""
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
             cube.oriented_copy('TF')
 
     def test_oriented_copy_invalid_front_face(self) -> None:
+        """Test oriented copy invalid front face."""
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
             cube.oriented_copy('FT')
 
     def test_oriented_copy_invalid_opposite_face(self) -> None:
+        """Test oriented copy invalid opposite face."""
         cube = VCube()
 
         with self.assertRaises(InvalidFaceError):
             cube.oriented_copy('FB')
 
     def test_oriented_copy_history_preservation(self) -> None:
+        """Test oriented copy history preservation."""
         cube = VCube()
         cube.rotate('R F')
 
@@ -388,6 +425,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
         )
 
     def test_oriented_copy_history_tracking(self) -> None:
+        """Test oriented copy history tracking."""
         cube = VCube()
         cube.rotate('R F')
 
@@ -406,6 +444,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
         )
 
     def test_all_edge_reorientation(self) -> None:
+        """Test all edge reorientation."""
         orientations = [
             'UF', 'UB', 'UR', 'UL',
             'DF', 'DB', 'DR', 'DL',
@@ -430,6 +469,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
                 )
 
     def test_all_reorientation(self) -> None:
+        """Test all reorientation."""
         orientations = [
             'U', 'R', 'F', 'D', 'L', 'B',
         ]
@@ -444,10 +484,11 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
                 )
 
 
-class VCubeCheckIntegrityTestCase(unittest.TestCase):
-    """Tests pour les nouvelles vérifications de check_integrity"""
+class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for cube state integrity verification."""
 
     def test_initial(self) -> None:
+        """Test initial."""
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBB'
 
         cube = VCube(initial)
@@ -461,6 +502,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
         """Test that get_face_center_indexes raises NotImplementedError."""
         class IncompleteVCube(VCubeIntegrityChecker):
             """Incomplete implementation for testing."""
+
             size = 3
             face_size = 9
             face_number = 6
@@ -472,12 +514,14 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             incomplete_cube.get_face_center_indexes()
 
     def test_invalid_length_no_check(self) -> None:
+        """Test invalid length no check."""
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
 
         cube = VCube(initial, check=False)
         self.assertEqual(cube.state, initial)
 
     def test_invalid_length(self) -> None:
+        """Test invalid length."""
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'
 
         with self.assertRaisesRegex(
@@ -487,6 +531,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(initial)
 
     def test_invalid_character(self) -> None:
+        """Test invalid character."""
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBT'
 
         with self.assertRaisesRegex(
@@ -496,6 +541,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(initial)
 
     def test_invalid_face(self) -> None:
+        """Test invalid face."""
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFBF'
 
         with self.assertRaisesRegex(
@@ -505,6 +551,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(initial)
 
     def test_invalid_centers_not_unique(self) -> None:
+        """Test invalid centers not unique."""
         invalid_state = (
             'UUUUUUUUR'
             'RRRRURRRR'
@@ -521,6 +568,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     def test_invalid_corner_orientation_sum(self) -> None:
+        """Test invalid corner orientation sum."""
         co = [1, 0, 0, 0, 0, 0, 0, 0]
 
         with self.assertRaisesRegex(
@@ -530,6 +578,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_corner_sum(co)
 
     def test_invalid_edge_orientation_sum(self) -> None:
+        """Test invalid edge orientation sum."""
         eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         with self.assertRaisesRegex(
@@ -539,6 +588,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_edge_sum(eo)
 
     def test_invalid_corner_permutation_duplicate(self) -> None:
+        """Test invalid corner permutation duplicate."""
         cp = [0, 0, 2, 3, 4, 5, 6, 7]
 
         with self.assertRaisesRegex(
@@ -549,6 +599,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_corner_permutations(cp)
 
     def test_invalid_edge_permutation_duplicate(self) -> None:
+        """Test invalid edge permutation duplicate."""
         ep = [0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
         with self.assertRaisesRegex(
@@ -559,6 +610,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_edge_permutations(ep)
 
     def test_invalid_corner_orientation_value(self) -> None:
+        """Test invalid corner orientation value."""
         co = [3, 0, 0, 0, 0, 0, 0, 0]
 
         with self.assertRaisesRegex(
@@ -569,6 +621,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_corner_orientations(co)
 
     def test_invalid_edge_orientation_value(self) -> None:
+        """Test invalid edge orientation value."""
         eo = [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         with self.assertRaisesRegex(
@@ -579,6 +632,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_edge_orientations(eo)
 
     def test_invalid_center_orientation_value(self) -> None:
+        """Test invalid center orientation value."""
         so = [7, 0, 0, 0, 0, 0]
 
         with self.assertRaisesRegex(
@@ -589,6 +643,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_center_orientations(so)
 
     def test_invalid_permutation_parity(self) -> None:
+        """Test invalid permutation parity."""
         # Swap 0,1 = 1 inversion (odd)
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         # Identity = 0 inversions (even)
@@ -601,7 +656,8 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube().check_permutation_parity(cp, ep)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_corner_same_colors(self, *_: Any) -> None:
+    def test_invalid_corner_same_colors(self, *_: Mock) -> None:
+        """Test invalid corner same colors."""
         invalid_state_list = list(INITIAL_STATE)
         # Corner URF: same color on the 2 faces
         invalid_state_list[8] = invalid_state_list[9]
@@ -614,7 +670,8 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_edge_same_colors(self, *_: Any) -> None:
+    def test_invalid_edge_same_colors(self, *_: Mock) -> None:
+        """Test invalid edge same colors."""
         invalid_state_list = list(INITIAL_STATE)
         # Edge UR: same color on the 2 faces
         invalid_state_list[5] = invalid_state_list[10]
@@ -627,7 +684,8 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_corner_opposite_colors(self, *_: Any) -> None:
+    def test_invalid_corner_opposite_colors(self, *_: Mock) -> None:
+        """Test invalid corner opposite colors."""
         invalid_state_list = list(INITIAL_STATE)
         invalid_state_list[8] = 'U'  # Face U
         invalid_state_list[9] = 'D'  # Opposite face D
@@ -642,7 +700,8 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     @unittest.mock.patch.object(VCube, 'check_colors')
-    def test_invalid_edge_opposite_colors(self, *_: Any) -> None:
+    def test_invalid_edge_opposite_colors(self, *_: Mock) -> None:
+        """Test invalid edge opposite colors."""
         invalid_state_list = list(INITIAL_STATE)
         invalid_state_list[5] = 'F'
         invalid_state_list[10] = 'B'  # Opposite color
@@ -656,6 +715,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
             VCube(invalid_state)
 
     def test_valid_complex_scramble(self) -> None:
+        """Test valid complex scramble."""
         cube = VCube()
         complex_scramble = (
             "R U2 R' D' R U' R' D R' U "
@@ -666,6 +726,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
         self.assertTrue(cube.check_integrity())
 
     def test_rotations_preserve_validity(self) -> None:
+        """Test rotations preserve validity."""
         cube = VCube()
         rotations = ['x', 'y', 'z', "x'", "y'", "z'", 'x2', 'y2', 'z2']
 
@@ -676,11 +737,13 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
                 self.assertTrue(cube_copy.check_integrity())
 
     def test_preserve_validity(self) -> None:
+        """Test preserve validity."""
         cube = VCube()
 
         self.assertTrue(cube.check_integrity())
 
     def test_oriented_preserve_validity(self) -> None:
+        """Test oriented preserve validity."""
         cube = VCube()
         cube.rotate('z2')
 
@@ -690,8 +753,10 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):
 
 
 class VCubeRotateTestCase(unittest.TestCase):
+    """Tests for cube rotation with various move types."""
 
     def test_rotate_types(self) -> None:
+        """Test rotate types."""
         cube = VCube()
 
         self.assertEqual(
@@ -714,6 +779,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_typing(self) -> None:
+        """Test rotate typing."""
         expected = 'UUFUUFUUFRRRRRRRRRFFDFFDFFDDDBDDBDDBLLLLLLLLLUBBUBBUBB'
 
         move_str = 'R'
@@ -732,6 +798,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         self.assertEqual(cube.state, expected)
 
     def test_rotate_u(self) -> None:
+        """Test rotate u."""
         cube = VCube()
 
         self.assertEqual(
@@ -750,6 +817,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_r(self) -> None:
+        """Test rotate r."""
         cube = VCube()
 
         self.assertEqual(
@@ -768,6 +836,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_f(self) -> None:
+        """Test rotate f."""
         cube = VCube()
 
         self.assertEqual(
@@ -786,6 +855,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_d(self) -> None:
+        """Test rotate d."""
         cube = VCube()
 
         self.assertEqual(
@@ -804,6 +874,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_l(self) -> None:
+        """Test rotate l."""
         cube = VCube()
 
         self.assertEqual(
@@ -822,6 +893,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_b(self) -> None:
+        """Test rotate b."""
         cube = VCube()
 
         self.assertEqual(
@@ -840,6 +912,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_m(self) -> None:
+        """Test rotate m."""
         cube = VCube()
 
         self.assertEqual(
@@ -858,6 +931,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_s(self) -> None:
+        """Test rotate s."""
         cube = VCube()
 
         self.assertEqual(
@@ -876,6 +950,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_e(self) -> None:
+        """Test rotate e."""
         cube = VCube()
 
         self.assertEqual(
@@ -894,6 +969,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_x(self) -> None:
+        """Test rotate x."""
         cube = VCube()
 
         self.assertEqual(
@@ -912,6 +988,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_y(self) -> None:
+        """Test rotate y."""
         cube = VCube()
 
         self.assertEqual(
@@ -930,6 +1007,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_z(self) -> None:
+        """Test rotate z."""
         cube = VCube()
 
         self.assertEqual(
@@ -948,18 +1026,21 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_rotate_invalid_modifier(self) -> None:
+        """Test rotate invalid modifier."""
         cube = VCube()
 
         with self.assertRaises(InvalidMoveError):
             cube.rotate('z3')
 
     def test_rotate_invalid_move(self) -> None:
+        """Test rotate invalid move."""
         cube = VCube()
 
         with self.assertRaises(InvalidMoveError):
             cube.rotate('T2')
 
     def test_real_case(self) -> None:
+        """Test real case."""
         cube = VCube()
         scramble = "U2 D2 F U2 F2 U R' L U2 R2 U' B2 D R2 L2 F2 U' L2 D F2 U'"
 
@@ -969,6 +1050,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_real_case_2(self) -> None:
+        """Test real case 2."""
         cube = VCube()
         scramble = "F R' F' U' D2 B' L F U' F L' U F2 U' F2 B2 L2 D2 B2 D' L2"
 
@@ -978,6 +1060,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_real_case_3(self) -> None:
+        """Test real case 3."""
         cube = VCube()
         scramble = "F R F' U' D2 B' L F U' F L' U F2 U' F2 B2 L2 D2 B2 D' L2 B'"
 
@@ -987,6 +1070,7 @@ class VCubeRotateTestCase(unittest.TestCase):
         )
 
     def test_real_case_with_algorithm(self) -> None:
+        """Test real case with algorithm."""
         cube = VCube()
         scramble = parse_moves(
             "U2 D2 F U2 F2 U R' L U2 R2 U' B2 D R2 L2 F2 U' L2 D F2 U'",
@@ -999,8 +1083,10 @@ class VCubeRotateTestCase(unittest.TestCase):
 
 
 class VCubeRotateWideSiGNTestCase(unittest.TestCase):
+    """Tests for wide move rotation using SiGN notation."""
 
     def check_rotate(self, raw_move: str) -> None:
+        """Check wide move rotation against unwided equivalent."""
         base_move = Move(raw_move)
 
         for move, name in zip(
@@ -1024,27 +1110,35 @@ class VCubeRotateWideSiGNTestCase(unittest.TestCase):
                 )
 
     def test_rotate_u(self) -> None:
+        """Test rotate u."""
         self.check_rotate('u')
 
     def test_rotate_r(self) -> None:
+        """Test rotate r."""
         self.check_rotate('r')
 
     def test_rotate_f(self) -> None:
+        """Test rotate f."""
         self.check_rotate('f')
 
     def test_rotate_d(self) -> None:
+        """Test rotate d."""
         self.check_rotate('d')
 
     def test_rotate_l(self) -> None:
+        """Test rotate l."""
         self.check_rotate('l')
 
     def test_rotate_b(self) -> None:
+        """Test rotate b."""
         self.check_rotate('b')
 
 
 class VCubeRotateWideStandardTestCase(unittest.TestCase):
+    """Tests for wide move rotation using standard notation."""
 
     def check_rotate(self, raw_move: str) -> None:
+        """Check wide move rotation against unwided equivalent."""
         base_move = Move(raw_move)
 
         for move, name in zip(
@@ -1068,27 +1162,35 @@ class VCubeRotateWideStandardTestCase(unittest.TestCase):
                 )
 
     def test_rotate_u(self) -> None:
+        """Test rotate u."""
         self.check_rotate('Uw')
 
     def test_rotate_r(self) -> None:
+        """Test rotate r."""
         self.check_rotate('Rw')
 
     def test_rotate_f(self) -> None:
+        """Test rotate f."""
         self.check_rotate('Fw')
 
     def test_rotate_d(self) -> None:
+        """Test rotate d."""
         self.check_rotate('Dw')
 
     def test_rotate_l(self) -> None:
+        """Test rotate l."""
         self.check_rotate('Lw')
 
     def test_rotate_b(self) -> None:
+        """Test rotate b."""
         self.check_rotate('Bw')
 
 
 class VCubeRotateWideCancelTestCase(unittest.TestCase):
+    """Tests for wide move cancellation behavior."""
 
     def check_rotate(self, raw_move: str) -> None:
+        """Check wide move and inverse cancel to solved state."""
         base_move = Move(raw_move)
 
         cube = VCube()
@@ -1115,27 +1217,35 @@ class VCubeRotateWideCancelTestCase(unittest.TestCase):
         self.assertTrue(cube.is_solved)
 
     def test_rotate_u(self) -> None:
+        """Test rotate u."""
         self.check_rotate('u')
 
     def test_rotate_r(self) -> None:
+        """Test rotate r."""
         self.check_rotate('r')
 
     def test_rotate_f(self) -> None:
+        """Test rotate f."""
         self.check_rotate('f')
 
     def test_rotate_d(self) -> None:
+        """Test rotate d."""
         self.check_rotate('d')
 
     def test_rotate_l(self) -> None:
+        """Test rotate l."""
         self.check_rotate('l')
 
     def test_rotate_b(self) -> None:
+        """Test rotate b."""
         self.check_rotate('b')
 
 
 class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
+    """Tests for double wide move cancellation behavior."""
 
     def check_rotate(self, raw_move: str) -> None:
+        """Check double wide moves cancel to solved state."""
         move = Move(raw_move).doubled
 
         cube = VCube()
@@ -1167,27 +1277,35 @@ class VCubeRotateWideDoubleCancelTestCase(unittest.TestCase):
         self.assertTrue(cube.is_solved)
 
     def test_rotate_u(self) -> None:
+        """Test rotate u."""
         self.check_rotate('u')
 
     def test_rotate_r(self) -> None:
+        """Test rotate r."""
         self.check_rotate('r')
 
     def test_rotate_f(self) -> None:
+        """Test rotate f."""
         self.check_rotate('f')
 
     def test_rotate_d(self) -> None:
+        """Test rotate d."""
         self.check_rotate('d')
 
     def test_rotate_l(self) -> None:
+        """Test rotate l."""
         self.check_rotate('l')
 
     def test_rotate_b(self) -> None:
+        """Test rotate b."""
         self.check_rotate('b')
 
 
 class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
+    """Tests for advanced wide move scenarios."""
 
     def check_rotate(self, raw_move: str) -> None:
+        """Check wide moves on pre-scrambled cube state."""
         base_move = Move(raw_move)
 
         cube = VCube()
@@ -1213,30 +1331,39 @@ class VCubeRotateWideAdvancedTestCase(unittest.TestCase):
                 )
 
     def test_rotate_u(self) -> None:
+        """Test rotate u."""
         self.check_rotate('u')
 
     def test_rotate_r(self) -> None:
+        """Test rotate r."""
         self.check_rotate('r')
 
     def test_rotate_f(self) -> None:
+        """Test rotate f."""
         self.check_rotate('f')
 
     def test_rotate_d(self) -> None:
+        """Test rotate d."""
         self.check_rotate('d')
 
     def test_rotate_l(self) -> None:
+        """Test rotate l."""
         self.check_rotate('l')
 
     def test_rotate_b(self) -> None:
+        """Test rotate b."""
         self.check_rotate('b')
 
 
 class TestVCubeShow(unittest.TestCase):
+    """Tests for cube visualization and display functionality."""
 
     def setUp(self) -> None:
+        """Set up test fixtures."""
         self.cube = VCube()
 
     def test_show_default_parameters(self) -> None:
+        """Test show default parameters."""
         captured_output = StringIO()
         with patch('sys.stdout', captured_output):
             self.cube.show()
@@ -1247,6 +1374,7 @@ class TestVCubeShow(unittest.TestCase):
         self.assertGreater(len(output), 0)
 
     def test_show_with_orientation(self) -> None:
+        """Test show with orientation."""
         orientations = ['', 'DF', 'FR']
 
         for orientation in orientations:
@@ -1260,6 +1388,7 @@ class TestVCubeShow(unittest.TestCase):
                 self.assertGreater(len(output), 0)
 
     def test_show_with_mode(self) -> None:
+        """Test show with mode."""
         modes = ['f2l', 'oll', 'pll']
 
         for mode in modes:
@@ -1273,6 +1402,7 @@ class TestVCubeShow(unittest.TestCase):
                 self.assertGreater(len(output), 0)
 
     def test_show_scrambled_cube(self) -> None:
+        """Test show scrambled cube."""
         self.cube.rotate("R U R' U'")
 
         captured_output = StringIO()
@@ -1288,6 +1418,7 @@ class TestVCubeShow(unittest.TestCase):
             self.assertEqual(output.count(letter), 9)
 
     def test_show_output_consistency(self) -> None:
+        """Test show output consistency."""
         captured_output1 = StringIO()
         with patch('sys.stdout', captured_output1):
             self.cube.show()
@@ -1301,6 +1432,7 @@ class TestVCubeShow(unittest.TestCase):
         self.assertEqual(output1, output2)
 
     def test_show_vs_display_consistency(self) -> None:
+        """Test show vs display consistency."""
         display_result = self.cube.display()
 
         captured_output = StringIO()
@@ -1311,6 +1443,7 @@ class TestVCubeShow(unittest.TestCase):
         self.assertEqual(display_result, show_result)
 
     def test_show_empty_parameters(self) -> None:
+        """Test show empty parameters."""
         captured_output = StringIO()
         with patch('sys.stdout', captured_output):
             self.cube.show(orientation='')
@@ -1321,39 +1454,48 @@ class TestVCubeShow(unittest.TestCase):
 
 
 class TestVCubeIsEqual(unittest.TestCase):
+    """Tests for cube equality comparison."""
 
     def setUp(self) -> None:
+        """Set up test fixtures."""
         self.cube1 = VCube()
         self.cube2 = VCube()
 
     def test_is_equal_strict_identical_cubes(self) -> None:
+        """Test is equal strict identical cubes."""
         self.assertTrue(self.cube1.is_equal(self.cube2, strict=True))
         self.assertTrue(self.cube1.is_equal(self.cube2))
 
     def test_is_equal_strict_identical_states_after_moves(self) -> None:
+        """Test is equal strict identical states after moves."""
         self.cube1.rotate("R U R'")
         self.cube2.rotate("R U R'")
         self.assertTrue(self.cube1.is_equal(self.cube2, strict=True))
 
     def test_is_equal_strict_different_states(self) -> None:
+        """Test is equal strict different states."""
         self.cube1.rotate("R U R'")
         self.cube2.rotate("L U L'")
         self.assertFalse(self.cube1.is_equal(self.cube2, strict=True))
 
     def test_is_equal_strict_different_orientations(self) -> None:
+        """Test is equal strict different orientations."""
         self.cube1.rotate('x')  # Rotate cube
         # Both cubes are solved but have different orientations
         self.assertFalse(self.cube1.is_equal(self.cube2, strict=True))
 
     def test_is_equal_non_strict_identical_cubes(self) -> None:
+        """Test is equal non strict identical cubes."""
         self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
 
     def test_is_equal_non_strict_same_cube_different_orientations(self) -> None:
+        """Test is equal non strict same cube different orientations."""
         self.cube1.rotate('x')  # Rotate the first cube
         # Both cubes should be considered equal in non-strict mode
         self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
 
     def test_is_equal_non_strict_complex_orientations(self) -> None:
+        """Test is equal non strict complex orientations."""
         # Test various rotations that should still be equal in non-strict mode
         rotations = ['x', 'y', 'z', 'x2', 'y2', 'z2', "x'", "y'", "z'"]
 
@@ -1365,10 +1507,12 @@ class TestVCubeIsEqual(unittest.TestCase):
                 self.assertTrue(cube1.is_equal(cube2, strict=False))
 
     def test_is_equal_non_strict_combined_rotations(self) -> None:
+        """Test is equal non strict combined rotations."""
         self.cube1.rotate('x y z')
         self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
 
     def test_is_equal_non_strict_scrambled_cubes_same_pattern(self) -> None:
+        """Test is equal non strict scrambled cubes same pattern."""
         scramble = "R U R' U'"
         self.cube1.rotate(scramble)
         self.cube2.rotate(scramble)
@@ -1381,16 +1525,19 @@ class TestVCubeIsEqual(unittest.TestCase):
         self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
 
     def test_is_equal_non_strict_different_scrambles(self) -> None:
+        """Test is equal non strict different scrambles."""
         self.cube1.rotate("R U R'")
         self.cube2.rotate("L U L'")
         self.assertFalse(self.cube1.is_equal(self.cube2, strict=False))
 
     def test_is_equal_non_strict_scramble_vs_solved(self) -> None:
+        """Test is equal non strict scramble vs solved."""
         self.cube1.rotate("R U R' U'")  # Not solved
         # cube2 remains solved
         self.assertFalse(self.cube1.is_equal(self.cube2, strict=False))
 
     def test_is_equal_non_strict_scrambled_and_oriented(self) -> None:
+        """Test is equal non strict scrambled and oriented."""
         # Apply same scramble to both cubes
         scramble = "R U2 R' D' R U' R' D"
         self.cube1.rotate(scramble)
@@ -1406,6 +1553,7 @@ class TestVCubeIsEqual(unittest.TestCase):
         self.assertFalse(self.cube1.is_equal(self.cube2, strict=True))
 
     def test_is_equal_with_invalid_states(self) -> None:
+        """Test is equal with invalid states."""
         # Test with cubes that have invalid states but same pattern
         invalid_state_list = list(INITIAL_STATE)
         invalid_state_list[4] = 'R'   # Change top center to R
@@ -1419,6 +1567,7 @@ class TestVCubeIsEqual(unittest.TestCase):
         self.assertTrue(cube1.is_equal(cube2, strict=False))
 
     def test_is_equal_edge_case_empty_history(self) -> None:
+        """Test is equal edge case empty history."""
         # Test that history doesn't affect equality
         self.cube1.rotate("R U R'", history=True)
         self.cube2.rotate("R U R'", history=False)
@@ -1427,6 +1576,7 @@ class TestVCubeIsEqual(unittest.TestCase):
         self.assertTrue(self.cube1.is_equal(self.cube2, strict=False))
 
     def test_is_equal_reflexive_property(self) -> None:
+        """Test is equal reflexive property."""
         # A cube should always be equal to itself
         self.assertTrue(self.cube1.is_equal(self.cube1, strict=True))
         self.assertTrue(self.cube1.is_equal(self.cube1, strict=False))
@@ -1437,6 +1587,7 @@ class TestVCubeIsEqual(unittest.TestCase):
         self.assertTrue(self.cube1.is_equal(self.cube1, strict=False))
 
     def test_is_equal_symmetric_property(self) -> None:
+        """Test is equal symmetric property."""
         # If A equals B, then B equals A
         cube_oriented = VCube()
         cube_oriented.rotate('x')  # Apply orientation rotation
@@ -1460,15 +1611,19 @@ class TestVCubeIsEqual(unittest.TestCase):
 
 
 class TestVCubeOrientation(unittest.TestCase):
+    """Tests for cube orientation computation and handling."""
 
     def setUp(self) -> None:
+        """Set up test fixtures."""
         self.cube = VCube()
 
     def test_orientation_solved_cube(self) -> None:
+        """Test orientation solved cube."""
         # Solved cube should have 'UF' orientation (top=U, front=F)
         self.assertEqual(self.cube.orientation, 'UF')
 
     def test_orientation_after_basic_rotations(self) -> None:
+        """Test orientation after basic rotations."""
         # Test each basic rotation
         expected_orientations = {
             'x': 'FD',   # x rotation: top becomes front, front becomes down
@@ -1486,6 +1641,7 @@ class TestVCubeOrientation(unittest.TestCase):
                 self.assertEqual(cube.orientation, expected)
 
     def test_orientation_after_double_rotations(self) -> None:
+        """Test orientation after double rotations."""
         expected_orientations = {
             'x2': 'DB',  # x2: top becomes down, front becomes back
             'y2': 'UB',  # y2: top stays, front becomes back
@@ -1499,6 +1655,7 @@ class TestVCubeOrientation(unittest.TestCase):
                 self.assertEqual(cube.orientation, expected)
 
     def test_orientation_combined_rotations(self) -> None:
+        """Test orientation combined rotations."""
         # Test combinations of rotations
         test_cases = [
             ('x y', 'FR'),    # x then y
@@ -1514,6 +1671,7 @@ class TestVCubeOrientation(unittest.TestCase):
                 self.assertEqual(cube.orientation, expected)
 
     def test_orientation_with_face_moves(self) -> None:
+        """Test orientation with face moves."""
         # Basic face moves (R, U, F, D, B) shouldn't change center positions
         # Slice moves (M, E, S) are expected to change centers
         face_moves = ['R', 'U', 'F', 'D', 'B', 'L']
@@ -1526,6 +1684,7 @@ class TestVCubeOrientation(unittest.TestCase):
                 self.assertEqual(cube.orientation, original_orientation)
 
     def test_orientation_with_slice_moves(self) -> None:
+        """Test orientation with slice moves."""
         # Slice moves (M, E, S) are expected to change center positions
         slice_moves = {
             'M': 'BU',  # Middle slice affects centers
@@ -1540,6 +1699,7 @@ class TestVCubeOrientation(unittest.TestCase):
                 self.assertEqual(cube.orientation, expected)
 
     def test_orientation_with_complex_sequences(self) -> None:
+        """Test orientation with complex sequences."""
         # Test that face moves don't affect orientation
         # even in complex sequences
         # Using only moves that don't change centers: R, U, F, D, B L
@@ -1550,6 +1710,7 @@ class TestVCubeOrientation(unittest.TestCase):
         self.assertEqual(self.cube.orientation, original_orientation)
 
     def test_orientation_scrambled_cube(self) -> None:
+        """Test orientation scrambled cube."""
         # Orientation should still work correctly on scrambled cubes
         self.cube.rotate("R U R' U' F R F' U2 R' U R U2")
         original_orientation = self.cube.orientation
@@ -1560,6 +1721,7 @@ class TestVCubeOrientation(unittest.TestCase):
         self.assertEqual(self.cube.orientation, 'FD')
 
     def test_orientation_all_24_possible_orientations(self) -> None:
+        """Test orientation all 24 possible orientations."""
         # Test all 24 possible orientations of a cube
         # Each face can be on top (6),
         # and for each top face, 4 different front faces
@@ -1604,6 +1766,7 @@ class TestVCubeOrientation(unittest.TestCase):
         self.assertEqual(len(orientations_found), 24)
 
     def test_orientation_consistency_with_oriented_copy(self) -> None:
+        """Test orientation consistency with oriented copy."""
         # Test that orientation property is consistent with oriented_copy method
         target_orientations = ['UF', 'DF', 'FR', 'BL', 'UL', 'DR']
 
@@ -1614,6 +1777,7 @@ class TestVCubeOrientation(unittest.TestCase):
                 self.assertEqual(oriented_cube.orientation, target)
 
     def test_orientation_with_invalid_state(self) -> None:
+        """Test orientation with invalid state."""
         # Test orientation with an unchecked/invalid state
         # Create a state with modified centers
         invalid_state_list = list(INITIAL_STATE)
@@ -1625,6 +1789,7 @@ class TestVCubeOrientation(unittest.TestCase):
         self.assertEqual(cube.orientation, 'RD')
 
     def test_orientation_property_type(self) -> None:
+        """Test orientation property type."""
         # Test that orientation always returns a string
         self.assertIsInstance(self.cube.orientation, str)
 
@@ -1637,6 +1802,7 @@ class TestVCubeOrientation(unittest.TestCase):
         self.assertEqual(len(self.cube.orientation), 2)
 
     def test_orientation_valid_face_characters(self) -> None:
+        """Test orientation valid face characters."""
         # Orientation should only contain valid face characters
         rotations = ['', 'x', 'y', 'z', 'x2', 'y2', 'z2', 'x y', 'z x y']
 
@@ -1652,6 +1818,7 @@ class TestVCubeOrientation(unittest.TestCase):
                 )
 
     def test_orientation_specific_positions(self) -> None:
+        """Test orientation specific positions."""
         # Test that orientation correctly reads positions 4 and 21
         cube = VCube()
 
@@ -1667,6 +1834,7 @@ class TestVCubeOrientation(unittest.TestCase):
         self.assertEqual(cube.orientation, 'FD')
 
     def test_orientation_edge_case_positions(self) -> None:
+        """Test orientation edge case positions."""
         # Test edge case: what if centers are swapped in an invalid way
         state = list(VCube().state)
         # Swap some centers to create an unusual but testable state

@@ -1,3 +1,5 @@
+"""Tests for visual effects and color transformations."""
+
 import unittest
 from unittest.mock import patch
 
@@ -149,9 +151,10 @@ class TestPositioningFunctions(unittest.TestCase):
 
 
 class RGBTestCase(unittest.TestCase):
+    """Tests for RGB color manipulation and transformation effects."""
 
     def _validate_rgb_output(self, rgb: tuple[int, int, int]) -> None:
-        """Helper to validate RGB output is properly clamped."""
+        """Help to validate RGB output is properly clamped."""
         self.assertIsInstance(rgb, tuple)
         self.assertEqual(len(rgb), 3)
         for component in rgb:
@@ -777,7 +780,7 @@ class TestEffectsConfiguration(unittest.TestCase):
 
     def test_effects_parameters_structure(self) -> None:
         """Test that effects parameters are properly structured."""
-        for _effect_name, effect_config in EFFECTS.items():
+        for effect_config in EFFECTS.values():
             if 'parameters' in effect_config:
                 params = effect_config['parameters']
                 # Check that parameter values are reasonable types

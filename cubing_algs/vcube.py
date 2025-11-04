@@ -1,3 +1,5 @@
+"""Virtual 3x3 cube implementation for simulating moves and tracking state."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -19,16 +21,15 @@ class VCube(VCubeIntegrityChecker):
     Represents a Rubik's cube state using a 54-character string
     where each character represents a facelet color.
     """
+
     size = 3
     face_number = 6
     face_size = size * size
 
     def __init__(self, initial: str | None = None, *,
                  check: bool = True,
-                 history: list[str] | None = None):
-        """
-        Initialize a virtual cube with optional initial state and history.
-        """
+                 history: list[str] | None = None) -> None:
+        """Initialize a virtual cube with optional initial state and history."""
         if initial:
             self._state = initial
             if check:
@@ -40,9 +41,7 @@ class VCube(VCubeIntegrityChecker):
 
     @property
     def state(self) -> str:
-        """
-        Get the current state of the cube as a facelet string.
-        """
+        """Get the current state of the cube as a facelet string."""
         return self._state
 
     @staticmethod
@@ -52,6 +51,18 @@ class VCube(VCubeIntegrityChecker):
                     scheme: str | None = None) -> 'VCube':
         """
         Create a VCube from cubie representation.
+
+        Args:
+            cp: Corner permutation array.
+            co: Corner orientation array.
+            ep: Edge permutation array.
+            eo: Edge orientation array.
+            so: Center orientation array.
+            scheme: Optional color scheme to use.
+
+        Returns:
+            A new VCube with the specified cubie configuration.
+
         """
         return VCube(
             cubies_to_facelets(cp, co, ep, eo, so, scheme),
@@ -64,14 +75,17 @@ class VCube(VCubeIntegrityChecker):
     ]:
         """
         Convert the cube state to cubie representation.
+
+        Returns:
+            A tuple of (corner_permutation, corner_orientation,
+            edge_permutation, edge_orientation, center_orientation).
+
         """
         return facelets_to_cubies(self._state)
 
     @property
     def is_solved(self) -> bool:
-        """
-        Check if the cube is in a solved state.
-        """
+        """Check if the cube is in a solved state."""
         return all(face * self.face_size in self.state for face in FACE_ORDER)
 
     def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
@@ -81,6 +95,15 @@ class VCube(VCubeIntegrityChecker):
         In strict mode, compares exact facelet states.
         In non-strict mode, reorients the other cube to match
         this cube's orientation before comparing.
+
+        Args:
+            other_cube: The cube to compare against.
+            strict: If True, compare exact states; if False, allow
+                orientation differences.
+
+        Returns:
+            True if the cubes are equal according to the comparison mode.
+
         """
         if strict:
             return self.state == other_cube.state
@@ -105,6 +128,14 @@ class VCube(VCubeIntegrityChecker):
                history: bool = True) -> str:
         """
         Apply a sequence of moves to the cube.
+
+        Args:
+            moves: The moves to apply to the cube.
+            history: If True, record moves in the cube's history.
+
+        Returns:
+            The new state of the cube after applying the moves.
+
         """
         moves_str = str(moves)
 
@@ -119,6 +150,17 @@ class VCube(VCubeIntegrityChecker):
     def rotate_move(self, move: str, *, history: bool = True) -> str:
         """
         Apply a single move to the cube.
+
+        Args:
+            move: The move string to apply.
+            history: If True, record the move in the cube's history.
+
+        Returns:
+            The new state of the cube after applying the move.
+
+        Raises:
+            InvalidMoveError: If the move is invalid.
+
         """
         try:
             self._state = rotate.rotate_move(self._state, move)
@@ -132,6 +174,13 @@ class VCube(VCubeIntegrityChecker):
     def copy(self, *, full: bool = False) -> 'VCube':
         """
         Create a copy of the cube with optional history preservation.
+
+        Args:
+            full: If True, copy the move history as well.
+
+        Returns:
+            A new VCube instance with the same state.
+
         """
         history = None
         if full:
@@ -146,6 +195,14 @@ class VCube(VCubeIntegrityChecker):
     def compute_orientation_moves(self, faces: str) -> str:
         """
         Calculate the moves needed to orient the cube to specific faces.
+
+        Args:
+            faces: A string specifying the desired face orientation
+                (e.g., 'UF').
+
+        Returns:
+            A string of moves needed to achieve the desired orientation.
+
         """
         top_face, front_face = self.check_face_orientations(faces)
 
@@ -159,6 +216,14 @@ class VCube(VCubeIntegrityChecker):
     def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
         """
         Create a copy of the cube oriented to specific faces.
+
+        Args:
+            faces: The desired face orientation (e.g., 'UF').
+            full: If True, copy the move history as well.
+
+        Returns:
+            A new VCube instance oriented to the specified faces.
+
         """
         cube = self.copy(full=full)
 
@@ -174,6 +239,18 @@ class VCube(VCubeIntegrityChecker):
                 effect: str = '', facelet: str = '') -> str:
         """
         Generate a visual representation of the cube.
+
+        Args:
+            mode: Display mode for the visualization.
+            orientation: Desired orientation for display.
+            mask: Mask to apply to the display.
+            palette: Color palette to use.
+            effect: Visual effect to apply.
+            facelet: Facelet mode for display.
+
+        Returns:
+            A string containing the visual representation of the cube.
+
         """
         return VCubeDisplay(self, palette, effect, facelet).display(
             mode, orientation, mask,
@@ -182,10 +259,8 @@ class VCube(VCubeIntegrityChecker):
     def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
              mask: str = '', palette: str = '',
              effect: str = '', facelet: str = '') -> None:
-        """
-        Print a visual representation of the cube.
-        """
-        print(
+        """Print a visual representation of the cube."""
+        print(  # noqa: T201
             self.display(
                 mode, orientation, mask,
                 palette, effect, facelet,
@@ -196,6 +271,13 @@ class VCube(VCubeIntegrityChecker):
     def get_face(self, face: str) -> str:
         """
         Get the facelets of a specific face by face letter.
+
+        Args:
+            face: The face letter (e.g., 'U', 'F', 'R').
+
+        Returns:
+            A string of 9 characters representing the facelets on that face.
+
         """
         index = FACE_INDEXES[face]
         return self._state[index * self.face_size: (index + 1) * self.face_size]
@@ -203,23 +285,36 @@ class VCube(VCubeIntegrityChecker):
     def get_face_center_indexes(self) -> list[str]:
         """
         Get the center facelet colors for all faces.
+
+        Returns:
+            A list of center colors for all six faces in order.
+
         """
-        face_centers = []
-
-        for i in range(6):
-            face_centers.append(self.state[(i * self.face_size) + 4])
-
-        return face_centers
+        return [self.state[(i * self.face_size) + 4] for i in range(6)]
 
     def get_face_index(self, face: str) -> int:
         """
         Get the index of a face by its center color.
+
+        Args:
+            face: The center color of the face to find.
+
+        Returns:
+            The index (0-5) of the face with that center color.
+
         """
         return self.get_face_center_indexes().index(face)
 
     def get_face_by_center(self, face: str) -> str:
         """
         Get the facelets of a face by its center color.
+
+        Args:
+            face: The center color to search for.
+
+        Returns:
+            A string of 9 characters representing the facelets on that face.
+
         """
         index = self.get_face_index(face)
 
@@ -227,11 +322,13 @@ class VCube(VCubeIntegrityChecker):
 
     def __str__(self) -> str:
         """
-        Return the facelets of the cube
+        Return the facelets of the cube.
+
+        Returns:
+            A multi-line string showing each face and its facelets.
+
         """
-        faces = []
-        for face in FACE_ORDER:
-            faces.append(f'{ face }: { self.get_face(face)}')
+        faces = [f'{ face }: { self.get_face(face)}' for face in FACE_ORDER]
 
         return '\n'.join(faces)
 
@@ -239,5 +336,9 @@ class VCube(VCubeIntegrityChecker):
         """
         Return a string representation that can be used
         to recreate the VCube.
+
+        Returns:
+            A Python expression that can recreate this VCube object.
+
         """
         return f"VCube('{ self._state }')"

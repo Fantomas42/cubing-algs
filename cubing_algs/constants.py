@@ -12,6 +12,8 @@ MAX_ITERATIONS = 50
 
 RESLICE_THRESHOLD = 50
 
+REWIDE_THRESHOLD = 50
+
 DOUBLE_CHAR = '2'
 
 INVERT_CHAR = "'"
@@ -166,75 +168,63 @@ UNSLICE_ROTATION_MOVES = {
 }
 
 RESLICE_M_MOVES = {
-    "R L'": ['M', 'x'],
+    # 2-move patterns (sorted form is canonical)
     "L' R": ['M', 'x'],
-    "R' L": ["M'", "x'"],
     "L R'": ["M'", "x'"],
-    'R2 L2': ['M2', 'x2'],
     'L2 R2': ['M2', 'x2'],
 
-    "r' R": ['M'],
-    "R r'": ['M'],
-    "l L'": ['M'],
+    # 3-move patterns with rotation (sorted form is canonical)
+    "L' R x'": ['M'],
+    "L R' x": ["M'"],
+    'L2 R2 x2': ['M2'],
+
+    # Wide move patterns (sorted form is canonical)
     "L' l": ['M'],
-
-    "r R'": ["M'"],
-    "R' r": ["M'"],
-    "l' L": ["M'"],
+    "R r'": ['M'],
     "L l'": ["M'"],
-
-    'R2 r2': ['M2'],
-    'r2 R2': ['M2'],
+    "R' r": ["M'"],
     'L2 l2': ['M2'],
-    'l2 L2': ['M2'],
+    'R2 r2': ['M2'],
 }
 
 RESLICE_S_MOVES = {
-    "F' B": ['S', "z'"],
+    # 2-move patterns (sorted form is canonical)
     "B F'": ['S', "z'"],
-    "F B'": ["S'", 'z'],
     "B' F": ["S'", 'z'],
     'B2 F2': ['S2', 'z2'],
-    'F2 B2': ['S2', 'z2'],
 
-    "f F'": ['S'],
+    # 3-move patterns with rotation (sorted form is canonical)
+    "B F' z": ['S'],
+    "B' F z'": ["S'"],
+    'B2 F2 z2': ['S2'],
+
+    # Wide move patterns (sorted form is canonical)
     "F' f": ['S'],
-    "b' B": ['S'],
     "B b'": ['S'],
-
-    "f' F": ["S'"],
     "F f'": ["S'"],
-    "b B'": ["S'"],
     "B' b": ["S'"],
-
-    'F2 f2': ['S2'],
-    'f2 F2': ['S2'],
     'B2 b2': ['S2'],
-    'b2 B2': ['S2'],
+    'F2 f2': ['S2'],
 }
 
 RESLICE_E_MOVES = {
-    "U D'": ['E', 'y'],
+    # 2-move patterns (sorted form is canonical)
     "D' U": ['E', 'y'],
-    "U' D": ["E'", "y'"],
     "D U'": ["E'", "y'"],
-    'U2 D2': ['E2'],
-    'D2 U2': ['E2'],
+    'D2 U2': ['E2 y2'],
 
-    "u' U": ['E'],
+    # 3-move patterns with rotation (sorted form is canonical)
+    "D' U y'": ['E'],
+    "D U' y": ["E'"],
+    'D2 U2 y2': ['E2'],
+
+    # Wide move patterns (sorted form is canonical)
     "U u'": ['E'],
-    "d D'": ['E'],
     "D' d": ['E'],
-
-    "u U'": ["E'"],
     "U' u": ["E'"],
-    "d' D": ["E'"],
     "D d'": ["E'"],
-
-    'U2 u2': ['E2'],
-    'u2 U2': ['E2'],
     'D2 d2': ['E2'],
-    'u2 D2': ['E2'],
+    'U2 u2': ['E2'],
 }
 
 RESLICE_MOVES = {}
@@ -492,3 +482,36 @@ ORIENTATIONS = [
     'FD', 'FR', 'FU', 'FL',
     'BD', 'BR', 'BU', 'BL',
 ]
+
+FACE_EDGES_INDEX = {1, 3, 5, 7}
+
+FACE_CORNERS_INDEX = {0, 2, 6, 8}
+
+# QTM distance calculation constants
+QTM_SAME_FACE_OPPOSITE_PAIRS = {
+    (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
+    (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
+    (1, 7), (7, 1),  # Top edge <-> Bottom edge
+    (3, 5), (5, 3),  # Left edge <-> Right edge
+}
+
+QTM_OPPOSITE_FACE_SIMPLE_PAIRS = {
+    (1, 1), (7, 7),  # Top edge <-> Bottom edge
+    (3, 5), (5, 3),  # Left edge <-> Right edge
+    (0, 0), (2, 2),  # Top-left corner + Top-right corner
+    (6, 6), (8, 8),  # Bottom-left corner + Bottom-right corner
+}
+
+QTM_OPPOSITE_FACE_DOUBLE_PAIRS = {
+    (1, 7), (7, 1),  # Top edge <-> Bottom edge
+    (3, 3), (5, 5),  # Left edge <-> Right edge
+    (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
+    (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner
+}
+
+QTM_OPPOSITE_EDGE_OFFSETS = {
+    1: 6,
+    7: -6,
+    3: 2,
+    5: -2,
+}

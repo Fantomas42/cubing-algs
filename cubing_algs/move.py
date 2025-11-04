@@ -19,7 +19,7 @@ from cubing_algs.constants import ROTATIONS
 from cubing_algs.constants import WIDE_CHAR
 
 
-class Move(UserString):
+class Move(UserString):  # noqa: PLR0904
     """
     Represents a single move in a Rubik's cube algorithm.
 
@@ -35,9 +35,7 @@ class Move(UserString):
 
     @cached_property
     def layer_move_modifier_time(self) -> tuple[str, str, str, str]:
-        """
-        Parse the move string into its component parts.
-        """
+        """Parse the move string into its component parts."""
         layer = ''
         move = ''
         modifier = ''
@@ -63,16 +61,12 @@ class Move(UserString):
 
     @cached_property
     def layer(self) -> str:
-        """
-        Extract the layers impacted.
-        """
+        """Extract the layers impacted."""
         return self.layer_move_modifier_time[0]
 
     @cached_property
     def layers(self) -> list[int]:
-        """
-        List of impacted layers, 0-indexed.
-        """
+        """List of impacted layers, 0-indexed."""
         if not self.layer:
             if self.is_wide_move:
                 return [0, 1]
@@ -121,19 +115,15 @@ class Move(UserString):
 
     @cached_property
     def time(self) -> str:
-        """
-        Extract the time part of the move.
-        """
+        """Extract the time part of the move."""
         return self.layer_move_modifier_time[3]
 
     @cached_property
-    def timed(self) -> int | None:
-        """
-        Integer version of the timed move
-        """
+    def timed(self) -> int:
+        """Integer version of the timed move."""
         if self.time:
             return int(self.time[1:])
-        return None
+        return 0
 
     # Validation
 
@@ -242,9 +232,12 @@ class Move(UserString):
         """
         Check if this is an inner slice move.
 
-        Inner slice moves include M, E, and S, which turn the middle slices.
+        Inner slice moves include M, E, and S, which turn the middle slices and
+        layered moves which do not include outer layer.
         """
-        return self.base_move in INNER_MOVES
+        return self.base_move in INNER_MOVES or (
+            0 not in self.layers
+        )
 
     @cached_property
     def is_outer_move(self) -> bool:
@@ -254,7 +247,7 @@ class Move(UserString):
         Outer face moves include U, D, L, R, F, and B,
         which turn the outer faces.
         """
-        return self.base_move in OUTER_MOVES
+        return self.base_move in OUTER_MOVES and not self.is_inner_move
 
     @cached_property
     def is_wide_move(self) -> bool:
@@ -287,9 +280,7 @@ class Move(UserString):
 
     @cached_property
     def is_standard_move(self) -> bool:
-        """
-        Determine if this move uses Standard notation.
-        """
+        """Determine if this move uses Standard notation."""
         return not self.is_sign_move
 
     @cached_property

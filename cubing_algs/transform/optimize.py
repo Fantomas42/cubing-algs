@@ -1,3 +1,5 @@
+"""Move optimization functions for reducing algorithm length and complexity."""
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
 
@@ -7,7 +9,15 @@ def optimize_repeat_three_moves(
         max_depth: int = MAX_ITERATIONS,
 ) -> Algorithm:
     """
-    R, R, R --> R'
+    R, R, R --> R'.
+
+    Args:
+        old_moves: Algorithm to optimize.
+        max_depth: Maximum recursion depth for optimization.
+
+    Returns:
+        Optimized algorithm with triple repeats converted to inverse.
+
     """
     if max_depth <= 0:
         return old_moves
@@ -39,7 +49,15 @@ def optimize_do_undo_moves(
     """
     R R' --> <nothing>
     R2 R2 --> <nothing>
-    R R R' R' --> <nothing>
+    R R R' R' --> <nothing>.
+
+    Args:
+        old_moves: Algorithm to optimize.
+        max_depth: Maximum recursion depth for optimization.
+
+    Returns:
+        Optimized algorithm with canceling move pairs removed.
+
     """
     if max_depth <= 0:
         return old_moves
@@ -73,7 +91,15 @@ def optimize_double_moves(
         max_depth: int = MAX_ITERATIONS,
 ) -> Algorithm:
     """
-    R, R --> R2
+    R, R --> R2.
+
+    Args:
+        old_moves: Algorithm to optimize.
+        max_depth: Maximum recursion depth for optimization.
+
+    Returns:
+        Optimized algorithm with consecutive identical moves combined.
+
     """
     if max_depth <= 0:
         return old_moves
@@ -106,7 +132,15 @@ def optimize_triple_moves(
     """
     R, R2 --> R'
     R2, R --> R'
-    R', R2 --> R
+    R', R2 --> R.
+
+    Args:
+        old_moves: Algorithm to optimize.
+        max_depth: Maximum recursion depth for optimization.
+
+    Returns:
+        Optimized algorithm with move-double combinations simplified.
+
     """
     if max_depth <= 0:
         return old_moves

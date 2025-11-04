@@ -1,3 +1,5 @@
+"""Pause insertion and removal transformations for timed algorithms."""
+
 from collections.abc import Callable
 
 from cubing_algs.algorithm import Algorithm
@@ -8,12 +10,15 @@ from cubing_algs.move import Move
 def unpause_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove all pause moves from an algorithm.
-    """
-    moves: list[Move] = []
 
-    for move in old_moves:
-        if not move.is_pause:
-            moves.append(move)
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        A new Algorithm with all pause moves removed.
+
+    """
+    moves: list[Move] = [move for move in old_moves if not move.is_pause]
 
     return Algorithm(moves)
 
@@ -26,11 +31,13 @@ def pause_moves(
     Create a configurable pause_moves function.
 
     Args:
-        speed: Base speed in milliseconds (default: 200)
-        factor: Multiplier for threshold calculation (default: 2)
+        speed: Base speed threshold in milliseconds.
+        factor: Multiplier for the speed threshold.
+        multiple: If True, insert multiple pauses for long delays.
 
     Returns:
-        A function that can be used with transform() or called directly.
+        A function that inserts pause moves into timed algorithms.
+
     """
     def _pause_moves(old_moves: Algorithm) -> Algorithm:
         if not old_moves:

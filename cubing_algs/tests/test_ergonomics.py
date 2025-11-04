@@ -1,3 +1,5 @@
+"""Tests for ergonomics analysis."""
+
 import unittest
 from unittest.mock import patch
 

@@ -1,3 +1,5 @@
+"""Binary masks for identifying and manipulating cube regions and pieces."""
+
 from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
@@ -5,9 +7,16 @@ from cubing_algs.facelets import facelets_to_cubies
 
 def union_masks(*masks: str) -> str:
     """
-    Performs the union (logical OR) of multiple binary masks.
+    Perform the union (logical OR) of multiple binary masks.
 
     Returns '1' if at least one mask has '1' at that position.
+
+    Args:
+        *masks: Variable number of binary mask strings.
+
+    Returns:
+        The union of all masks as a binary string.
+
     """
     if not masks:
         return ''
@@ -23,9 +32,16 @@ def union_masks(*masks: str) -> str:
 
 def intersection_masks(*masks: str) -> str:
     """
-    Performs the intersection (logical AND) of multiple binary masks.
+    Perform the intersection (logical AND) of multiple binary masks.
 
     Returns '1' only if all masks have '1' at that position.
+
+    Args:
+        *masks: Variable number of binary mask strings.
+
+    Returns:
+        The intersection of all masks as a binary string.
+
     """
     if not masks:
         return ''
@@ -41,9 +57,16 @@ def intersection_masks(*masks: str) -> str:
 
 def negate_mask(mask: str) -> str:
     """
-    Inverts a binary mask (logical NOT).
+    Invert a binary mask (logical NOT).
 
     '0' becomes '1' and '1' becomes '0'.
+
+    Args:
+        mask: The binary mask string to invert.
+
+    Returns:
+        The inverted mask as a binary string.
+
     """
     if not mask:
         return ''
@@ -63,12 +86,20 @@ _CACHE_SIZE_LIMIT = 1000  # Prevent unbounded memory growth
 
 def facelets_masked(facelets: str, mask: str) -> str:
     """
-    Applies a binary mask to a facelets string.
+    Apply a binary mask to a facelets string.
 
     Returns a new facelets string where positions with '0' in the mask
     are replaced with '-', and positions with '1' retain their original value.
 
     Optimized for high-frequency usage with caching and fast string operations.
+
+    Args:
+        facelets: The facelets string to mask.
+        mask: The binary mask string.
+
+    Returns:
+        The masked facelets string with '-' for masked positions.
+
     """
     if mask in _MASK_CACHE:
         translation = _MASK_CACHE[mask]
@@ -97,11 +128,19 @@ def facelets_masked(facelets: str, mask: str) -> str:
 
 def state_masked(state: str, mask: str) -> str:
     """
-    Applies a binary mask to a cube state.
+    Apply a binary mask to a cube state.
 
     Converts the state to cubies, applies the mask
     to the initial state facelets, then converts back
     to a facelets representation showing only the masked pieces.
+
+    Args:
+        state: The cube state string to mask.
+        mask: The binary mask string.
+
+    Returns:
+        The masked cube state as a facelets string.
+
     """
     return cubies_to_facelets(
         *facelets_to_cubies(state),

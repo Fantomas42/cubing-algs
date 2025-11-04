@@ -1,11 +1,15 @@
+"""Tests for the Move class."""
+
 import unittest
 
 from cubing_algs.move import Move
 
 
-class MoveTestCase(unittest.TestCase):
+class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for the Move class and its properties."""
 
     def test_base_move(self) -> None:
+        """Test base move."""
         self.assertEqual(Move('U').base_move, 'U')
         self.assertEqual(Move('x2').base_move, 'x')
         self.assertEqual(Move('Uw').base_move, 'U')
@@ -15,6 +19,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move("2-4Uw'@200").base_move, 'U')
 
     def test_raw_base_move(self) -> None:
+        """Test raw base move."""
         self.assertEqual(Move('U').raw_base_move, 'U')
         self.assertEqual(Move('x2').raw_base_move, 'x')
         self.assertEqual(Move('Uw').raw_base_move, 'Uw')
@@ -25,6 +30,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.').raw_base_move, '.')
 
     def test_modifier(self) -> None:
+        """Test modifier."""
         self.assertEqual(Move('U').modifier, '')
         self.assertEqual(Move('x2').modifier, '2')
         self.assertEqual(Move('Uw').modifier, '')
@@ -32,6 +38,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.').modifier, '')
 
     def test_is_valid(self) -> None:
+        """Test is valid."""
         self.assertTrue(Move('U').is_valid)
         self.assertTrue(Move('u').is_valid)
         self.assertTrue(Move('u2').is_valid)
@@ -47,6 +54,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('.').is_valid)
 
     def test_is_valid_move(self) -> None:
+        """Test is valid move."""
         self.assertTrue(Move('U').is_valid_move)
         self.assertTrue(Move('u').is_valid_move)
         self.assertTrue(Move('Uw').is_valid_move)
@@ -55,6 +63,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('.').is_valid_move)
 
     def test_is_valid_modifier(self) -> None:
+        """Test is valid modifier."""
         self.assertTrue(Move('U').is_valid_modifier)
         self.assertTrue(Move('U2').is_valid_modifier)
         self.assertTrue(Move("U'").is_valid_modifier)
@@ -65,6 +74,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('.').is_valid_modifier)
 
     def test_is_valid_layer(self) -> None:
+        """Test is valid layer."""
         self.assertTrue(Move('3Rw').is_valid_layer)
         self.assertTrue(Move('3R').is_valid_layer)
         self.assertTrue(Move('3-4Rw').is_valid_layer)
@@ -76,56 +86,74 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('.').is_valid_layer)
 
     def test_is_double(self) -> None:
+        """Test is double."""
         self.assertFalse(Move('U').is_double)
         self.assertFalse(Move("U'").is_double)
         self.assertTrue(Move('U2').is_double)
         self.assertFalse(Move('.').is_double)
 
     def test_is_clockwise(self) -> None:
+        """Test is clockwise."""
         self.assertTrue(Move('U').is_clockwise)
         self.assertFalse(Move("U'").is_clockwise)
         self.assertFalse(Move('.').is_clockwise)
 
     def test_is_counter_clockwise(self) -> None:
+        """Test is counter clockwise."""
         self.assertTrue(Move("U'").is_counter_clockwise)
         self.assertFalse(Move('U').is_counter_clockwise)
         self.assertFalse(Move('.').is_counter_clockwise)
 
     def test_is_pause(self) -> None:
+        """Test is pause."""
         self.assertFalse(Move('U').is_pause)
         self.assertFalse(Move('x').is_pause)
         self.assertTrue(Move('.').is_pause)
         self.assertTrue(Move('.@100').is_pause)
 
     def test_is_rotation_move(self) -> None:
+        """Test is rotation move."""
         self.assertFalse(Move('U').is_rotation_move)
         self.assertFalse(Move('.').is_rotation_move)
         self.assertTrue(Move('x').is_rotation_move)
 
     def test_is_rotational_move(self) -> None:
+        """Test is rotational move."""
         self.assertFalse(Move('U').is_rotational_move)
         self.assertFalse(Move('.').is_rotational_move)
         self.assertTrue(Move('x').is_rotational_move)
         self.assertTrue(Move('M').is_rotational_move)
 
     def test_is_face_move(self) -> None:
+        """Test is face move."""
         self.assertFalse(Move('x').is_face_move)
         self.assertFalse(Move('.').is_face_move)
         self.assertTrue(Move('F').is_face_move)
 
     def test_is_inner_move(self) -> None:
+        """Test is inner move."""
         self.assertFalse(Move('R').is_inner_move)
-        self.assertTrue(Move('M').is_inner_move)
         self.assertFalse(Move('.').is_inner_move)
+        self.assertTrue(Move('M').is_inner_move)
+        self.assertTrue(Move('2L').is_inner_move)
+        self.assertTrue(Move('2-3Lw').is_inner_move)
+        self.assertFalse(Move('1-3Lw').is_inner_move)
+        self.assertFalse(Move('0-3Lw').is_inner_move)
 
     def test_is_outer_move(self) -> None:
+        """Test is outer move."""
         self.assertFalse(Move('x').is_outer_move)
         self.assertFalse(Move('M').is_outer_move)
         self.assertTrue(Move('R').is_outer_move)
         self.assertTrue(Move('r2').is_outer_move)
         self.assertFalse(Move('.').is_outer_move)
+        self.assertFalse(Move('2L').is_outer_move)
+        self.assertFalse(Move('2-3Lw').is_outer_move)
+        self.assertTrue(Move('1-3Lw').is_outer_move)
+        self.assertTrue(Move('0-3Lw').is_outer_move)
 
     def test_is_wide_move(self) -> None:
+        """Test is wide move."""
         self.assertFalse(Move('x').is_wide_move)
         self.assertFalse(Move('R').is_wide_move)
         self.assertTrue(Move('r2').is_wide_move)
@@ -134,6 +162,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move('.').is_wide_move)
 
     def test_is_layered(self) -> None:
+        """Test is layered."""
         self.assertFalse(Move('x').is_layered)
         self.assertFalse(Move('R').is_layered)
         self.assertFalse(Move('.').is_layered)
@@ -145,6 +174,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('r2').is_layered)
 
     def test_is_timed(self) -> None:
+        """Test is timed."""
         self.assertFalse(Move('x').is_timed)
         self.assertFalse(Move('R').is_timed)
         self.assertFalse(Move('.').is_timed)
@@ -159,6 +189,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move('.@500').is_timed)
 
     def test_is_standard_move(self) -> None:
+        """Test is standard move."""
         self.assertTrue(Move('x').is_standard_move)
         self.assertTrue(Move('R').is_standard_move)
         self.assertTrue(Move('.').is_standard_move)
@@ -173,6 +204,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(Move("2-4u'@100").is_standard_move)
 
     def test_is_sign_move(self) -> None:
+        """Test is sign move."""
         self.assertFalse(Move('x').is_sign_move)
         self.assertFalse(Move('R').is_sign_move)
         self.assertFalse(Move('.').is_sign_move)
@@ -187,6 +219,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertTrue(Move("2-4u'@100").is_sign_move)
 
     def test_inverted(self) -> None:
+        """Test inverted."""
         self.assertEqual(Move('R').inverted, Move("R'"))
         self.assertEqual(Move("R'").inverted, Move('R'))
         self.assertEqual(Move("x'").inverted, Move('x'))
@@ -196,6 +229,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.').inverted, Move('.'))
 
     def test_doubled(self) -> None:
+        """Test doubled."""
         self.assertEqual(Move('R').doubled, Move('R2'))
         self.assertEqual(Move("R'").doubled, Move('R2'))
         self.assertEqual(Move("x'").doubled, Move('x2'))
@@ -205,6 +239,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.').doubled, Move('.'))
 
     def test_to_sign(self) -> None:
+        """Test to sign."""
         self.assertEqual(Move('R').to_sign, Move('R'))
         self.assertEqual(Move('x').to_sign, Move('x'))
         self.assertEqual(Move('r').to_sign, Move('r'))
@@ -213,6 +248,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.').to_sign, Move('.'))
 
     def test_to_standard(self) -> None:
+        """Test to standard."""
         self.assertEqual(Move('R').to_standard, Move('R'))
         self.assertEqual(Move('x').to_standard, Move('x'))
         self.assertEqual(Move('r').to_standard, Move('Rw'))
@@ -221,6 +257,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.').to_standard, Move('.'))
 
     def test_unlayered(self) -> None:
+        """Test unlayered."""
         self.assertEqual(Move('R').unlayered, Move('R'))
         self.assertEqual(Move('2R').unlayered, Move('R'))
         self.assertEqual(Move('2-4Rw').unlayered, Move('Rw'))
@@ -233,6 +270,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.').unlayered, Move('.'))
 
     def test_untimed(self) -> None:
+        """Test untimed."""
         self.assertEqual(Move('R').untimed, Move('R'))
         self.assertEqual(Move('2R').untimed, Move('2R'))
         self.assertEqual(Move('2-4Rw').untimed, Move('2-4Rw'))
@@ -242,6 +280,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('.@100').untimed, Move('.'))
 
     def test_layer(self) -> None:
+        """Test layer."""
         self.assertEqual(Move('R').layer, '')
         self.assertEqual(Move('.').layer, '')
 
@@ -261,6 +300,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('2Dw2').layer, '2')
 
     def test_big_moves_standard(self) -> None:
+        """Test big moves standard."""
         move = Move('3Rw')
 
         self.assertEqual(move.layer, '3')
@@ -285,6 +325,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(move.is_double)
 
     def test_big_moves_sign(self) -> None:
+        """Test big moves sign."""
         move = Move('3r')
 
         self.assertEqual(move.layer, '3')
@@ -309,6 +350,7 @@ class MoveTestCase(unittest.TestCase):
         self.assertFalse(move.is_double)
 
     def test_layers(self) -> None:
+        """Test layers."""
         self.assertEqual(Move('R').layers, [0])
         self.assertEqual(Move('2R').layers, [1])
 
@@ -329,11 +371,12 @@ class MoveTestCase(unittest.TestCase):
         self.assertEqual(Move('2Dw2').layers, [0, 1])
 
     def test_timed(self) -> None:
+        """Test timed."""
         self.assertEqual(Move('R').time, '')
-        self.assertEqual(Move('R').timed, None)
+        self.assertEqual(Move('R').timed, 0)
 
         self.assertEqual(Move('.').time, '')
-        self.assertEqual(Move('.').timed, None)
+        self.assertEqual(Move('.').timed, 0)
 
         self.assertEqual(Move('R@1500').time, '@1500')
         self.assertEqual(Move('R@1500').timed, 1500)

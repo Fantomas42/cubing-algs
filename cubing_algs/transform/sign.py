@@ -1,15 +1,25 @@
+"""SiGN notation conversion transformations for alternative move notation."""
+
+from typing import TYPE_CHECKING
+
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.move import Move
+
+if TYPE_CHECKING:
+    from cubing_algs.move import Move  # pragma: no cover
 
 
 def sign_moves(old_moves: Algorithm) -> Algorithm:
     """
     Convert an algorithm from standard notation to SiGN notation.
-    """
-    moves: list[Move] = []
 
-    for move in old_moves:
-        moves.append(move.to_sign)
+    Args:
+        old_moves: The algorithm to convert.
+
+    Returns:
+        A new Algorithm in SiGN notation.
+
+    """
+    moves: list[Move] = [move.to_sign for move in old_moves]
 
     return Algorithm(moves)
 
@@ -17,10 +27,14 @@ def sign_moves(old_moves: Algorithm) -> Algorithm:
 def unsign_moves(old_moves: Algorithm) -> Algorithm:
     """
     Convert an algorithm from SiGN notation to standard notation.
-    """
-    moves: list[Move] = []
 
-    for move in old_moves:
-        moves.append(move.to_standard)
+    Args:
+        old_moves: The algorithm to convert.
+
+    Returns:
+        A new Algorithm in standard notation.
+
+    """
+    moves: list[Move] = [move.to_standard for move in old_moves]
 
     return Algorithm(moves)

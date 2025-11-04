@@ -1,3 +1,5 @@
+"""Tests for move permutation calculations."""
+
 import unittest
 from typing import Any
 
@@ -5,15 +7,34 @@ from cubing_algs.vcube import VCube
 
 
 class TestMovePermutations(unittest.TestCase):
+    """Tests for move permutation calculations."""
 
     @staticmethod
     def create_numbered_cube() -> VCube:
+        """
+        Create a cube with numbered positions for tracking permutations.
+
+        Returns:
+            VCube with unique character positions for permutation tracking.
+
+        """
         state = ''.join([chr(ord('A') + i) for i in range(54)])
         return VCube(initial=state, check=False)
 
     @staticmethod
     def get_permutations(initial_state: str,
                          final_state: str) -> dict[int, int]:
+        """
+        Get position permutations between initial and final states.
+
+        Args:
+            initial_state: Initial cube state string.
+            final_state: Final cube state string.
+
+        Returns:
+            Dictionary mapping destination positions to source positions.
+
+        """
         permutations = {}
         for dest_pos in range(54):
             dest_char = final_state[dest_pos]
@@ -23,6 +44,7 @@ class TestMovePermutations(unittest.TestCase):
         return permutations
 
     def test_permutation_correctness(self) -> None:
+        """Test permutation correctness."""
         cube = self.create_numbered_cube()
         initial_state = cube.state
 
@@ -46,6 +68,16 @@ class TestMovePermutations(unittest.TestCase):
             )
 
     def analyze_move_permutations(self, move_name: str) -> dict[str, Any]:
+        """
+        Analyze permutations and cycles produced by a move.
+
+        Args:
+            move_name: Name of the move to analyze.
+
+        Returns:
+            Dictionary containing move analysis data.
+
+        """
         cube = self.create_numbered_cube()
         initial_state = cube.state
 
@@ -62,6 +94,16 @@ class TestMovePermutations(unittest.TestCase):
 
     @staticmethod
     def find_cycles(permutations: dict[int, int]) -> list[list[int]]:
+        """
+        Find cycles in permutation mapping.
+
+        Args:
+            permutations: Dictionary mapping positions to their sources.
+
+        Returns:
+            List of cycles, where each cycle is a list of positions.
+
+        """
         visited = set()
         cycles = []
 
@@ -86,6 +128,7 @@ class TestMovePermutations(unittest.TestCase):
         return cycles
 
     def test_cancellation_all_moves(self) -> None:
+        """Test cancellation all moves."""
         moves = [
             'U', 'R', 'F', 'D', 'L', 'B',
             'x', 'y', 'z', 'M', 'E', 'S',
@@ -106,6 +149,7 @@ class TestMovePermutations(unittest.TestCase):
                 )
 
     def test_double_moves_cancellation(self) -> None:
+        """Test double moves cancellation."""
         moves = [
             'U', 'R', 'F', 'D', 'L', 'B',
             'x', 'y', 'z', 'M', 'E', 'S',
@@ -126,6 +170,7 @@ class TestMovePermutations(unittest.TestCase):
                 )
 
     def test_all_basic_moves_produce_permutations(self) -> None:
+        """Test all basic moves produce permutations."""
         moves = ['U', 'R', 'F', 'D', 'L', 'B', 'M', 'E', 'S']
 
         for move in moves:
@@ -144,6 +189,7 @@ class TestMovePermutations(unittest.TestCase):
                 )
 
     def test_rotations_permutations(self) -> None:
+        """Test rotations permutations."""
         rotations = ['x', 'y', 'z']
 
         for rotation in rotations:
@@ -167,6 +213,7 @@ class TestMovePermutations(unittest.TestCase):
                 )
 
     def test_wide_moves_permutations(self) -> None:
+        """Test wide moves permutations."""
         wide_moves = ['u', 'r', 'f', 'd', 'l', 'b']
 
         for move in wide_moves:
@@ -190,6 +237,7 @@ class TestMovePermutations(unittest.TestCase):
                 )
 
     def test_all_move_variants(self) -> None:
+        """Test all move variants."""
         base_moves = [
             'U', 'R', 'F', 'D', 'L', 'B',
             'x', 'y', 'z', 'M', 'E', 'S',
@@ -218,6 +266,7 @@ class TestMovePermutations(unittest.TestCase):
                         self.fail(f'The move { move } has failed: { e }')
 
     def test_specific_move_permutations_u(self) -> None:
+        """Test specific move permutations u."""
         analysis = self.analyze_move_permutations('U')
 
         self.assertEqual(
@@ -229,6 +278,7 @@ class TestMovePermutations(unittest.TestCase):
         self.assertGreater(len(cycles), 0, 'U must produce cycles')
 
     def test_specific_move_permutations_m(self) -> None:
+        """Test specific move permutations m."""
         analysis = self.analyze_move_permutations('M')
 
         self.assertEqual(
@@ -240,6 +290,7 @@ class TestMovePermutations(unittest.TestCase):
         self.assertGreater(len(cycles), 0, 'M must produce cycles')
 
     def test_permutation_bijectivity(self) -> None:
+        """Test permutation bijectivity."""
         moves = [
             'U', 'R', 'F', 'D', 'L', 'B',
             'x', 'y', 'z', 'M', 'E', 'S',

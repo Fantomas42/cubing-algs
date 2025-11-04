@@ -1,3 +1,5 @@
+"""Tests for algorithm parsing functions."""
+
 import unittest
 
 from cubing_algs.exceptions import InvalidBracketError
@@ -13,21 +15,26 @@ from cubing_algs.parsing import split_moves
 
 
 class CleanMovesTestCase(unittest.TestCase):
+    """Tests for the clean_moves function."""
 
     def test_clean_moves(self) -> None:
-        moves = "R2 L2  (y):F B2' e U R` U’  "  # noqa RUF001
+        """Test clean moves."""
+        moves = "R2 L2  (y):F B2' e U R` U’  "  # noqa: RUF001
         expect = "R2 L2 y F B2 E U R' U'"
         self.assertEqual(clean_moves(moves), expect)
 
 
 class SplitMovesTestCase(unittest.TestCase):
+    """Tests for the split_moves function."""
 
     def test_split_moves(self) -> None:
+        """Test split moves."""
         moves = "R2L2yFB2EU'R'U'"
         expect = ['R2', 'L2', 'y', 'F', 'B2', 'E', "U'", "R'", "U'"]
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_big_moves(self) -> None:
+        """Test split big moves."""
         moves = "3R 3Uw' 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'", '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
@@ -37,32 +44,39 @@ class SplitMovesTestCase(unittest.TestCase):
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_timed_moves(self) -> None:
+        """Test split timed moves."""
         moves = "3R 3Uw'@1500 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'@1500", '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_timed_pauses(self) -> None:
+        """Test split timed pauses."""
         moves = "3R 3Uw'@1500 .@2000 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'@1500", '.@2000', '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
 
     def test_split_timed_moves_with_pauses(self) -> None:
+        """Test split timed moves with pauses."""
         moves = "3R 3Uw'@1500 . 3b 2-3Dw 3-4d"
         expect = ['3R', "3Uw'@1500", '.', '3b', '2-3Dw', '3-4d']
         self.assertEqual(split_moves(moves), expect)
 
 
 class CheckMovesTestCase(unittest.TestCase):
+    """Tests for the check_moves function."""
 
     def test_check_moves(self) -> None:
+        """Test check moves."""
         moves = split_moves('R2 L2')
         self.assertTrue(check_moves(moves))
 
     def test_check_moves_invalid_move(self) -> None:
+        """Test check moves invalid move."""
         moves = [Move('T2'), Move('R')]
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_wide_standard_move(self) -> None:
+        """Test check moves invalid wide standard move."""
         moves = [Move('Rw')]
         self.assertTrue(check_moves(moves))
         moves = [Move('Rw3')]
@@ -71,6 +85,7 @@ class CheckMovesTestCase(unittest.TestCase):
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_wide_sign_move(self) -> None:
+        """Test check moves invalid wide sign move."""
         moves = [Move('r')]
         self.assertTrue(check_moves(moves))
         moves = [Move('r3')]
@@ -79,21 +94,26 @@ class CheckMovesTestCase(unittest.TestCase):
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_modifier(self) -> None:
+        """Test check moves invalid modifier."""
         moves = [Move('R5')]
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_too_long(self) -> None:
+        """Test check moves invalid too long."""
         moves = [Move("R2'")]
         self.assertFalse(check_moves(moves))
 
     def test_check_moves_invalid_layer(self) -> None:
+        """Test check moves invalid layer."""
         moves = [Move('2-4R')]
         self.assertFalse(check_moves(moves))
 
 
 class ParseMovesTestCase(unittest.TestCase):
+    """Tests for the parse_moves function."""
 
     def test_parse_moves(self) -> None:
+        """Test parse moves."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -102,6 +122,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_with_pauses(self) -> None:
+        """Test parse moves with pauses."""
         moves = 'R2 . L2 .'
         expect = ['R2', '.', 'L2', '.']
         self.assertEqual(
@@ -117,6 +138,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_list(self) -> None:
+        """Test parse list."""
         moves = ['R2 L2']
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -132,6 +154,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_invalid(self) -> None:
+        """Test parse moves invalid."""
         moves = 'R2 T2'
         self.assertRaises(
             InvalidMoveError,
@@ -140,6 +163,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_invalid_case_but_corrected(self) -> None:
+        """Test parse moves invalid case but corrected."""
         moves = ['R2', 'X2']
         expect = ['R2', 'x2']
         self.assertEqual(
@@ -155,6 +179,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_list_moves(self) -> None:
+        """Test parse moves list moves."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -163,6 +188,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_algorithm(self) -> None:
+        """Test parse moves algorithm."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -171,6 +197,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate(self) -> None:
+        """Test parse moves conjugate."""
         moves = 'F [R, U] F'
         expect = ['F', 'R', 'U', "R'", "U'", 'F']
         self.assertEqual(
@@ -185,6 +212,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate_malformed(self) -> None:
+        """Test parse moves conjugate malformed."""
         moves = 'F [R, U F'
 
         self.assertRaises(
@@ -194,6 +222,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate_invalid_moves(self) -> None:
+        """Test parse moves conjugate invalid moves."""
         moves = 'F [T, U] F'
 
         self.assertRaises(
@@ -209,6 +238,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_conjugate_nested(self) -> None:
+        """Test parse moves conjugate nested."""
         moves = 'F [[R, U], B] F'
         expect = [
             'F',
@@ -224,6 +254,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator(self) -> None:
+        """Test parse moves commutator."""
         moves = 'F [R: U] F'
         expect = ['F', 'R', 'U', "R'", 'F']
         self.assertEqual(
@@ -238,6 +269,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator_malformed(self) -> None:
+        """Test parse moves commutator malformed."""
         moves = 'F [R: U F'
 
         self.assertRaises(
@@ -247,6 +279,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator_invalid_moves(self) -> None:
+        """Test parse moves commutator invalid moves."""
         moves = 'F [T: U] F'
 
         self.assertRaises(
@@ -262,6 +295,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_commutator_nested(self) -> None:
+        """Test parse moves commutator nested."""
         moves = 'F [[R: U]: B] F'
         expect = [
             'F',
@@ -276,6 +310,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_invalid_operator(self) -> None:
+        """Test parse moves invalid operator."""
         moves = 'F [R; U] F'
 
         self.assertRaises(
@@ -285,6 +320,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_complex_1(self) -> None:
+        """Test parse moves complex 1."""
         moves = '[[R: U], D] B [F: [U, R]]'
         expect = [
             'R', 'U', "R'", 'D',
@@ -298,6 +334,7 @@ class ParseMovesTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_complex_2(self) -> None:
+        """Test parse moves complex 2."""
         moves = '[[R F: U L], D] B'
         expect = [
             'R', 'F', 'U', 'L', "F'", "R'",
@@ -313,8 +350,10 @@ class ParseMovesTestCase(unittest.TestCase):
 
 
 class ParseMovesCFOPTestCase(unittest.TestCase):
+    """Tests for the parse_moves_cfop function."""
 
     def test_parse_moves_cfop(self) -> None:
+        """Test parse moves cfop."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -323,6 +362,7 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
         )
 
     def test_parse_moves_cfop_cleaned(self) -> None:
+        """Test parse moves cfop cleaned."""
         moves = 'U R2 L2 y'
         expect = ['R2', 'L2']
         self.assertEqual(
@@ -331,76 +371,59 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
         )
 
 
-class CleanMultilineAndCommentsTestCase(unittest.TestCase):
+class CleanMultilineAndCommentsTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for cleaning multiline text and removing comments."""
 
     def test_simple_text_without_comments_or_newlines_fast_path(self) -> None:
-        """
-        Test the fast path when no comments or newlines are present.
-        """
+        """Test the fast path when no comments or newlines are present."""
         text = "R U R' U'"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, "R U R' U'")
 
     def test_simple_text_with_spaces_only(self) -> None:
-        """
-        Test text with only spaces but no comments or newlines.
-        """
+        """Test text with only spaces but no comments or newlines."""
         text = "R  U   R'    U'"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, "R  U   R'    U'")
 
     def test_single_line_with_comment_at_end(self) -> None:
-        """
-        Test removing comment from end of single line.
-        """
+        """Test removing comment from end of single line."""
         text = "R U R' U' // This is a comment"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, "R U R' U'")
 
     def test_single_line_with_comment_at_start(self) -> None:
-        """
-        Test line starting with comment.
-        """
+        """Test line starting with comment."""
         text = '// This is a comment'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, '')
 
     def test_single_line_comment_only_no_moves(self) -> None:
-        """
-        Test line with only comment and whitespace.
-        """
+        """Test line with only comment and whitespace."""
         text = '   // Just a comment   '
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, '')
 
     def test_single_line_with_comment_in_middle(self) -> None:
-        """
-        Test comment appearing in middle of moves.
-        """
+        """Test comment appearing in middle of moves."""
         text = "R U // comment here R' U'"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, 'R U')
 
     def test_multiple_comment_markers_in_line(self) -> None:
-        """
-        Test line with multiple // markers.
-        """
+        """Test line with multiple // markers."""
         text = 'R U // first comment // second comment'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, 'R U')
 
     def test_multiline_without_comments(self) -> None:
-        """
-        Test multiline text without any comments.
-        """
+        """Test multiline text without any comments."""
         text = "R U R' U'\nD' R D\nF R F'"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, "R U R' U' D' R D F R F'")
 
     def test_multiline_with_comments(self) -> None:
-        """
-        Test multiline text with comments on each line.
-        """
+        """Test multiline text with comments on each line."""
         text = (
             "R U R' U' // first part\n"
             "D' R D // second part\n"
@@ -410,25 +433,19 @@ class CleanMultilineAndCommentsTestCase(unittest.TestCase):
         self.assertEqual(result, "R U R' U' D' R D F R F'")
 
     def test_multiline_with_some_comments(self) -> None:
-        """
-        Test multiline where only some lines have comments.
-        """
+        """Test multiline where only some lines have comments."""
         text = "R U R' U' // with comment\nD' R D\nF R F' // another comment"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, "R U R' U' D' R D F R F'")
 
     def test_multiline_with_empty_lines(self) -> None:
-        """
-        Test multiline with empty lines that should be ignored.
-        """
+        """Test multiline with empty lines that should be ignored."""
         text = "R U R' U'\n\nD' R D\n   \nF R F'"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, "R U R' U' D' R D F R F'")
 
     def test_multiline_with_comment_only_lines(self) -> None:
-        """
-        Test multiline with lines containing only comments.
-        """
+        """Test multiline with lines containing only comments."""
         text = (
             "R U R' U'\n"
             "// This is just a comment\n"
@@ -440,9 +457,7 @@ class CleanMultilineAndCommentsTestCase(unittest.TestCase):
         self.assertEqual(result, "R U R' U' D' R D F R F'")
 
     def test_multiline_mixed_empty_and_comment_lines(self) -> None:
-        """
-        Test complex multiline with empty lines, comments, and moves.
-        """
+        """Test complex multiline with empty lines, comments, and moves."""
         text = """R U R' U' // setup
 
         // This is a comment line
@@ -455,84 +470,65 @@ class CleanMultilineAndCommentsTestCase(unittest.TestCase):
         self.assertEqual(result, "R U R' U' D' R D F R F'")
 
     def test_whitespace_only_before_comment(self) -> None:
-        """
-        Test line with only whitespace before comment.
-        """
+        """Test line with only whitespace before comment."""
         text = 'R U\n   // whitespace before comment\nD R'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, 'R U D R')
 
     def test_whitespace_preservation_within_moves(self) -> None:
-        """
-        Test that whitespace between moves is preserved appropriately.
-        """
+        """Test that whitespace between moves is preserved appropriately."""
         text = "R  U   R'\nD    R     D"
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, "R  U   R' D    R     D")
 
     def test_empty_string(self) -> None:
-        """
-        Test empty string input.
-        """
+        """Test empty string input."""
         text = ''
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, '')
 
     def test_whitespace_only_string(self) -> None:
-        """
-        Test string with only whitespace.
-        """
+        """Test string with only whitespace."""
         text = '   \n  \n   '
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, '')
 
     def test_newline_only_string(self) -> None:
-        """
-        Test string with only newlines.
-        """
+        """Test string with only newlines."""
         text = '\n\n\n'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, '')
 
     def test_comment_markers_only(self) -> None:
-        """
-        Test string with only comment markers.
-        """
+        """Test string with only comment markers."""
         text = '//\n//\n//'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, '')
 
     def test_single_newline_character(self) -> None:
-        """
-        Test string that is just a newline character.
-        """
+        """Test string that is just a newline character."""
         text = '\n'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, '')
 
     def test_comment_with_no_space_after_marker(self) -> None:
-        """
-        Test comment marker directly followed by text.
-        """
+        """Test comment marker directly followed by text."""
         text = 'R U//comment\nD R'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, 'R U D R')
 
     def test_moves_after_comment_removal_with_extra_spaces(self) -> None:
-        """
-        Test extra spaces are handled correctly after comment removal.
-        """
+        """Test extra spaces are handled correctly after comment removal."""
         text = 'R U   // comment with spaces\n   D R   // another comment'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, 'R U D R')
 
 
 class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
+    """Tests for multiline move parsing integration."""
 
     def test_parse_moves_multiline_basic(self) -> None:
-        """
-        Test basic multiline parsing integration.
-        """
+        """Test basic multiline parsing integration."""
         multiline_moves = """R U R' U'
         D' R D"""
         single_line_moves = "R U R' U' D' R D"
@@ -545,9 +541,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(multiline_result), expected)
 
     def test_parse_moves_multiline_with_comments(self) -> None:
-        """
-        Test multiline parsing with comments.
-        """
+        """Test multiline parsing with comments."""
         multiline_moves = """R U R' U' // first pair
         D' R D // second pair
         F R F' // third pair"""
@@ -561,9 +555,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(multiline_result), expected)
 
     def test_parse_moves_multiline_complex_scramble(self) -> None:
-        """
-        Test parsing a complex multiline scramble with comments.
-        """
+        """Test parsing a complex multiline scramble with comments."""
         scramble = """R2 U2 R2 D2 F2 U2 L2 U2 R2 // cross edges
         B' R' F R B R' F' R // F2L-1
         U' R U R' U R U R' // F2L-2
@@ -585,9 +577,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(result), expected_moves)
 
     def test_parse_moves_multiline_with_empty_lines(self) -> None:
-        """
-        Test multiline parsing with empty lines.
-        """
+        """Test multiline parsing with empty lines."""
         multiline_moves = """R U R' U'
 
         D' R D
@@ -599,9 +589,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(result), expected)
 
     def test_parse_moves_multiline_comment_only_lines(self) -> None:
-        """
-        Test multiline parsing with comment-only lines.
-        """
+        """Test multiline parsing with comment-only lines."""
         multiline_moves = """R U R' U'
         // This is just a comment
         D' R D
@@ -613,9 +601,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(result), expected)
 
     def test_parse_moves_multiline_with_commutators(self) -> None:
-        """
-        Test multiline parsing with commutators and comments.
-        """
+        """Test multiline parsing with commutators and comments."""
         multiline_moves = """F [R, U] F' // setup and commutator
         D' R D // additional moves"""
 
@@ -624,9 +610,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(result), expected)
 
     def test_parse_moves_multiline_with_conjugates(self) -> None:
-        """
-        Test multiline parsing with conjugates and comments.
-        """
+        """Test multiline parsing with conjugates and comments."""
         multiline_moves = """[R: U R U'] // conjugate
         F R F' // more moves"""
 
@@ -635,9 +619,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(result), expected)
 
     def test_parse_moves_backward_compatibility_single_line(self) -> None:
-        """
-        Test that single line input still works exactly as before.
-        """
+        """Test that single line input still works exactly as before."""
         single_line = "R U R' U' D' R D F R F'"
         result = parse_moves(single_line)
         expected = ['R', 'U', "R'", "U'", "D'", 'R', 'D', 'F', 'R', "F'"]
@@ -645,18 +627,14 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
 
     def test_parse_moves_backward_compatibility_with_existing_comments(
             self) -> None:
-        """
-        Test backward compatibility when comments were in single line.
-        """
+        """Test backward compatibility when comments were in single line."""
         moves_with_comment = "R U R' U' // this should work"
         result = parse_moves(moves_with_comment)
         expected = ['R', 'U', "R'", "U'"]
         self.assertEqual(list(result), expected)
 
     def test_parse_moves_multiline_secure_mode(self) -> None:
-        """
-        Test multiline parsing with secure mode enabled.
-        """
+        """Test multiline parsing with secure mode enabled."""
         multiline_moves = """R U R' U' // first part
         D' R D // second part"""
 
@@ -665,9 +643,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(result), expected)
 
     def test_parse_moves_multiline_non_secure_mode(self) -> None:
-        """
-        Test multiline parsing with secure mode disabled.
-        """
+        """Test multiline parsing with secure mode disabled."""
         multiline_moves = """R U R' U' // first part
         D' R D // second part"""
 
@@ -676,9 +652,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         self.assertEqual(list(result), expected)
 
     def test_parse_moves_multiline_with_pauses(self) -> None:
-        """
-        Test multiline parsing with pause notation.
-        """
+        """Test multiline parsing with pause notation."""
         multiline_moves = """R U . R' U' // with pause
         D' R D . // ending pause"""
 

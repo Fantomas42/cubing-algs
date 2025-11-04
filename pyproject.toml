@@ -50,56 +50,14 @@ show-fixes = true
 [tool.ruff.lint]
 preview = true
 fixable = ["ALL"]
-select = [
-       "A",
-       "ARG",
-       "B",
-       "BLE",
-       "C4",
-       #"C90",
-       "COM",
-       #"D",
-       "DJ",
-       "DTZ",
-       "E",
-       "EM",
-       "ERA",
-       "EXE",
-       "F",
-       "FBT",
-       "FIX",
-       "FLY",
-       "FURB",
-       "G",
-       "I",
-       "ICN",
-       "INP",
-       "INT",
-       "ISC",
-       "LOG",
-       "N",
-       "PIE",
-       "PL",
-       "PTH",
-       "Q",
-       "RET",
-       "RSE",
-       "RUF",
-       "S",
-       "SIM",
-       "SLF",
-       "T10",
-       "T20",
-       "TD",
-       "TRY",
-       "UP",
-       "W",
-]
+select = ["ALL"]
 ignore = [
-       "S311",
-       "TD003",
-       "T201",
-       "PLR0904",
+    "PT009",
+    "PT027",
+    "CPY001",
+    "D203",
+    "D205",
+    "D212",
 ]
 
 [tool.ruff.format]
@@ -121,7 +79,6 @@ force-single-line = true
 allow-magic-value-types = ["str", "int"]
 
 [tool.mypy]
-disable_error_code = ["import-untyped"]
 exclude = ["poc"]
 python_version = 3.12
 
@@ -131,8 +88,8 @@ addopts = "--cov=cubing_algs"
 [tool.coverage.run]
 branch = true
 omit = [
-     "cubing_algs/tests/*",
-     "cubing_algs/poc/*",
+    "cubing_algs/tests/*",
+    "cubing_algs/poc/*",
 ]
 
 [tool.coverage.report]

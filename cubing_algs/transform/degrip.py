@@ -1,3 +1,5 @@
+"""Degrip transformations for converting rotation moves into face moves."""
+
 from collections.abc import Callable
 
 from cubing_algs.algorithm import Algorithm
@@ -43,6 +45,14 @@ def has_grip(
 ) -> tuple[bool, Algorithm, Algorithm, str]:
     """
     Check if an algorithm contains grip moves according to config.
+
+    Args:
+        old_moves: The algorithm to check.
+        config: Dictionary mapping rotation moves to offset functions.
+
+    Returns:
+        Tuple of (has_grip, prefix, suffix, gripper_move_string).
+
     """
     i = 0
     prefix = Algorithm()
@@ -72,7 +82,16 @@ def degrip(
         config: dict[str, Callable[[Algorithm], Algorithm]],
 ) -> Algorithm:
     """
-    Remove grip moves from an algorithm by applying appropriate transformations.
+    Remove grip moves from an algorithm
+    by applying appropriate transformations.
+
+    Args:
+        old_moves: The algorithm to process.
+        config: Dictionary mapping rotation moves to offset functions.
+
+    Returns:
+        Algorithm with grip moves removed.
+
     """
     _gripped, prefix, suffix, gripper = has_grip(old_moves, config)
 
@@ -90,6 +109,13 @@ def degrip(
 def degrip_x_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove X-axis grip rotations from an algorithm.
+
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        Algorithm with X-axis grips removed.
+
     """
     return degrip(
         old_moves, DEGRIP_X,
@@ -99,6 +125,13 @@ def degrip_x_moves(old_moves: Algorithm) -> Algorithm:
 def degrip_y_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove Y-axis grip rotations from an algorithm.
+
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        Algorithm with Y-axis grips removed.
+
     """
     return degrip(
         old_moves, DEGRIP_Y,
@@ -108,6 +141,13 @@ def degrip_y_moves(old_moves: Algorithm) -> Algorithm:
 def degrip_z_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove Z-axis grip rotations from an algorithm.
+
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        Algorithm with Z-axis grips removed.
+
     """
     return degrip(
         old_moves, DEGRIP_Z,
@@ -117,6 +157,13 @@ def degrip_z_moves(old_moves: Algorithm) -> Algorithm:
 def degrip_full_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove all grip rotations from an algorithm.
+
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        Algorithm with all grip rotations removed.
+
     """
     return degrip(
         old_moves, DEGRIP_FULL,

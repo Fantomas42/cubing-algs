@@ -94,7 +94,7 @@ from cubing_algs.transform.size import compress_moves
 from cubing_algs.transform.size import expand_moves
 from cubing_algs.transform.sign import sign_moves
 from cubing_algs.transform.sign import unsign_moves
-from cubing_algs.transform.rotation import remove_final_rotations
+from cubing_algs.transform.rotation import remove_ending_rotations
 from cubing_algs.transform.slice import reslice_moves
 from cubing_algs.transform.slice import unslice_wide_moves
 from cubing_algs.transform.wide import rewide_moves
@@ -131,7 +131,7 @@ sign = algo.transform(sign_moves)  # Convert to r, u, f notation
 standard = algo.transform(unsign_moves)  # Convert to Rw, Uw, Fw notation
 
 # Remove final rotations
-clean = algo.transform(remove_final_rotations)  # Remove trailing x, y, z moves
+clean = algo.transform(remove_ending_rotations)  # Remove trailing x, y, z moves
 
 # Slice moves
 wide = algo.transform(unslice_wide_moves)  # M -> r' R, S -> f F', E -> u' U

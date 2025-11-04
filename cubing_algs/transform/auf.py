@@ -1,3 +1,5 @@
+"""AUF (Adjust U Face) transformations for optimizing last layer adjustments."""
+
 from collections.abc import Iterable
 from itertools import takewhile
 
@@ -19,6 +21,13 @@ OFFSET_MAP = {
 def get_move_score(move: Move) -> int:
     """
     Calculate the numeric score for a move for AUF calculations.
+
+    Args:
+        move: The move to score.
+
+    Returns:
+        Numeric score (2 for double, -1 for CCW, 1 for CW, 0 otherwise).
+
     """
     if move.is_double:
         return 2
@@ -32,6 +41,13 @@ def get_move_score(move: Move) -> int:
 def is_auf_or_pause(move: Move) -> bool:
     """
     Check if a move is an AUF move or pause.
+
+    Args:
+        move: The move to check.
+
+    Returns:
+        True if the move is AUF or pause.
+
     """
     return move.base_move == AUF_CHAR or move.is_pause
 
@@ -39,6 +55,13 @@ def is_auf_or_pause(move: Move) -> bool:
 def calculate_auf_score(moves: Iterable[Move]) -> int:
     """
     Calculate the total AUF score for a sequence of moves.
+
+    Args:
+        moves: Sequence of moves to score.
+
+    Returns:
+        Total AUF score.
+
     """
     return sum(
         get_move_score(move)
@@ -49,6 +72,13 @@ def calculate_auf_score(moves: Iterable[Move]) -> int:
 def remove_auf_moves(old_moves: Algorithm) -> Algorithm:
     """
     Remove AUF (Adjust Upper Face) moves from an algorithm.
+
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        Algorithm with AUF moves removed.
+
     """
     if not old_moves:
         return old_moves

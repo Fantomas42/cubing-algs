@@ -1,3 +1,5 @@
+"""Color palette management and conversion utilities for cube visualization."""
+
 from typing import TypedDict
 
 from cubing_algs.constants import FACE_ORDER
@@ -12,6 +14,7 @@ class PaletteConfig(TypedDict, total=False):
     Defines the complete color scheme for a cube display, including face colors,
     font settings, and various background states used in different contexts.
     """
+
     faces: tuple[str | dict[str, str], ...]
     font: str
     masked_background: str
@@ -20,7 +23,19 @@ class PaletteConfig(TypedDict, total=False):
 
 
 def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
-    """Convert hexadecimal color string to RGB tuple."""
+    """
+    Convert hexadecimal color string to RGB tuple.
+
+    Args:
+        hex_color: Hexadecimal color string (e.g., '#FF0000' or 'F00').
+
+    Returns:
+        Tuple of (red, green, blue) values (0-255).
+
+    Raises:
+        ValueError: If hex color format is invalid.
+
+    """
     hex_color = hex_color.lstrip('#')
 
     if len(hex_color) == 3:
@@ -42,23 +57,61 @@ def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
 
 
 def hex_to_ansi(domain: str, hex_color: str) -> str:
-    """Convert hexadecimal color value to ANSI escape code."""
+    """
+    Convert hexadecimal color value to ANSI escape code.
+
+    Args:
+        domain: ANSI domain code ('38' for foreground, '48' for background).
+        hex_color: Hexadecimal color string.
+
+    Returns:
+        ANSI escape sequence for the color.
+
+    """
     r, g, b = hex_to_rgb(hex_color)
     return f'\x1b[{ domain };2;{ r };{ g };{ b }m'
 
 
 def background_hex_to_ansi(hex_color: str) -> str:
-    """Convert hexadecimal color value to ANSI background color code."""
+    """
+    Convert hexadecimal color value to ANSI background color code.
+
+    Args:
+        hex_color: Hexadecimal color string.
+
+    Returns:
+        ANSI background color escape sequence.
+
+    """
     return hex_to_ansi('48', hex_color)
 
 
 def foreground_hex_to_ansi(hex_color: str) -> str:
-    """Convert hexadecimal color value to ANSI foreground color code."""
+    """
+    Convert hexadecimal color value to ANSI foreground color code.
+
+    Args:
+        hex_color: Hexadecimal color string.
+
+    Returns:
+        ANSI foreground color escape sequence.
+
+    """
     return hex_to_ansi('38', hex_color)
 
 
 def build_ansi_color(background_hex: str, foreground_hex: str) -> str:
-    """Build a complete ANSI escape sequence with background and foreground."""
+    """
+    Build a complete ANSI escape sequence with background and foreground.
+
+    Args:
+        background_hex: Hexadecimal background color.
+        foreground_hex: Hexadecimal foreground color.
+
+    Returns:
+        Combined ANSI escape sequence for both colors.
+
+    """
     return (
         background_hex_to_ansi(background_hex)
         + foreground_hex_to_ansi(foreground_hex)
@@ -594,6 +647,17 @@ def build_ansi_palette(
 
     Each face can be defined as a simple hex color string
     or a dictionary with custom background, font, and masked font colors.
+
+    Args:
+        faces: Tuple of 6 face colors (U/R/F/D/L/B order).
+        font: Default font color hex string.
+        masked_background: Background color for masked facelets.
+        adjacent_background: Background color for adjacent faces.
+        hidden_ansi: ANSI sequence for hidden facelets.
+
+    Returns:
+        Dictionary mapping color keys to ANSI escape sequences.
+
     """
     palette = {
         'reset': '\x1b[0;0m',
@@ -655,6 +719,13 @@ def load_palette(palette_name: str) -> dict[str, str]:
     and caches the palette from the PALETTES dictionary.
 
     Falls back to 'default' palette if the requested palette name is not found.
+
+    Args:
+        palette_name: Name of the palette to load.
+
+    Returns:
+        Dictionary mapping color keys to ANSI escape sequences.
+
     """
     if palette_name not in PALETTES:
         palette_name = 'default'
