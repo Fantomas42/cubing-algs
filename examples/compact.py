@@ -1,3 +1,5 @@
+"""Demonstrate compact facelet display mode for cube visualization."""
+# ruff: noqa: T201
 from cubing_algs.vcube import VCube
 
 c = VCube()

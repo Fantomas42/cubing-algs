@@ -1,3 +1,5 @@
+"""Demonstrate various cube masks for highlighting specific pieces."""
+# ruff: noqa: T201
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.masks import CORNERS_MASK
 from cubing_algs.masks import CROSS_MASK
@@ -18,6 +20,14 @@ from cubing_algs.vcube import VCube
 
 
 def show_cube_masked(name: str, mask: str) -> None:
+    """
+    Display cube with a specific mask applied.
+
+    Args:
+        name: Name of the mask for display purposes.
+        mask: 54-character mask string.
+
+    """
     c = VCube()
 
     print(name, '====>')

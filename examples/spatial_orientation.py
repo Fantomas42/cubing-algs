@@ -1,3 +1,4 @@
+# ruff: noqa: T201
 """
 Demonstrate preservation of the cube spatial orientation
 when serializing/deserializing facelets to cubies.
