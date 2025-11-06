@@ -539,7 +539,7 @@ class TestComputeOppositeFaceManhattanDistance(unittest.TestCase):
                 )
 
 
-class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
+class TestComputeQTMDistance(unittest.TestCase):  # noqa: PLR0904
     """Test the compute_qtm_distance function."""
 
     def setUp(self) -> None:
@@ -800,15 +800,15 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
         """
         # U to D
         distance = compute_qtm_distance(0, 35, self.cube)
-        self.assertEqual(distance, 4)
+        self.assertEqual(distance, 2)
 
         # R to L
         distance = compute_qtm_distance(9, 44, self.cube)
-        self.assertEqual(distance, 4)
+        self.assertEqual(distance, 2)
 
         # F to B
         distance = compute_qtm_distance(26, 45, self.cube)
-        self.assertEqual(distance, 4)
+        self.assertEqual(distance, 2)
 
     def test_boundary_positions_to_themselves(self) -> None:
         """Test boundary positions (first and last) to themselves."""
@@ -1039,6 +1039,11 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (6, 33, 2), (33, 6, 2),  # bottom-left to bottom-left
             (8, 35, 2), (35, 8, 2),  # bottom-right to bottom-right
 
+            (0, 35, 2), (35, 0, 2),  # top-left to bottom-right
+            (2, 33, 2), (33, 2, 2),  # top-right to bottom-left
+            (6, 29, 2), (29, 6, 2),  # bottom-left to top-right
+            (8, 27, 2), (27, 8, 2),  # bottom-right to top-left
+
             # 90° rotated positions (3 QTM)
             (0, 29, 3), (29, 0, 3),  # top-left to top-right
             (0, 33, 3), (33, 0, 3),  # top-left to bottom-left
@@ -1048,12 +1053,6 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (6, 35, 3), (35, 6, 3),  # bottom-left to bottom-right
             (8, 29, 3), (29, 8, 3),  # bottom-right to top-right
             (8, 33, 3), (33, 8, 3),  # bottom-right to bottom-left
-
-            # 180° rotated positions (4 QTM - diagonal opposite)
-            (0, 35, 4), (35, 0, 4),  # top-left to bottom-right
-            (2, 33, 4), (33, 2, 4),  # top-right to bottom-left
-            (6, 29, 4), (29, 6, 4),  # bottom-left to top-right
-            (8, 27, 4), (27, 8, 4),  # bottom-right to top-left
         ]
 
         # R face to L face (opposite faces)
@@ -1065,6 +1064,11 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (15, 42, 2), (42, 15, 2),
             (17, 44, 2), (44, 17, 2),
 
+            (9, 44, 2), (44, 9, 2),
+            (11, 42, 2), (42, 11, 2),
+            (15, 38, 2), (38, 15, 2),
+            (17, 36, 2), (36, 17, 2),
+
             # 90° rotated positions (3 QTM)
             (9, 38, 3), (38, 9, 3),
             (9, 42, 3), (42, 9, 3),
@@ -1074,12 +1078,6 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (15, 44, 3), (44, 15, 3),
             (17, 38, 3), (38, 17, 3),
             (17, 42, 3), (42, 17, 3),
-
-            # 180° rotated positions (4 QTM)
-            (9, 44, 4), (44, 9, 4),
-            (11, 42, 4), (42, 11, 4),
-            (15, 38, 4), (38, 15, 4),
-            (17, 36, 4), (36, 17, 4),
         ])
 
         # F face to B face (opposite faces)
@@ -1091,6 +1089,11 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (24, 51, 2), (51, 24, 2),
             (26, 53, 2), (53, 26, 2),
 
+            (18, 53, 2), (53, 18, 2),
+            (20, 51, 2), (51, 20, 2),
+            (24, 47, 2), (47, 24, 2),
+            (26, 45, 2), (45, 26, 2),
+
             # 90° rotated positions (3 QTM)
             (18, 47, 3), (47, 18, 3),
             (18, 51, 3), (51, 18, 3),
@@ -1100,12 +1103,6 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (24, 53, 3), (53, 24, 3),
             (26, 47, 3), (47, 26, 3),
             (26, 51, 3), (51, 26, 3),
-
-            # 180° rotated positions (4 QTM)
-            (18, 53, 4), (53, 18, 4),
-            (20, 51, 4), (51, 20, 4),
-            (24, 47, 4), (47, 24, 4),
-            (26, 45, 4), (45, 26, 4),
         ])
 
         for orig_pos, final_pos, expected_distance in test_cases:
@@ -1138,6 +1135,11 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
         # U edges: 1, 3, 5, 7  |  D edges: 28, 30, 32, 34
         test_cases = [
             # Aligned positions (2 QTM)
+            (1, 34, 2), (34, 1, 2),  # top to bottom
+            (7, 28, 2), (28, 7, 2),  # bottom to top
+            (3, 30, 2), (30, 3, 2),  # left to left
+            (5, 32, 2), (32, 5, 2),  # right to right
+
             (1, 28, 2), (28, 1, 2),  # top to top
             (7, 34, 2), (34, 7, 2),  # bottom to bottom
             (3, 32, 2), (32, 3, 2),  # left to right
@@ -1152,12 +1154,6 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (5, 34, 3), (34, 5, 3),  # right to bottom
             (7, 30, 3), (30, 7, 3),  # bottom to left
             (7, 32, 3), (32, 7, 3),  # bottom to right
-
-            # 180° rotated positions (4 QTM - opposite edge)
-            (1, 34, 4), (34, 1, 4),  # top to bottom
-            (7, 28, 4), (28, 7, 4),  # bottom to top
-            (3, 30, 4), (30, 3, 4),  # left to left
-            (5, 32, 4), (32, 5, 4),  # right to right
         ]
 
         # R face to L face (opposite faces)
@@ -1169,6 +1165,11 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (12, 41, 2), (41, 12, 2),
             (14, 39, 2), (39, 14, 2),
 
+            (10, 43, 2), (43, 10, 2),
+            (16, 37, 2), (37, 16, 2),
+            (12, 39, 2), (39, 12, 2),
+            (14, 41, 2), (41, 14, 2),
+
             # 90° rotated positions (3 QTM)
             (10, 39, 3), (39, 10, 3),
             (10, 41, 3), (41, 10, 3),
@@ -1178,12 +1179,6 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (14, 43, 3), (43, 14, 3),
             (16, 39, 3), (39, 16, 3),
             (16, 41, 3), (41, 16, 3),
-
-            # 180° rotated positions (4 QTM)
-            (10, 43, 4), (43, 10, 4),
-            (16, 37, 4), (37, 16, 4),
-            (12, 39, 4), (39, 12, 4),
-            (14, 41, 4), (41, 14, 4),
         ])
 
         # F face to B face (opposite faces)
@@ -1195,6 +1190,11 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (21, 50, 2), (50, 21, 2),
             (23, 48, 2), (48, 23, 2),
 
+            (19, 52, 2), (52, 19, 2),
+            (25, 46, 2), (46, 25, 2),
+            (21, 48, 2), (48, 21, 2),
+            (23, 50, 2), (50, 23, 2),
+
             # 90° rotated positions (3 QTM)
             (19, 48, 3), (48, 19, 3),
             (19, 50, 3), (50, 19, 3),
@@ -1204,12 +1204,6 @@ class TestComputeQtmDistance(unittest.TestCase):  # noqa: PLR0904
             (23, 52, 3), (52, 23, 3),
             (25, 48, 3), (48, 25, 3),
             (25, 50, 3), (50, 25, 3),
-
-            # 180° rotated positions (4 QTM)
-            (19, 52, 4), (52, 19, 4),
-            (25, 46, 4), (46, 25, 4),
-            (21, 48, 4), (48, 21, 4),
-            (23, 50, 4), (50, 23, 4),
         ])
 
         for orig_pos, final_pos, expected_distance in test_cases:
@@ -3460,7 +3454,6 @@ class TestFaceInvariance(unittest.TestCase):
 
         for face_move in face_moves:
             algorithm = Algorithm.parse_moves(face_move)
-
             impacts = compute_impacts(algorithm)
             distance_metrics = (
                 impacts.facelets_manhattan_distance
