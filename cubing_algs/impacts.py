@@ -161,7 +161,7 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
     )
 
 
-def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
+def positions_on_same_piece(pos1: int, pos2: int) -> bool:
     """
     Check if two positions are on the same physical piece (edge or corner).
 
@@ -169,8 +169,8 @@ def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
     meaning they are the same physical location viewed from different faces.
 
     Args:
-        original_pos: The original facelet position index.
-        final_pos: The final facelet position index.
+        pos1: The original facelet position index.
+        pos2: The final facelet position index.
 
     Returns:
         True if both positions are on the same physical piece.
@@ -178,12 +178,12 @@ def positions_on_same_piece(original_pos: int, final_pos: int) -> bool:
     """
     # Check if they're on the same edge piece
     for edge_map in EDGE_FACELET_MAP:
-        if original_pos in edge_map and final_pos in edge_map:
+        if pos1 in edge_map and pos2 in edge_map:
             return True
 
     # Check if they're on the same corner piece
     for corner_map in CORNER_FACELET_MAP:
-        if original_pos in corner_map and final_pos in corner_map:
+        if pos1 in corner_map and pos2 in corner_map:
             return True
 
     return False
@@ -198,7 +198,7 @@ def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
     Args:
         pos1: The first facelet position index.
         pos2: The second facelet position index.
-        cube: The virtual cube (unused but kept for API consistency).
+        cube: The virtual cube for size context.
 
     Returns:
         True if positions are on adjacent corners.
@@ -288,8 +288,6 @@ def compute_opposite_face_manhattan_distance(
 
 
 def compute_adjacent_face_manhattan_distance(
-        original_pos: int,
-        final_pos: int,
         orig: FaceletPosition,
         final: FaceletPosition,
         cube: 'VCube',
@@ -301,8 +299,6 @@ def compute_adjacent_face_manhattan_distance(
     then calculates the shortest path accounting for edge crossing.
 
     Args:
-        original_pos: The original facelet position index.
-        final_pos: The final facelet position index.
         orig: The parsed original facelet position.
         final: The parsed final facelet position.
         cube: The virtual cube for size context.
@@ -311,22 +307,24 @@ def compute_adjacent_face_manhattan_distance(
         Manhattan distance across adjacent faces.
 
     """
-    if positions_on_same_piece(original_pos, final_pos):
+    if positions_on_same_piece(orig.original, final.original):
         return 1
 
     # Check if positions are on adjacent corners (corners sharing an edge)
-    if positions_on_adjacent_corners(original_pos, final_pos, cube):
+    if positions_on_adjacent_corners(orig.original, final.original, cube):
         return 3
 
     # Transform original position to destination face coordinate system
-    translated_pos = transform_adjacent_position(
+    translated_face_pos = transform_adjacent_position(
         final.face_name,
         orig.face_name,
         orig.face_position,
     )
+    # Convert face position to global position
+    translated_pos = final.face_index * cube.face_size + translated_face_pos
     translated = parse_facelet_position(translated_pos, cube)
 
-    if positions_on_same_piece(translated_pos, final_pos):
+    if positions_on_same_piece(translated_pos, final.original):
         return 3
 
     # Distance components:
@@ -370,15 +368,18 @@ def compute_manhattan_distance(original_pos: int, final_pos: int,
 
     # Case 1: Same face movements
     if orig.face_index == final.face_index:
-        return compute_within_face_manhattan_distance(orig, final)
+        return compute_within_face_manhattan_distance(
+            orig, final,
+        )
 
     # Case 2: Opposite faces
     if orig.face_name == OPPOSITE_FACES[final.face_name]:
-        return compute_opposite_face_manhattan_distance(orig, final, cube)
+        return compute_opposite_face_manhattan_distance(
+            orig, final, cube,
+        )
 
     # Case 3: Adjacent faces
     return compute_adjacent_face_manhattan_distance(
-        original_pos, final_pos,
         orig, final, cube,
     )
 
@@ -501,14 +502,14 @@ def compute_adjacent_face_qtm_distance(
             return edge_distance
 
     # General adjacent face handling via transformation
-    translated = parse_facelet_position(
-        transform_adjacent_position(
-            final.face_name,
-            orig.face_name,
-            orig.face_position,
-        ),
-        cube,
+    translated_face_pos = transform_adjacent_position(
+        final.face_name,
+        orig.face_name,
+        orig.face_position,
     )
+    # Convert face position to global position
+    translated_pos = final.face_index * cube.face_size + translated_face_pos
+    translated = parse_facelet_position(translated_pos, cube)
 
     if translated.face_position == final.face_position:
         return 1
