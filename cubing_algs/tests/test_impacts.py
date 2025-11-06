@@ -3357,6 +3357,7 @@ class TestOrientationInvariance(unittest.TestCase):
 
     SCRAMBLES = (
         'U R',
+        'U U',
         "R U R' U' R' F R2 U' R' U' R U R' F'",
         "R U R' U' L' B L B' R2 D F2 D' R' U2 L U L' B2 R F",
     )
