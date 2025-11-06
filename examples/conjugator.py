@@ -1,3 +1,4 @@
+"""Demonstrate commutator and conjugate notation parsing and visualization."""
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
 

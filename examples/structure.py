@@ -1,10 +1,10 @@
+"""Demonstrate comprehensive algorithm structure analysis."""
+# ruff: noqa: T201
 from cubing_algs.algorithm import Algorithm
 
 
 def show_structure(algorithm: str) -> None:  # noqa: PLR0915
-    """
-    Display comprehensive structure analysis for an algorithm.
-    """
+    """Display comprehensive structure analysis for an algorithm."""
     print(f'{"=" * 70}')
     print(f'Algorithm: {algorithm}')
     print('=' * 70)

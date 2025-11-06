@@ -2,8 +2,8 @@
 
 import math
 import re
+from random import choice
 from random import randint
-from secrets import choice
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
@@ -155,7 +155,7 @@ def random_moves(cube_size: int,
         Algorithm containing the random move sequence.
 
     """
-    value = choice(move_set)
+    value = choice(move_set)  # noqa: S311
     moves = [value]
     previous = value
 
@@ -165,7 +165,7 @@ def random_moves(cube_size: int,
 
     while len(moves) < iterations:
         while not is_valid_next_move(value, previous):
-            value = choice(move_set)
+            value = choice(move_set)  # noqa: S311
 
         previous = value
         moves.append(value)

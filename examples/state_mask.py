@@ -1,3 +1,5 @@
+"""Demonstrate state masking functionality for cube visualization."""
+# ruff: noqa: T201
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import state_masked
 from cubing_algs.vcube import VCube

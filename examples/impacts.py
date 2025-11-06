@@ -1,10 +1,10 @@
+"""Demonstrate comprehensive algorithm impact analysis."""
+# ruff: noqa: T201
 from cubing_algs.algorithm import Algorithm
 
 
-def show_impact(algorithm: str) -> None:  # noqa PLR0915
-    """
-    Display comprehensive impact analysis for an algorithm.
-    """
+def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
+    """Display comprehensive impact analysis for an algorithm."""
     print(f'{ "=" * 70 }')
     print(f'Algorithm: { algorithm }')
     print('=' * 70)

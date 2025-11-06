@@ -1,3 +1,5 @@
+"""Demonstrate various color palettes for cube visualization."""
+# ruff: noqa: T201
 import argparse
 
 from cubing_algs.constants import FACE_ORDER
@@ -11,6 +13,15 @@ from cubing_algs.vcube import VCube
 
 
 def print_colorized(string: str, colors: list[str], line: str = '-') -> None:
+    """
+    Print a string with colorized underline characters.
+
+    Args:
+        string: The string to print.
+        colors: List of ANSI color codes for each face.
+        line: Character to use for underlining.
+
+    """
     result = '\n' if line == '-' else ''
     result += string + '\n'
 
@@ -24,6 +35,13 @@ def print_colorized(string: str, colors: list[str], line: str = '-') -> None:
 
 
 def show_cube_palette(palette_name: str) -> None:
+    """
+    Display comprehensive cube visualization using a specific color palette.
+
+    Args:
+        palette_name: Name of the palette to use.
+
+    """
     palette = load_palette(palette_name)
     colors = [
         '\x1b' + palette[face].split('\x1b')[1].replace('48', '38')
@@ -122,6 +140,7 @@ def show_cube_palette(palette_name: str) -> None:
 
 
 def main() -> None:
+    """Parse command-line arguments and display cube palettes."""
     parser = argparse.ArgumentParser(
         description=(
             'Display cube visualizations using different color palettes'

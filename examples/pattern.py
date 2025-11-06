@@ -1,3 +1,4 @@
+"""Demonstrate cube pattern visualization using predefined patterns."""
 from cubing_algs.patterns import get_pattern
 from cubing_algs.vcube import VCube
 

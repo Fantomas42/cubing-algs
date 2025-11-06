@@ -1,8 +1,17 @@
+"""Demonstrate cube visualization with different spatial orientations."""
+# ruff: noqa: T201
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.vcube import VCube
 
 
 def show_cube_oriented(faces: str) -> None:
+    """
+    Display cube with a specific spatial orientation.
+
+    Args:
+        faces: Two-character orientation string (e.g., 'UF', 'DF', 'RU').
+
+    """
     cube = VCube()
     cube.rotate("R U R' U'")
 

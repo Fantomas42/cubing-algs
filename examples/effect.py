@@ -1,8 +1,17 @@
+"""Demonstrate all available visual effects for cube display."""
+# ruff: noqa: T201
 from cubing_algs.effects import EFFECTS
 from cubing_algs.vcube import VCube
 
 
 def show_cube_effect(effect_name: str) -> None:
+    """
+    Display cube visualization with a specific visual effect.
+
+    Args:
+        effect_name: Name of the effect to apply.
+
+    """
     print(effect_name.upper())
     print('=' * len(effect_name))
 

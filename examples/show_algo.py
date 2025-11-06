@@ -1,9 +1,18 @@
-from typing import Any
-
+"""Demonstrate algorithm visualization with different display options."""
+# ruff: noqa: T201
 from cubing_algs.parsing import parse_moves
 
 
-def show_algorithm(name: str, algorithm: str, **kw: Any) -> None:
+def show_algorithm(name: str, algorithm: str, **kw: object) -> None:
+    """
+    Display algorithm visualization with optional parameters.
+
+    Args:
+        name: Name of the algorithm.
+        algorithm: Move sequence string.
+        **kw: Additional keyword arguments passed to show method.
+
+    """
     algo = parse_moves(algorithm)
 
     print(f'{ name}: { algo }')
