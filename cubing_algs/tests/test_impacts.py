@@ -3446,6 +3446,107 @@ class TestOrientationInvariance(unittest.TestCase):
         self.check_orientation_invariance('qtm', pre=False)
 
 
+class TestFaceInvariance(unittest.TestCase):
+    """Test that distance metrics behave correctly with different faces."""
+
+    def check_face_invariance(
+            self,
+            metric_type: str,
+            face_moves: list[str],
+    ) -> None:
+        """Check that distance metrics are invariant under face."""
+        metric_name = metric_type.title()
+        results = []
+
+        for face_move in face_moves:
+            algorithm = Algorithm.parse_moves(face_move)
+
+            impacts = compute_impacts(algorithm)
+            distance_metrics = (
+                impacts.facelets_manhattan_distance
+                if metric_type == 'manhattan'
+                else impacts.facelets_qtm_distance
+            )
+
+            results.append(
+                {
+                    'face_move': face_move,
+                    'sum': distance_metrics.sum,
+                    'mean': distance_metrics.mean,
+                    'max': distance_metrics.max,
+                },
+            )
+
+        # Assert all faces have identical metrics
+        base_result = results[0]
+        for result in results[1:]:
+            self.assertEqual(
+                result['sum'],
+                base_result['sum'],
+                f'{ metric_name } sum differs between '
+                f"{ base_result['face_move'] } "
+                f"and { result['face_move'] }",
+            )
+
+            self.assertEqual(
+                result['mean'],
+                base_result['mean'],
+                f'{ metric_name } mean differs between '
+                f"{ base_result['face_move'] } "
+                f"and { result['face_move'] }",
+            )
+
+            self.assertEqual(
+                result['max'],
+                base_result['max'],
+                f'{ metric_name } max differs between '
+                f"{ base_result['face_move'] } "
+                f"and { result['face_move'] }",
+            )
+
+    def test_manhattan_face_invarient(self) -> None:
+        """Test Manhattan distance metrics are same accross simple face turn."""
+        self.check_face_invariance(
+            'manhattan',
+            ['U', 'R', 'F', 'D', 'L', 'B'],
+        )
+
+    def test_manhattan_face_double_invarient(self) -> None:
+        """Test Manhattan distance metrics are same accross double face turn."""
+        self.check_face_invariance(
+            'manhattan',
+            ['U2', 'R2', 'F2', 'D2', 'L2', 'B2'],
+        )
+
+    def test_manhattan_face_invert_invarient(self) -> None:
+        """Test Manhattan distance metrics are same accross inv face turn."""
+        self.check_face_invariance(
+            'manhattan',
+            ["U'", "R'", "F'", "D'", "L'", "B'"],
+        )
+
+    def test_qtm_face_invarient(self) -> None:
+        """Test QTM distance metrics are same accross simple face turn."""
+        self.check_face_invariance(
+            'qtm',
+            ['U', 'R', 'F', 'D', 'L', 'B'],
+        )
+
+    def test_qtm_face_double_invarient(self) -> None:
+        """Test QTM distance metrics are same accross double face turn."""
+        self.check_face_invariance(
+            'qtm',
+            ['U2', 'R2', 'F2', 'D2', 'L2', 'B2'],
+        )
+
+    def test_qtm_face_invert_invarient(self) -> None:
+        """Test QTM distance metrics are same accross inv face turn."""
+        self.check_face_invariance(
+            'qtm',
+            ["U'", "R'", "F'", "D'", "L'", "B'"],
+        )
+
+
 class TestPositionsOnAdjacentCorners(unittest.TestCase):
     """Test the positions_on_adjacent_corners helper function."""
 
