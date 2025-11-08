@@ -30,6 +30,15 @@ ANSI_TO_RGB = re.compile(
     r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
 )
 
+EMOJIS = {
+    'U': '⬜',
+    'D': '🟨',
+    'F': '🟩',
+    'B': '🟦',
+    'L': '🟧',
+    'R': '🟥',
+}
+
 
 class VCubeDisplay:
     """
@@ -59,7 +68,7 @@ class VCubeDisplay:
 
         if self.facelet_type == 'compact':
             self.facelet_size = 2
-        elif self.facelet_type == 'condensed':
+        elif self.facelet_type in {'condensed', 'emoji'}:
             self.facelet_size = 1
 
     def compute_mask(self, cube: 'VCube', mask: str) -> str:
@@ -200,6 +209,9 @@ class VCubeDisplay:
             String containing the appropriate number of spaces.
 
         """
+        if self.facelet_type == 'emoji':
+            return '  ' * (self.facelet_size * count)
+
         return ' ' * (self.facelet_size * count)
 
     def display_facelet(self, facelet: str, mask: str = '',
@@ -256,6 +268,9 @@ class VCubeDisplay:
                 f'◼︎'
                 f'{ self.palette["reset"] }'
             )
+
+        if self.facelet_type == 'emoji':
+            return EMOJIS[facelet]
 
         return (
             f'{ face_color }'
