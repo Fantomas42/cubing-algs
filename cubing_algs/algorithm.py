@@ -2,7 +2,6 @@
 Core Algorithm class for representing and manipulating
 sequences of cube moves.
 """
-
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
@@ -21,6 +20,7 @@ from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
 from cubing_algs.structure import StructureData
 from cubing_algs.structure import compute_structure
+from cubing_algs.visual_cube import visual_cube_algorithm
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
@@ -383,6 +383,11 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             m.is_wide_move or m.is_inner_move
             for m in self
         )
+
+    @property
+    def visual_cube_url(self) -> str:
+        """Get a VisualCube URL for this algorithm."""
+        return visual_cube_algorithm(self)
 
     def show(self, mode: str = '', orientation: str = '') -> 'VCube':
         """
