@@ -370,6 +370,15 @@ class ParseMovesCFOPTestCase(unittest.TestCase):
             expect,
         )
 
+    def test_parse_moves_cfop_cleaned_advanced(self) -> None:
+        """Test parse moves cfop cleaned."""
+        moves = "U' y  R2 L2 U y2"
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves_cfop(moves),
+            expect,
+        )
+
 
 class CleanMultilineAndCommentsTestCase(unittest.TestCase):  # noqa: PLR0904
     """Tests for cleaning multiline text and removing comments."""
