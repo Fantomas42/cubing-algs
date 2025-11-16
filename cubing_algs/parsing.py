@@ -140,8 +140,8 @@ def check_moves(moves: list[Move]) -> bool:
     return True
 
 
-def parse_moves(raw_moves: str | Iterable[Move | str] | Algorithm,
-                secure: bool = True) -> Algorithm:  # noqa: FBT001, FBT002
+def parse_moves(raw_moves: Iterable[Move | str] | Algorithm | str,
+                *, secure: bool = True) -> Algorithm:
     """
     Parse raw move data into an Algorithm object.
 
