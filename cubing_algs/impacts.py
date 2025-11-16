@@ -1089,10 +1089,11 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
             - cubies_suggested_approach: Recommended solving strategy
 
     """
+    from cubing_algs.transform.timing import untime_moves
     from cubing_algs.vcube import VCube
 
     cube = VCube()
-    cube.rotate(algorithm)
+    cube.rotate(untime_moves(algorithm))
     cube = cube.oriented_copy('UF')
 
     # Create unique state with each facelet having a unique character
