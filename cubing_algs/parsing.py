@@ -141,7 +141,7 @@ def check_moves(moves: list[Move]) -> bool:
     return True
 
 
-def parse_moves(raw_moves: Iterable[Move | str] | Algorithm | str,
+def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
                 *, secure: bool = True) -> Algorithm:
     """
     Parse raw move data into an Algorithm object.
@@ -180,6 +180,9 @@ def parse_moves(raw_moves: Iterable[Move | str] | Algorithm | str,
     if isinstance(raw_moves, Algorithm):
         return raw_moves
 
+    if isinstance(raw_moves, Move) and raw_moves.is_valid:
+        return Algorithm([raw_moves])
+
     if isinstance(raw_moves, list):
         raw_moves_str = ''.join(str(m) for m in raw_moves)
     else:
@@ -202,7 +205,7 @@ def parse_moves(raw_moves: Iterable[Move | str] | Algorithm | str,
 
 
 def parse_moves_cfop(
-        raw_moves: Iterable[Move | str] | Algorithm | str,
+        raw_moves: Iterable[Move | str] | Move | str,
 ) -> Algorithm:
     """
     Parse moves specifically for CFOP method algorithms.

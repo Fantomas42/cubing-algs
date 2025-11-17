@@ -42,7 +42,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             self.data.extend(initlist)
 
     @staticmethod
-    def parse_moves(items: Iterable[Move | str] | str) -> 'Algorithm':
+    def parse_moves(items: Iterable[Move | str] | Move | str) -> 'Algorithm':
         """
         Parse a string or list of strings into an Algorithm object.
 
@@ -89,14 +89,14 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """Insert a move at a specific position in the algorithm."""
         self.data.insert(i, self.parse_move(item))
 
-    def extend(self, other: Iterable[Move | str]) -> None:
+    def extend(self, other: Iterable[Move | str] | Move | str) -> None:
         """Extend the algorithm with moves from another sequence."""
         if isinstance(other, Algorithm):
             self.data.extend(other)
         else:
             self.data.extend(self.parse_moves(other))
 
-    def __iadd__(self, other: Iterable[Move | str] | str) -> Self:
+    def __iadd__(self, other: Iterable[Move | str] | Move | str) -> Self:
         """
         In-place addition operator (+=) for algorithms.
 
@@ -116,7 +116,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         Right addition operator for algorithms.
 
         Args:
-            other: A string, Move, or iterable of moves to add before this
+            other: A string, or iterable of moves to add before this
                 algorithm.
 
         Returns:
@@ -127,7 +127,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         result += self
         return result
 
-    def __add__(self, other: Iterable[Move | str] | str) -> 'Algorithm':
+    def __add__(self, other: Iterable[Move | str] | Move | str) -> 'Algorithm':
         """
         Addition operator (+) for algorithms.
 

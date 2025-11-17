@@ -41,6 +41,9 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo = Algorithm.parse_moves([Move('R2'), Move('U')])
         self.assertEqual(str(algo), 'R2 U')
 
+        algo = Algorithm.parse_moves(Move('R2'))
+        self.assertEqual(str(algo), 'R2')
+
         algo = Algorithm.parse_moves(Algorithm.parse_moves(['R2', 'U']))
         self.assertEqual(str(algo), 'R2 U')
 
@@ -122,6 +125,12 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         for m in algo:
             self.assertIsInstance(m, Move)
 
+        algo.extend(Move('U'))
+        self.assertEqual(str(algo), 'R2 U F2 B F R D2 L B U')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
         with self.assertRaises(InvalidMoveError):
             algo.extend(['F2', 'G'])
 
@@ -175,6 +184,12 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         algo += [Move('L2'), Move('D')]
         self.assertEqual(str(algo), 'R2 U F2 B F R L2 D')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo += Move('U')
+        self.assertEqual(str(algo), 'R2 U F2 B F R L2 D U')
 
         for m in algo:
             self.assertIsInstance(m, Move)
@@ -239,6 +254,12 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         algo += 'z y'
         self.assertEqual(str(algo), 'R2 U F2 B D2 B2 z y')
+
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
+        algo += Move('B')
+        self.assertEqual(str(algo), 'R2 U F2 B D2 B2 z y B')
 
         for m in algo:
             self.assertIsInstance(m, Move)

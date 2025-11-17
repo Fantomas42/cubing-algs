@@ -183,7 +183,7 @@ class ParseMovesTestCase(unittest.TestCase):
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
@@ -196,18 +196,38 @@ class ParseMovesTestCase(unittest.TestCase):
             expect,
         )
 
+    def test_parse_moves_move(self) -> None:
+        """Test parse moves Move."""
+        moves = Move('R2')
+        expect = ['R2']
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_move_invalid(self) -> None:
+        """Test parse moves invalid Move."""
+        moves = Move('T2')
+
+        self.assertRaises(
+            InvalidMoveError,
+            parse_moves,
+            moves,
+            secure=False,
+        )
+
     def test_parse_moves_conjugate(self) -> None:
         """Test parse moves conjugate."""
         moves = 'F [R, U] F'
         expect = ['F', 'R', 'U', "R'", "U'", 'F']
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
         moves = 'F[R,U]F'
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
@@ -249,7 +269,7 @@ class ParseMovesTestCase(unittest.TestCase):
             'F',
         ]
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
@@ -258,13 +278,13 @@ class ParseMovesTestCase(unittest.TestCase):
         moves = 'F [R: U] F'
         expect = ['F', 'R', 'U', "R'", 'F']
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
         moves = 'F[R:U]F'
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
@@ -305,7 +325,7 @@ class ParseMovesTestCase(unittest.TestCase):
             'F',
         ]
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
@@ -329,7 +349,7 @@ class ParseMovesTestCase(unittest.TestCase):
             'F', 'U', 'R', "U'", "R'", "F'",
         ]
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
@@ -344,7 +364,7 @@ class ParseMovesTestCase(unittest.TestCase):
             'B',
         ]
         self.assertEqual(
-            parse_moves(parse_moves(moves)),
+            parse_moves(moves),
             expect,
         )
 
