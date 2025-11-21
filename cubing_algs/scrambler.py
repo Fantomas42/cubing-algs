@@ -2,8 +2,7 @@
 
 import math
 import re
-from random import choice
-from random import randint
+from random import Random
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
@@ -23,6 +22,8 @@ MOVES_EASY_CROSS = [
 
 EXCLUDE_ODD_FACES_RH = {'D', 'L', 'B'}
 EXCLUDE_ODD_FACES_LH = {'D', 'R', 'B'}
+
+DEFAULT_RNG = Random()  # noqa: S311
 
 
 def build_cube_move_set(cube_size: int, *,
@@ -139,7 +140,8 @@ def is_valid_next_move(current: str, previous: str) -> bool:
 
 def random_moves(cube_size: int,
                  move_set: list[str],
-                 iterations: int = 0) -> Algorithm:
+                 iterations: int = 0,
+                 rng: Random | None = None) -> Algorithm:
     """
     Generate a random sequence of moves from a given move set.
 
@@ -150,22 +152,26 @@ def random_moves(cube_size: int,
         cube_size: Size of the cube.
         move_set: List of available moves to choose from.
         iterations: Number of moves to generate (0 for automatic).
+        rng: Optional random number generator.
 
     Returns:
         Algorithm containing the random move sequence.
 
     """
-    value = choice(move_set)  # noqa: S311
+    if rng is None:
+        rng = DEFAULT_RNG
+
+    value = rng.choice(move_set)
     moves = [value]
     previous = value
 
     if not iterations:
         iterations_range = ITERATIONS_BY_CUBE_SIZE[min(cube_size, 7)]
-        iterations = randint(*iterations_range)  # noqa: S311
+        iterations = rng.randint(*iterations_range)
 
     while len(moves) < iterations:
         while not is_valid_next_move(value, previous):
-            value = choice(move_set)  # noqa: S311
+            value = rng.choice(move_set)
 
         previous = value
         moves.append(value)
@@ -175,7 +181,8 @@ def random_moves(cube_size: int,
 
 def scramble(cube_size: int, iterations: int = 0, *,
              inner_layers: bool = False,
-             right_handed: bool = True) -> Algorithm:
+             right_handed: bool = True,
+             rng: Random | None = None) -> Algorithm:
     """
     Generate a random scramble for a cube of the specified size.
 
@@ -187,6 +194,7 @@ def scramble(cube_size: int, iterations: int = 0, *,
         iterations: Number of moves in the scramble (0 for automatic).
         inner_layers: Whether to include inner layer moves.
         right_handed: Whether to optimize for right-handed solving.
+        rng: Optional random number generator.
 
     Returns:
         Algorithm containing the scramble sequence.
@@ -198,18 +206,21 @@ def scramble(cube_size: int, iterations: int = 0, *,
         right_handed=right_handed,
     )
 
-    return random_moves(cube_size, move_set, iterations)
+    return random_moves(cube_size, move_set, iterations, rng)
 
 
-def scramble_easy_cross() -> Algorithm:
+def scramble_easy_cross(rng: Random | None = None) -> Algorithm:
     """
     Generate an easy cross scramble using only basic face moves.
 
     Creates a simple scramble suitable for practicing cross patterns
     in speedcubing methods like CFOP.
 
+    Args:
+        rng: Optional random number generator.
+
     Returns:
         Algorithm with 10 random moves from F, R, B, L faces.
 
     """
-    return random_moves(3, MOVES_EASY_CROSS, 10)
+    return random_moves(3, MOVES_EASY_CROSS, 10, rng)
