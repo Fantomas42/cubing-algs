@@ -23,14 +23,13 @@ class CaseCollection:
             source: Path to the JSON file containing case data
 
         """
-        self.method = method
-        self.source = source
-        self.name = source.stem
-
-        self.loaded_cases = {}
+        self.method: str = method
+        self.source: Path = source
+        self.name: str = source.stem
+        self.loaded_cases: dict[str, Case] = {}
 
     @property
-    def cases(self) -> list:
+    def cases(self) -> dict[str, Case]:
         """
         Load and return all cases in the collection.
 
@@ -103,11 +102,11 @@ class CaseCollection:
         return f"CaseCollection('{ self.method }', '{ self.source }')"
 
 
-CASES_DIRECTORY: Final = Path(__file__).parent
+CASES_DIRECTORY: Final[Path] = Path(__file__).parent
 
-METHODS = ['CFOP']
+METHODS: list[str] = ['CFOP']
 
-COLLECTIONS = {}
+COLLECTIONS: dict[str, CaseCollection] = {}
 
 
 for method in METHODS:
