@@ -17,8 +17,8 @@ class Case:
         Initialize a Case with method, step, and data.
 
         Args:
-            method: The solving method (e.g., 'cfop')
-            step: The step within the method (e.g., 'oll', 'pll')
+            method: The solving method (e.g., 'CFOP')
+            step: The step within the method (e.g., 'OLL', 'PLL')
             data: Dictionary containing case properties and algorithms
 
         """
@@ -114,3 +114,9 @@ class Case:
             parse_moves(moves)
             for moves in self.data['algorithms']
         ]
+
+    def __str__(self) -> str:
+        return f'Case { self.name }'
+
+    def __repr__(self) -> str:
+        return f"Case('{ self.method }', '{ self.step }', {{'name': '{ self.name }'}})"

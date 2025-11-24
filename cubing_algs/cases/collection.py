@@ -71,6 +71,7 @@ class CaseCollection:
         msg = f'{ name } is not a valid case'
         raise InvalidCaseNameError(msg)
 
+    @property
     def size(self) -> int:
         """
         Return the number of cases in the collection.
@@ -81,10 +82,16 @@ class CaseCollection:
         """
         return len(self.cases)
 
+    def __str__(self) -> str:
+        return f'Collection { self.name }: { self.size }'
+
+    def __repr__(self) -> str:
+        return f"CaseCollection('{ self.method }', '{ self.source }')"
+
 
 CASES_DIRECTORY: Final = Path(__file__).parent
 
-METHODS = ['cfop']
+METHODS = ['CFOP']
 
 COLLECTIONS = {}
 
