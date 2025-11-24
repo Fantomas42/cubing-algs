@@ -3336,13 +3336,13 @@
         "family": "",
         "groups": [],
         "main": "",
-        "name": "AF2L Skipped",
+        "name": "OLL Skipped",
         "optimal_cycles": 0,
         "optimal_htm": 0,
         "optimal_stm": 0,
         "probability": 0.004629629629629629,
         "probability_label": "1/216",
-        "recognition": [],
+        "recognition": {},
         "status": "OK",
         "symmetry": ""
     }

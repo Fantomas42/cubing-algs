@@ -1404,7 +1404,7 @@
         "optimal_stm": 0,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": [],
+        "recognition": {},
         "status": "OK",
         "symmetry": ""
     }

@@ -2657,13 +2657,13 @@
         "family": "",
         "groups": [],
         "main": "",
-        "name": "AF2L Skipped",
+        "name": "PLL Skipped",
         "optimal_cycles": 0,
         "optimal_htm": 0,
         "optimal_stm": 0,
         "probability": 0.013888888888888888,
         "probability_label": "1/72",
-        "recognition": [],
+        "recognition": {},
         "status": "OK",
         "symmetry": ""
     }
