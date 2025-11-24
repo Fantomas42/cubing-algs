@@ -28,3 +28,7 @@ class InvalidOperatorError(InvalidMoveError):
 
 class InvalidCaseNameError(ValueError):
     """Exception raised when requesting a case with an invalid name."""
+
+
+class InvalidCollectionNameError(ValueError):
+    """Exception raised when requesting a collection with an invalid name."""

@@ -115,4 +115,4 @@ for method in METHODS:
     for cases_path in method_directory.glob('*.json'):
         cc = CaseCollection(method, cases_path)
 
-        COLLECTIONS[cc.name] = cc
+        COLLECTIONS[f'{ method.upper() }/{ cc.name }'] = cc
