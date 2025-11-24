@@ -116,7 +116,24 @@ class Case:
         ]
 
     def __str__(self) -> str:
+        """
+        Return a human-readable string representation of the case.
+
+        Returns:
+            String representation with case name
+
+        """
         return f'Case { self.name }'
 
     def __repr__(self) -> str:
-        return f"Case('{ self.method }', '{ self.step }', {{'name': '{ self.name }'}})"
+        """
+        Return a developer-friendly string representation of the case.
+
+        Returns:
+            String representation with method, step, and case name
+
+        """
+        return (
+            f"Case('{ self.method }', '{ self.step }', "
+            f"{{'name': '{ self.name }'}})"
+        )

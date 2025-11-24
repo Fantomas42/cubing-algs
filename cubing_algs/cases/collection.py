@@ -83,9 +83,23 @@ class CaseCollection:
         return len(self.cases)
 
     def __str__(self) -> str:
+        """
+        Return a human-readable string representation of the collection.
+
+        Returns:
+            String representation with collection name and size
+
+        """
         return f'Collection { self.name }: { self.size }'
 
     def __repr__(self) -> str:
+        """
+        Return a developer-friendly string representation.
+
+        Returns:
+            String representation with method and source path
+
+        """
         return f"CaseCollection('{ self.method }', '{ self.source }')"
 
 
