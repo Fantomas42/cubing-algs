@@ -24,3 +24,7 @@ class InvalidBracketError(InvalidMoveError):
 
 class InvalidOperatorError(InvalidMoveError):
     """Exception raised when an invalid operator is encountered."""
+
+
+class InvalidCaseNameError(ValueError):
+    """Exception raised when requesting a case with an invalid name."""

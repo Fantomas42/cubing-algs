@@ -1,0 +1,2670 @@
+[
+    {
+        "algorithms": [
+            "F'LF'R2FL'F'R2F2",
+            "l'UR'D2RU'R'D2R2x'",
+            "l'UR'D2RU'R'D2R2x'",
+            "R'Fl'D2RU'R'D2R2x'",
+            "R'FR'f2LF'L'f2R2",
+            "R'FR'f2rU'r'f2R2",
+            "r2F2r'U'rF2r'Ur'",
+            "R2F2R'B'RF2R'BR'",
+            "L'UR'D2RU'R'D2RL",
+            "R'FR'B2RF'R'B2R2",
+            "l'UR'D2RU'R'D2Rl",
+            "xR'UR'D2RU'R'D2R2x'",
+            "xR'UR'D2RU'R'D2R2x'",
+            "rLD2L'U'LD2L'Ur'",
+            "FU2R'D'RU'R'DRU'F'",
+            "x'R'DR'U2RD'R'U2R2x",
+            "r'Ur'B2rU'r'B2r2",
+            "RU'RF2R'UR'U'R2F2R2",
+            "xR'UR'D2RU'R'u2r2x'",
+            "l'UR'u2LU'L'u2lR",
+            "x'r2D2L'U'LD2L'Ur'",
+            "x'R2u2r'F'ru2R'UR'x",
+            "l'UR'zr2UR'U'r2u2x",
+            "xR2RUR'D2RU'R'D2R2x'",
+            "RBFR'F'RB'R'FRF'R'",
+            "lDUR'D'RU'R'DRD'l'",
+            "RFR'UR'D'RU'R'DR2F'R'",
+            "FUR2DR'U'RD'R'UR'U'F'",
+            "RUR'F'rUR'U'r'FR2U'R'",
+            "RUR'F'rUR'U'r'FR2U'R'",
+            "R'U'D'R'DRU'R'D'RU2DR",
+            "RU2DRD'R'U'RDR'U'D'R'",
+            "x'R'U'RUR'D'RU'R'UDRx",
+            "x'R'U'RUR'D'RU'R'DURx",
+            "x'U2BU2B'R2U2F'U2FR2x",
+            "rUR'F'rUR'U'r'FR2U'r'",
+            "x'RDUR'D'RU'R'DRD'R'x",
+            "R'B'R2DR'U'RD'R'UR'BR",
+            "rUr'F'rUR'U'r'FRrU'r'",
+            "R'U'RU'R'F'RUR'U'R'FRU2R",
+            "R'D'RU2R'DRU'R'D'RU'R'DR",
+            "R'D'RU'R'DRU'R'D'RU2R'DR",
+            "R'D'RU'R'DRU2R'D'RU'R'DR",
+            "R'DRU'R'D'RU'R'DRU2R'D'R",
+            "R'DRU'R'D'RU2R'DRU'R'D'R",
+            "R'DRU2R'D'RU'R'DRU'R'D'R",
+            "rUr'U'r'Fr2U'r'U'rUr'F'",
+            "RDR'U2RD'R'U'RDR'U'RD'R'",
+            "RDR'U'RD'R'U2RDR'U'RD'R'",
+            "r2Ur2U'r2U'Dr2U'r2Ur2D'",
+            "RUR'U'R'FRUR'U'R'F'RUR2U'R'",
+            "RUR'UR2DR'U'RD'R'UR'U'RU'R'",
+            "R'U'RU'R'UR'D'RU'R'DR2UR'UR",
+            "R2UDR2U'R2UR2D'R2U'R2UR2U'R2",
+            "rUr'U'r'Fr2U'r'U'rUr'f'y'M'",
+            "RUR'U'RURDR'URD'R'U2R'URU'R'"
+        ],
+        "aliases": [
+            "A-PLL a"
+        ],
+        "arrows": "U0U2-black,U2U8-black,U8U0-black",
+        "code": "Aa",
+        "description": "Utilis\u00e9e en headlights.",
+        "family": "Corners only",
+        "groups": [
+            "CPLL",
+            "PLL",
+            "L3C",
+            "L4C",
+            "ZBLL",
+            "BLD"
+        ],
+        "main": "x'R'DR'U2RD'R'U2R2x",
+        "name": "PLL Aa",
+        "optimal_cycles": 2,
+        "optimal_htm": 9,
+        "optimal_stm": 9,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une A-Perm gr\u00e2ce au motif \u00e0 Damier (4 facelets) et le 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Aa-Perm parce que le motif \u00e0 Damier est sur la gauche and the 2-Bar ext\u00e9rieur \u00e0 droite.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                    },
+                    "notes": "Aa = 3 couleurs, Ga = 4 couleurs",
+                    "observation": "Motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                },
+                {
+                    "description": "Clairement une A-Perm parce que of the 2x2 block at the front and the opposite corner facelet.<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the opposite corner facelet est sur la droite.",
+                    "feature": {
+                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
+                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                    },
+                    "notes": "Aa = 3 couleurs, V = 4 couleurs",
+                    "observation": "Right corner is the opposite of the block"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Aa-Perm parce que of the 2-bar at the back-left and the opposite facelets at the front-right.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                    },
+                    "notes": "Aa = 4 couleurs, Gd = 3 couleurs",
+                    "observation": "Opposite facelets at the front-right"
+                },
+                {
+                    "description": "Clairement une A-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Aa-Perm parce que the \"almost\" motif \u00e0 Damier est sur la droite.<br><br>The edge \u00e0 gauche is also the opposite of the rear corner.",
+                    "feature": {
+                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "name": "Headlights (Adjacent Edge)"
+                    },
+                    "notes": "Aa = 4 couleurs, Ra = 3 couleurs",
+                    "observation": "Almost motif \u00e0 Damier \u00e0 droite (5 facelets)"
+                }
+            ],
+            "moves": [
+                "y2",
+                "x'",
+                "R'",
+                "D",
+                "R'",
+                "U2",
+                "R",
+                "D'",
+                "R'",
+                "U2",
+                "R2",
+                "x"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "FR'FL2F'RFL2F2",
+            "lU'RD2R'URD2R2x",
+            "R2f2rUr'f2RF'R",
+            "LF'rD2L'ULD2r2x",
+            "rU'rF2r'UrF2r2",
+            "RB'RF2R'BRF2R2",
+            "R2B2RFR'B2RF'R",
+            "l'R'D2RUR'D2RU'Rx'",
+            "l'R'D2RUR'D2RU'Rx'",
+            "l'R'D2RUR'D2RU'l",
+            "xR2D2RUR'D2RU'Rx'",
+            "FUR'D'RUR'DRU2F'",
+            "xRD'RU2R'DRU2R2x'",
+            "x'RU'RD2R'URD2R2x",
+            "rU'Lu2R'URu2rLx2",
+            "r2B2rUr'B2rU'r",
+            "F'UF'R2FU'FUF2R2F2",
+            "x'RU'Ru2r'Fru2R2x",
+            "lU'Rzr2U'RUr2u2x'",
+            "xR2D2RUR'D2RU'R'R2x'",
+            "zUR'Dr2U'RUr2U'D'z'",
+            "lDR'D'RUR'DRU'D'l'",
+            "RUR2F'LFRF'L'FRU'R'",
+            "RFR2D'RUR'DRU'RF'R'",
+            "FURU'RDR'URD'R2U'F'",
+            "RUR2F'rURU'r'FRU'R'",
+            "RUDRD'R'URDR'U2D'R'",
+            "x'R'D'U'RUR'DRU'R'URx",
+            "L'U'LFl'U'LURU'r2Fr",
+            "R'F'RURU'R2FRUR'F'RF",
+            "L'U'LFl'U'LUlF'L2UL",
+            "x'RU'Rz'R2U'rBR2B2",
+            "R'B'RU'RDR'URD'R2BR",
+            "R2D'R2UR2U'DR2UR2D'R2D",
+            "R'U2R'F'RURU'R'FRUR'UR",
+            "R'D'RUR'DRUR'D'RU2R'DR",
+            "R'D'RU2R'DRUR'D'RUR'DR",
+            "R'D'RUR'DRU2R'D'RUR'DR",
+            "R'DRUR'D'RUR'DRU2R'D'R",
+            "R'DRUR'D'RU2R'DRUR'D'R",
+            "R'DRU2R'D'RUR'DRUR'D'R",
+            "FrU'r'UrUr2F'rUrU'r'",
+            "RDR'URD'R'URDR'U2RD'R'",
+            "RU2R'U2L'URU'LUR'URU2R'",
+            "RU2R'U2R'FRF'rUR'URU2r'",
+            "LUL'ULFL'U'LULF'L'U2L'",
+            "RU2R'U2r'FRF'rUR'URU2R'",
+            "l'U'lUlF'l2UlUl'U'lF",
+            "RUR2U'R'FRURU'R'F'RURU'R'",
+            "RUR'URU'RDR'URD'R2U'RU'R'"
+        ],
+        "aliases": [
+            "A-PLL b"
+        ],
+        "arrows": "U8U2-black,U6U8-black,U2U6-black",
+        "code": "Ab",
+        "description": "Version sym\u00e9trique en M, S et mirroir de la Aa.",
+        "family": "Corners only",
+        "groups": [
+            "CPLL",
+            "PLL",
+            "L3C",
+            "L4C",
+            "ZBLL",
+            "BLD"
+        ],
+        "main": "xRD'RU2R'DRU2R2x'",
+        "name": "PLL Ab",
+        "optimal_cycles": 2,
+        "optimal_htm": 9,
+        "optimal_stm": 9,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une A-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the \"almost\" motif \u00e0 Damier est sur la gauche.<br><br>The edge \u00e0 droite is also the opposite of the rear corner.",
+                    "feature": {
+                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "name": "Headlights (Adjacent Edge)"
+                    },
+                    "notes": "Ab = 4 couleurs, Rb = 3 couleurs",
+                    "observation": "Almost motif \u00e0 Damier \u00e0 gauche (5 facelets)"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ab-Perm parce que of the 2-bar at the back-right and the opposite facelets at the front-left.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                    },
+                    "notes": "Ab = 4 couleurs, Gb = 3 couleurs",
+                    "observation": "Opposite facelets at the front-left"
+                },
+                {
+                    "description": "Clairement une A-Perm parce que of the 2x2 block at the front and the opposite corner facelet.<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the opposite corner facelet est sur la gauche.",
+                    "feature": {
+                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
+                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                    },
+                    "notes": "Ab = 3 couleurs, V = 4 couleurs",
+                    "observation": "Left corner is the opposite of the block"
+                },
+                {
+                    "description": "Clairement une A-Perm parce que of the motif \u00e0 Damier (4 facelets) and the 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the motif \u00e0 Damier est sur la droite and the 2-Bar ext\u00e9rieur \u00e0 gauche.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                    },
+                    "notes": "Ab = 3 couleurs, Gc = 4 couleurs",
+                    "observation": "motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                }
+            ],
+            "moves": [
+                "x",
+                "R",
+                "D'",
+                "R",
+                "U2",
+                "R'",
+                "D",
+                "R",
+                "U2",
+                "R2",
+                "x'"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "R2U'LD'L'URLU'R'DRUMx",
+            "LU'RD2R'URL'U'LD2L'UR'",
+            "r'R'D'RU'R'DRrF'r'UrF",
+            "RU'LD2L'UR'LU'RD2R'UL'",
+            "R'UL'D2LU'RL'UR'D2RU'L",
+            "L'UR'D2RU'LR'UL'D2LU'R",
+            "f'R2U'RFR'UR2fD'R'F'RD",
+            "R'FRUR'U'D'R'DF'D'RUDR",
+            "R'DFRUR'D'U'R'DF'D'RUR",
+            "R'U'R'DFD'RUDRU'R'F'D'R",
+            "R'FRUR'D'U'R'DF'D'RDUR",
+            "R'U'D'R'DFD'RUDRU'R'F'R",
+            "F2U'R2U2R2F2U'R2U'R2U2F2UF2",
+            "R'UL'D2LU'RU2R'UL'D2LU'R",
+            "LU'RD2R'UL'U2LU'RD2R'UL'",
+            "FR'F'rURU'r2U'RUrf'U'f",
+            "l'URD'R'U'RD2LU'L'D'LUr'",
+            "LFRF'L'FR'F'LFR'F'L'FRF'",
+            "RU'rF2r'UR'U2RU'rF2r'UR'",
+            "l'U'r'FRF'RUR'U'LURU'R'F",
+            "R'U2F'UFU2RUR2U'F'UFRU'R",
+            "lU'R'DRUR'D'RUR'DRU'R'D'x",
+            "lU'R'DRUR'D'RUR'DRU'R'D'x",
+            "l'U'L'URU'LUR'U'LURU'L'Ux'",
+            "FR'F'rURU'r'FRF'rUR'U'r'",
+            "rURU'r'FR'F'rUR'U'r'FRF'",
+            "xUR'U'LURU'r2U'RULU'R'Ux",
+            "x'RU'R'DRUR'u2R'URDR'U'Rx'",
+            "R'U'R'D'RU'R'DRUR'D'RUR'DR2",
+            "R2D'RU'R'DRU'R'D'RUR'DRUR",
+            "r'UrF'r'U'rFr'U'rF'r'UrF",
+            "RURDR'URD'R'U'RDR'U'RD'R2",
+            "R2DR'URD'R'URDR'U'RD'R'U'R'",
+            "F'rUR'U'r'FRU2rUR'U'r'FRF'",
+            "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
+            "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
+            "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
+            "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
+            "xR'URD'R'U'RDR'U'RD'R'URDx'",
+            "R2D'RU2R'DRUR'D'RU'R'DRU2R",
+            "R2DR'U2RD'R'U'RDR'URD'R'U2R'",
+            "RU2RDR'U'RD'R'URDR'U2RD'R2",
+            "xUR'U'LURU'L'URU'LUR'U'r'",
+            "x'RU'R'DRUR'D'RUR'DRU'R'u'z'",
+            "FU'RU'R'U2RU'R'UR'U2RUR'URF'",
+            "FR'U'RU'R'U2RU'RUR'U2RUR'UF'",
+            "FU'RU'RUR'URU2R'UR'U'RU2R'F'",
+            "R2UF'R'URU'R'URU'R'URU'FU'R2",
+            "LR'U'RUL'U'R'URrUR'U'r'FRF'",
+            "R'F'L'FRF'LFL'U'LURU'L'ULR'",
+            "R2UR'd'RUR'U'RUR'U'RUR'FU'F2",
+            "R2U2F'R'U'RUR'U'RUR'U'RUFU2R2",
+            "R2UR2UDR2U'R2UR2U'D'R2UR2U2R2",
+            "RUR'UR'U'RF'RUR'U'R'FR2U'R2UR",
+            "L2U2FLUL'U'LUL'U'LUL'U'F'U2L2",
+            "RU2R'U'RU'R2FRF'URUR'U2FR'F'R",
+            "L2U2FULU'L'ULU'L'ULU'L'F'U2L2",
+            "R2UR'U'yRUR'U'RUR'U'RUR'FU'F2",
+            "R2UR'yRU'R'URU'R'URU'R'UFU'F2",
+            "l'URD'R'U'RDy'zrUR'U'r'FRF'",
+            "FU'BU'D2F'UB'U'BL2U2FD2B'R2F'",
+            "x'RU'R'DRUR'D'xR'U'R'D'RUR'DR2",
+            "UzU2R2FRUR'U'RUR'U'RUR'U'F'R2U2z'",
+            "R2UR'U'yRUR'U'RUR'U'RUR'y'RU'R2",
+            "xR'UR'D2RU'R'D2R2z'R'UR'D2RU'R'D2R2x'",
+            "RRUR'U'yRUR'U'RUR'U'RUR'y'RU'R'R'"
+        ],
+        "aliases": [],
+        "arrows": "U0U6-black,U6U0-black,U2U8-black,U8U2-black",
+        "code": "E",
+        "description": "Sym\u00e9trie avec le U' au d\u00e9but et fin, et le D qui va et vient \u00e0 chaque tour.",
+        "family": "Corners only",
+        "groups": [
+            "CPLL",
+            "PLL",
+            "L4C",
+            "ZBLL",
+            "ZZLL"
+        ],
+        "main": "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
+        "name": "PLL E",
+        "optimal_cycles": 1,
+        "optimal_htm": 14,
+        "optimal_stm": 14,
+        "probability": 0.027777777777777776,
+        "probability_label": "1/36",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as E-Perm parce que of the \"malformed\" pair in the front-left, resulting in a partial motif \u00e0 Damier (3 facelets).<br><br>The E-Perm has two appearances and looks the same after a U2.",
+                    "feature": {
+                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "name": "Miscellaneous without Bookends"
+                    },
+                    "notes": "Learn the features of E, Y and V",
+                    "observation": "Malformed pair at front-left"
+                },
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as E-Perm parce que of the \"malformed\" pair in the front-right, resulting in a partial motif \u00e0 Damier (3 facelets).<br><br>The E-Perm has two appearances and looks the same after a U2.",
+                    "feature": {
+                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "name": "Miscellaneous without Bookends"
+                    },
+                    "notes": "Learn the features of E, Y and V",
+                    "observation": "Malformed pair at front-right"
+                }
+            ],
+            "moves": [
+                "x'",
+                "R",
+                "U'",
+                "R'",
+                "D",
+                "R",
+                "U",
+                "R'",
+                "D'",
+                "R",
+                "U",
+                "R'",
+                "D",
+                "R",
+                "U'",
+                "R'",
+                "D'",
+                "x"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "double"
+    },
+    {
+        "algorithms": [
+            "MU2r'UR'F2rF'M'R'F2R2",
+            "M'U2LF'RU2r'Ur'R2U2R2x",
+            "R2F2R2r'Fr'F2RU'rU2M'",
+            "R'URU'R2F'U'FURFR'F'R2",
+            "R2FRF'R'U'F'UFR2UR'U'R",
+            "rU'RB2r'BMRB2R2U'M'",
+            "M'U2rU'Rx'U2r'UMRU2R2x",
+            "MUx'R2U2R2rU'rU2l'Ur'",
+            "R'U2R'd'R'F'R2U'R'UR'FRU'F",
+            "R'U2R'd'R'F'R2U'R'UR'FRU'F",
+            "RU'R'UR2yRUR'U'F'R'FRF2",
+            "M'U2rU'Rx'U2r'UR2r'U2R'l'",
+            "LR2URUR2U'R'U'R2U'RU2L'UR'",
+            "LR2URUR2U'R'U'R2U'RU2L'UR'",
+            "R'U2R'U'yR'F'R2U'R'UR'FRU'F",
+            "Fr2R'U2rU'r'U2lRU'R'Ur2u'z'",
+            "RU'R2FRURU'R2F'RfR'F'RS'",
+            "S'RU'R2FRURU'R2F'RfR'F'R",
+            "R'FRf'R'FR2UR'U'R'F'R2UR'S",
+            "SR'FRf'R'FR2UR'U'R'F'R2UR'",
+            "RU2R'U'S'RU'R'fR'F'RU2RU2R'",
+            "R'U2RU'R'f'U'RU2R'U'RU'R'fU'R",
+            "R'Uf'RUR'URU2R'UfRUR'U2R",
+            "R'U'F'RUR'U'R'FR2U'R'U'RUR'UR",
+            "R'U'F'RUR'U'R'FR2U'R'U'RUR'UR",
+            "R'U'F'RUR'U'R'FR2U'R'U'RUR'UR",
+            "RU2R'U'rU2R'FRU2r2FR2U2r'M2",
+            "L'F2UL'B2RD'R'B2R2D2RL2D2R",
+            "RUR'U'R'URU2L'R'URU'LU'RU'R'",
+            "RUR'U'R'URU2L'R'URU'LU'RU'R'",
+            "RUR'U'R'URU2R'L'URU'LU'RU'R'",
+            "RU'R'URfR'URU'R'URU'Rf'UR'",
+            "RU2R'U2R'FRf'RUR'URU2R'US",
+            "RUR'UL'ULU2R'L'ULU'RURU'R'",
+            "fU'FRUR'U'R'F'U2FU'R'U'RUf'F'",
+            "RUR'URU'R2F'U'FURFR'F'R2U2R'",
+            "rUR'U'zU'l'U2r'U'rU2l'Ul'R'",
+            "zD'U2R'U'R'U2RURU2RU'R2DR'Uz'",
+            "RU2RUR'DRD'RU'DR2UR2D'R'UR'",
+            "LR2URUR2U'R'U'R2U'RU2zU'Ru'x'",
+            "rU'r'frU'r2F'rUrUr2F'rS'",
+            "Sr'Fr2U'r'U'r'Fr2Ur'f'rUr'",
+            "R'U2R'U'RD'R'DR'UD'R2U'R2DRU'R",
+            "LUFL'U'LULF'L2ULUL'U'LU'L'",
+            "R'U2R'U'x2y'R'UR'U'l2F'R'FRU'F",
+            "RUR'U'R'URU2L'R'URU'LU2URU'R'",
+            "R'U'RURU2R'U'R'URU'RU2L'UR'U'L",
+            "R2US'U2SU2R2U'B2DL2U'L2B2D'",
+            "xD'l2D'l'z'R'F'R2U'R'UR'FRU'f",
+            "RUR'U'R'URU2R'L'URU'rx'U'RU'R'",
+            "R'U'F'RUR'U'R'FR2U'R'U'RUR'F'FUR",
+            "zURU'RUDR'U'RD'R2UR'U'RUR'U'z'",
+            "RU2R2D'RUR'DRU2RU'R2U2RUR'UR",
+            "R'U2R2DR'U'RD'R'U2R'UR2U2R'U'RU'R'",
+            "R'U2R'D'R2UR'URU2R2DRU'RU'R'U2R",
+            "R2UD'R2UR2U'DRD'RDR'URU'R'U'R2",
+            "R2UR2UDR2U2D'R2U2R2UR2DR2U'D'R2",
+            "xUR2FR2U'R'UR'xU2rU'r'UlRU'x'",
+            "L2F2L2RUR'U'R'FR2U'R'U'RUR'F'L2F2L2",
+            "F'UR'U'F'RUR'U'R'FR2U'R'U'RUR'URU'F",
+            "RU2R'U'RUR'U'RU2L'UR'U'LRUR'URU2R'",
+            "RUR'URU2R2U'RU'R'U2RUrUR'U'r'FRF'",
+            "RUR'U'R'FR2U'R'U'RUR'F'M2UM2U2M2UM2",
+            "r2B2r2RUR'U'R'FR2U'R'U'RUR'F'r2B2r2",
+            "R'U'F'RD'RU'R'DRURURU'R'U'RU'R'URFUR"
+        ],
+        "aliases": [],
+        "arrows": "U2U8-black,U8U2-black,U1U7,U7U1",
+        "code": "F",
+        "description": "Ressemble \u00e0 la Jb-Perm et T-Perm sauf la fin.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL",
+            "ZZLL"
+        ],
+        "main": "R'U'F'RUR'U'R'FR2U'R'U'RUR'UR",
+        "name": "PLL F",
+        "optimal_cycles": 1,
+        "optimal_htm": 13,
+        "optimal_stm": 12,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une F-Perm parce que of the lonesome 3-bar.<br><br>It is also worth knowing that the edge \u00e0 droite is the opposite of the front corner.",
+                    "feature": {
+                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
+                        "name": "3-Bar sans Headlights"
+                    },
+                    "notes": "F = 4 couleurs, Ja / Jb = 3 couleurs",
+                    "observation": "Right edge is the opposite of front corner"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as F-Perm parce que of the \"malformed\" 2x2 block at the front, resulting in a motif \u00e0 Damier (4 facelets).",
+                    "feature": {
+                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "name": "Miscellaneous with Bookends"
+                    },
+                    "notes": "F = 3 couleurs, Gc / Rb = 4 couleurs",
+                    "observation": "Malformed 2x2 block (motif \u00e0 Damier)"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as F-Perm parce que of the \"malformed\" 2x2 block at the front, resulting in a motif \u00e0 Damier (4 facelets).",
+                    "feature": {
+                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "name": "Miscellaneous with Bookends"
+                    },
+                    "notes": "F = 3 couleurs, Ga / Ra = 4 couleurs",
+                    "observation": "Malformed 2x2 block (motif \u00e0 Damier)"
+                },
+                {
+                    "description": "Clairement une F-Perm parce que of the lonesome 3-bar.<br><br>It is also worth knowing that the edge \u00e0 gauche is the opposite of the front corner.",
+                    "feature": {
+                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
+                        "name": "3-Bar sans Headlights"
+                    },
+                    "notes": "F = 4 couleurs, Ja / Jb = 3 couleurs",
+                    "observation": "Left edge is the opposite of front corner"
+                }
+            ],
+            "moves": [
+                "y",
+                "R'",
+                "U'",
+                "F'",
+                "R",
+                "U",
+                "R'",
+                "U'",
+                "R'",
+                "F",
+                "R2",
+                "U'",
+                "R'",
+                "U'",
+                "R",
+                "U",
+                "R'",
+                "U",
+                "R"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "simple"
+    },
+    {
+        "algorithms": [
+            "F2DR'UR'U'RD'F2L'UL",
+            "R2uR'UR'U'Ru'R2F'UF",
+            "R2uR'UR'U'Ru'R2b'RFz'",
+            "RLU2R'L'F'UB'U2FU'B",
+            "RDL'D2RD'L'F2D'L2D'R2",
+            "rU2RU'r'FUR'U'F'rU'r'",
+            "F2R2L2UR2U'R2DR2D'L2F2",
+            "R2uR'UR'U'Ru'R2b'Rb",
+            "RlfR'Fl'U'Ru'R2F'UF",
+            "R2S2Ul2U'l2uR2U'r2F2",
+            "R2uR'UR'U'Ru'R2y'R'UR",
+            "R2uR'UR'U'Ru'R2y'R'UR",
+            "R2uR'UR'U'Ru'R2y'R'UR",
+            "R2uR'UR'U'RD'xU2r'Urx'",
+            "R2uR'UR'U'Ru'R2yL'UL",
+            "RFU'DR'U2RD'R'URUF'UR'",
+            "R2UR'UR'U'RU'R2DU'R'URD'",
+            "D'R2UR'UR'U'RU'R2U'DR'UR",
+            "R2UR'UR'U'RU'R2U'DR'URD'",
+            "fRF'R'U2R2U2FR'F'R'U2R'S'",
+            "R2UR'UR'U'RU'R2DU'R'URu'",
+            "u'R2UR'UR'U'RU'R2U'DR'UR",
+            "R'U'Rf'U2fRURfR2f'RU'R'",
+            "lU2R'rUr'F'DRU'R'D'RU'l'",
+            "L2F2L'U2L'U2LF'L'U'LULF'L2",
+            "RU2R'U'F'RUR2U'R'FRUR2U2R'",
+            "R'FR'URU'F'R2U2R'UR2UR2UR",
+            "RLU2R'L'B2UF2U'F2DR2D'B2",
+            "RUR'U'R'UFRURU'R'F'UR'U2R",
+            "RU2R'U'S'RSU'S'U'R'fR'F'R",
+            "LU'R'UxU2r'RUR'U'rU2r'U'R",
+            "RlU2l'U2R'U2lU'R'F'RFRU'R2x",
+            "RU'RUR2DR'U'RD'R'U2RU'R'U'R2",
+            "FRU'R'URUR2F'U2RURU'R2U2R",
+            "R2F2R'UR2F'RURU'R'FRU'RF2R2",
+            "R2U'R2UR2U'D'R2U2R2U'R2UR2U2R2U'D",
+            "RUR2F'RURU'R'FR'F'rURU'r'FRU'R'",
+            "RUR'F'RUR'U'R'FRU'R'FR2U'R'U'RUR'F'",
+            "RUR'F'RUR'U'R'FRU'R'FR2U'R'UF'r'Fr"
+        ],
+        "aliases": [
+            "G-PLL a"
+        ],
+        "arrows": "U0U2-black,U2U6-black,U6U0-black,U1U3-red,U3U5-red,U5U1-red",
+        "code": "Ga",
+        "description": "",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL"
+        ],
+        "main": "R2uR'UR'U'Ru'R2y'R'UR",
+        "name": "PLL Ga",
+        "optimal_cycles": 2,
+        "optimal_htm": 12,
+        "optimal_stm": 11,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une Ga-Perm / Gc-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (4 facelets).<br><br>Facilement reconnaissable en tant que Ga-Perm parce que the \"almost\" motif \u00e0 Damier est sur la gauche and the 2-Bar ext\u00e9rieur \u00e0 droite.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                    },
+                    "notes": "Ga = 4 couleurs, Aa = 3 couleurs",
+                    "observation": "Almost motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ga-Perm parce que of the 2-bar at the front-left and the edge \u00e0 droite being an adjacent of the back-left corner.",
+                    "feature": {
+                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "name": "Inside 2-Bar"
+                    },
+                    "notes": "Y / Ga = 4 couleurs",
+                    "observation": "Edge \u00e0 droite is an adjacent of the back-left corner"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ga-Perm parce que the edge \u00e0 gauche is the opposite of the front-right corner and the edge \u00e0 droite matches the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "feature": {
+                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "name": "Miscellaneous with Bookends"
+                    },
+                    "notes": "Ga = 4 couleurs, F = 3 couleurs",
+                    "observation": "Almost malformed 2x2 block"
+                },
+                {
+                    "description": "Clairement une Ga-Perm / Gc-Perm parce que of the motif \u00e0 Damier (4 facelets) and the absence of an 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Ga-Perm parce que the motif \u00e0 Damier est sur la droite.<br><br>The edge \u00e0 gauche is also the opposite of the front corner.",
+                    "feature": {
+                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "name": "Headlights (Adjacent Edge)"
+                    },
+                    "notes": "Ga = 4 couleurs, Ra = 3 couleurs",
+                    "observation": "motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                }
+            ],
+            "moves": [
+                "y",
+                "R2",
+                "u",
+                "R'",
+                "U",
+                "R'",
+                "U'",
+                "R",
+                "u'",
+                "R2",
+                "y'",
+                "R'",
+                "U",
+                "R"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "L'U'LF2DR'URU'RD'F2",
+            "F'U'FR2uR'URU'RD'F2",
+            "L'U'LF2DR'URU'Ru'R2",
+            "F'U'FR2uR'URU'Ru'R2",
+            "F'U'FR2uR'URU'Ru'R2",
+            "r'F'rF2DR'URU'Ru'R2",
+            "R'd'FR2uR'URU'Ru'R2",
+            "r2UR2UF2RUr'F2RF'r'",
+            "R2DL2DF2LDR'D2LD'R'",
+            "rUr'FURU'F'rUR'U2r'",
+            "R'UL'U2RU'Ly'RLU2L'R'",
+            "R'UL'U2RU'Ly'LRU2L'R'",
+            "R'U'Rf2Uz'U'RUR'Ur'U2z'",
+            "R'U'RyR2uR'URU'Ru'R2",
+            "R'U'RyR2uR'URU'Ru'R2",
+            "R'U'RyR2uR'URU'Ru'R2",
+            "R2F2UR2D'R2DB2U'F2B2R2",
+            "R2F2UR2D'R2DB2U'B2F2R2",
+            "R2F2UFUF'R2FU'F'R2U'F2R2",
+            "R'U'RUD'R2UR'URU'RU'R2D",
+            "DR'U'RUD'R2UR'URU'RU'R2",
+            "R'U'RUD'R2UR'URU'RU'R2u",
+            "uR'U'RUD'R2UR'URU'RU'R2",
+            "L'U'LD'UL2UL'ULU'LU'L2D",
+            "lUR'DRUR'D'FrU'r'RU2l'",
+            "u'L'U'LUD'L2UL'ULU'LU'L2",
+            "L2FL'U'L'ULFL'U2LU2LF2L2",
+            "R'U'R2U'R2U'RU2R2FUR'U'RF'R",
+            "RU'R'U2R'U'FRf'R'URSRU'R'",
+            "R'U2RU'FRUR'U'R'F'U'RURU'R'",
+            "R'U2R2UR'U'R'U2FR2U'R'U'RUR'F'",
+            "R2F2R'UR'F'RUR'U'R'FR2U'RF2R2",
+            "R'DR2UR'UR'U2RUR'UR2U'R2D'R",
+            "RUR'U2R'D'RU'R'DU'R2U'R'UR'UR",
+            "R'D'RUR'DR2UR'U2RUR2U'RU'R'U2R",
+            "RUR'F'RUR'U'R'FR2U'RU'S'U2SU'R2",
+            "RUR'F'RUR'U'R'FRF'rUR'U'r'FR2U'R'",
+            "RUR'F'rUR'U'r'FRF'RUR'U'R'FR2U'R'",
+            "FRU'R'URUR2F'RUR'F'RURU'R'FRU'R'",
+            "L'U'LFL'U'LU'L'ULULF'L2U'LUL'UL",
+            "R'F'RURUR'U'RU'R'FRUR'URUR'U'RU'R'",
+            "BFU2BF'U'B2L2U'L2UF2U'B2UF2L2B2"
+        ],
+        "aliases": [
+            "G-PLL b"
+        ],
+        "arrows": "U0U6-black,U6U8-black,U8U0-black,U1U7-red,U7U3-red,U3U1-red",
+        "code": "Gb",
+        "description": "",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL"
+        ],
+        "main": "R'U'RyR2uR'URU'Ru'R2",
+        "name": "PLL Gb",
+        "optimal_cycles": 2,
+        "optimal_htm": 12,
+        "optimal_stm": 12,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gb-Perm parce que the headlights are \u00e0 gauche and the adjacent edge is the opposite of the front corner.",
+                    "feature": {
+                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "name": "Headlights (Opposite Edge)"
+                    },
+                    "notes": "Gb = 4 couleurs, Gd = 3 couleurs",
+                    "observation": "Right edge is the opposite of front corner"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gb-Perm parce que of the 2-bar at the back-right and the opposite facelets at the back-left.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                    },
+                    "notes": "Gb = 3 couleurs, Ab / V = 4 couleurs",
+                    "observation": "Opposite facelets at the back-left"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gb-Perm parce que of the 2-bar at the front-left and the edge \u00e0 droite being the opposite of the front corner.<br><br>You might find the corner \u00e0 gauche useful during recognition.",
+                    "feature": {
+                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "name": "Inside 2-Bar"
+                    },
+                    "notes": "Y / Gb = 4 couleurs",
+                    "observation": "Edge \u00e0 droite is the opposite of the front-right corner"
+                },
+                {
+                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gb-Perm parce que the edge \u00e0 gauche matches the headlights.<br><br>The edge \u00e0 gauche is also the opposite of the back corner.",
+                    "feature": {
+                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "name": "Headlights (Opposite Edge)"
+                    },
+                    "notes": "Gb = 3 couleurs, Gd = 4 couleurs",
+                    "observation": "Left edge matches right headlights"
+                }
+            ],
+            "moves": [
+                "y",
+                "R'",
+                "U'",
+                "R",
+                "y",
+                "R2",
+                "u",
+                "R'",
+                "U",
+                "R",
+                "U'",
+                "R",
+                "u'",
+                "R2"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "F2D'LU'LUL'DF2RU'R'",
+            "R2u'RU'RUR'uR2fR'f'",
+            "R2F2RU2MFrU2R'U'F2R",
+            "L2u'LU'LUL'uL2FU'F'",
+            "R2u'RU'RUR'DB2LU'L'",
+            "L'R'U2LRFU'BU2F'UB'",
+            "R2S2D'F2DF2U'F2UB2L2z2",
+            "R2S2U'R2DR2D'F2UB2r2",
+            "R2S2D'F2DF2U'F2UB2r2",
+            "F2R2L2U'L2UL2D'L2DR2F2",
+            "R2F2RU2Rr'FrU2R'U'F2R",
+            "R'L'U2LRy'RU'LU2R'UL'",
+            "R'L'U2RLy'RU'LU2R'UL'",
+            "L'R'U2LRyLU'RU2L'UR'",
+            "R2u'RU'RUR'uR2yRU'R'",
+            "R2u'RU'RUR'uR2yRU'R'",
+            "R2u'RU'RUR'uR2yRU'R'",
+            "R2u'RU'RUR'Dx'U2rU'L'",
+            "R2u'RU'RUz'U'Rf2UR'U'z'",
+            "R2u'RU'RUR'Dx'U2rU'r'x",
+            "F2r2R2D'r2Ur2U'r2DR2F2",
+            "R2S2U'R2DR2D'b2DB2R2",
+            "R2u'RU'RUR'uRU2F'U'FR",
+            "R2S2U'l2Ul2u'R2Ur2B2",
+            "FRUR'FR2F'R'U'R'F'U2R'UR",
+            "R2U'RU'RUR'UR2D'URU'R'D",
+            "DR2U'RU'RUR'UR2UD'RU'R'",
+            "DR2U'RU'RUR'UR2D'URU'R'",
+            "R2U'RU'RUR'UR2UD'RU'R'D",
+            "R2U'RU'RUR'UR2D'URU'R'u",
+            "R2F2RU2RU2R'FRUR'U'R'FR2",
+            "R2F2RU2RU2R'FRUR'U'R'FR2",
+            "R2U'RU'RUR'UR'F'R'URU'FR'",
+            "uL2U'LU'LUL'UL2D'ULU'L'",
+            "RF'R2F'U'RU'R'U2RU'R'FR2FR'",
+            "R2u'RU'RUR'uRUR'FRF'U'R",
+            "uR2U'RU'RUR'UR2D'URU'R'D",
+            "R'U'RU'R2DR'URD'RURU'RU'R'",
+            "zR'F'B'R2FBR'UR'DR2U'RD'z'",
+            "R'U'F2u'RUR'uF2RU'FRUR'U'F'",
+            "L'U'LULU'F'L'U'L'ULFU'LU2L'",
+            "R2F'RDR'U'R'U'RU2R'U'R2D'R'FR2",
+            "RU'Fu'R'U'RuDU'R'U2RD'UF'R'",
+            "RD'R2U'R2UR'URU2R'UR'UR2DR'",
+            "RFR'UR'U'R'URU'R'F'U'RUR'U'R2",
+            "RUR'URU2R'URU2R'U2L'URU'R'L",
+            "R'D'R'U'RDU'RD'UR'URDRURU'R'",
+            "FR'F'RFR'F'RFR'F'RU2R2U2R2U'R2U'R2",
+            "R'U2R'D'RU'R'DRURU'R2U'R'U'R'URUR2",
+            "L'ULUFRU'M'U'r'U2rUr'R'F'RURU'R'",
+            "L'U'L2FL'U'L'ULF'LFl'U'L'UlF'L'UL",
+            "L'U'LFL'U'LULF'L'ULF'L2ULUL'U'LF"
+        ],
+        "aliases": [
+            "G-PLL c"
+        ],
+        "arrows": "U0U6-black,U6U8-black,U8U0-black,U7U3-red,U3U5-red,U5U7-red",
+        "code": "Gc",
+        "description": "",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL"
+        ],
+        "main": "R2u'RU'RUR'uR2yRU'R'",
+        "name": "PLL Gc",
+        "optimal_cycles": 2,
+        "optimal_htm": 12,
+        "optimal_stm": 11,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une Ga-Perm / Gc-Perm parce que of the motif \u00e0 Damier (4 facelets) and the absence of an 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Gc-Perm parce que the motif \u00e0 Damier est sur la gauche.<br><br>The edge \u00e0 droite is also the opposite of the front corner.",
+                    "feature": {
+                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "name": "Headlights (Adjacent Edge)"
+                    },
+                    "notes": "Gc = 4 couleurs, Rb = 3 couleurs",
+                    "observation": "motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gc-Perm parce que the edge \u00e0 droite is the opposite of the front-left corner and the edge \u00e0 gauche matches the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "feature": {
+                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "name": "Miscellaneous with Bookends"
+                    },
+                    "notes": "Gc = 4 couleurs, F = 3 couleurs",
+                    "observation": "Almost malformed 2x2 block"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gc-Perm parce que of the 2-bar at the front-right and the edge \u00e0 gauche being an adjacent of the back-right corner.",
+                    "feature": {
+                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "name": "Inside 2-Bar"
+                    },
+                    "notes": "Y / Gc = 4 couleurs",
+                    "observation": "Edge \u00e0 gauche is an adjacent of the back-right corner"
+                },
+                {
+                    "description": "Clairement une Ga-Perm / Gc-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (4 facelets).<br><br>Facilement reconnaissable en tant que Gc-Perm parce que the \"almost\" motif \u00e0 Damier est sur la droite and the 2-Bar ext\u00e9rieur \u00e0 gauche.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                    },
+                    "notes": "Gc = 4 couleurs, Ab = 3 couleurs",
+                    "observation": "Almost motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                }
+            ],
+            "moves": [
+                "y",
+                "R2",
+                "u'",
+                "R",
+                "U'",
+                "R",
+                "U",
+                "R'",
+                "u",
+                "R2",
+                "y",
+                "R",
+                "U'",
+                "R'"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "RUR'F2u'FU'F'UF'DR2",
+            "RUR'F2D'LU'L'UL'DF2",
+            "RU'LU2R'Ur'U'D'F2UDx",
+            "fR'FR2f'UF'R'L'U2LR",
+            "fRf'R2u'RU'R'UR'uR2",
+            "R'F'RF'U'L'UFR'F'LF2R",
+            "FUF'L2u'LU'L'UL'uL2",
+            "LUL'B2D'RU'R'UR'uR2",
+            "RdB'R2u'RU'R'UR'uR2",
+            "F2R2D'L2DL2U'L2UM2B2x2",
+            "RU'LU2R'UL'y'R'L'U2LR",
+            "RU'LU2R'UL'y'L'R'U2LR",
+            "RUR'y'R2u'RU'R'UR'uR2",
+            "RUR'y'R2u'RU'R'UR'uR2",
+            "RUR'y'R2u'RU'R'UR'uR2",
+            "LUr'U2xD'RU'R'UR'uR2",
+            "R'U'RU2FRURFR2F'RU'R'F'",
+            "RUR'U'DR2U'RU'R'UR'UR2D'",
+            "D'RUR'U'DR2U'RU'R'UR'UR2",
+            "RUR'DU'R2U'RU'R'UR'UR2D'",
+            "u'RUR'U'DR2U'RU'R'UR'UR2",
+            "RUR'U'DR2U'RU'R'UR'UR2u'",
+            "RUR'DU'R2U'RU'R'UR'UR2u'",
+            "R2F'RURU'R'F'RU2R'U2R'F2R2",
+            "R2F'RURU'R'F'RU2R'U2R'F2R2",
+            "RF'UR'U'RFRU'RU'R'UR'UR2",
+            "x'rUr'U2xD'RU'R'UR'uR2",
+            "LUL'U'DL2U'LU'L'UL'UL2UD'",
+            "LU2L'UF'L'U'LULFUL'U'L'UL",
+            "M'U2ML'U'LFL'U'LULF'L2ULM'U2M",
+            "RUR'F'RUR'URU'R'U'R'FR2UR'U'RU'R'",
+            "F'RUR'URU2R'FURU'R'U2RUR'U'RU'R'",
+            "R2U'R'U'RURUR2UR'U'R'D'RUR'DRU2R",
+            "R'U'F'RUR'U'R'FR2U'R'URURUR'URU2R'",
+            "L'U'LFL'U'LULF'L'Fl'U'LUlF'L2UL",
+            "RUR'F'RU2R'U'RUR'U2R'FRURU'R'URU2R'",
+            "RUR'F'L'U'LULF'L'F2RUR'U'L'U2RUR'U2L"
+        ],
+        "aliases": [
+            "G-PLL d"
+        ],
+        "arrows": "U0U2-black,U2U6-black,U6U0-black,U3U7-red,U7U1-red,U1U3-red",
+        "code": "Gd",
+        "description": "",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL"
+        ],
+        "main": "RUR'y'R2u'RU'R'UR'uR2",
+        "name": "PLL Gd",
+        "optimal_cycles": 2,
+        "optimal_htm": 12,
+        "optimal_stm": 11,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gd-Perm parce que the edge \u00e0 droite matches the headlights.<br><br>The edge \u00e0 droite is also the opposite of the back corner.",
+                    "feature": {
+                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "name": "Headlights (Opposite Edge)"
+                    },
+                    "notes": "Gd = 3 couleurs, Gb = 4 couleurs",
+                    "observation": "Right edge matches left headlights"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gd-Perm parce que of the 2-bar at the front-right and the edge \u00e0 gauche being the opposite of the front corner.<br><br>You might find the corner \u00e0 droite useful during recognition.",
+                    "feature": {
+                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "name": "Inside 2-Bar"
+                    },
+                    "notes": "Y / Gd = 4 couleurs",
+                    "observation": "Edge \u00e0 gauche is the opposite of the front-left corner"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gd-Perm parce que of the 2-bar at the back-left and the opposite facelets at the back-right.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                    },
+                    "notes": "Gd = 3 couleurs, Aa / V = 4 couleurs",
+                    "observation": "Opposite facelets at the back-right"
+                },
+                {
+                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gd-Perm parce que the headlights are \u00e0 droite and the adjacent edge is the opposite of the front corner.",
+                    "feature": {
+                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "name": "Headlights (Opposite Edge)"
+                    },
+                    "notes": "Gd = 4 couleurs, Gb = 3 couleurs",
+                    "observation": "Left edge is the opposite of front corner"
+                }
+            ],
+            "moves": [
+                "y",
+                "R",
+                "U",
+                "R'",
+                "y'",
+                "R2",
+                "u'",
+                "R",
+                "U'",
+                "R'",
+                "U",
+                "R'",
+                "u",
+                "R2"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "M2UM2U2M2UM2",
+            "M2U'M2U2M2U'M2",
+            "M2UM2U2M2UM2",
+            "M2UM2U2M2UM2",
+            "M2U'M2U2M2U'M2",
+            "M2U2M2U'M2U2M2",
+            "M2U2M2UM2U2M2",
+            "M2u'M2u2M2u'M2",
+            "M2uM2u2M2uM2",
+            "R2S2R2U'R2S2R2",
+            "R2S2R2UR2S2R2",
+            "M2U'M2U2M2U2UM2",
+            "M'UM2U2M2UM2U2M'",
+            "M'U'M2U2M2U'M2U2M'",
+            "M'U2M2UM2U2M2UM'",
+            "M'U2M2U'M2U2M2U'M'",
+            "SRU2R2U2R2U2RS'",
+            "S2DM2U2M2U2D'S2",
+            "RLU2R'L'F'B'U2FB",
+            "R2F2B2L2D'R2F2B2L2",
+            "R2F2B2L2D'R2F2B2L2",
+            "R2F2B2L2DR2F2B2L2",
+            "RLU2L'R'yL'R'U2RL",
+            "RU2R2U2R2U2R'SR2S'",
+            "R2U2RU2R2U2R2U2RU2R2",
+            "R2U2R'U2R2U2R2U2R'U2R2",
+            "R2U2RU2R2U2R2U2RU2R2",
+            "x'RrU2r'R'U'u'R2UDz'",
+            "R2U2R2U2R2U'R2U2R2U2R2",
+            "R2U2R2U2R2UR2U2R2U2R2",
+            "FB'U'R2U2R2U2R2U'F'B",
+            "x'rRU2r'R'U'u'R2uUx",
+            "M2u'M2u2M2u'M2rR'M",
+            "R2L2U2R2L2UR2L2U2R2L2",
+            "L2R2DL2R2U2L2R2DL2R2",
+            "M2UM2UM2UM2UM2UM2",
+            "M2U'M2U'M2U'M2U'M2U'M2",
+            "r'Ry'RU2R2U2R2U2RS'",
+            "rR'yRU2R2U2R2U2RS'",
+            "M2UM2UM2U2M2UM2UM2",
+            "z2M2U2M2y'U'M2U2M2Uz2",
+            "R'U2R2U2R2U'R2U'R'U'R'U2R",
+            "RU2R'U'R'U'R2U'R2U2R2U2R'",
+            "R2F2D2L2B2L2B2L2B2D2F2R2",
+            "M'UMU2M'UMU'M'UMU2M'UM",
+            "RUF'RUR'UR2U2R'FU'R'UR'U2R",
+            "F2R2U2xR2U2R2U2R2U2x'U2R2F2",
+            "RUR'U2RU'R'U'RU'R'U2RU'R'U'RU2R'",
+            "RUR2F'RU2RU'R'U'R'FR2UR'U'RU'R'",
+            "M2E2S2M2DM2D2M2DM2S2E2M2",
+            "R'UR'U'R'U'R'URUR2UM2U'MU2M'U'M2",
+            "R'U2R'U'R'U'R'URURU'Ry'R'U2R'U'R'U'R'URURU'R"
+        ],
+        "aliases": [
+            "X-PLL"
+        ],
+        "arrows": "U1U7-black,U7U1-black,U5U3-black,U3U5-black",
+        "code": "H",
+        "description": "Des U U2 U toujours entour\u00e9s de M2.",
+        "family": "Edges only",
+        "groups": [
+            "EPLL",
+            "CPLL",
+            "PLL",
+            "ELL",
+            "ZBLL",
+            "ZZLL"
+        ],
+        "main": "M2UM2U2M2UM2",
+        "name": "PLL H",
+        "optimal_cycles": 1,
+        "optimal_htm": 9,
+        "optimal_stm": 7,
+        "probability": 0.013888888888888888,
+        "probability_label": "1/72",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une [EPLL] parce que of the headlights on both sides.<br><br>Facilement reconnaissable en tant que H-Perm parce que both sets of headlights contain the opposite edge couleur.<br><br>H-perm looks the same from all four possible angles.",
+                    "feature": {
+                        "description": "Double headlights with at least one opposite edge peut seulement \u00eatre une H-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La H-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, H-Perm = 4 couleurs.",
+                        "name": "Double Lights (Opposite Edge)"
+                    },
+                    "notes": "H = 4 couleurs, Ua / Ub = 3 couleurs",
+                    "observation": "Both headlights contain the opposite edge"
+                }
+            ],
+            "moves": [
+                "M2",
+                "U",
+                "M2",
+                "U2",
+                "M2",
+                "U",
+                "M2"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "double"
+    },
+    {
+        "algorithms": [
+            "R'UL'U2RU'R'U2RL",
+            "L'R'U2RUR'U2LU'R",
+            "R'L'U2RUR'U2LU'R",
+            "R'UL'U2RU'R'U2RL",
+            "R'UL'U2RU'R'U2RL",
+            "R'UL'U2RU'R'U2LR",
+            "R'r'F2RFR'F2rU'R",
+            "R'Ur'F2RF'R'F2Rr",
+            "r'FU'R'F'RU2r'F'r2",
+            "R'r'F2rUr'F2RF'r",
+            "r'R'F2rUr'F2RF'r",
+            "r'FR'F2rU'r'F2rR",
+            "R2DRD'RF2r'FrF2",
+            "F2L'U'rU2l'UR'U'R2x2",
+            "R2F2U'F2DR2D'R2UR2",
+            "R2U'R2DR2D'F2UF2R2",
+            "R'U2RUR'U2LU'RUL'",
+            "LU'R'UL'U2RU'R'U2R",
+            "R'U2RUR'U2LU'RUL'",
+            "F2L'U'rU2l'UR'U'l2",
+            "l2URU'lU2r'ULF2",
+            "R'U2RUR'U2LU'RUr'x",
+            "l2UlF'RU2r'UrU2x'",
+            "l2URU'lU2r'UrU2x'",
+            "F2D'L2DL2U'L2UL2F2",
+            "l'R'FRF'RU2r'ULF2",
+            "F'U'FR'U'RF'R'URUF",
+            "f'rU'r2Ur'F'r2FBz",
+            "l'R'FRF'RU2r'UrU2x'",
+            "RU'r'FR'F2rU'r'F2r",
+            "L2DLD'LB2R'URB2",
+            "L2DLD'LB2R'URB2",
+            "B2R'U'RB2L'DL'D'L2",
+            "lF'L'Fl'U2LU'L'U2L",
+            "L'U2LUL'U2lF'LFl'",
+            "R2D'F'RU'R'FDR'f'U'f",
+            "R'UL'U2RU'LL'R'U2RL",
+            "xU2r'U'rU2l'UR'U'R2x2",
+            "M'R'FRF'RU2r'UrU2r'",
+            "R'U2RUR'U2rx'U'RUL'",
+            "x'rU'R'UL'U2RU'R'U2R",
+            "RFR'URF'R2UFU2F'U'R",
+            "rR2FRF'RU2r'UrU2r'",
+            "zR'U'RD'R2UR'U'R2UDz'",
+            "zU'RD'R2UR'U'R2UDR'z'",
+            "R2U'R2DR2U'R2UR2UD'R2",
+            "R2U'DR2U'R2UR2D'R2UR2",
+            "R'U'R'DR2U'R'UR2D'R2UR",
+            "L'U'LFL'U'LULF'L2UL",
+            "L'U'LFL'U'LULF'L2UL",
+            "L'U'L2FL'U'L'ULF'L'UL",
+            "xR2URU2r'UrUx'U'R",
+            "xR2FRF'RU2r'UrU2B'x'",
+            "lF'r'xFl'U2LU'L'U2L",
+            "R'U2RUR'URR'ULU'RUL'",
+            "r'F'rFr'F'rUrU'r2Fr",
+            "r'F'r2Ur'U'r'FrF'r'Fr",
+            "r2UD'r2U'r2Dr2D'r2Dr2",
+            "RFR'URF'R'U2RFR'URF'R'",
+            "R'U'RU'R'U2RURU'L'UR'U'L",
+            "R'FRF'rUR'U'r'U2RUR'UR",
+            "FRU'R2FR2UR'U'F'U'RU2R'F'",
+            "x'R'F'RUR'F'RFRU'R2FRF2x",
+            "xr'U'rUr'U'LUrU'r2Fr",
+            "x'R2u'R'uR2x'y'R'UR'U'R2x2",
+            "FU'R'FR2U'R'U'RUR'F'RUR'F'",
+            "RUR'FR'F'R'DR'U'RD'R2F'U2F",
+            "rUr'U2r'D'rU'r'DrU'rU'r'",
+            "rDr'U2rD'r'UrDr'UrD'r'",
+            "rDr'U2rD'r'U'rDr'U'rD'r'",
+            "lDl'UlD'l'U2lDl'UlD'l'",
+            "RUR'F'R'F'rU'r'F2RU'r'F2rUF",
+            "RD'R'FR2U'R'U'RUR'F'RUR'U'DR'",
+            "rU'r'U'rUrDr'U'rD'r'U2R'U'M",
+            "RD'RU'R'U'RUR'F'RUR'U'R'FRDR'",
+            "D'R2U2R2DR2U2D'R2UR2UR2U'R2DR2",
+            "R2U'R'UR'U'R'FR2U'R'U'RUR'F'R2UR2"
+        ],
+        "aliases": [
+            "J-PLL a",
+            "L-perm"
+        ],
+        "arrows": "U0U6-black,U6U0-black,U3U7,U7U3",
+        "code": "Ja",
+        "description": "Comme la Jb-Perm mais mirroir.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL",
+            "BLD"
+        ],
+        "main": "L'U'LFL'U'LULF'L2UL",
+        "name": "PLL Ja",
+        "optimal_cycles": 1,
+        "optimal_htm": 10,
+        "optimal_stm": 10,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une J-Perm parce que of the 3-bar and inside 2-bar which look like a 3x2 block.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 3-bar est sur la gauche and the inside 2-bar \u00e0 droite.",
+                    "feature": {
+                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
+                        "name": "3-Bar sans Headlights"
+                    },
+                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
+                    "observation": "Inside 2-bar \u00e0 droite"
+                },
+                {
+                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 2-bars are \u00e0 gauche.",
+                    "feature": {
+                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
+                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                    },
+                    "notes": "Ja = 3 couleurs, Nb = 4 couleurs",
+                    "observation": "Opposite corner facelet \u00e0 droite"
+                },
+                {
+                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 2-bars are \u00e0 gauche.",
+                    "feature": {
+                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
+                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                    },
+                    "notes": "Ja = 3 couleurs, Nb = 4 couleurs",
+                    "observation": "Opposite corner facelet on the front-left"
+                },
+                {
+                    "description": "Clairement une J-Perm parce que of the 3-bar and the 2-Bar ext\u00e9rieur, separated by an adjacent corner facelet.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 2-Bar ext\u00e9rieur est sur la gauche, disconnected from the 3-bar \u00e0 droite.",
+                    "feature": {
+                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
+                        "name": "3-Bar sans Headlights"
+                    },
+                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
+                    "observation": "2-Bar ext\u00e9rieur \u00e0 gauche"
+                }
+            ],
+            "moves": [
+                "y'",
+                "L'",
+                "U'",
+                "L",
+                "F",
+                "L'",
+                "U'",
+                "L",
+                "U",
+                "L",
+                "F'",
+                "L2",
+                "U",
+                "L"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "RU'LU2R'URU2L'R'",
+            "RLU2R'U'RU2L'UR'",
+            "RU'LU2R'URU2R'L'",
+            "LRU2R'U'RU2L'UR'",
+            "r2U'r'Fr'F2RU'R'F2",
+            "RU'FU'R'U'RUF'U2R'",
+            "F2R2UR2U'R2DR2D'F2",
+            "RU2R'U'RU2L'UR'U'L",
+            "L'URU'LU2R'URU2R'",
+            "RU2R'U'RU2L'UR'U'L",
+            "RU2R'U'RU2L'UR'U'rx'",
+            "r'FRF'rU2R'URU2R'",
+            "LlF2l'U'lF2L'Fl'",
+            "RU2R'U'RU2r'FR'F'r",
+            "fR'FR2B'RBR2f'F'",
+            "B2LUL'B2RD'RDR2",
+            "R2D'R'DR'B2LU'L'B2",
+            "R2D'R'DR'B2LU'L'B2",
+            "R2UR2D'R2DB2U'B2R2",
+            "xL2F'L'FL'U2lU'l'U2x'",
+            "RUR'F'RUR'U'R'FR2U'R'",
+            "RUR'F'RUR'U'R'FR2U'R'",
+            "RUR'F'RUR'U'R'FR2U'R'",
+            "RUR'F'RUR'U'R'FR2U'R'",
+            "RUR2F'RURU'R'FRU'R'",
+            "LrU2R2FRF'RU2r'UL'",
+            "R2UD'R2UR2U'R2DR2U'R2",
+            "xr2FRF'rU2R'URU2M'x'",
+            "RUR2D'R2UR'U'R2DR'U'R'",
+            "RU2R'U'RU'R'RU'L'UR'U'L",
+            "RUl'U'lUR'U'l'UlRU'R'",
+            "RUR'URU2R'yL'URU'LUR'",
+            "FR'F'R2rDr'U'rD'R'r'F'U'F",
+            "lFl'F'lFl'U'l'UR2x'U'R'",
+            "r'DrU2r'D'rUr'DrUr'D'r",
+            "r'D'rU'r'DrU2r'D'rU'r'Dr",
+            "R'U2RUR'F'RUR'U'R'FR2U'R'UR",
+            "R2UR2UR2U'R2DR2D'R2U'R2DR2D'",
+            "R'UR'D2RU'R'DF2R'F2U'RUF2DR'",
+            "RUR2FR2U'R'U'RUR'F'RUR'U'RU'R'",
+            "B2UBUB'U'B2DBD'B'D'R2DR2",
+            "RUR'F'RUR'U'R'FR2U'R'U'RUR'F'FRU'R'",
+            "RUR'U'R'FR2U'R'U'RUR'F'M2UMU2M'UM2",
+            "RU'L'U2R'U'LURU'R'U2L'ULRU2R'U'RU'R'"
+        ],
+        "aliases": [
+            "J-PLL b"
+        ],
+        "arrows": "U2U8-black,U8U2-black,U5U7,U7U5",
+        "code": "Jb",
+        "description": "Comme la T-Perm, mais le d\u00e9but est la fin.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL",
+            "BLD"
+        ],
+        "main": "RUR'F'RUR'U'R'FR2U'R'",
+        "name": "PLL Jb",
+        "optimal_cycles": 1,
+        "optimal_htm": 10,
+        "optimal_stm": 10,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une J-Perm parce que of the 3-bar and the 2-Bar ext\u00e9rieur, separated by an adjacent corner facelet.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 2-Bar ext\u00e9rieur est sur la droite, disconnected from the 3-bar \u00e0 gauche.",
+                    "feature": {
+                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
+                        "name": "3-Bar sans Headlights"
+                    },
+                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
+                    "observation": "2-Bar ext\u00e9rieur \u00e0 droite"
+                },
+                {
+                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 2-bars are \u00e0 droite.",
+                    "feature": {
+                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
+                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                    },
+                    "notes": "Jb = 3 couleurs, Na = 4 couleurs",
+                    "observation": "Opposite corner facelet on the front-right"
+                },
+                {
+                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 2-bars are \u00e0 droite.",
+                    "feature": {
+                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
+                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                    },
+                    "notes": "Jb = 3 couleurs, Na = 4 couleurs",
+                    "observation": "Opposite corner facelet \u00e0 gauche"
+                },
+                {
+                    "description": "Clairement une J-Perm parce que of the 3-bar and inside 2-bar which look like a 3x2 block.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 3-bar est sur la droite and the inside 2-bar \u00e0 gauche.",
+                    "feature": {
+                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
+                        "name": "3-Bar sans Headlights"
+                    },
+                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
+                    "observation": "Inside 2-bar \u00e0 gauche"
+                }
+            ],
+            "moves": [
+                "y",
+                "R",
+                "U",
+                "R'",
+                "F'",
+                "R",
+                "U",
+                "R'",
+                "U'",
+                "R'",
+                "F",
+                "R2",
+                "U'",
+                "R'"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "F'UF2R2UF'R2FU'R2F2U'F",
+            "LU'RU2r'FM'U'RU2r'Fl'",
+            "fR'FR2f'USR'FR2f'UF'",
+            "LU'RU2L'ULR'U'RU2L'UR'",
+            "LU'RU2L'UR'LU'RU2L'UR'",
+            "RU'LU2R'UL'RU'LU2R'UL'",
+            "LU'RU2L'UR'LU'RU2L'UR'",
+            "LU'RU2L'UR'LU'RU2L'UR'",
+            "F2U2R2UF2U2F2R2UR2U2R2F2",
+            "RU'R2B2D'LF2L'DB2R2UR'",
+            "LU'lF2L'Fl'LU'lF2L'Fl'",
+            "F'RUR'U'R'FR2FU'R'U'RUF'R'",
+            "RFU'R'URUF'R2F'RURU'R'F",
+            "F'R2UR2U'R2FU2F'R2UR2U'R2F",
+            "RUR'U'R'U'RUF'U'FU'R'U2FRF'",
+            "RU2D'RU2R'U'DR2U'D'RUR'DR2",
+            "RU'R'UlUFU'R'F'RU'RUR'FR'x",
+            "LRU'R'UL'U2RU'R2D'rU2r'DR",
+            "RU2RU2R'U2DR'UR2D'RDR2U'D'",
+            "D'UR2DRD'R2UR'DU2R'U2RU2R",
+            "zR'UR'DR2U'RUD'R'DR2U'RD'z'",
+            "LU'L'ULFUF'L'U'LF'LFL'UL'",
+            "RU'R'URfRf'R'U'Rf'UfR'UR'",
+            "RFR'F'RUR'U'R'FR2U'R'U'RUF'R'",
+            "lDF'l'UlFD'l2U'lUlF'l'F",
+            "RUR'URLU2R'U'RU2L'UR'U2RU'R'",
+            "lF'R'U'Rz'RU'R'U'rUl'UR'U'R2x'",
+            "R2UR2U'D'R2DR2U2R2UR2U'D'R2DR2",
+            "RUR'URU2R'U'RU2L'UR'U'LU'RU'R'",
+            "RUR'Ur'FRF'rU2R'URU2R'U'RU'R'",
+            "LUL'U'RUR'F'RUR'U'R'FR2U'M'B'r'",
+            "LDL'F'RUR'U'R'FR2U'R'U'RUR'LD'L'",
+            "RFB'R2D2FBR'B2L'B2R2U2RU2R'F2",
+            "R'FR2B'R2F'R2BUR'URU'R'F'r'F'rF",
+            "r2U'r2UDr2D'r2U2r2U'r2UDr2D'r2",
+            "RUR'URUR'F'RUR'U'R'FR2U'R'U2RU'R'",
+            "RUR'URUR'F'RUR'U'R'FR2U'R'U2RU'R'",
+            "R2Dr'U2rD'R'U2R'U2FRU'R'U'RU2R'U'F'",
+            "RUR'URUR'F'RUR'U'R'FR2U'R'U'U'RU'R'",
+            "R'B'RU2R'B'RU2R'B'RU2R'B'RU2R'B'R",
+            "r'DrU2r'DrU2r'DrU2r'DrU2r'Dr",
+            "r'D'rU2r'D'rU2r'D'rU2r'D'rU2r'D'r",
+            "R2D'R2URUR'U'R'FR2U'R'U'RUR'F'U'R2DR2",
+            "RUR'UFR'F'R2rDr'U'rD'R'r'F'U'FRU'R'",
+            "r'D'rUr'DrU'r'D'rU'r'DrU'r'D'rUr'Dr",
+            "r'D'rU'r'DrUr'D'rUr'DrUr'D'rU'r'Dr",
+            "r'DrU2r'D'rU'r'DrUr'D'rUr'DrUr'D'r",
+            "r'D'rUr'DrU'r'D'rU2r'DrUr'D'rU'r'Dr"
+        ],
+        "aliases": [
+            "N-PLL a"
+        ],
+        "arrows": "U1U7,U7U1,U0U8-black,U8U0-black",
+        "code": "Na",
+        "description": "Suivre le coin FLU.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL",
+            "ZZLL"
+        ],
+        "main": "LU'RU2L'UR'LU'RU2L'UR'",
+        "name": "PLL Na",
+        "optimal_cycles": 1,
+        "optimal_htm": 13,
+        "optimal_stm": 13,
+        "probability": 0.013888888888888888,
+        "probability_label": "1/72",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que Na-Perm parce que of the 2-bars \u00e0 droite and opposite corner couleurs.<br><br>Na-perm looks the same from all four possible angles.",
+                    "feature": {
+                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
+                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                    },
+                    "notes": "Na = 4 couleurs, Jb = 4 couleurs",
+                    "observation": "Opposite corner facelet on the front-right and back-left"
+                }
+            ],
+            "moves": [
+                "L",
+                "U'",
+                "R",
+                "U2",
+                "L'",
+                "U",
+                "R'",
+                "L",
+                "U'",
+                "R",
+                "U2",
+                "L'",
+                "U",
+                "R'"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "double inverted"
+    },
+    {
+        "algorithms": [
+            "RU'R2F2U'RF2R'UF2R2UR'",
+            "R'Ur'F2RF'M'Ur'F2RF'r",
+            "R'UL'U2lF'M'UL'U2RU'L",
+            "R'UL'U2RU'M'Br'U2RU'L",
+            "R'UR2F2Dr'U2rD'F2R2U'R",
+            "L'UR'U2LU'L'RUR'U2LU'R",
+            "R'UL'U2RU'LR'UL'U2RU'L",
+            "R'UL'U2RU'LR'UL'U2RU'L",
+            "R'UL'U2RU'LR'UL'U2RU'L",
+            "R'UL'U2RU'LR'UL'U2RU'L",
+            "R'F2U2R'U'RU'f2UR'U'S2R",
+            "R'Ur'F2RF'rR'Ur'F2RF'r",
+            "R2U2F2U'R2U2R2F2U'F2U2F2R2",
+            "F'DR2F2UB'R2BU'F2R2D'F",
+            "RD'FR'D2rD'r'D2R2F'R'DR'",
+            "R'UL'U2RU'M'x'UL'U2RU'L",
+            "f'rU'r2Ur'SUf'r2Br'Dz",
+            "R'U2DR'UR2D'RDR2U'D'RU2R",
+            "RU2R'f'U2fR'FR'SR2f2U'f",
+            "R2DRD'R2UR'U2DR'U2RU2RD'",
+            "R2DRD'R2UR'DU2R'U2RU2RD'",
+            "R2DR'D'R2UDR'U2R'U2RU2D'R",
+            "D'R2DRD'R2UR'DU2R'U2RU2R",
+            "R'U2R'U2RU2D'RU'R2DR'D'R2D",
+            "DR'U2R'U2RU2D'RU'R2DR'D'R2",
+            "R'U'RU2RFR'URF'R2UFU2F'R",
+            "FL'U'LULF'L2F'ULUL'U'FL",
+            "L'F'ULU'L'U'FL2FL'U'L'ULF'",
+            "R'UR'FRF'RU'R'F'UFRUR'U'R",
+            "R'URU'R'F'U'FRUR'FR'F'RU'R",
+            "R'URU'R'F'U'FRUR'FR'F'RU'R",
+            "R'U'RUr'R'F2rUr'F2RF'M'UR",
+            "R'U2DR'U2RUD'R2UDR'U'RD'R2",
+            "R'URU'R'F'U'FRUR'U'Rd'RUR'",
+            "RU'R'dR'URU'R'F'UFRUR'U'R",
+            "R'URU'R'F'U'FRUR'U'RU'fRf'",
+            "fR'f'UR'URU'R'F'UFRUR'U'R",
+            "L'R'URU'LU2R'UR2Dr'U2rD'R'",
+            "r'D'FrU'r'F'Dr2Ur'U'L'UrU'x'",
+            "r'URU'R'Ur'F'rUrU2r'F2U2r",
+            "r'D'FrU'r'F'Dr2Ur'U'r'FrF'",
+            "Fr'F'rUrU'r2D'FrUr'F'Dr",
+            "R'FRUF'U'l'ULURU2r'F'RU'R'",
+            "R'B'URU'R'U'BR2BR'U'R'URf'z",
+            "L'U'LR'UL'U2RU'R'U2LRU'L'UL",
+            "L'U'LR'UL'U2RU'R'U2RLU'L'UL",
+            "R'URU'R'L'D2LU2L'D2LRUR'U'R",
+            "BR2U'R2UR2B'U2BR2U'R2UR2B'",
+            "R'U'RU'R'L'U2RUR'U2LU'RU2R'UR",
+            "R'U'RU2R'UL'U2RU'R'U2LRUR'UR",
+            "R'U'RU2R'UL'U2RU'R'U2RLUR'UR",
+            "R'U'RU'R2DRD'RF2r'FrF2UR'UR",
+            "R'U'RU'R'U2RUR'U2LU'RUL'UR'UR",
+            "RF'R'U2RF'R'U2RF'R'U2RF'R'U2RF'R'",
+            "R'U'RUL'U2LUL'U2RU'LUR'U'R'UR",
+            "L'U'LULU'R'UL'U2RU'R'U2RU'L'UL",
+            "xu'L'uR2FRF'RU2r'UrUELux'",
+            "R2DR'URD'R2U'RU'R'U'FRUR'U'R'F'R",
+            "R'U'RUL'U'LFL'U'LULF'L2UM'Bl",
+            "L'U'LUR2U'R2DR2U'R2UR2UD'R2L'UL",
+            "R'U'RUL'U'LFL'U'LULF'L2ULR'UR",
+            "R'U2f'U'RUR'F'RUR'U'R'FR2U'R'fU2R",
+            "r2Ur2U'D'r2Dr2U2r2Ur2U'D'r2Dr2",
+            "r'F'rUl'R'FRF'RU2r'UrU2B'r'UL",
+            "L'U'LU'yR'UL'U2RU'R'U2RLy'L'UL",
+            "zU'R2URUR'F'RUR'U'R'FR2U'R'U2R2Uz'",
+            "R'U2R2UR2UR2U'D'RUR'DR2U'R'U'R2U2R",
+            "RFBD2R2F'BL'U2RB2L2U2L'B2LB2",
+            "R'UL'U2RU'R'U2RLUR'UL'U2RU'R'U2RL",
+            "r'F'rUrR2FRF'RU2r'UrU2r'U'r'Fr",
+            "rDr'U2rDr'U2rDr'U2rDr'U2rDr'",
+            "rD'r'U2rD'r'U2rD'r'U2rD'r'U2rD'r'",
+            "L'U'LU'L'U'LFL'U'LULF'L2ULU2L'UL",
+            "L'U'LUxR2FRF'RU2r'UrU2x'U'L'UL",
+            "LBL'U2LBL'U2LBL'U2LBL'U2LBL'",
+            "L'UR'URUR'F'RUR'U'R'FR2U'R'U2RU'R'U2RL",
+            "xRUR'B2RUR'B2RUR'B2RUR'B2RUR'B2x'"
+        ],
+        "aliases": [
+            "N-PLL b"
+        ],
+        "arrows": "U1U7,U7U1,U6U2-black,U2U6-black",
+        "code": "Nb",
+        "description": "Suivre le coin FRU.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL",
+            "ZZLL"
+        ],
+        "main": "R'UL'U2RU'LR'UL'U2RU'L",
+        "name": "PLL Nb",
+        "optimal_cycles": 1,
+        "optimal_htm": 13,
+        "optimal_stm": 13,
+        "probability": 0.013888888888888888,
+        "probability_label": "1/72",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que Nb-Perm parce que of the 2-bars \u00e0 gauche and opposite corner couleurs.<br><br>Nb-perm looks the same from all four possible angles.",
+                    "feature": {
+                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
+                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                    },
+                    "notes": "Nb = 4 couleurs, Ja = 4 couleurs",
+                    "observation": "Opposite corner facelet on the front-left and back-right"
+                }
+            ],
+            "moves": [
+                "R'",
+                "U",
+                "L'",
+                "U2",
+                "R",
+                "U'",
+                "L",
+                "R'",
+                "U",
+                "L'",
+                "U2",
+                "R",
+                "U'",
+                "L"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "double inverted"
+    },
+    {
+        "algorithms": [
+            "R2F2URUR'U'R'U'F2R'UR'",
+            "RU'RF2URURU'R'U'F2R2",
+            "LU2L'UFR'F'LFRF'UL'",
+            "F'L'UL2U2L'FRU'M'B2L'x'",
+            "LU2L'U2LF'L'U'LULFL2",
+            "LU2L'U2LF'L'U'LULFL2",
+            "LU2L'U2LF'L'U'LULFL2",
+            "L2F'L'U'L'ULFL'U2LU2L'",
+            "FR'F'RU'F'U'L'U'LFRU2R'",
+            "RU2R'U2lU'l'U'RUlUR2x",
+            "RU2R'U2RB'R'U'RURBR2",
+            "LUR'DRUR'D'RL'ULUL'",
+            "Rf'U'fU'R'U'F'U'FRfR2f'",
+            "RU2R2FRF'RU'R'F'UFRU'R'",
+            "RUR'F'U'FRUR'FR'F'R2U2R'",
+            "RU'R'U'RURDR'U'RD'R'U2R'",
+            "RU2RDR'URD'R'U'R'URUR'",
+            "RU'R'U'RURDR'U'RD'R'U2R'",
+            "RUR'F'RU2R'U2R'FRURU2R'",
+            "RUR'F'RU2R'U2R'FRURU2R'",
+            "RU2R'U'R'F'RU2RU2R'FRU'R'",
+            "RlU'l'U'R'UlUl'U2RU2R'",
+            "F'R'U'RF'R'Uy'R'U'R'URBR2",
+            "M'URU'r'UM'URU'r'U'FR'F'R",
+            "RU2R2UR'U'DR'U'RD'R'U2R'UR'",
+            "R2F2U'L'UL'B2RD'R'B2L2F2R2",
+            "RU'R2D'RUR'DRU'RU'R'URUR'",
+            "RU'R'U'RUR'UR'D'RU'R'DR2UR'",
+            "F2UR'U'R2D2RD'RF2UF2R'D'R2F2",
+            "rU2R'U'RU'r'FURU'R2F'rURU'r'",
+            "SMRUR'F'RUR'U'R'FR2U'R'U'M'S'",
+            "zU2R2U'r'UrU'r'U'rd'RU'R'U'F2U2x"
+        ],
+        "aliases": [
+            "R-PLL a"
+        ],
+        "arrows": "U0U2-black,U2U0-black,U3U7,U7U3",
+        "code": "Ra",
+        "description": "",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL"
+        ],
+        "main": "LU2L'U2LF'L'U'LULFL2",
+        "name": "PLL Ra",
+        "optimal_cycles": 1,
+        "optimal_htm": 13,
+        "optimal_stm": 12,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une R-Perm parce que the headlights contain an adjacent edge couleur.<br><br>Facilement reconnaissable en tant que Ra-Perm parce que the headlights are \u00e0 gauche and inside 2-bar \u00e0 droite.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                    },
+                    "notes": "Ra = 4 couleurs, T = 3 couleurs",
+                    "observation": "Headlights contain an adjacent edge"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ra-Perm parce que of the 2-bar at the back-left and the edge \u00e0 droite matching the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right   is useful during recognition.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                    },
+                    "notes": "Ra = 3 couleurs, T = 4 couleurs",
+                    "observation": "Edge \u00e0 droite matches the front-left corner"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ra-Perm parce que the edge \u00e0 droite is the opposite of the front corner and the edge \u00e0 gauche matches the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "feature": {
+                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "name": "Miscellaneous with Bookends"
+                    },
+                    "notes": "Ra = 4 couleurs, F = 3 couleurs",
+                    "observation": "Malformed pair at front-left"
+                },
+                {
+                    "description": "Clairement une R-Perm parce que of the long motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Ra-Perm parce que the motif \u00e0 Damier est sur la droite.<br><br>The edge \u00e0 gauche is also the opposite of the rear corner.",
+                    "feature": {
+                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "name": "Headlights (Adjacent Edge)"
+                    },
+                    "notes": "Ra = 3 couleurs, Aa / Ga = 4 couleurs",
+                    "observation": "motif \u00e0 Damier \u00e0 droite (5 facelets)"
+                }
+            ],
+            "moves": [
+                "L",
+                "U2",
+                "L'",
+                "U2",
+                "L",
+                "F'",
+                "L'",
+                "U'",
+                "L",
+                "U",
+                "L",
+                "F",
+                "L2"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "FRU'R2U2RF'L'UM'B2Rx'",
+            "R'U2RU2R'FRUR'U'R'F'R2",
+            "R'U2RU2R'FRUR'U'R'F'R2",
+            "R'U2RU2R'FRUR'U'R'F'R2",
+            "R'U2RU2R'FRUR'U'R'F'R2",
+            "R2FRURU'R'F'RU2R'U2R",
+            "R'UF'rURU'r'FUR'U2R",
+            "L2F2U'L'U'LULUF2LU'L",
+            "L'UL'F2U'L'U'L'ULUF2L2",
+            "R'U'LD'L'U'LDL'RU'R'U'R",
+            "RUR'U2r'U2R'f'U'fR2U2r",
+            "r'F2rFRU'R'U'F'U'rU'r'F",
+            "RUR'U'f'U2F2RUR'U'F2U2f",
+            "R'URUR'U'R'D'RUR'DRU2R",
+            "R'U2R'D'RU'R'DRURU'R'U'R",
+            "R'U2R'D'RU'R'DRURU'R'U'R",
+            "RU2FU'R'URDR'URUD'F'R'",
+            "SRU'R'US'URU'R'U'FR'F'R",
+            "L'U'LFL'U2LU2LF'L'U'L'U2L",
+            "r'FrUr'F'r'U'rFr'UrF2r",
+            "M'U2MU'xr2D2rUr'D2rU'rx'",
+            "R'URUR'U'RU'RDR'URD'R2U'R",
+            "M'U'L'UlU'M'U'L'UldR'FRF'",
+            "R2B2D'R'DR'B2LU'L'B2R2B2R2",
+            "L'UL2DL'U'LD'L'UL'ULU'L'U'L",
+            "R'U2RU'xU'rx'UR'U'L'Ux'U'R",
+            "xr'Ur'D2rU'r'D2r2x'UR'LF2L'R",
+            "S'ML'U'LFL'U'LULF'L2ULUM'S",
+            "RU2R'U2R'FR2U'R'U'RUR'F'RUR'URU2R'"
+        ],
+        "aliases": [
+            "R-PLL b"
+        ],
+        "arrows": "U0U2-black,U2U0-black,U5U7,U7U5",
+        "code": "Rb",
+        "description": "",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL"
+        ],
+        "main": "R'U2RU2R'FRUR'U'R'F'R2",
+        "name": "PLL Rb",
+        "optimal_cycles": 1,
+        "optimal_htm": 13,
+        "optimal_stm": 12,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une R-Perm parce que of the long motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Rb-Perm parce que the motif \u00e0 Damier est sur la gauche.<br><br>The edge \u00e0 droite is also the opposite of the rear corner.",
+                    "feature": {
+                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "name": "Headlights (Adjacent Edge)"
+                    },
+                    "notes": "Rb = 3 couleurs, Ab / Gc = 4 couleurs",
+                    "observation": "motif \u00e0 Damier \u00e0 gauche (5 facelets)"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Rb-Perm parce que the edge \u00e0 gauche is the opposite of the front corner and the edge \u00e0 droite matches the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "feature": {
+                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "name": "Miscellaneous with Bookends"
+                    },
+                    "notes": "Rb = 4 couleurs, F = 3 couleurs",
+                    "observation": "Malformed pair at front-right"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Rb-Perm parce que of the 2-bar at the back-right and the edge \u00e0 gauche matching the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                    },
+                    "notes": "Rb = 3 couleurs, T = 4 couleurs",
+                    "observation": "Edge \u00e0 gauche matches the front-right corner"
+                },
+                {
+                    "description": "Clairement une R-Perm parce que the headlights contain an adjacent edge couleur.<br><br>Facilement reconnaissable en tant que Rb-Perm parce que the headlights are \u00e0 droite and inside 2-bar \u00e0 gauche.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                    },
+                    "notes": "Rb = 4 couleurs, T = 3 couleurs",
+                    "observation": "Headlights contain an adjacent edge"
+                }
+            ],
+            "moves": [
+                "R'",
+                "U2",
+                "R",
+                "U2",
+                "R'",
+                "F",
+                "R",
+                "U",
+                "R'",
+                "U'",
+                "R'",
+                "F'",
+                "R2"
+            ]
+        },
+        "status": "OK",
+        "symmetry": ""
+    },
+    {
+        "algorithms": [
+            "F2DR2U'R2F2D'L2UL2",
+            "R2UR2D'F2L2U'L2DF2",
+            "F2DR2U'R2F2D'r2Dr2",
+            "R2uR2U'R2F2D'r2Dr2",
+            "R2DB2D'R2F2D'L2DF2",
+            "R2uR2u'R2F2u'F2uF2",
+            "R2UR2U'R2F2U'F2DR2D'",
+            "F2U'F2DR2B2UB2D'R2",
+            "M'R'UR'F2rF'r'F2R2U'M",
+            "R2u'R2UR2yR2uR2U'R2",
+            "R2u'R2uR2yR2uR2u'R2",
+            "RUR'U'R'FR2U'R'U'RUR'F'",
+            "RUR'U'R'FR2U'R'U'RUR'F'",
+            "RUR'U'R'FR2U'R'U'RUR'F'",
+            "RUR'U'R'FR2U'R'U'RUR'F'",
+            "FRU'R'URUR2F'RURU'R'",
+            "RUR'U'R'FR2U'R'UF'L'UL",
+            "R2UR2U'R2U'DR2U'R2UR2D'",
+            "D'R2UR2U'R2U'DR2U'R2UR2",
+            "RUR'U'R'FR2U'R'UF'r'Fr",
+            "R'UR'F2rF'r'F2R2U'MU2M'",
+            "L'U'LULF'L2ULU'FRU'R'",
+            "L'U'LULF'L2ULUL'U'LF",
+            "r'F'rUrU'r2FrU'FRU'R'",
+            "RUR'U'R'FR2U'R'F'ULF'L'F",
+            "RUR'U'R2DR'U'R'U'RUR2D'R",
+            "F'r'FrU'r'F'r2Ur'U'r'Fr",
+            "r'F'rUrU'r2FrUr'F'rF",
+            "RUR'U'R'FRF'R'FRF'U'F'UF",
+            "RUR'U'R'FRF'FRU'R'U'RUR'F'",
+            "RUR'd'F'rUr'F'rUr'U'r'Fr",
+            "RUR'U'R'FRF'UF'rUr'U'r'Fr",
+            "F'BU2R2FB'DF2UL2U'F2R2U'B2",
+            "RU'R'U2LRU'R'U'R'U2RU2L'U'R'UR",
+            "RD'RU'R'DRURURU'R'U'RU'R'UR",
+            "RUR'U'RU'R'U'RUR'F'RUR'U'R'FRURU'R'",
+            "B2RBR'BLBLB2LB2L'B2RB2R'B'L'"
+        ],
+        "aliases": [],
+        "arrows": "U3U5,U5U3,U2U8-black,U8U2-black",
+        "code": "T",
+        "description": "La base des J-Perms et F-Perm.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL",
+            "ZZLL",
+            "BLD"
+        ],
+        "main": "RUR'U'R'FR2U'R'U'RUR'F'",
+        "name": "PLL T",
+        "optimal_cycles": 1,
+        "optimal_htm": 10,
+        "optimal_stm": 10,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une T-Perm parce que the headlights contain the opposite edge couleur.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                    },
+                    "notes": "T = 3 couleurs, Ra = 4 couleurs",
+                    "observation": "Headlights contain the opposite edge"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as T-Perm parce que of the 2-bar at the back-left and the edge \u00e0 droite being the opposite of the front-left corner.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                    },
+                    "notes": "T = 4 couleurs, Ra = 3 couleurs",
+                    "observation": "Edge \u00e0 droite is the opposite of the front-left corner"
+                },
+                {
+                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as T-Perm parce que of the 2-bar at the back-right and the edge \u00e0 gauche being the opposite of the front-right corner.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                    },
+                    "notes": "T = 4 couleurs, Rb = 3 couleurs",
+                    "observation": "Edge \u00e0 gauche is the opposite of the front-right corner"
+                },
+                {
+                    "description": "Clairement une T-Perm parce que the headlights contain the opposite edge couleur.",
+                    "feature": {
+                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
+                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                    },
+                    "notes": "T = 3 couleurs, Rb = 4 couleurs",
+                    "observation": "Headlights contain the opposite edge"
+                }
+            ],
+            "moves": [
+                "y",
+                "R",
+                "U",
+                "R'",
+                "U'",
+                "R'",
+                "F",
+                "R2",
+                "U'",
+                "R'",
+                "U'",
+                "R",
+                "U",
+                "R'",
+                "F'"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "simple"
+    },
+    {
+        "algorithms": [
+            "F2U'M'U2MU'F2",
+            "M2UMU2M'UM2",
+            "M2UM'U2MUM2",
+            "M2UMU2M'UM2",
+            "M2UMU2M'UM2",
+            "M2UM'U2MUM2",
+            "M2u'M'u2M'u'M2",
+            "M2u'Mu2Mu'M2",
+            "R2D'M'U2MU2DR2",
+            "M2UMU2M'U2U'M2",
+            "M2UM'U2MU2U'M2",
+            "F2U'LR'F2L'RU'F2",
+            "F2U'R'LF2RL'U'F2",
+            "F2U'R'LF2RL'U'F2",
+            "R2USR2S'R2U'R2",
+            "R2U'R2SR2S'UR2",
+            "R2U'FB'R2BF'U'R2",
+            "RU'RURURU'R'U'R2",
+            "R2U'R'U'RURURU'R",
+            "R2U'R'U'RURURU'R",
+            "RU'RURURU'R'U'R2",
+            "RU'RURURU'R'U'R2",
+            "R2D'rU2r'RU2R'DR2",
+            "RU2RURUR2U'R'U'R2",
+            "B2U'L'RB2R'LU'B2",
+            "rUMUR'U'M'URU2r'",
+            "FURU'R'F'f'U'L'ULf",
+            "M'U2MUM'U2MUM'U2M",
+            "R2UF2R2F2U2F2R2F2UR2",
+            "rUr'RUR'U'M'URU2r'",
+            "RUR'UR'U'R2U'R'UR'UR",
+            "RU2RURURU'R'U'R'UR'",
+            "M2U'MU2M'U2MU2M'U'M2",
+            "FURU'R'F'U2F'L'U'LUF",
+            "RUR'U'R'U2RURU'R2U2R",
+            "rUR'UR'U'R2U'r'UR'UR",
+            "MSDS'U2SD'S'U2M'",
+            "R'UU'R'U'R'U'RURURU'R",
+            "RU'RURURU'R'U'R'U'UR'",
+            "RUR'F'L'U'LFR'U'F'UFR",
+            "FURU'R'F'y2F'L'U'LUF",
+            "R2UF2L2B2D'B2L2F2U2R2",
+            "M2uM'u2M'u2M'u2M'uM2",
+            "fR'S2RSR2S'RS2Rf'",
+            "RUR2U'R'U'RURURU'RU'R'",
+            "R'U'RU'RURURU'R'U'R2UR",
+            "RUR'U'L'U'LU2RU'R'U'L'UL",
+            "R'U'RU'R'U2RU'LUL'ULU2L'",
+            "M2UM'U2MUM2URSUU'S'R'",
+            "F'rUR'U'L'U'LU2lF'L'U'L'ULF",
+            "RUR'y'L'U'LUyRU'R'y'L'UL"
+        ],
+        "aliases": [
+            "U-PLL a"
+        ],
+        "arrows": "U5U3-black,U3U7-black,U7U5-black",
+        "code": "Ua",
+        "description": "Mirroir \u00e0 Ub-Perm sur les U.",
+        "family": "Edges only",
+        "groups": [
+            "EPLL",
+            "PLL",
+            "ELL",
+            "ZBLL",
+            "BLD"
+        ],
+        "main": "M2UMU2M'UM2",
+        "name": "PLL Ua",
+        "optimal_cycles": 2,
+        "optimal_htm": 9,
+        "optimal_stm": 7,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Recognisable as Ua-Perm (CCW) parce que the headlights contain an adjacent edge couleur.<br><br>You may also notice that the edge \u00e0 droite is the opposite of the bar \u00e0 gauche.",
+                    "feature": {
+                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
+                        "name": "3-Bar avec Headlights"
+                    },
+                    "notes": "Ua / Ub = 3 couleurs",
+                    "observation": "Headlights contain an adjacent edge"
+                },
+                {
+                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ua-Perm (CCW) parce que the edge \u00e0 gauche matches the headlights \u00e0 droite.<br><br>Alternatively, recognisable parce que the edge \u00e0 droite is the opposite of the headlights \u00e0 gauche.<br></br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 gauche is useful during recognition.",
+                    "feature": {
+                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "name": "Double Lights (Adjacent Edges)"
+                    },
+                    "notes": "Ua = 3 couleurs, Z = 2 ou 4 couleurs",
+                    "observation": "Left edge matches right headlights"
+                },
+                {
+                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ua-Perm (CCW) parce que the headlights \u00e0 droite contain the opposite edge couleur.<br><br>Another way to recognise as Ua-Perm (CCW) is parce que the edge \u00e0 gauche matches the headlights \u00e0 droite.<br><br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 gauche useful during recognition.",
+                    "feature": {
+                        "description": "Double headlights with at least one opposite edge peut seulement \u00eatre une H-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La H-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, H-Perm = 4 couleurs.",
+                        "name": "Double Lights (Opposite Edge)"
+                    },
+                    "notes": "Ua = 3 couleurs, H = 4 couleurs",
+                    "observation": "Right headlights contain the opposite edge"
+                },
+                {
+                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Facilement reconnaissable en tant que Ua-Perm (CCW) parce que the headlights contain the opposite edge couleur.",
+                    "feature": {
+                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
+                        "name": "3-Bar avec Headlights"
+                    },
+                    "notes": "Ua / Ub = 3 couleurs",
+                    "observation": "Headlights contain the opposite edge"
+                }
+            ],
+            "moves": [
+                "y2",
+                "M2",
+                "U",
+                "M",
+                "U2",
+                "M'",
+                "U",
+                "M2"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "simple"
+    },
+    {
+        "algorithms": [
+            "F2U'M'U2MU'F2",
+            "F2UM'U2MUF2",
+            "M2U'MU2M'U'M2",
+            "M2U'MU2M'U'M2",
+            "M2U'MU2M'U'M2",
+            "M2U'M'U2MU'M2",
+            "M2uM'u2M'uM2",
+            "M2U'MU2M'U2UM2",
+            "M2U'M'U2MU2UM2",
+            "F2ULR'F2L'RUF2",
+            "F2UR'LF2RL'UF2",
+            "F2ULR'F2RL'UF2",
+            "R2U'SR2S'R2UR2",
+            "R2UR2SR2S'U'R2",
+            "R2U'Sl2Sl2UR2",
+            "M2U'M2U2M'U2M'UM2",
+            "M2UM'U2M'U2M2U'M2",
+            "R2URUR'U'R'U'R'UR'",
+            "R2URUR'U'R'U'R'UR'",
+            "R2URUR'U'R'U'R'UR'",
+            "R'UR'U'R'U'R'URUR2",
+            "R'UR'U'R'U'R'URUR2",
+            "R2URUR2U'R'U'R'U2R'",
+            "B2UL'RB2R'LUB2",
+            "M'U'MU'M'U2MU'M'U'M",
+            "MU2M'U'MU2M'U'MU2M'",
+            "R'U'RU'RUR2URU'RU'R'",
+            "R'U2R'U'R'U'R'URURU'R",
+            "l'U'lL'U'LUM'U'L'U2l",
+            "R'U'RURU2R'U'R'UR2U2R'",
+            "R'U2R2UR'U'R'U2RURU'R'",
+            "RUR'U'R'U'R'URd'M'U2M",
+            "RU'URURUR'U'R'U'R'UR'",
+            "UzU'RU'R'U'R'U'RURU2z'",
+            "rU2R'U'r'RURU'R'rU'r'",
+            "U'zU2RURU'R'U'R'U'RU'z'",
+            "R'UR'U'R'U'R'URURUU'R",
+            "M2UMU2M'UUMU2M'UM2",
+            "R2U2F2L2B2DB2L2F2U'R2",
+            "R2U'S'U2SU2S'U2SU'R2",
+            "RLu2R'URE2R'U'RU2R'L'",
+            "fR'S2R'SR2S'R'S2Rf'",
+            "R'U'R2URUR'U'R'U'R'UR'UR",
+            "RUR'UR'U'R'U'R'URUR2U'R'",
+            "L'U'LURUR'U2L'ULURU'R'",
+            "LUL'ULU2L'UR'U'RU'R'U2R",
+            "R'FRf'RU'R'SRUR'FR'F'R",
+            "RUR'URU2R'y'R'U'RU'R'U2R",
+            "R2U'S'U2SU'S2R2UR2S2R2",
+            "MD'M'U2MDM'U'MD'M'U'MDM'",
+            "RUR'F'RUR'U'M'URU'r'FRU'R'",
+            "R'S'RU'R'SRU2R'S'RU'R'SR"
+        ],
+        "aliases": [
+            "U-PLL b"
+        ],
+        "arrows": "U3U5-black,U5U7-black,U7U3-black",
+        "code": "Ub",
+        "description": "Mirroir \u00e0 Ua-Perm sur les U.",
+        "family": "Edges only",
+        "groups": [
+            "EPLL",
+            "PLL",
+            "ELL",
+            "ZBLL",
+            "BLD"
+        ],
+        "main": "M2U'MU2M'U'M2",
+        "name": "PLL Ub",
+        "optimal_cycles": 2,
+        "optimal_htm": 9,
+        "optimal_stm": 7,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Facilement reconnaissable en tant que Ub-Perm (CW) parce que the headlights contain the opposite edge couleur.",
+                    "feature": {
+                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
+                        "name": "3-Bar avec Headlights"
+                    },
+                    "notes": "Ua / Ub = 3 couleurs",
+                    "observation": "Headlights contain the opposite edge"
+                },
+                {
+                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ub-Perm (CW) parce que the headlights \u00e0 gauche contain the opposite edge couleur.<br><br>Another way to recognise as Ub-Perm (CW) is parce que the edge \u00e0 droite matches the headlights \u00e0 gauche.<br><br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 droite useful during recognition.",
+                    "feature": {
+                        "description": "Double headlights with at least one opposite edge peut seulement \u00eatre une H-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La H-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, H-Perm = 4 couleurs.",
+                        "name": "Double Lights (Opposite Edge)"
+                    },
+                    "notes": "Ub = 3 couleurs, H = 4 couleurs",
+                    "observation": "Left headlights contain the opposite edge"
+                },
+                {
+                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ub-Perm (CW) parce que the edge \u00e0 droite matches the headlights \u00e0 gauche.<br><br>Alternatively, recognisable parce que the edge \u00e0 gauche is the opposite of the headlights \u00e0 droite.<br></br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 droite is useful during recognition.",
+                    "feature": {
+                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "name": "Double Lights (Adjacent Edges)"
+                    },
+                    "notes": "Ub = 3 couleurs, Z = 2 ou 4 couleurs",
+                    "observation": "Right edge matches left headlights"
+                },
+                {
+                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Recognisable as Ub-Perm (CW) parce que the headlights contain an adjacent edge couleur.<br><br>You may also notice that the edge \u00e0 gauche is the opposite of the bar \u00e0 droite.",
+                    "feature": {
+                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
+                        "name": "3-Bar avec Headlights"
+                    },
+                    "notes": "Ua / Ub = 3 couleurs",
+                    "observation": "Headlights contain an adjacent edge"
+                }
+            ],
+            "moves": [
+                "y2",
+                "M2",
+                "U'",
+                "M",
+                "U2",
+                "M'",
+                "U'",
+                "M2"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "simple"
+    },
+    {
+        "algorithms": [
+            "RU'RUFRF2UFU'FR'F'R'",
+            "F'R'F'RU'RUR2FRUFU'F",
+            "F'UF'U'R'F'R2U'R'UR'FRF",
+            "R'UR'd'R'F'R2U'R'UR'FRF",
+            "R'UR'd'R'F'R2U'R'UR'FRF",
+            "R'UR'd'R'F'R2U'R'UR'FRF",
+            "R'UR'd'R'F'R2U'R'UR'FRF",
+            "L'dF'U'R'F'R2U'R'UR'FRF",
+            "R2UF2U'F2R'DR'D'RU'R'UR'",
+            "R'Ul'f'R'FR'F'R2U'R'UlF",
+            "R'UR'U'f'U'f2R'f'Uf'UfR",
+            "R'f'U'fU'fRf2UfURU'R",
+            "LU'LdLFL2ULU'LF'L'F'",
+            "R2U'f2Df2RD'RDR'URU'R",
+            "R'U'F'SUF2U'B'R2U'R'DR'Uz'",
+            "R'ULU'RUR'UL'U'RU2LU2L'",
+            "LU2L'U2R'ULU'RU'R'UL'U'R",
+            "R'U2RU2LU'R'UL'ULU'RUL'",
+            "R'U2RU2LU'R'UL'ULU'RUL'",
+            "RU'L'UR'U'RU'LUR'U2L'U2L",
+            "R2U'B2UB2RD'RDR'URU'R",
+            "R'UR'U'RD'R'DR'B2U'B2UR2",
+            "R'UR'xf'R'FR'F'R2U'R'URUx'",
+            "RU2R'U2r'FRF'rU'r'FR'F'r",
+            "R'Ul'f'l'Ul'B'l2U'R'URUx'",
+            "xU'fR'f'R'FR'F'R2U'R'URUx'",
+            "RUF'B2L'B2LFU2LUR'UL'",
+            "R'URU'R'f'U'RU2R'U'RU'R'fR",
+            "R'f'RUR'URU2R'UfRUR'U'R",
+            "RU2Ru2RU'R'D'RUR2F2RD'L2",
+            "R'UR'U'RD'R'DR'yR2U'R2dR2",
+            "RU2R'DRU'RU'RUR2DR'U'RD2",
+            "D2RU2R'DRU'RU'RUR2DR'U'R",
+            "RU'RUR'DRD'RU'DR2UR2D'R2",
+            "R2DR2U'R2D'UR'DR'D'RU'R'UR'",
+            "R2DR2U'R2UD'R'DR'D'RU'R'UR'",
+            "R'UR'U'RD'R'DR'UD'R2U'R2DR2",
+            "R2D'R2UR2U'DRD'RDR'URU'R",
+            "R2D'R2UR2DU'RD'RDR'URU'R",
+            "RU2R'DRU'RU'RUR2DR'U'Ru2",
+            "FR'U'R'F'U'FRU2RU'R'FR2F'R'F'",
+            "RFR2U'R'UR'U'R2URF'R'U'RUR'",
+            "R'UR'U'yxR'FR'F'R2U'R'URUx'",
+            "RUD'RU'RUR'U'DRD'RDR2UR'",
+            "DRU2R'DRU'RU'RUR2DR'U'RD",
+            "RDU'R'D2R'D'R2DR'UD'R'D'RD'R'",
+            "fR2f'M'U2R'U'R2UR'U'R'FRF'U'M",
+            "RU'RF2R'UR'U'R2U'F2UF2D'F2DR2",
+            "RU'R2D'R'DR'yRSU'R'US'R'F'",
+            "l'UR'D2RU'R'D2FRF'RU2r'UrU2x'",
+            "R'URU'x'URU2R'U'RU'R'U2RUR'U'x",
+            "R'URU'x'URU2R'U'RU'R'U2RUR'U'x",
+            "RUR'URU'R'UL'U2RU2R'U2LRU2R'",
+            "R'B'DRD'RDR2D'Rfz'RUR'U'R",
+            "rUR'UR'FRF'RU2r'UrU2R'U'RU'r'",
+            "FR'URU'RUR'U'R'F'RU2R'U'RURU2R'",
+            "RURDR'U'RD'R2U2R'U2R'D'rU2r'DR2",
+            "RUR'UR'U'F'RUR'U'R'FR2U'R'U'RUR'URU'RU'R'"
+        ],
+        "aliases": [],
+        "arrows": "U1U5,U5U1,U0U8-black,U8U0-black",
+        "code": "V",
+        "description": "Un peu reloud celle l\u00e0.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL"
+        ],
+        "main": "R'UR'd'R'F'R2U'R'UR'FRF",
+        "name": "PLL V",
+        "optimal_cycles": 1,
+        "optimal_htm": 14,
+        "optimal_stm": 14,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que V-Perm parce que of the 2x2 block at the front, bookended by opposite corner couleurs.",
+                    "feature": {
+                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
+                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                    },
+                    "notes": "V = 4 couleurs, Aa / Ab = 3 couleurs",
+                    "observation": "Outer corners are the opposites of the block"
+                },
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as V-Perm parce que of the 2-bar at the back-left.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                    },
+                    "notes": "V = 4 couleurs, Gd = 3 couleurs",
+                    "observation": "Almost motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                },
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as V-Perm parce que of the \"malformed\" 2x2 block at the front, resulting in a motif \u00e0 Damier (4 facelets).",
+                    "feature": {
+                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "name": "Miscellaneous without Bookends"
+                    },
+                    "notes": "Learn the features of E and V",
+                    "observation": "Malformed 2x2 block (motif \u00e0 Damier)"
+                },
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as V-Perm parce que of the 2-bar at the back-right.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "feature": {
+                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
+                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                    },
+                    "notes": "V = 4 couleurs, Gb = 3 couleurs",
+                    "observation": "Almost motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                }
+            ],
+            "moves": [
+                "y",
+                "R'",
+                "U",
+                "R'",
+                "d'",
+                "R'",
+                "F'",
+                "R2",
+                "U'",
+                "R'",
+                "U",
+                "R'",
+                "F",
+                "R",
+                "F"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "axial"
+    },
+    {
+        "algorithms": [
+            "FUF'R2FU'F'U'R2UR2UR2",
+            "R2U'R2U'R2UFUF'R2FU'F'",
+            "RFR'f'RUR'F'U'fR2U'R2",
+            "R'U'RF2R'URUF2U'F2U'F2",
+            "R'f'UFR'U'RfRF'R2UR2",
+            "R'U'RF2R'URDR2U'R2D'F2",
+            "F2DR2UR2D'R'U'RF2R'UR",
+            "R'U'RF2R'URdR2U'R2U'R2",
+            "R'F'UFUF'U'R'U'RFR'UR2",
+            "R2uR2UR2D'R'U'RF2R'UR",
+            "FRURU2R'L'URU'LU2R2F'",
+            "R'U'lD2l'URdR2U'R2U'R2",
+            "FRU'R'U'RdRUR'B'RU'R2",
+            "FRUrU2R2FRF'RU2r'R'F'",
+            "R'F'R'F2r2U'r'Fr'F2RU'FR",
+            "FR'F'RURU'R2U'RUlU'R'Ux",
+            "f'UfR'U'R'UR2UR'U'R'FRF'",
+            "R'F'RUR'L'U2RUR'U2LU'FR",
+            "R'F'UL'U2RU'R'U2LRU'R'FR",
+            "FR'F'RURU'R2U'RURf'U'f",
+            "BrD'R2Dr'B'U2R2U'R2U'R2",
+            "R2U'R2U'R2UR'F'RUR2U'R'FR",
+            "R2URU'R'UxURD'RDRU'R'x'",
+            "R2U'R'URU'x'U'R'DR'D'R'URx",
+            "FR'FR2U'R'U'RUR'F'RUR'U'F'",
+            "B'RBR'U'R'UR2UR'U'R'FRF'",
+            "FR'F'RURU'R2U'RURB'R'B",
+            "FRU'R'U'RUy'RUR'B'RU'R2",
+            "R'U2R'F'R2U'R'F'U'FRUR'FU2R",
+            "r'U'FR'F2rU'r'F2rRU'r'Ur",
+            "RUR2UL'U2RU'R'U2RLU'RU'R'",
+            "R2U'R'URU'f'y'U'RU'R'U'rB",
+            "R2D'R2UR2U'R2DR2U'R2UR2UR2",
+            "R2UR2UR2U'R2DR2U'R2UR2D'R2",
+            "F'LF'L2ULUL'U'LFL'U'LUF",
+            "FRU'R'U'RUR'F'RUR'U'R'FRF'",
+            "FRU'R'U'RUR'F'RUR'U'R'FRF'",
+            "FRU'R'U'RUR'F'RUR'U'R'FRF'",
+            "FRU'R'U'RUR'F'RUR'U'R'FRF'",
+            "R'FRF'U'F'UFU'RUR'U'R'FRF'",
+            "FR'F'RURU'R'FRU'R'URUR'F'",
+            "x'U'RUl'U'R'UR2UR'U'R'FRF'",
+            "R2FRF'U'RU'R'UR2UR'U'R'FRF'",
+            "FR'F'RURU'R'U2L'U'LULF'L'F",
+            "R2U'R'URU'y'x'L'U'RU'R'U'LUx",
+            "F'L'ULUL'U'LFL'U'LULF'L'F",
+            "R2U'R'URU'x'U'z'U'RU'R'U'rB",
+            "xUR'UlRU'R'U'RUR'F'RUR'U'F'",
+            "FRU'R'SU'RUR'F'RUR'U'R'FRf'",
+            "R'F'RUR'UF2rUr'U'r'FrFU'FR",
+            "R'U'RU'RUR'F'RUR'U'R'FR2U'R2UR",
+            "R'U'R2UR2F'RURU'R'FRU'R'UR'UR",
+            "R'F'RUR'U'R'FRU'RUR2D'RUR'DR2",
+            "R'U'RU'RU2R'U'RU2L'UR'U'LUR'UR",
+            "FRF'Ur'D'rU'r'Dr2UR'URU2r'U'R'",
+            "FURU'R'F'U2RU2R'U'RU'R2F2rUr'FR",
+            "R2BU'F2L2B2DF'D2B2D2R2FB2D2L2F2"
+        ],
+        "aliases": [],
+        "arrows": "U1U3,U3U1,U0U8-black,U8U0-black",
+        "code": "Y",
+        "description": "Utilis\u00e9e en no headlights, assez facile.",
+        "family": "Corners and edges",
+        "groups": [
+            "PLL",
+            "ZBLL",
+            "BLD"
+        ],
+        "main": "FRU'R'U'RUR'F'RUR'U'R'FRF'",
+        "name": "PLL Y",
+        "optimal_cycles": 1,
+        "optimal_htm": 13,
+        "optimal_stm": 13,
+        "probability": 0.05555555555555555,
+        "probability_label": "1/18",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que Y-Perm parce que the 2-Bar ext\u00e9rieurs are a unique feature.<br><br>The corner at the front makes this case very distinctive due to the opposite couleurs.",
+                    "feature": {
+                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
+                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                    },
+                    "notes": "Y = 4 couleurs",
+                    "observation": "2-Bar ext\u00e9rieurs \u00e0 gauche and right"
+                },
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as Y-Perm parce que of the 2-bar at the front-left and the edge \u00e0 droite matching the back-left corner.",
+                    "feature": {
+                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "name": "Inside 2-Bar"
+                    },
+                    "notes": "Y / Ga / Gb = 4 couleurs",
+                    "observation": "Edge \u00e0 droite matches the back-left corner"
+                },
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>This is the only angle for a diagonal corner swap without a visible pair, 2x2 block, \"malformed\" pair ou \"malformed\" 2x2 block.<br><br>Most people find the \"outer\" motif \u00e0 Damier (4 facelets) is useful during recognition.",
+                    "feature": {
+                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "name": "Miscellaneous without Bookends"
+                    },
+                    "notes": "Learn the features of E and Y",
+                    "observation": "\"Outer\" motif \u00e0 Damier (4 facelets)"
+                },
+                {
+                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as Y-Perm parce que of the 2-bar at the front-right and the edge \u00e0 gauche matching the back-right corner.",
+                    "feature": {
+                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "name": "Inside 2-Bar"
+                    },
+                    "notes": "Y / Gc / Gd = 4 couleurs",
+                    "observation": "Edge \u00e0 gauche matches the back-right corner"
+                }
+            ],
+            "moves": [
+                "F",
+                "R",
+                "U'",
+                "R'",
+                "U'",
+                "R",
+                "U",
+                "R'",
+                "F'",
+                "R",
+                "U",
+                "R'",
+                "U'",
+                "R'",
+                "F",
+                "R",
+                "F'"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "axial"
+    },
+    {
+        "algorithms": [
+            "M2UM2UM2F2M2F2",
+            "M2uM2u'SM2S'",
+            "M2uM2u'SM2S'",
+            "SM2S'uM2u'M2",
+            "M2u'M2uSM2S'",
+            "S'M2Su'M2uM2",
+            "M2DS2D'SM2S'",
+            "M'U'M2U'M2U'M'U2M2",
+            "M'UM2UM2UM'U2M2",
+            "M2U2MU'M2U'M2U'M",
+            "M2U2M'UM2UM2UM'",
+            "M'U'M2U'M2U'M'U2M2",
+            "M2UM2U'M'E2M'u2",
+            "M2UM2UM'U2M2U2M'",
+            "M2U'M2U'M'U2M2U2M'",
+            "M2U'M'U2M2U2M'UM2",
+            "M'U2M2U2M'U'M2U'M2",
+            "M'U2M2U2M'UM2UM2",
+            "M2UM'U2M2U2M'U'M2",
+            "M2UM2UM'U2M2U2M'",
+            "M2U'M2U'M'U2M2U2M'",
+            "M2U'M2U'M'U2M2U2M'",
+            "M2U'M2U'M2B2M2B2",
+            "M2UM2U'M'S2M'S2",
+            "M2UME2MEu'M2",
+            "M2UM2U'E2ME2M",
+            "M2U'M2UME2ME2",
+            "R2S2R2S2d'M2U'M2",
+            "M2UM2Ux'U2M2U2M2x",
+            "S2D'ME2MD'U2S2",
+            "M'U'M2U'M2U'MM2U2M2",
+            "M2U'M2U'M'U2D2M'D2M2",
+            "MU'M2U'M2U'M'U2M2U2M2",
+            "MU2M2UM2UM2U'M'U2M2",
+            "R2UR2U'R2F2R2U'F2UR2F2",
+            "x'RU'R'UDR'DU'R'URD2x",
+            "F'L'U'LUFR'U'FR'F'RUR",
+            "xU2R'D'RU'DRU'D'RDR'x'",
+            "RL'U2D2RL'D'R2L2UF2B2",
+            "F2B2U'R2L2DRL'U2D2RL'",
+            "FRUR'U'F'LUF'rUr'U'L'",
+            "RUS'R'U'RSM'R'URU'r'",
+            "RUS'R'U'RSR'M'URU'r'",
+            "x'RU'R'UDR'U'DR'URD2Fx",
+            "R'U'R2URUR'U'RURU'RU'R'",
+            "RUR2U'R'U'RUR'U'R'UR'UR",
+            "RUR'UR'U'R'URU'R'U'R2UR",
+            "RUR'UR'U'R'URU'R'U'R2UR",
+            "R'U'RU'RURU'R'URUR2U'R'",
+            "R'U'RU'RURU'R'URUR2U'R'",
+            "R2U'R2U'R2U'R2U'R2U'SR2S'",
+            "R2UR2UR2UR2UR2USR2S'",
+            "RUR'S'RU'R'fR'F'MFRF'M'",
+            "MU'F'L'U'LUFR'U'FR'F'RUr",
+            "M'UM'U'MUMUM'UM'U'MUM",
+            "R2UR2URU2R2U2R2U2RU'R2U'R2",
+            "L2R2DL2R2ULR'F2L2R2B2LR'",
+            "R2UR2U2R2UR2U'R2UR2U2R2UR2",
+            "RUR2F'RURUR'U2R'FRURU2R'",
+            "RU2R'U'R'F'RU2RU'R'U'R'FR2U'R'",
+            "R'U2RU'R2F'RURUR'U2R'FRU'R",
+            "M2U'M2U'M'U2M2U2MUM2U2M2UM2",
+            "LRU2LR'UF2L2F2UL2UF2L2F2UL2"
+        ],
+        "aliases": [],
+        "arrows": "U1U3-black,U3U1-black,U5U7-black,U7U5-black",
+        "code": "Z",
+        "description": "Simple a retenir, dure \u00e0 \u00e9x\u00e9cuter.",
+        "family": "Edges only",
+        "groups": [
+            "EPLL",
+            "PLL",
+            "ELL",
+            "ZBLL",
+            "ZZLL"
+        ],
+        "main": "M2uM2u'SM2S'",
+        "name": "PLL Z",
+        "optimal_cycles": 1,
+        "optimal_htm": 12,
+        "optimal_stm": 7,
+        "probability": 0.027777777777777776,
+        "probability_label": "1/36",
+        "recognition": {
+            "cases": [
+                {
+                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Exactly 2 couleurs, unlike U-Perms which have 3 couleurs.<br><br>The edge \u00e0 gauche matches the headlights \u00e0 droite and the edge \u00e0 droite matches the headlights \u00e0 gauche.<br><br>Facilement reconnaissable en tant que Z-Perm parce que of the distinctive motif \u00e0 Damier (6 facelets).<br><br>The Z-Perm has two appearances and looks the same after a U2.",
+                    "feature": {
+                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "name": "Double Lights (Adjacent Edges)"
+                    },
+                    "notes": "Z = 2 couleurs, Ua / Ub = 3 couleurs",
+                    "observation": "Distinctive motif \u00e0 Damier (6 facelets)"
+                },
+                {
+                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Exactly 4 couleurs, unlike U-Perms which have 3 couleurs.<br><br>The edge \u00e0 gauche is the opposite of the headlights \u00e0 droite. The edge \u00e0 droite is the opposite of the headlights \u00e0 gauche.<br><br>Recognisable as Z-Perm parce que both sets of headlights contain an adjacent edge couleur.<br><br>The Z-Perm has two appearances and looks the same after a U2.",
+                    "feature": {
+                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "name": "Double Lights (Adjacent Edges)"
+                    },
+                    "notes": "Z = 4 couleurs, Ua / Ub = 3 couleurs",
+                    "observation": "Both headlights contain an adjacent edge"
+                }
+            ],
+            "moves": [
+                "M2",
+                "u",
+                "M2",
+                "u'",
+                "S",
+                "M2",
+                "S'"
+            ]
+        },
+        "status": "OK",
+        "symmetry": "double"
+    },
+    {
+        "algorithms": [],
+        "aliases": [],
+        "arrows": "",
+        "code": "SKIP",
+        "description": "Skipped case",
+        "family": "",
+        "groups": [],
+        "main": "",
+        "name": "AF2L Skipped",
+        "optimal_cycles": 0,
+        "optimal_htm": 0,
+        "optimal_stm": 0,
+        "probability": 0.013888888888888888,
+        "probability_label": "1/72",
+        "recognition": [],
+        "status": "OK",
+        "symmetry": ""
+    }
+]
