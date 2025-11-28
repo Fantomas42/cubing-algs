@@ -507,6 +507,18 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(result), expected_length)
         self.assertTrue(all(c == ' ' for c in result))
 
+    def test_display_spaces_emoji(self) -> None:
+        """Test display_spaces with emoji facelets."""
+        printer = VCubeDisplay(self.cube, facelet_type='emoji')
+        # Test with zero spaces
+        result = printer.display_spaces(0)
+        self.assertEqual(result, '')
+
+        # Test with positive count
+        result = printer.display_spaces(2)
+        self.assertEqual(len(result), 4)
+        self.assertTrue(all(c == ' ' for c in result))
+
     def test_display_face_row_all_positions(self) -> None:
         """Test display_face_row for different faces and rows."""
         faces = self.printer.split_faces(self.cube.state)
@@ -1246,6 +1258,13 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         self.assertEqual(printer.facelet_type, 'condensed')
         self.assertEqual(printer.facelet_size, 1)
 
+    def test_facelet_type_emoji_initialization(self) -> None:
+        """Test VCubeDisplay initialization with emoji facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='emoji')
+
+        self.assertEqual(printer.facelet_type, 'emoji')
+        self.assertEqual(printer.facelet_size, 1)
+
     def test_facelet_type_default_initialization(self) -> None:
         """Test VCubeDisplay initialization with default facelet_type."""
         printer = VCubeDisplay(self.cube, facelet_type='')
@@ -1302,6 +1321,19 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         compact_printer = VCubeDisplay(self.cube, facelet_type='compact')
         compact_result = compact_printer.display_facelet('U')
         self.assertLess(len(result), len(compact_result))
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    @patch('cubing_algs.display.USE_COLORS', True)  # noqa: FBT003
+    def test_display_facelet_emoji_type(self) -> None:
+        """Test display_facelet with emoji facelet_type."""
+        printer = VCubeDisplay(self.cube, facelet_type='emoji')
+
+        result = printer.display_facelet('U')
+
+        # Should contain color codes and block character without space
+        self.assertNotIn('\x1b[', result)
+        self.assertIn('⬜', result)  # Block character without trailing space
+        self.assertNotIn(' U ', result)  # Should not contain letter
 
     @patch.dict(os.environ, {'TERM': 'other'})
     @patch('cubing_algs.display.USE_COLORS', False)  # noqa: FBT003

@@ -16,6 +16,11 @@ from cubing_algs.vcube import VCube
 class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
     """Tests for the Algorithm class core functionality."""
 
+    def check_contains_moves(self, algo: Algorithm) -> None:
+        """Check algo contains Move only."""
+        for m in algo:
+            self.assertIsInstance(m, Move)
+
     def test_init_empty(self) -> None:
         """Test init empty."""
         algo = Algorithm()
@@ -41,6 +46,9 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo = Algorithm.parse_moves([Move('R2'), Move('U')])
         self.assertEqual(str(algo), 'R2 U')
 
+        algo = Algorithm.parse_moves(Move('R2'))
+        self.assertEqual(str(algo), 'R2')
+
         algo = Algorithm.parse_moves(Algorithm.parse_moves(['R2', 'U']))
         self.assertEqual(str(algo), 'R2 U')
 
@@ -63,14 +71,12 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo.append('F2')
         self.assertEqual(str(algo), 'R2 U F2')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo.append(Move('D'))
         self.assertEqual(str(algo), 'R2 U F2 D')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         with self.assertRaises(InvalidMoveError):
             algo.append('G')
@@ -95,32 +101,32 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo.extend(['F2', 'B'])
         self.assertEqual(str(algo), 'R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo.extend([])
         self.assertEqual(str(algo), 'R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo.extend('F R')
         self.assertEqual(str(algo), 'R2 U F2 B F R')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo.extend('D2')
         self.assertEqual(str(algo), 'R2 U F2 B F R D2')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo.extend([Move('L'), Move('B')])
         self.assertEqual(str(algo), 'R2 U F2 B F R D2 L B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
+
+        algo.extend(Move('U'))
+        self.assertEqual(str(algo), 'R2 U F2 B F R D2 L B U')
+
+        self.check_contains_moves(algo)
 
         with self.assertRaises(InvalidMoveError):
             algo.extend(['F2', 'G'])
@@ -133,8 +139,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo.extend(parse_moves('F2 B'))
         self.assertEqual(str(algo), 'R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_add_operator(self) -> None:
         """Test add operator."""
@@ -144,14 +149,12 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo = algo + ['F2', 'B']  # noqa: RUF005, PLR6104
         self.assertEqual(str(algo), 'R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo = algo + 'F R'  # noqa: PLR6104
         self.assertEqual(str(algo), 'R2 U F2 B F R')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         with self.assertRaises(InvalidMoveError):
             algo += 'F2 G'
@@ -164,20 +167,22 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo += ['F2', 'B']
         self.assertEqual(str(algo), 'R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo += 'F R'
         self.assertEqual(str(algo), 'R2 U F2 B F R')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo += [Move('L2'), Move('D')]
         self.assertEqual(str(algo), 'R2 U F2 B F R L2 D')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
+
+        algo += Move('U')
+        self.assertEqual(str(algo), 'R2 U F2 B F R L2 D U')
+
+        self.check_contains_moves(algo)
 
         with self.assertRaises(InvalidMoveError):
             algo + 'F2 G'
@@ -187,20 +192,17 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo = 'F2R2' + parse_moves('D2 U')
         self.assertEqual(str(algo), 'F2 R2 D2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo = ['R2', 'L'] + algo  # noqa: RUF005
         self.assertEqual(str(algo), 'R2 L F2 R2 D2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo = [Move('D'), Move('U')] + algo  # noqa: RUF005
         self.assertEqual(str(algo), 'D U R2 L F2 R2 D2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         with self.assertRaises(InvalidMoveError):
             'F2 G' + algo
@@ -228,20 +230,22 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo += ['F2', 'B']
         self.assertEqual(str(algo), 'R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo += [Move('D2'), Move('B2')]
         self.assertEqual(str(algo), 'R2 U F2 B D2 B2')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo += 'z y'
         self.assertEqual(str(algo), 'R2 U F2 B D2 B2 z y')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
+
+        algo += Move('B')
+        self.assertEqual(str(algo), 'R2 U F2 B D2 B2 z y B')
+
+        self.check_contains_moves(algo)
 
         with self.assertRaises(InvalidMoveError):
             algo += 'F G'
@@ -254,8 +258,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo += [*algo, 'F2', 'B']
         self.assertEqual(str(algo), 'R2 U R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_add_operator_with_algorithm(self) -> None:
         """Test add operator with algorithm."""
@@ -265,8 +268,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo = algo + parse_moves('F2 B')  # noqa: PLR6104
         self.assertEqual(str(algo), 'R2 U F2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_insert(self) -> None:
         """Test insert."""
@@ -276,14 +278,12 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo.insert(0, 'F2')
         self.assertEqual(str(algo), 'F2 R2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo.insert(0, Move('L'))
         self.assertEqual(str(algo), 'L F2 R2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         with self.assertRaises(InvalidMoveError):
             algo.insert(0, 'G')
@@ -296,8 +296,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo.remove(Move('R2'))
         self.assertEqual(str(algo), 'U R2')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_remove_type_str(self) -> None:
         """Test remove type str."""
@@ -307,8 +306,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo.remove('R2')  # type: ignore[arg-type]
         self.assertEqual(str(algo), 'U R2')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_pop(self) -> None:
         """Test pop."""
@@ -318,8 +316,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(str(algo), 'R2')
         self.assertEqual(popped, 'U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_copy(self) -> None:
         """Test copy."""
@@ -330,19 +327,15 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertIsInstance(copy, Algorithm)
         self.assertEqual(str(copy), 'R2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
-        for m in copy:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
+        self.check_contains_moves(copy)
 
         algo.pop()
         self.assertEqual(str(algo), 'R2')
         self.assertEqual(str(copy), 'R2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
-        for m in copy:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
+        self.check_contains_moves(copy)
 
     def test_iter(self) -> None:
         """Test iter."""
@@ -367,39 +360,34 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo[2:] = []
         self.assertEqual(str(algo), 'R2 U')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo = parse_moves('R2 U F')
         algo[1:] = []
         self.assertEqual(str(algo), 'R2')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo = parse_moves('R2 U F')
         new_algo = parse_moves('B2 D')
         algo[2:] = new_algo
         self.assertEqual(str(algo), 'R2 U B2 D')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo = parse_moves('R2 U F')
         new_algo = parse_moves('B2 D')
         algo[1:] = new_algo
         self.assertEqual(str(algo), 'R2 B2 D')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
         algo = parse_moves('R2 U F L D')
         new_algo = parse_moves('B2 D')
         algo[1:3] = new_algo
         self.assertEqual(str(algo), 'R2 B2 D L D')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_setitem(self) -> None:
         """Test setitem."""
@@ -407,8 +395,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         algo[1] = Move('B')
         self.assertEqual(str(algo), 'R2 B')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_delitem(self) -> None:
         """Test delitem."""
@@ -416,8 +403,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         del algo[1]
         self.assertEqual(str(algo), 'R2')
 
-        for m in algo:
-            self.assertIsInstance(m, Move)
+        self.check_contains_moves(algo)
 
     def test_contains(self) -> None:
         """Test contains."""

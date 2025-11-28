@@ -17,7 +17,7 @@ Core modules:
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.vcube import VCube
 
-__version__ = '1.0.14'
+__version__ = '1.0.15'
 
 __all__ = [  # noqa: PLE0604
     Algorithm.__name__,

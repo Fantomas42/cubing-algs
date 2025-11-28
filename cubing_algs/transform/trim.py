@@ -9,7 +9,7 @@ from cubing_algs.move import Move
 
 def trim_moves(
         trim_move: str,
-        start: bool = True, end: bool = True,  # noqa: FBT001, FBT002
+        *, start: bool = True, end: bool = True,
 ) -> Callable[[Algorithm], Algorithm]:
     """
     Remove specified moves from the start and/or end of an algorithm.

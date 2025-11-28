@@ -1,5 +1,4 @@
 """Virtual 3x3 cube implementation for simulating moves and tracking state."""
-
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -12,9 +11,10 @@ from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
+from cubing_algs.visual_cube import visual_cube_cube
 
 
-class VCube(VCubeIntegrityChecker):
+class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     """
     Virtual 3x3 cube for tracking moves on facelets.
 
@@ -319,6 +319,11 @@ class VCube(VCubeIntegrityChecker):
         index = self.get_face_index(face)
 
         return self._state[index * self.face_size: (index + 1) * self.face_size]
+
+    @property
+    def visual_cube_url(self) -> str:
+        """Get a VisualCube URL for this cube state."""
+        return visual_cube_cube(self)
 
     def __str__(self) -> str:
         """

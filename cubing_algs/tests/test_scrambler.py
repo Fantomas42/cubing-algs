@@ -3,6 +3,7 @@
 import time
 import unittest
 from collections import Counter
+from random import Random
 from statistics import mean
 from statistics import stdev
 
@@ -1075,3 +1076,390 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
                 f'Move type {move_type} appears '
                 f'too frequently: {percentage:.1f}%',
             )
+
+
+class TestRNGParameter(unittest.TestCase):
+    """Tests for random number generator parameter functionality."""
+
+    def test_random_moves_deterministic_with_seed(self) -> None:
+        """Test random_moves produces identical results with same seed."""
+        move_set = ['R', 'U', 'F', "R'", "U'", "F'", 'R2', 'U2', 'F2']
+        iterations = 10
+
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        result1 = random_moves(3, move_set, iterations, rng1)
+        result2 = random_moves(3, move_set, iterations, rng2)
+
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical scrambles',
+        )
+
+    def test_random_moves_different_seeds_produce_different_results(
+            self) -> None:
+        """Test random_moves produces different results with different seeds."""
+        move_set = ['R', 'U', 'F', "R'", "U'", "F'", 'R2', 'U2', 'F2']
+        iterations = 10
+
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(123)  # noqa: S311
+
+        result1 = random_moves(3, move_set, iterations, rng1)
+        result2 = random_moves(3, move_set, iterations, rng2)
+
+        self.assertNotEqual(
+            str(result1),
+            str(result2),
+            'Different seeds should produce different scrambles',
+        )
+
+    def test_random_moves_uses_default_rng_when_none(self) -> None:
+        """Test that random_moves works without explicit rng parameter."""
+        move_set = ['R', 'U', 'F']
+        iterations = 5
+
+        result = random_moves(3, move_set, iterations)
+
+        self.assertEqual(
+            len(result),
+            iterations,
+            'Should generate correct number of moves with default RNG',
+        )
+
+    def test_random_moves_automatic_iterations_with_seeded_rng(self) -> None:
+        """Test random_moves with automatic iterations using seeded RNG."""
+        move_set = ['R', 'U', 'F', "R'", "U'", "F'", 'R2', 'U2', 'F2']
+
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        result1 = random_moves(3, move_set, 0, rng1)
+        result2 = random_moves(3, move_set, 0, rng2)
+
+        self.assertEqual(
+            len(result1),
+            len(result2),
+            'Same seed should produce same length with automatic iterations',
+        )
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical scrambles',
+        )
+
+    def test_scramble_deterministic_with_seed(self) -> None:
+        """Test that scramble produces identical results with same seed."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        result1 = scramble(3, 15, rng=rng1)
+        result2 = scramble(3, 15, rng=rng2)
+
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical scrambles',
+        )
+        self.assertEqual(
+            len(result1),
+            15,
+            'Scramble should have correct length',
+        )
+
+    def test_scramble_different_seeds_produce_different_results(self) -> None:
+        """Test scramble produces different results with different seeds."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(999)  # noqa: S311
+
+        result1 = scramble(3, 15, rng=rng1)
+        result2 = scramble(3, 15, rng=rng2)
+
+        self.assertNotEqual(
+            str(result1),
+            str(result2),
+            'Different seeds should produce different scrambles',
+        )
+
+    def test_scramble_uses_default_rng_when_none(self) -> None:
+        """Test that scramble works without explicit rng parameter."""
+        result = scramble(3, 10)
+
+        self.assertEqual(
+            len(result),
+            10,
+            'Should generate correct scramble with default RNG',
+        )
+
+    def test_scramble_with_options_and_seeded_rng(self) -> None:
+        """Test scramble with options using seeded RNG."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        result1 = scramble(
+            5,
+            12,
+            inner_layers=True,
+            right_handed=False,
+            rng=rng1,
+        )
+        result2 = scramble(
+            5,
+            12,
+            inner_layers=True,
+            right_handed=False,
+            rng=rng2,
+        )
+
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed with options should produce identical results',
+        )
+        self.assertEqual(
+            len(result1),
+            12,
+            'Scramble should have correct length',
+        )
+
+    def test_scramble_automatic_iterations_with_seeded_rng(self) -> None:
+        """Test scramble with automatic iterations using seeded RNG."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        result1 = scramble(3, 0, rng=rng1)
+        result2 = scramble(3, 0, rng=rng2)
+
+        self.assertEqual(
+            len(result1),
+            len(result2),
+            'Same seed should produce same length with automatic iterations',
+        )
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical scrambles',
+        )
+
+    def test_scramble_easy_cross_deterministic_with_seed(self) -> None:
+        """Test scramble_easy_cross produces identical results with seed."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        result1 = scramble_easy_cross(rng1)
+        result2 = scramble_easy_cross(rng2)
+
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical easy cross scrambles',
+        )
+        self.assertEqual(
+            len(result1),
+            10,
+            'Easy cross scramble should have 10 moves',
+        )
+
+    def test_scramble_easy_cross_different_seeds_produce_different_results(
+            self) -> None:
+        """Test scramble_easy_cross produces different results."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(777)  # noqa: S311
+
+        result1 = scramble_easy_cross(rng1)
+        result2 = scramble_easy_cross(rng2)
+
+        self.assertNotEqual(
+            str(result1),
+            str(result2),
+            'Different seeds should produce different easy cross scrambles',
+        )
+
+    def test_scramble_easy_cross_uses_default_rng_when_none(self) -> None:
+        """Test scramble_easy_cross works without explicit rng parameter."""
+        result = scramble_easy_cross()
+
+        self.assertEqual(
+            len(result),
+            10,
+            'Should generate easy cross scramble with default RNG',
+        )
+        self.assertFalse(
+            any(str(move).startswith(('U', 'D')) for move in result),
+            'Easy cross should not contain U or D moves',
+        )
+
+    def test_rng_state_advances_with_multiple_calls(self) -> None:
+        """Test RNG state advances correctly with multiple sequential calls."""
+        rng = Random(42)  # noqa: S311
+
+        result1 = scramble(3, 5, rng=rng)
+        result2 = scramble(3, 5, rng=rng)
+        result3 = scramble(3, 5, rng=rng)
+
+        self.assertNotEqual(
+            str(result1),
+            str(result2),
+            'Sequential calls should produce different results',
+        )
+        self.assertNotEqual(
+            str(result2),
+            str(result3),
+            'Sequential calls should produce different results',
+        )
+        self.assertNotEqual(
+            str(result1),
+            str(result3),
+            'Sequential calls should produce different results',
+        )
+
+    def test_resetting_rng_seed_resets_sequence(self) -> None:
+        """Test that resetting RNG seed produces the same sequence again."""
+        seed = 42
+
+        rng1 = Random(seed)  # noqa: S311
+        result1_first = scramble(3, 10, rng=rng1)
+        result1_second = scramble(3, 10, rng=rng1)
+
+        rng2 = Random(seed)  # noqa: S311
+        result2_first = scramble(3, 10, rng=rng2)
+
+        self.assertEqual(
+            str(result1_first),
+            str(result2_first),
+            'Resetting seed should restart sequence',
+        )
+        self.assertNotEqual(
+            str(result1_first),
+            str(result1_second),
+            'Continued sequence should differ from start',
+        )
+
+    def test_same_rng_instance_across_different_functions(self) -> None:
+        """Test using same RNG instance across different functions."""
+        seed = 42
+
+        rng1 = Random(seed)  # noqa: S311
+        random_moves_result1 = random_moves(
+            3,
+            ['R', 'U', 'F', "R'", "U'", "F'"],
+            5,
+            rng1,
+        )
+        scramble_result1 = scramble(3, 5, rng=rng1)
+        easy_cross_result1 = scramble_easy_cross(rng1)
+
+        rng2 = Random(seed)  # noqa: S311
+        random_moves_result2 = random_moves(
+            3,
+            ['R', 'U', 'F', "R'", "U'", "F'"],
+            5,
+            rng2,
+        )
+        scramble_result2 = scramble(3, 5, rng=rng2)
+        easy_cross_result2 = scramble_easy_cross(rng2)
+
+        self.assertEqual(
+            str(random_moves_result1),
+            str(random_moves_result2),
+            'Same RNG sequence should produce same results',
+        )
+        self.assertEqual(
+            str(scramble_result1),
+            str(scramble_result2),
+            'Same RNG sequence should produce same results',
+        )
+        self.assertEqual(
+            str(easy_cross_result1),
+            str(easy_cross_result2),
+            'Same RNG sequence should produce same results',
+        )
+
+    def test_rng_parameter_edge_case_very_short_scramble(self) -> None:
+        """Test RNG parameter with very short scrambles."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        result1 = scramble(3, 1, rng=rng1)
+        result2 = scramble(3, 1, rng=rng2)
+
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical single-move scrambles',
+        )
+        self.assertEqual(
+            len(result1),
+            1,
+            'Should generate exactly 1 move',
+        )
+
+    def test_rng_parameter_edge_case_very_long_scramble(self) -> None:
+        """Test RNG parameter with very long scrambles."""
+        rng1 = Random(42)  # noqa: S311
+        rng2 = Random(42)  # noqa: S311
+
+        iterations = 100
+        result1 = scramble(3, iterations, rng=rng1)
+        result2 = scramble(3, iterations, rng=rng2)
+
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical long scrambles',
+        )
+        self.assertEqual(
+            len(result1),
+            iterations,
+            'Should generate correct number of moves',
+        )
+
+    def test_rng_parameter_with_different_cube_sizes(self) -> None:
+        """Test RNG parameter consistency across different cube sizes."""
+        seed = 42
+
+        for cube_size in [2, 3, 4, 5, 6]:
+            with self.subTest(cube_size=cube_size):
+                rng1 = Random(seed)  # noqa: S311
+                rng2 = Random(seed)  # noqa: S311
+
+                result1 = scramble(cube_size, 10, rng=rng1)
+                result2 = scramble(cube_size, 10, rng=rng2)
+
+                self.assertEqual(
+                    str(result1),
+                    str(result2),
+                    f'Same seed should produce identical '
+                    f'scrambles for {cube_size}x{cube_size}x{cube_size}',
+                )
+
+    def test_rng_produces_valid_scrambles(self) -> None:
+        """Test seeded RNG produces valid scrambles with no invalid moves."""
+        rng = Random(42)  # noqa: S311
+
+        for _ in range(10):
+            result = scramble(3, 20, rng=rng)
+
+            moves = [str(move) for move in result]
+            for i in range(len(moves) - 1):
+                self.assertTrue(
+                    is_valid_next_move(moves[i + 1], moves[i]),
+                    f'Invalid consecutive moves: {moves[i]} -> {moves[i + 1]}',
+                )
+
+    def test_default_rng_produces_different_results_each_call(self) -> None:
+        """Test that default RNG produces different results on each call."""
+        results = []
+
+        for _ in range(5):
+            result = scramble(3, 10)
+            results.append(str(result))
+
+        unique_results = set(results)
+        self.assertGreater(
+            len(unique_results),
+            1,
+            'Default RNG should produce different results across calls',
+        )
