@@ -3,6 +3,7 @@ import unittest
 
 from cubing_algs.initial_state import get_initial_state
 from cubing_algs.rotate_dynamic import rotate_move
+from cubing_algs.vcube import VCube
 
 # Solved 2x2x2 state: 24 facelets (6 faces * 4 facelets each)
 # Face order: U, R, F, D, L, B
@@ -17,6 +18,18 @@ EXPECTED_2X2X2_F = 'UULLURURFFFFRRDDLDLDBBBB'
 EXPECTED_2X2X2_x = 'FFFFRRRRDDDDBBBBLLLLUUUU'
 EXPECTED_2X2X2_y = 'UUUUBBBBRRRRDDDDFFFFLLLL'
 EXPECTED_2X2X2_z = 'LLLLUUUUFFFFRRRRDDDDBBBB'
+
+
+class Test2x2x2VCube(unittest.TestCase):
+    """Test VCube implementation for 2x2x2."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.cube = VCube(size=2)
+
+    def test_has_fixed_centers(self) -> None:
+        """Check has_fixed_centers property."""
+        self.assertFalse(self.cube.has_fixed_centers)
 
 
 class Test2x2x2BasicMoves(unittest.TestCase):

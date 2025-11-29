@@ -45,6 +45,12 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
             cube.state,
         )
 
+    def test_has_fixed_centers(self) -> None:
+        """Test has_fixed_centers property."""
+        cube = VCube()
+
+        self.assertTrue(cube.has_fixed_centers)
+
     def test_is_solved(self) -> None:
         """Test is_solved property on solved and scrambled cube."""
         cube = VCube()

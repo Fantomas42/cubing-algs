@@ -3,6 +3,7 @@ import unittest
 
 from cubing_algs.initial_state import get_initial_state
 from cubing_algs.rotate_dynamic import rotate_move
+from cubing_algs.vcube import VCube
 
 # Solved 5x5x5 state: 150 facelets (6 faces * 25 facelets each)
 # Face order: U, R, F, D, L, B
@@ -64,6 +65,18 @@ EXPECTED_5X5X5_3R = (
     'FFDFFFFDFFFFDFFFFDFFDDBDDDDBDDDDBDDDDBDDDDBDDLLLLLLLLLL'
     'LLLLLLLLLLLLLLLBBUBBBBUBBBBUBBBBUBBBBUBB'
 )
+
+
+class Test5x5x5VCube(unittest.TestCase):
+    """Test VCube implementation for 5x5x5."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.cube = VCube(size=5)
+
+    def test_has_fixed_centers(self) -> None:
+        """Check has_fixed_centers property."""
+        self.assertTrue(self.cube.has_fixed_centers)
 
 
 class Test5x5x5BasicMoves(unittest.TestCase):
