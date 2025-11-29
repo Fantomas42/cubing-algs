@@ -144,6 +144,20 @@ class Test2x2x2BasicMoves(unittest.TestCase):
                 f'{move} applied 4 times should return to solved',
             )
 
+    def test_layered_move(self) -> None:
+        """Test behavior of layered moves on a 2x2x2."""
+        result = rotate_move(SOLVED_2X2X2, '2L', size=2)
+        self.assertEqual(result, EXPECTED_2X2X2_RPRIME, '2L move state mismatch')
+        self.assertNotEqual(result, SOLVED_2X2X2)
+
+    def test_wide_move(self) -> None:
+        """Test behavior of wide moves on a 2x2x2."""
+        result = rotate_move(SOLVED_2X2X2, 'Rw', size=2)
+        expected = rotate_move(SOLVED_2X2X2, 'x', size=2)
+
+        self.assertEqual(result, expected, 'Rw move state mismatch')
+        self.assertNotEqual(result, SOLVED_2X2X2)
+
 
 class Test2x2x2Rotations(unittest.TestCase):
     """Test cube rotation moves (x, y, z) on 2x2x2."""
