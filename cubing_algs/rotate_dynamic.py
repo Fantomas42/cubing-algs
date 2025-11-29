@@ -335,13 +335,13 @@ def get_move_axis_and_direction(move_type: str) -> tuple[int, int]:
     # Following MagicCube's conventions
     if move_type in {'R', 'L', 'x'}:
         axis = 0
-        direction = -1 if move_type == 'R' else 1
+        direction = -1 if move_type in {'R', 'x'} else 1
     elif move_type in {'U', 'D', 'y'}:
         axis = 1
-        direction = 1 if move_type == 'U' else -1
+        direction = 1 if move_type in {'U', 'y'} else -1
     elif move_type in {'F', 'B', 'z'}:
         axis = 2
-        direction = -1 if move_type == 'F' else 1
+        direction = -1 if move_type in {'F', 'z'} else 1
     else:
         msg = f'Unknown move type: {move_type}'
         raise ValueError(msg)
