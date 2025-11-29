@@ -78,6 +78,10 @@ class Test5x5x5VCube(unittest.TestCase):
         """Check has_fixed_centers property."""
         self.assertTrue(self.cube.has_fixed_centers)
 
+    def test_center_index(self) -> None:
+        """Test the value of center index."""
+        self.assertEqual(self.cube.center_index, 12)
+
 
 class Test5x5x5BasicMoves(unittest.TestCase):
     """Test basic face moves on 5x5x5 cube."""

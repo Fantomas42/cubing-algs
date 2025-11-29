@@ -67,6 +67,15 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """Check if the cube has fixed centers."""
         return bool(self.size % 2)
 
+    @property
+    def center_index(self) -> int:
+        """
+        Return the center index.
+
+        Does not work for even cube size.
+        """
+        return self.face_size // 2
+
     @staticmethod
     def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
                     ep: list[int], eo: list[int],
@@ -149,8 +158,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             NotImplementedError: If the cube size is not handled
 
         """
-        if self.size != 3:
-            msg = f'Cannot compute orientation for cube size { self.size }'
+        if not self.has_fixed_centers:
+            msg = 'Cannot compute orientation for cube even size.'
             raise NotImplementedError(msg)
 
         return self._state[4] + self._state[22]
@@ -329,8 +338,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             NotImplementedError: If the cube size is not handled
 
         """
-        if self.size != 3:
-            msg = f'Cannot compute center indexes for cube size { self.size }'
+        if not self.has_fixed_centers:
+            msg = 'Cannot compute center indexes for cube even size.'
             raise NotImplementedError(msg)
 
         return [self.state[(i * self.face_size) + 4] for i in range(6)]
