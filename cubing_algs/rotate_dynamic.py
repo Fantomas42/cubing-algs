@@ -277,6 +277,38 @@ def get_slice_mask(  # noqa: C901, PLR0912
                 for y in range(size)
             )
 
+    # Slice moves (M, E, S) - middle layer for odd-sized cubes
+    # Note: Validation for even cubes happens in calculate_permutation()
+    elif move_type == 'M':
+        # M slice: middle vertical slice (L/R axis)
+        # Middle layer at x = size // 2
+        x_coord = size // 2
+        coords.extend(
+            (x_coord, y, z)
+            for y in range(size)
+            for z in range(size)
+        )
+
+    elif move_type == 'E':
+        # E slice: equatorial slice (U/D axis)
+        # Middle layer at y = size // 2
+        y_coord = size // 2
+        coords.extend(
+            (x, y_coord, z)
+            for x in range(size)
+            for z in range(size)
+        )
+
+    elif move_type == 'S':
+        # S slice: standing slice (F/B axis)
+        # Middle layer at z = size // 2
+        z_coord = size // 2
+        coords.extend(
+            (x, y, z_coord)
+            for x in range(size)
+            for y in range(size)
+        )
+
     # Rotation moves affect the entire cube
     elif move_type == 'x':
         # Rotate around x-axis (entire cube)
@@ -317,7 +349,7 @@ def get_move_axis_and_direction(move_type: str) -> tuple[int, int]:
     Get the rotation axis and direction for a move type.
 
     Args:
-        move_type: The base move type (e.g., 'R', 'U', 'F').
+        move_type: The base move type (e.g., 'R', 'U', 'F', 'M', 'E', 'S').
 
     Returns:
         Tuple of (axis, direction) where:
@@ -332,12 +364,24 @@ def get_move_axis_and_direction(move_type: str) -> tuple[int, int]:
     if move_type in {'R', 'L', 'x'}:
         axis = 0
         direction = -1 if move_type in {'R', 'x'} else 1
+    elif move_type == 'M':
+        # M moves like L (counter-clockwise from right)
+        axis = 0
+        direction = 1
     elif move_type in {'U', 'D', 'y'}:
         axis = 1
         direction = 1 if move_type in {'U', 'y'} else -1
+    elif move_type == 'E':
+        # E moves like D (clockwise from top)
+        axis = 1
+        direction = -1
     elif move_type in {'F', 'B', 'z'}:
         axis = 2
         direction = -1 if move_type in {'F', 'z'} else 1
+    elif move_type == 'S':
+        # S moves like F (clockwise from back)
+        axis = 2
+        direction = -1
     else:
         msg = f'Unknown move type: {move_type}'
         raise ValueError(msg)
@@ -487,6 +531,14 @@ def calculate_permutation(size: int, move: str) -> list[int]:  # noqa: C901, PLR
     # For rotations, keep lowercase
     if base_move in 'XYZ':
         base_move = base_move.lower()
+
+    # Validate slice moves on even cubes
+    if base_move in {'M', 'E', 'S'} and size % 2 == 0:
+        msg = (
+            f'{base_move} moves are only allowed on odd-sized cubes. '
+            f'Current cube size is {size}x{size}x{size}.'
+        )
+        raise ValueError(msg)
 
     # Get layer indices (0-indexed)
     layers = move_obj.layers

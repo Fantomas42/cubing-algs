@@ -9,6 +9,55 @@ from cubing_algs.vcube import VCube
 # Face order: U, R, F, D, L, B
 SOLVED_5X5X5 = get_initial_state(5)
 
+# Expected states for slice moves (M, E, S) - verified against MagicCube
+EXPECTED_5X5X5 = {
+    'M': (
+        'UUBUUUUBUUUUBUUUUBUUUUBUURRRRRRRRRRRRRRRRRRRRRRRRRFFUFFFFUFFFFUFFFFUFFFFUFFDDFDDDDFDDDDFDDDDFDDDDFDDLLLLLLLLLLLLLLLLLLLLLLLLLBBDBBBBDBBBBDBBBBDBBBBDBB'
+    ),
+    "M'": (
+        'UUFUUUUFUUUUFUUUUFUUUUFUURRRRRRRRRRRRRRRRRRRRRRRRRFFDFFFFDFFFFDFFFFDFFFFDFFDDBDDDDBDDDDBDDDDBDDDDBDDLLLLLLLLLLLLLLLLLLLLLLLLLBBUBBBBUBBBBUBBBBUBBBBUBB'
+    ),
+    'M2': (
+        'UUDUUUUDUUUUDUUUUDUUUUDUURRRRRRRRRRRRRRRRRRRRRRRRRFFBFFFFBFFFFBFFFFBFFFFBFFDDUDDDDUDDDDUDDDDUDDDDUDDLLLLLLLLLLLLLLLLLLLLLLLLLBBFBBBBFBBBBFBBBBFBBBBFBB'
+    ),
+    'E': (
+        'UUUUUUUUUUUUUUUUUUUUUUUUURRRRRRRRRRFFFFFRRRRRRRRRRFFFFFFFFFFLLLLLFFFFFFFFFFDDDDDDDDDDDDDDDDDDDDDDDDDLLLLLLLLLLBBBBBLLLLLLLLLLBBBBBBBBBBRRRRRBBBBBBBBBB'
+    ),
+    "E'": (
+        'UUUUUUUUUUUUUUUUUUUUUUUUURRRRRRRRRRBBBBBRRRRRRRRRRFFFFFFFFFFRRRRRFFFFFFFFFFDDDDDDDDDDDDDDDDDDDDDDDDDLLLLLLLLLLFFFFFLLLLLLLLLLBBBBBBBBBBLLLLLBBBBBBBBBB'
+    ),
+    'E2': (
+        'UUUUUUUUUUUUUUUUUUUUUUUUURRRRRRRRRRLLLLLRRRRRRRRRRFFFFFFFFFFBBBBBFFFFFFFFFFDDDDDDDDDDDDDDDDDDDDDDDDDLLLLLLLLLLRRRRRLLLLLLLLLLBBBBBBBBBBFFFFFBBBBBBBBBB'
+    ),
+    'S': (
+        'UUUUUUUUUULLLLLUUUUUUUUUURRURRRRURRRRURRRRURRRRURRFFFFFFFFFFFFFFFFFFFFFFFFFDDDDDDDDDDRRRRRDDDDDDDDDDLLDLLLLDLLLLDLLLLDLLLLDLLBBBBBBBBBBBBBBBBBBBBBBBBB'
+    ),
+    "S'": (
+        'UUUUUUUUUURRRRRUUUUUUUUUURRDRRRRDRRRRDRRRRDRRRRDRRFFFFFFFFFFFFFFFFFFFFFFFFFDDDDDDDDDDLLLLLDDDDDDDDDDLLULLLLULLLLULLLLULLLLULLBBBBBBBBBBBBBBBBBBBBBBBBB'
+    ),
+    'S2': (
+        'UUUUUUUUUUDDDDDUUUUUUUUUURRLRRRRLRRRRLRRRRLRRRRLRRFFFFFFFFFFFFFFFFFFFFFFFFFDDDDDDDDDDUUUUUDDDDDDDDDDLLRLLLLRLLLLRLLLLRLLLLRLLBBBBBBBBBBBBBBBBBBBBBBBBB'
+    ),
+    'M E': (
+        'UUBUUUUBUUUUBUUUUBUUUUBUURRRRRRRRRRFFUFFRRRRRRRRRRFFUFFFFUFFLLLLLFFUFFFFUFFDDFDDDDFDDDDFDDDDFDDDDFDDLLLLLLLLLLBBDBBLLLLLLLLLLBBDBBBBDBBRRRRRBBDBBBBDBB'
+    ),
+    "M' E'": (
+        'UUFUUUUFUUUUFUUUUFUUUUFUURRRRRRRRRRBBUBBRRRRRRRRRRFFDFFFFDFFRRRRRFFDFFFFDFFDDBDDDDBDDDDBDDDDBDDDDBDDLLLLLLLLLLFFDFFLLLLLLLLLLBBUBBBBUBBLLLLLBBUBBBBUBB'
+    ),
+    'M S': (
+        'UUBUUUUBUULLLLLUUBUUUUBUURRURRRRURRRRBRRRRURRRRURRFFUFFFFUFFFFUFFFFUFFFFUFFDDFDDDDFDDRRRRRDDFDDDDFDDLLDLLLLDLLLLFLLLLDLLLLDLLBBDBBBBDBBBBDBBBBDBBBBDBB'
+    ),
+    'E S': (
+        'UUUUUUUUUULLBLLUUUUUUUUUURRURRRRURRFFUFFRRURRRRURRFFFFFFFFFFLLLLLFFFFFFFFFFDDDDDDDDDDRRFRRDDDDDDDDDDLLDLLLLDLLBBDBBLLDLLLLDLLBBBBBBBBBBRRRRRBBBBBBBBBB'
+    ),
+    "M E M' E'": (
+        'UUUUUUUUUUUULUUUUUUUUUUUURRRRRRRRRRRRBRRRRRRRRRRRRFFFFFFFFFFFFUFFFFFFFFFFFFDDDDDDDDDDDDRDDDDDDDDDDDDLLLLLLLLLLLLFLLLLLLLLLLLLBBBBBBBBBBBBDBBBBBBBBBBBB'
+    ),
+    "S M S' M'": (
+        'UUUUUUUUUUUULUUUUUUUUUUUURRRRRRRRRRRRFRRRRRRRRRRRRFFFFFFFFFFFFDFFFFFFFFFFFFDDDDDDDDDDDDRDDDDDDDDDDDDLLLLLLLLLLLLBLLLLLLLLLLLLBBBBBBBBBBBBUBBBBBBBBBBBB'
+    ),
+}
+
 # Expected states after moves (generated from magiccube)
 EXPECTED_5X5X5_R = (
     'UUUUFUUUUFUUUUFUUUUFUUUUFRRRRRRRRRRRRRRRRRRRRRRRRRFFFFDFFFF'
@@ -467,3 +516,94 @@ class Test5x5x5LayeredMoves(unittest.TestCase):
         self.assertNotEqual(r_result, two_r_result)
         self.assertNotEqual(r_result, three_r_result)
         self.assertNotEqual(two_r_result, three_r_result)
+
+
+class Test5x5x5SliceMoves(unittest.TestCase):
+    """Test slice moves (M, E, S) on 5x5x5 cube."""
+
+    def test_m_move(self) -> None:
+        """Test M move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate('M')
+        self.assertEqual(result, EXPECTED_5X5X5['M'])
+
+    def test_m_prime_move(self) -> None:
+        """Test M' move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate("M'")
+        self.assertEqual(result, EXPECTED_5X5X5["M'"])
+
+    def test_m2_move(self) -> None:
+        """Test M2 move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate('M2')
+        self.assertEqual(result, EXPECTED_5X5X5['M2'])
+
+    def test_e_move(self) -> None:
+        """Test E move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate('E')
+        self.assertEqual(result, EXPECTED_5X5X5['E'])
+
+    def test_e_prime_move(self) -> None:
+        """Test E' move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate("E'")
+        self.assertEqual(result, EXPECTED_5X5X5["E'"])
+
+    def test_e2_move(self) -> None:
+        """Test E2 move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate('E2')
+        self.assertEqual(result, EXPECTED_5X5X5['E2'])
+
+    def test_s_move(self) -> None:
+        """Test S move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate('S')
+        self.assertEqual(result, EXPECTED_5X5X5['S'])
+
+    def test_s_prime_move(self) -> None:
+        """Test S' move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate("S'")
+        self.assertEqual(result, EXPECTED_5X5X5["S'"])
+
+    def test_s2_move(self) -> None:
+        """Test S2 move on 5x5x5 matches MagicCube."""
+        cube = VCube(size=5)
+        result = cube.rotate('S2')
+        self.assertEqual(result, EXPECTED_5X5X5['S2'])
+
+    def test_slice_move_combinations(self) -> None:
+        """Test combined slice move sequences on 5x5x5."""
+        # Test M E
+        cube = VCube(size=5)
+        result = cube.rotate('M E')
+        self.assertEqual(result, EXPECTED_5X5X5['M E'])
+
+        # Test M S
+        cube = VCube(size=5)
+        result = cube.rotate('M S')
+        self.assertEqual(result, EXPECTED_5X5X5['M S'])
+
+        # Test E S
+        cube = VCube(size=5)
+        result = cube.rotate('E S')
+        self.assertEqual(result, EXPECTED_5X5X5['E S'])
+
+    def test_slice_move_reversibility(self) -> None:
+        """Test that slice moves are reversible on 5x5x5."""
+        for move in ['M', 'E', 'S']:
+            with self.subTest(move=move):
+                cube = VCube(size=5)
+                cube.rotate(f'{move} {move} {move} {move}')
+                self.assertTrue(cube.is_solved)
+
+    def test_slice_move_prime_cancels(self) -> None:
+        """Test that slice moves cancel with their primes."""
+        for move in ['M', 'E', 'S']:
+            with self.subTest(move=move):
+                cube = VCube(size=5)
+                cube.rotate(f"{move} {move}'")
+                self.assertTrue(cube.is_solved)

@@ -1,6 +1,7 @@
 """Tests for 2x2x2 cube rotation using dynamic rotation system."""
 import unittest
 
+from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.initial_state import get_initial_state
 from cubing_algs.rotate_dynamic import rotate_move
 from cubing_algs.vcube import VCube
@@ -147,7 +148,9 @@ class Test2x2x2BasicMoves(unittest.TestCase):
     def test_layered_move(self) -> None:
         """Test behavior of layered moves on a 2x2x2."""
         result = rotate_move(SOLVED_2X2X2, '2L', size=2)
-        self.assertEqual(result, EXPECTED_2X2X2_RPRIME, '2L move state mismatch')
+        self.assertEqual(
+            result, EXPECTED_2X2X2_RPRIME, '2L move state mismatch',
+        )
         self.assertNotEqual(result, SOLVED_2X2X2)
 
     def test_wide_move(self) -> None:
@@ -238,3 +241,60 @@ class Test2x2x2Sequences(unittest.TestCase):
             state = rotate_move(state, "U'", size=2)
 
         self.assertEqual(state, SOLVED_2X2X2)
+
+
+class Test2x2x2SliceMoveErrors(unittest.TestCase):
+    """Test that slice moves properly fail on even cubes like 2x2x2."""
+
+    def test_m_move_raises_error(self) -> None:
+        """Test that M move raises error on 2x2x2."""
+        cube = VCube(size=2)
+        with self.assertRaises(InvalidMoveError) as context:
+            cube.rotate('M')
+        self.assertIn(
+            'M moves are only allowed on odd-sized cubes',
+            str(context.exception),
+        )
+        self.assertIn('2x2x2', str(context.exception))
+
+    def test_e_move_raises_error(self) -> None:
+        """Test that E move raises error on 2x2x2."""
+        cube = VCube(size=2)
+        with self.assertRaises(InvalidMoveError) as context:
+            cube.rotate('E')
+        self.assertIn(
+            'E moves are only allowed on odd-sized cubes',
+            str(context.exception),
+        )
+        self.assertIn('2x2x2', str(context.exception))
+
+    def test_s_move_raises_error(self) -> None:
+        """Test that S move raises error on 2x2x2."""
+        cube = VCube(size=2)
+        with self.assertRaises(InvalidMoveError) as context:
+            cube.rotate('S')
+        self.assertIn(
+            'S moves are only allowed on odd-sized cubes',
+            str(context.exception),
+        )
+        self.assertIn('2x2x2', str(context.exception))
+
+    def test_m_prime_move_raises_error(self) -> None:
+        """Test that M' move raises error on 2x2x2."""
+        cube = VCube(size=2)
+        with self.assertRaises(InvalidMoveError) as context:
+            cube.rotate("M'")
+        self.assertIn(
+            'M moves are only allowed on odd-sized cubes',
+            str(context.exception),
+        )
+
+    def test_m2_move_raises_error(self) -> None:
+        """Test that M2 move raises error on 2x2x2."""
+        cube = VCube(size=2)
+        with self.assertRaises(InvalidMoveError) as context:
+            cube.rotate('M2')
+        self.assertIn(
+            'M moves are only allowed on odd-sized cubes',
+            str(context.exception),
+        )
