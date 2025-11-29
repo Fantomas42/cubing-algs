@@ -26,12 +26,8 @@ Example 3x3x3 grid (per face):
     - y-axis: 0 (down/D) to N-1 (up/U)
     - z-axis: 0 (back/B) to N-1 (front/F)
 """
-
-
+from cubing_algs.constants import FACE_ORDER
 from cubing_algs.move import Move
-
-# Face ordering matches VCube convention
-FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
 
 # Cache for permutation calculations
 _PERMUTATION_CACHE: dict[tuple[int, str], list[int]] = {}
