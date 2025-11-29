@@ -70,11 +70,23 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     @property
     def center_index(self) -> int:
         """
-        Return the center index.
+        Return the center index for a face.
 
-        Does not work for even cube size.
+        For odd-sized cubes (3x3x3, 5x5x5, etc.), returns the index of the
+        physical center facelet. For 2x2x2, returns 0 (top-left position).
+        For other even-sized cubes (4x4x4, 6x6x6, etc.), returns a virtual
+        center position calculated as face_size + 1, alias the top-left
+        piece of a virtual center.
+
+        Returns:
+            The index of the center position within a face.
+
         """
-        return self.face_size // 2
+        if self.has_fixed_centers:
+            return self.face_size // 2
+        if self.size == 2:
+            return 0
+        return self.size + 1
 
     @staticmethod
     def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
@@ -152,16 +164,17 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Uses the top face center and front face center
         to determine the current orientation of the cube in space.
 
+        For odd-sized cubes, uses the physical center facelet.
+        For even-sized cubes, uses a representative position to
+        determine orientation.
+
         It might not work well with an unchecked state.
 
-        Raises:
-            NotImplementedError: If the cube size is not handled
+        Returns:
+            A two-character string representing the orientation
+            (e.g., 'UF' for white top, green front).
 
         """
-        if not self.has_fixed_centers:
-            msg = 'Cannot compute orientation for cube even size.'
-            raise NotImplementedError(msg)
-
         top_center_index = self.center_index
         front_center_index = 2 * self.face_size + top_center_index
 
@@ -334,17 +347,15 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """
         Get the center facelet colors for all faces.
 
-        Returns:
-            A list of center colors for all six faces in order.
+        For odd-sized cubes, returns the physical center facelet colors.
+        For even-sized cubes, returns representative facelet colors at
+        the calculated center position.
 
-        Raises:
-            NotImplementedError: If the cube size is not handled
+        Returns:
+            A list of center colors for all six faces in order
+            (U, R, F, D, L, B).
 
         """
-        if not self.has_fixed_centers:
-            msg = 'Cannot compute center indexes for cube even size.'
-            raise NotImplementedError(msg)
-
         center_index = self.center_index
 
         return [

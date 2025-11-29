@@ -65,12 +65,19 @@ class Test4x4x4VCube(unittest.TestCase):
 
     def test_center_index(self) -> None:
         """Test the value of center index."""
-        self.assertEqual(self.cube.center_index, 8)
+        self.assertEqual(self.cube.center_index, 5)
 
     def test_orientation(self) -> None:
         """Test orientation."""
-        with self.assertRaises(NotImplementedError):
-            _ = self.cube.orientation
+        self.assertEqual(
+            self.cube.orientation, 'UF',
+        )
+
+        self.cube.rotate('z2')
+
+        self.assertEqual(
+            self.cube.orientation, 'DF',
+        )
 
 
 class Test4x4x4BasicMoves(unittest.TestCase):
