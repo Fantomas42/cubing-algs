@@ -1,41 +1,59 @@
-"""Virtual 3x3 cube implementation for simulating moves and tracking state."""
+"""Virtual cube implementation for simulating moves and tracking state."""
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.extensions import rotate
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
+from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
+from cubing_algs.rotate_dynamic import rotate_move as rotate_dynamic
 from cubing_algs.visual_cube import visual_cube_cube
 
 
 class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     """
-    Virtual 3x3 cube for tracking moves on facelets.
+    Virtual cube for tracking moves on facelets.
 
-    Represents a Rubik's cube state using a 54-character string
-    where each character represents a facelet color.
+    Represents a Rubik's cube state using a facelet string where each
+    character represents a facelet color.
+
+    Supports arbitrary cube sizes:
+    - 2x2x2: 24-character string (6 faces * 4 facelets)
+    - 3x3x3: 54-character string (6 faces * 9 facelets)
+    - NxNxN: 6*N*N-character string
     """
 
-    size = 3
-    face_number = 6
-    face_size = size * size
+    face_number: int = 6
 
     def __init__(self, initial: str | None = None, *,
+                 size: int = 3,
                  check: bool = True,
                  history: list[str] | None = None) -> None:
-        """Initialize a virtual cube with optional initial state and history."""
+        """
+        Initialize a virtual cube with optional initial state and history.
+
+        Args:
+            initial: Optional initial state string. If None, uses solved state.
+            size: Size of the cube. Default is 3.
+              (2 for 2x2x2, 3 for 3x3x3, etc.).
+            check: Whether to check cube integrity on initialization.
+            history: Optional move history to restore.
+
+        """
+        self.size = size
+        self.face_size = size * size
+
         if initial:
             self._state = initial
             if check:
                 self.check_integrity()
         else:
-            self._state = INITIAL_STATE
+            self._state = get_initial_state(size)
 
         self.history: list[str] = history or []
 
@@ -121,7 +139,15 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         to determine the current orientation of the cube in space.
 
         It might not work well with an unchecked state.
+
+        Raises:
+            NotImplementedError: If the cube size is not handled
+
         """
+        if self.size != 3:
+            msg = f'Cannot compute orientation for cube size { self.size }'
+            raise NotImplementedError(msg)
+
         return self._state[4] + self._state[22]
 
     def rotate(self, moves: Algorithm | Move | str, *,
@@ -163,7 +189,11 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         """
         try:
-            self._state = rotate.rotate_move(self._state, move)
+            # Use C extension for 3x3x3, Python for other sizes
+            if self.size == 3:
+                self._state = rotate.rotate_move(self._state, move)
+            else:
+                self._state = rotate_dynamic(self._state, move, size=self.size)
         except ValueError as e:
             raise InvalidMoveError(str(e)) from e
         else:
@@ -188,6 +218,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return VCube(
             self.state,
+            size=self.size,
             check=False,
             history=history,
         )
@@ -289,7 +320,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             A list of center colors for all six faces in order.
 
+        Raises:
+            NotImplementedError: If the cube size is not handled
+
         """
+        if self.size != 3:
+            msg = f'Cannot compute center indexes for cube size { self.size }'
+            raise NotImplementedError(msg)
+
         return [self.state[(i * self.face_size) + 4] for i in range(6)]
 
     def get_face_index(self, face: str) -> int:
