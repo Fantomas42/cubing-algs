@@ -162,7 +162,10 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             msg = 'Cannot compute orientation for cube even size.'
             raise NotImplementedError(msg)
 
-        return self._state[4] + self._state[22]
+        top_center_index = self.center_index
+        front_center_index = 2 * self.face_size + top_center_index
+
+        return self._state[top_center_index] + self._state[front_center_index]
 
     def rotate(self, moves: Algorithm | Move | str, *,
                history: bool = True) -> str:
@@ -342,7 +345,9 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             msg = 'Cannot compute center indexes for cube even size.'
             raise NotImplementedError(msg)
 
-        return [self.state[(i * self.face_size) + 4] for i in range(6)]
+        center_index = self.center_index
+
+        return [self.state[(i * self.face_size) + center_index] for i in range(6)]
 
     def get_face_index(self, face: str) -> int:
         """

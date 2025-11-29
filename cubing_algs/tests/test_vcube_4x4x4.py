@@ -67,6 +67,11 @@ class Test4x4x4VCube(unittest.TestCase):
         """Test the value of center index."""
         self.assertEqual(self.cube.center_index, 8)
 
+    def test_orientation(self) -> None:
+        """Test orientation."""
+        with self.assertRaises(NotImplementedError):
+            _ = self.cube.orientation
+
 
 class Test4x4x4BasicMoves(unittest.TestCase):
     """Test basic face moves on 4x4x4 cube."""

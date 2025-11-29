@@ -82,6 +82,34 @@ class Test5x5x5VCube(unittest.TestCase):
         """Test the value of center index."""
         self.assertEqual(self.cube.center_index, 12)
 
+    def test_get_face_center_indexes(self) -> None:
+        """Test get face center indexes."""
+        self.cube.rotate('F R U')
+
+        self.assertEqual(
+            self.cube.get_face_center_indexes(),
+            ['U', 'R', 'F', 'D', 'L', 'B'],
+        )
+
+        self.cube.rotate('z2')
+
+        self.assertEqual(
+            self.cube.get_face_center_indexes(),
+            ['D', 'L', 'F', 'U', 'R', 'B'],
+        )
+
+    def test_orientation(self) -> None:
+        """Test orientation."""
+        self.assertEqual(
+            self.cube.orientation, 'UF',
+        )
+
+        self.cube.rotate('z2')
+
+        self.assertEqual(
+            self.cube.orientation, 'DF',
+        )
+
 
 class Test5x5x5BasicMoves(unittest.TestCase):
     """Test basic face moves on 5x5x5 cube."""
