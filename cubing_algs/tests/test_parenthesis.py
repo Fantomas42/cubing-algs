@@ -129,6 +129,14 @@ class ExpandParenthesisMultipliersTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(result, expected)
 
+    def test_complex_inversion_without_spaces(self) -> None:
+        """Test multiplier without extra spaces."""
+        moves = "(RUR'U')'"
+        expected = "U R U' R'"
+        result = expand_parenthesis_multipliers_and_inversions(moves)
+
+        self.assertEqual(result, expected)
+
     def test_inversion_with_double_moves(self) -> None:
         """Test inversion with R2 moves (should stay R2)."""
         moves = "(R U2 R')'"
@@ -173,6 +181,14 @@ class ExpandParenthesisMultipliersTestCase(unittest.TestCase):  # noqa: PLR0904
     def test_simple_multiplier_then_inversion(self) -> None:
         """Test simple multiplier then inversion."""
         moves = "(R U)2'"
+        expected = "U' R' U' R'"
+        result = expand_parenthesis_multipliers_and_inversions(moves)
+
+        self.assertEqual(result, expected)
+
+    def test_simple_multiplier_then_inversion_without_spaces(self) -> None:
+        """Test simple multiplier then inversion without spaces."""
+        moves = "(RU)2'"
         expected = "U' R' U' R'"
         result = expand_parenthesis_multipliers_and_inversions(moves)
 
