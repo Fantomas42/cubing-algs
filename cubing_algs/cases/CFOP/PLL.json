@@ -168,9 +168,7 @@
                 "x"
             ]
         },
-        "sarah": [],
         "status": "OK",
-        "symmetry": "",
         "two-phase": [
             "R'FR'B2RF'R'B2R2"
         ]
@@ -333,9 +331,7 @@
                 "x'"
             ]
         },
-        "sarah": [],
         "status": "OK",
-        "symmetry": "",
         "two-phase": [
             "RB'RF2R'BRF2R2"
         ]
@@ -409,7 +405,6 @@
             "xR'UR'D2RU'R'D2R2z'R'UR'D2RU'R'D2R2x'",
             "RRUR'U'yRUR'U'RUR'U'RUR'y'RU'R'R'"
         ],
-        "aliases": [],
         "arrows": "U0U6-black,U6U0-black,U2U8-black,U8U2-black",
         "badmephisto": {
             "algos": [
@@ -515,7 +510,6 @@
                 "x"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "double",
         "two-phase": [
@@ -590,7 +584,6 @@
             "r2B2r2RUR'U'R'FR2U'R'U'RUR'F'r2B2r2",
             "R'U'F'RD'RU'R'DRURURU'R'U'RU'R'URFUR"
         ],
-        "aliases": [],
         "arrows": "U2U8-black,U8U2-black,U1U7,U7U1",
         "badmephisto": {
             "algos": [
@@ -717,7 +710,6 @@
                 "R"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "simple",
         "two-phase": [
@@ -779,7 +771,6 @@
             "uid": "Ga"
         },
         "code": "Ga",
-        "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -866,10 +857,7 @@
                 "R"
             ]
         },
-        "sarah": [],
-        "status": "OK",
-        "symmetry": "",
-        "two-phase": []
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -929,7 +917,6 @@
             "uid": "Gb"
         },
         "code": "Gb",
-        "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -1016,10 +1003,7 @@
                 "R2"
             ]
         },
-        "sarah": [],
-        "status": "OK",
-        "symmetry": "",
-        "two-phase": []
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -1089,7 +1073,6 @@
             "uid": "Gc"
         },
         "code": "Gc",
-        "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -1174,10 +1157,7 @@
                 "R'"
             ]
         },
-        "sarah": [],
-        "status": "OK",
-        "symmetry": "",
-        "two-phase": []
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -1232,7 +1212,6 @@
             "uid": "Gd"
         },
         "code": "Gd",
-        "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -1317,10 +1296,7 @@
                 "R2"
             ]
         },
-        "sarah": [],
-        "status": "OK",
-        "symmetry": "",
-        "two-phase": []
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -1451,7 +1427,6 @@
                 "M2"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "double",
         "two-phase": [
@@ -1650,9 +1625,7 @@
                 "L"
             ]
         },
-        "sarah": [],
         "status": "OK",
-        "symmetry": "",
         "two-phase": [
             "L2DLD'LB2R'URB2"
         ]
@@ -1815,9 +1788,7 @@
                 "R'"
             ]
         },
-        "sarah": [],
         "status": "OK",
-        "symmetry": "",
         "two-phase": [
             "R2D'R'DR'B2LU'L'B2"
         ]
@@ -1951,7 +1922,6 @@
                 "R'"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "double inverted",
         "two-phase": [
@@ -2110,7 +2080,6 @@
                 "L"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "double inverted",
         "two-phase": [
@@ -2166,7 +2135,6 @@
             "uid": "Ra"
         },
         "code": "Ra",
-        "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -2251,9 +2219,7 @@
                 "L2"
             ]
         },
-        "sarah": [],
         "status": "OK",
-        "symmetry": "",
         "two-phase": [
             "R2F2U'L'UL'B2RD'R'B2L2F2R2"
         ]
@@ -2303,7 +2269,6 @@
             "uid": "Rb"
         },
         "code": "Rb",
-        "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -2389,9 +2354,7 @@
                 "R2"
             ]
         },
-        "sarah": [],
         "status": "OK",
-        "symmetry": "",
         "two-phase": [
             "R2B2D'R'DR'B2LU'L'B2R2B2R2"
         ]
@@ -2436,7 +2399,6 @@
             "RUR'U'RU'R'U'RUR'F'RUR'U'R'FRURU'R'",
             "B2RBR'BLBLB2LB2L'B2RB2R'B'L'"
         ],
-        "aliases": [],
         "arrows": "U3U5,U5U3,U2U8-black,U8U2-black",
         "badmephisto": {
             "algos": [
@@ -2535,7 +2497,6 @@
                 "F'"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "simple",
         "two-phase": [
@@ -2731,7 +2692,6 @@
                 "M2"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "simple",
         "two-phase": [
@@ -2940,7 +2900,6 @@
                 "M2"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "simple",
         "two-phase": [
@@ -3008,7 +2967,6 @@
             "RURDR'U'RD'R2U2R'U2R'D'rU2r'DR2",
             "RUR'UR'U'F'RUR'U'R'FR2U'R'U'RUR'URU'RU'R'"
         ],
-        "aliases": [],
         "arrows": "U1U5,U5U1,U0U8-black,U8U0-black",
         "badmephisto": {
             "algos": [
@@ -3112,10 +3070,8 @@
                 "F"
             ]
         },
-        "sarah": [],
         "status": "OK",
-        "symmetry": "axial",
-        "two-phase": []
+        "symmetry": "axial"
     },
     {
         "algorithms": [
@@ -3177,7 +3133,6 @@
             "FURU'R'F'U2RU2R'U'RU'R2F2rUr'FR",
             "R2BU'F2L2B2DF'D2B2D2R2FB2D2L2F2"
         ],
-        "aliases": [],
         "arrows": "U1U3,U3U1,U0U8-black,U8U0-black",
         "badmephisto": {
             "algos": [
@@ -3277,7 +3232,6 @@
                 "F'"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "axial",
         "two-phase": [
@@ -3350,7 +3304,6 @@
             "M2U'M2U'M'U2M2U2MUM2U2M2UM2",
             "LRU2LR'UF2L2F2UL2UF2L2F2UL2"
         ],
-        "aliases": [],
         "arrows": "U1U3-black,U3U1-black,U5U7-black,U7U5-black",
         "badmephisto": {
             "algos": [
@@ -3448,7 +3401,6 @@
                 "S'"
             ]
         },
-        "sarah": [],
         "status": "OK",
         "symmetry": "double",
         "two-phase": [

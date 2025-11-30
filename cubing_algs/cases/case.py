@@ -51,7 +51,7 @@ class CaseData(TypedDict):
     algorithms: list[str]
 
 
-class Case:
+class Case:  # noqa: PLR0904
     """
     Represents a single cubing case with its algorithms and properties.
 
@@ -84,26 +84,6 @@ class Case:
         return self.data['code']
 
     @cached_property
-    def description(self) -> str:
-        """Human-readable description of the case."""
-        return self.data['description']
-
-    @cached_property
-    def aliases(self) -> list[str]:
-        """Alternative names for the case."""
-        return self.data['aliases']
-
-    @cached_property
-    def arrows(self) -> str:
-        """Arrow notation for visualizing piece movements."""
-        return self.data['arrows']
-
-    @cached_property
-    def symmetry(self) -> str:
-        """Symmetry properties of the case."""
-        return self.data['symmetry']
-
-    @cached_property
     def family(self) -> str:
         """Family or category the case belongs to."""
         return self.data['family']
@@ -119,9 +99,29 @@ class Case:
         return self.data['status']
 
     @cached_property
+    def description(self) -> str:
+        """Human-readable description of the case."""
+        return self.data.get('description', '')
+
+    @cached_property
+    def aliases(self) -> list[str]:
+        """Alternative names for the case."""
+        return self.data.get('aliases', [])
+
+    @cached_property
+    def arrows(self) -> str:
+        """Arrow notation for visualizing piece movements."""
+        return self.data.get('arrows', '')
+
+    @cached_property
+    def symmetry(self) -> str:
+        """Symmetry properties of the case."""
+        return self.data.get('symmetry', '')
+
+    @cached_property
     def recognition(self) -> RecognitionData:
         """Recognition pattern for identifying the case."""
-        return self.data['recognition']
+        return self.data.get('recognition', {})
 
     @cached_property
     def optimal_cycles(self) -> int:
