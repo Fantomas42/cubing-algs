@@ -8,23 +8,8 @@ This module handles expansion of:
 """
 import re
 
-
-def invert_move(move_str: str) -> str:
-    """
-    Invert a single move string.
-
-    Returns:
-        The inverted move (R -> R', R' -> R, R2 -> R2).
-
-    """
-    move_str = move_str.strip()
-    if not move_str:
-        return move_str
-    if move_str.endswith("'"):
-        return move_str[:-1]
-    if move_str.endswith('2'):
-        return move_str
-    return move_str + "'"
+from cubing_algs.algorithm import Algorithm
+from cubing_algs.transform.mirror import mirror_moves
 
 
 def apply_multiplier(content: str, multiplier: int) -> str:
@@ -40,7 +25,7 @@ def apply_multiplier(content: str, multiplier: int) -> str:
     return ''
 
 
-def apply_inversion(content: str) -> str:
+def apply_inversion(old_moves: str) -> str:
     """
     Apply inversion to content.
 
@@ -48,11 +33,9 @@ def apply_inversion(content: str) -> str:
         Content with moves reversed and each move inverted.
 
     """
-    if not content:
-        return ''
-    move_strs = content.split()
-    inverted_moves = [invert_move(m) for m in reversed(move_strs)]
-    return ' '.join(inverted_moves)
+    algo = Algorithm.parse_moves(old_moves)
+
+    return str(algo.transform(mirror_moves))
 
 
 def expand_parenthesis_multipliers_and_inversions(moves: str) -> str:
