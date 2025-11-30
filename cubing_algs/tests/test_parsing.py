@@ -742,6 +742,14 @@ class ExpandParenthesisMultipliersTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(result, expected)
 
+    def test_multiplier_without_spaces(self) -> None:
+        """Test multiplier without extra spaces."""
+        moves = "(RUR'U')3"
+        expected = "R U R' U' R U R' U' R U R' U'"
+        result = expand_parenthesis_multipliers_and_inversions(moves)
+
+        self.assertEqual(result, expected)
+
     def test_multiplier_in_sequence(self) -> None:
         """Test multiplier in middle of sequence."""
         moves = "R (U R')2 U"
