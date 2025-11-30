@@ -80,52 +80,112 @@ def clean_moves(moves: str) -> str:
     return moves.translate(CASE_FIXES)
 
 
-def expand_parenthesis_multipliers(moves: str) -> str:
+def _invert_move(move_str: str) -> str:
     """
-    Expand parenthesis multipliers like (R U R' U')3 into repeated sequences.
+    Invert a single move string.
 
-    Parentheses with numbers are expanded by repeating the content.
-    Parentheses without numbers are left as-is (to be removed by cleaning).
+    Returns:
+        The inverted move (R -> R', R' -> R, R2 -> R2).
+
+    """
+    move_str = move_str.strip()
+    if not move_str:
+        return move_str
+    if move_str.endswith("'"):
+        return move_str[:-1]
+    if move_str.endswith('2'):
+        return move_str
+    return move_str + "'"
+
+
+def _apply_multiplier(content: str, multiplier: int) -> str:
+    """
+    Apply multiplier to content.
+
+    Returns:
+        Content repeated multiplier times, joined with spaces.
+
+    """
+    if multiplier > 0:
+        return ' '.join([content] * multiplier)
+    return ''
+
+
+def _apply_inversion(content: str) -> str:
+    """
+    Apply inversion to content.
+
+    Returns:
+        Content with moves reversed and each move inverted.
+
+    """
+    if not content:
+        return ''
+    move_strs = content.split()
+    inverted_moves = [_invert_move(m) for m in reversed(move_strs)]
+    return ' '.join(inverted_moves)
+
+
+def expand_parenthesis_multipliers_and_inversions(moves: str) -> str:
+    """
+    Expand parenthesis multipliers and inversions.
+
+    Handles three patterns:
+    - (R U)3 - repeat 3 times
+    - (R U)' - invert (reverse and invert each move)
+    - (R U)3' - repeat 3 times then invert
+
+    Parentheses without modifiers are left as-is (to be removed by cleaning).
     Handles nested parentheses from inside out.
 
     Args:
-        moves: A string containing move sequences with parenthesis multipliers.
+        moves: A string containing move sequences with parenthesis modifiers.
 
     Returns:
-        The expanded move string with all multipliers resolved.
+        The expanded move string with all modifiers resolved.
 
     Examples:
         "(R U R' U')3" -> "R U R' U' R U R' U' R U R' U'"
-        "R (U R')2 U" -> "R U R' U R' U"
+        "(R U)'" -> "U' R'"
+        "(R U R' U')3'" -> "U R U' R' U R U' R' U R U' R'"
         "((R U)2)3" -> "R U R U R U R U R U R U" (6 times total)
 
     """
     result = moves
-
-    # Keep expanding until no more parenthesis multipliers found
-    # We need to handle nested parentheses from inside out
-    max_iterations = 100  # Safety limit to prevent infinite loops
+    max_iterations = 100
     iteration = 0
 
     while iteration < max_iterations:
-        # Find innermost parentheses followed by a number
-        # Pattern: (...) followed by digits, where ... contains no parentheses
-        pattern = re.compile(r'\(([^()]*)\)(\d+)')
-        match = pattern.search(result)
+        # Try multiplier with inversion: (...)N'
+        match = re.search(r"\(([^()]*)\)(\d+)'", result)
+        if match:
+            content = match.group(1).strip()
+            multiplier = int(match.group(2))
+            expanded = _apply_inversion(_apply_multiplier(content, multiplier))
+            result = result[:match.start()] + expanded + result[match.end():]
+            iteration += 1
+            continue
 
-        if match is None:
-            break
+        # Try just multiplier: (...)N
+        match = re.search(r'\(([^()]*)\)(\d+)', result)
+        if match:
+            content = match.group(1).strip()
+            multiplier = int(match.group(2))
+            expanded = _apply_multiplier(content, multiplier)
+            result = result[:match.start()] + expanded + result[match.end():]
+            iteration += 1
+            continue
 
-        content = match.group(1).strip()
-        multiplier = int(match.group(2))
+        # Try just inversion: (...)'
+        match = re.search(r"\(([^()]*)\)'", result)
+        if match:
+            content = match.group(1).strip()
+            expanded = _apply_inversion(content)
+            result = result[:match.start()] + expanded + result[match.end():]
+            iteration += 1
+            continue
 
-        # Expand the content by repeating it
-        expanded = ' '.join([content] * multiplier) if multiplier > 0 else ''
-
-        # Replace in result, preserving surrounding whitespace
-        result = result[:match.start()] + expanded + result[match.end():]
-
-        iteration += 1
+        break
 
     return result.strip()
 
@@ -203,6 +263,7 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
     - Strings are cleaned, split into moves, validated, and converted
       to an Algorithm
     - Supports multiline input and removes comments starting with //
+    - Supports parenthesis inversions (R U)'
     - Supports parenthesis multipliers (R U)3
     - Supports commutators [A, B] and conjugates [A: B]
 
@@ -215,9 +276,13 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
 
     Examples:
         (R U R' U')3 becomes R U R' U' R U R' U' R U R' U'
+        (R U R' U')' becomes U R U' R' (inversion)
+        (R U R' U')3' becomes U R U' R' U R U' R' U R U' R'
+            (multiply then invert)
         [A, B] becomes A B A' B' (commutator)
         [A: B] becomes A B A' (conjugate)
         ([R, U])3 becomes R U R' U' R U R' U' R U R' U'
+        ((R U)')2 becomes U' R' U' R' (inversion then multiplier)
         [[R: U], D] becomes R U R' D R U' R' D'
         [F: [U, R]] becomes F U R U' R' F'
 
@@ -243,8 +308,12 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
 
     raw_moves_str = clean_multiline_and_comments(raw_moves_str)
 
-    expanded_moves = expand_parenthesis_multipliers(raw_moves_str)
-    expanded_moves = expand_commutators_and_conjugates(expanded_moves)
+    # First expand commutators/conjugates so modifiers work on simple moves
+    expanded_moves = expand_commutators_and_conjugates(raw_moves_str)
+    # Then expand multipliers and inversions
+    expanded_moves = expand_parenthesis_multipliers_and_inversions(
+        expanded_moves,
+    )
 
     if not secure:
         moves = split_moves(clean_moves(expanded_moves))
