@@ -62,6 +62,14 @@
             "A-PLL a"
         ],
         "arrows": "U0U2-black,U2U8-black,U8U0-black",
+        "badmephisto": {
+            "algos": [
+                "xR'UR'D2RU'R'D2R2x'"
+            ],
+            "comment": "The\nalgorithm has a little bit of a symmetry to it. I have a very weird way\nto memorize this algorithm tracking the two corners in UBR and UFR\naround the cube as I do it. But I know that many of my friends do it\ndifferently. Find what suits you best, it is not too hard or long.",
+            "difficulty": 3,
+            "uid": "Aa"
+        },
         "code": "Aa",
         "description": "Utilis\u00e9e en headlights.",
         "family": "Corners only",
@@ -72,6 +80,32 @@
             "L4C",
             "ZBLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "xR2RUR'D2RU'R'D2R2x'",
+                "description": "A9 [commutator] / [conjugate] - [x R2: [R U R', D2]]",
+                "variations": [
+                    {
+                        "algo": "l'UR'D2RU'R'D2R2x'",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "xR'UR'D2RU'R'D2R2x'",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RUR'F'rUR'U'r'FR2U'R'",
+                "description": "Modified Jb-Perm potentially good for big cubes"
+            }
         ],
         "main": "x'R'DR'U2RD'R'U2R2x",
         "name": "PLL Aa",
@@ -134,8 +168,12 @@
                 "x"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": [
+            "R'FR'B2RF'R'B2R2"
+        ]
     },
     {
         "algorithms": [
@@ -194,6 +232,14 @@
             "A-PLL b"
         ],
         "arrows": "U8U2-black,U6U8-black,U2U6-black",
+        "badmephisto": {
+            "algos": [
+                "x'RU'RD2R'URD2R2x"
+            ],
+            "comment": "This\nis the exact same type of motion you do in A(a). If you memorized it by\nmotions instead of notation, you should be able to do this one without\ntoo many problems.",
+            "difficulty": 2,
+            "uid": "Ab"
+        },
         "code": "Ab",
         "description": "Version sym\u00e9trique en M, S et mirroir de la Aa.",
         "family": "Corners only",
@@ -204,6 +250,28 @@
             "L4C",
             "ZBLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "xR2D2RUR'D2RU'R'R2x'",
+                "description": "A9 [commutator] / [conjugate] - [x R2: [D2, R U R']]",
+                "variations": [
+                    {
+                        "algo": "l'R'D2RUR'D2RU'Rx'",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "xR2D2RUR'D2RU'Rx'",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "xRD'RU2R'DRU2R2x'",
         "name": "PLL Ab",
@@ -265,8 +333,12 @@
                 "x'"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": [
+            "RB'RF2R'BRF2R2"
+        ]
     },
     {
         "algorithms": [
@@ -339,6 +411,15 @@
         ],
         "aliases": [],
         "arrows": "U0U6-black,U6U0-black,U2U8-black,U8U2-black",
+        "badmephisto": {
+            "algos": [
+                "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
+                "x'RU'R'DRUR'u2R'URDR'U'Rx'"
+            ],
+            "comment": "This algorithm has a nice symmetry to it, as highlighted. Some people fund the second one faster to execute",
+            "difficulty": 2,
+            "uid": "E"
+        },
         "code": "E",
         "description": "Sym\u00e9trie avec le U' au d\u00e9but et fin, et le D qui va et vient \u00e0 chaque tour.",
         "family": "Corners only",
@@ -348,6 +429,42 @@
             "L4C",
             "ZBLL",
             "ZZLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
+                "description": "[Commutator] combinaison - [R U' R', D] [R, U R' D]",
+                "variations": [
+                    {
+                        "algo": "lU'R'DRUR'D'RUR'DRU'R'D'x",
+                        "description": "Execution starts with a wide turn",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "x'RU'R'DRUR'D'RUR'DRU'R'u'z'",
+                        "description": "Execution ends with a wide turn",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RRUR'U'yRUR'U'RUR'U'RUR'y'RU'R'R'",
+                "description": "Long algorithm but decent for [OH] and big cubes",
+                "variations": [
+                    {
+                        "algo": "R2UR'U'yRUR'U'RUR'U'RUR'y'RU'R2",
+                        "description": "Execution incorporates cancellations"
+                    }
+                ]
+            },
+            {
+                "algo": "UzU2R2FRUR'U'RUR'U'RUR'U'F'R2U2z'",
+                "description": "Long algorithm but decent for [OH] and big cubes"
+            }
         ],
         "main": "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
         "name": "PLL E",
@@ -398,8 +515,12 @@
                 "x"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "FU'BU'D2F'UB'U'BL2U2FD2B'R2F'"
+        ]
     },
     {
         "algorithms": [
@@ -471,6 +592,14 @@
         ],
         "aliases": [],
         "arrows": "U2U8-black,U8U2-black,U1U7,U7U1",
+        "badmephisto": {
+            "algos": [
+                "R'U2R'd'R'F'R2U'R'UR'FRU'F"
+            ],
+            "comment": "If\n      you know V permutation, this one is REALLY easy. I highlighted the\n      differences. There is simply one extra U, so instead of R' U R' in the\n      beginning you have R' U U R' (or R' U2 R'), and then you have to undo\n      that U at the end of the algorithm, so there is an extra U' that pops\n      in from nowhere near the end of the algorithm.",
+            "difficulty": 1,
+            "uid": "F"
+        },
         "code": "F",
         "description": "Ressemble \u00e0 la Jb-Perm et T-Perm sauf la fin.",
         "family": "Corners and edges",
@@ -478,6 +607,47 @@
             "PLL",
             "ZBLL",
             "ZZLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U'F'RUR'U'R'FR2U'R'U'RUR'F'FUR",
+                "description": "[Conjugate] of T-Perm - [R' U' F': T-Perm]",
+                "variations": [
+                    {
+                        "algo": "R'U'F'RUR'U'R'FR2U'R'U'RUR'UR",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RUR'U'R'URU2L'R'URU'LU2URU'R'",
+                "description": "Playing with [F2L] pairs - track FR + BR + FL",
+                "variations": [
+                    {
+                        "algo": "RUR'U'R'URU2L'R'URU'LU'RU'R'",
+                        "description": "Note the [COLL] algorithm in the middle - case F2",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "LR2URUR2U'R'U'R2U'RU2L'UR'",
+                "description": "[RUL] algorithm",
+                "variations": [
+                    {
+                        "algo": "LR2URUR2U'R'U'R2U'RU2zU'Ru'x'",
+                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "R'U'F'RUR'U'R'FR2U'R'U'RUR'UR",
         "name": "PLL F",
@@ -547,8 +717,12 @@
                 "R"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "L'F2UL'B2RD'R'B2R2D2RL2D2R"
+        ]
     },
     {
         "algorithms": [
@@ -596,12 +770,38 @@
             "G-PLL a"
         ],
         "arrows": "U0U2-black,U2U6-black,U6U0-black,U1U3-red,U3U5-red,U5U1-red",
+        "badmephisto": {
+            "algos": [
+                "R2uR'UR'U'Ru'R2y'R'UR"
+            ],
+            "comment": "This is very similar to G(c). Everything just goes the other way :)",
+            "difficulty": 2,
+            "uid": "Ga"
+        },
         "code": "Ga",
         "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
             "ZBLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R2uR'UR'U'Ru'R2y'R'UR",
+                "description": "Standard algorithm",
+                "tags": [
+                    "2H"
+                ],
+                "variations": [
+                    {
+                        "algo": "R2uR'UR'U'Ru'R2yL'UL",
+                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "R2uR'UR'U'Ru'R2y'R'UR",
         "name": "PLL Ga",
@@ -666,8 +866,10 @@
                 "R"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -718,12 +920,38 @@
             "G-PLL b"
         ],
         "arrows": "U0U6-black,U6U8-black,U8U0-black,U1U7-red,U7U3-red,U3U1-red",
+        "badmephisto": {
+            "algos": [
+                "R'U'RyR2uR'URU'Ru'R2"
+            ],
+            "comment": "This\nis similar. First take out the pair that is right under the aligned\n2x1x1 block, as in G(d), and then rotate the cube, and do a similar\npattern. See how there is a symmetry to the U's again? u U U' u'. When\nI execute, I do the first R2 as R' R', counterclockwise motion. So I\nthink CCW, CCW, CW, CW, and final R2 just to fix it all up.",
+            "difficulty": 2,
+            "uid": "Gb"
+        },
         "code": "Gb",
         "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
             "ZBLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U'RyR2uR'URU'Ru'R2",
+                "description": "Standard algorithm",
+                "tags": [
+                    "OH"
+                ],
+                "variations": [
+                    {
+                        "algo": "F'U'FR2uR'URU'Ru'R2",
+                        "description": "Execution \u00e0 deux mains",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "R'U'RyR2uR'URU'Ru'R2",
         "name": "PLL Gb",
@@ -788,8 +1016,10 @@
                 "R2"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -850,12 +1080,36 @@
             "G-PLL c"
         ],
         "arrows": "U0U6-black,U6U8-black,U8U0-black,U7U3-red,U3U5-red,U5U7-red",
+        "badmephisto": {
+            "algos": [
+                "R2u'RU'RUR'uR2yRU'R'"
+            ],
+            "comment": "This\nis simply G(d) inverted. But I find it useless to remember it like\nthat. This is like a completely new algorithm for me. Note the still\ndistinct pattern to the U's. And also R's. Remember it as you wish. The\nlast part yRU'R' just inserts an F2L pair once the first part is done.",
+            "difficulty": 3,
+            "uid": "Gc"
+        },
         "code": "Gc",
         "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
             "ZBLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R2F2RU2RU2R'FRUR'U'R'FR2",
+                "description": "[RUF] algorithm. Requires decent [TPS] to be fast",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "R2u'RU'RUR'uR2yRU'R'",
+                "description": "Standard algorithm",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "R2u'RU'RUR'uR2yRU'R'",
         "name": "PLL Gc",
@@ -920,8 +1174,10 @@
                 "R'"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -967,12 +1223,36 @@
             "G-PLL d"
         ],
         "arrows": "U0U2-black,U2U6-black,U6U0-black,U3U7-red,U7U1-red,U1U3-red",
+        "badmephisto": {
+            "algos": [
+                "RUR'y'R2u'RU'R'UR'uR2"
+            ],
+            "comment": "RUR'\ntakes out a pair. Then rotate the cube, and now the fun part starts. I\nhighleted the R rotations so that you can see the pattern better.\nNotice in particular how the U turns are. It is u' U' U u. It has a\nvery nice symmetry to it. The R's I remember as follows: Since in\nexecution I perfrom the R2 as RR (in clockwise motion), I see them as R\nclockwise twice, and then R counterclockwise twice, and the final R2 is\njust to finish up the algorithm. You are welcome to come up with better\nmemory techniques for this things. I know a couple of friends, each\nwith different ways of remembering these G perms...",
+            "difficulty": 2,
+            "uid": "Gd"
+        },
         "code": "Gd",
         "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
             "ZBLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R2F'RURU'R'F'RU2R'U2R'F2R2",
+                "description": "[RUF] algorithm. Requires decent [TPS] to be fast",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "RUR'y'R2u'RU'R'UR'uR2",
+                "description": "Standard algorithm",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "RUR'y'R2u'RU'R'UR'uR2",
         "name": "PLL Gd",
@@ -1037,8 +1317,10 @@
                 "R2"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1099,6 +1381,14 @@
             "X-PLL"
         ],
         "arrows": "U1U7-black,U7U1-black,U5U3-black,U3U5-black",
+        "badmephisto": {
+            "algos": [
+                "M2UM2U2M2UM2"
+            ],
+            "comment": "A very easy to remember algorithm. Note how the M2's always alternate, and in between you simply have just U, U2, U",
+            "difficulty": 1,
+            "uid": "H"
+        },
         "code": "H",
         "description": "Des U U2 U toujours entour\u00e9s de M2.",
         "family": "Edges only",
@@ -1109,6 +1399,28 @@
             "ELL",
             "ZBLL",
             "ZZLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "M2U'M2U2M2U2UM2",
+                "description": "[MU] [commutator] / [conjugate] - [M2 U': [M2, U2]]",
+                "variations": [
+                    {
+                        "algo": "M2U'M2U2M2U'M2",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R2U2RU2R2U2R2U2RU2R2",
+                "description": "Note the Ortega / Varasano [OLL] algorithm (H case)",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "M2UM2U2M2UM2",
         "name": "PLL H",
@@ -1139,8 +1451,12 @@
                 "M2"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "R2F2B2L2D'R2F2B2L2"
+        ]
     },
     {
         "algorithms": [
@@ -1227,6 +1543,14 @@
             "L-perm"
         ],
         "arrows": "U0U6-black,U6U0-black,U3U7,U7U3",
+        "badmephisto": {
+            "algos": [
+                "R'UL'U2RU'R'U2RL"
+            ],
+            "comment": "1st\n      part is exactly as in N(b), below. But then you do U2RU'R'U2 which I\n      find personally very easy to remember. The last part (RLU)just simply\n      restores all yellows and I find it very easy to see it visually.",
+            "difficulty": 2,
+            "uid": "Ja"
+        },
         "code": "Ja",
         "description": "Comme la Jb-Perm mais mirroir.",
         "family": "Corners and edges",
@@ -1234,6 +1558,34 @@
             "PLL",
             "ZBLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'UL'U2RU'LL'R'U2RL",
+                "description": "Playing with [F2L] pairs - track BR + FL. Similar to Na",
+                "variations": [
+                    {
+                        "algo": "R'UL'U2RU'R'U2RL",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U2RUR'URR'ULU'RUL'",
+                "description": "[COLL] combinaison - [RBAS], [RBN]",
+                "variations": [
+                    {
+                        "algo": "R'U2RUR'U2LU'RUL'",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "L'U'LFL'U'LULF'L2UL",
         "name": "PLL Ja",
@@ -1298,8 +1650,12 @@
                 "L"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": [
+            "L2DLD'LB2R'URB2"
+        ]
     },
     {
         "algorithms": [
@@ -1352,6 +1708,14 @@
             "J-PLL b"
         ],
         "arrows": "U2U8-black,U8U2-black,U5U7,U7U5",
+        "badmephisto": {
+            "algos": [
+                "RUR'F'RUR'U'R'FR2U'R'"
+            ],
+            "comment": "Notice\nthat this is EXACTLY the same algorithm as the one above but the RUR'F'\nfrom the end was now moved to the beginning! So just do RUR'F' and then\nstart doing the T permutation (above) until you see that the cube is\nsolved!",
+            "difficulty": 1,
+            "uid": "Jb"
+        },
         "code": "Jb",
         "description": "Comme la T-Perm, mais le d\u00e9but est la fin.",
         "family": "Corners and edges",
@@ -1359,6 +1723,34 @@
             "PLL",
             "ZBLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'F'RUR'U'R'FR2U'R'U'RUR'F'FRU'R'",
+                "description": "[Conjugate] of T-Perm - [R U R' F': T-Perm]",
+                "variations": [
+                    {
+                        "algo": "RUR'F'RUR'U'R'FR2U'R'",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU2R'U'RU'R'RU'L'UR'U'L",
+                "description": "[COLL] combinaison - [RFAS], [RFN]",
+                "variations": [
+                    {
+                        "algo": "RU2R'U'RU2L'UR'U'L",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "RUR'F'RUR'U'R'FR2U'R'",
         "name": "PLL Jb",
@@ -1423,8 +1815,12 @@
                 "R'"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": [
+            "R2D'R'DR'B2LU'L'B2"
+        ]
     },
     {
         "algorithms": [
@@ -1481,6 +1877,14 @@
             "N-PLL a"
         ],
         "arrows": "U1U7,U7U1,U0U8-black,U8U0-black",
+        "badmephisto": {
+            "algos": [
+                "LU'RU2L'UR'LU'RU2L'UR'"
+            ],
+            "comment": "This is just the mirror of the algorithm above and should not be hard to learn.",
+            "difficulty": 1,
+            "uid": "Na"
+        },
         "code": "Na",
         "description": "Suivre le coin FLU.",
         "family": "Corners and edges",
@@ -1488,6 +1892,28 @@
             "PLL",
             "ZBLL",
             "ZZLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'URUR'F'RUR'U'R'FR2U'R'U'U'RU'R'",
+                "description": "[Conjugate] of Jb-Perm - [R U R' U: Jb-Perm]",
+                "variations": [
+                    {
+                        "algo": "RUR'URUR'F'RUR'U'R'FR2U'R'U2RU'R'",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU'LU2R'UL'RU'LU2R'UL'",
+                "description": "Playing with [F2L] pairs - track FR + BL",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "LU'RU2L'UR'LU'RU2L'UR'",
         "name": "PLL Na",
@@ -1525,8 +1951,12 @@
                 "R'"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "double inverted"
+        "symmetry": "double inverted",
+        "two-phase": [
+            "RFB'R2D2FBR'B2L'B2R2U2RU2R'F2"
+        ]
     },
     {
         "algorithms": [
@@ -1612,6 +2042,14 @@
             "N-PLL b"
         ],
         "arrows": "U1U7,U7U1,U6U2-black,U2U6-black",
+        "badmephisto": {
+            "algos": [
+                "R'UL'U2RU'LR'UL'U2RU'L"
+            ],
+            "comment": "Note how the algorithm is made up of two IDENTICAL pieces (in squigly brackets).\n      To memorize this, track the corner in UBR. As you do R'UL', it will\n      travel along a U on the top layer of the cube. Then do U2, and then\n      restore yellows by doing RU'L. Then repeat that whole thing again. \n      I hate executing this algorithm. Its a good thing that it rarely ever comes up.",
+            "difficulty": 1,
+            "uid": "Nb"
+        },
         "code": "Nb",
         "description": "Suivre le coin FRU.",
         "family": "Corners and edges",
@@ -1619,6 +2057,22 @@
             "PLL",
             "ZBLL",
             "ZZLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'URU'R'F'U'FRUR'FR'F'RU'R",
+                "description": "Playing with [F2L] pair - track BR corner",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "R'UL'U2RU'LR'UL'U2RU'L",
+                "description": "Playing with [F2L] pairs - track BR + FL",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "R'UL'U2RU'LR'UL'U2RU'L",
         "name": "PLL Nb",
@@ -1656,8 +2110,12 @@
                 "L"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "double inverted"
+        "symmetry": "double inverted",
+        "two-phase": [
+            "RFBD2R2F'BL'U2RB2L2U2L'B2LB2"
+        ]
     },
     {
         "algorithms": [
@@ -1698,12 +2156,38 @@
             "R-PLL a"
         ],
         "arrows": "U0U2-black,U2U0-black,U3U7,U7U3",
+        "badmephisto": {
+            "algos": [
+                "LU2L'U2LF'L'U'LULFL2",
+                "RU2R'U2RB'R'U'RURBR2"
+            ],
+            "comment": "This\nis just the reflection of the above. You need to do the above, but\nusing the left hand instead of the right hand. You will be able to\nmirror the R permutation to your left hand after about a weeks practice\nof doing it with your right hand. When it becomes a little bit of\nmuscle memory for you it should be really easy to mirror the algorithm\nwith the left hand. So if you can't do it right away, just wait a\nlittle more and get a little more comfortable with R(b). The second algorithm is an alternative that I sometime like to do because it involves the (faster) right hand instead.",
+            "difficulty": 1,
+            "uid": "Ra"
+        },
         "code": "Ra",
         "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
             "ZBLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'F'RU2R'U2R'FRURU2R'",
+                "description": "[RUF] algorithm. Decent for big cubes.",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "RU'R'U'RURDR'U'RD'R'U2R'",
+                "description": "Contains an 8-move [commutator] - [U, R D R']",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "LU2L'U2LF'L'U'LULFL2",
         "name": "PLL Ra",
@@ -1767,8 +2251,12 @@
                 "L2"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": [
+            "R2F2U'L'UL'B2RD'R'B2L2F2R2"
+        ]
     },
     {
         "algorithms": [
@@ -1806,12 +2294,38 @@
             "R-PLL b"
         ],
         "arrows": "U0U2-black,U2U0-black,U5U7,U7U5",
+        "badmephisto": {
+            "algos": [
+                "R'U2RU2R'FRUR'U'R'F'R2"
+            ],
+            "comment": "Again\nfor this one I find it easiest to track an F2L pair. Remember the first\npart using just notation because it is easy. After R'F you have an F2L\npair on the bottom. Then you do RUR'U' trigger. Next, R'F' reconnects\nthat F2L pair and alligns it with the whites on top, and R2U' just\nfinishes it all up.",
+            "difficulty": 2,
+            "uid": "Rb"
+        },
         "code": "Rb",
         "description": "",
         "family": "Corners and edges",
         "groups": [
             "PLL",
             "ZBLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U2RU2R'FRUR'U'R'F'R2",
+                "description": "Playing with [F2L] pairs - track BR + FL",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "R'U2R'D'RU'R'DRURU'R'U'R",
+                "description": "Contains an 8-move [commutator] - [R' D R, U]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "R'U2RU2R'FRUR'U'R'F'R2",
         "name": "PLL Rb",
@@ -1875,8 +2389,12 @@
                 "R2"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": [
+            "R2B2D'R'DR'B2LU'L'B2R2B2R2"
+        ]
     },
     {
         "algorithms": [
@@ -1920,6 +2438,14 @@
         ],
         "aliases": [],
         "arrows": "U3U5,U5U3,U2U8-black,U8U2-black",
+        "badmephisto": {
+            "algos": [
+                "RUR'U'R'FR2U'R'U'RUR'F'"
+            ],
+            "comment": "I\nfind it easy to learn this algorithm by tracking F2L pairs around the\ncube.RUR'U' takes out a pair. R'F hides it and takes the other pair out\nto the top layer. R2U'R' aligns this pair with the whites and hides\nthat pair. Now all the pairs are hidden from the top layer. Now we do\nU' on the Top Layer. Finally RUR'F' takes the second pair out and\naligns it with the whites again, and restores the First Two Layers.",
+            "difficulty": 2,
+            "uid": "T"
+        },
         "code": "T",
         "description": "La base des J-Perms et F-Perm.",
         "family": "Corners and edges",
@@ -1928,6 +2454,22 @@
             "ZBLL",
             "ZZLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'U'R'FRF'FRU'R'U'RUR'F'",
+                "description": "[OLL] combinaison - [sexy-sledge], [Mounted Fish]",
+                "variations": [
+                    {
+                        "algo": "RUR'U'R'FR2U'R'U'RUR'F'",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "RUR'U'R'FR2U'R'U'RUR'F'",
         "name": "PLL T",
@@ -1993,8 +2535,12 @@
                 "F'"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "F'BU2R2FB'DF2UL2U'F2R2U'B2"
+        ]
     },
     {
         "algorithms": [
@@ -2054,6 +2600,14 @@
             "U-PLL a"
         ],
         "arrows": "U5U3-black,U3U7-black,U7U5-black",
+        "badmephisto": {
+            "algos": [
+                "RU'RURURU'R'U'R2"
+            ],
+            "comment": "Note\nhow the algorithm is basically always R and then U' U U U' in that\nsymmetrical order accompanying the R, and lastly R' and fix up rest by\naligning pieces.",
+            "difficulty": 1,
+            "uid": "Ua"
+        },
         "code": "Ua",
         "description": "Mirroir \u00e0 Ub-Perm sur les U.",
         "family": "Edges only",
@@ -2063,6 +2617,62 @@
             "ELL",
             "ZBLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "M2UMU2M'U2U'M2",
+                "description": "[MU] [commutator] / [conjugate] - [M2 U: [M, U2]]",
+                "variations": [
+                    {
+                        "algo": "M2UMU2M'UM2",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "M2UM'U2MU2U'M2",
+                "description": "[MU] [commutator] / [conjugate] - [M2 U: [M', U2]]",
+                "variations": [
+                    {
+                        "algo": "M2UM'U2MUM2",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU'RURURU'R'U'R'U'UR'",
+                "description": "[Conjugate] of [F2L] insert - [R U': R U R U R U' R' U' R' U']",
+                "variations": [
+                    {
+                        "algo": "RU'RURURU'R'U'R2",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'UU'R'U'R'U'RURURU'R",
+                "description": "[Conjugate] of [F2L] insert - [R' U: U' R' U' R' U' R U R U R]",
+                "variations": [
+                    {
+                        "algo": "R2U'R'U'RURURU'R",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "M2UMU2M'UM2",
         "name": "PLL Ua",
@@ -2121,8 +2731,12 @@
                 "M2"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "F2U'R'LF2RL'U'F2"
+        ]
     },
     {
         "algorithms": [
@@ -2183,6 +2797,14 @@
             "U-PLL b"
         ],
         "arrows": "U3U5-black,U5U7-black,U7U3-black",
+        "badmephisto": {
+            "algos": [
+                "R2URUR'U'R'U'R'UR'"
+            ],
+            "comment": "The\nway I remember it: R2 U, then the RUR'U' trigger, then the last two\nletters of the RUR'U' trigger, then do R' and fix up rest by aligning\npieces and putting them to their right positions.",
+            "difficulty": 1,
+            "uid": "Ub"
+        },
         "code": "Ub",
         "description": "Mirroir \u00e0 Ua-Perm sur les U.",
         "family": "Edges only",
@@ -2192,6 +2814,74 @@
             "ELL",
             "ZBLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "M2U'MU2M'U2UM2",
+                "description": "[MU] [commutator] / [conjugate] - [M2 U': [M, U2]]",
+                "variations": [
+                    {
+                        "algo": "M2U'MU2M'U'M2",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "M2U'M'U2MU2UM2",
+                "description": "[MU] [commutator] / [conjugate] - [M2 U': [M', U2]]",
+                "variations": [
+                    {
+                        "algo": "M2U'M'U2MU'M2",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU'URURUR'U'R'U'R'UR'",
+                "description": "[Conjugate] of [F2L] insert - [R U': U R U R U R' U' R' U' R']",
+                "variations": [
+                    {
+                        "algo": "R2URUR'U'R'U'R'UR'",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "U'zU2RURU'R'U'R'U'RU'z'",
+                        "description": "Execution is on the left",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'UR'U'R'U'R'URURUU'R",
+                "description": "[Conjugate] of [F2L] insert - [R' U: R' U' R' U' R' U R U R U]",
+                "variations": [
+                    {
+                        "algo": "R'UR'U'R'U'R'URUR2",
+                        "description": "L'ex\u00e9cution applique les annulations",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "UzU'RU'R'U'R'U'RURU2z'",
+                        "description": "Execution is on the left",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "M2U'MU2M'U'M2",
         "name": "PLL Ub",
@@ -2250,8 +2940,12 @@
                 "M2"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "F2UR'LF2RL'UF2"
+        ]
     },
     {
         "algorithms": [
@@ -2316,12 +3010,43 @@
         ],
         "aliases": [],
         "arrows": "U1U5,U5U1,U0U8-black,U8U0-black",
+        "badmephisto": {
+            "algos": [
+                "R'UR'd'R'F'R2U'R'UR'FRF"
+            ],
+            "comment": "I\ndon't really have a great way to memorize this and thats why I rated\nthis as a hard algorithm. I kind of just did it until I had it in my\nmuscle memory. Note how the R'FRF at the end is ALMOST the common\nR'FRF' trigger, but with F instead of F' at the end.",
+            "difficulty": 4,
+            "uid": "V"
+        },
         "code": "V",
         "description": "Un peu reloud celle l\u00e0.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
             "ZBLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'UR'd'R'F'R2U'R'UR'FRF",
+                "description": "Two-handed algorithm includes a hidden rotation",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "R'URU'x'URU2R'U'RU'R'U2RUR'U'x",
+                "description": "Extract [F2L] pair (BR), rotate, [AUF], [RFAS], [AUF], [Sexy Move]",
+                "tags": [
+                    "OH"
+                ]
+            },
+            {
+                "algo": "R'U2RU2LU'R'UL'ULU'RUL'",
+                "description": "Playing with [F2L] pairs - track BR + BL",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "R'UR'd'R'F'R2U'R'UR'FRF",
         "name": "PLL V",
@@ -2387,8 +3112,10 @@
                 "F"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "axial"
+        "symmetry": "axial",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -2452,6 +3179,14 @@
         ],
         "aliases": [],
         "arrows": "U1U3,U3U1,U0U8-black,U8U0-black",
+        "badmephisto": {
+            "algos": [
+                "FRU'R'U'RUR'F'RUR'U'R'FRF'"
+            ],
+            "comment": "Again\nI find it helpful to see how F2L pairs move around for this algorithm.\nF brings an F2L pair to the top, RU'R' inserts that pair back to the\nmiddle. Now again as before, all F2L is again intact, but slightly\nmessed up. Then U' is done as in T permutation, and then RUR'F' is\nAGAIN used to take that pair and insert it back where it was before.\nThe result will leave you with an OLL, which after when you fix using\nthe appropritate algorithm, you will be left with Ypermutation at the\nend. Note that the OLL is very easy: It takes one pair out to top\nlayer, and inserts it back a different way (in particular, using R'FRF')",
+            "difficulty": 2,
+            "uid": "Y"
+        },
         "code": "Y",
         "description": "Utilis\u00e9e en no headlights, assez facile.",
         "family": "Corners and edges",
@@ -2459,6 +3194,22 @@
             "PLL",
             "ZBLL",
             "BLD"
+        ],
+        "logiqx": [
+            {
+                "algo": "FRU'R'U'RUR'F'RUR'U'R'FRF'",
+                "description": "[OLL] combinaison - [Mounted Fish], [sexy-sledge]",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "R2U'R'URU'x'U'R'DR'D'R'URx",
+                "description": "One-handed algorithm is fast despite the re-grips",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "FRU'R'U'RUR'F'RUR'U'R'FRF'",
         "name": "PLL Y",
@@ -2526,8 +3277,12 @@
                 "F'"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "axial"
+        "symmetry": "axial",
+        "two-phase": [
+            "R2BU'F2L2B2DF'D2B2D2R2FB2D2L2F2"
+        ]
     },
     {
         "algorithms": [
@@ -2597,6 +3352,14 @@
         ],
         "aliases": [],
         "arrows": "U1U3-black,U3U1-black,U5U7-black,U7U5-black",
+        "badmephisto": {
+            "algos": [
+                "M2UM2UM'U2M2U2M'"
+            ],
+            "comment": "Similar to the H permutation, I find this easy to remember, and I saw some people executing it extremely quickly.",
+            "difficulty": 1,
+            "uid": "Z"
+        },
         "code": "Z",
         "description": "Simple a retenir, dure \u00e0 \u00e9x\u00e9cuter.",
         "family": "Edges only",
@@ -2606,6 +3369,46 @@
             "ELL",
             "ZBLL",
             "ZZLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "M'U'M2U'M2U'MM2U2M2",
+                "description": "Intuitive - Solve UF + UB then solve remaining edges",
+                "variations": [
+                    {
+                        "algo": "M'U'M2U'M2U'M'U2M2",
+                        "description": "L'ex\u00e9cution applique une annulation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "M2U'M2U'M'U2M2U2M'",
+                "description": "Intuitive - Solve UL + UR then solve remaining edges",
+                "variations": [
+                    {
+                        "algo": "M2U'M2U'M'U2M2U2M'",
+                        "description": "Execution \u00e0 deux mains",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U'RU'RURU'R'URUR2U'R'",
+                "description": "Playing with [F2L] pairs - track BR + FR",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "RUR'UR'U'R'URU'R'U'R2UR",
+                "description": "Playing with [F2L] pairs - track FR + BR"
+            }
         ],
         "main": "M2uM2u'SM2S'",
         "name": "PLL Z",
@@ -2645,8 +3448,12 @@
                 "S'"
             ]
         },
+        "sarah": [],
         "status": "OK",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "F2B2U'R2L2DRL'U2D2RL'"
+        ]
     },
     {
         "algorithms": [],

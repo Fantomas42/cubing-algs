@@ -161,6 +161,41 @@ class Case:
             for moves in self.data['algorithms']
         ]
 
+    @cached_property
+    def badmephisto(self) -> dict:
+        """
+        BadMephisto informations.
+
+        http://badmephisto.com/
+        """
+        return self.data.get('badmephisto', {})
+
+    @cached_property
+    def logiqx(self) -> list:
+        """
+        Logiqx informations.
+
+        https://logiqx.github.io/cubing-algs/html/
+        """
+        return self.data.get('logiqx', [])
+
+    @cached_property
+    def sarah_pll_skips(self) -> dict:
+        """
+        Sarah's cubing site informations.
+
+        https://sarah.cubing.net/3x3x3/pll-skip-cases
+        """
+        return self.data.get('sarah', {})
+
+    @cached_property
+    def two_phase_algorithms(self) -> list[Algorithm]:
+        """Algorithms computed by two-phase algorithm."""
+        return [
+            parse_moves(moves)
+            for moves in self.data.get('two-phase', [])
+        ]
+
     def __str__(self) -> str:
         """
         Return a human-readable string representation of the case.

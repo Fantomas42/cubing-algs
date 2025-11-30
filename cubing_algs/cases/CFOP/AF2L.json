@@ -8,12 +8,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "01",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "SR'S'",
         "name": "AF2L 01",
         "optimal_cycles": 3,
@@ -22,8 +24,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -34,12 +38,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "02",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "LF'U2FL'",
         "name": "AF2L 02",
         "optimal_cycles": 1,
@@ -48,8 +54,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -60,12 +68,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "03",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'UF'rUr'",
         "name": "AF2L 03",
         "optimal_cycles": 23,
@@ -74,8 +84,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -86,12 +98,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "04",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "FR'F'RUR'U2R",
         "name": "AF2L 04",
         "optimal_cycles": 11,
@@ -100,8 +114,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -112,12 +128,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "05",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RUR'ULUL'",
         "name": "AF2L 05",
         "optimal_cycles": 5,
@@ -126,8 +144,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -138,12 +158,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "06",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RUR'FUF'",
         "name": "AF2L 06",
         "optimal_cycles": 11,
@@ -152,8 +174,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -164,12 +188,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "07",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'F'U'fRS'",
         "name": "AF2L 07",
         "optimal_cycles": 5,
@@ -178,8 +204,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -190,12 +218,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "08",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'F'U2LUL'F",
         "name": "AF2L 08",
         "optimal_cycles": 29,
@@ -204,8 +234,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -216,12 +248,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "09",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "UR'F'RF'R'FR",
         "name": "AF2L 09",
         "optimal_cycles": 11,
@@ -230,8 +264,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -242,12 +278,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "10",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'RUR2U'R",
         "name": "AF2L 10",
         "optimal_cycles": 2,
@@ -256,8 +294,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -266,12 +306,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "11",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'RU'R'LU'L'",
         "name": "AF2L 11",
         "optimal_cycles": 5,
@@ -280,8 +322,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -292,12 +336,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "12",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U2RUR'L'UL",
         "name": "AF2L 12",
         "optimal_cycles": 5,
@@ -306,8 +352,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -318,12 +366,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "13",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "UR'FRF'R'U'R",
         "name": "AF2L 13",
         "optimal_cycles": 11,
@@ -332,8 +382,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -344,12 +396,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "14",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U2r2UB2U'r2",
         "name": "AF2L 14",
         "optimal_cycles": 17,
@@ -358,8 +412,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -370,12 +426,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "15",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "UR'FR2U'R'U2F'",
         "name": "AF2L 15",
         "optimal_cycles": 23,
@@ -384,8 +442,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -396,12 +456,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "16",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'F'R'U'RF",
         "name": "AF2L 16",
         "optimal_cycles": 14,
@@ -410,8 +472,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -422,12 +486,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "17",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U2RB'U'BR'",
         "name": "AF2L 17",
         "optimal_cycles": 5,
@@ -436,8 +502,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -448,12 +516,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "18",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "UF'U2FL'U'L",
         "name": "AF2L 18",
         "optimal_cycles": 4,
@@ -462,8 +532,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -474,12 +546,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "19",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'RU2R'fRf'",
         "name": "AF2L 19",
         "optimal_cycles": 17,
@@ -488,8 +562,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -499,12 +575,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "20",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "URUR'LUL'",
         "name": "AF2L 20",
         "optimal_cycles": 5,
@@ -513,8 +591,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -525,12 +605,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "21",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "URFUF'R'",
         "name": "AF2L 21",
         "optimal_cycles": 9,
@@ -539,8 +621,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -550,12 +634,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "22",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R2UR",
         "name": "AF2L 22",
         "optimal_cycles": 1,
@@ -564,8 +650,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -576,12 +664,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "23",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "LF'UFL'",
         "name": "AF2L 23",
         "optimal_cycles": 3,
@@ -590,8 +680,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -602,12 +694,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "24",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'U2L'UL",
         "name": "AF2L 24",
         "optimal_cycles": 1,
@@ -616,8 +710,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -627,12 +723,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "25",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "F'UR'U2RF",
         "name": "AF2L 25",
         "optimal_cycles": 5,
@@ -641,8 +739,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -653,12 +753,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "26",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "LRU2R'L'",
         "name": "AF2L 26",
         "optimal_cycles": 1,
@@ -667,8 +769,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -679,12 +783,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "27",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "R'FR2UR'F'",
         "name": "AF2L 27",
         "optimal_cycles": 3,
@@ -693,8 +799,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -705,12 +813,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "28",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R2U'RU'R'U'R",
         "name": "AF2L 28",
         "optimal_cycles": 14,
@@ -719,8 +829,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -731,12 +843,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "29",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "F'UL'ULU'LUL'F",
         "name": "AF2L 29",
         "optimal_cycles": 11,
@@ -745,8 +859,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -756,12 +872,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "30",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'U'RU'R'U2L'U'L",
         "name": "AF2L 30",
         "optimal_cycles": 11,
@@ -770,8 +888,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -780,12 +900,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "31",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'UR'U'RU'R'UR",
         "name": "AF2L 31",
         "optimal_cycles": 5,
@@ -794,8 +916,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -806,12 +930,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "32",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RUR'U'RU'R'f'L'f",
         "name": "AF2L 32",
         "optimal_cycles": 5,
@@ -820,8 +946,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -831,12 +959,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "33",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'U'L'U'LU'L'UL",
         "name": "AF2L 33",
         "optimal_cycles": 11,
@@ -845,8 +975,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -857,12 +989,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "34",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "F'R'URU'R'U'RF",
         "name": "AF2L 34",
         "optimal_cycles": 3,
@@ -871,8 +1005,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -883,12 +1019,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "35",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'U'RUR'LU'L'",
         "name": "AF2L 35",
         "optimal_cycles": 35,
@@ -897,8 +1035,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -909,12 +1049,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "36",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "R'FR2U'R'U'RUR'U2F'",
         "name": "AF2L 36",
         "optimal_cycles": 5,
@@ -923,8 +1065,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -935,12 +1079,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "37",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RUR'U2RU'R'fRf'",
         "name": "AF2L 37",
         "optimal_cycles": 3,
@@ -949,8 +1095,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -961,12 +1109,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "38",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'URU2R'LU2L'",
         "name": "AF2L 38",
         "optimal_cycles": 35,
@@ -975,8 +1125,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -987,12 +1139,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "39",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RUR'L'ULU'LF'L'FL'UL",
         "name": "AF2L 39",
         "optimal_cycles": 29,
@@ -1001,8 +1155,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1013,12 +1169,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "40",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R2U2RUR'U2R",
         "name": "AF2L 40",
         "optimal_cycles": 14,
@@ -1027,8 +1185,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1039,12 +1199,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "41",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "F'U2L'U2L2UL'F",
         "name": "AF2L 41",
         "optimal_cycles": 5,
@@ -1053,8 +1215,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1065,12 +1229,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "42",
         "description": "",
         "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU'R'U2L'U2LU2L'UL",
         "name": "AF2L 42",
         "optimal_cycles": 11,
@@ -1079,8 +1245,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1091,12 +1259,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "01a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'RUR2U'RU'R'UR",
         "name": "AF2L 01a",
         "optimal_cycles": 3,
@@ -1105,8 +1275,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1117,12 +1289,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "02a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "R'FRF'LU2L'",
         "name": "AF2L 02a",
         "optimal_cycles": 14,
@@ -1131,8 +1305,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1143,12 +1319,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "03a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "R'FR2U'R'UF'",
         "name": "AF2L 03a",
         "optimal_cycles": 5,
@@ -1157,8 +1335,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1168,12 +1348,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "04a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "URUR2U2R",
         "name": "AF2L 04a",
         "optimal_cycles": 4,
@@ -1182,8 +1364,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1194,12 +1378,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "05a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "UlU'F2Ul'",
         "name": "AF2L 05a",
         "optimal_cycles": 17,
@@ -1208,8 +1394,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1219,12 +1407,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "06a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "URL'ULR'",
         "name": "AF2L 06a",
         "optimal_cycles": 14,
@@ -1233,8 +1423,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1245,12 +1437,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "07a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU2R'UR'U'R",
         "name": "AF2L 07a",
         "optimal_cycles": 2,
@@ -1259,8 +1453,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1271,12 +1467,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "08a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "RU2R'f'L'f",
         "name": "AF2L 08a",
         "optimal_cycles": 11,
@@ -1285,8 +1483,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1295,12 +1495,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "09a",
         "description": "",
         "family": "Coin pi\u00e9g\u00e9",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U2RU'R'L'UL",
         "name": "AF2L 09a",
         "optimal_cycles": 4,
@@ -1309,8 +1511,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1320,12 +1524,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "10a",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'RU'R'UfR'f'",
         "name": "AF2L 10a",
         "optimal_cycles": 14,
@@ -1334,8 +1540,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1346,12 +1554,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "11a",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U2LU'F'UFL'",
         "name": "AF2L 11a",
         "optimal_cycles": 3,
@@ -1360,8 +1570,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [
@@ -1372,12 +1584,14 @@
         ],
         "aliases": [],
         "arrows": "",
+        "badmephisto": {},
         "code": "12a",
         "description": "",
         "family": "Arr\u00eate pi\u00e9g\u00e9e",
         "groups": [
             "F2L Avanc\u00e9"
         ],
+        "logiqx": [],
         "main": "U'RU'R'U2F'rUr'",
         "name": "AF2L 12a",
         "optimal_cycles": 29,
@@ -1386,8 +1600,10 @@
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
         "recognition": {},
+        "sarah": [],
         "status": "OK",
-        "symmetry": ""
+        "symmetry": "",
+        "two-phase": []
     },
     {
         "algorithms": [],
