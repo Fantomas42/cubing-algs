@@ -9,6 +9,7 @@ from cubing_algs.move import Move
 from cubing_algs.parsing import check_moves
 from cubing_algs.parsing import clean_moves
 from cubing_algs.parsing import clean_multiline_and_comments
+from cubing_algs.parsing import expand_parenthesis_multipliers
 from cubing_algs.parsing import parse_moves
 from cubing_algs.parsing import parse_moves_cfop
 from cubing_algs.parsing import split_moves
@@ -109,7 +110,7 @@ class CheckMovesTestCase(unittest.TestCase):
         self.assertFalse(check_moves(moves))
 
 
-class ParseMovesTestCase(unittest.TestCase):
+class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
     """Tests for the parse_moves function."""
 
     def test_parse_moves(self) -> None:
@@ -368,6 +369,82 @@ class ParseMovesTestCase(unittest.TestCase):
             expect,
         )
 
+    def test_parse_moves_simple_multiplier(self) -> None:
+        """Test parse moves with simple multiplier."""
+        moves = "(R U R' U')3"
+        expect = [
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_multiplier_with_commutator(self) -> None:
+        """Test parse moves with multiplier and commutator."""
+        moves = '([R, U])3'
+        expect = [
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_multiplier_with_conjugate(self) -> None:
+        """Test parse moves with multiplier and conjugate."""
+        moves = '([R: U])2'
+        expect = [
+            'R', 'U', "R'",
+            'R', 'U', "R'",
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_commutator_with_multiplier_inside(self) -> None:
+        """Test parse moves with commutator containing multiplier."""
+        moves = "[(R U)2, R']"
+        expect = [
+            'R', 'U', 'R', 'U',
+            "R'",
+            "U'", "R'", "U'", "R'",
+            'R',
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_nested_multipliers(self) -> None:
+        """Test parse moves with nested multipliers."""
+        moves = '((R U)2)2'
+        expect = [
+            'R', 'U', 'R', 'U',
+            'R', 'U', 'R', 'U',
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_multiple_multipliers(self) -> None:
+        """Test parse moves with multiple multipliers."""
+        moves = '(R U)2 (F R)2'
+        expect = [
+            'R', 'U', 'R', 'U',
+            'F', 'R', 'F', 'R',
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
 
 class ParseMovesCFOPTestCase(unittest.TestCase):
     """Tests for the parse_moves_cfop function."""
@@ -551,6 +628,82 @@ class CleanMultilineAndCommentsTestCase(unittest.TestCase):  # noqa: PLR0904
         text = 'R U   // comment with spaces\n   D R   // another comment'
         result = clean_multiline_and_comments(text)
         self.assertEqual(result, 'R U D R')
+
+
+class ExpandParenthesisMultipliersTestCase(unittest.TestCase):
+    """Tests for the expand_parenthesis_multipliers function."""
+
+    def test_simple_multiplier(self) -> None:
+        """Test simple parenthesis multiplier."""
+        moves = '(R U)3'
+        expected = 'R U R U R U'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_complex_multiplier(self) -> None:
+        """Test multiplier with complex move sequence."""
+        moves = "(R U R' U')3"
+        expected = "R U R' U' R U R' U' R U R' U'"
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_multiplier_with_spaces(self) -> None:
+        """Test multiplier with extra spaces."""
+        moves = "( R U R' U' )3"
+        expected = "R U R' U' R U R' U' R U R' U'"
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_multiplier_in_sequence(self) -> None:
+        """Test multiplier in middle of sequence."""
+        moves = "R (U R')2 U"
+        expected = "R U R' U R' U"
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_multiple_multipliers(self) -> None:
+        """Test multiple multipliers in one sequence."""
+        moves = '(R U)2 (F R)2'
+        expected = 'R U R U F R F R'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_nested_multipliers(self) -> None:
+        """Test nested parenthesis multipliers."""
+        moves = '((R U)2)3'
+        expected = 'R U R U R U R U R U R U'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_multiplier_with_single_move(self) -> None:
+        """Test multiplier with single move."""
+        moves = '(R)4'
+        expected = 'R R R R'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_multiplier_with_wide_moves(self) -> None:
+        """Test multiplier with wide moves."""
+        moves = '(Rw U)2'
+        expected = 'Rw U Rw U'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_multiplier_zero(self) -> None:
+        """Test multiplier with zero (edge case)."""
+        moves = "R (U R')0 F"
+        expected = 'R  F'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_multiplier_one(self) -> None:
+        """Test multiplier with one."""
+        moves = '(R U)1'
+        expected = 'R U'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_no_multiplier(self) -> None:
+        """Test that parentheses without numbers are left unchanged."""
+        moves = '(R U) R'
+        expected = '(R U) R'
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
+
+    def test_no_parentheses(self) -> None:
+        """Test string without parentheses."""
+        moves = "R U R' U'"
+        expected = "R U R' U'"
+        self.assertEqual(expand_parenthesis_multipliers(moves), expected)
 
 
 class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):

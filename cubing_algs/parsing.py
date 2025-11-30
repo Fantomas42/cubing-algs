@@ -80,6 +80,56 @@ def clean_moves(moves: str) -> str:
     return moves.translate(CASE_FIXES)
 
 
+def expand_parenthesis_multipliers(moves: str) -> str:
+    """
+    Expand parenthesis multipliers like (R U R' U')3 into repeated sequences.
+
+    Parentheses with numbers are expanded by repeating the content.
+    Parentheses without numbers are left as-is (to be removed by cleaning).
+    Handles nested parentheses from inside out.
+
+    Args:
+        moves: A string containing move sequences with parenthesis multipliers.
+
+    Returns:
+        The expanded move string with all multipliers resolved.
+
+    Examples:
+        "(R U R' U')3" -> "R U R' U' R U R' U' R U R' U'"
+        "R (U R')2 U" -> "R U R' U R' U"
+        "((R U)2)3" -> "R U R U R U R U R U R U" (6 times total)
+
+    """
+    result = moves
+
+    # Keep expanding until no more parenthesis multipliers found
+    # We need to handle nested parentheses from inside out
+    max_iterations = 100  # Safety limit to prevent infinite loops
+    iteration = 0
+
+    while iteration < max_iterations:
+        # Find innermost parentheses followed by a number
+        # Pattern: (...) followed by digits, where ... contains no parentheses
+        pattern = re.compile(r'\(([^()]*)\)(\d+)')
+        match = pattern.search(result)
+
+        if match is None:
+            break
+
+        content = match.group(1).strip()
+        multiplier = int(match.group(2))
+
+        # Expand the content by repeating it
+        expanded = ' '.join([content] * multiplier) if multiplier > 0 else ''
+
+        # Replace in result, preserving surrounding whitespace
+        result = result[:match.start()] + expanded + result[match.end():]
+
+        iteration += 1
+
+    return result.strip()
+
+
 def split_moves(moves: str) -> list[Move]:
     """
     Split a string of moves into individual Move objects.
@@ -153,7 +203,8 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
     - Strings are cleaned, split into moves, validated, and converted
       to an Algorithm
     - Supports multiline input and removes comments starting with //
-    - Supports commutators [A, B] and conjugates [A: B].
+    - Supports parenthesis multipliers (R U)3
+    - Supports commutators [A, B] and conjugates [A: B]
 
     Args:
         raw_moves: The moves to parse, as a string, iterable, or Algorithm.
@@ -163,8 +214,10 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
         An Algorithm object containing the parsed moves.
 
     Examples:
+        (R U R' U')3 becomes R U R' U' R U R' U' R U R' U'
         [A, B] becomes A B A' B' (commutator)
         [A: B] becomes A B A' (conjugate)
+        ([R, U])3 becomes R U R' U' R U R' U' R U R' U'
         [[R: U], D] becomes R U R' D R U' R' D'
         [F: [U, R]] becomes F U R U' R' F'
 
@@ -190,7 +243,8 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
 
     raw_moves_str = clean_multiline_and_comments(raw_moves_str)
 
-    expanded_moves = expand_commutators_and_conjugates(raw_moves_str)
+    expanded_moves = expand_parenthesis_multipliers(raw_moves_str)
+    expanded_moves = expand_commutators_and_conjugates(expanded_moves)
 
     if not secure:
         moves = split_moves(clean_moves(expanded_moves))
