@@ -7,9 +7,15 @@ This module handles expansion of:
 - Combined: (R U)3' → U' R' U' R' U' R'
 """
 import re
+from re import Match
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.transform.mirror import mirror_moves
+
+# Compiled regex patterns for performance
+_MULT_INV_PATTERN = re.compile(r"\(([^()]*)\)(\d+)'")
+_MULT_PATTERN = re.compile(r'\(([^()]*)\)(\d+)')
+_INV_PATTERN = re.compile(r"\(([^()]*)\)'")
 
 
 def apply_multiplier(content: str, multiplier: int) -> str:
@@ -38,6 +44,40 @@ def apply_inversion(old_moves: str) -> str:
     return str(algo.transform(mirror_moves))
 
 
+def find_innermost_parenthesis_with_modifier(
+    text: str,
+) -> tuple[int, int, str, Match[str]] | None:
+    """
+    Find the innermost parenthesis that has a modifier
+    (multiplier or inversion).
+
+    Args:
+        text: A string potentially containing nested parentheses with modifiers.
+
+    Returns:
+        A tuple of (start_index, end_index, modifier_type, match_object),
+        where modifier_type is 'mult_inv', 'mult', or 'inv', or None if no
+        parenthesis with modifier is found.
+
+    """
+    # Try multiplier with inversion: (...)N'
+    match = _MULT_INV_PATTERN.search(text)
+    if match:
+        return (match.start(), match.end(), 'mult_inv', match)
+
+    # Try just multiplier: (...)N
+    match = _MULT_PATTERN.search(text)
+    if match:
+        return (match.start(), match.end(), 'mult', match)
+
+    # Try just inversion: (...)'
+    match = _INV_PATTERN.search(text)
+    if match:
+        return (match.start(), match.end(), 'inv', match)
+
+    return None
+
+
 def expand_parenthesis_multipliers_and_inversions(moves: str) -> str:
     """
     Expand parenthesis multipliers and inversions.
@@ -64,39 +104,27 @@ def expand_parenthesis_multipliers_and_inversions(moves: str) -> str:
 
     """
     result = moves
-    max_iterations = 100
-    iteration = 0
 
-    while iteration < max_iterations:
-        # Try multiplier with inversion: (...)N'
-        match = re.search(r"\(([^()]*)\)(\d+)'", result)
-        if match:
+    while True:
+        paren_info = find_innermost_parenthesis_with_modifier(result)
+        if paren_info is None:
+            break
+
+        start, end, modifier_type, match = paren_info
+
+        # Extract content and modifier details from the match object
+        if modifier_type == 'mult_inv':
             content = match.group(1).strip()
             multiplier = int(match.group(2))
             expanded = apply_inversion(apply_multiplier(content, multiplier))
-            result = result[:match.start()] + expanded + result[match.end():]
-            iteration += 1
-            continue
-
-        # Try just multiplier: (...)N
-        match = re.search(r'\(([^()]*)\)(\d+)', result)
-        if match:
+        elif modifier_type == 'mult':
             content = match.group(1).strip()
             multiplier = int(match.group(2))
             expanded = apply_multiplier(content, multiplier)
-            result = result[:match.start()] + expanded + result[match.end():]
-            iteration += 1
-            continue
-
-        # Try just inversion: (...)'
-        match = re.search(r"\(([^()]*)\)'", result)
-        if match:
+        else:  # modifier_type == 'inv'
             content = match.group(1).strip()
             expanded = apply_inversion(content)
-            result = result[:match.start()] + expanded + result[match.end():]
-            iteration += 1
-            continue
 
-        break
+        result = result[:start] + expanded + result[end:]
 
     return result.strip()
