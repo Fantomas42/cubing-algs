@@ -1,9 +1,13 @@
 """Tests for the Case class."""
 import unittest
+from typing import cast
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.cases.case import BadmephistoData
 from cubing_algs.cases.case import Case
 from cubing_algs.cases.case import CaseData
+from cubing_algs.cases.case import LogiqxAlgorithm
+from cubing_algs.cases.case import RecognitionData
 
 
 class TestCaseInitialization(unittest.TestCase):
@@ -138,7 +142,8 @@ class TestCaseProperties(unittest.TestCase):
 
     def test_recognition_property(self) -> None:
         """Test recognition property returns correct data."""
-        recognition = self.case.recognition
+        self.assertIsNotNone(self.case.recognition)
+        recognition = cast('RecognitionData', self.case.recognition)
         self.assertIsInstance(recognition, dict)
         self.assertIn('cases', recognition)
         self.assertIn('moves', recognition)
@@ -352,6 +357,269 @@ class TestCaseStringMethods(unittest.TestCase):
         self.assertEqual(repr(case), expected)
 
 
+class TestCaseOptionalProperties(unittest.TestCase):
+    """Test Case optional properties (badmephisto, logiqx, sarah, two-phase)."""
+
+    def test_badmephisto_property_present(self) -> None:
+        """Test badmephisto property when data is present."""
+        data: CaseData = {
+            'name': 'OLL 27',
+            'code': '27',
+            'description': 'Sune',
+            'aliases': ['Sune'],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+            'badmephisto': {
+                'algos': ["R U R' U R U2 R'"],
+                'comment': 'Easy algorithm',
+                'difficulty': 1,
+                'uid': 'oll27',
+            },
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertIsNotNone(case.badmephisto)
+        badmephisto = cast('BadmephistoData', case.badmephisto)
+        self.assertIn('algos', badmephisto)
+        self.assertIn('comment', badmephisto)
+        self.assertIn('difficulty', badmephisto)
+        self.assertIn('uid', badmephisto)
+        self.assertEqual(badmephisto['algos'], ["R U R' U R U2 R'"])
+        self.assertEqual(badmephisto['comment'], 'Easy algorithm')
+        self.assertEqual(badmephisto['difficulty'], 1)
+        self.assertEqual(badmephisto['uid'], 'oll27')
+
+    def test_badmephisto_property_missing(self) -> None:
+        """Test badmephisto property when data is missing."""
+        data: CaseData = {
+            'name': 'OLL 27',
+            'code': '27',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertIsNone(case.badmephisto)
+
+    def test_logiqx_property_present(self) -> None:
+        """Test logiqx property when data is present."""
+        data: CaseData = {
+            'name': 'PLL Aa',
+            'code': 'Aa',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+            'logiqx': [
+                {
+                    'algo': "x R' U R' D2 R U' R' D2 R2 x'",
+                    'description': 'Standard algorithm',
+                },
+                {
+                    'algo': "R' F R' B2 R F' R' B2 R2",
+                    'description': 'Alternative',
+                    'variations': [
+                        {
+                            'algo': "y R' F R' B2 R F' R' B2 R2 y'",
+                            'description': 'With rotation',
+                            'tags': ['rotation'],
+                        },
+                    ],
+                },
+            ],
+        }
+        case = Case('CFOP', 'PLL', data)
+
+        self.assertIsNotNone(case.logiqx)
+        logiqx = cast('list[LogiqxAlgorithm]', case.logiqx)
+        self.assertIsInstance(logiqx, list)
+        self.assertEqual(len(logiqx), 2)
+        self.assertEqual(logiqx[0]['algo'], "x R' U R' D2 R U' R' D2 R2 x'")
+        self.assertEqual(logiqx[0]['description'], 'Standard algorithm')
+        self.assertEqual(logiqx[1]['algo'], "R' F R' B2 R F' R' B2 R2")
+        self.assertIn('variations', logiqx[1])
+
+    def test_logiqx_property_missing(self) -> None:
+        """Test logiqx property when data is missing."""
+        data: CaseData = {
+            'name': 'PLL Aa',
+            'code': 'Aa',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'PLL', data)
+
+        self.assertIsNone(case.logiqx)
+
+    def test_sarah_pll_skips_property_present(self) -> None:
+        """Test sarah_pll_skips property when data is present."""
+        data: CaseData = {
+            'name': 'OLL 21',
+            'code': '21',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+            'sarah': {
+                'U': 'PLL skip',
+                "U'": 'Ua perm',
+                'U2': 'Ub perm',
+            },
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertIsNotNone(case.sarah_pll_skips)
+        sarah = cast('dict[str, str]', case.sarah_pll_skips)
+        self.assertIsInstance(sarah, dict)
+        self.assertEqual(sarah['U'], 'PLL skip')
+        self.assertEqual(sarah["U'"], 'Ua perm')
+        self.assertEqual(sarah['U2'], 'Ub perm')
+
+    def test_sarah_pll_skips_property_missing(self) -> None:
+        """Test sarah_pll_skips property when data is missing."""
+        data: CaseData = {
+            'name': 'OLL 21',
+            'code': '21',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertIsNone(case.sarah_pll_skips)
+
+    def test_two_phase_algorithms_property_present(self) -> None:
+        """Test two_phase_algorithms property when data is present."""
+        # Note: 'two-phase' key has hyphen, cast bypasses TypedDict
+        data = cast('CaseData', {
+            'name': 'OLL 27',
+            'code': '27',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+            'two-phase': ["R U R' U'", "F R U R' U' F'"],
+        })
+        case = Case('CFOP', 'OLL', data)
+
+        two_phase = case.two_phase_algorithms
+        self.assertIsInstance(two_phase, list)
+        self.assertEqual(len(two_phase), 2)
+        self.assertIsInstance(two_phase[0], Algorithm)
+        self.assertIsInstance(two_phase[1], Algorithm)
+        self.assertEqual(str(two_phase[0]), "R U R' U'")
+        self.assertEqual(str(two_phase[1]), "F R U R' U' F'")
+
+    def test_two_phase_algorithms_property_missing(self) -> None:
+        """Test two_phase_algorithms property when data is missing."""
+        data: CaseData = {
+            'name': 'OLL 27',
+            'code': '27',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        two_phase = case.two_phase_algorithms
+        self.assertIsInstance(two_phase, list)
+        self.assertEqual(len(two_phase), 0)
+
+
 class TestCaseEdgeCases(unittest.TestCase):
     """Test Case edge cases and boundary conditions."""
 
@@ -483,7 +751,8 @@ class TestCaseEdgeCases(unittest.TestCase):
         }
         case = Case('CFOP', 'OLL', data)
 
-        recognition = case.recognition
+        self.assertIsNotNone(case.recognition)
+        recognition = cast('RecognitionData', case.recognition)
         self.assertEqual(recognition['cases'], [])
         self.assertEqual(recognition['moves'], [])
 

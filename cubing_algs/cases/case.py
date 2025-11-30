@@ -1,6 +1,8 @@
 """Case representation for cubing algorithms."""
 from functools import cached_property
+from typing import NotRequired
 from typing import TypedDict
+from typing import cast
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
@@ -29,6 +31,31 @@ class RecognitionData(TypedDict):
     moves: list[str]
 
 
+class BadmephistoData(TypedDict):
+    """BadMephisto algorithm information."""
+
+    algos: list[str]
+    comment: str
+    difficulty: int
+    uid: str
+
+
+class LogiqxVariation(TypedDict):
+    """Logiqx algorithm variation."""
+
+    algo: str
+    description: str
+    tags: list[str]
+
+
+class LogiqxAlgorithm(TypedDict):
+    """Logiqx algorithm information."""
+
+    algo: str
+    description: str
+    variations: NotRequired[list[LogiqxVariation]]
+
+
 class CaseData(TypedDict):
     """Complete case data structure from JSON."""
 
@@ -41,7 +68,7 @@ class CaseData(TypedDict):
     family: str
     groups: list[str]
     status: str
-    recognition: RecognitionData
+    recognition: NotRequired[RecognitionData]
     optimal_cycles: int
     optimal_htm: int
     optimal_stm: int
@@ -49,6 +76,9 @@ class CaseData(TypedDict):
     probability_label: str
     main: str
     algorithms: list[str]
+    badmephisto: NotRequired[BadmephistoData]
+    logiqx: NotRequired[list[LogiqxAlgorithm]]
+    sarah: NotRequired[dict[str, str]]
 
 
 class Case:  # noqa: PLR0904
@@ -119,9 +149,9 @@ class Case:  # noqa: PLR0904
         return self.data.get('symmetry', '')
 
     @cached_property
-    def recognition(self) -> RecognitionData:
+    def recognition(self) -> RecognitionData | None:
         """Recognition pattern for identifying the case."""
-        return self.data.get('recognition', {})
+        return self.data.get('recognition')
 
     @cached_property
     def optimal_cycles(self) -> int:
@@ -162,38 +192,39 @@ class Case:  # noqa: PLR0904
         ]
 
     @cached_property
-    def badmephisto(self) -> dict:
+    def badmephisto(self) -> BadmephistoData | None:
         """
         BadMephisto informations.
 
         http://badmephisto.com/
         """
-        return self.data.get('badmephisto', {})
+        return self.data.get('badmephisto')
 
     @cached_property
-    def logiqx(self) -> list:
+    def logiqx(self) -> list[LogiqxAlgorithm] | None:
         """
         Logiqx informations.
 
         https://logiqx.github.io/cubing-algs/html/
         """
-        return self.data.get('logiqx', [])
+        return self.data.get('logiqx')
 
     @cached_property
-    def sarah_pll_skips(self) -> dict:
+    def sarah_pll_skips(self) -> dict[str, str] | None:
         """
         Sarah's cubing site informations.
 
         https://sarah.cubing.net/3x3x3/pll-skip-cases
         """
-        return self.data.get('sarah', {})
+        return self.data.get('sarah')
 
     @cached_property
     def two_phase_algorithms(self) -> list[Algorithm]:
         """Algorithms computed by two-phase algorithm."""
+        two_phase_data = cast('list[str]', self.data.get('two-phase', []))
         return [
             parse_moves(moves)
-            for moves in self.data.get('two-phase', [])
+            for moves in two_phase_data
         ]
 
     def __str__(self) -> str:
