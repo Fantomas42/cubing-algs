@@ -6,10 +6,12 @@ from cubing_algs.exceptions import InvalidBracketError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.exceptions import InvalidOperatorError
 from cubing_algs.move import Move
+from cubing_algs.parenthesis import (
+    expand_parenthesis_multipliers_and_inversions,
+)
 from cubing_algs.parsing import check_moves
 from cubing_algs.parsing import clean_moves
 from cubing_algs.parsing import clean_multiline_and_comments
-from cubing_algs.parsing import expand_parenthesis_multipliers_and_inversions
 from cubing_algs.parsing import parse_moves
 from cubing_algs.parsing import parse_moves_cfop
 from cubing_algs.parsing import split_moves
