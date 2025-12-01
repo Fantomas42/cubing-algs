@@ -46,8 +46,8 @@
             "uid": "24"
         },
         "code": "01",
-        "description": "Similaire \u00e0 17 Slash.",
-        "family": "Point",
+        "description": "Similar to 17 Slash.",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -58,7 +58,7 @@
                 "variations": [
                     {
                         "algo": "RU2R2FRF'U2R'FRF'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -155,8 +155,8 @@
             "uid": "12"
         },
         "code": "02",
-        "description": "Enchainement T + P.",
-        "family": "Point",
+        "description": "T + P combination.",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -187,11 +187,11 @@
             },
             {
                 "algo": "FRUR'U'F'fRUR'U'f'",
-                "description": "[OLL] combinaison - F [Sexy Move] F', f [Sexy Move] f'",
+                "description": "[OLL] combination - F [Sexy Move] F', f [Sexy Move] f'",
                 "variations": [
                     {
                         "algo": "FRUR'U'SRUR'U'f'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -272,8 +272,8 @@
             "uid": "11"
         },
         "code": "03",
-        "description": "Enchainement P + T avec un U' entre deux.",
-        "family": "Point",
+        "description": "P + T combination with U' in between.",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -284,14 +284,14 @@
                 "variations": [
                     {
                         "algo": "r'R2UR'UrU2r'UM'",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "r'R2UR'UrU2r'UrR'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -300,7 +300,7 @@
             },
             {
                 "algo": "fRUR'U'f'U'FRUR'U'F'",
-                "description": "[OLL] combinaison - f [Sexy Move] f', [AUF], F [Sexy Move] F'",
+                "description": "[OLL] combination - f [Sexy Move] f', [AUF], F [Sexy Move] F'",
                 "tags": [
                     "2H"
                 ]
@@ -382,8 +382,8 @@
             "uid": "10"
         },
         "code": "04",
-        "description": "Enchainement P + T avec un U entre deux.",
-        "family": "Point",
+        "description": "Sequence P + T with a U in between.",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -394,14 +394,14 @@
                 "variations": [
                     {
                         "algo": "M'R'U'RU'r'U2rU'r'R",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "rR2U'RU'r'U2rU'r'R",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -410,7 +410,7 @@
             },
             {
                 "algo": "fRUR'U'f'UFRUR'U'F'",
-                "description": "[OLL] combinaison - f [Sexy Move] f', [AUF], F [Sexy Move] F'",
+                "description": "[OLL] combination - f [Sexy Move] f', [AUF], F [Sexy Move] F'",
                 "tags": [
                     "2H"
                 ]
@@ -460,7 +460,7 @@
         },
         "code": "05",
         "description": "T U' T.",
-        "family": "Carr\u00e9",
+        "family": "Square",
         "groups": [
             "OLL"
         ],
@@ -517,7 +517,7 @@
         },
         "code": "06",
         "description": "T U' T.",
-        "family": "Carr\u00e9",
+        "family": "Square",
         "groups": [
             "OLL"
         ],
@@ -732,23 +732,23 @@
                 "R'U'Ry'x'RU'R'FRUR'x",
                 "RUR'U'R'FR2UR'U'F'"
             ],
-            "comment": "after the ugly y'x' the alg is incredibly fast. I love executing that part. I give a second alternative in case someone wants something else because they dont like the rotation. (Note that the second alg looks very much like the T PLL :) )",
+            "comment": "after the ugly y'x' the alg is incredibly fast. I love executing that part. I give a second alternative in case someone wants something else because they don't like the rotation. (Note that the second alg looks very much like the T PLL :) )",
             "difficulty": 0,
             "uid": "56"
         },
         "code": "09",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
         ],
         "logiqx": [
             {
                 "algo": "RUR'U'R'FRF'FRUR'U'F'",
-                "description": "[OLL] combinaison - [sexy-sledge], F [Sexy Move] F'",
+                "description": "[OLL] combination - [sexy-sledge], F [Sexy Move] F'",
                 "variations": [
                     {
                         "algo": "RUR'U'R'FR2UR'U'F'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H"
                         ]
@@ -761,7 +761,7 @@
                 "variations": [
                     {
                         "algo": "r'R2U2R'U'RU'R'U'rR'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -848,7 +848,7 @@
             "uid": "57"
         },
         "code": "10",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
         ],
@@ -866,7 +866,7 @@
                 "variations": [
                     {
                         "algo": "rR2U2RUR'URUr'R",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -962,14 +962,14 @@
                 "variations": [
                     {
                         "algo": "r'R2UR'URU2R'UM'",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "r'R2UR'URU2R'UrR'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -1068,7 +1068,7 @@
             "uid": "8"
         },
         "code": "12",
-        "description": "Deux fois T avec un U entre deux.",
+        "description": "T twice with a U in between.",
         "family": "Z",
         "groups": [
             "OLL"
@@ -1080,14 +1080,14 @@
                 "variations": [
                     {
                         "algo": "M'R'U'RU'R'U2RU'r'R",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "rR2U'RU'R'U2RU'r'R",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -1165,19 +1165,19 @@
             "uid": "46"
         },
         "code": "13",
-        "description": "L'important est de ne pas saisir la crosse.",
-        "family": "Grand L",
+        "description": "Important: don't catch the trigger.",
+        "family": "Big L",
         "groups": [
             "OLL"
         ],
         "logiqx": [
             {
                 "algo": "FURU'R'F'FRU'R'U'RUR'F'",
-                "description": "[OLL] combinaison - F [Inverse Sexy] F', OLL 37",
+                "description": "[OLL] combination - F [Inverse Sexy] F', OLL 37",
                 "variations": [
                     {
                         "algo": "FURU2R'U'RUR'F'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -1271,19 +1271,19 @@
             "uid": "47"
         },
         "code": "14",
-        "description": "L'important est de ne pas saisir la crosse.",
-        "family": "Grand L",
+        "description": "Important: don't catch the trigger.",
+        "family": "Big L",
         "groups": [
             "OLL"
         ],
         "logiqx": [
             {
                 "algo": "R'FRUR'F'RU'UFU'F'",
-                "description": "Basic [commutator] combinaison - [R' F R, U] [U, F]",
+                "description": "Basic [commutator] combination - [R' F R, U] [U, F]",
                 "variations": [
                     {
                         "algo": "R'FRUR'F'RFU'F'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -1363,7 +1363,7 @@
             "uid": "15"
         },
         "code": "15",
-        "family": "Grand L",
+        "family": "Big L",
         "groups": [
             "OLL"
         ],
@@ -1423,7 +1423,7 @@
             "uid": "14"
         },
         "code": "16",
-        "family": "Grand L",
+        "family": "Big L",
         "groups": [
             "OLL"
         ],
@@ -1504,7 +1504,7 @@
             "uid": "31"
         },
         "code": "17",
-        "family": "Point",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -1515,7 +1515,7 @@
                 "variations": [
                     {
                         "algo": "RUR'UR'FRF'U2R'FRF'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -1616,8 +1616,8 @@
             "uid": "32"
         },
         "code": "18",
-        "description": "G\u00e9n\u00e9ration automatique.",
-        "family": "Point",
+        "description": "Automatic generation.",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -1628,7 +1628,7 @@
                 "variations": [
                     {
                         "algo": "RU2R2FRF'U2M'URU'r'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -1641,7 +1641,7 @@
                 "variations": [
                     {
                         "algo": "rUR'URU2r2U'RU'R'U2r",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -1654,7 +1654,7 @@
                 "variations": [
                     {
                         "algo": "r'U'RU'R'U2r2UR'URU2r'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -1725,7 +1725,7 @@
             "uid": "26"
         },
         "code": "19",
-        "family": "Point",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -1853,8 +1853,8 @@
             "uid": "18"
         },
         "code": "20",
-        "description": "G\u00e9n\u00e9ration automatique.",
-        "family": "Point",
+        "description": "Automatic generation.",
+        "family": "Dot",
         "groups": [
             "OLL"
         ],
@@ -1865,14 +1865,14 @@
                 "variations": [
                     {
                         "algo": "rUR'U'M2URU'R'U'M'",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "rUR'U'r2R2URU'R'U'rR'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -1885,14 +1885,14 @@
                 "variations": [
                     {
                         "algo": "r'RURUR'U'M2URU'r'",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "r'RURUR'U'r2R2URU'r'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -1965,7 +1965,7 @@
         },
         "code": "21",
         "description": "F [Sexy Move x 3] F'.",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
@@ -1977,7 +1977,7 @@
                 "variations": [
                     {
                         "algo": "RU2R'U'RUR'U'RU'R'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -1991,7 +1991,7 @@
                 "variations": [
                     {
                         "algo": "R'U'RU'R'URU'R'U2R",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -2103,7 +2103,7 @@
             "uid": "13"
         },
         "code": "22",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
@@ -2115,7 +2115,7 @@
                 "variations": [
                     {
                         "algo": "RU2R2U'R2U'R2U2R",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -2129,7 +2129,7 @@
                 "variations": [
                     {
                         "algo": "R'U2R2UR2UR2U2R'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -2147,11 +2147,11 @@
             },
             {
                 "algo": "fRUR'U'f'FRUR'U'F'",
-                "description": "[EOLL] combinaison - f [Sexy Move] f', F [Sexy Move] F'",
+                "description": "[EOLL] combination - f [Sexy Move] f', F [Sexy Move] F'",
                 "variations": [
                     {
                         "algo": "fRUR'U'S'RUR'U'F'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2250,8 +2250,8 @@
             "uid": "48"
         },
         "code": "23",
-        "description": "Semblable \u00e0 la Aa-Perm.",
-        "family": "Croix",
+        "description": "Similar to the Aa-Perm.",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
@@ -2263,7 +2263,7 @@
                 "variations": [
                     {
                         "algo": "R2DR'U2RD'R'U2R'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2276,7 +2276,7 @@
                 "variations": [
                     {
                         "algo": "R2D'RU2R'DRU2R",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2289,7 +2289,7 @@
                 "variations": [
                     {
                         "algo": "RUR'URU2R2U'RU'R'U2R",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -2302,7 +2302,7 @@
                 "variations": [
                     {
                         "algo": "R'U'RU'R'U2R2UR'URU2R'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -2428,7 +2428,7 @@
             "uid": "21"
         },
         "code": "24",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
@@ -2494,7 +2494,7 @@
                 "variations": [
                     {
                         "algo": "RU2R'U'RU'R2U2RUR'UR",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -2507,7 +2507,7 @@
                 "variations": [
                     {
                         "algo": "R'U2RUR'UR2U2R'U'RU'R'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -2640,8 +2640,8 @@
             "uid": "22"
         },
         "code": "25",
-        "description": "C'est le m\u00eame que le T(24), mais en d\u00e9call\u00e9.",
-        "family": "Croix",
+        "description": "Same as T(24), but offsetted.",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
@@ -2707,7 +2707,7 @@
                 "variations": [
                     {
                         "algo": "R'U2R'D'RU2R'DR2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2720,7 +2720,7 @@
                 "variations": [
                     {
                         "algo": "RU2RDR'U2RD'R2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2733,7 +2733,7 @@
                 "variations": [
                     {
                         "algo": "RU2R'U'RUR'U'RUR'U'RU'R'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "OH"
                         ]
@@ -2746,7 +2746,7 @@
                 "variations": [
                     {
                         "algo": "R'U'RU'R'URU'R'URU'R'U2R",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "OH"
                         ]
@@ -2816,7 +2816,7 @@
             "uid": "36"
         },
         "code": "26",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
@@ -2899,7 +2899,7 @@
             "uid": "35"
         },
         "code": "27",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
@@ -3002,8 +3002,8 @@
             "uid": "44"
         },
         "code": "28",
-        "description": "On sort une des arr\u00eates, U2 et on la remet de l'autre c\u00f4t\u00e9.",
-        "family": "Coins",
+        "description": "Take out one of the cross edges, U2, and put it back from the other side.",
+        "family": "Corners",
         "groups": [
             "OLL"
         ],
@@ -3260,14 +3260,14 @@
                 "variations": [
                     {
                         "algo": "M'U'R'U'RURB'R'Br'R",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "rR'U'R'U'RUx'RU'R'Uxr'R",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -3494,7 +3494,7 @@
         "logiqx": [
             {
                 "algo": "RUR'U'R'FRF'",
-                "description": "Trigger combinaison known as \"[sexy-sledge]\"",
+                "description": "Trigger combination known as \"[sexy-sledge]\"",
                 "tags": [
                     "2H",
                     "OH"
@@ -3618,7 +3618,7 @@
                 "variations": [
                     {
                         "algo": "RUR'U'xD'R'URU'Dx'",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
@@ -3631,7 +3631,7 @@
                 "variations": [
                     {
                         "algo": "RUR'U'y'r'U'RUrR'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -3698,7 +3698,7 @@
             "uid": "25"
         },
         "code": "35",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
         ],
@@ -3709,7 +3709,7 @@
                 "variations": [
                     {
                         "algo": "RU2R2FRF'RU2R'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H",
                             "OH"
@@ -3796,18 +3796,18 @@
         "logiqx": [
             {
                 "algo": "R'U'RU'R'U2RR'U'RURB'R'B",
-                "description": "[OLL] combinaison - [RBS], [sexy-sledge] from the back",
+                "description": "[OLL] combination - [RBS], [sexy-sledge] from the back",
                 "variations": [
                     {
                         "algo": "R'U'RU'R'URUlU'R'Ux",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "R'U'RU'R'URUx'RU'R'Ux",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "OH"
                         ]
@@ -3866,7 +3866,7 @@
             "uid": "42"
         },
         "code": "37",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
         ],
@@ -3952,11 +3952,11 @@
         "logiqx": [
             {
                 "algo": "RUR'URU2R'RUR'U'R'FRF'",
-                "description": "[OLL] combinaison - [RFS], [sexy-sledge]",
+                "description": "[OLL] combination - [RFS], [sexy-sledge]",
                 "variations": [
                     {
                         "algo": "RUR'URU'R'U'R'FRF'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -4042,7 +4042,7 @@
             },
             {
                 "algo": "FRUR'U'F'R'U'RU'R'U2R",
-                "description": "[OLL] combinaison - F [Sexy Move] F', [RBS]",
+                "description": "[OLL] combination - F [Sexy Move] F', [RBS]",
                 "tags": [
                     "2H",
                     "OH"
@@ -4182,7 +4182,7 @@
         "logiqx": [
             {
                 "algo": "RUR'URU2R'FRUR'U'F'",
-                "description": "[OLL] combinaison - [RFS], F [Sexy Move] F'",
+                "description": "[OLL] combination - [RFS], F [Sexy Move] F'",
                 "tags": [
                     "2H",
                     "OH"
@@ -4273,7 +4273,7 @@
         "logiqx": [
             {
                 "algo": "R'U'RU'R'U2RFRUR'U'F'",
-                "description": "[OLL] combinaison - [RBS], F [Sexy Move] F'",
+                "description": "[OLL] combination - [RBS], F [Sexy Move] F'",
                 "tags": [
                     "2H",
                     "OH"
@@ -4341,7 +4341,7 @@
                 "variations": [
                     {
                         "algo": "F'U'L'ULF",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H",
                             "OH"
@@ -4349,7 +4349,7 @@
                     },
                     {
                         "algo": "f'L'U'LUf",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H",
                             "OH"
@@ -4357,7 +4357,7 @@
                     },
                     {
                         "algo": "B'U'R'URB",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H"
                         ]
@@ -4435,7 +4435,7 @@
                 "variations": [
                     {
                         "algo": "fRUR'U'f'",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H",
                             "OH"
@@ -4485,7 +4485,7 @@
             "uid": "1"
         },
         "code": "45",
-        "description": "Le plus simple des OLLs.",
+        "description": "The simplest of all OLLs.",
         "family": "T",
         "groups": [
             "OLL"
@@ -4501,7 +4501,7 @@
                 "variations": [
                     {
                         "algo": "fURU'R'f'",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H",
                             "OH"
@@ -4673,7 +4673,7 @@
             },
             {
                 "algo": "F'L'U'LUL'U'LUF",
-                "description": "[Conjugate] d'un double [Sexy Move] - [F': [L' U' L U]*2]]",
+                "description": "[Conjugate] of a double [Sexy Move] - [F': [L' U' L U]*2]]",
                 "tags": [
                     "2H",
                     "OH"
@@ -4681,7 +4681,7 @@
                 "variations": [
                     {
                         "algo": "f'U'L'ULU'L'ULf",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H",
                             "OH"
@@ -4689,7 +4689,7 @@
                     },
                     {
                         "algo": "B'R'U'RUR'U'RUB",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H"
                         ]
@@ -4747,7 +4747,7 @@
         "logiqx": [
             {
                 "algo": "FRUR'U'RUR'U'F'",
-                "description": "[Conjugate] d'un double [Sexy Move] - [F: [R U R' U']*2]]",
+                "description": "[Conjugate] of a double [Sexy Move] - [F: [R U R' U']*2]]",
                 "tags": [
                     "2H",
                     "OH"
@@ -4755,7 +4755,7 @@
                 "variations": [
                     {
                         "algo": "fURU'R'URU'R'f'",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H",
                             "OH"
@@ -4829,7 +4829,7 @@
                 "variations": [
                     {
                         "algo": "rU'r2Ur2Ur2U'r",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -4905,7 +4905,7 @@
                 "variations": [
                     {
                         "algo": "r'Ur2U'r2U'r2Ur'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -4915,14 +4915,14 @@
             },
             {
                 "algo": "RU2R'U'RU'R'FRUR'U'F'",
-                "description": "[OLL] combinaison - [RFAS], F [Sexy Move] F'",
+                "description": "[OLL] combination - [RFAS], F [Sexy Move] F'",
                 "tags": [
                     "2H"
                 ],
                 "variations": [
                     {
                         "algo": "RU2R'U'RU'R'FRUR'U'F'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -4981,7 +4981,7 @@
         "logiqx": [
             {
                 "algo": "FURU'R'URU'R'F'",
-                "description": "[Conjugate] d'un double [Inverse Sexy] - [F: [U R U' R']*2]]",
+                "description": "[Conjugate] of a double [Inverse Sexy] - [F: [U R U' R']*2]]",
                 "tags": [
                     "2H",
                     "OH"
@@ -4989,7 +4989,7 @@
                 "variations": [
                     {
                         "algo": "fRUR'U'RUR'U'f'",
-                        "description": "Execut\u00e9 depuis un angle diff\u00e9rent",
+                        "description": "Executed from a different angle",
                         "tags": [
                             "2H",
                             "OH"
@@ -5068,7 +5068,7 @@
             "uid": "30"
         },
         "code": "52",
-        "description": "G\u00e9n\u00e9ration automatique.",
+        "description": "Automatic generation.",
         "family": "I",
         "groups": [
             "OLL"
@@ -5076,11 +5076,11 @@
         "logiqx": [
             {
                 "algo": "RUR'URU2R'yFURU'R'F'",
-                "description": "[OLL] combinaison - [RFS], rotate, F [Sexy Move] F'",
+                "description": "[OLL] combination - [RFS], rotate, F [Sexy Move] F'",
                 "variations": [
                     {
                         "algo": "RUR'URU'yRU'R'F'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -5088,7 +5088,7 @@
                     },
                     {
                         "algo": "RUR'URU'BU'B'R'",
-                        "description": "L'ex\u00e9cution applique les annulations, without y rotation",
+                        "description": "Execution applies cancellations, without y rotation",
                         "tags": [
                             "2H",
                             "OH"
@@ -5098,11 +5098,11 @@
             },
             {
                 "algo": "R'U'RU'R'U2RR'U'F'UFR",
-                "description": "[OLL] combinaison - [RBS], OLL 43",
+                "description": "[OLL] combination - [RBS], OLL 43",
                 "variations": [
                     {
                         "algo": "R'U'RU'R'UF'UFR",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -5175,7 +5175,7 @@
                 "variations": [
                     {
                         "algo": "r'U'RU'R'URU'R'U2r",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -5189,7 +5189,7 @@
                 "variations": [
                     {
                         "algo": "r'U2RUR'U'RUR'Ur",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -5261,7 +5261,7 @@
                 "variations": [
                     {
                         "algo": "rUR'URU'R'URU2r'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -5275,7 +5275,7 @@
                 "variations": [
                     {
                         "algo": "rU2R'U'RUR'U'RU'r'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -5343,7 +5343,7 @@
             "uid": "49"
         },
         "code": "55",
-        "description": "G\u00e9n\u00e9ration automatique.",
+        "description": "Automatic generation.",
         "family": "I",
         "groups": [
             "OLL"
@@ -5358,11 +5358,11 @@
             },
             {
                 "algo": "rU2R'U'RU'r'rUr'RUR'U'rU'r'",
-                "description": "[OLL] combinaison - [RFAS], OLL 16",
+                "description": "[OLL] combination - [RFAS], OLL 16",
                 "variations": [
                     {
                         "algo": "rU2R'U'R2r'UR'U'rU'r'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies cancellations",
                         "tags": [
                             "OH"
                         ]
@@ -5440,7 +5440,7 @@
             "uid": "19"
         },
         "code": "56",
-        "description": "G\u00e9n\u00e9ration automatique.",
+        "description": "Automatic generation.",
         "family": "I",
         "groups": [
             "OLL"
@@ -5448,7 +5448,7 @@
         "logiqx": [
             {
                 "algo": "rUr'URU'R'URU'R'rU'r'",
-                "description": "[Conjugate] d'un double [Inverse Sexy] - [r U r': [U R U' R']*2]]",
+                "description": "[Conjugate] of a double [Inverse Sexy] - [r U r': [U R U' R']*2]]",
                 "tags": [
                     "2H",
                     "OH"
@@ -5456,7 +5456,7 @@
             },
             {
                 "algo": "r'U'rU'R'URU'R'URr'Ur",
-                "description": "[Conjugate] d'un double [Inverse Sexy] - [r' U' r: [U' R' U R]*2]]"
+                "description": "[Conjugate] of a double [Inverse Sexy] - [r' U' r: [U' R' U R]*2]]"
             }
         ],
         "main": "FRUR'U'RUR'U'SRUR'U'f'",
@@ -5528,7 +5528,7 @@
             "uid": "17"
         },
         "code": "57",
-        "family": "Coins",
+        "family": "Corners",
         "groups": [
             "OLL"
         ],
@@ -5539,14 +5539,14 @@
                 "variations": [
                     {
                         "algo": "RUR'U'M'URU'r'",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "RUR'U'rR'URU'r'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]

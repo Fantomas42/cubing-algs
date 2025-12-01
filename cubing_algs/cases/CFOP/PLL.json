@@ -71,7 +71,7 @@
             "uid": "Aa"
         },
         "code": "Aa",
-        "description": "Utilis\u00e9e en headlights.",
+        "description": "Used with headlights.",
         "family": "Corners only",
         "groups": [
             "CPLL",
@@ -88,14 +88,14 @@
                 "variations": [
                     {
                         "algo": "l'UR'D2RU'R'D2R2x'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "xR'UR'D2RU'R'D2R2x'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -117,40 +117,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une A-Perm gr\u00e2ce au motif \u00e0 Damier (4 facelets) et le 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Aa-Perm parce que le motif \u00e0 Damier est sur la gauche and the 2-Bar ext\u00e9rieur \u00e0 droite.",
+                    "description": "Clearly an A-Perm thanks to the checkerboard pattern (4 facelets) and the 2-Bar outer.<br><br>Easily recognizable as Aa-Perm because the checkerboard pattern is on the left and the 2-Bar outer on the right.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                        "description": "Headlights accompanied by a 2-Bar outer can only be an A-Perm or G-Perm.<br><br>The presence of a checkerboard pattern (4 facelets) is considered to differentiate cases.<br><br>A-Perms = 3 colors, G-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Outer)"
                     },
-                    "notes": "Aa = 3 couleurs, Ga = 4 couleurs",
-                    "observation": "Motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                    "notes": "Aa = 3 colors, Ga = 4 colors",
+                    "observation": "Checkerboard pattern on the left (4 facelets)"
                 },
                 {
-                    "description": "Clairement une A-Perm parce que of the 2x2 block at the front and the opposite corner facelet.<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the opposite corner facelet est sur la droite.",
+                    "description": "Clearly an A-Perm because of the 2x2 block at the front and the opposite corner facelet.<br><br>Easily recognizable as Ab-Perm because the opposite corner facelet is on the right.",
                     "feature": {
-                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
-                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                        "description": "Symmetrical 2-bars and 2x2 blocks can only be a Y-Perm, A-Perm or V-Perm.<br><br>The outer corners are considered to differentiate cases. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 colors, Y-Perm / V-Perm = 4 colors.",
+                        "name": "Double 2-Bar (Symmetric)"
                     },
-                    "notes": "Aa = 3 couleurs, V = 4 couleurs",
+                    "notes": "Aa = 3 colors, V = 4 colors",
                     "observation": "Right corner is the opposite of the block"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Aa-Perm parce que of the 2-bar at the back-left and the opposite facelets at the front-right.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Aa-Perm because of the 2-bar at the back-left and the opposite facelets at the front-right.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                        "description": "2-Bar outers connected to an opposite corner can only be a V-Perm, G-Perm or A-Perm.<br><br>The side adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms = 3 colors, V-Perms / A-Perms = 4 colors.",
+                        "name": "2-Bar outer (Opposite Corner)"
                     },
-                    "notes": "Aa = 4 couleurs, Gd = 3 couleurs",
+                    "notes": "Aa = 4 colors, Gd = 3 colors",
                     "observation": "Opposite facelets at the front-right"
                 },
                 {
-                    "description": "Clairement une A-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Aa-Perm parce que the \"almost\" motif \u00e0 Damier est sur la droite.<br><br>The edge \u00e0 gauche is also the opposite of the rear corner.",
+                    "description": "Clearly an A-Perm because the facelet between the headlights is the opposite of a checkerboard pattern (5 facelets).<br><br>Easily recognizable as Aa-Perm because the \"almost\" checkerboard pattern is on the right.<br><br>The edge on the left is also the opposite of the rear corner.",
                     "feature": {
-                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "description": "Headlights containing an adjacent edge can only be a R-Perm, G-Perm or A-Perm.<br><br>The presence of a checkerboard pattern (4 or 5 facelets) is considered to differentiate cases.<br><br>R-Perms = 3 colors, A-Perms / G-Perms = 4 colors.",
                         "name": "Headlights (Adjacent Edge)"
                     },
-                    "notes": "Aa = 4 couleurs, Ra = 3 couleurs",
-                    "observation": "Almost motif \u00e0 Damier \u00e0 droite (5 facelets)"
+                    "notes": "Aa = 4 colors, Ra = 3 colors",
+                    "observation": "Almost checkerboard pattern on the right (5 facelets)"
                 }
             ],
             "moves": [
@@ -239,7 +239,7 @@
             "uid": "Ab"
         },
         "code": "Ab",
-        "description": "Version sym\u00e9trique en M, S et mirroir de la Aa.",
+        "description": "Symmetric version with M, S and mirror of Aa.",
         "family": "Corners only",
         "groups": [
             "CPLL",
@@ -256,14 +256,14 @@
                 "variations": [
                     {
                         "algo": "l'R'D2RUR'D2RU'Rx'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
                     },
                     {
                         "algo": "xR2D2RUR'D2RU'Rx'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "OH"
                         ]
@@ -281,40 +281,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une A-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the \"almost\" motif \u00e0 Damier est sur la gauche.<br><br>The edge \u00e0 droite is also the opposite of the rear corner.",
+                    "description": "Clearly an A-Perm because the facelet between the headlights is the opposite of a checkerboard pattern (5 facelets).<br><br>Easily recognizable as Ab-Perm because the \"almost\" checkerboard pattern is on the left.<br><br>The edge on the right is also the opposite of the rear corner.",
                     "feature": {
-                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "description": "Headlights containing an adjacent edge can only be a R-Perm, G-Perm or A-Perm.<br><br>The presence of a checkerboard pattern (4 or 5 facelets) is considered to differentiate cases.<br><br>R-Perms = 3 colors, A-Perms / G-Perms = 4 colors.",
                         "name": "Headlights (Adjacent Edge)"
                     },
-                    "notes": "Ab = 4 couleurs, Rb = 3 couleurs",
-                    "observation": "Almost motif \u00e0 Damier \u00e0 gauche (5 facelets)"
+                    "notes": "Ab = 4 colors, Rb = 3 colors",
+                    "observation": "Almost checkerboard pattern on the left (5 facelets)"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ab-Perm parce que of the 2-bar at the back-right and the opposite facelets at the front-left.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Ab-Perm because of the 2-bar at the back-right and the opposite facelets at the front-left.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                        "description": "2-Bar outers connected to an opposite corner can only be a V-Perm, G-Perm or A-Perm.<br><br>The side adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms = 3 colors, V-Perms / A-Perms = 4 colors.",
+                        "name": "2-Bar outer (Opposite Corner)"
                     },
-                    "notes": "Ab = 4 couleurs, Gb = 3 couleurs",
+                    "notes": "Ab = 4 colors, Gb = 3 colors",
                     "observation": "Opposite facelets at the front-left"
                 },
                 {
-                    "description": "Clairement une A-Perm parce que of the 2x2 block at the front and the opposite corner facelet.<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the opposite corner facelet est sur la gauche.",
+                    "description": "Clearly an A-Perm because of the 2x2 block at the front and the opposite corner facelet.<br><br>Easily recognizable as Ab-Perm because the opposite corner facelet is on the left.",
                     "feature": {
-                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
-                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                        "description": "Symmetrical 2-bars and 2x2 blocks can only be a Y-Perm, A-Perm or V-Perm.<br><br>The outer corners are considered to differentiate cases. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 colors, Y-Perm / V-Perm = 4 colors.",
+                        "name": "Double 2-Bar (Symmetric)"
                     },
-                    "notes": "Ab = 3 couleurs, V = 4 couleurs",
+                    "notes": "Ab = 3 colors, V = 4 colors",
                     "observation": "Left corner is the opposite of the block"
                 },
                 {
-                    "description": "Clairement une A-Perm parce que of the motif \u00e0 Damier (4 facelets) and the 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Ab-Perm parce que the motif \u00e0 Damier est sur la droite and the 2-Bar ext\u00e9rieur \u00e0 gauche.",
+                    "description": "Clearly an A-Perm because of the checkerboard pattern (4 facelets) and the 2-Bar outer.<br><br>Easily recognizable as Ab-Perm because the checkerboard pattern is on the right and the 2-Bar outer on the left.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                        "description": "Headlights accompanied by a 2-Bar outer can only be an A-Perm or G-Perm.<br><br>The presence of a checkerboard pattern (4 facelets) is considered to differentiate cases.<br><br>A-Perms = 3 colors, G-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Outer)"
                     },
-                    "notes": "Ab = 3 couleurs, Gc = 4 couleurs",
-                    "observation": "motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                    "notes": "Ab = 3 colors, Gc = 4 colors",
+                    "observation": "Checkerboard pattern on the right (4 facelets)"
                 }
             ],
             "moves": [
@@ -411,12 +411,12 @@
                 "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
                 "x'RU'R'DRUR'u2R'URDR'U'Rx'"
             ],
-            "comment": "This algorithm has a nice symmetry to it, as highlighted. Some people fund the second one faster to execute",
+            "comment": "This algorithm has a nice symmetry to it, as highlighted. Some people find the second one faster to execute",
             "difficulty": 2,
             "uid": "E"
         },
         "code": "E",
-        "description": "Sym\u00e9trie avec le U' au d\u00e9but et fin, et le D qui va et vient \u00e0 chaque tour.",
+        "description": "Symmetry with the U' at the start and end, and the D that goes back and forth each turn.",
         "family": "Corners only",
         "groups": [
             "CPLL",
@@ -428,7 +428,7 @@
         "logiqx": [
             {
                 "algo": "x'RU'R'DRUR'D'RUR'DRU'R'D'x",
-                "description": "[Commutator] combinaison - [R U' R', D] [R, U R' D]",
+                "description": "[Commutator] combination - [R U' R', D] [R, U R' D]",
                 "variations": [
                     {
                         "algo": "lU'R'DRUR'D'RUR'DRU'R'D'x",
@@ -471,18 +471,18 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as E-Perm parce que of the \"malformed\" pair in the front-left, resulting in a partial motif \u00e0 Damier (3 facelets).<br><br>The E-Perm has two appearances and looks the same after a U2.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Recognizable as E-Perm because of the \"malformed\" pair in the front-left, resulting in a partial checkerboard pattern (3 facelets).<br><br>The E-Perm has two appearances and looks the same after a U2.",
                     "feature": {
-                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "description": "The miscellaneous cases without matching bookends can only be an E-Perm, V-Perm or Y-Perm.<br><br>The checkerboard pattern in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 colors.",
                         "name": "Miscellaneous without Bookends"
                     },
                     "notes": "Learn the features of E, Y and V",
                     "observation": "Malformed pair at front-left"
                 },
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as E-Perm parce que of the \"malformed\" pair in the front-right, resulting in a partial motif \u00e0 Damier (3 facelets).<br><br>The E-Perm has two appearances and looks the same after a U2.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Recognizable as E-Perm because of the \"malformed\" pair in the front-right, resulting in a partial checkerboard pattern (3 facelets).<br><br>The E-Perm has two appearances and looks the same after a U2.",
                     "feature": {
-                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "description": "The miscellaneous cases without matching bookends can only be an E-Perm, V-Perm or Y-Perm.<br><br>The checkerboard pattern in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 colors.",
                         "name": "Miscellaneous without Bookends"
                     },
                     "notes": "Learn the features of E, Y and V",
@@ -594,7 +594,7 @@
             "uid": "F"
         },
         "code": "F",
-        "description": "Ressemble \u00e0 la Jb-Perm et T-Perm sauf la fin.",
+        "description": "Resembles Jb-Perm and T-Perm except the end.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -608,7 +608,7 @@
                 "variations": [
                     {
                         "algo": "R'U'F'RUR'U'R'FR2U'R'U'RUR'UR",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -634,7 +634,7 @@
                 "variations": [
                     {
                         "algo": "LR2URUR2U'R'U'R2U'RU2zU'Ru'x'",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -652,39 +652,39 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une F-Perm parce que of the lonesome 3-bar.<br><br>It is also worth knowing that the edge \u00e0 droite is the opposite of the front corner.",
+                    "description": "Clearly a F-Perm because of the lonesome 3-bar.<br><br>It is also worth knowing that the edge on the right is the opposite of the front corner.",
                     "feature": {
-                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
-                        "name": "3-Bar sans Headlights"
+                        "description": "The 3-bar without headlights can only be a J-Perm or F-Perm.<br><br>The presence and location of a 2-bar is considered to differentiate cases.<br><br>J-Perms = 3 colors, F-Perm = 4 colors.",
+                        "name": "3-Bar without Headlights"
                     },
-                    "notes": "F = 4 couleurs, Ja / Jb = 3 couleurs",
+                    "notes": "F = 4 colors, Ja / Jb = 3 colors",
                     "observation": "Right edge is the opposite of front corner"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as F-Perm parce que of the \"malformed\" 2x2 block at the front, resulting in a motif \u00e0 Damier (4 facelets).",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as F-Perm because of the \"malformed\" 2x2 block at the front, resulting in a checkerboard pattern (4 facelets).",
                     "feature": {
-                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "description": "The miscellaneous cases with matching bookends can only be a F-Perm, R-Perm or G-Perm.<br><br>The checkerboard pattern in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 colors, R-Perms / G-Perms = 4 colors.",
                         "name": "Miscellaneous with Bookends"
                     },
-                    "notes": "F = 3 couleurs, Gc / Rb = 4 couleurs",
-                    "observation": "Malformed 2x2 block (motif \u00e0 Damier)"
+                    "notes": "F = 3 colors, Gc / Rb = 4 colors",
+                    "observation": "Malformed 2x2 block (checkerboard pattern)"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as F-Perm parce que of the \"malformed\" 2x2 block at the front, resulting in a motif \u00e0 Damier (4 facelets).",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as F-Perm because of the \"malformed\" 2x2 block at the front, resulting in a checkerboard pattern (4 facelets).",
                     "feature": {
-                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "description": "The miscellaneous cases with matching bookends can only be a F-Perm, R-Perm or G-Perm.<br><br>The checkerboard pattern in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 colors, R-Perms / G-Perms = 4 colors.",
                         "name": "Miscellaneous with Bookends"
                     },
-                    "notes": "F = 3 couleurs, Ga / Ra = 4 couleurs",
-                    "observation": "Malformed 2x2 block (motif \u00e0 Damier)"
+                    "notes": "F = 3 colors, Ga / Ra = 4 colors",
+                    "observation": "Malformed 2x2 block (checkerboard pattern)"
                 },
                 {
-                    "description": "Clairement une F-Perm parce que of the lonesome 3-bar.<br><br>It is also worth knowing that the edge \u00e0 gauche is the opposite of the front corner.",
+                    "description": "Clearly a F-Perm because of the lonesome 3-bar.<br><br>It is also worth knowing that the edge on the left is the opposite of the front corner.",
                     "feature": {
-                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
-                        "name": "3-Bar sans Headlights"
+                        "description": "The 3-bar without headlights can only be a J-Perm or F-Perm.<br><br>The presence and location of a 2-bar is considered to differentiate cases.<br><br>J-Perms = 3 colors, F-Perm = 4 colors.",
+                        "name": "3-Bar without Headlights"
                     },
-                    "notes": "F = 4 couleurs, Ja / Jb = 3 couleurs",
+                    "notes": "F = 4 colors, Ja / Jb = 3 colors",
                     "observation": "Left edge is the opposite of front corner"
                 }
             ],
@@ -786,7 +786,7 @@
                 "variations": [
                     {
                         "algo": "R2uR'UR'U'Ru'R2yL'UL",
-                        "description": "Ex\u00e9cution \u00e0 une main",
+                        "description": "One-handed execution",
                         "tags": [
                             "OH"
                         ]
@@ -804,40 +804,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une Ga-Perm / Gc-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (4 facelets).<br><br>Facilement reconnaissable en tant que Ga-Perm parce que the \"almost\" motif \u00e0 Damier est sur la gauche and the 2-Bar ext\u00e9rieur \u00e0 droite.",
+                    "description": "Clearly a Ga-Perm / Gc-Perm because the facelet between the headlights is the opposite of a checkerboard pattern (4 facelets).<br><br>Easily recognizable as Ga-Perm because the \"almost\" checkerboard pattern is on the left and the 2-Bar outer on the right.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                        "description": "Headlights accompanied by a 2-Bar outer can only be an A-Perm or G-Perm.<br><br>The presence of a checkerboard pattern (4 facelets) is considered to differentiate cases.<br><br>A-Perms = 3 colors, G-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Outer)"
                     },
-                    "notes": "Ga = 4 couleurs, Aa = 3 couleurs",
-                    "observation": "Almost motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                    "notes": "Ga = 4 colors, Aa = 3 colors",
+                    "observation": "Almost checkerboard pattern on the left (4 facelets)"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ga-Perm parce que of the 2-bar at the front-left and the edge \u00e0 droite being an adjacent of the back-left corner.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Ga-Perm because of the 2-bar at the front-left and the edge on the right being an adjacent of the back-left corner.",
                     "feature": {
-                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "description": "Inside 2-bars can only be a G-Perm or Y-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms / Y-Perm = 4 colors.",
                         "name": "Inside 2-Bar"
                     },
-                    "notes": "Y / Ga = 4 couleurs",
-                    "observation": "Edge \u00e0 droite is an adjacent of the back-left corner"
+                    "notes": "Y / Ga = 4 colors",
+                    "observation": "Edge on the right is an adjacent of the back-left corner"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ga-Perm parce que the edge \u00e0 gauche is the opposite of the front-right corner and the edge \u00e0 droite matches the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Ga-Perm because the edge on the left is the opposite of the front-right corner and the edge on the right matches the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
                     "feature": {
-                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "description": "The miscellaneous cases with matching bookends can only be a F-Perm, R-Perm or G-Perm.<br><br>The checkerboard pattern in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 colors, R-Perms / G-Perms = 4 colors.",
                         "name": "Miscellaneous with Bookends"
                     },
-                    "notes": "Ga = 4 couleurs, F = 3 couleurs",
+                    "notes": "Ga = 4 colors, F = 3 colors",
                     "observation": "Almost malformed 2x2 block"
                 },
                 {
-                    "description": "Clairement une Ga-Perm / Gc-Perm parce que of the motif \u00e0 Damier (4 facelets) and the absence of an 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Ga-Perm parce que the motif \u00e0 Damier est sur la droite.<br><br>The edge \u00e0 gauche is also the opposite of the front corner.",
+                    "description": "Clearly a Ga-Perm / Gc-Perm because of the checkerboard pattern (4 facelets) and the absence of a 2-Bar outer.<br><br>Easily recognizable as Ga-Perm because the checkerboard pattern is on the right.<br><br>The edge on the left is also the opposite of the front corner.",
                     "feature": {
-                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "description": "Headlights containing an adjacent edge can only be a R-Perm, G-Perm or A-Perm.<br><br>The presence of a checkerboard pattern (4 or 5 facelets) is considered to differentiate cases.<br><br>R-Perms = 3 colors, A-Perms / G-Perms = 4 colors.",
                         "name": "Headlights (Adjacent Edge)"
                     },
-                    "notes": "Ga = 4 couleurs, Ra = 3 couleurs",
-                    "observation": "motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                    "notes": "Ga = 4 colors, Ra = 3 colors",
+                    "observation": "Checkerboard pattern on the right (4 facelets)"
                 }
             ],
             "moves": [
@@ -932,7 +932,7 @@
                 "variations": [
                     {
                         "algo": "F'U'FR2uR'URU'Ru'R2",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
@@ -950,39 +950,39 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gb-Perm parce que the headlights are \u00e0 gauche and the adjacent edge is the opposite of the front corner.",
+                    "description": "Clearly a Gb-Perm / Gd-Perm because the headlights contain the opposite edge color.<br><br>Recognizable as Gb-Perm because the headlights are on the left and the adjacent edge is the opposite of the front corner.",
                     "feature": {
-                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "description": "Headlights containing an opposite edge can only be a G-Perm.<br><br>The edge adjacent to the headlights is considered to differentiate cases.<br><br>G-Perms = 3 or 4 colors.",
                         "name": "Headlights (Opposite Edge)"
                     },
-                    "notes": "Gb = 4 couleurs, Gd = 3 couleurs",
+                    "notes": "Gb = 4 colors, Gd = 3 colors",
                     "observation": "Right edge is the opposite of front corner"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gb-Perm parce que of the 2-bar at the back-right and the opposite facelets at the back-left.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Gb-Perm because of the 2-bar at the back-right and the opposite facelets at the back-left.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                        "description": "2-Bar outers connected to an opposite corner can only be a V-Perm, G-Perm or A-Perm.<br><br>The side adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms = 3 colors, V-Perms / A-Perms = 4 colors.",
+                        "name": "2-Bar outer (Opposite Corner)"
                     },
-                    "notes": "Gb = 3 couleurs, Ab / V = 4 couleurs",
+                    "notes": "Gb = 3 colors, Ab / V = 4 colors",
                     "observation": "Opposite facelets at the back-left"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gb-Perm parce que of the 2-bar at the front-left and the edge \u00e0 droite being the opposite of the front corner.<br><br>You might find the corner \u00e0 gauche useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Gb-Perm because of the 2-bar at the front-left and the edge on the right being the opposite of the front corner.<br><br>You might find the corner on the left useful during recognition.",
                     "feature": {
-                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "description": "Inside 2-bars can only be a G-Perm or Y-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms / Y-Perm = 4 colors.",
                         "name": "Inside 2-Bar"
                     },
-                    "notes": "Y / Gb = 4 couleurs",
-                    "observation": "Edge \u00e0 droite is the opposite of the front-right corner"
+                    "notes": "Y / Gb = 4 colors",
+                    "observation": "Edge on the right is the opposite of the front-right corner"
                 },
                 {
-                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gb-Perm parce que the edge \u00e0 gauche matches the headlights.<br><br>The edge \u00e0 gauche is also the opposite of the back corner.",
+                    "description": "Clearly a Gb-Perm / Gd-Perm because the headlights contain the opposite edge color.<br><br>Recognizable as Gb-Perm because the edge on the left matches the headlights.<br><br>The edge on the left is also the opposite of the back corner.",
                     "feature": {
-                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "description": "Headlights containing an opposite edge can only be a G-Perm.<br><br>The edge adjacent to the headlights is considered to differentiate cases.<br><br>G-Perms = 3 or 4 colors.",
                         "name": "Headlights (Opposite Edge)"
                     },
-                    "notes": "Gb = 3 couleurs, Gd = 4 couleurs",
+                    "notes": "Gb = 3 colors, Gd = 4 colors",
                     "observation": "Left edge matches right headlights"
                 }
             ],
@@ -1104,40 +1104,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une Ga-Perm / Gc-Perm parce que of the motif \u00e0 Damier (4 facelets) and the absence of an 2-Bar ext\u00e9rieur.<br><br>Facilement reconnaissable en tant que Gc-Perm parce que the motif \u00e0 Damier est sur la gauche.<br><br>The edge \u00e0 droite is also the opposite of the front corner.",
+                    "description": "Clearly a Ga-Perm / Gc-Perm because of the checkerboard pattern (4 facelets) and the absence of a 2-Bar outer.<br><br>Easily recognizable as Gc-Perm because the checkerboard pattern is on the left.<br><br>The edge on the right is also the opposite of the front corner.",
                     "feature": {
-                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "description": "Headlights containing an adjacent edge can only be a R-Perm, G-Perm or A-Perm.<br><br>The presence of a checkerboard pattern (4 or 5 facelets) is considered to differentiate cases.<br><br>R-Perms = 3 colors, A-Perms / G-Perms = 4 colors.",
                         "name": "Headlights (Adjacent Edge)"
                     },
-                    "notes": "Gc = 4 couleurs, Rb = 3 couleurs",
-                    "observation": "motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                    "notes": "Gc = 4 colors, Rb = 3 colors",
+                    "observation": "Checkerboard pattern on the left (4 facelets)"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gc-Perm parce que the edge \u00e0 droite is the opposite of the front-left corner and the edge \u00e0 gauche matches the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Gc-Perm because the edge on the right is the opposite of the front-left corner and the edge on the left matches the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
                     "feature": {
-                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "description": "The miscellaneous cases with matching bookends can only be a F-Perm, R-Perm or G-Perm.<br><br>The checkerboard pattern in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 colors, R-Perms / G-Perms = 4 colors.",
                         "name": "Miscellaneous with Bookends"
                     },
-                    "notes": "Gc = 4 couleurs, F = 3 couleurs",
+                    "notes": "Gc = 4 colors, F = 3 colors",
                     "observation": "Almost malformed 2x2 block"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gc-Perm parce que of the 2-bar at the front-right and the edge \u00e0 gauche being an adjacent of the back-right corner.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Gc-Perm because of the 2-bar at the front-right and the edge on the left being an adjacent of the back-right corner.",
                     "feature": {
-                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "description": "Inside 2-bars can only be a G-Perm or Y-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms / Y-Perm = 4 colors.",
                         "name": "Inside 2-Bar"
                     },
-                    "notes": "Y / Gc = 4 couleurs",
-                    "observation": "Edge \u00e0 gauche is an adjacent of the back-right corner"
+                    "notes": "Y / Gc = 4 colors",
+                    "observation": "Edge on the left is an adjacent of the back-right corner"
                 },
                 {
-                    "description": "Clairement une Ga-Perm / Gc-Perm parce que the facelet between the headlights is the opposite of a motif \u00e0 Damier (4 facelets).<br><br>Facilement reconnaissable en tant que Gc-Perm parce que the \"almost\" motif \u00e0 Damier est sur la droite and the 2-Bar ext\u00e9rieur \u00e0 gauche.",
+                    "description": "Clearly a Ga-Perm / Gc-Perm because the facelet between the headlights is the opposite of a checkerboard pattern (4 facelets).<br><br>Easily recognizable as Gc-Perm because the \"almost\" checkerboard pattern is on the right and the 2-Bar outer on the left.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un 2-Bar ext\u00e9rieur peut seulement \u00eatre une A-Perm ou G-Perm.<br><br>La pr\u00e9sence d'un motif \u00e0 Damier (4 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>A-Perms = 3 couleurs, G-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Ext\u00e9rieur)"
+                        "description": "Headlights accompanied by a 2-Bar outer can only be an A-Perm or G-Perm.<br><br>The presence of a checkerboard pattern (4 facelets) is considered to differentiate cases.<br><br>A-Perms = 3 colors, G-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Outer)"
                     },
-                    "notes": "Gc = 4 couleurs, Ab = 3 couleurs",
-                    "observation": "Almost motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                    "notes": "Gc = 4 colors, Ab = 3 colors",
+                    "observation": "Almost checkerboard pattern on the right (4 facelets)"
                 }
             ],
             "moves": [
@@ -1243,39 +1243,39 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gd-Perm parce que the edge \u00e0 droite matches the headlights.<br><br>The edge \u00e0 droite is also the opposite of the back corner.",
+                    "description": "Clearly a Gb-Perm / Gd-Perm because the headlights contain the opposite edge color.<br><br>Recognizable as Gd-Perm because the edge on the right matches the headlights.<br><br>The edge on the right is also the opposite of the back corner.",
                     "feature": {
-                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "description": "Headlights containing an opposite edge can only be a G-Perm.<br><br>The edge adjacent to the headlights is considered to differentiate cases.<br><br>G-Perms = 3 or 4 colors.",
                         "name": "Headlights (Opposite Edge)"
                     },
-                    "notes": "Gd = 3 couleurs, Gb = 4 couleurs",
+                    "notes": "Gd = 3 colors, Gb = 4 colors",
                     "observation": "Right edge matches left headlights"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gd-Perm parce que of the 2-bar at the front-right and the edge \u00e0 gauche being the opposite of the front corner.<br><br>You might find the corner \u00e0 droite useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Gd-Perm because of the 2-bar at the front-right and the edge on the left being the opposite of the front corner.<br><br>You might find the corner on the right useful during recognition.",
                     "feature": {
-                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "description": "Inside 2-bars can only be a G-Perm or Y-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms / Y-Perm = 4 colors.",
                         "name": "Inside 2-Bar"
                     },
-                    "notes": "Y / Gd = 4 couleurs",
-                    "observation": "Edge \u00e0 gauche is the opposite of the front-left corner"
+                    "notes": "Y / Gd = 4 colors",
+                    "observation": "Edge on the left is the opposite of the front-left corner"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Gd-Perm parce que of the 2-bar at the back-left and the opposite facelets at the back-right.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Gd-Perm because of the 2-bar at the back-left and the opposite facelets at the back-right.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                        "description": "2-Bar outers connected to an opposite corner can only be a V-Perm, G-Perm or A-Perm.<br><br>The side adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms = 3 colors, V-Perms / A-Perms = 4 colors.",
+                        "name": "2-Bar outer (Opposite Corner)"
                     },
-                    "notes": "Gd = 3 couleurs, Aa / V = 4 couleurs",
+                    "notes": "Gd = 3 colors, Aa / V = 4 colors",
                     "observation": "Opposite facelets at the back-right"
                 },
                 {
-                    "description": "Clairement une Gb-Perm / Gd-Perm parce que the headlights contain the opposite edge couleur.<br><br>Recognisable as Gd-Perm parce que the headlights are \u00e0 droite and the adjacent edge is the opposite of the front corner.",
+                    "description": "Clearly a Gb-Perm / Gd-Perm because the headlights contain the opposite edge color.<br><br>Recognizable as Gd-Perm because the headlights are on the right and the adjacent edge is the opposite of the front corner.",
                     "feature": {
-                        "description": "Headlights containing an opposite edge peut seulement \u00eatre une G-Perm.<br><br>The edge adjacent to the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 ou 4 couleurs.",
+                        "description": "Headlights containing an opposite edge can only be a G-Perm.<br><br>The edge adjacent to the headlights is considered to differentiate cases.<br><br>G-Perms = 3 or 4 colors.",
                         "name": "Headlights (Opposite Edge)"
                     },
-                    "notes": "Gd = 4 couleurs, Gb = 3 couleurs",
+                    "notes": "Gd = 4 colors, Gb = 3 colors",
                     "observation": "Left edge is the opposite of front corner"
                 }
             ],
@@ -1366,7 +1366,7 @@
             "uid": "H"
         },
         "code": "H",
-        "description": "Des U U2 U toujours entour\u00e9s de M2.",
+        "description": "U, U2, U always surrounded by M2.",
         "family": "Edges only",
         "groups": [
             "EPLL",
@@ -1383,7 +1383,7 @@
                 "variations": [
                     {
                         "algo": "M2U'M2U2M2U'M2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -1408,12 +1408,12 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une [EPLL] parce que of the headlights on both sides.<br><br>Facilement reconnaissable en tant que H-Perm parce que both sets of headlights contain the opposite edge couleur.<br><br>H-perm looks the same from all four possible angles.",
+                    "description": "Clearly an [EPLL] because of the headlights on both sides.<br><br>Easily recognizable as H-Perm because both sets of headlights contain the opposite edge color.<br><br>H-perm looks the same from all four possible angles.",
                     "feature": {
-                        "description": "Double headlights with at least one opposite edge peut seulement \u00eatre une H-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La H-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, H-Perm = 4 couleurs.",
+                        "description": "Double headlights with at least one opposite edge can only be a H-Perm or U-Perm.<br><br>The two edges are considered to differentiate cases. The H-Perm is the most distinct.<br><br>U-Perms = 3 colors, H-Perm = 4 colors.",
                         "name": "Double Lights (Opposite Edge)"
                     },
-                    "notes": "H = 4 couleurs, Ua / Ub = 3 couleurs",
+                    "notes": "H = 4 colors, Ua / Ub = 3 colors",
                     "observation": "Both headlights contain the opposite edge"
                 }
             ],
@@ -1527,7 +1527,7 @@
             "uid": "Ja"
         },
         "code": "Ja",
-        "description": "Comme la Jb-Perm mais mirroir.",
+        "description": "Like Jb-Perm but mirrored.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -1541,7 +1541,7 @@
                 "variations": [
                     {
                         "algo": "R'UL'U2RU'R'U2RL",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -1550,11 +1550,11 @@
             },
             {
                 "algo": "R'U2RUR'URR'ULU'RUL'",
-                "description": "[COLL] combinaison - [RBAS], [RBN]",
+                "description": "[COLL] combination - [RBAS], [RBN]",
                 "variations": [
                     {
                         "algo": "R'U2RUR'U2LU'RUL'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "OH"
                         ]
@@ -1572,40 +1572,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une J-Perm parce que of the 3-bar and inside 2-bar which look like a 3x2 block.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 3-bar est sur la gauche and the inside 2-bar \u00e0 droite.",
+                    "description": "Clearly a J-Perm because of the 3-bar and inside 2-bar which look like a 3x2 block.<br><br>Easily recognizable as Ja-Perm because the 3-bar is on the left and the inside 2-bar on the right.",
                     "feature": {
-                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
-                        "name": "3-Bar sans Headlights"
+                        "description": "The 3-bar without headlights can only be a J-Perm or F-Perm.<br><br>The presence and location of a 2-bar is considered to differentiate cases.<br><br>J-Perms = 3 colors, F-Perm = 4 colors.",
+                        "name": "3-Bar without Headlights"
                     },
-                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
-                    "observation": "Inside 2-bar \u00e0 droite"
+                    "notes": "Ja / Jb = 3 colors, F = 4 colors",
+                    "observation": "Inside 2-bar on the right"
                 },
                 {
-                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 2-bars are \u00e0 gauche.",
+                    "description": "Clearly a J-Perm because of the inside and 2-Bar outers, one of which is connected to an opposite corner.<br><br>Easily recognizable as Ja-Perm because the 2-bars are on the left.",
                     "feature": {
-                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
-                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                        "description": "Asymmetrical 2-bars can only be a J-Perm or N-Perm.<br><br>The relationships of the corner facelets are considered to differentiate cases.<br><br>J-Perms = 3 colors, N-Perms = 4 colors.",
+                        "name": "Double 2-Bar (Asymmetrical)"
                     },
-                    "notes": "Ja = 3 couleurs, Nb = 4 couleurs",
-                    "observation": "Opposite corner facelet \u00e0 droite"
+                    "notes": "Ja = 3 colors, Nb = 4 colors",
+                    "observation": "Opposite corner facelet on the right"
                 },
                 {
-                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 2-bars are \u00e0 gauche.",
+                    "description": "Clearly a J-Perm because of the inside and 2-Bar outers, one of which is connected to an opposite corner.<br><br>Easily recognizable as Ja-Perm because the 2-bars are on the left.",
                     "feature": {
-                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
-                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                        "description": "Asymmetrical 2-bars can only be a J-Perm or N-Perm.<br><br>The relationships of the corner facelets are considered to differentiate cases.<br><br>J-Perms = 3 colors, N-Perms = 4 colors.",
+                        "name": "Double 2-Bar (Asymmetrical)"
                     },
-                    "notes": "Ja = 3 couleurs, Nb = 4 couleurs",
+                    "notes": "Ja = 3 colors, Nb = 4 colors",
                     "observation": "Opposite corner facelet on the front-left"
                 },
                 {
-                    "description": "Clairement une J-Perm parce que of the 3-bar and the 2-Bar ext\u00e9rieur, separated by an adjacent corner facelet.<br><br>Facilement reconnaissable en tant que Ja-Perm parce que the 2-Bar ext\u00e9rieur est sur la gauche, disconnected from the 3-bar \u00e0 droite.",
+                    "description": "Clearly a J-Perm because of the 3-bar and the 2-Bar outer, separated by an adjacent corner facelet.<br><br>Easily recognizable as Ja-Perm because the 2-Bar outer is on the left, disconnected from the 3-bar on the right.",
                     "feature": {
-                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
-                        "name": "3-Bar sans Headlights"
+                        "description": "The 3-bar without headlights can only be a J-Perm or F-Perm.<br><br>The presence and location of a 2-bar is considered to differentiate cases.<br><br>J-Perms = 3 colors, F-Perm = 4 colors.",
+                        "name": "3-Bar without Headlights"
                     },
-                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
-                    "observation": "2-Bar ext\u00e9rieur \u00e0 gauche"
+                    "notes": "Ja / Jb = 3 colors, F = 4 colors",
+                    "observation": "2-Bar outer on the left"
                 }
             ],
             "moves": [
@@ -1690,7 +1690,7 @@
             "uid": "Jb"
         },
         "code": "Jb",
-        "description": "Comme la T-Perm, mais le d\u00e9but est la fin.",
+        "description": "Like T-Perm, but the start is the end.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -1704,7 +1704,7 @@
                 "variations": [
                     {
                         "algo": "RUR'F'RUR'U'R'FR2U'R'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "2H"
                         ]
@@ -1713,11 +1713,11 @@
             },
             {
                 "algo": "RU2R'U'RU'R'RU'L'UR'U'L",
-                "description": "[COLL] combinaison - [RFAS], [RFN]",
+                "description": "[COLL] combination - [RFAS], [RFN]",
                 "variations": [
                     {
                         "algo": "RU2R'U'RU2L'UR'U'L",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "OH"
                         ]
@@ -1735,40 +1735,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une J-Perm parce que of the 3-bar and the 2-Bar ext\u00e9rieur, separated by an adjacent corner facelet.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 2-Bar ext\u00e9rieur est sur la droite, disconnected from the 3-bar \u00e0 gauche.",
+                    "description": "Clearly a J-Perm because of the 3-bar and the 2-Bar outer, separated by an adjacent corner facelet.<br><br>Easily recognizable as Jb-Perm because the 2-Bar outer is on the right, disconnected from the 3-bar on the left.",
                     "feature": {
-                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
-                        "name": "3-Bar sans Headlights"
+                        "description": "The 3-bar without headlights can only be a J-Perm or F-Perm.<br><br>The presence and location of a 2-bar is considered to differentiate cases.<br><br>J-Perms = 3 colors, F-Perm = 4 colors.",
+                        "name": "3-Bar without Headlights"
                     },
-                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
-                    "observation": "2-Bar ext\u00e9rieur \u00e0 droite"
+                    "notes": "Ja / Jb = 3 colors, F = 4 colors",
+                    "observation": "2-Bar outer on the right"
                 },
                 {
-                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 2-bars are \u00e0 droite.",
+                    "description": "Clearly a J-Perm because of the inside and 2-Bar outers, one of which is connected to an opposite corner.<br><br>Easily recognizable as Jb-Perm because the 2-bars are on the right.",
                     "feature": {
-                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
-                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                        "description": "Asymmetrical 2-bars can only be a J-Perm or N-Perm.<br><br>The relationships of the corner facelets are considered to differentiate cases.<br><br>J-Perms = 3 colors, N-Perms = 4 colors.",
+                        "name": "Double 2-Bar (Asymmetrical)"
                     },
-                    "notes": "Jb = 3 couleurs, Na = 4 couleurs",
+                    "notes": "Jb = 3 colors, Na = 4 colors",
                     "observation": "Opposite corner facelet on the front-right"
                 },
                 {
-                    "description": "Clairement une J-Perm parce que of the inside and 2-Bar ext\u00e9rieurs, one of which is connected to an opposite corner.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 2-bars are \u00e0 droite.",
+                    "description": "Clearly a J-Perm because of the inside and 2-Bar outers, one of which is connected to an opposite corner.<br><br>Easily recognizable as Jb-Perm because the 2-bars are on the right.",
                     "feature": {
-                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
-                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                        "description": "Asymmetrical 2-bars can only be a J-Perm or N-Perm.<br><br>The relationships of the corner facelets are considered to differentiate cases.<br><br>J-Perms = 3 colors, N-Perms = 4 colors.",
+                        "name": "Double 2-Bar (Asymmetrical)"
                     },
-                    "notes": "Jb = 3 couleurs, Na = 4 couleurs",
-                    "observation": "Opposite corner facelet \u00e0 gauche"
+                    "notes": "Jb = 3 colors, Na = 4 colors",
+                    "observation": "Opposite corner facelet on the left"
                 },
                 {
-                    "description": "Clairement une J-Perm parce que of the 3-bar and inside 2-bar which look like a 3x2 block.<br><br>Facilement reconnaissable en tant que Jb-Perm parce que the 3-bar est sur la droite and the inside 2-bar \u00e0 gauche.",
+                    "description": "Clearly a J-Perm because of the 3-bar and inside 2-bar which look like a 3x2 block.<br><br>Easily recognizable as Jb-Perm because the 3-bar is on the right and the inside 2-bar on the left.",
                     "feature": {
-                        "description": "The 3-bar without headlights peut seulement \u00eatre une J-Perm ou F-Perm.<br><br>La pr\u00e9sence and location of a 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, F-Perm = 4 couleurs.",
-                        "name": "3-Bar sans Headlights"
+                        "description": "The 3-bar without headlights can only be a J-Perm or F-Perm.<br><br>The presence and location of a 2-bar is considered to differentiate cases.<br><br>J-Perms = 3 colors, F-Perm = 4 colors.",
+                        "name": "3-Bar without Headlights"
                     },
-                    "notes": "Ja / Jb = 3 couleurs, F = 4 couleurs",
-                    "observation": "Inside 2-bar \u00e0 gauche"
+                    "notes": "Ja / Jb = 3 colors, F = 4 colors",
+                    "observation": "Inside 2-bar on the left"
                 }
             ],
             "moves": [
@@ -1857,7 +1857,7 @@
             "uid": "Na"
         },
         "code": "Na",
-        "description": "Suivre le coin FLU.",
+        "description": "Track the FLU corner.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -1871,7 +1871,7 @@
                 "variations": [
                     {
                         "algo": "RUR'URUR'F'RUR'U'R'FR2U'R'U2RU'R'",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -1896,12 +1896,12 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que Na-Perm parce que of the 2-bars \u00e0 droite and opposite corner couleurs.<br><br>Na-perm looks the same from all four possible angles.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Easily recognizable as Na-Perm because of the 2-bars on the right and opposite corner colors.<br><br>Na-perm looks the same from all four possible angles.",
                     "feature": {
-                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
-                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                        "description": "Asymmetrical 2-bars can only be a J-Perm or N-Perm.<br><br>The relationships of the corner facelets are considered to differentiate cases.<br><br>J-Perms = 3 colors, N-Perms = 4 colors.",
+                        "name": "Double 2-Bar (Asymmetrical)"
                     },
-                    "notes": "Na = 4 couleurs, Jb = 4 couleurs",
+                    "notes": "Na = 4 colors, Jb = 4 colors",
                     "observation": "Opposite corner facelet on the front-right and back-left"
                 }
             ],
@@ -2016,12 +2016,12 @@
             "algos": [
                 "R'UL'U2RU'LR'UL'U2RU'L"
             ],
-            "comment": "Note how the algorithm is made up of two IDENTICAL pieces (in squigly brackets).\n      To memorize this, track the corner in UBR. As you do R'UL', it will\n      travel along a U on the top layer of the cube. Then do U2, and then\n      restore yellows by doing RU'L. Then repeat that whole thing again. \n      I hate executing this algorithm. Its a good thing that it rarely ever comes up.",
+            "comment": "Note how the algorithm is made up of two IDENTICAL pieces (in squiggly brackets).\n      To memorize this, track the corner in UBR. As you do R'UL', it will\n      travel along a U on the top layer of the cube. Then do U2, and then\n      restore yellows by doing RU'L. Then repeat that whole thing again. \n      I hate executing this algorithm. It's a good thing that it rarely ever comes up.",
             "difficulty": 1,
             "uid": "Nb"
         },
         "code": "Nb",
-        "description": "Suivre le coin FRU.",
+        "description": "Track the FRU corner.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -2054,12 +2054,12 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que Nb-Perm parce que of the 2-bars \u00e0 gauche and opposite corner couleurs.<br><br>Nb-perm looks the same from all four possible angles.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Easily recognizable as Nb-Perm because of the 2-bars on the left and opposite corner colors.<br><br>Nb-perm looks the same from all four possible angles.",
                     "feature": {
-                        "description": "Asymmetrical 2-bars peut seulement \u00eatre une J-Perm ou N-Perm.<br><br>The relationships of the corner facelets are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>J-Perms = 3 couleurs, N-Perms = 4 couleurs.",
-                        "name": "Double 2-Bar (Asym\u00e9trique)"
+                        "description": "Asymmetrical 2-bars can only be a J-Perm or N-Perm.<br><br>The relationships of the corner facelets are considered to differentiate cases.<br><br>J-Perms = 3 colors, N-Perms = 4 colors.",
+                        "name": "Double 2-Bar (Asymmetrical)"
                     },
-                    "notes": "Nb = 4 couleurs, Ja = 4 couleurs",
+                    "notes": "Nb = 4 colors, Ja = 4 colors",
                     "observation": "Opposite corner facelet on the front-left and back-right"
                 }
             ],
@@ -2167,40 +2167,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une R-Perm parce que the headlights contain an adjacent edge couleur.<br><br>Facilement reconnaissable en tant que Ra-Perm parce que the headlights are \u00e0 gauche and inside 2-bar \u00e0 droite.",
+                    "description": "Clearly a R-Perm because the headlights contain an adjacent edge color.<br><br>Easily recognizable as Ra-Perm because the headlights are on the left and inside 2-bar on the right.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                        "description": "Headlights accompanied by an inside 2-bar can only be a T-Perm or R-Perm.<br><br>The edge between the headlights is considered to differentiate cases.<br><br>T-Perm = 3 colors, R-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Inside)"
                     },
-                    "notes": "Ra = 4 couleurs, T = 3 couleurs",
+                    "notes": "Ra = 4 colors, T = 3 colors",
                     "observation": "Headlights contain an adjacent edge"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ra-Perm parce que of the 2-bar at the back-left and the edge \u00e0 droite matching the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right   is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Ra-Perm because of the 2-bar at the back-left and the edge on the right matching the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                        "description": "2-Bar outers connected to an adjacent corner can only be a R-Perm or T-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>R-Perms = 3 colors, T-Perm = 4 colors.",
+                        "name": "2-Bar outer (Corner Adjacent)"
                     },
-                    "notes": "Ra = 3 couleurs, T = 4 couleurs",
-                    "observation": "Edge \u00e0 droite matches the front-left corner"
+                    "notes": "Ra = 3 colors, T = 4 colors",
+                    "observation": "Edge on the right matches the front-left corner"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Ra-Perm parce que the edge \u00e0 droite is the opposite of the front corner and the edge \u00e0 gauche matches the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Ra-Perm because the edge on the right is the opposite of the front corner and the edge on the left matches the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
                     "feature": {
-                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "description": "The miscellaneous cases with matching bookends can only be a F-Perm, R-Perm or G-Perm.<br><br>The checkerboard pattern in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 colors, R-Perms / G-Perms = 4 colors.",
                         "name": "Miscellaneous with Bookends"
                     },
-                    "notes": "Ra = 4 couleurs, F = 3 couleurs",
+                    "notes": "Ra = 4 colors, F = 3 colors",
                     "observation": "Malformed pair at front-left"
                 },
                 {
-                    "description": "Clairement une R-Perm parce que of the long motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Ra-Perm parce que the motif \u00e0 Damier est sur la droite.<br><br>The edge \u00e0 gauche is also the opposite of the rear corner.",
+                    "description": "Clearly a R-Perm because of the long checkerboard pattern (5 facelets).<br><br>Easily recognizable as Ra-Perm because the checkerboard pattern is on the right.<br><br>The edge on the left is also the opposite of the rear corner.",
                     "feature": {
-                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "description": "Headlights containing an adjacent edge can only be a R-Perm, G-Perm or A-Perm.<br><br>The presence of a checkerboard pattern (4 or 5 facelets) is considered to differentiate cases.<br><br>R-Perms = 3 colors, A-Perms / G-Perms = 4 colors.",
                         "name": "Headlights (Adjacent Edge)"
                     },
-                    "notes": "Ra = 3 couleurs, Aa / Ga = 4 couleurs",
-                    "observation": "motif \u00e0 Damier \u00e0 droite (5 facelets)"
+                    "notes": "Ra = 3 colors, Aa / Ga = 4 colors",
+                    "observation": "Checkerboard pattern on the right (5 facelets)"
                 }
             ],
             "moves": [
@@ -2264,7 +2264,7 @@
             "algos": [
                 "R'U2RU2R'FRUR'U'R'F'R2"
             ],
-            "comment": "Again\nfor this one I find it easiest to track an F2L pair. Remember the first\npart using just notation because it is easy. After R'F you have an F2L\npair on the bottom. Then you do RUR'U' trigger. Next, R'F' reconnects\nthat F2L pair and alligns it with the whites on top, and R2U' just\nfinishes it all up.",
+            "comment": "Again\nfor this one I find it easiest to track an F2L pair. Remember the first\npart using just notation because it is easy. After R'F you have an F2L\npair on the bottom. Then you do RUR'U' trigger. Next, R'F' reconnects\nthat F2L pair and aligns it with the whites on top, and R2U' just\nfinishes it all up.",
             "difficulty": 2,
             "uid": "Rb"
         },
@@ -2302,39 +2302,39 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une R-Perm parce que of the long motif \u00e0 Damier (5 facelets).<br><br>Facilement reconnaissable en tant que Rb-Perm parce que the motif \u00e0 Damier est sur la gauche.<br><br>The edge \u00e0 droite is also the opposite of the rear corner.",
+                    "description": "Clearly a R-Perm because of the long checkerboard pattern (5 facelets).<br><br>Easily recognizable as Rb-Perm because the checkerboard pattern is on the left.<br><br>The edge on the right is also the opposite of the rear corner.",
                     "feature": {
-                        "description": "Headlights containing an adjacent edge peut seulement \u00eatre une R-Perm, G-Perm ou A-Perm.<br><br>La pr\u00e9sence of a motif \u00e0 Damier (4 ou 5 facelets) est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, A-Perms / G-Perms = 4 couleurs.",
+                        "description": "Headlights containing an adjacent edge can only be a R-Perm, G-Perm or A-Perm.<br><br>The presence of a checkerboard pattern (4 or 5 facelets) is considered to differentiate cases.<br><br>R-Perms = 3 colors, A-Perms / G-Perms = 4 colors.",
                         "name": "Headlights (Adjacent Edge)"
                     },
-                    "notes": "Rb = 3 couleurs, Ab / Gc = 4 couleurs",
-                    "observation": "motif \u00e0 Damier \u00e0 gauche (5 facelets)"
+                    "notes": "Rb = 3 colors, Ab / Gc = 4 colors",
+                    "observation": "Checkerboard pattern on the left (5 facelets)"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Rb-Perm parce que the edge \u00e0 gauche is the opposite of the front corner and the edge \u00e0 droite matches the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Rb-Perm because the edge on the left is the opposite of the front corner and the edge on the right matches the front-left corner.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
                     "feature": {
-                        "description": "The miscellaneous cases with matching bookends peut seulement \u00eatre une F-Perm, R-Perm ou G-Perm.<br><br>The motif \u00e0 Damier in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 couleurs, R-Perms / G-Perms = 4 couleurs.",
+                        "description": "The miscellaneous cases with matching bookends can only be a F-Perm, R-Perm or G-Perm.<br><br>The checkerboard pattern in the F-Perm (malformed 2x2 block) distinguishes it from the R-Perms and G-Perms (malformed pairs).<br><br>F-Perm = 3 colors, R-Perms / G-Perms = 4 colors.",
                         "name": "Miscellaneous with Bookends"
                     },
-                    "notes": "Rb = 4 couleurs, F = 3 couleurs",
+                    "notes": "Rb = 4 colors, F = 3 colors",
                     "observation": "Malformed pair at front-right"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as Rb-Perm parce que of the 2-bar at the back-right and the edge \u00e0 gauche matching the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as Rb-Perm because of the 2-bar at the back-right and the edge on the left matching the front-right corner.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                        "description": "2-Bar outers connected to an adjacent corner can only be a R-Perm or T-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>R-Perms = 3 colors, T-Perm = 4 colors.",
+                        "name": "2-Bar outer (Corner Adjacent)"
                     },
-                    "notes": "Rb = 3 couleurs, T = 4 couleurs",
-                    "observation": "Edge \u00e0 gauche matches the front-right corner"
+                    "notes": "Rb = 3 colors, T = 4 colors",
+                    "observation": "Edge on the left matches the front-right corner"
                 },
                 {
-                    "description": "Clairement une R-Perm parce que the headlights contain an adjacent edge couleur.<br><br>Facilement reconnaissable en tant que Rb-Perm parce que the headlights are \u00e0 droite and inside 2-bar \u00e0 gauche.",
+                    "description": "Clearly a R-Perm because the headlights contain an adjacent edge color.<br><br>Easily recognizable as Rb-Perm because the headlights are on the right and inside 2-bar on the left.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                        "description": "Headlights accompanied by an inside 2-bar can only be a T-Perm or R-Perm.<br><br>The edge between the headlights is considered to differentiate cases.<br><br>T-Perm = 3 colors, R-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Inside)"
                     },
-                    "notes": "Rb = 4 couleurs, T = 3 couleurs",
+                    "notes": "Rb = 4 colors, T = 3 colors",
                     "observation": "Headlights contain an adjacent edge"
                 }
             ],
@@ -2409,7 +2409,7 @@
             "uid": "T"
         },
         "code": "T",
-        "description": "La base des J-Perms et F-Perm.",
+        "description": "The basis of J-Perms and F-Perm.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -2420,11 +2420,11 @@
         "logiqx": [
             {
                 "algo": "RUR'U'R'FRF'FRU'R'U'RUR'F'",
-                "description": "[OLL] combinaison - [sexy-sledge], [Mounted Fish]",
+                "description": "[OLL] combination - [sexy-sledge], [Mounted Fish]",
                 "variations": [
                     {
                         "algo": "RUR'U'R'FR2U'R'U'RUR'F'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -2443,39 +2443,39 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une T-Perm parce que the headlights contain the opposite edge couleur.",
+                    "description": "Clearly a T-Perm because the headlights contain the opposite edge color.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                        "description": "Headlights accompanied by an inside 2-bar can only be a T-Perm or R-Perm.<br><br>The edge between the headlights is considered to differentiate cases.<br><br>T-Perm = 3 colors, R-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Inside)"
                     },
-                    "notes": "T = 3 couleurs, Ra = 4 couleurs",
+                    "notes": "T = 3 colors, Ra = 4 colors",
                     "observation": "Headlights contain the opposite edge"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as T-Perm parce que of the 2-bar at the back-left and the edge \u00e0 droite being the opposite of the front-left corner.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as T-Perm because of the 2-bar at the back-left and the edge on the right being the opposite of the front-left corner.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                        "description": "2-Bar outers connected to an adjacent corner can only be a R-Perm or T-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>R-Perms = 3 colors, T-Perm = 4 colors.",
+                        "name": "2-Bar outer (Corner Adjacent)"
                     },
-                    "notes": "T = 4 couleurs, Ra = 3 couleurs",
-                    "observation": "Edge \u00e0 droite is the opposite of the front-left corner"
+                    "notes": "T = 4 colors, Ra = 3 colors",
+                    "observation": "Edge on the right is the opposite of the front-left corner"
                 },
                 {
-                    "description": "D\u00e9finitivement une adjacent corner swap parce que the outermost corner facelets are identical.<br><br>Recognisable as T-Perm parce que of the 2-bar at the back-right and the edge \u00e0 gauche being the opposite of the front-right corner.",
+                    "description": "Definitely an adjacent corner swap because the outermost corner facelets are identical.<br><br>Recognizable as T-Perm because of the 2-bar at the back-right and the edge on the left being the opposite of the front-right corner.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an adjacent corner peut seulement \u00eatre une R-Perm ou T-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>R-Perms = 3 couleurs, T-Perm = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Adjacent)"
+                        "description": "2-Bar outers connected to an adjacent corner can only be a R-Perm or T-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>R-Perms = 3 colors, T-Perm = 4 colors.",
+                        "name": "2-Bar outer (Corner Adjacent)"
                     },
-                    "notes": "T = 4 couleurs, Rb = 3 couleurs",
-                    "observation": "Edge \u00e0 gauche is the opposite of the front-right corner"
+                    "notes": "T = 4 colors, Rb = 3 colors",
+                    "observation": "Edge on the left is the opposite of the front-right corner"
                 },
                 {
-                    "description": "Clairement une T-Perm parce que the headlights contain the opposite edge couleur.",
+                    "description": "Clearly a T-Perm because the headlights contain the opposite edge color.",
                     "feature": {
-                        "description": "Headlights accompagn\u00e9 par un inside 2-bar peut seulement \u00eatre une T-Perm ou R-Perm.<br><br>The edge between the headlights est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>T-Perm = 3 couleurs, R-Perms = 4 couleurs.",
-                        "name": "Headlights + 2-Bar (Int\u00e9rieur)"
+                        "description": "Headlights accompanied by an inside 2-bar can only be a T-Perm or R-Perm.<br><br>The edge between the headlights is considered to differentiate cases.<br><br>T-Perm = 3 colors, R-Perms = 4 colors.",
+                        "name": "Headlights + 2-Bar (Inside)"
                     },
-                    "notes": "T = 3 couleurs, Rb = 4 couleurs",
+                    "notes": "T = 3 colors, Rb = 4 colors",
                     "observation": "Headlights contain the opposite edge"
                 }
             ],
@@ -2570,7 +2570,7 @@
             "uid": "Ua"
         },
         "code": "Ua",
-        "description": "Mirroir \u00e0 Ub-Perm sur les U.",
+        "description": "Mirror of Ub-Perm on the U.",
         "family": "Edges only",
         "groups": [
             "EPLL",
@@ -2586,7 +2586,7 @@
                 "variations": [
                     {
                         "algo": "M2UMU2M'UM2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2599,7 +2599,7 @@
                 "variations": [
                     {
                         "algo": "M2UM'U2MUM2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2612,7 +2612,7 @@
                 "variations": [
                     {
                         "algo": "RU'RURURU'R'U'R2",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -2626,7 +2626,7 @@
                 "variations": [
                     {
                         "algo": "R2U'R'U'RURURU'R",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "2H",
                             "OH"
@@ -2645,39 +2645,39 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Recognisable as Ua-Perm (CCW) parce que the headlights contain an adjacent edge couleur.<br><br>You may also notice that the edge \u00e0 droite is the opposite of the bar \u00e0 gauche.",
+                    "description": "Definitely an U-Perm because of the bar and headlights.<br><br>Recognizable as Ua-Perm (CCW) because the headlights contain an adjacent edge color.<br><br>You may also notice that the edge on the right is the opposite of the bar on the left.",
                     "feature": {
-                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
-                        "name": "3-Bar avec Headlights"
+                        "description": "The 3-bar with headlights can only be an U-Perm.<br><br>The lone edge is considered to differentiate cases.<br><br>U-Perms = 3 colors.",
+                        "name": "3-Bar with Headlights"
                     },
-                    "notes": "Ua / Ub = 3 couleurs",
+                    "notes": "Ua / Ub = 3 colors",
                     "observation": "Headlights contain an adjacent edge"
                 },
                 {
-                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ua-Perm (CCW) parce que the edge \u00e0 gauche matches the headlights \u00e0 droite.<br><br>Alternatively, recognisable parce que the edge \u00e0 droite is the opposite of the headlights \u00e0 gauche.<br></br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 gauche is useful during recognition.",
+                    "description": "Clearly an [EPLL] because of the headlights on both sides. Definitely an U-Perm because there are exactly 3 colors.<br><br>Recognizable as Ua-Perm (CCW) because the edge on the left matches the headlights on the right.<br><br>Alternatively, recognisable because the edge on the right is the opposite of the headlights on the left.<br><br>You might find the checkerboard pattern (4 facelets) on the left is useful during recognition.",
                     "feature": {
-                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "description": "Double headlights without an opposite edge can only be a Z-Perm or U-Perm.<br><br>The two edges are considered to differentiate cases. The Z-Perm is the most distinct.<br><br>U-Perms = 3 colors, Z-Perm = 2 or 4 colors.",
                         "name": "Double Lights (Adjacent Edges)"
                     },
-                    "notes": "Ua = 3 couleurs, Z = 2 ou 4 couleurs",
+                    "notes": "Ua = 3 colors, Z = 2 or 4 colors",
                     "observation": "Left edge matches right headlights"
                 },
                 {
-                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ua-Perm (CCW) parce que the headlights \u00e0 droite contain the opposite edge couleur.<br><br>Another way to recognise as Ua-Perm (CCW) is parce que the edge \u00e0 gauche matches the headlights \u00e0 droite.<br><br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 gauche useful during recognition.",
+                    "description": "Clearly an [EPLL] because of the headlights on both sides. Definitely an U-Perm because there are exactly 3 colors.<br><br>Recognizable as Ua-Perm (CCW) because the headlights on the right contain the opposite edge color.<br><br>Another way to recognize as Ua-Perm (CCW) is because the edge on the left matches the headlights on the right.<br><br>You might find the checkerboard pattern (4 facelets) on the left useful during recognition.",
                     "feature": {
-                        "description": "Double headlights with at least one opposite edge peut seulement \u00eatre une H-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La H-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, H-Perm = 4 couleurs.",
+                        "description": "Double headlights with at least one opposite edge can only be a H-Perm or U-Perm.<br><br>The two edges are considered to differentiate cases. The H-Perm is the most distinct.<br><br>U-Perms = 3 colors, H-Perm = 4 colors.",
                         "name": "Double Lights (Opposite Edge)"
                     },
-                    "notes": "Ua = 3 couleurs, H = 4 couleurs",
+                    "notes": "Ua = 3 colors, H = 4 colors",
                     "observation": "Right headlights contain the opposite edge"
                 },
                 {
-                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Facilement reconnaissable en tant que Ua-Perm (CCW) parce que the headlights contain the opposite edge couleur.",
+                    "description": "Definitely an U-Perm because of the bar and headlights.<br><br>Easily recognizable as Ua-Perm (CCW) because the headlights contain the opposite edge color.",
                     "feature": {
-                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
-                        "name": "3-Bar avec Headlights"
+                        "description": "The 3-bar with headlights can only be an U-Perm.<br><br>The lone edge is considered to differentiate cases.<br><br>U-Perms = 3 colors.",
+                        "name": "3-Bar with Headlights"
                     },
-                    "notes": "Ua / Ub = 3 couleurs",
+                    "notes": "Ua / Ub = 3 colors",
                     "observation": "Headlights contain the opposite edge"
                 }
             ],
@@ -2766,7 +2766,7 @@
             "uid": "Ub"
         },
         "code": "Ub",
-        "description": "Mirroir \u00e0 Ua-Perm sur les U.",
+        "description": "Mirror of Ua-Perm on the U.",
         "family": "Edges only",
         "groups": [
             "EPLL",
@@ -2782,7 +2782,7 @@
                 "variations": [
                     {
                         "algo": "M2U'MU2M'U'M2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2795,7 +2795,7 @@
                 "variations": [
                     {
                         "algo": "M2U'M'U2MU'M2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -2808,7 +2808,7 @@
                 "variations": [
                     {
                         "algo": "R2URUR'U'R'U'R'UR'",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "2H"
                         ]
@@ -2828,7 +2828,7 @@
                 "variations": [
                     {
                         "algo": "R'UR'U'R'U'R'URUR2",
-                        "description": "L'ex\u00e9cution applique les annulations",
+                        "description": "Execution applies the cancellations",
                         "tags": [
                             "2H"
                         ]
@@ -2853,39 +2853,39 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Facilement reconnaissable en tant que Ub-Perm (CW) parce que the headlights contain the opposite edge couleur.",
+                    "description": "Definitely an U-Perm because of the bar and headlights.<br><br>Easily recognizable as Ub-Perm (CW) because the headlights contain the opposite edge color.",
                     "feature": {
-                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
-                        "name": "3-Bar avec Headlights"
+                        "description": "The 3-bar with headlights can only be an U-Perm.<br><br>The lone edge is considered to differentiate cases.<br><br>U-Perms = 3 colors.",
+                        "name": "3-Bar with Headlights"
                     },
-                    "notes": "Ua / Ub = 3 couleurs",
+                    "notes": "Ua / Ub = 3 colors",
                     "observation": "Headlights contain the opposite edge"
                 },
                 {
-                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ub-Perm (CW) parce que the headlights \u00e0 gauche contain the opposite edge couleur.<br><br>Another way to recognise as Ub-Perm (CW) is parce que the edge \u00e0 droite matches the headlights \u00e0 gauche.<br><br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 droite useful during recognition.",
+                    "description": "Clearly an [EPLL] because of the headlights on both sides. Definitely an U-Perm because there are exactly 3 colors.<br><br>Recognizable as Ub-Perm (CW) because the headlights on the left contain the opposite edge color.<br><br>Another way to recognize as Ub-Perm (CW) is because the edge on the right matches the headlights on the left.<br><br>You might find the checkerboard pattern (4 facelets) on the right useful during recognition.",
                     "feature": {
-                        "description": "Double headlights with at least one opposite edge peut seulement \u00eatre une H-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La H-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, H-Perm = 4 couleurs.",
+                        "description": "Double headlights with at least one opposite edge can only be a H-Perm or U-Perm.<br><br>The two edges are considered to differentiate cases. The H-Perm is the most distinct.<br><br>U-Perms = 3 colors, H-Perm = 4 colors.",
                         "name": "Double Lights (Opposite Edge)"
                     },
-                    "notes": "Ub = 3 couleurs, H = 4 couleurs",
+                    "notes": "Ub = 3 colors, H = 4 colors",
                     "observation": "Left headlights contain the opposite edge"
                 },
                 {
-                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Definitely a U-Perm parce que there are exactly 3 couleurs.<br><br>Recognisable as Ub-Perm (CW) parce que the edge \u00e0 droite matches the headlights \u00e0 gauche.<br><br>Alternatively, recognisable parce que the edge \u00e0 gauche is the opposite of the headlights \u00e0 droite.<br></br>You might find the motif \u00e0 Damier (4 facelets) \u00e0 droite is useful during recognition.",
+                    "description": "Clearly an [EPLL] because of the headlights on both sides. Definitely an U-Perm because there are exactly 3 colors.<br><br>Recognizable as Ub-Perm (CW) because the edge on the right matches the headlights on the left.<br><br>Alternatively, recognisable because the edge on the left is the opposite of the headlights on the right.<br><br>You might find the checkerboard pattern (4 facelets) on the right is useful during recognition.",
                     "feature": {
-                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "description": "Double headlights without an opposite edge can only be a Z-Perm or U-Perm.<br><br>The two edges are considered to differentiate cases. The Z-Perm is the most distinct.<br><br>U-Perms = 3 colors, Z-Perm = 2 or 4 colors.",
                         "name": "Double Lights (Adjacent Edges)"
                     },
-                    "notes": "Ub = 3 couleurs, Z = 2 ou 4 couleurs",
+                    "notes": "Ub = 3 colors, Z = 2 or 4 colors",
                     "observation": "Right edge matches left headlights"
                 },
                 {
-                    "description": "Definitely a U-Perm parce que of the bar and headlights.<br><br>Recognisable as Ub-Perm (CW) parce que the headlights contain an adjacent edge couleur.<br><br>You may also notice that the edge \u00e0 gauche is the opposite of the bar \u00e0 droite.",
+                    "description": "Definitely an U-Perm because of the bar and headlights.<br><br>Recognizable as Ub-Perm (CW) because the headlights contain an adjacent edge color.<br><br>You may also notice that the edge on the left is the opposite of the bar on the right.",
                     "feature": {
-                        "description": "The 3-bar with headlights peut seulement \u00eatre une U-Perm.<br><br>The lone edge est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>U-Perms = 3 couleurs.",
-                        "name": "3-Bar avec Headlights"
+                        "description": "The 3-bar with headlights can only be an U-Perm.<br><br>The lone edge is considered to differentiate cases.<br><br>U-Perms = 3 colors.",
+                        "name": "3-Bar with Headlights"
                     },
-                    "notes": "Ua / Ub = 3 couleurs",
+                    "notes": "Ua / Ub = 3 colors",
                     "observation": "Headlights contain an adjacent edge"
                 }
             ],
@@ -2977,7 +2977,7 @@
             "uid": "V"
         },
         "code": "V",
-        "description": "Un peu reloud celle l\u00e0.",
+        "description": "A bit tricky this one.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -3016,40 +3016,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que V-Perm parce que of the 2x2 block at the front, bookended by opposite corner couleurs.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Easily recognizable as V-Perm because of the 2x2 block at the front, bookended by opposite corner colors.",
                     "feature": {
-                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
-                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                        "description": "Symmetrical 2-bars and 2x2 blocks can only be a Y-Perm, A-Perm or V-Perm.<br><br>The outer corners are considered to differentiate cases. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 colors, Y-Perm / V-Perm = 4 colors.",
+                        "name": "Double 2-Bar (Symmetric)"
                     },
-                    "notes": "V = 4 couleurs, Aa / Ab = 3 couleurs",
+                    "notes": "V = 4 colors, Aa / Ab = 3 colors",
                     "observation": "Outer corners are the opposites of the block"
                 },
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as V-Perm parce que of the 2-bar at the back-left.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Recognizable as V-Perm because of the 2-bar at the back-left.<br><br>You might find the \"malformed\" pair at the front-right is useful during recognition.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                        "description": "2-Bar outers connected to an opposite corner can only be a V-Perm, G-Perm or A-Perm.<br><br>The side adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms = 3 colors, V-Perms / A-Perms = 4 colors.",
+                        "name": "2-Bar outer (Opposite Corner)"
                     },
-                    "notes": "V = 4 couleurs, Gd = 3 couleurs",
-                    "observation": "Almost motif \u00e0 Damier \u00e0 droite (4 facelets)"
+                    "notes": "V = 4 colors, Gd = 3 colors",
+                    "observation": "Almost checkerboard pattern on the right (4 facelets)"
                 },
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as V-Perm parce que of the \"malformed\" 2x2 block at the front, resulting in a motif \u00e0 Damier (4 facelets).",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Recognizable as V-Perm because of the \"malformed\" 2x2 block at the front, resulting in a checkerboard pattern (4 facelets).",
                     "feature": {
-                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "description": "The miscellaneous cases without matching bookends can only be an E-Perm, V-Perm or Y-Perm.<br><br>The checkerboard pattern in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 colors.",
                         "name": "Miscellaneous without Bookends"
                     },
                     "notes": "Learn the features of E and V",
-                    "observation": "Malformed 2x2 block (motif \u00e0 Damier)"
+                    "observation": "Malformed 2x2 block (checkerboard pattern)"
                 },
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as V-Perm parce que of the 2-bar at the back-right.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Recognizable as V-Perm because of the 2-bar at the back-right.<br><br>You might find the \"malformed\" pair at the front-left is useful during recognition.",
                     "feature": {
-                        "description": "2-Bar ext\u00e9rieurs connected to an opposite corner peut seulement \u00eatre une V-Perm, G-Perm ou A-Perm.<br><br>The side adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms = 3 couleurs, V-Perms / A-Perms = 4 couleurs.",
-                        "name": "2-Bar ext\u00e9rieur (Coin Oppos\u00e9)"
+                        "description": "2-Bar outers connected to an opposite corner can only be a V-Perm, G-Perm or A-Perm.<br><br>The side adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms = 3 colors, V-Perms / A-Perms = 4 colors.",
+                        "name": "2-Bar outer (Opposite Corner)"
                     },
-                    "notes": "V = 4 couleurs, Gb = 3 couleurs",
-                    "observation": "Almost motif \u00e0 Damier \u00e0 gauche (4 facelets)"
+                    "notes": "V = 4 colors, Gb = 3 colors",
+                    "observation": "Almost checkerboard pattern on the left (4 facelets)"
                 }
             ],
             "moves": [
@@ -3138,12 +3138,12 @@
             "algos": [
                 "FRU'R'U'RUR'F'RUR'U'R'FRF'"
             ],
-            "comment": "Again\nI find it helpful to see how F2L pairs move around for this algorithm.\nF brings an F2L pair to the top, RU'R' inserts that pair back to the\nmiddle. Now again as before, all F2L is again intact, but slightly\nmessed up. Then U' is done as in T permutation, and then RUR'F' is\nAGAIN used to take that pair and insert it back where it was before.\nThe result will leave you with an OLL, which after when you fix using\nthe appropritate algorithm, you will be left with Ypermutation at the\nend. Note that the OLL is very easy: It takes one pair out to top\nlayer, and inserts it back a different way (in particular, using R'FRF')",
+            "comment": "Again\nI find it helpful to see how F2L pairs move around for this algorithm.\nF brings an F2L pair to the top, RU'R' inserts that pair back to the\nmiddle. Now again as before, all F2L is again intact, but slightly\nmessed up. Then U' is done as in T permutation, and then RUR'F' is\nAGAIN used to take that pair and insert it back where it was before.\nThe result will leave you with an OLL, which after when you fix using\nthe appropriate algorithm, you will be left with Ypermutation at the\nend. Note that the OLL is very easy: It takes one pair out to top\nlayer, and inserts it back a different way (in particular, using R'FRF')",
             "difficulty": 2,
             "uid": "Y"
         },
         "code": "Y",
-        "description": "Utilis\u00e9e en no headlights, assez facile.",
+        "description": "Used with no headlights, fairly easy.",
         "family": "Corners and edges",
         "groups": [
             "PLL",
@@ -3153,7 +3153,7 @@
         "logiqx": [
             {
                 "algo": "FRU'R'U'RUR'F'RUR'U'R'FRF'",
-                "description": "[OLL] combinaison - [Mounted Fish], [sexy-sledge]",
+                "description": "[OLL] combination - [Mounted Fish], [sexy-sledge]",
                 "tags": [
                     "2H"
                 ]
@@ -3176,40 +3176,40 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Facilement reconnaissable en tant que Y-Perm parce que the 2-Bar ext\u00e9rieurs are a unique feature.<br><br>The corner at the front makes this case very distinctive due to the opposite couleurs.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Easily recognizable as Y-Perm because the 2-Bar outers are a unique feature.<br><br>The corner at the front makes this case very distinctive due to the opposite colors.",
                     "feature": {
-                        "description": "Symmetrical 2-bars and 2x2 blocks peut seulement \u00eatre une Y-Perm, A-Perm ou V-Perm.<br><br>The outer corners are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 couleurs, Y-Perm / V-Perm = 4 couleurs.",
-                        "name": "Double 2-Bar (Sym\u00e9trique)"
+                        "description": "Symmetrical 2-bars and 2x2 blocks can only be a Y-Perm, A-Perm or V-Perm.<br><br>The outer corners are considered to differentiate cases. The Y-Perm and V-Perm are most distinctive.<br><br>A-Perms = 3 colors, Y-Perm / V-Perm = 4 colors.",
+                        "name": "Double 2-Bar (Symmetric)"
                     },
-                    "notes": "Y = 4 couleurs",
-                    "observation": "2-Bar ext\u00e9rieurs \u00e0 gauche and right"
+                    "notes": "Y = 4 colors",
+                    "observation": "2-Bar outers on the left and right"
                 },
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as Y-Perm parce que of the 2-bar at the front-left and the edge \u00e0 droite matching the back-left corner.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Recognizable as Y-Perm because of the 2-bar at the front-left and the edge on the right matching the back-left corner.",
                     "feature": {
-                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "description": "Inside 2-bars can only be a G-Perm or Y-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms / Y-Perm = 4 colors.",
                         "name": "Inside 2-Bar"
                     },
-                    "notes": "Y / Ga / Gb = 4 couleurs",
-                    "observation": "Edge \u00e0 droite matches the back-left corner"
+                    "notes": "Y / Ga / Gb = 4 colors",
+                    "observation": "Edge on the right matches the back-left corner"
                 },
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>This is the only angle for a diagonal corner swap without a visible pair, 2x2 block, \"malformed\" pair ou \"malformed\" 2x2 block.<br><br>Most people find the \"outer\" motif \u00e0 Damier (4 facelets) is useful during recognition.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>This is the only angle for a diagonal corner swap without a visible pair, 2x2 block, \"malformed\" pair or\"malformed\" 2x2 block.<br><br>Most people find the \"outer\" checkerboard pattern (4 facelets) is useful during recognition.",
                     "feature": {
-                        "description": "The miscellaneous cases without matching bookends peut seulement \u00eatre une E-Perm, V-Perm ou Y-Perm.<br><br>The motif \u00e0 Damier in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 couleurs.",
+                        "description": "The miscellaneous cases without matching bookends can only be an E-Perm, V-Perm or Y-Perm.<br><br>The checkerboard pattern in the V-Perm (malformed 2x2 block) distinguishes it from the E-Perm (malformed pair) and Y-Perm.<br><br>E-Perm / V-Perm / Y-Perm = 4 colors.",
                         "name": "Miscellaneous without Bookends"
                     },
                     "notes": "Learn the features of E and Y",
-                    "observation": "\"Outer\" motif \u00e0 Damier (4 facelets)"
+                    "observation": "\"Outer\" checkerboard pattern (4 facelets)"
                 },
                 {
-                    "description": "Definitely a diagonal corner swap parce que the outermost corner facelets are adjacent couleurs.<br><br>Recognisable as Y-Perm parce que of the 2-bar at the front-right and the edge \u00e0 gauche matching the back-right corner.",
+                    "description": "Definitely a diagonal corner swap because the outermost corner facelets are adjacent colors.<br><br>Recognizable as Y-Perm because of the 2-bar at the front-right and the edge on the left matching the back-right corner.",
                     "feature": {
-                        "description": "Inside 2-bars peut seulement \u00eatre a G-Perm ou Y-Perm.<br><br>The edge adjacent to the 2-bar est consid\u00e9r\u00e9 pour diff\u00e9rencier les cas.<br><br>G-Perms / Y-Perm = 4 couleurs.",
+                        "description": "Inside 2-bars can only be a G-Perm or Y-Perm.<br><br>The edge adjacent to the 2-bar is considered to differentiate cases.<br><br>G-Perms / Y-Perm = 4 colors.",
                         "name": "Inside 2-Bar"
                     },
-                    "notes": "Y / Gc / Gd = 4 couleurs",
-                    "observation": "Edge \u00e0 gauche matches the back-right corner"
+                    "notes": "Y / Gc / Gd = 4 colors",
+                    "observation": "Edge on the left matches the back-right corner"
                 }
             ],
             "moves": [
@@ -3314,7 +3314,7 @@
             "uid": "Z"
         },
         "code": "Z",
-        "description": "Simple a retenir, dure \u00e0 \u00e9x\u00e9cuter.",
+        "description": "Simple to remember, hard to execute.",
         "family": "Edges only",
         "groups": [
             "EPLL",
@@ -3330,7 +3330,7 @@
                 "variations": [
                     {
                         "algo": "M'U'M2U'M2U'M'U2M2",
-                        "description": "L'ex\u00e9cution applique une annulation",
+                        "description": "Execution applies a cancellation",
                         "tags": [
                             "2H"
                         ]
@@ -3343,7 +3343,7 @@
                 "variations": [
                     {
                         "algo": "M2U'M2U'M'U2M2U2M'",
-                        "description": "Execution \u00e0 deux mains",
+                        "description": "Two-handed execution",
                         "tags": [
                             "2H"
                         ]
@@ -3373,21 +3373,21 @@
         "recognition": {
             "cases": [
                 {
-                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Exactly 2 couleurs, unlike U-Perms which have 3 couleurs.<br><br>The edge \u00e0 gauche matches the headlights \u00e0 droite and the edge \u00e0 droite matches the headlights \u00e0 gauche.<br><br>Facilement reconnaissable en tant que Z-Perm parce que of the distinctive motif \u00e0 Damier (6 facelets).<br><br>The Z-Perm has two appearances and looks the same after a U2.",
+                    "description": "Clearly an [EPLL] because of the headlights on both sides. Exactly 2 colors, unlike U-Perms which have 3 colors.<br><br>The edge on the left matches the headlights on the right and the edge on the right matches the headlights on the left.<br><br>Easily recognizable as Z-Perm because of the distinctive checkerboard pattern (6 facelets).<br><br>The Z-Perm has two appearances and looks the same after a U2.",
                     "feature": {
-                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "description": "Double headlights without an opposite edge can only be a Z-Perm or U-Perm.<br><br>The two edges are considered to differentiate cases. The Z-Perm is the most distinct.<br><br>U-Perms = 3 colors, Z-Perm = 2 or 4 colors.",
                         "name": "Double Lights (Adjacent Edges)"
                     },
-                    "notes": "Z = 2 couleurs, Ua / Ub = 3 couleurs",
-                    "observation": "Distinctive motif \u00e0 Damier (6 facelets)"
+                    "notes": "Z = 2 colors, Ua / Ub = 3 colors",
+                    "observation": "Distinctive checkerboard pattern (6 facelets)"
                 },
                 {
-                    "description": "Clairement une [EPLL] parce que of the headlights on both sides. Exactly 4 couleurs, unlike U-Perms which have 3 couleurs.<br><br>The edge \u00e0 gauche is the opposite of the headlights \u00e0 droite. The edge \u00e0 droite is the opposite of the headlights \u00e0 gauche.<br><br>Recognisable as Z-Perm parce que both sets of headlights contain an adjacent edge couleur.<br><br>The Z-Perm has two appearances and looks the same after a U2.",
+                    "description": "Clearly an [EPLL] because of the headlights on both sides. Exactly 4 colors, unlike U-Perms which have 3 colors.<br><br>The edge on the left is the opposite of the headlights on the right. The edge on the right is the opposite of the headlights on the left.<br><br>Recognizable as Z-Perm because both sets of headlights contain an adjacent edge color.<br><br>The Z-Perm has two appearances and looks the same after a U2.",
                     "feature": {
-                        "description": "Double headlights without an opposite edge peut seulement \u00eatre une Z-Perm ou U-Perm.<br><br>The two edges are consid\u00e9r\u00e9 pour diff\u00e9rencier les cas. La Z-Perm est la plus distinct.<br><br>U-Perms = 3 couleurs, Z-Perm = 2 ou 4 couleurs.",
+                        "description": "Double headlights without an opposite edge can only be a Z-Perm or U-Perm.<br><br>The two edges are considered to differentiate cases. The Z-Perm is the most distinct.<br><br>U-Perms = 3 colors, Z-Perm = 2 or 4 colors.",
                         "name": "Double Lights (Adjacent Edges)"
                     },
-                    "notes": "Z = 4 couleurs, Ua / Ub = 3 couleurs",
+                    "notes": "Z = 4 colors, Ua / Ub = 3 colors",
                     "observation": "Both headlights contain an adjacent edge"
                 }
             ],

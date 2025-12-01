@@ -7,9 +7,9 @@
             "RU'R'UR2FRF'R"
         ],
         "code": "01",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "SR'S'",
         "name": "AF2L 01",
@@ -28,9 +28,9 @@
             "RU'R'LU2L'"
         ],
         "code": "02",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "LF'U2FL'",
         "name": "AF2L 02",
@@ -49,9 +49,9 @@
             "RU'R'UF'rUr'"
         ],
         "code": "03",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'UF'rUr'",
         "name": "AF2L 03",
@@ -70,9 +70,9 @@
             "RUR'U2SU'R'URS'"
         ],
         "code": "04",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "FR'F'RUR'U2R",
         "name": "AF2L 04",
@@ -91,9 +91,9 @@
             "RUR'yUfRf'"
         ],
         "code": "05",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RUR'ULUL'",
         "name": "AF2L 05",
@@ -112,9 +112,9 @@
             "RUR'yLUL'"
         ],
         "code": "06",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RUR'FUF'",
         "name": "AF2L 06",
@@ -133,9 +133,9 @@
             "RU'R'U'RU'R'fRf'"
         ],
         "code": "07",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'F'U'fRS'",
         "name": "AF2L 07",
@@ -154,9 +154,9 @@
             "U'R'FRF'U2LUL'"
         ],
         "code": "08",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'F'U2LUL'F",
         "name": "AF2L 08",
@@ -175,9 +175,9 @@
             "UR'FRF'RU'R'U'L'U'L"
         ],
         "code": "09",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "UR'F'RF'R'FR",
         "name": "AF2L 09",
@@ -196,9 +196,9 @@
             "U2RUR'U2R'UR"
         ],
         "code": "10",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'RUR2U'R",
         "name": "AF2L 10",
@@ -215,9 +215,9 @@
             "U'RU'R'LU'L'"
         ],
         "code": "11",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'RU'R'LU'L'",
         "name": "AF2L 11",
@@ -236,9 +236,9 @@
             "FU'F'U2RU'R'L'U'L"
         ],
         "code": "12",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U2RUR'L'UL",
         "name": "AF2L 12",
@@ -257,9 +257,9 @@
             "URU'R'URU'R'y'LU'L'"
         ],
         "code": "13",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "UR'FRF'R'U'R",
         "name": "AF2L 13",
@@ -278,9 +278,9 @@
             "U'FR'F'RULUL'"
         ],
         "code": "14",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U2r2UB2U'r2",
         "name": "AF2L 14",
@@ -299,9 +299,9 @@
             "RUR'U'RUR'FUF'"
         ],
         "code": "15",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "UR'FR2U'R'U2F'",
         "name": "AF2L 15",
@@ -320,9 +320,9 @@
             "U'RU'R'r'U'RUM'"
         ],
         "code": "16",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'F'R'U'RF",
         "name": "AF2L 16",
@@ -341,9 +341,9 @@
             "U'RUR'U'f'L'f"
         ],
         "code": "17",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U2RB'U'BR'",
         "name": "AF2L 17",
@@ -362,9 +362,9 @@
             "U'RU'R'U2F'LFL'"
         ],
         "code": "18",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "UF'U2FL'U'L",
         "name": "AF2L 18",
@@ -383,9 +383,9 @@
             "URUR'UyRUR'"
         ],
         "code": "19",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'RU2R'fRf'",
         "name": "AF2L 19",
@@ -403,9 +403,9 @@
             "U'RU2R'U'LUL'"
         ],
         "code": "20",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "URUR'LUL'",
         "name": "AF2L 20",
@@ -424,9 +424,9 @@
             "U'RU2R'U2yLUL'"
         ],
         "code": "21",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "URFUF'R'",
         "name": "AF2L 21",
@@ -444,9 +444,9 @@
             "R2B'R2B"
         ],
         "code": "22",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R2UR",
         "name": "AF2L 22",
@@ -465,9 +465,9 @@
             "RU2R'y'L'UL"
         ],
         "code": "23",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "LF'UFL'",
         "name": "AF2L 23",
@@ -486,9 +486,9 @@
             "RU2R'U'L'UL"
         ],
         "code": "24",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'U2L'UL",
         "name": "AF2L 24",
@@ -506,9 +506,9 @@
             "RUR'U'BU'B'"
         ],
         "code": "25",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "F'UR'U2RF",
         "name": "AF2L 25",
@@ -527,9 +527,9 @@
             "RU'R'U2LUL'"
         ],
         "code": "26",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "LRU2R'L'",
         "name": "AF2L 26",
@@ -548,9 +548,9 @@
             "R'FR2UR2F'R2U2R'"
         ],
         "code": "27",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "R'FR2UR'F'",
         "name": "AF2L 27",
@@ -569,9 +569,9 @@
             "rU'r'U2rUr'd'RUR'"
         ],
         "code": "28",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R2U'RU'R'U'R",
         "name": "AF2L 28",
@@ -590,9 +590,9 @@
             "RU'R'yR'URUR'U'R"
         ],
         "code": "29",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "F'UL'ULU'LUL'F",
         "name": "AF2L 29",
@@ -610,9 +610,9 @@
             "rU'r'U2rUr'dRUR'"
         ],
         "code": "30",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'U'RU'R'U2L'U'L",
         "name": "AF2L 30",
@@ -629,9 +629,9 @@
             "RU'R'UR'U'RU'R'UR"
         ],
         "code": "31",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'UR'U'RU'R'UR",
         "name": "AF2L 31",
@@ -650,9 +650,9 @@
             "RU'R'yR'U'RU'R'UR"
         ],
         "code": "32",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RUR'U'RU'R'f'L'f",
         "name": "AF2L 32",
@@ -670,9 +670,9 @@
             "RU'R'U'L'U'LU'L'UL"
         ],
         "code": "33",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'U'L'U'LU'L'UL",
         "name": "AF2L 33",
@@ -691,9 +691,9 @@
             "RU'R'U'RUR'r'U'RUM'"
         ],
         "code": "34",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "F'R'URU'R'U'RF",
         "name": "AF2L 34",
@@ -712,9 +712,9 @@
             "RUR'U'RU2R'ULUL'"
         ],
         "code": "35",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'U'RUR'LU'L'",
         "name": "AF2L 35",
@@ -733,9 +733,9 @@
             "R'FRF'U2L'ULU'L'U'L"
         ],
         "code": "36",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "R'FR2U'R'U'RUR'U2F'",
         "name": "AF2L 36",
@@ -754,9 +754,9 @@
             "RU'R'yRU2R'URU'R'"
         ],
         "code": "37",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RUR'U2RU'R'fRf'",
         "name": "AF2L 37",
@@ -775,9 +775,9 @@
             "RU'R'U'LU2L'ULU'L'"
         ],
         "code": "38",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'URU2R'LU2L'",
         "name": "AF2L 38",
@@ -796,9 +796,9 @@
             "RUR'L'ULU'LF'L'FL'UL"
         ],
         "code": "39",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RUR'L'ULU'LF'L'FL'UL",
         "name": "AF2L 39",
@@ -817,9 +817,9 @@
             "R'FRF'RU'R'URU'R'UyRU'R'"
         ],
         "code": "40",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R2U2RUR'U2R",
         "name": "AF2L 40",
@@ -838,9 +838,9 @@
             "RU'R'yU'R'U2RUR'U2R"
         ],
         "code": "41",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "F'U2L'U2L2UL'F",
         "name": "AF2L 41",
@@ -859,9 +859,9 @@
             "R'FRF'RU'R'URU'R'd'LU'L'"
         ],
         "code": "42",
-        "family": "Toutes les pi\u00e8ces pi\u00e9g\u00e9es",
+        "family": "All pieces trapped",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU'R'U2L'U2LU2L'UL",
         "name": "AF2L 42",
@@ -880,9 +880,9 @@
             "U'RUR2U'RU'R'UR"
         ],
         "code": "01a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'RUR2U'RU'R'UR",
         "name": "AF2L 01a",
@@ -901,9 +901,9 @@
             "U2RU'R'U2B'U'B"
         ],
         "code": "02a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "R'FRF'LU2L'",
         "name": "AF2L 02a",
@@ -922,9 +922,9 @@
             "R'FRF'dR'FRF'"
         ],
         "code": "03a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "R'FR2U'R'UF'",
         "name": "AF2L 03a",
@@ -942,9 +942,9 @@
             "URU'R'SR2S'"
         ],
         "code": "04a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "URUR2U2R",
         "name": "AF2L 04a",
@@ -963,9 +963,9 @@
             "yUL'ULR'U2R"
         ],
         "code": "05a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "UlU'F2Ul'",
         "name": "AF2L 05a",
@@ -983,9 +983,9 @@
             "URUR'U'L'UL"
         ],
         "code": "06a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "URL'ULR'",
         "name": "AF2L 06a",
@@ -1004,9 +1004,9 @@
             "U2RU'R'UR'U2R"
         ],
         "code": "07a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU2R'UR'U'R",
         "name": "AF2L 07a",
@@ -1025,9 +1025,9 @@
             "U2RU'R'yR'U2R"
         ],
         "code": "08a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "RU2R'f'L'f",
         "name": "AF2L 08a",
@@ -1044,9 +1044,9 @@
             "RU2R'U'L'U'L"
         ],
         "code": "09a",
-        "family": "Coin pi\u00e9g\u00e9",
+        "family": "Trapped corner",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U2RU'R'L'UL",
         "name": "AF2L 09a",
@@ -1064,9 +1064,9 @@
             "U'RU'R'dLU'L'"
         ],
         "code": "10a",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'RU'R'UfR'f'",
         "name": "AF2L 10a",
@@ -1085,9 +1085,9 @@
             "U'RUR'y'U'L'U'L"
         ],
         "code": "11a",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U2LU'F'UFL'",
         "name": "AF2L 11a",
@@ -1106,9 +1106,9 @@
             "FR'F'R2U'R'UF'rUr'"
         ],
         "code": "12a",
-        "family": "Arr\u00eate pi\u00e9g\u00e9e",
+        "family": "Trapped edge",
         "groups": [
-            "F2L Avanc\u00e9"
+            "Advanced F2L"
         ],
         "main": "U'RU'R'U2F'rUr'",
         "name": "AF2L 12a",

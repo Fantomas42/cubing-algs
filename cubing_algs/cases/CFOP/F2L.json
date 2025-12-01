@@ -7,7 +7,7 @@
             "y'r'U'RUM'"
         ],
         "code": "01",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -26,7 +26,7 @@
             "U'F'UF"
         ],
         "code": "02",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -46,7 +46,7 @@
             "SURU'R'S'"
         ],
         "code": "03",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -66,7 +66,7 @@
             "y'fRf'"
         ],
         "code": "04",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -87,7 +87,7 @@
             "y2U'LUL'U2LU'L'"
         ],
         "code": "05",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -107,7 +107,7 @@
             "dR'U'RU2R'UR"
         ],
         "code": "06",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -128,7 +128,7 @@
             "U'RU2R'UR'FRF'"
         ],
         "code": "07",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -148,7 +148,7 @@
             "y'UR'U2RU2R'UR"
         ],
         "code": "08",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -169,7 +169,7 @@
             "FRUR'U'F'RU'R'"
         ],
         "code": "09",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -190,7 +190,7 @@
             "y'UR'URU'fRf'"
         ],
         "code": "10",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -211,7 +211,7 @@
             "U'RU2R'dR'U'R"
         ],
         "code": "11",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -232,7 +232,7 @@
             "URU'R'U'RUR'U'RUR'"
         ],
         "code": "12",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -253,7 +253,7 @@
             "RU'R'UR'FRF'RU'R'"
         ],
         "code": "13",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -274,7 +274,7 @@
             "RU2R'U2RUR'U2RU'R'"
         ],
         "code": "14",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -295,7 +295,7 @@
             "R'D'RU'R'DRURU'R'"
         ],
         "code": "15",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -316,7 +316,7 @@
             "UM'URU'r'U'RUR'"
         ],
         "code": "16",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -337,7 +337,7 @@
             "yLF'L'FL'ULU'L'UL"
         ],
         "code": "17",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -358,7 +358,7 @@
             "FR'F'R2U'R'URU2R2FRF'"
         ],
         "code": "18",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -379,7 +379,7 @@
             "RU'R'URU'R'URUR'"
         ],
         "code": "19",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -400,7 +400,7 @@
             "yU'L'U2LU'L'UL"
         ],
         "code": "20",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -421,7 +421,7 @@
             "y'fR'f'U2fRf'"
         ],
         "code": "21",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -441,7 +441,7 @@
             "y'U2R'U'RU'R'UR"
         ],
         "code": "22",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -462,7 +462,7 @@
             "URU'R'U'RU'R'URU'R'"
         ],
         "code": "23",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -483,7 +483,7 @@
             "yU'L'ULUL'ULU'L'UL"
         ],
         "code": "24",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -504,7 +504,7 @@
             "U'F'RUR'U'R'FR"
         ],
         "code": "25",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -525,7 +525,7 @@
             "y'RURURU'R'U'R'"
         ],
         "code": "26",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -546,7 +546,7 @@
             "y'fR'f'r'U'RUM'"
         ],
         "code": "27",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -565,7 +565,7 @@
             "RUR'U'FR'F'R"
         ],
         "code": "28",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -585,7 +585,7 @@
             "y'R'U'RUR'U'R"
         ],
         "code": "29",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -606,7 +606,7 @@
             "U'RU2R'U2RUR'"
         ],
         "code": "30",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -627,7 +627,7 @@
             "RU'R'Uy'R'UR"
         ],
         "code": "31",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -648,7 +648,7 @@
             "URU'R'URU'R'URU'R'"
         ],
         "code": "32",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -669,7 +669,7 @@
             "RUR'U'RU'R'URU'R'"
         ],
         "code": "33",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -690,7 +690,7 @@
             "yUL'ULU2L'UL"
         ],
         "code": "34",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -711,7 +711,7 @@
             "U2RUR'y'U'R'UR"
         ],
         "code": "35",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -732,7 +732,7 @@
             "RUR'URUR'U'F'U'F"
         ],
         "code": "36",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -753,7 +753,7 @@
             "R'FRF'RU'R'URU'R'U2RU'R'"
         ],
         "code": "37",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -774,7 +774,7 @@
             "RU'R'U'RUR'U2RU'R'"
         ],
         "code": "38",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -795,7 +795,7 @@
             "RU'R'URU2R'URU'R'"
         ],
         "code": "39",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -816,7 +816,7 @@
             "RU'R'U'RU'R'Uy'R'U'R"
         ],
         "code": "40",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -837,7 +837,7 @@
             "RUR'U'yMU'R'FRUM'"
         ],
         "code": "41",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
