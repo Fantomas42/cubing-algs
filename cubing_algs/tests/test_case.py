@@ -250,6 +250,50 @@ class TestCaseAlgorithmProperties(unittest.TestCase):
         self.assertIsInstance(algorithms, list)
         self.assertEqual(len(algorithms), 0)
 
+    def test_setup_algorithms_property(self) -> None:
+        """Test setup_algorithms property returns mirrored algorithms."""
+        setup_algos = self.case.setup_algorithms
+        self.assertIsInstance(setup_algos, list)
+        self.assertEqual(len(setup_algos), 3)
+
+        for algo in setup_algos:
+            self.assertIsInstance(algo, Algorithm)
+
+        # Setup algorithms should be inverse (reversed and inverted) versions
+        # R U R' U' inverted is U R U' R'
+        self.assertEqual(str(setup_algos[0]), "U R U' R'")
+        # F R U R' U' F' inverted is F U R U' R' F'
+        self.assertEqual(str(setup_algos[1]), "F U R U' R' F'")
+        # R U2 R2 F R F2 U2 F inverted is F' U2 F2 R' F' R2 U2 R'
+        self.assertEqual(str(setup_algos[2]), "F' U2 F2 R' F' R2 U2 R'")
+
+    def test_setup_algorithms_property_empty_list(self) -> None:
+        """Test setup_algorithms property with empty algorithms list."""
+        data: CaseData = {
+            'name': 'Empty',
+            'code': '00',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        setup_algos = case.setup_algorithms
+        self.assertIsInstance(setup_algos, list)
+        self.assertEqual(len(setup_algos), 0)
+
 
 class TestCaseStringMethods(unittest.TestCase):
     """Test Case string representation methods."""
