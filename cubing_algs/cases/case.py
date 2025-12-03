@@ -6,6 +6,7 @@ from typing import cast
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.mirror import mirror_moves
 
 
 class RecognitionFeature(TypedDict):
@@ -189,6 +190,14 @@ class Case:  # noqa: PLR0904
         return [
             parse_moves(moves)
             for moves in self.data['algorithms']
+        ]
+
+    @cached_property
+    def setup_algorithms(self) -> list[Algorithm]:
+        """Return setup algorithms."""
+        return [
+            algorithm.transform(mirror_moves)
+            for algorithm in self.algorithms
         ]
 
     @cached_property
