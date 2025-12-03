@@ -163,7 +163,7 @@
         "logiqx": [
             {
                 "algo": "R'U2rU'r'U2rUr'U2R",
-                "description": "Fast algorithm popularised by Jayden McNeill",
+                "description": "Fast algorithm popularized by Jayden McNeill",
                 "tags": [
                     "2H",
                     "OH"
@@ -843,7 +843,7 @@
                 "RUR'yR'FRU'R'F'R",
                 "RUR'UR'FRF'RU2R'"
             ],
-            "comment": "I try to use the first one. The second one was suggested to me and its incredibly easy to memorize, but I don't think its AS fast as say the first one.",
+            "comment": "I try to use the first one. The second one was suggested to me and it's incredibly easy to memorize, but I don't think it's AS fast as say the first one.",
             "difficulty": 0,
             "uid": "57"
         },
@@ -1611,7 +1611,7 @@
             "algos": [
                 "FRUR'UF'y'U2R'FRF'"
             ],
-            "comment": "Easy. This is ALMOST case #1, but with that modified trigger. I execute this by doing y' R' U2 instead of the F' y' U2. But thats a detail.",
+            "comment": "Easy. This is ALMOST case #1, but with that modified trigger. I execute this by doing y' R' U2 instead of the F' y' U2. But that's a detail.",
             "difficulty": 0,
             "uid": "32"
         },
@@ -1848,7 +1848,7 @@
             "algos": [
                 "MURUR'U'M2URU'r'"
             ],
-            "comment": "This almost never comes up, so skip it if you want. But its not too bad. Note the last part is the same as in case 17.",
+            "comment": "This almost never comes up, so skip it if you want. But it's not too bad. Note the last part is the same as in case 17.",
             "difficulty": 0,
             "uid": "18"
         },
@@ -1959,7 +1959,7 @@
                 "FRUR'U'RUR'U'RUR'U'F'",
                 "R'U'RU'R'URU'R'U2R"
             ],
-            "comment": "Just repeat the trigger 3 times. The second one is the one I use, its much faster",
+            "comment": "Just repeat the trigger 3 times. The second one is the one I use, it's much faster",
             "difficulty": 0,
             "uid": "3"
         },
@@ -2098,7 +2098,7 @@
                 "fRUR'U'f'FRUR'U'F'",
                 "RU2R2U'R2U'R2U2R"
             ],
-            "comment": "This is just like the above, but T (case1) and P (case 4) are done in reverse order! \n      You should really learn the second algorithm though, its much faster. Its the one everyone fast uses too.",
+            "comment": "This is just like the above, but T (case1) and P (case 4) are done in reverse order! \n      You should really learn the second algorithm though, it's much faster. It's the one everyone fast uses too.",
             "difficulty": 0,
             "uid": "13"
         },
@@ -3684,8 +3684,8 @@
             "FR'F'R2U'R'U2RU'R'U2RUR'"
         ],
         "aliases": [
-            "Orque",
-            "Grenouille",
+            "Orca",
+            "Frog",
             "Crawl",
             "Fish Salad"
         ],
@@ -3853,7 +3853,7 @@
             "RUR'U'R'FRF'RUR'U'R'FRF'"
         ],
         "aliases": [
-            "Tortue",
+            "Turtle",
             "Mounted Fish",
             "Untying Shoelaces"
         ],
@@ -4022,7 +4022,7 @@
                 "RB'R'U'RUBU'R'",
                 "LF'L'U'LUFU'L'"
             ],
-            "comment": "Try to use the thumb for the B' too, i think. Pretty clumsy as well, but after it its quick",
+            "comment": "Try to use the thumb for the B' too, i think. Pretty clumsy as well, but after it it's quick",
             "difficulty": 0,
             "uid": "52"
         },
@@ -4321,7 +4321,7 @@
             "algos": [
                 "f'L'U'LUf"
             ],
-            "comment": "This is the reflection of P. You are just doing the algorithm with your left hand. It should be quiet easy to transfer it with just a little bit of practice. \n    I execute it more like f' L' U' L U y' r",
+            "comment": "This is the reflection of P. You are just doing the algorithm with your left hand. It should be quite easy to transfer it with just a little bit of practice. \n    I execute it more like f' L' U' L U y' r",
             "difficulty": 0,
             "uid": "6"
         },
@@ -4415,7 +4415,7 @@
             "algos": [
                 "fRUR'U'f'"
             ],
-            "comment": "Instead of F F' you now have f and f '",
+            "comment": "Instead of F F' you now have f and f'",
             "difficulty": 0,
             "uid": "4"
         },
@@ -4806,7 +4806,7 @@
             "rUR'URU2r'l'U2LUL'Ul"
         ],
         "aliases": [
-            "Professeur Xavier",
+            "Professor Xavier",
             "Right Back Squeezy"
         ],
         "badmephisto": {
@@ -4882,7 +4882,7 @@
             "LU'y'R'U2R'URU'RU2Rd'L'"
         ],
         "aliases": [
-            "Anti-Professeur Xavier",
+            "Anti-Professor Xavier",
             "Right Front Squeezy"
         ],
         "badmephisto": {
@@ -4961,7 +4961,7 @@
             "RUR'U'RUR'U'R'FR2U'R'U'RUR'F'RUR'UR'FRF'"
         ],
         "aliases": [
-            "St\u00e9rilet",
+            "IUD",
             "Bottlecap",
             "Ant"
         ],
@@ -5063,7 +5063,7 @@
                 "RUR'URd'RU'R'F'",
                 "R'U'RU'R'dR'URB"
             ],
-            "comment": "I use the first one, but both are very good, and its definitely a judgement call per individual",
+            "comment": "I use the first one, but both are very good, and it's definitely a judgement call per individual",
             "difficulty": 0,
             "uid": "30"
         },
@@ -5151,7 +5151,7 @@
             "FRUR'U'RUR'U'F2U'L'ULF"
         ],
         "aliases": [
-            "Barbu",
+            "Bearded",
             "Frying Pan"
         ],
         "badmephisto": {
@@ -5238,7 +5238,7 @@
             "xU'LU2R'U'MU'L'ULURUR'U'RU'R'"
         ],
         "aliases": [
-            "Anti-Barbu",
+            "Anti-Bearded",
             "Anti-Frying Pan"
         ],
         "badmephisto": {
