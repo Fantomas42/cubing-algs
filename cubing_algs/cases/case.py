@@ -236,6 +236,19 @@ class Case:  # noqa: PLR0904
             for moves in two_phase_data
         ]
 
+    @cached_property
+    def pretty_name(self) -> str:
+        """Return pretty name for case."""
+        name = self.name
+        if self.aliases:
+            name += f' ({ self.aliases[0] })'
+        return name
+
+    @cached_property
+    def cubing_fache_url(self) -> str:
+        """Return cubing.fache.fr URL."""
+        return f'https://cubing.fache.fr/{ self.step }/{ self.code }.html'
+
     def __str__(self) -> str:
         """
         Return a human-readable string representation of the case.

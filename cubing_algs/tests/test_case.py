@@ -865,3 +865,278 @@ class TestCaseEdgeCases(unittest.TestCase):
         algos1 = case.algorithms
         algos2 = case.algorithms
         self.assertIs(algos1, algos2)
+
+
+class TestCasePrettyName(unittest.TestCase):
+    """Test Case pretty_name property."""
+
+    def test_pretty_name_with_aliases(self) -> None:
+        """Test pretty_name includes first alias in parentheses."""
+        data: CaseData = {
+            'name': 'OLL 27',
+            'code': '27',
+            'description': 'Sune pattern',
+            'aliases': ['Sune', 'Anti-Bruno'],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.pretty_name, 'OLL 27 (Sune)')
+
+    def test_pretty_name_without_aliases(self) -> None:
+        """Test pretty_name returns just name when no aliases."""
+        data: CaseData = {
+            'name': 'OLL 01',
+            'code': '01',
+            'description': 'Test case',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.pretty_name, 'OLL 01')
+
+    def test_pretty_name_with_single_alias(self) -> None:
+        """Test pretty_name with exactly one alias."""
+        data: CaseData = {
+            'name': 'PLL Aa',
+            'code': 'Aa',
+            'description': '',
+            'aliases': ['Aa perm'],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'PLL', data)
+
+        self.assertEqual(case.pretty_name, 'PLL Aa (Aa perm)')
+
+    def test_pretty_name_with_multiple_aliases_uses_first(self) -> None:
+        """Test pretty_name uses only first alias when multiple exist."""
+        data: CaseData = {
+            'name': 'OLL 21',
+            'code': '21',
+            'description': '',
+            'aliases': ['Headlights', 'Bowtie', 'Bruno'],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.pretty_name, 'OLL 21 (Headlights)')
+
+    def test_pretty_name_cached(self) -> None:
+        """Test pretty_name is cached properly."""
+        data: CaseData = {
+            'name': 'Test',
+            'code': '01',
+            'description': '',
+            'aliases': ['Alias'],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        name1 = case.pretty_name
+        name2 = case.pretty_name
+        self.assertIs(name1, name2)
+
+
+class TestCaseCubingFacheUrl(unittest.TestCase):
+    """Test Case cubing_fache_url property."""
+
+    def test_cubing_fache_url_oll(self) -> None:
+        """Test cubing_fache_url generates correct URL for OLL case."""
+        data: CaseData = {
+            'name': 'OLL 27',
+            'code': '27',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(
+            case.cubing_fache_url,
+            'https://cubing.fache.fr/OLL/27.html',
+        )
+
+    def test_cubing_fache_url_pll(self) -> None:
+        """Test cubing_fache_url generates correct URL for PLL case."""
+        data: CaseData = {
+            'name': 'PLL Aa',
+            'code': 'Aa',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'PLL', data)
+
+        self.assertEqual(
+            case.cubing_fache_url,
+            'https://cubing.fache.fr/PLL/Aa.html',
+        )
+
+    def test_cubing_fache_url_coll(self) -> None:
+        """Test cubing_fache_url generates correct URL for COLL case."""
+        data: CaseData = {
+            'name': 'COLL AS 1',
+            'code': 'AS-1',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'COLL', data)
+
+        self.assertEqual(
+            case.cubing_fache_url,
+            'https://cubing.fache.fr/COLL/AS-1.html',
+        )
+
+    def test_cubing_fache_url_format(self) -> None:
+        """Test cubing_fache_url format is consistent."""
+        data: CaseData = {
+            'name': 'Test Case',
+            'code': 'test-code',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'TestStep', data)
+
+        url = case.cubing_fache_url
+        self.assertTrue(url.startswith('https://cubing.fache.fr/'))
+        self.assertTrue(url.endswith('.html'))
+        self.assertIn('TestStep', url)
+        self.assertIn('test-code', url)
+
+    def test_cubing_fache_url_cached(self) -> None:
+        """Test cubing_fache_url is cached properly."""
+        data: CaseData = {
+            'name': 'OLL 01',
+            'code': '01',
+            'description': '',
+            'aliases': [],
+            'arrows': '',
+            'symmetry': '',
+            'family': '',
+            'groups': [],
+            'status': '',
+            'recognition': {'cases': [], 'moves': []},
+            'optimal_cycles': 0,
+            'optimal_htm': 0,
+            'optimal_stm': 0,
+            'probability': 0.0,
+            'probability_label': '',
+            'main': '',
+            'algorithms': [],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        url1 = case.cubing_fache_url
+        url2 = case.cubing_fache_url
+        self.assertIs(url1, url2)
