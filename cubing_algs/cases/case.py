@@ -1,9 +1,12 @@
 """Case representation for cubing algorithms."""
 from functools import cached_property
+from typing import NotRequired
 from typing import TypedDict
+from typing import cast
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.mirror import mirror_moves
 
 
 class RecognitionFeature(TypedDict):
@@ -29,6 +32,31 @@ class RecognitionData(TypedDict):
     moves: list[str]
 
 
+class BadmephistoData(TypedDict):
+    """BadMephisto algorithm information."""
+
+    algos: list[str]
+    comment: str
+    difficulty: int
+    uid: str
+
+
+class LogiqxVariation(TypedDict):
+    """Logiqx algorithm variation."""
+
+    algo: str
+    description: str
+    tags: list[str]
+
+
+class LogiqxAlgorithm(TypedDict):
+    """Logiqx algorithm information."""
+
+    algo: str
+    description: str
+    variations: NotRequired[list[LogiqxVariation]]
+
+
 class CaseData(TypedDict):
     """Complete case data structure from JSON."""
 
@@ -41,7 +69,7 @@ class CaseData(TypedDict):
     family: str
     groups: list[str]
     status: str
-    recognition: RecognitionData
+    recognition: NotRequired[RecognitionData]
     optimal_cycles: int
     optimal_htm: int
     optimal_stm: int
@@ -49,9 +77,12 @@ class CaseData(TypedDict):
     probability_label: str
     main: str
     algorithms: list[str]
+    badmephisto: NotRequired[BadmephistoData]
+    logiqx: NotRequired[list[LogiqxAlgorithm]]
+    sarah: NotRequired[dict[str, str]]
 
 
-class Case:
+class Case:  # noqa: PLR0904
     """
     Represents a single cubing case with its algorithms and properties.
 
@@ -84,26 +115,6 @@ class Case:
         return self.data['code']
 
     @cached_property
-    def description(self) -> str:
-        """Human-readable description of the case."""
-        return self.data['description']
-
-    @cached_property
-    def aliases(self) -> list[str]:
-        """Alternative names for the case."""
-        return self.data['aliases']
-
-    @cached_property
-    def arrows(self) -> str:
-        """Arrow notation for visualizing piece movements."""
-        return self.data['arrows']
-
-    @cached_property
-    def symmetry(self) -> str:
-        """Symmetry properties of the case."""
-        return self.data['symmetry']
-
-    @cached_property
     def family(self) -> str:
         """Family or category the case belongs to."""
         return self.data['family']
@@ -119,9 +130,29 @@ class Case:
         return self.data['status']
 
     @cached_property
-    def recognition(self) -> RecognitionData:
+    def description(self) -> str:
+        """Human-readable description of the case."""
+        return self.data.get('description', '')
+
+    @cached_property
+    def aliases(self) -> list[str]:
+        """Alternative names for the case."""
+        return self.data.get('aliases', [])
+
+    @cached_property
+    def arrows(self) -> str:
+        """Arrow notation for visualizing piece movements."""
+        return self.data.get('arrows', '')
+
+    @cached_property
+    def symmetry(self) -> str:
+        """Symmetry properties of the case."""
+        return self.data.get('symmetry', '')
+
+    @cached_property
+    def recognition(self) -> RecognitionData | None:
         """Recognition pattern for identifying the case."""
-        return self.data['recognition']
+        return self.data.get('recognition')
 
     @cached_property
     def optimal_cycles(self) -> int:
@@ -160,6 +191,63 @@ class Case:
             parse_moves(moves)
             for moves in self.data['algorithms']
         ]
+
+    @cached_property
+    def setup_algorithms(self) -> list[Algorithm]:
+        """Return setup algorithms."""
+        return [
+            algorithm.transform(mirror_moves)
+            for algorithm in self.algorithms
+        ]
+
+    @cached_property
+    def badmephisto(self) -> BadmephistoData | None:
+        """
+        BadMephisto informations.
+
+        http://badmephisto.com/
+        """
+        return self.data.get('badmephisto')
+
+    @cached_property
+    def logiqx(self) -> list[LogiqxAlgorithm] | None:
+        """
+        Logiqx informations.
+
+        https://logiqx.github.io/cubing-algs/html/
+        """
+        return self.data.get('logiqx')
+
+    @cached_property
+    def sarah_pll_skips(self) -> dict[str, str] | None:
+        """
+        Sarah's cubing site informations.
+
+        https://sarah.cubing.net/3x3x3/pll-skip-cases
+        """
+        return self.data.get('sarah')
+
+    @cached_property
+    def two_phase_algorithms(self) -> list[Algorithm]:
+        """Algorithms computed by two-phase algorithm."""
+        two_phase_data = cast('list[str]', self.data.get('two-phase', []))
+        return [
+            parse_moves(moves)
+            for moves in two_phase_data
+        ]
+
+    @cached_property
+    def pretty_name(self) -> str:
+        """Return pretty name for case."""
+        name = self.name
+        if self.aliases:
+            name += f' ({ self.aliases[0] })'
+        return name
+
+    @cached_property
+    def cubing_fache_url(self) -> str:
+        """Return cubing.fache.fr URL."""
+        return f'https://cubing.fache.fr/{ self.step }/{ self.code }.html'
 
     def __str__(self) -> str:
         """

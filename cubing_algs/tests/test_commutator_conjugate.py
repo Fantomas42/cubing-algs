@@ -121,6 +121,30 @@ class TestExpandCommutatorsAndConjugates(unittest.TestCase):
         expected = "R U R'"
         self.assertEqual(result.strip(), expected)
 
+    def test_long_commutator(self) -> None:
+        """Should expand long commutator."""
+        result = expand_commutators_and_conjugates("[R B, U R U']")
+        expected = "R B U R U' B' R' U R' U'"
+        self.assertEqual(result.strip(), expected)
+
+    def test_long_conjugate(self) -> None:
+        """Should expand long conjugate."""
+        result = expand_commutators_and_conjugates("[R B: U R U']")
+        expected = "R B U R U' B' R'"
+        self.assertEqual(result.strip(), expected)
+
+    def test_long_commutator_no_space(self) -> None:
+        """Should expand long commutator without spaces."""
+        result = expand_commutators_and_conjugates("[RB,URU']")
+        expected = "RB URU' B' R' U R' U'"
+        self.assertEqual(result.strip(), expected)
+
+    def test_long_conjugate_space(self) -> None:
+        """Should expand long conjugate without spaces."""
+        result = expand_commutators_and_conjugates("[RB:URU']")
+        expected = "RB URU' B' R'"
+        self.assertEqual(result.strip(), expected)
+
     def test_nested_commutator(self) -> None:
         """Should handle nested commutators."""
         result = expand_commutators_and_conjugates('[[R, U], D]')

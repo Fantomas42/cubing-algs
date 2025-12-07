@@ -6,11 +6,8 @@
             "M'URU'r'",
             "y'r'U'RUM'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "01",
-        "description": "",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -21,20 +18,15 @@
         "optimal_stm": 4,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
             "FR'F'R",
             "U'F'UF"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "02",
-        "description": "",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -45,9 +37,7 @@
         "optimal_stm": 4,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -55,11 +45,8 @@
             "y'R'U'R",
             "SURU'R'S'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "03",
-        "description": "",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -70,9 +57,7 @@
         "optimal_stm": 3,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -80,11 +65,8 @@
             "yFUF'",
             "y'fRf'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "04",
-        "description": "",
-        "family": "Paires Libres",
+        "family": "Free pairs",
         "groups": [
             "F2L"
         ],
@@ -95,9 +77,7 @@
         "optimal_stm": 3,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -106,11 +86,8 @@
             "U'RUR'U2RU'R'",
             "y2U'LUL'U2LU'L'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "05",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -121,9 +98,7 @@
         "optimal_stm": 6,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -131,11 +106,8 @@
             "U'rU'R'URUr'",
             "dR'U'RU2R'UR"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "06",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -146,9 +118,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -157,11 +127,8 @@
             "U'RU2R'U'RU2R'",
             "U'RU2R'UR'FRF'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "07",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -172,9 +139,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -182,11 +147,8 @@
             "r'U2R2UR2Ur",
             "y'UR'U2RU2R'UR"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "08",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -197,9 +159,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -208,11 +168,8 @@
             "dR'U'RU'R'U'R",
             "FRUR'U'F'RU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "09",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -223,9 +180,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -234,11 +189,8 @@
             "dR'URd'RUR'",
             "y'UR'URU'fRf'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "10",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -249,9 +201,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -260,11 +210,8 @@
             "U'RU2R'UF'U'F",
             "U'RU2R'dR'U'R"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "11",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -275,9 +222,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -286,11 +231,8 @@
             "RU'R'URU'R'U2RU'R'",
             "URU'R'U'RUR'U'RUR'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "12",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -301,9 +243,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -312,11 +252,8 @@
             "RU'R'UR'FRF'RU'R'",
             "RU'R'UR'FRF'RU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "13",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -327,9 +264,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -338,11 +273,8 @@
             "U'R'FR2UR'U'R'F'R",
             "RU2R'U2RUR'U2RU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "14",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -353,9 +285,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -364,11 +294,8 @@
             "RUR'U2RU'R'URU'R'",
             "R'D'RU'R'DRURU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "15",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -379,9 +306,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -390,11 +315,8 @@
             "UFURU'R'F'RUR'",
             "UM'URU'r'U'RUR'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "16",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -405,9 +327,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -416,11 +336,8 @@
             "RUR'U'RU2R'U2RUR'",
             "yLF'L'FL'ULU'L'UL"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "17",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -431,9 +348,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -442,11 +357,8 @@
             "R'FRF'RU'R'URU'R'",
             "FR'F'R2U'R'URU2R2FRF'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "18",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -457,9 +369,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -468,11 +378,8 @@
             "Uy'fR2f'UfR'f'",
             "RU'R'URU'R'URUR'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "19",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -483,9 +390,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -494,11 +399,8 @@
             "U'RU'R2FRF'RU'R'",
             "yU'L'U2LU'L'UL"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "20",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -509,9 +411,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -520,11 +420,8 @@
             "U2RUR'URU'R'",
             "y'fR'f'U2fRf'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "21",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -535,9 +432,7 @@
         "optimal_stm": 5,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -545,11 +440,8 @@
             "rU'r'U2rUr'",
             "y'U2R'U'RU'R'UR"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "22",
-        "description": "",
-        "family": "Paires D\u00e9connect\u00e9es",
+        "family": "Disconnected pairs",
         "groups": [
             "F2L"
         ],
@@ -560,9 +452,7 @@
         "optimal_stm": 5,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -571,11 +461,8 @@
             "RUR'U2RUR'U'RUR'",
             "URU'R'U'RU'R'URU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "23",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -586,9 +473,7 @@
         "optimal_stm": 9,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -597,11 +482,8 @@
             "y'R'U'RU2R'U'RUR'U'R",
             "yU'L'ULUL'ULU'L'UL"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "24",
-        "description": "",
-        "family": "Paires Connect\u00e9es",
+        "family": "Connected pairs",
         "groups": [
             "F2L"
         ],
@@ -612,9 +494,7 @@
         "optimal_stm": 9,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -623,11 +503,8 @@
             "R'F'RURU'R'F",
             "U'F'RUR'U'R'FR"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "25",
-        "description": "",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -638,9 +515,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -649,11 +524,8 @@
             "RS'R'URSR'",
             "y'RURURU'R'U'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "26",
-        "description": "",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -664,9 +536,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -675,11 +545,8 @@
             "y'fR'f'UfR'f'",
             "y'fR'f'r'U'RUM'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "27",
-        "description": "",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -690,20 +557,15 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
             "F'UFU'F'UF",
             "RUR'U'FR'F'R"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "28",
-        "description": "",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -714,9 +576,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -724,11 +584,8 @@
             "R'FRF'URU'R'",
             "y'R'U'RUR'U'R"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "29",
-        "description": "",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -739,9 +596,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -750,11 +605,8 @@
             "FR'F'RFR'F'R",
             "U'RU2R'U2RUR'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "30",
-        "description": "",
-        "family": "Coin dans le Puit",
+        "family": "Corner in slot",
         "groups": [
             "F2L"
         ],
@@ -765,9 +617,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -776,11 +626,8 @@
             "RU'R'U2FR'F'R",
             "RU'R'Uy'R'UR"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "31",
-        "description": "",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -791,9 +638,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -802,11 +647,8 @@
             "RUR'U'RUR'U'RUR'",
             "URU'R'URU'R'URU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "32",
-        "description": "",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -817,9 +659,7 @@
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -828,11 +668,8 @@
             "U'yL'U'LU2L'U'L",
             "RUR'U'RU'R'URU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "33",
-        "description": "",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -843,9 +680,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -854,11 +689,8 @@
             "UR'D'RU'R'DR",
             "yUL'ULU2L'UL"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "34",
-        "description": "",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -869,9 +701,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -880,11 +710,8 @@
             "U'RUR'dR'U'R",
             "U2RUR'y'U'R'UR"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "35",
-        "description": "",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -895,9 +722,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -906,11 +731,8 @@
             "R2uRUR'U'u'R'UR'",
             "RUR'URUR'U'F'U'F"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "36",
-        "description": "",
-        "family": "Arr\u00eate dans le Puit",
+        "family": "Edge in slot",
         "groups": [
             "F2L"
         ],
@@ -921,9 +743,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -932,11 +752,8 @@
             "RUR'U2RU2R'Uy'R'U'R",
             "R'FRF'RU'R'URU'R'U2RU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "37",
-        "description": "",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -947,9 +764,7 @@
         "optimal_stm": 9,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -958,11 +773,8 @@
             "RUR'U'RU2R'U'RUR'",
             "RU'R'U'RUR'U2RU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "38",
-        "description": "",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -973,9 +785,7 @@
         "optimal_stm": 9,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -984,11 +794,8 @@
             "RU2R'URU'R'URUR'",
             "RU'R'URU2R'URU'R'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "39",
-        "description": "",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -999,9 +806,7 @@
         "optimal_stm": 9,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -1010,11 +815,8 @@
             "RU'R'FRUR'U'F'RU'R'",
             "RU'R'U'RU'R'Uy'R'U'R"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "40",
-        "description": "",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -1025,9 +827,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -1036,11 +836,8 @@
             "RUR'U'RU'R'U2y'R'U'R",
             "RUR'U'yMU'R'FRUM'"
         ],
-        "aliases": [],
-        "arrows": "",
         "code": "41",
-        "description": "",
-        "family": "Pi\u00e8ces dans le Puit",
+        "family": "Pieces in slot",
         "groups": [
             "F2L"
         ],
@@ -1051,9 +848,7 @@
         "optimal_stm": 8,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [],

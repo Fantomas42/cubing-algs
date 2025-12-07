@@ -14,6 +14,9 @@ from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
 from cubing_algs.constants import MOVE_SPLIT
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
+from cubing_algs.parenthesis import (
+    expand_parenthesis_multipliers_and_inversions,
+)
 from cubing_algs.transform.trim import trim_moves
 
 logger = logging.getLogger(__name__)
@@ -153,7 +156,9 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
     - Strings are cleaned, split into moves, validated, and converted
       to an Algorithm
     - Supports multiline input and removes comments starting with //
-    - Supports commutators [A, B] and conjugates [A: B].
+    - Supports parenthesis inversions (R U)'
+    - Supports parenthesis multipliers (R U)3
+    - Supports commutators [A, B] and conjugates [A: B]
 
     Args:
         raw_moves: The moves to parse, as a string, iterable, or Algorithm.
@@ -163,8 +168,14 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
         An Algorithm object containing the parsed moves.
 
     Examples:
+        (R U R' U')3 becomes R U R' U' R U R' U' R U R' U'
+        (R U R' U')' becomes U R U' R' (inversion)
+        (R U R' U')3' becomes U R U' R' U R U' R' U R U' R'
+            (multiply then invert)
         [A, B] becomes A B A' B' (commutator)
         [A: B] becomes A B A' (conjugate)
+        ([R, U])3 becomes R U R' U' R U R' U' R U R' U'
+        ((R U)')2 becomes U' R' U' R' (inversion then multiplier)
         [[R: U], D] becomes R U R' D R U' R' D'
         [F: [U, R]] becomes F U R U' R' F'
 
@@ -190,7 +201,12 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
 
     raw_moves_str = clean_multiline_and_comments(raw_moves_str)
 
+    # First expand commutators/conjugates so modifiers work on simple moves
     expanded_moves = expand_commutators_and_conjugates(raw_moves_str)
+    # Then expand multipliers and inversions
+    expanded_moves = expand_parenthesis_multipliers_and_inversions(
+        expanded_moves,
+    )
 
     if not secure:
         moves = split_moves(clean_moves(expanded_moves))
