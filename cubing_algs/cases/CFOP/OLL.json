@@ -447,7 +447,8 @@
             "RU'R2U'RUR'U'R'UR2U'R2U'RU'R'U'BUB'U2R'UR"
         ],
         "aliases": [
-            "Right back wide antisune (RBWAS)",
+            "Right back wide Anti-Sune",
+            "RBWAS",
             "Lefty Square"
         ],
         "badmephisto": {
@@ -504,7 +505,8 @@
             "RUR'U'R'FRF'ySRUR'U'R'FRf'"
         ],
         "aliases": [
-            "Right front wide antisune (RFWAS)",
+            "Right front wide Anti-Sune",
+            "RFWAS",
             "Righty Square"
         ],
         "badmephisto": {
@@ -639,7 +641,8 @@
             "R'F'LF'LU2D2R2U2D2F2U2D2L"
         ],
         "aliases": [
-            "Left Wide Sune (LWS)",
+            "Left Wide Sune",
+            "LWS",
             "Reverse Lightning"
         ],
         "badmephisto": {
@@ -3587,7 +3590,8 @@
             "RUR'U'M'URU'r'RURDR'U'RD'R2"
         ],
         "aliases": [
-            "City (C and T)"
+            "City",
+            "C and T"
         ],
         "badmephisto": {
             "algos": [
@@ -4014,7 +4018,7 @@
             "FRUR'U'RUR'U'RU'R'U'RUR'F'"
         ],
         "aliases": [
-            "Serpent",
+            "Snake",
             "Fung"
         ],
         "badmephisto": {
@@ -4089,7 +4093,7 @@
             "RUR'URU'R'U'M'U2RU'R'URU2r'"
         ],
         "aliases": [
-            "Anti-Serpent",
+            "Anti-Snake",
             "Anti-Fung"
         ],
         "badmephisto": {
@@ -4571,7 +4575,8 @@
             "fRUR'U'f'rUR'U'r'RURU'R'"
         ],
         "aliases": [
-            "Seein' Headlights (C and headlights)"
+            "Seein' Headlights",
+            "C and Headlights"
         ],
         "badmephisto": {
             "algos": [
@@ -4806,7 +4811,7 @@
             "rUR'URU2r'l'U2LUL'Ul"
         ],
         "aliases": [
-            "Professor Xavier",
+            "Professor X",
             "Right Back Squeezy"
         ],
         "badmephisto": {
@@ -4882,7 +4887,7 @@
             "LU'y'R'U2R'URU'RU2Rd'L'"
         ],
         "aliases": [
-            "Anti-Professor Xavier",
+            "Anti-Professor X",
             "Right Front Squeezy"
         ],
         "badmephisto": {
