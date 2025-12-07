@@ -21,7 +21,21 @@ from cubing_algs.palettes import load_palette
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
 
-USE_COLORS = os.environ.get('TERM') == 'xterm-256color'
+
+def color_support() -> bool:
+    """
+    Return boolean telling if terminal support color.
+
+    Returns:
+       Is the terminal support colors.
+
+    """
+    if os.environ.get('COLORTERM', '') in {'truecolor', '24bit'}:
+        return True
+    return '256color' in os.environ.get('TERM', '')
+
+
+USE_COLORS = color_support()
 
 DEFAULT_EFFECT = os.getenv('CUBING_ALGS_EFFECT', '')
 DEFAULT_PALETTE = os.getenv('CUBING_ALGS_PALETTE', 'default')
