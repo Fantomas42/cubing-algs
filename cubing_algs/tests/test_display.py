@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display import VCubeDisplay
+from cubing_algs.display import color_support
 from cubing_algs.vcube import VCube
 
 
@@ -1357,3 +1358,43 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         # Should return plain text even when colors are available
         self.assertEqual(result, ' U ')
         self.assertNotIn('\x1b[', result)
+
+
+class TestColorSupport(unittest.TestCase):
+    """Tests for color_support() function."""
+
+    @patch.dict(os.environ, {'COLORTERM': 'truecolor'}, clear=True)
+    def test_color_support_with_colorterm_truecolor(self) -> None:
+        """Test color_support returns True when COLORTERM='truecolor'."""
+        result = color_support()
+        self.assertTrue(result)
+
+    @patch.dict(os.environ, {'COLORTERM': '24bit'}, clear=True)
+    def test_color_support_with_colorterm_24bit(self) -> None:
+        """Test color_support returns True when COLORTERM='24bit'."""
+        result = color_support()
+        self.assertTrue(result)
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'}, clear=True)
+    def test_color_support_with_term_256color(self) -> None:
+        """Test color_support returns True when TERM contains '256color'."""
+        result = color_support()
+        self.assertTrue(result)
+
+    @patch.dict(os.environ, {'TERM': 'screen-256color'}, clear=True)
+    def test_color_support_with_term_screen_256color(self) -> None:
+        """Test color_support returns True when TERM='screen-256color'."""
+        result = color_support()
+        self.assertTrue(result)
+
+    @patch.dict(os.environ, {'TERM': 'xterm'}, clear=True)
+    def test_color_support_without_color_support(self) -> None:
+        """Test color_support returns False when no color support detected."""
+        result = color_support()
+        self.assertFalse(result)
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_color_support_with_empty_env(self) -> None:
+        """Test color_support returns False when environment is empty."""
+        result = color_support()
+        self.assertFalse(result)

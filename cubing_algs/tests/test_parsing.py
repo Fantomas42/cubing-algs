@@ -109,7 +109,7 @@ class CheckMovesTestCase(unittest.TestCase):
         self.assertFalse(check_moves(moves))
 
 
-class ParseMovesTestCase(unittest.TestCase):
+class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
     """Tests for the parse_moves function."""
 
     def test_parse_moves(self) -> None:
@@ -363,6 +363,166 @@ class ParseMovesTestCase(unittest.TestCase):
             "D'",
             'B',
         ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_simple_multiplier(self) -> None:
+        """Test parse moves with simple multiplier."""
+        moves = "(R U R' U')3"
+        expect = [
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_multiplier_with_commutator(self) -> None:
+        """Test parse moves with multiplier and commutator."""
+        moves = '([R, U])3'
+        expect = [
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+            'R', 'U', "R'", "U'",
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_multiplier_with_conjugate(self) -> None:
+        """Test parse moves with multiplier and conjugate."""
+        moves = '([R: U])2'
+        expect = [
+            'R', 'U', "R'",
+            'R', 'U', "R'",
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_commutator_with_multiplier_inside(self) -> None:
+        """Test parse moves with commutator containing multiplier."""
+        moves = "[(R U)2, R']"
+        expect = [
+            'R', 'U', 'R', 'U',
+            "R'",
+            "U'", "R'", "U'", "R'",
+            'R',
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_nested_multipliers(self) -> None:
+        """Test parse moves with nested multipliers."""
+        moves = '((R U)2)2'
+        expect = [
+            'R', 'U', 'R', 'U',
+            'R', 'U', 'R', 'U',
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_multiple_multipliers(self) -> None:
+        """Test parse moves with multiple multipliers."""
+        moves = '(R U)2 (F R)2'
+        expect = [
+            'R', 'U', 'R', 'U',
+            'F', 'R', 'F', 'R',
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_simple_inversion(self) -> None:
+        """Test parse moves with simple inversion."""
+        moves = "(R U)'"
+        expect = ["U'", "R'"]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_complex_inversion(self) -> None:
+        """Test parse moves with complex inversion."""
+        moves = "(R U R' U')'"
+        expect = ['U', 'R', "U'", "R'"]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_multiplier_then_inversion(self) -> None:
+        """Test parse moves with multiplier then inversion."""
+        moves = "(R U)2'"
+        expect = ["U'", "R'", "U'", "R'"]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_commutator_then_inversion(self) -> None:
+        """Test parse moves with commutator then inversion."""
+        moves = "([R, U])'"
+        expect = ['U', 'R', "U'", "R'"]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_conjugate_then_inversion(self) -> None:
+        """Test parse moves with conjugate then inversion."""
+        moves = "([R: U])'"
+        expect = ['R', "U'", "R'"]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_commutator_multiplier_inversion(self) -> None:
+        """Test parse moves with commutator, multiplier, and inversion."""
+        moves = "([R, U])2'"
+        expect = [
+            'U', 'R', "U'", "R'",
+            'U', 'R', "U'", "R'",
+        ]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_nested_inversion(self) -> None:
+        """Test parse moves with nested inversion."""
+        moves = "((R U)')2"
+        expect = ["U'", "R'", "U'", "R'"]
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_double_inversion(self) -> None:
+        """Test parse moves with double inversion (cancels out)."""
+        moves = "((R U)')'"
+        expect = ['R', 'U']
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_inversion_in_sequence(self) -> None:
+        """Test parse moves with inversion in middle of sequence."""
+        moves = "F (R U)' D"
+        expect = ['F', "U'", "R'", 'D']
         self.assertEqual(
             parse_moves(moves),
             expect,

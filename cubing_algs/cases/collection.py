@@ -104,7 +104,7 @@ class CaseCollection:
 
 CASES_DIRECTORY: Final[Path] = Path(__file__).parent
 
-METHODS: list[str] = ['CFOP']
+METHODS: list[str] = ['CFOP', 'Ortega']
 
 COLLECTIONS: dict[str, CaseCollection] = {}
 

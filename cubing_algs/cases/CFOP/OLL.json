@@ -37,12 +37,41 @@
             "Runway",
             "Blank"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RU2R'R'FRF'U2R'FRF'"
+            ],
+            "comment": "The R' R' is obviously made as a giant R2 in the actual execution",
+            "difficulty": 0,
+            "uid": "24"
+        },
         "code": "01",
-        "description": "Similaire \u00e0 17 Slash.",
-        "family": "Point",
+        "description": "Similar to 17 Slash.",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RU2R'R'FRF'U2R'FRF'",
+                "description": "Extract [F2L] pair, [sledgehammer], [AUF], [sledgehammer]",
+                "variations": [
+                    {
+                        "algo": "RU2R2FRF'U2R'FRF'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "r'U'RU'R'U2rUrU2R'U'RU'r'",
+                "description": "[SuneOLL]: [RBWS], [AUF], [RFWAS]",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "RU2R'R'FRF'U2R'FRF'",
         "name": "OLL 01",
@@ -51,9 +80,11 @@
         "optimal_stm": 11,
         "probability": 0.009259259259259259,
         "probability_label": "1/108",
-        "recognition": {},
         "status": "OK",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "RU2R2FRF'U2R'FRF'"
+        ]
     },
     {
         "algorithms": [
@@ -115,12 +146,58 @@
             "Tie-Fighter",
             "Zamboni"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRUR'U'F'fRUR'U'f'"
+            ],
+            "comment": "This is T (case 1) followed by P (case 4)",
+            "difficulty": 0,
+            "uid": "12"
+        },
         "code": "02",
-        "description": "Enchainement T + P.",
-        "family": "Point",
+        "description": "T + P combination.",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U2rU'r'U2rUr'U2R",
+                "description": "Fast algorithm popularized by Jayden McNeill",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "rUr'U2RU2R'U2rU'r'",
+                "description": "Decent for [OH] but also pretty good for [2H]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "rU2R'U'RU'r'U'rU2R'U'RU'r'",
+                "description": "[SuneOLL]: [RFWAS], [AUF], [RFWAS]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "FRUR'U'F'fRUR'U'f'",
+                "description": "[OLL] combination - F [Sexy Move] F', f [Sexy Move] f'",
+                "variations": [
+                    {
+                        "algo": "FRUR'U'SRUR'U'f'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "FRUR'U'F'fRUR'U'f'",
         "name": "OLL 02",
@@ -129,9 +206,11 @@
         "optimal_stm": 11,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "RU2L'BLU2L'B'LU2R'"
+        ]
     },
     {
         "algorithms": [
@@ -184,12 +263,48 @@
             "Anti-Pinwheel",
             "Anti-Mouse"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "fRUR'U'f'U'FRUR'U'F'"
+            ],
+            "comment": "This is case 10 with a U' instead of U",
+            "difficulty": 0,
+            "uid": "11"
+        },
         "code": "03",
-        "description": "Enchainement P + T avec un U' entre deux.",
-        "family": "Point",
+        "description": "P + T combination with U' in between.",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "MRUR'UrU2r'UM'",
+                "description": "Similar to OLL 11 but uses a hybrid of [RFS] and [RFWS]",
+                "variations": [
+                    {
+                        "algo": "r'R2UR'UrU2r'UM'",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "r'R2UR'UrU2r'UrR'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "fRUR'U'f'U'FRUR'U'F'",
+                "description": "[OLL] combination - f [Sexy Move] f', [AUF], F [Sexy Move] F'",
+                "tags": [
+                    "2H"
+                ]
+            }
         ],
         "main": "fRUR'U'f'U'FRUR'U'F'",
         "name": "OLL 03",
@@ -198,9 +313,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "F2R2F'BUB'URF2U2FR2F'U2F"
+        ]
     },
     {
         "algorithms": [
@@ -257,12 +373,48 @@
             "Pinwheel",
             "Mouse"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "fRUR'U'f'UFRUR'U'F'"
+            ],
+            "comment": "This is just case4 followed by case 1, with a U in between",
+            "difficulty": 0,
+            "uid": "10"
+        },
         "code": "04",
-        "description": "Enchainement P + T avec un U entre deux.",
-        "family": "Point",
+        "description": "Sequence P + T with a U in between.",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "M'R'U'RU'r'U2rU'M",
+                "description": "Similar to OLL 12 but uses a hybrid of [RBS] and [RBWS]",
+                "variations": [
+                    {
+                        "algo": "M'R'U'RU'r'U2rU'r'R",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "rR2U'RU'r'U2rU'r'R",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "fRUR'U'f'UFRUR'U'F'",
+                "description": "[OLL] combination - f [Sexy Move] f', [AUF], F [Sexy Move] F'",
+                "tags": [
+                    "2H"
+                ]
+            }
         ],
         "main": "fRUR'U'f'UFRUR'U'F'",
         "name": "OLL 04",
@@ -271,9 +423,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "F'BL2B2U'BU'L'U2BL2FB2U2B"
+        ]
     },
     {
         "algorithms": [
@@ -297,12 +450,29 @@
             "Right back wide antisune (RBWAS)",
             "Lefty Square"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "r'U2RUR'Ur"
+            ],
+            "comment": "Easy.",
+            "difficulty": 0,
+            "uid": "33"
+        },
         "code": "05",
         "description": "T U' T.",
-        "family": "Carr\u00e9",
+        "family": "Square",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "r'U2RUR'Ur",
+                "description": "[RBWAS] - Extract 2x2x1 block, [AUF], re-insert block",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "FRUR'U'F'U'FRUR'U'F'",
         "name": "OLL 05",
@@ -311,9 +481,10 @@
         "optimal_stm": 7,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "L'B2RBR'BL"
+        ]
     },
     {
         "algorithms": [
@@ -336,12 +507,29 @@
             "Right front wide antisune (RFWAS)",
             "Righty Square"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "rU2R'U'RU'r'"
+            ],
+            "comment": "quick alg. Note how similar it is to 36! Just replace R->r. Uncanny!",
+            "difficulty": 0,
+            "uid": "41"
+        },
         "code": "06",
         "description": "T U' T.",
-        "family": "Carr\u00e9",
+        "family": "Square",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "rU2R'U'RU'r'",
+                "description": "[RFWAS] - Extract 2x2x1 block, [AUF], re-insert block",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "F'L'U'LUFUF'L'U'LUF",
         "name": "OLL 06",
@@ -350,9 +538,10 @@
         "optimal_stm": 7,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "LF2R'F'RF'L'"
+        ]
     },
     {
         "algorithms": [
@@ -380,12 +569,28 @@
             "Lightning",
             "Wide Sune"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "rUR'URU2r'"
+            ],
+            "comment": "slight variation of the trigger and then easy finish",
+            "difficulty": 0,
+            "uid": "34"
+        },
         "code": "07",
-        "description": "",
         "family": "Z",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "rUR'URU2r'",
+                "description": "[RFWS] - Extract 2x2x1 block, [AUF], re-insert block",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "L'U2LU2LF'L'F",
         "name": "OLL 07",
@@ -394,9 +599,24 @@
         "optimal_stm": 7,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "rUR'URU2r'",
+                "mask": "rob"
+            },
+            {
+                "algo": "L'U2LU2LF'L'F",
+                "mask": "bo"
+            },
+            {
+                "algo": "FR'F'RU2RU2R'",
+                "mask": "bo"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "LFR'FRF2L'"
+        ]
     },
     {
         "algorithms": [
@@ -422,12 +642,28 @@
             "Left Wide Sune (LWS)",
             "Reverse Lightning"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "r'U'RU'R'U2r"
+            ],
+            "comment": "quick, and very similar to sunes (cases 34-38)",
+            "difficulty": 0,
+            "uid": "43"
+        },
         "code": "08",
-        "description": "",
         "family": "Z",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "r'U'RU'R'U2r",
+                "description": "[RBWS] - Extract 2x2x1 block, [AUF], re-insert block",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "RU2R'U2R'FRF'",
         "name": "OLL 08",
@@ -436,9 +672,24 @@
         "optimal_stm": 7,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "l'U'LU'L'U2l",
+                "mask": "bro"
+            },
+            {
+                "algo": "RU2R'U2R'FRF'",
+                "mask": "br"
+            },
+            {
+                "algo": "F'LFL'U2L'U2L",
+                "mask": "br"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "R'F'LF'LU2D2R2U2D2F2U2D2L"
+        ]
     },
     {
         "algorithms": [
@@ -476,12 +727,47 @@
         "aliases": [
             "Kite"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'U'Ry'x'RU'R'FRUR'x",
+                "RUR'U'R'FR2UR'U'F'"
+            ],
+            "comment": "after the ugly y'x' the alg is incredibly fast. I love executing that part. I give a second alternative in case someone wants something else because they don't like the rotation. (Note that the second alg looks very much like the T PLL :) )",
+            "difficulty": 0,
+            "uid": "56"
+        },
         "code": "09",
-        "description": "",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'U'R'FRF'FRUR'U'F'",
+                "description": "[OLL] combination - [sexy-sledge], F [Sexy Move] F'",
+                "variations": [
+                    {
+                        "algo": "RUR'U'R'FR2UR'U'F'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "MRU2R'U'RU'R'U'M'",
+                "description": "M-slice, [RFAS], [AUF], M-slice",
+                "variations": [
+                    {
+                        "algo": "r'R2U2R'U'RU'R'U'rR'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "MRU2R'U'RU'R'U'M'",
         "name": "OLL 09",
@@ -490,9 +776,17 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "sarah": [
+            {
+                "algo": "R'U'RyrU'r'UrUr'",
+                "mask": "bg"
+            },
+            {
+                "algo": "RUR'U'R'FR2UR'U'F'",
+                "mask": "bg"
+            }
+        ],
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -544,12 +838,41 @@
         "aliases": [
             "Anti-Kite"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'yR'FRU'R'F'R",
+                "RUR'UR'FRF'RU2R'"
+            ],
+            "comment": "I try to use the first one. The second one was suggested to me and it's incredibly easy to memorize, but I don't think it's AS fast as say the first one.",
+            "difficulty": 0,
+            "uid": "57"
+        },
         "code": "10",
-        "description": "",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'UR'FRF'RU2R'",
+                "description": "[Sledgehammer] in the middle of [RFS]",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "M'R'U2RUR'URUM",
+                "description": "M-slice, [RBAS], [AUF], M-slice",
+                "variations": [
+                    {
+                        "algo": "rR2U2RUR'URUr'R",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "ML'U2LUL'ULUM'",
         "name": "OLL 10",
@@ -558,9 +881,20 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "RUR'y'r'UrU'r'U'r",
+                "mask": "bg"
+            },
+            {
+                "algo": "L'U'LULF'L2U'LUF",
+                "mask": "bg"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "RUR'UR'FRF'RU2R'"
+        ]
     },
     {
         "algorithms": [
@@ -607,12 +941,41 @@
         "aliases": [
             "Downstairs"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "F'L'U'LUFyFRUR'U'F'",
+                "rUR'UR'FRF'RU2r'"
+            ],
+            "comment": "Reflection of case 1 followed by case 1, with a y rotation in between, and it comes very natural in that position I find.  Second algorithm was suggested to me and I kinda like it.",
+            "difficulty": 0,
+            "uid": "9"
+        },
         "code": "11",
-        "description": "",
         "family": "Z",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "MRUR'URU2R'UM'",
+                "description": "M-slice, [RFS], [AUF], M-slice",
+                "variations": [
+                    {
+                        "algo": "r'R2UR'URU2R'UM'",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "r'R2UR'URU2R'UrR'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "F'L'U'LUFU'F'L'U'LUF",
         "name": "OLL 11",
@@ -621,9 +984,24 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "l'L2UL'ULU2L'UM",
+                "mask": "br"
+            },
+            {
+                "algo": "F'L'U'LUFU'F'L'U'LUF",
+                "mask": "bro"
+            },
+            {
+                "algo": "F'L'U'LUFUFRUR'U'F'",
+                "mask": "or"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "B'R'F2D'F'D2R'D'R2F'B"
+        ]
     },
     {
         "algorithms": [
@@ -681,12 +1059,41 @@
         "aliases": [
             "Upstairs"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRUR'U'F'UFRUR'U'F'"
+            ],
+            "comment": "This is just T, twice, with a U in between.",
+            "difficulty": 0,
+            "uid": "8"
+        },
         "code": "12",
-        "description": "Deux fois T avec un U entre deux.",
+        "description": "T twice with a U in between.",
         "family": "Z",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "M'R'U'RU'R'U2RU'M",
+                "description": "M-slice, [RBS], [AUF], M-slice",
+                "variations": [
+                    {
+                        "algo": "M'R'U'RU'R'U2RU'r'R",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "rR2U'RU'R'U2RU'r'R",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "FRUR'U'F'UFRUR'U'F'",
         "name": "OLL 12",
@@ -695,9 +1102,24 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "rR2U'RU'R'U2RU'M",
+                "mask": "bo"
+            },
+            {
+                "algo": "FRUR'U'F'UFRUR'U'F'",
+                "mask": "bor"
+            },
+            {
+                "algo": "FRUR'U'F'U'F'L'U'LUF",
+                "mask": "ro"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "BLF2DFD2LDL2FB'"
+        ]
     },
     {
         "algorithms": [
@@ -734,12 +1156,43 @@
             "Gun",
             "Trigger"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FURU'R2F'RURU'R'"
+            ],
+            "comment": "note how the last part just inserts an F2L pair back.",
+            "difficulty": 0,
+            "uid": "46"
+        },
         "code": "13",
-        "description": "L'important est de ne pas saisir la crosse.",
-        "family": "Grand L",
+        "description": "Important: don't catch the trigger.",
+        "family": "Big L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FURU'R'F'FRU'R'U'RUR'F'",
+                "description": "[OLL] combination - F [Inverse Sexy] F', OLL 37",
+                "variations": [
+                    {
+                        "algo": "FURU2R'U'RUR'F'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "rU'r'U'rUr'y'R'UR",
+                "description": "Extract [F2L] pair using wide turns, re-insert normally",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "L'U'LULF'L'FL'U2LUL'UL",
         "name": "OLL 13",
@@ -748,9 +1201,24 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "rU'r'U'rUr'y'R'UR",
+                "mask": "gb"
+            },
+            {
+                "algo": "FURU2R'U'RUR'F'",
+                "mask": "bro"
+            },
+            {
+                "algo": "FURU'R2F'RURU'R'",
+                "mask": "gb"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "LF'L'U'LFL'F'UF"
+        ]
     },
     {
         "algorithms": [
@@ -794,12 +1262,41 @@
             "Anti-Gun",
             "Anti-Trigger"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'FRUR'F'Ry'RU'R'"
+            ],
+            "comment": "pretty nice alg. Last part just inserts F2L pair",
+            "difficulty": 0,
+            "uid": "47"
+        },
         "code": "14",
-        "description": "L'important est de ne pas saisir la crosse.",
-        "family": "Grand L",
+        "description": "Important: don't catch the trigger.",
+        "family": "Big L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'FRUR'F'RU'UFU'F'",
+                "description": "Basic [commutator] combination - [R' F R, U] [U, F]",
+                "variations": [
+                    {
+                        "algo": "R'FRUR'F'RFU'F'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "r'UrUr'U'ryRU'R'",
+                "description": "Extract [F2L] pair using wide turns, re-insert normally",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "RUR'U'R'FRF'RU2R'U'RU'R'",
         "name": "OLL 14",
@@ -808,9 +1305,24 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "R'FRUR'F'Ry'RU'R'",
+                "mask": "gb"
+            },
+            {
+                "algo": "F'U'L'U2LUL'U'LF",
+                "mask": "bgr"
+            },
+            {
+                "algo": "F'U'L'UL2FL'U'L'UL",
+                "mask": "gb"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "R'FRUR'F'RFU'F'"
+        ]
     },
     {
         "algorithms": [
@@ -842,12 +1354,28 @@
         "aliases": [
             "Squeegee"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "l'U'lL'U'LUl'Ul"
+            ],
+            "comment": "Reflection of case 14",
+            "difficulty": 0,
+            "uid": "15"
+        },
         "code": "15",
-        "description": "",
-        "family": "Grand L",
+        "family": "Big L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "r'U'rR'U'RUr'Ur",
+                "description": "[Conjugate] of [Sexy Move] from the back - [r' U' r: R' U' R U]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "l'U'lL'U'LUl'Ul",
         "name": "OLL 15",
@@ -856,9 +1384,10 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "L'B'LR'U'RUL'BL"
+        ]
     },
     {
         "algorithms": [
@@ -885,12 +1414,28 @@
         "aliases": [
             "Anti-Squeegee"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "rUr'RUR'U'rU'r'"
+            ],
+            "comment": "This algorithm is very easy to remember",
+            "difficulty": 0,
+            "uid": "14"
+        },
         "code": "16",
-        "description": "",
-        "family": "Grand L",
+        "family": "Big L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "rUr'RUR'U'rU'r'",
+                "description": "[Conjugate] of [Sexy Move] - [r U r': R U R' U']",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "rUr'RUR'U'rU'r'",
         "name": "OLL 16",
@@ -899,9 +1444,10 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "LFL'RUR'U'LF'L'"
+        ]
     },
     {
         "algorithms": [
@@ -949,12 +1495,40 @@
             "Slash",
             "Diagonal"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'UR'FRF'U2R'FRF'"
+            ],
+            "comment": "Easy to remember. Note similarity to case 24.",
+            "difficulty": 0,
+            "uid": "31"
+        },
         "code": "17",
-        "description": "",
-        "family": "Point",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'U'U2R'FRF'U2R'FRF'",
+                "description": "[Sexy Move], [AUF], [sledgehammer], [AUF], [sledgehammer]",
+                "variations": [
+                    {
+                        "algo": "RUR'UR'FRF'U2R'FRF'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "rU2R'U'RU'r'U2rUR'URU2r'",
+                "description": "[SuneOLL]: [RFWAS], [AUF], [RBWS]",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "RUR'UR'FRF'U2R'FRF'",
         "name": "OLL 17",
@@ -963,9 +1537,11 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": "axial"
+        "symmetry": "axial",
+        "two-phase": [
+            "RU2R'F2LF2RF'L'UBU'B'FR'"
+        ]
     },
     {
         "algorithms": [
@@ -1031,12 +1607,60 @@
         "aliases": [
             "Crown"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRUR'UF'y'U2R'FRF'"
+            ],
+            "comment": "Easy. This is ALMOST case #1, but with that modified trigger. I execute this by doing y' R' U2 instead of the F' y' U2. But that's a detail.",
+            "difficulty": 0,
+            "uid": "32"
+        },
         "code": "18",
-        "description": "G\u00e9n\u00e9ration automatique.",
-        "family": "Point",
+        "description": "Automatic generation.",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RU2R'R'FRF'U2M'URU'r'",
+                "description": "Extract [F2L] pair, [sledgehammer], [AUF], re-insert pair",
+                "variations": [
+                    {
+                        "algo": "RU2R2FRF'U2M'URU'r'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "rUR'URU2r'r'U'RU'R'U2r",
+                "description": "[SuneOLL]: [RFWS], [RBWS]",
+                "variations": [
+                    {
+                        "algo": "rUR'URU2r2U'RU'R'U2r",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "r'U'RU'R'U2rrUR'URU2r'",
+                "description": "[SuneOLL]: [RBWS], [RFWS]",
+                "variations": [
+                    {
+                        "algo": "r'U'RU'R'U2r2UR'URU2r'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "FRUR'U'F'U2FRUR'U'RUR'U'F'",
         "name": "OLL 18",
@@ -1045,9 +1669,11 @@
         "optimal_stm": 11,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "TODO",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "LFR'FRF2L2B'RB'R'B2L"
+        ]
     },
     {
         "algorithms": [
@@ -1090,12 +1716,59 @@
         "aliases": [
             "Bunny"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "MURUR'U'M'R'FRF'"
+            ],
+            "comment": "pretty easy to remember. Also note how similar this algorithm is to case 17",
+            "difficulty": 0,
+            "uid": "26"
+        },
         "code": "19",
-        "description": "",
-        "family": "Point",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "MURUR'U'M'R'FRF'",
+                "description": "Triggers - M U, [Sexy Move], M', [sledgehammer]",
+                "variations": [
+                    {
+                        "algo": "r'RURUR'U'M'R'FRF'",
+                        "description": "Execution avoids the M move",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "r'U2RUR'UrrU2R'U'RU'r'",
+                "description": "[SuneOLL]: [RBWAS], [RFWAS]",
+                "variations": [
+                    {
+                        "algo": "r'U2RUR'Ur2U2R'U'RU'r'",
+                        "description": "Execution includes a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "rU2R'U'RU'r'r'U2RUR'Ur",
+                "description": "[SuneOLL]: [RFWAS], [RBWAS]",
+                "variations": [
+                    {
+                        "algo": "rU2R'U'RU'r2U2RUR'Ur",
+                        "description": "Execution includes a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "MURUR'U'M'R'FRF'",
         "name": "OLL 19",
@@ -1104,9 +1777,11 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "L'B2LU2R'F'L'U2RB'LR'FR"
+        ]
     },
     {
         "algorithms": [
@@ -1169,12 +1844,61 @@
             "X",
             "Checkers"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "MURUR'U'M2URU'r'"
+            ],
+            "comment": "This almost never comes up, so skip it if you want. But it's not too bad. Note the last part is the same as in case 17.",
+            "difficulty": 0,
+            "uid": "18"
+        },
         "code": "20",
-        "description": "G\u00e9n\u00e9ration automatique.",
-        "family": "Point",
+        "description": "Automatic generation.",
+        "family": "Dot",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "M'RUR'U'M2URU'R'U'M'",
+                "description": "M-slice, [Sexy Move], M-slice, [Inverse Sexy], [AUF], M-slice",
+                "variations": [
+                    {
+                        "algo": "rUR'U'M2URU'R'U'M'",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "rUR'U'r2R2URU'R'U'rR'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "MURUR'U'M2URU'R'M",
+                "description": "M-slice, [AUF], [Sexy Move], M-slice, [Inverse Sexy], M-slice",
+                "variations": [
+                    {
+                        "algo": "r'RURUR'U'M2URU'r'",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "r'RURUR'U'r2R2URU'r'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "MURUR'U'M2URU'r'",
         "name": "OLL 20",
@@ -1183,9 +1907,11 @@
         "optimal_stm": 9,
         "probability": 0.004629629629629629,
         "probability_label": "1/216",
-        "recognition": {},
         "status": "TODO",
-        "symmetry": "radial"
+        "symmetry": "radial",
+        "two-phase": [
+            "FB'R2F2D2B2L'F'BD2B2R2F2"
+        ]
     },
     {
         "algorithms": [
@@ -1228,13 +1954,55 @@
             "Flip",
             "Cross"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRUR'U'RUR'U'RUR'U'F'",
+                "R'U'RU'R'URU'R'U2R"
+            ],
+            "comment": "Just repeat the trigger 3 times. The second one is the one I use, it's much faster",
+            "difficulty": 0,
+            "uid": "3"
+        },
         "code": "21",
         "description": "F [Sexy Move x 3] F'.",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RU2R'U'RU'R'RU2R'U'RU'R'",
+                "description": "[SuneOLL]/[2GLL]: Double [RFAS]",
+                "variations": [
+                    {
+                        "algo": "RU2R'U'RUR'U'RU'R'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U'RU'R'U2RR'U'RU'R'U2R",
+                "description": "[SuneOLL]/[2GLL]: Double [RBS]",
+                "variations": [
+                    {
+                        "algo": "R'U'RU'R'URU'R'U2R",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "FRUR'U'RUR'U'RUR'U'F'",
+                "description": "[Conjugate] of triple [Sexy Move]: [F: [R U R' U']*3]"
+            }
         ],
         "main": "FRUR'U'RUR'U'RUR'U'F'",
         "name": "OLL 21",
@@ -1243,9 +2011,33 @@
         "optimal_stm": 11,
         "probability": 0.009259259259259259,
         "probability_label": "1/108",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "RU2R'U'RUR'U'RU'R'",
+                "mask": "ro"
+            },
+            {
+                "algo": "L'U2LUL'U'LUL'UL",
+                "mask": "ro"
+            },
+            {
+                "algo": "RUR'URU'R'URU2R'",
+                "mask": "bg"
+            },
+            {
+                "algo": "L'U'LU'L'ULU'L'U2L",
+                "mask": "bg"
+            },
+            {
+                "algo": "FRUR'U'RUR'U'RUR'U'F'",
+                "mask": "bg"
+            }
+        ],
         "status": "OK",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "F2RF2L'U2B2U2RU2L'B2R2L2"
+        ]
     },
     {
         "algorithms": [
@@ -1301,13 +2093,71 @@
             "Wheel",
             "T-shirt"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "fRUR'U'f'FRUR'U'F'",
+                "RU2R2U'R2U'R2U2R"
+            ],
+            "comment": "This is just like the above, but T (case1) and P (case 4) are done in reverse order! \n      You should really learn the second algorithm though, it's much faster. It's the one everyone fast uses too.",
+            "difficulty": 0,
+            "uid": "13"
+        },
         "code": "22",
-        "description": "",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RU2R'R'U'RRU'R'R'U2R",
+                "description": "[Palindrome]. Essentially [RFAS] and [RBS] mixed together",
+                "variations": [
+                    {
+                        "algo": "RU2R2U'R2U'R2U2R",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U2RRUR'R'URRU2R'",
+                "description": "[Palindrome]. Essentially [RBAS] and [RFS] mixed together",
+                "variations": [
+                    {
+                        "algo": "R'U2R2UR2UR2U2R'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU2R'U'RU'R'U'RU2R'U'RU'R'",
+                "description": "[SuneOLL]/[2GLL]: Anti-Sune, [AUF], Anti-Sune",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "fRUR'U'f'FRUR'U'F'",
+                "description": "[EOLL] combination - f [Sexy Move] f', F [Sexy Move] F'",
+                "variations": [
+                    {
+                        "algo": "fRUR'U'S'RUR'U'F'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "RU2R2U'R2U'R2U2R",
         "name": "OLL 22",
@@ -1316,9 +2166,11 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "RU2R2U'R2U'R2U2R"
+        ]
     },
     {
         "algorithms": [
@@ -1389,13 +2241,74 @@
             "U",
             "Superman"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R2DR'U2RD'R'U2R'"
+            ],
+            "comment": "I don't like this alg too much. Note the repeating structure.",
+            "difficulty": 0,
+            "uid": "48"
+        },
         "code": "23",
-        "description": "Semblable \u00e0 la Aa-Perm.",
-        "family": "Croix",
+        "description": "Similar to the Aa-Perm.",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R2DR'U2RD'R'U2RR2",
+                "description": "A9 [commutator] / [conjugate] - [R2: [D, R' U2 R]]",
+                "variations": [
+                    {
+                        "algo": "R2DR'U2RD'R'U2R'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R2D'RU2R'DRU2R'R2",
+                "description": "A9 [commutator] / [conjugate] - [R2: [D', R U2 R']]",
+                "variations": [
+                    {
+                        "algo": "R2D'RU2R'DRU2R",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RUR'URU2R'R'U'RU'R'U2R",
+                "description": "[SuneOLL]/[2GLL]: [RFS], [RBS]",
+                "variations": [
+                    {
+                        "algo": "RUR'URU2R2U'RU'R'U2R",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U'RU'R'U2RRUR'URU2R'",
+                "description": "[SuneOLL]/[2GLL]: [RBS], [RFS]",
+                "variations": [
+                    {
+                        "algo": "R'U'RU'R'U2R2UR'URU2R'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "R2DR'U2RD'R'U2R'",
         "name": "OLL 23",
@@ -1404,9 +2317,37 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "R2DR'U2RD'R'U2R'",
+                "mask": "og"
+            },
+            {
+                "algo": "R2D'RU2R'DRU2R",
+                "mask": "ob"
+            },
+            {
+                "algo": "R'F2RU2RU2R'F2RU2R'",
+                "mask": "obr"
+            },
+            {
+                "algo": "LF2L'U2L'U2LF2L'U2L",
+                "mask": "obr"
+            },
+            {
+                "algo": "F2RU'R'U'RUR'F'RUR'U'R'FRF2",
+                "mask": "obr"
+            },
+            {
+                "algo": "R'FRU'R'U'RUR'F'RUR'U'R'FRF'R",
+                "mask": "grb"
+            }
+        ],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "R2DR'U2RD'R'U2R'"
+        ]
     },
     {
         "algorithms": [
@@ -1478,13 +2419,101 @@
             "Little Horse",
             "Stingray"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "rUR'U'r'FRF'"
+            ],
+            "comment": "Same as T2 (case 20) but the first R's are actually double layer R turn (r)",
+            "difficulty": 0,
+            "uid": "21"
+        },
         "code": "24",
-        "description": "",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "LFR'F'L'FRF'",
+                "description": "Basic [commutator] - [L, F R' F']",
+                "variations": [
+                    {
+                        "algo": "rUR'U'r'FRF'",
+                        "description": "Two-handed - wide-[Sexy Move], wide-[sledgehammer]",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "rUR'U'zU'RuF'z'",
+                        "description": "Execution incorporates wide turns",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "x'RUR'DRU'R'D'x",
+                "description": "Second half of E-Perm. Basic [commutator] - [R, U R' D]",
+                "variations": [
+                    {
+                        "algo": "lUR'DRU'R'D'x",
+                        "description": "Execution incorporates wide turns",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "x'RUR'DRU'R'u'z'",
+                        "description": "Execution incorporates wide turns",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RUR'U'L'URU'R'L",
+                "description": "Basic [commutator] - [R U R' U', L']",
+                "tags": [
+                    "OH"
+                ]
+            },
+            {
+                "algo": "L'U'LURU'L'ULR'",
+                "description": "Basic [commutator] - [L' U' L U, R]",
+                "tags": [
+                    "OH"
+                ]
+            },
+            {
+                "algo": "RU2R'U'RU'R'R'U2RUR'UR",
+                "description": "[SuneOLL]/[2GLL]: [RFAS], [RBAS]",
+                "variations": [
+                    {
+                        "algo": "RU2R'U'RU'R2U2RUR'UR",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U2RUR'URRU2R'U'RU'R'",
+                "description": "[SuneOLL]/[2GLL]: [RBAS], [RFAS]",
+                "variations": [
+                    {
+                        "algo": "R'U2RUR'UR2U2R'U'RU'R'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "rUR'U'r'FRF'",
         "name": "OLL 24",
@@ -1493,9 +2522,29 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "l'U'LUlF'L'F",
+                "mask": "bo"
+            },
+            {
+                "algo": "rUR'U'r'FRF'",
+                "mask": "rb"
+            },
+            {
+                "algo": "RU2R'F2RU2R'U2R'F2R",
+                "mask": "brg"
+            },
+            {
+                "algo": "L'U2LF2L'U2LU2LF2L'",
+                "mask": "bgo"
+            }
+        ],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "LFR'F'L'FRF'"
+        ]
     },
     {
         "algorithms": [
@@ -1582,13 +2631,128 @@
             "Diagonals",
             "Spaceship"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "F'rUR'U'r'FR"
+            ],
+            "comment": "Same as chameleon (case21) , with the last F' moved to the front!",
+            "difficulty": 0,
+            "uid": "22"
+        },
         "code": "25",
-        "description": "C'est le m\u00eame que le T(24), mais en d\u00e9call\u00e9.",
-        "family": "Croix",
+        "description": "Same as T(24), but offsetted.",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "F'LFR'F'L'FR",
+                "description": "Basic [commutator] - [F' L F, R']",
+                "variations": [
+                    {
+                        "algo": "F'rUR'U'r'FR",
+                        "description": "Execution incorporates wide turns",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "F'rUR'U'zU'Ruz'",
+                        "description": "Execution incorporates wide turns",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "x'RU'R'DRUR'D'x",
+                "description": "First half of E-Perm. Basic [commutator] - [R U' R', D]",
+                "variations": [
+                    {
+                        "algo": "lU'R'DRUR'D'x",
+                        "description": "Execution incorporates wide turns",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "x'RU'R'DRUR'u'z'",
+                        "description": "Execution incorporates wide turns",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RL'U'LUR'U'L'UL",
+                "description": "Basic [commutator] - [R, L' U' L U]",
+                "tags": [
+                    "OH"
+                ]
+            },
+            {
+                "algo": "L'RUR'U'LURU'R'",
+                "description": "Basic [commutator] - [L', R U R' U']",
+                "tags": [
+                    "OH"
+                ]
+            },
+            {
+                "algo": "R2RU2R'D'RU2R'DR2",
+                "description": "A9 [commutator] / [conjugate] - [R2: [R U2 R', D']]",
+                "variations": [
+                    {
+                        "algo": "R'U2R'D'RU2R'DR2",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R2R'U2RDR'U2RD'R2",
+                "description": "A9 [commutator] / [conjugate] - [R2: [R' U2 R, D]]",
+                "variations": [
+                    {
+                        "algo": "RU2RDR'U2RD'R2",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU2R'U'RU'R'RU2R'U'RU'R'RU2R'U'RU'R'",
+                "description": "[SuneOLL]/[2GLL]: Triple [RFAS]",
+                "variations": [
+                    {
+                        "algo": "RU2R'U'RUR'U'RUR'U'RU'R'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U'RU'R'U2RR'U'RU'R'U2RR'U'RU'R'U2R",
+                "description": "[SuneOLL]/[2GLL]: Triple [RBS]",
+                "variations": [
+                    {
+                        "algo": "R'U'RU'R'URU'R'URU'R'U2R",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "F'rUR'U'r'FR",
         "name": "OLL 25",
@@ -1597,9 +2761,29 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "FR'F'rURU'r'",
+                "mask": "gbr"
+            },
+            {
+                "algo": "F'LFl'U'L'Ul",
+                "mask": "gbo"
+            },
+            {
+                "algo": "RU2RDR'U2RD'R2",
+                "mask": "gbo"
+            },
+            {
+                "algo": "R'U2R'D'RU2R'DR2",
+                "mask": "gbo"
+            }
+        ],
         "status": "OK",
-        "symmetry": "axial"
+        "symmetry": "axial",
+        "two-phase": [
+            "RBLB'R'BL'B'"
+        ]
     },
     {
         "algorithms": [
@@ -1623,13 +2807,37 @@
             "S-",
             "Swimming Right"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RU2R'U'RU'R'"
+            ],
+            "comment": "This algorithm is the same as case 35 in philosophy. Track the F2L pair.",
+            "difficulty": 0,
+            "uid": "36"
+        },
         "code": "26",
-        "description": "",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RU2R'U'RU'R'",
+                "description": "[RFAS] - Extract [F2L] pair, [AUF], re-insert pair",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "R'U'RU'R'U2R",
+                "description": "[RBS] - Extract [F2L] pair, [AUF], re-insert pair",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "RU2R'U'RU'R'",
         "name": "OLL 26",
@@ -1638,9 +2846,24 @@
         "optimal_stm": 7,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "RU2R'U'RU'R'",
+                "mask": "rog"
+            },
+            {
+                "algo": "L'U'LU'L'U2L",
+                "mask": "ogr"
+            },
+            {
+                "algo": "L'URU'LUR'",
+                "mask": "bog"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "RU2R'U'RU'R'"
+        ]
     },
     {
         "algorithms": [
@@ -1667,13 +2890,37 @@
             "S",
             "Swimming Left"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'URU2R'"
+            ],
+            "comment": "Very quick OLL. Look what happens to one of the F2L pairs as you execute it. \n    The whole algorithm is just: Take out a pair, move it over, insert it back. It's also very similar to case 34",
+            "difficulty": 0,
+            "uid": "35"
+        },
         "code": "27",
-        "description": "",
-        "family": "Croix",
+        "family": "Cross",
         "groups": [
             "OCLL",
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'URU2R'",
+                "description": "[RFS] - Extract [F2L] pair, [AUF], re-insert pair",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "R'U2RUR'UR",
+                "description": "[RBAS] - Extract [F2L] pair, [AUF], re-insert pair",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "L'U2LUL'UL",
         "name": "OLL 27",
@@ -1682,9 +2929,24 @@
         "optimal_stm": 7,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "RUR'URU2R'",
+                "mask": "rog"
+            },
+            {
+                "algo": "R'U2RUR'UR",
+                "mask": "rob"
+            },
+            {
+                "algo": "RU'L'UR'U'L",
+                "mask": "rbg"
+            }
+        ],
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "L'U2LUL'UL"
+        ]
     },
     {
         "algorithms": [
@@ -1731,12 +2993,42 @@
             "Arrowhead",
             "Fish"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "M'UMU2M'UM"
+            ],
+            "comment": "easy. Look what happens to one of the cross edges. You take it out, do a U2, and put it back from the other side.",
+            "difficulty": 0,
+            "uid": "44"
+        },
         "code": "28",
-        "description": "On sort une des arr\u00eates, U2 et on la remet de l'autre c\u00f4t\u00e9.",
-        "family": "Coins",
+        "description": "Take out one of the cross edges, U2, and put it back from the other side.",
+        "family": "Corners",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "M'RUR'U'MURU'R'",
+                "description": "Triggers - M-slice, [Sexy Move], M-slice, [Inverse Sexy]",
+                "variations": [
+                    {
+                        "algo": "rUR'U'r'RURU'R'",
+                        "description": "Execution avoids the M move",
+                        "tags": [
+                            "OH",
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "M'U'MU2M'U'M",
+                "description": "Moo!",
+                "tags": [
+                    "2H"
+                ]
+            }
         ],
         "main": "M'UMU2M'UM",
         "name": "OLL 28",
@@ -1745,9 +3037,29 @@
         "optimal_stm": 7,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "M'UMU2M'UM",
+                "mask": "rogb"
+            },
+            {
+                "algo": "M'U'MU2M'U'M",
+                "mask": "rogb"
+            },
+            {
+                "algo": "rUR'U'MURU'R'",
+                "mask": "rogb"
+            },
+            {
+                "algo": "r'U'RUM'U'R'UR",
+                "mask": "rogb"
+            }
+        ],
         "status": "OK",
-        "symmetry": "axial"
+        "symmetry": "axial",
+        "two-phase": [
+            "B'R'B2D2F2L'F2D2B'"
+        ]
     },
     {
         "algorithms": [
@@ -1806,12 +3118,58 @@
         "aliases": [
             "Spotted Chameleon"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'U'RU'R'F'U'FRUR'",
+                "FRUR'U'F'U2RUR'U'R'FRF'"
+            ],
+            "comment": "flows nicely, no regrips. The second one is longer but easier to remember: It is just case 1 followed by U2 and case 20!",
+            "difficulty": 0,
+            "uid": "54"
+        },
         "code": "29",
-        "description": "",
         "family": "Y",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'U'RU'R'F'U'FRUR'",
+                "description": "Playing with [F2L] pair - track FR corner",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "B'U'R'U2RUR'U2RUB",
+                "description": "[Conjugate] - [B' U' R' U2 R: U]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "MURUR'U'R'FRF'M'",
+                "description": "Includes [sexy-sledge]",
+                "variations": [
+                    {
+                        "algo": "r'RURUR'U'R'FRF'M'",
+                        "description": "Execution avoids M move",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "rU2R'U'RU'r'R'U2RUR'UR",
+                "description": "[SuneOLL]: [RFWAS], [RBAS]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "MURUR'U'R'FRF'M'",
         "name": "OLL 29",
@@ -1820,9 +3178,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "L'RDBD'R'BU'B'UL"
+        ]
     },
     {
         "algorithms": [
@@ -1873,12 +3232,56 @@
         "aliases": [
             "Anti-Spotted Chameleon"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R2UR'B'RU'R2URBR'"
+            ],
+            "comment": "Ok the first R2 is executed in a weird way. You overgrip the R slice to do the R2 both times. After doing the R2's you have to be able to the U with a finger flick without a regrip. The alg is actually quite fast.",
+            "difficulty": 0,
+            "uid": "55"
+        },
         "code": "30",
-        "description": "",
         "family": "Y",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FURU2R'U'RU2R'U'F'",
+                "description": "[Conjugate] - [F U R U2' R': U']",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "M'U'R'U'RURB'R'BM",
+                "description": "Includes mirror of [sexy-sledge]",
+                "variations": [
+                    {
+                        "algo": "M'U'R'U'RURB'R'Br'R",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "rR'U'R'U'RUx'RU'R'Uxr'R",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "r'U2RUR'UrRU2R'U'RU'R'",
+                "description": "Sune OLL: [RBWAS], [RFAS]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "MU'L'U'LULF'L'FM'",
         "name": "OLL 30",
@@ -1887,9 +3290,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "B'RU'LD2L2UR'LU'FBD2B'"
+        ]
     },
     {
         "algorithms": [
@@ -1921,12 +3325,29 @@
         "aliases": [
             "Couch"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'U'FURU'R'F'R",
+                "L'd'RdLU'L'B'L"
+            ],
+            "comment": "I use the second one, but I think the first may be a little better.",
+            "difficulty": 0,
+            "uid": "51"
+        },
         "code": "31",
-        "description": "",
         "family": "P",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U'FURU'R'F'R",
+                "description": "Includes F [Inverse Sexy] F'",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "S'L'U'LULF'L'f",
         "name": "OLL 31",
@@ -1935,9 +3356,10 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "B'U'F'R'FUF'RFB"
+        ]
     },
     {
         "algorithms": [
@@ -1987,12 +3409,36 @@
         "aliases": [
             "Anti-Couch"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUB'U'R'URBR'",
+                "RdL'd'R'URBR'"
+            ],
+            "comment": "The B' is very clumsily done. Try do it with your thumb, then the rest is very quick. I use the second algorithm, but I'm not sure which one is better",
+            "difficulty": 0,
+            "uid": "50"
+        },
         "code": "32",
-        "description": "",
         "family": "P",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RU2R'U'F'UFRU'R'",
+                "description": "Basically [RFAS] with an embedded (F' U F')",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "RUB'U'R'URBR'",
+                "description": "Includes mirror of F [Inverse Sexy] F'",
+                "tags": [
+                    "2H"
+                ]
+            }
         ],
         "main": "SRUR'U'R'FRf'",
         "name": "OLL 32",
@@ -2001,9 +3447,10 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "BUFLF'U'FL'F'B'"
+        ]
     },
     {
         "algorithms": [
@@ -2031,12 +3478,28 @@
             "Tying Shoelaces",
             "Key"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'U'R'FRF'"
+            ],
+            "comment": "Just the two triggers is all it takes :)",
+            "difficulty": 0,
+            "uid": "20"
+        },
         "code": "33",
-        "description": "",
         "family": "T",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'U'R'FRF'",
+                "description": "Trigger combination known as \"[sexy-sledge]\"",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "RUR'U'R'FRF'",
         "name": "OLL 33",
@@ -2045,9 +3508,21 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "RUR'U'R'FRF'",
+                "mask": "rb"
+            },
+            {
+                "algo": "R'U'RUlU'R'Ux",
+                "mask": "gro"
+            }
+        ],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "RUR'U'R'FRF'"
+        ]
     },
     {
         "algorithms": [
@@ -2114,12 +3589,55 @@
         "aliases": [
             "City (C and T)"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR2U'R'FRURU'F'",
+                "RUR'U'xD'R'URU'Dx'"
+            ],
+            "comment": "I cannot decide which one is better... you have to pick for yourself",
+            "difficulty": 0,
+            "uid": "45"
+        },
         "code": "34",
-        "description": "",
         "family": "C",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR2U'R'FRURU'F'",
+                "description": "Playing with [F2L] pairs - track FR + BR + FL",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "RUR'U'B'R'FRF'B",
+                "description": "Triggers - [Sexy Move], B', [sledgehammer], B",
+                "variations": [
+                    {
+                        "algo": "RUR'U'xD'R'URU'Dx'",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RUR'U'y'r'U'RUM'",
+                "description": "Triggers - [Sexy Move] then Roux-style insert to back",
+                "variations": [
+                    {
+                        "algo": "RUR'U'y'r'U'RUrR'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "RUR'U'B'R'FRF'B",
         "name": "OLL 34",
@@ -2128,9 +3646,21 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "R'U'RUy'x'RUL'U'M'",
+                "mask": "go"
+            },
+            {
+                "algo": "RUR'U'y'r'U'RUM'",
+                "mask": "gr"
+            }
+        ],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "L2B2DF2U'L2DU'R'FR2F'R'"
+        ]
     },
     {
         "algorithms": [
@@ -2154,17 +3684,39 @@
             "FR'F'R2U'R'U2RU'R'U2RUR'"
         ],
         "aliases": [
-            "Orque",
-            "Grenouille",
+            "Orca",
+            "Frog",
             "Crawl",
             "Fish Salad"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RU2R'R'FRF'RU2R'"
+            ],
+            "comment": "Incredibly easy to remember, and fast to execute. Again, the R' R' is made as a big R2. Note first part is the same as in case 24",
+            "difficulty": 0,
+            "uid": "25"
+        },
         "code": "35",
-        "description": "",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RU2R'R'FRF'RU2R'",
+                "description": "Extract [F2L] pair, [sledgehammer], re-insert pair",
+                "variations": [
+                    {
+                        "algo": "RU2R2FRF'RU2R'",
+                        "description": "Execution applies a cancellation",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "RU2R'R'FRF'RU2R'",
         "name": "OLL 35",
@@ -2173,9 +3725,11 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": "axial"
+        "symmetry": "axial",
+        "two-phase": [
+            "RU2R2FRF'RU2R'"
+        ]
     },
     {
         "algorithms": [
@@ -2226,12 +3780,40 @@
             "Wario",
             "Anti-Moustache"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "L'U'LU'L'ULULF'L'F"
+            ],
+            "comment": "The reflection. Should be easy enough to mirror it.",
+            "difficulty": 0,
+            "uid": "29"
+        },
         "code": "36",
-        "description": "",
         "family": "W",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U'RU'R'U2RR'U'RURB'R'B",
+                "description": "[OLL] combination - [RBS], [sexy-sledge] from the back",
+                "variations": [
+                    {
+                        "algo": "R'U'RU'R'URUlU'R'Ux",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "R'U'RU'R'URUx'RU'R'Ux",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "L'U'LU'L'ULULF'L'F",
         "name": "OLL 36",
@@ -2240,9 +3822,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "B'URB'R'D'FR'F'UR2L2UD'B2"
+        ]
     },
     {
         "algorithms": [
@@ -2270,16 +3853,36 @@
             "RUR'U'R'FRF'RUR'U'R'FRF'"
         ],
         "aliases": [
-            "Tortue",
+            "Turtle",
             "Mounted Fish",
             "Untying Shoelaces"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRU'R'U'RUR'F'"
+            ],
+            "comment": "very quick. Note the Y permutation starts with this exactly",
+            "difficulty": 0,
+            "uid": "42"
+        },
         "code": "37",
-        "description": "",
-        "family": "Poisson",
+        "family": "Fish",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FRU'R'U'RUR'F'",
+                "description": "Playing with [F2L] pair - track FL",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "FR'F'RURU'R'",
+                "description": "Triggers - [hedgeslammer], [Inverse Sexy]"
+            }
         ],
         "main": "R'FRF'U'F'UF",
         "name": "OLL 37",
@@ -2288,9 +3891,21 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "FRU'R'U'RUR'F'",
+                "mask": "gbr"
+            },
+            {
+                "algo": "F'L'ULUL'U'LF",
+                "mask": "gb"
+            }
+        ],
         "status": "OK",
-        "symmetry": "axial"
+        "symmetry": "axial",
+        "two-phase": [
+            "FRU'R'U'RUR'F'"
+        ]
     },
     {
         "algorithms": [
@@ -2321,12 +3936,34 @@
             "Mario",
             "Moustache"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'URU'R'U'R'FRF'"
+            ],
+            "comment": "Very quick to perform. Second part is same as first, but with U's instead of Us",
+            "difficulty": 0,
+            "uid": "28"
+        },
         "code": "38",
-        "description": "",
         "family": "W",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'URU2R'RUR'U'R'FRF'",
+                "description": "[OLL] combination - [RFS], [sexy-sledge]",
+                "variations": [
+                    {
+                        "algo": "RUR'URU'R'U'R'FRF'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "RUR'URU'R'U'R'FRF'",
         "name": "OLL 38",
@@ -2335,9 +3972,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "FLDFD'L'R'FRU'F2"
+        ]
     },
     {
         "algorithms": [
@@ -2379,12 +4017,44 @@
             "Serpent",
             "Fung"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RB'R'U'RUBU'R'",
+                "LF'L'U'LUFU'L'"
+            ],
+            "comment": "Try to use the thumb for the B' too, i think. Pretty clumsy as well, but after it it's quick",
+            "difficulty": 0,
+            "uid": "52"
+        },
         "code": "39",
-        "description": "",
         "family": "Z",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'F'U'FURU2R'",
+                "description": "Basically [RFS] with an embedded (F' U' F)",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "FRUR'U'F'R'U'RU'R'U2R",
+                "description": "[OLL] combination - F [Sexy Move] F', [RBS]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "RB'R'U'RUBU'R'",
+                "description": "Includes mirror of F [Sexy Move] F'",
+                "tags": [
+                    "2H"
+                ]
+            }
         ],
         "main": "LF'L'U'LUFU'L'",
         "name": "OLL 39",
@@ -2393,9 +4063,7 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -2424,12 +4092,28 @@
             "Anti-Serpent",
             "Anti-Fung"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'FRUR'U'F'UR"
+            ],
+            "comment": "Look how neatly case 1 (T) is placed in middle there :)",
+            "difficulty": 0,
+            "uid": "16"
+        },
         "code": "40",
-        "description": "",
         "family": "Z",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'FRUR'U'F'UR",
+                "description": "Includes F [Sexy Move] F'",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "R'FRUR'U'F'UR",
         "name": "OLL 40",
@@ -2438,9 +4122,7 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -2483,12 +4165,29 @@
             "Awkward Fish",
             "Dalmation"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'URU2R'FRUR'U'F'"
+            ],
+            "comment": "This is basically the Sune followed by the T(case 1)",
+            "difficulty": 0,
+            "uid": "38"
+        },
         "code": "41",
         "description": "Anti P + Sune.",
         "family": "Y",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'URU2R'FRUR'U'F'",
+                "description": "[OLL] combination - [RFS], F [Sexy Move] F'",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "fRUR'U'f'L'U2LUL'UL",
         "name": "OLL 41",
@@ -2497,9 +4196,10 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "FUFRL2B'RD'B'UR2F2B2L2D'"
+        ]
     },
     {
         "algorithms": [
@@ -2555,12 +4255,30 @@
             "Lefty Awkward Fish",
             "Anti-Dalmation"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'U2RUR'URyFRUR'U'F'",
+                "R'FRF'R'FRF'RUR'U'RUR'"
+            ],
+            "comment": "First part is just the sune from different angle (similar to case 33), and second part is the T OLL.\n      The second algorithm was suggested to me by someone, and I kinda like it even more! To do the R'FRF' parts, I actually make a cube rotation x and then execute them as R'URU'.",
+            "difficulty": 0,
+            "uid": "37"
+        },
         "code": "42",
         "description": "P + Anti Sune.",
         "family": "Y",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U'RU'R'U2RFRUR'U'F'",
+                "description": "[OLL] combination - [RBS], F [Sexy Move] F'",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "f'L'U'LUfRU2R'U'RU'R'",
         "name": "OLL 42",
@@ -2569,9 +4287,10 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "R'FUFR'D'F'L2D'L2B'L2BD2R2"
+        ]
     },
     {
         "algorithms": [
@@ -2598,12 +4317,53 @@
         "aliases": [
             "Anti-P"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "f'L'U'LUf"
+            ],
+            "comment": "This is the reflection of P. You are just doing the algorithm with your left hand. It should be quite easy to transfer it with just a little bit of practice. \n    I execute it more like f' L' U' L U y' r",
+            "difficulty": 0,
+            "uid": "6"
+        },
         "code": "43",
-        "description": "",
         "family": "P",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U'F'UFR",
+                "description": "[Conjugate] - [R': U' F' U F]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ],
+                "variations": [
+                    {
+                        "algo": "F'U'L'ULF",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    },
+                    {
+                        "algo": "f'L'U'LUf",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    },
+                    {
+                        "algo": "B'U'R'URB",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "f'L'U'LUf",
         "name": "OLL 43",
@@ -2612,9 +4372,10 @@
         "optimal_stm": 6,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "B'U'R'URB"
+        ]
     },
     {
         "algorithms": [
@@ -2650,12 +4411,38 @@
         "aliases": [
             "P"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "fRUR'U'f'"
+            ],
+            "comment": "Instead of F F' you now have f and f'",
+            "difficulty": 0,
+            "uid": "4"
+        },
         "code": "44",
-        "description": "",
         "family": "P",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FURU'R'F'",
+                "description": "[Conjugate] of [Inverse Sexy] - [F: U R U' R']",
+                "tags": [
+                    "2H",
+                    "OH"
+                ],
+                "variations": [
+                    {
+                        "algo": "fRUR'U'f'",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "fRUR'U'f'",
         "name": "OLL 44",
@@ -2664,9 +4451,10 @@
         "optimal_stm": 6,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "BULU'L'B'"
+        ]
     },
     {
         "algorithms": [
@@ -2688,12 +4476,47 @@
             "Suit up",
             "T"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRUR'U'F'"
+            ],
+            "comment": "Simplest OLL of them all",
+            "difficulty": 0,
+            "uid": "1"
+        },
         "code": "45",
-        "description": "Le plus simple des OLLs.",
+        "description": "The simplest of all OLLs.",
         "family": "T",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FRUR'U'F'",
+                "description": "[Conjugate] of [Sexy Move] - [F: R U R' U']",
+                "tags": [
+                    "2H",
+                    "OH"
+                ],
+                "variations": [
+                    {
+                        "algo": "fURU'R'f'",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'F'U'FUR",
+                "description": "[Conjugate] - [R': F' U' F U]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "FRUR'U'F'",
         "name": "OLL 45",
@@ -2702,9 +4525,21 @@
         "optimal_stm": 6,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "FRUR'U'F'",
+                "mask": "rb"
+            },
+            {
+                "algo": "F'L'U'LUF",
+                "mask": "ob"
+            }
+        ],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "FRUR'U'F'"
+        ]
     },
     {
         "algorithms": [
@@ -2738,12 +4573,28 @@
         "aliases": [
             "Seein' Headlights (C and headlights)"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'U'R'FRF'UR"
+            ],
+            "comment": "There are some setup moves involved here. Note how U R \"undoes\" the R' U' you do in beginning",
+            "difficulty": 0,
+            "uid": "23"
+        },
         "code": "46",
-        "description": "",
         "family": "C",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'U'R'FRF'UR",
+                "description": "[Conjugate] of [sledgehammer] - [R' U': R' F R F']",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            }
         ],
         "main": "R'U'R'FRF'UR",
         "name": "OLL 46",
@@ -2752,9 +4603,21 @@
         "optimal_stm": 8,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "R'U'R'FRF'UR",
+                "mask": "rob"
+            },
+            {
+                "algo": "RUx'RU'R'UxU'R'",
+                "mask": "rog"
+            }
+        ],
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "R'U'R'FRF'UR"
+        ]
     },
     {
         "algorithms": [
@@ -2786,12 +4649,53 @@
         "aliases": [
             "Anti-Breakneck"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "F'L'U'LUL'U'LUF"
+            ],
+            "comment": "This is reflection of Case 2. Just do the trigger twice.",
+            "difficulty": 0,
+            "uid": "7"
+        },
         "code": "47",
-        "description": "",
         "family": "L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FR'F'RU2RU'R'URU2R'",
+                "description": "[Hedgeslammer] into Winter Variation",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "F'L'U'LUL'U'LUF",
+                "description": "[Conjugate] of a double [Sexy Move] - [F': [L' U' L U]*2]]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ],
+                "variations": [
+                    {
+                        "algo": "f'U'L'ULU'L'ULf",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    },
+                    {
+                        "algo": "B'R'U'RUR'U'RUB",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "F'L'U'LUL'U'LUF",
         "name": "OLL 47",
@@ -2800,9 +4704,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "F'L'U'LUL'U'LUF"
+        ]
     },
     {
         "algorithms": [
@@ -2826,12 +4731,38 @@
         "aliases": [
             "Breakneck"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRUR'U'RUR'U'F'"
+            ],
+            "comment": "Just repeat the trigger one more time",
+            "difficulty": 0,
+            "uid": "2"
+        },
         "code": "48",
-        "description": "",
         "family": "L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FRUR'U'RUR'U'F'",
+                "description": "[Conjugate] of a double [Sexy Move] - [F: [R U R' U']*2]]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ],
+                "variations": [
+                    {
+                        "algo": "fURU'R'URU'R'f'",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "FRUR'U'RUR'U'F'",
         "name": "OLL 48",
@@ -2840,9 +4771,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "FRUR'U'RUR'U'F'"
+        ]
     },
     {
         "algorithms": [
@@ -2874,15 +4806,37 @@
             "rUR'URU2r'l'U2LUL'Ul"
         ],
         "aliases": [
-            "Professeur Xavier",
+            "Professor Xavier",
             "Right Back Squeezy"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'FR'F'R2U2yR'FRF'"
+            ],
+            "comment": "Be warned that the first trigger is not really R'FRF' trigger. But almost... the second R turn in it is R', not R",
+            "difficulty": 0,
+            "uid": "27"
+        },
         "code": "49",
-        "description": "",
         "family": "L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "rU'r'r'UrrUr'r'U'r",
+                "description": "[Palindrome] / [Commutator] - [r U' r', r' U r]",
+                "variations": [
+                    {
+                        "algo": "rU'r2Ur2Ur2U'r",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "L'U2LUL'ULF'L'U'LUF",
         "name": "OLL 49",
@@ -2891,9 +4845,10 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "R'F'B'D2BU2FR'L'D2RL2"
+        ]
     },
     {
         "algorithms": [
@@ -2927,15 +4882,53 @@
             "LU'y'R'U2R'URU'RU2Rd'L'"
         ],
         "aliases": [
-            "Anti-Professeur Xavier",
+            "Anti-Professor Xavier",
             "Right Front Squeezy"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'FR2B'R2F'R2BR'"
+            ],
+            "comment": "Again, I do the B' with my thumb. Awkward alg. ew.",
+            "difficulty": 0,
+            "uid": "53"
+        },
         "code": "50",
-        "description": "",
         "family": "L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "r'UrrU'r'r'U'rrUr'",
+                "description": "[Palindrome] / [Commutator] - [r' U r, r U' r']",
+                "variations": [
+                    {
+                        "algo": "r'Ur2U'r2U'r2Ur'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU2R'U'RU'R'FRUR'U'F'",
+                "description": "[OLL] combination - [RFAS], F [Sexy Move] F'",
+                "tags": [
+                    "2H"
+                ],
+                "variations": [
+                    {
+                        "algo": "RU2R'U'RU'R'FRUR'U'F'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "RU2R'U'RU'R'FRUR'U'F'",
         "name": "OLL 50",
@@ -2944,9 +4937,10 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "L'FU2F'U2F'L2FL'"
+        ]
     },
     {
         "algorithms": [
@@ -2967,16 +4961,42 @@
             "RUR'U'RUR'U'R'FR2U'R'U'RUR'F'RUR'UR'FRF'"
         ],
         "aliases": [
-            "St\u00e9rilet",
+            "IUD",
             "Bottlecap",
             "Ant"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "fRUR'U'RUR'U'f'"
+            ],
+            "comment": "Just repeat the RUR'U' trigger 2 times",
+            "difficulty": 0,
+            "uid": "5"
+        },
         "code": "51",
-        "description": "",
         "family": "I",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "FURU'R'URU'R'F'",
+                "description": "[Conjugate] of a double [Inverse Sexy] - [F: [U R U' R']*2]]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ],
+                "variations": [
+                    {
+                        "algo": "fRUR'U'RUR'U'f'",
+                        "description": "Executed from a different angle",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "fRUR'U'RUR'U'f'",
         "name": "OLL 51",
@@ -2985,9 +5005,11 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": "simple"
+        "symmetry": "simple",
+        "two-phase": [
+            "BULU'L'ULU'L'B'"
+        ]
     },
     {
         "algorithms": [
@@ -3036,12 +5058,58 @@
         "aliases": [
             "Rice Cooker"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'URd'RU'R'F'",
+                "R'U'RU'R'dR'URB"
+            ],
+            "comment": "I use the first one, but both are very good, and it's definitely a judgement call per individual",
+            "difficulty": 0,
+            "uid": "30"
+        },
         "code": "52",
-        "description": "G\u00e9n\u00e9ration automatique.",
+        "description": "Automatic generation.",
         "family": "I",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'URU2R'yFURU'R'F'",
+                "description": "[OLL] combination - [RFS], rotate, F [Sexy Move] F'",
+                "variations": [
+                    {
+                        "algo": "RUR'URU'yRU'R'F'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    },
+                    {
+                        "algo": "RUR'URU'BU'B'R'",
+                        "description": "Execution applies cancellations, without y rotation",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "R'U'RU'R'U2RR'U'F'UFR",
+                "description": "[OLL] combination - [RBS], OLL 43",
+                "variations": [
+                    {
+                        "algo": "R'U'RU'R'UF'UFR",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "R'FRF'U2RUR'U'R'FRF'RU'R'",
         "name": "OLL 52",
@@ -3050,7 +5118,6 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "TODO",
         "symmetry": "simple"
     },
@@ -3084,15 +5151,52 @@
             "FRUR'U'RUR'U'F2U'L'ULF"
         ],
         "aliases": [
-            "Barbu",
+            "Bearded",
             "Frying Pan"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "l'U'LU'L'ULU'L'U2l",
+                "r'U'RU'R'URU'R'U2r"
+            ],
+            "comment": "I execute one or the other depending on which angle I run into the OLL in. It saves me a y2 rotation. First one is just reflection of case 39.",
+            "difficulty": 0,
+            "uid": "40"
+        },
         "code": "53",
-        "description": "",
         "family": "L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "r'U'RU'R'U2rr'U'RU'R'U2r",
+                "description": "[SuneOLL]: Double [RBWS]",
+                "variations": [
+                    {
+                        "algo": "r'U'RU'R'URU'R'U2r",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "r'U2RUR'Urr'U2RUR'Ur",
+                "description": "[SuneOLL]: Double [RBWAS]",
+                "variations": [
+                    {
+                        "algo": "r'U2RUR'U'RUR'Ur",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "FRUR'U'F'RUR'U'R'FRF'",
         "name": "OLL 53",
@@ -3101,9 +5205,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "L'B'RB'R'BRB'R'B2L"
+        ]
     },
     {
         "algorithms": [
@@ -3133,15 +5238,51 @@
             "xU'LU2R'U'MU'L'ULURUR'U'RU'R'"
         ],
         "aliases": [
-            "Anti-Barbu",
+            "Anti-Bearded",
             "Anti-Frying Pan"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "rUR'URU'R'URU2r'"
+            ],
+            "comment": "Incredibly quick to execute. I love this algorithm. When you execute it, it feels like the two fingers on right and left hand are in battle, flicking towards each other the top layer like crazy :)",
+            "difficulty": 0,
+            "uid": "39"
+        },
         "code": "54",
-        "description": "",
         "family": "L",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "rUR'URU2r'rUR'URU2r'",
+                "description": "[SuneOLL]: Double [RFWS]",
+                "variations": [
+                    {
+                        "algo": "rUR'URU'R'URU2r'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "rU2R'U'RU'r'rU2R'U'RU'r'",
+                "description": "[SuneOLL]: Double [RFWAS]",
+                "variations": [
+                    {
+                        "algo": "rU2R'U'RUR'U'RU'r'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "2H",
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "F'L'U'LUFL'U'LULF'L'F",
         "name": "OLL 54",
@@ -3150,9 +5291,10 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "recognition": {},
         "status": "OK",
-        "symmetry": ""
+        "two-phase": [
+            "LFR'FRF'R'FRF2L'"
+        ]
     },
     {
         "algorithms": [
@@ -3192,12 +5334,55 @@
             "Highway",
             "Freeway"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "R'U2R2UR'URU2x'U'R'Ux"
+            ],
+            "comment": "... i don't like this one too much",
+            "difficulty": 0,
+            "uid": "49"
+        },
         "code": "55",
-        "description": "G\u00e9n\u00e9ration automatique.",
+        "description": "Automatic generation.",
         "family": "I",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "R'FRURU'R2F'R2U'R'URUR'",
+                "description": "Fast [OLL] with a [PLL] feel - Collin Burns 5.25 WR",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "rU2R'U'RU'r'rUr'RUR'U'rU'r'",
+                "description": "[OLL] combination - [RFAS], OLL 16",
+                "variations": [
+                    {
+                        "algo": "rU2R'U'R2r'UR'U'rU'r'",
+                        "description": "Execution applies cancellations",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            },
+            {
+                "algo": "RU2R2U'RU'R'U2FRF'",
+                "description": "I used this before finding the Collin Burns algorithm",
+                "tags": [
+                    "2H"
+                ]
+            },
+            {
+                "algo": "RU2R'U'RU'R'U'r'U'RU'R'U2r",
+                "description": "[SuneOLL]: [RFAS], [AUF], [RBWS]",
+                "tags": [
+                    "OH"
+                ]
+            }
         ],
         "main": "FRUR'U'SRUR'U'S'RUR'U'F'",
         "name": "OLL 55",
@@ -3206,9 +5391,11 @@
         "optimal_stm": 11,
         "probability": 0.009259259259259259,
         "probability_label": "1/108",
-        "recognition": {},
         "status": "TODO",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "RU2R2U'RU'R'U2FRF'"
+        ]
     },
     {
         "algorithms": [
@@ -3244,12 +5431,33 @@
             "Streetlights",
             "Dead Man"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "FRUR'U'RF'rUR'U'r'"
+            ],
+            "comment": "The second trigger in brackets is almost the RUR'U' trigger",
+            "difficulty": 0,
+            "uid": "19"
+        },
         "code": "56",
-        "description": "G\u00e9n\u00e9ration automatique.",
+        "description": "Automatic generation.",
         "family": "I",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "rUr'URU'R'URU'R'rU'r'",
+                "description": "[Conjugate] of a double [Inverse Sexy] - [r U r': [U R U' R']*2]]",
+                "tags": [
+                    "2H",
+                    "OH"
+                ]
+            },
+            {
+                "algo": "r'U'rU'R'URU'R'URr'Ur",
+                "description": "[Conjugate] of a double [Inverse Sexy] - [r' U' r: [U' R' U R]*2]]"
+            }
         ],
         "main": "FRUR'U'RUR'U'SRUR'U'f'",
         "name": "OLL 56",
@@ -3258,9 +5466,11 @@
         "optimal_stm": 11,
         "probability": 0.009259259259259259,
         "probability_label": "1/108",
-        "recognition": {},
         "status": "TODO",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "FR2B2DL'DLD'L'DLD2B2R2F'"
+        ]
     },
     {
         "algorithms": [
@@ -3309,12 +5519,40 @@
             "I",
             "Brick"
         ],
-        "arrows": "",
+        "badmephisto": {
+            "algos": [
+                "RUR'U'M'URU'r'"
+            ],
+            "comment": "I find this one pretty easy to remember too and it flows very nicely. It doesn't come up too often though",
+            "difficulty": 0,
+            "uid": "17"
+        },
         "code": "57",
-        "description": "",
-        "family": "Coins",
+        "family": "Corners",
         "groups": [
             "OLL"
+        ],
+        "logiqx": [
+            {
+                "algo": "RUR'U'M'URU'R'M",
+                "description": "Triggers - [Sexy Move], M-slice, [Inverse Sexy], M-slice",
+                "variations": [
+                    {
+                        "algo": "RUR'U'M'URU'r'",
+                        "description": "Two-handed execution",
+                        "tags": [
+                            "2H"
+                        ]
+                    },
+                    {
+                        "algo": "RUR'U'rR'URU'r'",
+                        "description": "One-handed execution",
+                        "tags": [
+                            "OH"
+                        ]
+                    }
+                ]
+            }
         ],
         "main": "L'RUR'U'LR'FRF'",
         "name": "OLL 57",
@@ -3323,9 +5561,21 @@
         "optimal_stm": 8,
         "probability": 0.009259259259259259,
         "probability_label": "1/108",
-        "recognition": {},
+        "sarah": [
+            {
+                "algo": "RUR'U'M'URU'r'",
+                "mask": "rogb"
+            },
+            {
+                "algo": "R'U'RUMU'R'Ur",
+                "mask": "rogb"
+            }
+        ],
         "status": "OK",
-        "symmetry": "double"
+        "symmetry": "double",
+        "two-phase": [
+            "RL'UR'U'R'LFRF'"
+        ]
     },
     {
         "algorithms": [],
