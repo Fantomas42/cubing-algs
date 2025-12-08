@@ -442,3 +442,62 @@ class Test4x4x4WideAndLayered(unittest.TestCase):
 
         rw2 = rotate_move(SOLVED_4X4X4, 'Rw2', size=4)
         self.assertEqual(rw_rw, rw2)
+
+
+class Test4x4x4SiGNNotation(unittest.TestCase):
+    """Test SiGN notation (lowercase) for wide moves on 4x4x4."""
+
+    def test_lowercase_r_equals_rw(self) -> None:
+        """Test that lowercase 'r' is equivalent to 'Rw'."""
+        result_r = rotate_move(SOLVED_4X4X4, 'r', size=4)
+        result_rw = rotate_move(SOLVED_4X4X4, 'Rw', size=4)
+        self.assertEqual(result_r, result_rw, 'r should equal Rw')
+
+    def test_lowercase_u_equals_uw(self) -> None:
+        """Test that lowercase 'u' is equivalent to 'Uw'."""
+        result_u = rotate_move(SOLVED_4X4X4, 'u', size=4)
+        result_uw = rotate_move(SOLVED_4X4X4, 'Uw', size=4)
+        self.assertEqual(result_u, result_uw, 'u should equal Uw')
+
+    def test_lowercase_f_equals_fw(self) -> None:
+        """Test that lowercase 'f' is equivalent to 'Fw'."""
+        result_f = rotate_move(SOLVED_4X4X4, 'f', size=4)
+        result_fw = rotate_move(SOLVED_4X4X4, 'Fw', size=4)
+        self.assertEqual(result_f, result_fw, 'f should equal Fw')
+
+    def test_all_lowercase_wide_moves(self) -> None:
+        """Test that all lowercase moves are equivalent to wide moves."""
+        lowercase_moves = ['r', 'l', 'u', 'd', 'f', 'b']
+        uppercase_moves = ['Rw', 'Lw', 'Uw', 'Dw', 'Fw', 'Bw']
+
+        for lower, upper in zip(lowercase_moves, uppercase_moves, strict=True):
+            with self.subTest(move=lower):
+                result_lower = rotate_move(SOLVED_4X4X4, lower, size=4)
+                result_upper = rotate_move(SOLVED_4X4X4, upper, size=4)
+                self.assertEqual(
+                    result_lower, result_upper,
+                    f'{lower} should equal {upper}',
+                )
+
+    def test_lowercase_with_prime(self) -> None:
+        """Test lowercase moves with prime notation."""
+        result_r_prime = rotate_move(SOLVED_4X4X4, "r'", size=4)
+        result_rw_prime = rotate_move(SOLVED_4X4X4, "Rw'", size=4)
+        self.assertEqual(result_r_prime, result_rw_prime, "r' should equal Rw'")
+
+    def test_lowercase_with_double(self) -> None:
+        """Test lowercase moves with double notation."""
+        result_r2 = rotate_move(SOLVED_4X4X4, 'r2', size=4)
+        result_rw2 = rotate_move(SOLVED_4X4X4, 'Rw2', size=4)
+        self.assertEqual(result_r2, result_rw2, 'r2 should equal Rw2')
+
+    def test_lowercase_sequence(self) -> None:
+        """Test a sequence using lowercase notation."""
+        # r U r' U' should work like Rw U Rw' U'
+        cube = VCube(size=4)
+        cube.rotate("r U r' U'")
+        self.assertFalse(cube.is_solved)
+
+        # Apply inverse to return to solved
+        cube.rotate("U r U' r'")
+        self.assertTrue(cube.is_solved)

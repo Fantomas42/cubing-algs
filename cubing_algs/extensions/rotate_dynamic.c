@@ -233,7 +233,7 @@ INLINE void rotate_piece_orientation(const int* RESTRICT axes, int num_axes, int
  * Parse move string to extract layers.
  *
  * Args:
- *     move: Move string (e.g., "R", "2Rw", "3-5Rw'")
+ *     move: Move string (e.g., "R", "2Rw", "3-5Rw'", "r" (SiGN notation))
  *     base_move: Output base move character
  *     layers: Output array of layer indices
  *     num_rotations: Output number of 90-degree rotations
@@ -271,13 +271,34 @@ static int parse_move(const char* move, char* base_move, int* layers, int* num_r
 
     // Get base move
     if (*p == '\0') return -1;
-    *base_move = *p;
-    p++;
 
-    // Check for wide notation
-    if (*p == 'w') {
-        is_wide = 1;
+    // Check for SiGN notation (lowercase = wide move)
+    // SiGN notation: r, l, u, d, f, b (equivalent to Rw, Lw, Uw, Dw, Fw, Bw)
+    // Note: x, y, z are rotation moves and should remain lowercase
+    if (*p >= 'a' && *p <= 'z') {
+        // Rotation moves (x, y, z) are already lowercase, keep them as-is
+        if (*p == 'x' || *p == 'y' || *p == 'z') {
+            *base_move = *p;
+            p++;
+        }
+        // SiGN notation moves (r, l, u, d, f, b) convert to uppercase + wide
+        else if (*p == 'r' || *p == 'l' || *p == 'u' ||
+                 *p == 'd' || *p == 'f' || *p == 'b') {
+            *base_move = *p - 32;  // Convert to uppercase
+            is_wide = 1;  // SiGN notation implies wide move
+            p++;
+        } else {
+            return -1;  // Invalid lowercase move
+        }
+    } else {
+        *base_move = *p;
         p++;
+
+        // Check for wide notation
+        if (*p == 'w') {
+            is_wide = 1;
+            p++;
+        }
     }
 
     // Determine layers based on notation
