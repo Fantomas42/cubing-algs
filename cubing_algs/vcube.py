@@ -1,14 +1,16 @@
-"""Virtual 3x3 cube implementation for simulating moves and tracking state."""
+"""Virtual cube implementation for simulating moves and tracking state."""
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.extensions import rotate
+from cubing_algs.extensions import rotate_2x2x2
+from cubing_algs.extensions import rotate_3x3x3
+from cubing_algs.extensions import rotate_dynamic
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
+from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
 from cubing_algs.visual_cube import visual_cube_cube
@@ -16,26 +18,43 @@ from cubing_algs.visual_cube import visual_cube_cube
 
 class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     """
-    Virtual 3x3 cube for tracking moves on facelets.
+    Virtual cube for tracking moves on facelets.
 
-    Represents a Rubik's cube state using a 54-character string
-    where each character represents a facelet color.
+    Represents a Rubik's cube state using a facelet string where each
+    character represents a facelet color.
+
+    Supports arbitrary cube sizes:
+    - 2x2x2: 24-character string (6 faces * 4 facelets)
+    - 3x3x3: 54-character string (6 faces * 9 facelets)
+    - NxNxN: 6*N*N-character string
     """
 
-    size = 3
-    face_number = 6
-    face_size = size * size
+    face_number: int = 6
 
     def __init__(self, initial: str | None = None, *,
+                 size: int = 3,
                  check: bool = True,
                  history: list[str] | None = None) -> None:
-        """Initialize a virtual cube with optional initial state and history."""
+        """
+        Initialize a virtual cube with optional initial state and history.
+
+        Args:
+            initial: Optional initial state string. If None, uses solved state.
+            size: Size of the cube. Default is 3.
+              (2 for 2x2x2, 3 for 3x3x3, etc.).
+            check: Whether to check cube integrity on initialization.
+            history: Optional move history to restore.
+
+        """
+        self.size = size
+        self.face_size = size * size
+
         if initial:
             self._state = initial
             if check:
                 self.check_integrity()
         else:
-            self._state = INITIAL_STATE
+            self._state = get_initial_state(size)
 
         self.history: list[str] = history or []
 
@@ -43,6 +62,32 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     def state(self) -> str:
         """Get the current state of the cube as a facelet string."""
         return self._state
+
+    @property
+    def has_fixed_centers(self) -> bool:
+        """Check if the cube has fixed centers."""
+        return bool(self.size % 2)
+
+    @property
+    def center_index(self) -> int:
+        """
+        Return the center index for a face.
+
+        For odd-sized cubes (3x3x3, 5x5x5, etc.), returns the index of the
+        physical center facelet. For 2x2x2, returns 0 (top-left position).
+        For other even-sized cubes (4x4x4, 6x6x6, etc.), returns a virtual
+        center position calculated as face_size + 1, alias the top-left
+        piece of a virtual center.
+
+        Returns:
+            The index of the center position within a face.
+
+        """
+        if self.has_fixed_centers:
+            return self.face_size // 2
+        if self.size == 2:
+            return 0
+        return self.size + 1
 
     @staticmethod
     def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
@@ -120,9 +165,21 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Uses the top face center and front face center
         to determine the current orientation of the cube in space.
 
+        For odd-sized cubes, uses the physical center facelet.
+        For even-sized cubes, uses a representative position to
+        determine orientation.
+
         It might not work well with an unchecked state.
+
+        Returns:
+            A two-character string representing the orientation
+            (e.g., 'UF' for white top, green front).
+
         """
-        return self._state[4] + self._state[22]
+        top_center_index = self.center_index
+        front_center_index = 2 * self.face_size + top_center_index
+
+        return self._state[top_center_index] + self._state[front_center_index]
 
     def rotate(self, moves: Algorithm | Move | str, *,
                history: bool = True) -> str:
@@ -163,7 +220,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         """
         try:
-            self._state = rotate.rotate_move(self._state, move)
+            if self.size == 2:
+                self._state = rotate_2x2x2.rotate_move(self._state, move)
+            elif self.size == 3:
+                self._state = rotate_3x3x3.rotate_move(self._state, move)
+            else:
+                self._state = rotate_dynamic.rotate_move(
+                    self._state, move, size=self.size,
+                )
         except ValueError as e:
             raise InvalidMoveError(str(e)) from e
         else:
@@ -188,6 +252,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return VCube(
             self.state,
+            size=self.size,
             check=False,
             history=history,
         )
@@ -286,11 +351,21 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """
         Get the center facelet colors for all faces.
 
+        For odd-sized cubes, returns the physical center facelet colors.
+        For even-sized cubes, returns representative facelet colors at
+        the calculated center position.
+
         Returns:
-            A list of center colors for all six faces in order.
+            A list of center colors for all six faces in order
+            (U, R, F, D, L, B).
 
         """
-        return [self.state[(i * self.face_size) + 4] for i in range(6)]
+        center_index = self.center_index
+
+        return [
+            self.state[(i * self.face_size) + center_index]
+            for i in range(6)
+        ]
 
     def get_face_index(self, face: str) -> int:
         """

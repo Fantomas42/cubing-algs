@@ -6,16 +6,18 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 from cubing_algs.constants import FACES
-from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.vcube import VCube
+
+INITIAL_STATE = get_initial_state(3)
 
 
 class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
@@ -42,6 +44,18 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
             result,
             cube.state,
         )
+
+    def test_has_fixed_centers(self) -> None:
+        """Test has_fixed_centers property."""
+        cube = VCube()
+
+        self.assertTrue(cube.has_fixed_centers)
+
+    def test_center_index(self) -> None:
+        """Test the value of center index."""
+        cube = VCube()
+
+        self.assertEqual(cube.center_index, 4)
 
     def test_is_solved(self) -> None:
         """Test is_solved property on solved and scrambled cube."""

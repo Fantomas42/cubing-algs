@@ -39,7 +39,11 @@ namespaces = false
 version = {attr = "cubing_algs.__version__"}
 
 [tool.setuptools]
-ext-modules = [{name = "cubing_algs.extensions.rotate", sources = ["cubing_algs/extensions/rotate.c"], extra-compile-args = ["-O3", "-Wall"]}]
+ext-modules = [
+    {name = "cubing_algs.extensions.rotate_2x2x2", sources = ["cubing_algs/extensions/rotate_2x2x2.c"], extra-compile-args = ["-O3", "-Wall"]},
+    {name = "cubing_algs.extensions.rotate_3x3x3", sources = ["cubing_algs/extensions/rotate_3x3x3.c"], extra-compile-args = ["-O3", "-Wall"]},
+    {name = "cubing_algs.extensions.rotate_dynamic", sources = ["cubing_algs/extensions/rotate_dynamic.c"], extra-compile-args = ["-O3", "-march=native", "-funroll-loops", "-fno-strict-aliasing", "-Wall"]}
+]
 
 [tool.ruff]
 line-length = 80

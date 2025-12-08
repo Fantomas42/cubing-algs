@@ -2037,20 +2037,20 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
 // Module method definitions
 static PyMethodDef RotateMethods[] = {
-    {"rotate_move", rotate_move, METH_VARARGS, "Rotate cube state with given move"},
+    {"rotate_move", rotate_move, METH_VARARGS, "Rotate 3x3x3 cube state with given move"},
     {NULL, NULL, 0, NULL}
 };
 
 // Module definition
 static struct PyModuleDef rotatemodule = {
     PyModuleDef_HEAD_INIT,
-    "rotate",
-    "Fast cube rotation operations",
+    "rotate_3x3x3",
+    "Fast 3x3x3 cube rotation operations",
     -1,
     RotateMethods
 };
 
 // Module initialization function
-PyMODINIT_FUNC PyInit_rotate(void) {
+PyMODINIT_FUNC PyInit_rotate_3x3x3(void) {
     return PyModule_Create(&rotatemodule);
 }
