@@ -5,13 +5,14 @@ from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.extensions import rotate
+from cubing_algs.extensions import rotate_2x2x2
+from cubing_algs.extensions import rotate_3x3x3
+from cubing_algs.extensions import rotate_dynamic
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
-from cubing_algs.rotate_dynamic import rotate_move as rotate_dynamic
 from cubing_algs.visual_cube import visual_cube_cube
 
 
@@ -219,11 +220,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         """
         try:
-            # Use C extension for 3x3x3, Python for other sizes
-            if self.size == 3:
-                self._state = rotate.rotate_move(self._state, move)
+            if self.size == 2:
+                self._state = rotate_2x2x2.rotate_move(self._state, move)
+            elif self.size == 3:
+                self._state = rotate_3x3x3.rotate_move(self._state, move)
             else:
-                self._state = rotate_dynamic(self._state, move, size=self.size)
+                self._state = rotate_dynamic.rotate_move(
+                    self._state, move, size=self.size,
+                )
         except ValueError as e:
             raise InvalidMoveError(str(e)) from e
         else:
