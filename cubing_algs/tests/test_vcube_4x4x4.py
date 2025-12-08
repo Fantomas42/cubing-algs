@@ -1,8 +1,8 @@
 """Tests for 4x4x4 cube rotation using dynamic rotation system."""
 import unittest
 
+from cubing_algs.extensions.rotate_dynamic import rotate_move
 from cubing_algs.initial_state import get_initial_state
-from cubing_algs.rotate_dynamic import rotate_move
 from cubing_algs.vcube import VCube
 
 # Solved 4x4x4 state: 96 facelets (6 faces * 16 facelets each)

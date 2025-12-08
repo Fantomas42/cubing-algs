@@ -1,8 +1,8 @@
 """Tests for 5x5x5 cube rotation using dynamic rotation system."""
 import unittest
 
+from cubing_algs.extensions.rotate_dynamic import rotate_move
 from cubing_algs.initial_state import get_initial_state
-from cubing_algs.rotate_dynamic import rotate_move
 from cubing_algs.vcube import VCube
 
 # Solved 5x5x5 state: 150 facelets (6 faces * 25 facelets each)
