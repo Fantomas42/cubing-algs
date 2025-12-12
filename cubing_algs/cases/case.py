@@ -62,21 +62,21 @@ class CaseData(TypedDict):
 
     name: str
     code: str
-    description: str
-    aliases: list[str]
-    arrows: str
-    symmetry: str
-    family: str
-    groups: list[str]
-    status: str
+    description: NotRequired[str]
+    aliases: NotRequired[list[str]]
+    arrows: NotRequired[str]
+    symmetry: NotRequired[str]
+    family: NotRequired[str]
+    groups: NotRequired[list[str]]
+    status: NotRequired[str]
     recognition: NotRequired[RecognitionData]
-    optimal_cycles: int
-    optimal_htm: int
-    optimal_stm: int
-    probability: float
-    probability_label: str
-    main: str
-    algorithms: list[str]
+    optimal_cycles: NotRequired[int]
+    optimal_htm: NotRequired[int]
+    optimal_stm: NotRequired[int]
+    probability: NotRequired[float]
+    probability_label: NotRequired[str]
+    main: NotRequired[str]
+    algorithms: NotRequired[list[str]]
     badmephisto: NotRequired[BadmephistoData]
     logiqx: NotRequired[list[LogiqxAlgorithm]]
     sarah: NotRequired[dict[str, str]]
@@ -117,17 +117,17 @@ class Case:  # noqa: PLR0904
     @cached_property
     def family(self) -> str:
         """Family or category the case belongs to."""
-        return self.data['family']
+        return self.data.get('family', '')
 
     @cached_property
     def groups(self) -> list[str]:
         """Groups or classifications for the case."""
-        return self.data['groups']
+        return self.data.get('groups', [])
 
     @cached_property
     def status(self) -> str:
         """Status of the case (e.g., active, deprecated)."""
-        return self.data['status']
+        return self.data.get('status', '')
 
     @cached_property
     def description(self) -> str:
@@ -157,39 +157,39 @@ class Case:  # noqa: PLR0904
     @cached_property
     def optimal_cycles(self) -> int:
         """Optimal number of cycles to solve the case."""
-        return self.data['optimal_cycles']
+        return self.data.get('optimal_cycles', 0)
 
     @cached_property
     def optimal_htm(self) -> int:
         """Optimal solution length in Half Turn Metric."""
-        return self.data['optimal_htm']
+        return self.data.get('optimal_htm', 0)
 
     @cached_property
     def optimal_stm(self) -> int:
         """Optimal solution length in Slice Turn Metric."""
-        return self.data['optimal_stm']
+        return self.data.get('optimal_stm', 0)
 
     @cached_property
     def probability(self) -> float:
         """Probability of encountering this case."""
-        return self.data['probability']
+        return self.data.get('probability', 0)
 
     @cached_property
     def probability_label(self) -> str:
         """Human-readable label for the probability."""
-        return self.data['probability_label']
+        return self.data.get('probability_label', '')
 
     @cached_property
     def main_algorithm(self) -> Algorithm:
         """Primary algorithm for solving the case."""
-        return parse_moves(self.data['main'])
+        return parse_moves(self.data.get('main', ''))
 
     @cached_property
     def algorithms(self) -> list[Algorithm]:
         """All alternative algorithms for solving the case."""
         return [
             parse_moves(moves)
-            for moves in self.data['algorithms']
+            for moves in self.data.get('algorithms', [])
         ]
 
     @cached_property
@@ -247,7 +247,9 @@ class Case:  # noqa: PLR0904
     @cached_property
     def cubing_fache_url(self) -> str:
         """Return cubing.fache.fr URL."""
-        return f'https://cubing.fache.fr/{ self.step }/{ self.code }.html'
+        if self.method == 'CFOP' and self.step in {'OLL', 'PLL', 'F2L', 'AF2L'}:
+            return f'https://cubing.fache.fr/{ self.step }/{ self.code }.html'
+        return ''
 
     def __str__(self) -> str:
         """
