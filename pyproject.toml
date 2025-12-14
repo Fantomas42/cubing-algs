@@ -45,6 +45,9 @@ ext-modules = [
     {name = "cubing_algs.extensions.rotate_dynamic", sources = ["cubing_algs/extensions/rotate_dynamic.c"], extra-compile-args = ["-O3", "-march=native", "-funroll-loops", "-fno-strict-aliasing", "-Wall"]}
 ]
 
+[tool.setuptools.package-data]
+cubing_algs = ["cases/*/*.json"]
+
 [tool.ruff]
 line-length = 80
 indent-width = 4
