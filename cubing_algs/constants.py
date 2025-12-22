@@ -386,8 +386,6 @@ FACE_INDEXES = {
 
 FACES = ''.join(FACE_ORDER)
 
-INITIAL_STATE = ''.join(face * 9 for face in FACE_ORDER)
-
 CORNER_FACELET_MAP = [
     [8, 9, 20],    # URF
     [6, 18, 38],   # UFL

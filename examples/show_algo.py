@@ -17,7 +17,7 @@ def show_algorithm(name: str, algorithm: str, **kw: object) -> None:
 
     print(f'{ name}: { algo }')
 
-    algo.show(**kw)
+    algo.show(**kw)  # type: ignore[arg-type]
 
 
 show_algorithm(

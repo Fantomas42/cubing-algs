@@ -1,8 +1,7 @@
 """Binary masks for identifying and manipulating cube regions and pieces."""
-
-from cubing_algs.constants import INITIAL_STATE
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
+from cubing_algs.initial_state import get_initial_state
 
 
 def union_masks(*masks: str) -> str:
@@ -145,7 +144,7 @@ def state_masked(state: str, mask: str) -> str:
     return cubies_to_facelets(
         *facelets_to_cubies(state),
         facelets_masked(
-            INITIAL_STATE,
+            get_initial_state(3),
             mask,
         ),
     )

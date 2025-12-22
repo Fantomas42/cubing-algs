@@ -1,7 +1,7 @@
 """Display facelets by their position (0-53)."""
 import sys
 
-from cubing_algs import VCube
+from cubing_algs.vcube import VCube
 
 
 def show_facelets(pos: list[str]) -> None:

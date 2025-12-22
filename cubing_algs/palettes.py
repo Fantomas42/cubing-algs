@@ -591,7 +591,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'font': '#FFFFFF',
         'masked_background': '#AA7070',
         'adjacent_background': '#F8C8C8',
-        'hidden_ansi': build_ansi_color('#000000', '#00BB00'),
+        'hidden_ansi': build_ansi_color('#000000', '#BB0000'),
     },
     'green': {
         'faces': (

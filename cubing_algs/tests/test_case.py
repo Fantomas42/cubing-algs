@@ -1006,21 +1006,6 @@ class TestCaseCubingFacheUrl(unittest.TestCase):
         data: CaseData = {
             'name': 'OLL 27',
             'code': '27',
-            'description': '',
-            'aliases': [],
-            'arrows': '',
-            'symmetry': '',
-            'family': '',
-            'groups': [],
-            'status': '',
-            'recognition': {'cases': [], 'moves': []},
-            'optimal_cycles': 0,
-            'optimal_htm': 0,
-            'optimal_stm': 0,
-            'probability': 0.0,
-            'probability_label': '',
-            'main': '',
-            'algorithms': [],
         }
         case = Case('CFOP', 'OLL', data)
 
@@ -1034,21 +1019,6 @@ class TestCaseCubingFacheUrl(unittest.TestCase):
         data: CaseData = {
             'name': 'PLL Aa',
             'code': 'Aa',
-            'description': '',
-            'aliases': [],
-            'arrows': '',
-            'symmetry': '',
-            'family': '',
-            'groups': [],
-            'status': '',
-            'recognition': {'cases': [], 'moves': []},
-            'optimal_cycles': 0,
-            'optimal_htm': 0,
-            'optimal_stm': 0,
-            'probability': 0.0,
-            'probability_label': '',
-            'main': '',
-            'algorithms': [],
         }
         case = Case('CFOP', 'PLL', data)
 
@@ -1058,85 +1028,158 @@ class TestCaseCubingFacheUrl(unittest.TestCase):
         )
 
     def test_cubing_fache_url_coll(self) -> None:
-        """Test cubing_fache_url generates correct URL for COLL case."""
+        """Test cubing_fache_url returns empty for unsupported COLL step."""
         data: CaseData = {
             'name': 'COLL AS 1',
             'code': 'AS-1',
-            'description': '',
-            'aliases': [],
-            'arrows': '',
-            'symmetry': '',
-            'family': '',
-            'groups': [],
-            'status': '',
-            'recognition': {'cases': [], 'moves': []},
-            'optimal_cycles': 0,
-            'optimal_htm': 0,
-            'optimal_stm': 0,
-            'probability': 0.0,
-            'probability_label': '',
-            'main': '',
-            'algorithms': [],
         }
         case = Case('CFOP', 'COLL', data)
 
         self.assertEqual(
             case.cubing_fache_url,
-            'https://cubing.fache.fr/COLL/AS-1.html',
+            '',
         )
-
-    def test_cubing_fache_url_format(self) -> None:
-        """Test cubing_fache_url format is consistent."""
-        data: CaseData = {
-            'name': 'Test Case',
-            'code': 'test-code',
-            'description': '',
-            'aliases': [],
-            'arrows': '',
-            'symmetry': '',
-            'family': '',
-            'groups': [],
-            'status': '',
-            'recognition': {'cases': [], 'moves': []},
-            'optimal_cycles': 0,
-            'optimal_htm': 0,
-            'optimal_stm': 0,
-            'probability': 0.0,
-            'probability_label': '',
-            'main': '',
-            'algorithms': [],
-        }
-        case = Case('CFOP', 'TestStep', data)
-
-        url = case.cubing_fache_url
-        self.assertTrue(url.startswith('https://cubing.fache.fr/'))
-        self.assertTrue(url.endswith('.html'))
-        self.assertIn('TestStep', url)
-        self.assertIn('test-code', url)
 
     def test_cubing_fache_url_cached(self) -> None:
         """Test cubing_fache_url is cached properly."""
         data: CaseData = {
             'name': 'OLL 01',
             'code': '01',
-            'description': '',
-            'aliases': [],
-            'arrows': '',
-            'symmetry': '',
-            'family': '',
-            'groups': [],
-            'status': '',
-            'recognition': {'cases': [], 'moves': []},
-            'optimal_cycles': 0,
-            'optimal_htm': 0,
-            'optimal_stm': 0,
-            'probability': 0.0,
-            'probability_label': '',
-            'main': '',
-            'algorithms': [],
         }
         case = Case('CFOP', 'OLL', data)
 
         url1 = case.cubing_fache_url
         url2 = case.cubing_fache_url
+        self.assertTrue(url1)
         self.assertIs(url1, url2)
+
+
+class TestCaseMinimalData(unittest.TestCase):
+    """Test Case instantiation with minimal data (only name and code)."""
+
+    def test_minimal_case_instantiation(self) -> None:
+        """Test creating a Case with only required fields."""
+        data: CaseData = {
+            'name': 'Test Case',
+            'code': 'TC-1',
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.name, 'Test Case')
+        self.assertEqual(case.code, 'TC-1')
+        self.assertEqual(case.method, 'CFOP')
+        self.assertEqual(case.step, 'OLL')
+
+    def test_minimal_case_string_defaults(self) -> None:
+        """Test that optional string fields return empty strings."""
+        data: CaseData = {
+            'name': 'Minimal',
+            'code': 'MIN',
+        }
+        case = Case('CFOP', 'PLL', data)
+
+        self.assertEqual(case.description, '')
+        self.assertEqual(case.arrows, '')
+        self.assertEqual(case.symmetry, '')
+        self.assertEqual(case.family, '')
+        self.assertEqual(case.status, '')
+        self.assertEqual(case.probability_label, '')
+
+    def test_minimal_case_list_defaults(self) -> None:
+        """Test that optional list fields return empty lists."""
+        data: CaseData = {
+            'name': 'Minimal',
+            'code': 'MIN',
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.aliases, [])
+        self.assertEqual(case.groups, [])
+        self.assertEqual(case.algorithms, [])
+        self.assertEqual(case.setup_algorithms, [])
+        self.assertEqual(case.two_phase_algorithms, [])
+
+    def test_minimal_case_numeric_defaults(self) -> None:
+        """Test that optional numeric fields return 0."""
+        data: CaseData = {
+            'name': 'Minimal',
+            'code': 'MIN',
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.optimal_cycles, 0)
+        self.assertEqual(case.optimal_htm, 0)
+        self.assertEqual(case.optimal_stm, 0)
+        self.assertEqual(case.probability, 0)
+
+    def test_minimal_case_optional_object_defaults(self) -> None:
+        """Test that optional object fields return None."""
+        data: CaseData = {
+            'name': 'Minimal',
+            'code': 'MIN',
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertIsNone(case.recognition)
+        self.assertIsNone(case.badmephisto)
+        self.assertIsNone(case.logiqx)
+        self.assertIsNone(case.sarah_pll_skips)
+
+    def test_minimal_case_main_algorithm(self) -> None:
+        """Test that main_algorithm returns empty Algorithm when missing."""
+        data: CaseData = {
+            'name': 'Minimal',
+            'code': 'MIN',
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertIsInstance(case.main_algorithm, Algorithm)
+        self.assertEqual(str(case.main_algorithm), '')
+
+    def test_minimal_case_pretty_name(self) -> None:
+        """Test pretty_name with minimal data (no aliases)."""
+        data: CaseData = {
+            'name': 'OLL 27',
+            'code': '27',
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.pretty_name, 'OLL 27')
+
+    def test_minimal_case_with_alias(self) -> None:
+        """Test pretty_name includes first alias when provided."""
+        data: CaseData = {
+            'name': 'OLL 27',
+            'code': '27',
+            'aliases': ['Sune'],
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(case.pretty_name, 'OLL 27 (Sune)')
+
+    def test_minimal_case_str_repr(self) -> None:
+        """Test __str__ and __repr__ with minimal data."""
+        data: CaseData = {
+            'name': 'Test Case',
+            'code': 'TC-1',
+        }
+        case = Case('CFOP', 'OLL', data)
+
+        self.assertEqual(str(case), 'Case Test Case')
+        self.assertEqual(
+            repr(case),
+            "Case('CFOP', 'OLL', {'name': 'Test Case'})",
+        )
+
+    def test_minimal_case_cubing_fache_url(self) -> None:
+        """Test cubing_fache_url works with minimal data."""
+        data: CaseData = {
+            'name': 'F2L Case',
+            'code': 'F2L-1',
+        }
+        case = Case('CFOP', 'F2L', data)
+
+        self.assertEqual(
+            case.cubing_fache_url,
+            'https://cubing.fache.fr/F2L/F2L-1.html',
+        )

@@ -170,7 +170,6 @@
     {
         "algorithms": [
             "UR'F'RF'R'FR",
-            "UR'F'RF'R'FR",
             "y'U'R'U'RU2RUR'",
             "UR'FRF'RU'R'U'L'U'L"
         ],
@@ -792,7 +791,6 @@
         "algorithms": [
             "RUR'U'y'RU'R'URUR'",
             "RU'R'y'U2RU2R'URU'R'",
-            "RUR'L'ULU'LF'L'FL'UL",
             "RUR'L'ULU'LF'L'FL'UL"
         ],
         "code": "39",
@@ -832,7 +830,6 @@
     },
     {
         "algorithms": [
-            "F'U2L'U2L2UL'F",
             "F'U2L'U2L2UL'F",
             "RU'R'UyL'U2LR'UR",
             "RU'R'yU'R'U2RUR'U2R"
@@ -1020,7 +1017,6 @@
     {
         "algorithms": [
             "RU2R'f'L'f",
-            "RU2R'f'L'f",
             "U2RU'R'Uf'Lf",
             "U2RU'R'yR'U2R"
         ],
@@ -1100,7 +1096,6 @@
     },
     {
         "algorithms": [
-            "U'RU'R'U2F'rUr'",
             "U'RU'R'U2F'rUr'",
             "U'RU'R'y'U'RU'R'",
             "FR'F'R2U'R'UF'rUr'"
