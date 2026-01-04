@@ -40,9 +40,6 @@ typedef struct {
     int x, y, z;
 } Coord3D;
 
-// Face order: U, R, F, D, L, B
-static const char FACE_ORDER[] = "URFBLB";
-
 /**
  * Get 3D coordinates for all facelets on a specific face.
  *
