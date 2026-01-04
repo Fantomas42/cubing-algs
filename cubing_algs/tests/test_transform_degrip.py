@@ -93,13 +93,13 @@ class TransformDegripTestCase(unittest.TestCase):
 
     def test_basic_x_grip_degrip(self) -> None:
         """Test basic x grip degrip."""
-        for _move, _expected in zip(
+        for raw_move, raw_expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('R', 'D', 'F', 'L', 'U', 'B', 'M', 'E', "S'", 'x', 'z', "y'"),
                 strict=True,
         ):
-            move = Move(_move)
-            expected = Move(_expected)
+            move = Move(raw_move)
+            expected = Move(raw_expected)
 
             self.check_basic_grip_degrip(
                 move, expected,
@@ -119,13 +119,13 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=False,
                 )
 
-        for _move, _expected in zip(
+        for raw_move, raw_expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('R', 'U', 'B', 'L', 'D', 'F', 'M', "E'", 'S', 'x', "z'", 'y'),
                 strict=True,
         ):
-            move = Move(_move)
-            expected = Move(_expected)
+            move = Move(raw_move)
+            expected = Move(raw_expected)
 
             self.check_basic_grip_degrip(
                 move, expected,
@@ -147,13 +147,13 @@ class TransformDegripTestCase(unittest.TestCase):
 
     def test_basic_y_grip_degrip(self) -> None:
         """Test basic y grip degrip."""
-        for _move, _expected in zip(
+        for raw_move, raw_expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('B', 'R', 'U', 'F', 'L', 'D', 'S', "M'", 'E', "z'", 'y', 'x'),
                 strict=True,
         ):
-            move = Move(_move)
-            expected = Move(_expected)
+            move = Move(raw_move)
+            expected = Move(raw_expected)
 
             self.check_basic_grip_degrip(
                 move, expected,
@@ -172,13 +172,13 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=False,
                 )
 
-        for _move, _expected in zip(
+        for raw_move, raw_expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('F', 'L', 'U', 'B', 'R', 'D', "S'", 'M', 'E', 'z', 'y', "x'"),
                 strict=True,
         ):
-            move = Move(_move)
-            expected = Move(_expected)
+            move = Move(raw_move)
+            expected = Move(raw_expected)
 
             self.check_basic_grip_degrip(
                 move, expected,
@@ -199,13 +199,13 @@ class TransformDegripTestCase(unittest.TestCase):
 
     def test_basic_z_grip_degrip(self) -> None:
         """Test basic z grip degrip."""
-        for _move, _expected in zip(
+        for raw_move, raw_expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('U', 'F', 'L', 'D', 'B', 'R', 'E', 'S', "M'", 'y', "x'", 'z'),
                 strict=True,
         ):
-            move = Move(_move)
-            expected = Move(_expected)
+            move = Move(raw_move)
+            expected = Move(raw_expected)
 
             self.check_basic_grip_degrip(
                 move, expected,
@@ -224,13 +224,13 @@ class TransformDegripTestCase(unittest.TestCase):
                     invert=False,
                 )
 
-        for _move, _expected in zip(
+        for raw_move, raw_expected in zip(
                 ('R', 'F', 'U', 'L', 'B', 'D', 'M', 'S', 'E', 'x', 'y', 'z'),
                 ('D', 'F', 'R', 'U', 'B', 'L', "E'", 'S', 'M', "y'", 'x', 'z'),
                 strict=True,
         ):
-            move = Move(_move)
-            expected = Move(_expected)
+            move = Move(raw_move)
+            expected = Move(raw_expected)
 
             self.check_basic_grip_degrip(
                 move, expected,
