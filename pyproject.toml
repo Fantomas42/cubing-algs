@@ -8,7 +8,8 @@ dynamic = ["version"]
 description = "Python module providing tools manipulating cubing algorithms."
 readme = "README.md"
 requires-python = ">=3.8"
-license = {file = "LICENSE"}
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 keywords = ["rubick", "cube", "speedcubing", "solve", "algorithm"]
 authors = [{name = "Fantomas42", email = "fantomas42@gmail.com"}]
 classifiers = [
