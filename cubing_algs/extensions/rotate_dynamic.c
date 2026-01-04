@@ -129,35 +129,6 @@ static int get_face_coordinates(char face, int size, Coord3D* coords) {
 }
 
 /**
- * Build a mapping from 3D coordinates to facelet indices.
- *
- * Returns a hash-like lookup where coord_to_facelet[x][y][z] = facelet_idx
- */
-static void build_coord_to_facelet_map(int size, int coord_map[MAX_CUBE_SIZE][MAX_CUBE_SIZE][MAX_CUBE_SIZE]) {
-    // Initialize with -1 (invalid)
-    for (int x = 0; x < MAX_CUBE_SIZE; x++) {
-        for (int y = 0; y < MAX_CUBE_SIZE; y++) {
-            for (int z = 0; z < MAX_CUBE_SIZE; z++) {
-                coord_map[x][y][z] = -1;
-            }
-        }
-    }
-
-    Coord3D coords[MAX_CUBE_SIZE * MAX_CUBE_SIZE];
-    int facelet_idx = 0;
-
-    for (int face_idx = 0; face_idx < 6; face_idx++) {
-        char face = FACE_ORDER[face_idx];
-        int num_coords = get_face_coordinates(face, size, coords);
-
-        for (int i = 0; i < num_coords; i++) {
-            coord_map[coords[i].x][coords[i].y][coords[i].z] = facelet_idx;
-            facelet_idx++;
-        }
-    }
-}
-
-/**
  * Rotate a 3D coordinate 90 degrees around an axis.
  *
  * Args:
@@ -190,26 +161,6 @@ INLINE Coord3D rotate_coord_90(Coord3D coord, int axis, int size, int direction)
     }
 
     return result;
-}
-
-/**
- * Get which axes a coordinate is on the surface of.
- */
-INLINE int get_axes_for_coord(Coord3D coord, int size, int* RESTRICT axes) {
-    const int size_m1 = size - 1;
-    int count = 0;
-
-    if (coord.x == 0 || coord.x == size_m1) {
-        axes[count++] = 0;
-    }
-    if (coord.y == 0 || coord.y == size_m1) {
-        axes[count++] = 1;
-    }
-    if (coord.z == 0 || coord.z == size_m1) {
-        axes[count++] = 2;
-    }
-
-    return count;
 }
 
 /**
@@ -734,7 +685,6 @@ static PyObject* rotate_move(PyObject* self, PyObject* args, PyObject* kwargs) {
                 const int orig_idx0 = orig_cf->facelets[0].facelet_idx;
                 const int orig_idx1 = orig_cf->facelets[1].facelet_idx;
                 const int target_axis0 = rotated_axes[0];
-                const int target_axis1 = rotated_axes[1];
 
                 if (new_cf->facelets[0].axis == target_axis0) {
                     temp_perm[orig_idx0] = new_cf->facelets[0].facelet_idx;
