@@ -193,46 +193,29 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             The new state of the cube after applying the moves.
 
+        Raises:
+            InvalidMoveError: If a move is invalid.
+
         """
         moves_str = str(moves)
 
         if not moves_str:
             return self._state
 
-        for move in moves_str.split(' '):
-            self.rotate_move(move, history=history)
-
-        return self._state
-
-    def rotate_move(self, move: str, *, history: bool = True) -> str:
-        """
-        Apply a single move to the cube.
-
-        Args:
-            move: The move string to apply.
-            history: If True, record the move in the cube's history.
-
-        Returns:
-            The new state of the cube after applying the move.
-
-        Raises:
-            InvalidMoveError: If the move is invalid.
-
-        """
         try:
             if self.size == 2:
-                self._state = rotate_2x2x2.rotate_move(self._state, move)
+                self._state = rotate_2x2x2.rotate_moves(self._state, moves_str)
             elif self.size == 3:
-                self._state = rotate_3x3x3.rotate_move(self._state, move)
+                self._state = rotate_3x3x3.rotate_moves(self._state, moves_str)
             else:
-                self._state = rotate_dynamic.rotate_move(
-                    self._state, move, size=self.size,
+                self._state = rotate_dynamic.rotate_moves(
+                    self._state, moves_str, size=self.size,
                 )
         except ValueError as e:
             raise InvalidMoveError(str(e)) from e
         else:
             if history:
-                self.history.append(move)
+                self.history.extend(moves_str.split(' '))
             return self._state
 
     def copy(self, *, full: bool = False) -> 'VCube':

@@ -88,17 +88,6 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(cube.history, ['R'])
 
-    def test_rotate_move_history(self) -> None:
-        """Test history tracking with rotate_move method."""
-        cube = VCube()
-        cube.rotate_move('R')
-
-        self.assertEqual(cube.history, ['R'])
-
-        cube.rotate_move('L', history=False)
-
-        self.assertEqual(cube.history, ['R'])
-
     def test_copy(self) -> None:
         """Test cube copy without history preservation."""
         cube = VCube()
