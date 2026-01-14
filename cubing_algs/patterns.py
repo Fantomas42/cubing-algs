@@ -91,3 +91,47 @@ def get_pattern(pattern_name: str) -> Algorithm:
 
     """
     return parse_moves(PATTERNS.get(pattern_name, ''))
+
+
+ALPHABET = {
+    'A': "R2 U' B2 D2 R2 D' U2 F2 U2 R' F' L' B2 L F R' U",
+    'B': "U2 L2 D U2 R2 F2 U F2 U' R2 F' D' F U2 L2 B' U2",
+    'C': "L2 D F2 D2 L2 U F2 D L D' F2 L D' B2 U R",
+    'D': "B2 D' B2 D' B2 U2 R2 U' L2 U2 F' L2 U' L2 U2 B2 U' F'",
+    'E': "R2 D' F2 U2 L2 U' B2 D' L' D B2 L' D F2 U' R'",
+    'F': "D2 B2 U2 F2 L2 D F2 D' L2 U' F L2 B' L2 D L2 D' U2",
+    'G': "D2 L2 B2 D B2 L2 U F2 R2 D B' D' U F D U2 B D'",
+    'H': "D B2 L2 B2 D U' R2 F2 R2 U'",
+    'I': "D2 L2 B2 F2 U2 B2 F2 U2 R2 U2",
+    'J': "R2 F2 D2 F2 R2 B2 U2 L2 D2 R2 F U2 R2 U2 R2 F",
+    'K': "R2 U2 L2 R2 U' L2 U2 F2 U L U' F2 D R' B2 D R' U'",
+    'L': "U' B2 R2 D2 L2 U' F2 D2 R2 U' L' R D2 F2 L' R'",
+    'M': "L2 B2 R2 B2 R2 D2 F2 R' B' L F2 L' B R'",
+    'N': "D' F2 D' L2 D' F2 U' F2 L2 U B D' B L2 U' R2 U2 F'",
+    'O': "D B2 F2 D U' L2 R2 U'",
+    'P': "R2 U' L2 B2 D' B2 D L2 B2 U R B R' B R2 B D2 B' D2",
+    'Q': "D' L2 U' L2 F2 U2 B2 D R2 U' B R2 D2 R2 F2 L2 F R2 U2",
+    'R': "L2 U2 R2 U' L2 B2 D' R2 U R2 B U' B D' R2 U2 B'",
+    'S': "D2 F2 U2 B2 R2 U2 F2 U2 L R' U2 L' R'",
+    'T': "B2 U' L2 U B2 R2 U F2 U' R' U' R' D' R U L2 R",
+    'U': "D' B2 D L2 D' B2 D' U F2 D' L U L D L' U' L F2",
+    'V': "L2 R2 D2",
+    'W': "R2 B2 U2 L2 B2 U2 R2 B2 R2 U2 R D' R U2 R' D R'",
+    'X': "D2 R2 U2 L2 R2 U2 R2 U2",
+    'Y': "L2 R2 U2",
+    'Z': "F2 D U' B2 F2 U2 R2 D' U' F2 L' R' U2 L' R'",
+}
+
+
+def get_letter(letter_name: str) -> Algorithm:
+    """
+    Get an algorithm for a cube pattern representing a letter of the alphabet by name.
+
+    Args:
+        letter_name: Name of the letter to retrieve.
+
+    Returns:
+        Algorithm object representing the pattern moves.
+
+    """
+    return parse_moves(ALPHABET.get(letter_name, ''))
