@@ -102,8 +102,8 @@ ALPHABET = {
     'F': "D2 B2 U2 F2 L2 D F2 D' L2 U' F L2 B' L2 D L2 D' U2",
     'G': "D2 L2 B2 D B2 L2 U F2 R2 D B' D' U F D U2 B D'",
     'H': "D B2 L2 B2 D U' R2 F2 R2 U'",
-    'I': "D2 L2 B2 F2 U2 B2 F2 U2 R2 U2",
-    'J': "R2 F2 D2 F2 R2 B2 U2 L2 D2 R2 F U2 R2 U2 R2 F",
+    'I': 'D2 L2 B2 F2 U2 B2 F2 U2 R2 U2',
+    'J': 'R2 F2 D2 F2 R2 B2 U2 L2 D2 R2 F U2 R2 U2 R2 F',
     'K': "R2 U2 L2 R2 U' L2 U2 F2 U L U' F2 D R' B2 D R' U'",
     'L': "U' B2 R2 D2 L2 U' F2 D2 R2 U' L' R D2 F2 L' R'",
     'M': "L2 B2 R2 B2 R2 D2 F2 R' B' L F2 L' B R'",
@@ -115,17 +115,18 @@ ALPHABET = {
     'S': "D2 F2 U2 B2 R2 U2 F2 U2 L R' U2 L' R'",
     'T': "B2 U' L2 U B2 R2 U F2 U' R' U' R' D' R U L2 R",
     'U': "D' B2 D L2 D' B2 D' U F2 D' L U L D L' U' L F2",
-    'V': "L2 R2 D2",
+    'V': 'L2 R2 D2',
     'W': "R2 B2 U2 L2 B2 U2 R2 B2 R2 U2 R D' R U2 R' D R'",
-    'X': "D2 R2 U2 L2 R2 U2 R2 U2",
-    'Y': "L2 R2 U2",
+    'X': 'D2 R2 U2 L2 R2 U2 R2 U2',
+    'Y': 'L2 R2 U2',
     'Z': "F2 D U' B2 F2 U2 R2 D' U' F2 L' R' U2 L' R'",
 }
 
 
 def get_letter(letter_name: str) -> Algorithm:
     """
-    Get an algorithm for a cube pattern representing a letter of the alphabet by name.
+    Get an algorithm for a cube pattern representing a letter
+    of the alphabet by name.
 
     Args:
         letter_name: Name of the letter to retrieve.
