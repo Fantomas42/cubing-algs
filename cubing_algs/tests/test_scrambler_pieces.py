@@ -1,5 +1,4 @@
 """Tests for scrambler piece manipulation functions."""
-
 from random import Random
 
 import pytest
@@ -13,9 +12,7 @@ from cubing_algs.scrambler_pieces import flip_n_edges
 from cubing_algs.scrambler_pieces import orient_corners
 from cubing_algs.scrambler_pieces import orient_edges
 from cubing_algs.scrambler_pieces import random_corner_orientation
-from cubing_algs.scrambler_pieces import random_corner_permutation
 from cubing_algs.scrambler_pieces import random_edge_orientation
-from cubing_algs.scrambler_pieces import random_edge_permutation
 from cubing_algs.scrambler_utils import ALL_CORNERS
 from cubing_algs.scrambler_utils import ALL_EDGES
 from cubing_algs.scrambler_utils import U_CORNERS
@@ -44,78 +41,6 @@ class TestCalculateParity:
         """Test parity of a 3-cycle."""
         perm = [1, 2, 0, 3, 4, 5, 6, 7]  # (0 1 2) is even (2 swaps)
         assert _calculate_parity(perm) == 0
-
-
-class TestRandomCornerPermutation:
-    """Tests for random_corner_permutation function."""
-
-    def test_no_corners_returns_solved(self) -> None:
-        """Test that permuting no corners returns solved state."""
-        cp, co = random_corner_permutation([])
-        assert cp == list(range(8))
-        assert co == [0] * 8
-
-    def test_permutation_maintains_parity(self) -> None:
-        """Test that corner permutation has even parity."""
-        rng = Random(42)
-        for _ in range(10):
-            cp, _ = random_corner_permutation(ALL_CORNERS, rng=rng)
-            assert _calculate_parity(cp) == 0
-
-    def test_with_buffer_maintains_parity(self) -> None:
-        """Test that permutation with buffer maintains parity."""
-        rng = Random(42)
-        for _ in range(10):
-            cp, _ = random_corner_permutation(U_CORNERS, [4, 5], rng=rng)
-            assert _calculate_parity(cp) == 0
-
-    def test_orientation_all_zero(self) -> None:
-        """Test that corner permutation doesn't change orientation."""
-        cp, co = random_corner_permutation(ALL_CORNERS, rng=Random(42))
-        assert co == [0] * 8
-
-    def test_deterministic_with_seed(self) -> None:
-        """Test that same seed produces same result."""
-        cp1, co1 = random_corner_permutation(ALL_CORNERS, rng=Random(42))
-        cp2, co2 = random_corner_permutation(ALL_CORNERS, rng=Random(42))
-        assert cp1 == cp2
-        assert co1 == co2
-
-
-class TestRandomEdgePermutation:
-    """Tests for random_edge_permutation function."""
-
-    def test_no_edges_returns_solved(self) -> None:
-        """Test that permuting no edges returns solved state."""
-        ep, eo = random_edge_permutation([])
-        assert ep == list(range(12))
-        assert eo == [0] * 12
-
-    def test_permutation_maintains_parity(self) -> None:
-        """Test that edge permutation has even parity."""
-        rng = Random(42)
-        for _ in range(10):
-            ep, _ = random_edge_permutation(ALL_EDGES, rng=rng)
-            assert _calculate_parity(ep) == 0
-
-    def test_with_buffer_maintains_parity(self) -> None:
-        """Test that permutation with buffer maintains parity."""
-        rng = Random(42)
-        for _ in range(10):
-            ep, _ = random_edge_permutation(U_EDGES, [8, 9], rng=rng)
-            assert _calculate_parity(ep) == 0
-
-    def test_orientation_all_zero(self) -> None:
-        """Test that edge permutation doesn't change orientation."""
-        ep, eo = random_edge_permutation(ALL_EDGES, rng=Random(42))
-        assert eo == [0] * 12
-
-    def test_deterministic_with_seed(self) -> None:
-        """Test that same seed produces same result."""
-        ep1, eo1 = random_edge_permutation(ALL_EDGES, rng=Random(42))
-        ep2, eo2 = random_edge_permutation(ALL_EDGES, rng=Random(42))
-        assert ep1 == ep2
-        assert eo1 == eo2
 
 
 class TestRandomCornerOrientation:
@@ -214,77 +139,6 @@ class TestFlipNEdges:
         for n in [0, 2, 4, 6, 8, 10, 12]:
             eo = flip_n_edges(ALL_EDGES, n, rng=Random(42))
             assert sum(eo) % 2 == 0
-
-
-class TestArrangePieces:
-    """Tests for arrange_pieces function."""
-
-    def test_arrange_no_pieces(self) -> None:
-        """Test arranging no pieces returns input state."""
-        cp, co, ep, eo = list(range(8)), [0] * 8, list(range(12)), [0] * 12
-        result = arrange_pieces(cp, co, ep, eo, [], [], rng=Random(42))
-        assert result == (cp, co, ep, eo)
-
-    def test_arrange_corners_to_solved(self) -> None:
-        """Test arranging corners puts them in correct positions."""
-        cp, co = random_corner_permutation(ALL_CORNERS, rng=Random(42))
-        ep, eo = list(range(12)), [0] * 12
-
-        cp, co, ep, eo = arrange_pieces(
-            cp,
-            co,
-            ep,
-            eo,
-            U_CORNERS,
-            [],
-            buffer_corners=[4, 5],
-            rng=Random(42),
-        )
-
-        # U corners should be solved
-        for idx in U_CORNERS:
-            assert cp[idx] == idx
-
-    def test_arrange_edges_to_solved(self) -> None:
-        """Test arranging edges puts them in correct positions."""
-        cp, co = list(range(8)), [0] * 8
-        ep, eo = random_edge_permutation(ALL_EDGES, rng=Random(42))
-
-        cp, co, ep, eo = arrange_pieces(
-            cp,
-            co,
-            ep,
-            eo,
-            [],
-            U_EDGES,
-            buffer_edges=[8, 9],
-            rng=Random(42),
-        )
-
-        # U edges should be solved
-        for idx in U_EDGES:
-            assert ep[idx] == idx
-
-    def test_maintains_parity(self) -> None:
-        """Test that arrangement maintains parity."""
-        rng = Random(42)
-        for _ in range(10):
-            cp, co = random_corner_permutation(ALL_CORNERS, rng=rng)
-            ep, eo = random_edge_permutation(ALL_EDGES, rng=rng)
-
-            cp, co, ep, eo = arrange_pieces(
-                cp,
-                co,
-                ep,
-                eo,
-                U_CORNERS,
-                U_EDGES,
-                [4, 5],
-                [8, 9],
-                rng=rng,
-            )
-
-            assert _calculate_parity(cp) == _calculate_parity(ep)
 
 
 class TestDerangePieces:

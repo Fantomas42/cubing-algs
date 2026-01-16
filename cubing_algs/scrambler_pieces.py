@@ -50,23 +50,25 @@ def _calculate_parity(permutation: list[int]) -> int:
     return parity
 
 
-def random_corner_permutation(
+def random_permutation(
     corners: list[int],
-    buffer_corners: list[int] | None = None,
+    edges: list[int],
     rng: Random | None = None,
-) -> tuple[list[int], list[int]]:
+) -> tuple[list[int], list[int], list[int], list[int]]:
     """
-    Generate random corner permutation using Fischer-Yates shuffle.
+    Generate random permutation for both corners and edges together.
 
-    Maintains permutation parity by possibly swapping buffer corners.
+    This function shuffles both corners and edges while maintaining the
+    parity constraint (parity(cp) == parity(ep)). Parity is fixed by
+    swapping within the permuted sets, never touching other pieces.
 
     Args:
         corners: Indices of corners to permute.
-        buffer_corners: Indices of corners that can absorb parity fixes.
+        edges: Indices of edges to permute.
         rng: Random number generator (uses DEFAULT_RNG if None).
 
     Returns:
-        Tuple of (cp, co) - corner permutation and orientation arrays.
+        Tuple of (cp, co, ep, eo) - corner/edge permutation and orientation.
 
     """
     if rng is None:
@@ -74,92 +76,42 @@ def random_corner_permutation(
 
     cp = list(range(8))
     co = [0] * 8
-
-    if not corners:
-        return cp, co
-
-    # Fischer-Yates shuffle
-    swap_count = 0
-    for i in range(len(corners) - 1):
-        j = rng.randint(i, len(corners) - 1)
-        if i != j:
-            # Swap in the permutation
-            idx_i = corners[i]
-            idx_j = corners[j]
-            cp[idx_i], cp[idx_j] = cp[idx_j], cp[idx_i]
-            swap_count += 1
-
-    # Check if we need to fix parity
-    if swap_count % 2 == 1:
-        # Odd number of swaps - need to fix parity
-        if buffer_corners and len(buffer_corners) >= 2:
-            # Swap two buffer corners
-            idx_1 = buffer_corners[0]
-            idx_2 = buffer_corners[1]
-            cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
-        elif len(corners) >= 2:
-            # Swap two of the permuted corners
-            idx_1 = corners[0]
-            idx_2 = corners[1]
-            cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
-
-    return cp, co
-
-
-def random_edge_permutation(
-    edges: list[int],
-    buffer_edges: list[int] | None = None,
-    rng: Random | None = None,
-) -> tuple[list[int], list[int]]:
-    """
-    Generate random edge permutation using Fischer-Yates shuffle.
-
-    Maintains permutation parity by possibly swapping buffer edges.
-
-    Args:
-        edges: Indices of edges to permute.
-        buffer_edges: Indices of edges that can absorb parity fixes.
-        rng: Random number generator (uses DEFAULT_RNG if None).
-
-    Returns:
-        Tuple of (ep, eo) - edge permutation and orientation arrays.
-
-    """
-    if rng is None:
-        rng = DEFAULT_RNG
-
     ep = list(range(12))
     eo = [0] * 12
 
-    if not edges:
-        return ep, eo
+    even_num_swaps = True
 
-    # Fischer-Yates shuffle
-    swap_count = 0
+    # Fischer-Yates shuffle corners
+    for i in range(len(corners) - 1):
+        j = rng.randint(i, len(corners) - 1)
+        if i != j:
+            idx_i = corners[i]
+            idx_j = corners[j]
+            cp[idx_i], cp[idx_j] = cp[idx_j], cp[idx_i]
+            even_num_swaps = not even_num_swaps
+
+    # Fischer-Yates shuffle edges
     for i in range(len(edges) - 1):
         j = rng.randint(i, len(edges) - 1)
         if i != j:
-            # Swap in the permutation
             idx_i = edges[i]
             idx_j = edges[j]
             ep[idx_i], ep[idx_j] = ep[idx_j], ep[idx_i]
-            swap_count += 1
+            even_num_swaps = not even_num_swaps
 
-    # Check if we need to fix parity
-    if swap_count % 2 == 1:
-        # Odd number of swaps - need to fix parity
-        if buffer_edges and len(buffer_edges) >= 2:
-            # Swap two buffer edges
-            idx_1 = buffer_edges[0]
-            idx_2 = buffer_edges[1]
-            ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
-        elif len(edges) >= 2:
-            # Swap two of the permuted edges
-            idx_1 = edges[0]
-            idx_2 = edges[1]
-            ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
+    # Fix parity if needed by swapping within permuted pieces
+    if not even_num_swaps:
+        if len(corners) == 0:
+            # No corners - must swap edges
+            ep[edges[0]], ep[edges[1]] = ep[edges[1]], ep[edges[0]]
+        elif len(edges) == 0 or rng.random() < 0.5:
+            # Swap corners
+            cp[corners[0]], cp[corners[1]] = cp[corners[1]], cp[corners[0]]
+        else:
+            # Swap edges
+            ep[edges[0]], ep[edges[1]] = ep[edges[1]], ep[edges[0]]
 
-    return ep, eo
+    return cp, co, ep, eo
 
 
 def random_corner_orientation(

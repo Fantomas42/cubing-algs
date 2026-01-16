@@ -17,12 +17,9 @@ from cubing_algs.scrambler_pieces import disorient_edges
 from cubing_algs.scrambler_pieces import orient_corners
 from cubing_algs.scrambler_pieces import orient_edges
 from cubing_algs.scrambler_pieces import random_corner_orientation
-from cubing_algs.scrambler_pieces import random_corner_permutation
 from cubing_algs.scrambler_pieces import random_edge_orientation
-from cubing_algs.scrambler_pieces import random_edge_permutation
+from cubing_algs.scrambler_pieces import random_permutation
 from cubing_algs.scrambler_utils import ALL_CORNERS
-from cubing_algs.scrambler_utils import D_CORNERS
-from cubing_algs.scrambler_utils import E_EDGES
 from cubing_algs.scrambler_utils import U_CORNERS
 from cubing_algs.scrambler_utils import U_EDGES
 from cubing_algs.scrambler_utils import parse_piece_spec
@@ -85,20 +82,17 @@ def _generate_step_state(
 
     # Last Layer (LL) - permute and orient U layer
     if step in ['LL', 'OLL', 'CLL', 'OLLCP']:
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         eo = random_edge_orientation(U_EDGES, rng)
 
     # PLL - only permutation on U layer
     elif step == 'PLL':
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
 
     # COLL, ZBLL - corners oriented, all permuted
     elif step in ['COLL', 'ZBLL']:
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 
     # 2GLL - specific pattern with phase edges
@@ -111,43 +105,40 @@ def _generate_step_state(
             tcp, tco, tep, teo, _ = temp_cube.to_cubies
             cp, co, ep, eo = tcp, tco, tep, teo
 
-        # Permute phase edges
+        # Permute phase edges only (no corners)
         phase_edges = [1, 3]  # UF, UB
-        ep, _ = random_edge_permutation(phase_edges, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation([], phase_edges, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 
     # OCLL - only corner orientation on U layer
     elif step == 'OCLL':
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 
     # ELL - edge orientation and permutation on U layer
     elif step == 'ELL':
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation([], U_EDGES, rng)
         eo = random_edge_orientation(U_EDGES, rng)
 
     # EPLL - only edge permutation on U layer
     elif step == 'EPLL':
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation([], U_EDGES, rng)
 
     # CPLL - only corner permutation on U layer
     elif step == 'CPLL':
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, [], rng)
 
     # CMLL, CMLLEO - Roux method steps
     elif step in ['CMLL', 'CMLLEO']:
         cmll_edges = parse_piece_spec('U DF DB', 'edge')
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(cmll_edges, [8, 9], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, cmll_edges, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         eo = random_edge_orientation(cmll_edges, rng)
 
     # ZZLL - ZZ method last layer
     elif step == 'ZZLL':
         phase_edges = [1, 3]  # UF, UB
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(phase_edges, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, phase_edges, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         # Random AUF
         auf_moves = rng.choice(['', 'U', 'U2', "U'"])
@@ -159,32 +150,28 @@ def _generate_step_state(
     # F2L - First Two Layers
     elif step == 'F2L':
         f2l_edges = parse_piece_spec('U FR FL BR BL', 'edge')
-        cp, _ = random_corner_permutation(ALL_CORNERS, [], rng)
-        ep, _ = random_edge_permutation(f2l_edges, [5, 6], rng)
+        cp, co, ep, eo = random_permutation(ALL_CORNERS, f2l_edges, rng)
         co = random_corner_orientation(ALL_CORNERS, rng)
         eo = random_edge_orientation(f2l_edges, rng)
 
     # ZZF2L - ZZ method F2L
     elif step == 'ZZF2L':
         zzf2l_edges = parse_piece_spec('R U L', 'edge')
-        cp, _ = random_corner_permutation(ALL_CORNERS, [], rng)
-        ep, _ = random_edge_permutation(zzf2l_edges, [5, 6], rng)
+        cp, co, ep, eo = random_permutation(ALL_CORNERS, zzf2l_edges, rng)
         co = random_corner_orientation(ALL_CORNERS, rng)
 
     # ZZRB, PetrusF2L - right block steps
     elif step in ['ZZRB', 'PETRUSF2L']:
         ru_corners = parse_piece_spec('R U', 'corner')
         ru_edges = parse_piece_spec('R U', 'edge')
-        cp, _ = random_corner_permutation(ru_corners, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(ru_edges, [5, 6], rng)
+        cp, co, ep, eo = random_permutation(ru_corners, ru_edges, rng)
         co = random_corner_orientation(ru_corners, rng)
 
     # SB - Roux Second Block
     elif step == 'SB':
         sb_corners = parse_piece_spec('R U', 'corner')
         sb_edges = parse_piece_spec('R U DF DB', 'edge')
-        cp, _ = random_corner_permutation(sb_corners, [5, 6], rng)
-        ep, _ = random_edge_permutation(sb_edges, [9, 10], rng)
+        cp, co, ep, eo = random_permutation(sb_corners, sb_edges, rng)
         co = random_corner_orientation(sb_corners, rng)
         eo = random_edge_orientation(sb_edges, rng)
 
@@ -192,8 +179,7 @@ def _generate_step_state(
     elif step in ['LS', 'ELS']:
         ls_corners = parse_piece_spec('U DFR', 'corner')
         ls_edges = parse_piece_spec('U FR', 'edge')
-        cp, _ = random_corner_permutation(ls_corners, [5, 6], rng)
-        ep, _ = random_edge_permutation(ls_edges, [9, 10], rng)
+        cp, co, ep, eo = random_permutation(ls_corners, ls_edges, rng)
         co = random_corner_orientation(ls_corners, rng)
         eo = random_edge_orientation(ls_edges, rng)
 
@@ -201,21 +187,18 @@ def _generate_step_state(
     elif step in ['ZZLS', 'TSLE']:
         ls_corners = parse_piece_spec('U DFR', 'corner')
         ls_edges = parse_piece_spec('U FR', 'edge')
-        cp, _ = random_corner_permutation(ls_corners, [5, 6], rng)
-        ep, _ = random_edge_permutation(ls_edges, [9, 10], rng)
+        cp, co, ep, eo = random_permutation(ls_corners, ls_edges, rng)
         co = random_corner_orientation(ls_corners, rng)
 
     # CLS, CPLS - Corner + Last Slot
     elif step in ['CLS', 'CPLS']:
         cls_corners = parse_piece_spec('U DFR', 'corner')
-        cp, _ = random_corner_permutation(cls_corners, [5, 6], rng)
-        ep, _ = random_edge_permutation(U_EDGES, [9, 10], rng)
+        cp, co, ep, eo = random_permutation(cls_corners, U_EDGES, rng)
         co = random_corner_orientation(cls_corners, rng)
 
     # EJLS, EJF2L - Edge Just Last Slot
     elif step in ['EJLS', 'EJF2L']:
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         # Randomize all U corners orientation
         co = random_corner_orientation(U_CORNERS, rng)
         # Ensure DFR (index 4) is disoriented
@@ -229,13 +212,11 @@ def _generate_step_state(
     # TTLL - Two-Twist Last Layer
     elif step == 'TTLL':
         ttll_corners = parse_piece_spec('U DFR', 'corner')
-        cp, _ = random_corner_permutation(ttll_corners, [5, 6], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(ttll_corners, U_EDGES, rng)
 
     # WV - Winter Variation
     elif step == 'WV':
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         # Apply R U R'
         temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
@@ -244,8 +225,7 @@ def _generate_step_state(
 
     # SV - Summer Variation
     elif step == 'SV':
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         # Apply R U' R'
         temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
@@ -254,8 +234,7 @@ def _generate_step_state(
 
     # VLS, VHLS - Valk Last Slot
     elif step in ['VLS', 'VHLS']:
-        cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-        ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         eo = random_edge_orientation(U_EDGES, rng)
         # Apply R U' R'
@@ -267,8 +246,7 @@ def _generate_step_state(
     elif step == 'PETRUS2X2X3':
         petrus_corners = parse_piece_spec('U R F', 'corner')
         petrus_edges = parse_piece_spec('U R F', 'edge')
-        cp, _ = random_corner_permutation(petrus_corners, [5, 6], rng)
-        ep, _ = random_edge_permutation(petrus_edges, [9, 10], rng)
+        cp, co, ep, eo = random_permutation(petrus_corners, petrus_edges, rng)
         co = random_corner_orientation(petrus_corners, rng)
         eo = random_edge_orientation(petrus_edges, rng)
 
@@ -276,8 +254,7 @@ def _generate_step_state(
     elif step == 'PETRUSEO':
         petrus_corners = parse_piece_spec('U F', 'corner')
         petrus_edges = parse_piece_spec('U F', 'edge')
-        cp, _ = random_corner_permutation(petrus_corners, [5, 6], rng)
-        ep, _ = random_edge_permutation(petrus_edges, [9, 10], rng)
+        cp, co, ep, eo = random_permutation(petrus_corners, petrus_edges, rng)
         co = random_corner_orientation(petrus_corners, rng)
         eo = random_edge_orientation(petrus_edges, rng)
 
@@ -375,18 +352,11 @@ def scramble_ocll_case(
 
     case = case.upper()
 
-    # Start with solved state
-    cp = list(range(8))
-    co = [0] * 8
-    ep = list(range(12))
-    eo = [0] * 12
-
-    # Permute U layer
-    cp, _ = random_corner_permutation(U_CORNERS, D_CORNERS[:2], rng)
-    ep, _ = random_edge_permutation(U_EDGES, E_EDGES[:2], rng)
+    # Start with solved state and permute U layer
+    cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
 
     # Orient U corners first
-    co = orient_corners(co, U_CORNERS, D_CORNERS[:2], rng)
+    co = orient_corners(co, U_CORNERS, [], rng)
 
     # Apply specific corner twists
     # U corner indices: URF=0, UFL=1, ULB=2, UBR=3
