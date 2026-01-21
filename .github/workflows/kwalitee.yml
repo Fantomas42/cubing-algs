@@ -39,6 +39,6 @@ jobs:
         pytest cubing_algs
     - name: Running the notebooks
       env:
-        COLORTERM=truecolor
+        COLORTERM: truecolor
       run: |
         pytest --no-cov --nbval --nbval-sanitize-with ./notebooks/sanitize.cfg ./notebooks/
