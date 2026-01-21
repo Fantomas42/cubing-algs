@@ -39,4 +39,4 @@ jobs:
         pytest cubing_algs
     - name: Running the notebooks
       run: |
-        pytest --nbval --nbval-sanitize-with ./notebooks/sanitize.cfg ./notebooks/
+        pytest --no-cov --nbval --nbval-sanitize-with ./notebooks/sanitize.cfg ./notebooks/
