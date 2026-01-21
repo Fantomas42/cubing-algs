@@ -1,16 +1,16 @@
 """Tests for the cases module public API."""
 import unittest
 
-from cubing_algs.cases import COLLECTIONS
-from cubing_algs.cases import Case
-from cubing_algs.cases import CaseCollection
-from cubing_algs.cases import _match_alias
-from cubing_algs.cases import _match_case_insensitive
-from cubing_algs.cases import _match_code
-from cubing_algs.cases import _match_exact
-from cubing_algs.cases import get_case
-from cubing_algs.cases import get_collection
-from cubing_algs.cases import list_collections
+from cubing_algs.cases.api import _match_alias
+from cubing_algs.cases.api import _match_case_insensitive
+from cubing_algs.cases.api import _match_code
+from cubing_algs.cases.api import _match_exact
+from cubing_algs.cases.api import get_case
+from cubing_algs.cases.api import get_collection
+from cubing_algs.cases.api import list_collections
+from cubing_algs.cases.case import Case
+from cubing_algs.cases.collection import COLLECTIONS
+from cubing_algs.cases.collection import CaseCollection
 from cubing_algs.exceptions import InvalidCaseNameError
 from cubing_algs.exceptions import InvalidCollectionNameError
 
