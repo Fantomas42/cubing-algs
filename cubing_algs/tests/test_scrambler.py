@@ -949,11 +949,12 @@ class TestScrambleEffectivenessByLength(unittest.TestCase):
 
     def test_very_long_scrambles(self) -> None:
         """Test edge cases with very long scrambles (50+ moves)."""
+        rng = Random(42)  # noqa: S311
         long_lengths = [50, 75, 100]
 
         for length in long_lengths:
             with self.subTest(length=length):
-                scramble_alg = scramble(3, length)
+                scramble_alg = scramble(3, length, rng=rng)
 
                 # Should generate exactly the requested length
                 self.assertEqual(len(scramble_alg), length)
