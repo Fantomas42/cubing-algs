@@ -1,9 +1,10 @@
 """Tests for cube pattern recognition and generation."""
-
 import unittest
 
 from cubing_algs.move import Move
+from cubing_algs.patterns import ALPHABET
 from cubing_algs.patterns import PATTERNS
+from cubing_algs.patterns import get_letter
 from cubing_algs.patterns import get_pattern
 
 
@@ -31,6 +32,36 @@ class PatternsTestCase(unittest.TestCase):
     def test_get_pattern_inexistant(self) -> None:
         """Test get pattern inexistant."""
         pattern = get_pattern('El Matadore')
+
+        self.assertEqual(
+            len(pattern), 0,
+        )
+
+
+class LetterTestCase(unittest.TestCase):
+    """Tests for cube letter and generation."""
+
+    def test_alphabet_size(self) -> None:
+        """Test patterns size."""
+        self.assertEqual(
+            len(ALPHABET.keys()),
+            26,
+        )
+
+    def test_get_letter(self) -> None:
+        """Test get letter."""
+        pattern = get_letter('A')
+
+        self.assertEqual(
+            len(pattern), 17,
+        )
+
+        for m in pattern:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_get_letter_inexistant(self) -> None:
+        """Test get letter inexistant."""
+        pattern = get_letter('5')
 
         self.assertEqual(
             len(pattern), 0,
