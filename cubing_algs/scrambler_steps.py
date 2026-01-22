@@ -9,6 +9,7 @@ from random import Random
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.scrambler import DEFAULT_RNG
 from cubing_algs.scrambler_pieces import arrange_pieces
 from cubing_algs.scrambler_pieces import derange_pieces
@@ -321,12 +322,12 @@ def scramble_step(
     # Generate solving algorithm
     solution = solve_to_algorithm(kociemba_state)
 
-    # Parse and return as Algorithm
+    # Parse and return as Algorithm (inverted, since kociemba returns solution)
     if not solution or solution.strip() == '':
         # Already solved
         return parse_moves('')
 
-    return parse_moves(solution)
+    return mirror_moves(parse_moves(solution))
 
 
 def scramble_ocll_case(
@@ -422,11 +423,11 @@ def scramble_ocll_case(
     # Generate solving algorithm
     solution = solve_to_algorithm(kociemba_state)
 
-    # Parse and return as Algorithm
+    # Parse and return as Algorithm (inverted, since kociemba returns solution)
     if not solution or solution.strip() == '':
         return parse_moves('')
 
-    return parse_moves(solution)
+    return mirror_moves(parse_moves(solution))
 
 
 def scramble_with_piece_constraints(
@@ -579,8 +580,8 @@ def scramble_with_piece_constraints(
     # Generate solving algorithm
     solution = solve_to_algorithm(kociemba_state)
 
-    # Parse and return as Algorithm
+    # Parse and return as Algorithm (inverted, since kociemba returns solution)
     if not solution or solution.strip() == '':
         return parse_moves('')
 
-    return parse_moves(solution)
+    return mirror_moves(parse_moves(solution))

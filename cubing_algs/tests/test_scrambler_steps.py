@@ -4,6 +4,7 @@ from random import Random
 
 import pytest
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.scrambler_pieces import _calculate_parity
 from cubing_algs.scrambler_steps import SUPPORTED_STEPS
 from cubing_algs.scrambler_steps import InvalidStepError
@@ -118,7 +119,7 @@ class TestScrambleStep:
             scramble = scramble_step(step, rng, include_auf=False)
 
             # Should return an Algorithm
-            assert hasattr(scramble, 'moves')
+            assert isinstance(scramble, Algorithm)
 
     def test_invalid_step_raises(self) -> None:
         """Test that invalid step raises error."""
@@ -163,8 +164,8 @@ class TestScrambleStep:
 
         # Different RNG seeds, so might be same or different
         # Just verify both work
-        assert hasattr(scramble_with, 'moves')
-        assert hasattr(scramble_without, 'moves')
+        assert isinstance(scramble_with, Algorithm)
+        assert isinstance(scramble_without, Algorithm)
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same scramble."""
@@ -207,7 +208,7 @@ class TestScrambleOCLLCase:
             scramble = scramble_ocll_case(case, rng)
 
             # Should return an Algorithm
-            assert hasattr(scramble, 'moves')
+            assert isinstance(scramble, Algorithm)
 
     def test_invalid_case_raises(self) -> None:
         """Test that invalid case raises error."""
