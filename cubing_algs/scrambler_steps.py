@@ -112,6 +112,7 @@ def _generate_step_state(
 
     # OCLL - only corner orientation on U layer
     elif step == 'OCLL':
+        # TODO(me): check meaning + merge in COLL, ZBLL
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 

@@ -4,7 +4,6 @@ from random import Random
 import pytest
 
 from cubing_algs.scrambler_pieces import _calculate_parity
-from cubing_algs.scrambler_pieces import arrange_pieces
 from cubing_algs.scrambler_pieces import derange_pieces
 from cubing_algs.scrambler_pieces import disorient_corners
 from cubing_algs.scrambler_pieces import disorient_edges
