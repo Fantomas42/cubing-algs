@@ -1,5 +1,6 @@
+# ruff: noqa: S311
 """Tests for step-based scramble generation."""
-
+import unittest
 from random import Random
 
 import pytest
@@ -15,7 +16,7 @@ from cubing_algs.scrambler_utils import SolverNotAvailableError
 from cubing_algs.vcube import VCube
 
 
-class TestGenerateStepState:
+class TestGenerateStepState(unittest.TestCase):
     """Tests for _generate_step_state function."""
 
     def test_all_supported_steps_generate(self) -> None:
@@ -25,18 +26,21 @@ class TestGenerateStepState:
             cp, co, ep, eo = _generate_step_state(step, rng)
 
             # Check basic validity
-            assert len(cp) == 8
-            assert len(co) == 8
-            assert len(ep) == 12
-            assert len(eo) == 12
+            self.assertEqual(len(cp), 8)
+            self.assertEqual(len(co), 8)
+            self.assertEqual(len(ep), 12)
+            self.assertEqual(len(eo), 12)
 
             # Check orientation constraints
-            assert sum(co) % 3 == 0, f'Step {step}: sum(co) % 3 != 0'
-            assert sum(eo) % 2 == 0, f'Step {step}: sum(eo) % 2 != 0'
+            self.assertEqual(sum(co) % 3, 0, f'Step {step}: sum(co) % 3 != 0')
+            self.assertEqual(sum(eo) % 2, 0, f'Step {step}: sum(eo) % 2 != 0')
 
             # Check parity constraint
-            assert _calculate_parity(cp) == _calculate_parity(ep), \
-                f'Step {step}: parity mismatch'
+            self.assertEqual(
+                _calculate_parity(cp),
+                _calculate_parity(ep),
+                f'Step {step}: parity mismatch',
+            )
 
     def test_invalid_step_raises(self) -> None:
         """Test that invalid step name raises error."""
@@ -48,8 +52,8 @@ class TestGenerateStepState:
         cp, co, ep, eo = _generate_step_state('PLL', Random(42))
 
         # All orientations should be solved
-        assert all(co[i] == 0 for i in range(8))
-        assert all(eo[i] == 0 for i in range(12))
+        self.assertTrue(all(co[i] == 0 for i in range(8)))
+        self.assertTrue(all(eo[i] == 0 for i in range(12)))
 
     def test_oll_has_orientation(self) -> None:
         """Test that OLL has some orientation on U layer."""
@@ -72,7 +76,7 @@ class TestGenerateStepState:
                 has_edge_orientation = True
 
         # At least one trial should have orientation
-        assert has_corner_orientation or has_edge_orientation
+        self.assertTrue(has_corner_orientation or has_edge_orientation)
 
     def test_f2l_permutes_all_corners(self) -> None:
         """Test that F2L permutes all corners."""
@@ -80,20 +84,20 @@ class TestGenerateStepState:
 
         # All corners should potentially be permuted
         # Just check valid permutation
-        assert set(cp) == set(range(8))
+        self.assertEqual(set(cp), set(range(8)))
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same result."""
         cp1, co1, ep1, eo1 = _generate_step_state('PLL', Random(42))
         cp2, co2, ep2, eo2 = _generate_step_state('PLL', Random(42))
 
-        assert cp1 == cp2
-        assert co1 == co2
-        assert ep1 == ep2
-        assert eo1 == eo2
+        self.assertEqual(cp1, cp2)
+        self.assertEqual(co1, co2)
+        self.assertEqual(ep1, ep2)
+        self.assertEqual(eo1, eo2)
 
 
-class TestScrambleStep:
+class TestScrambleStep(unittest.TestCase):
     """Tests for scramble_step function."""
 
     def test_requires_kociemba(self) -> None:
@@ -119,7 +123,7 @@ class TestScrambleStep:
             scramble = scramble_step(step, rng, include_auf=False)
 
             # Should return an Algorithm
-            assert isinstance(scramble, Algorithm)
+            self.assertIsInstance(scramble, Algorithm)
 
     def test_invalid_step_raises(self) -> None:
         """Test that invalid step raises error."""
@@ -149,8 +153,8 @@ class TestScrambleStep:
         cp, co, ep, eo, _ = cube.to_cubies
 
         # All orientations should be 0
-        assert all(co[i] == 0 for i in range(8))
-        assert all(eo[i] == 0 for i in range(12))
+        self.assertTrue(all(co[i] == 0 for i in range(8)))
+        self.assertTrue(all(eo[i] == 0 for i in range(12)))
 
     def test_with_auf(self) -> None:
         """Test scramble with AUF enabled."""
@@ -164,8 +168,8 @@ class TestScrambleStep:
 
         # Different RNG seeds, so might be same or different
         # Just verify both work
-        assert isinstance(scramble_with, Algorithm)
-        assert isinstance(scramble_without, Algorithm)
+        self.assertIsInstance(scramble_with, Algorithm)
+        self.assertIsInstance(scramble_without, Algorithm)
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same scramble."""
@@ -177,10 +181,10 @@ class TestScrambleStep:
         scramble1 = scramble_step('PLL', Random(42), include_auf=False)
         scramble2 = scramble_step('PLL', Random(42), include_auf=False)
 
-        assert str(scramble1) == str(scramble2)
+        self.assertEqual(str(scramble1), str(scramble2))
 
 
-class TestScrambleOCLLCase:
+class TestScrambleOCLLCase(unittest.TestCase):
     """Tests for scramble_ocll_case function."""
 
     def test_requires_kociemba(self) -> None:
@@ -208,7 +212,7 @@ class TestScrambleOCLLCase:
             scramble = scramble_ocll_case(case, rng)
 
             # Should return an Algorithm
-            assert isinstance(scramble, Algorithm)
+            self.assertIsInstance(scramble, Algorithm)
 
     def test_invalid_case_raises(self) -> None:
         """Test that invalid case raises error."""
@@ -251,7 +255,7 @@ class TestScrambleOCLLCase:
         u_corners = [0, 1, 2, 3]
 
         # All U corners should be oriented
-        assert all(co[i] == 0 for i in u_corners)
+        self.assertTrue(all(co[i] == 0 for i in u_corners))
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same scramble."""
@@ -263,42 +267,42 @@ class TestScrambleOCLLCase:
         scramble1 = scramble_ocll_case('T', Random(42))
         scramble2 = scramble_ocll_case('T', Random(42))
 
-        assert str(scramble1) == str(scramble2)
+        self.assertEqual(str(scramble1), str(scramble2))
 
 
-class TestSupportedSteps:
+class TestSupportedSteps(unittest.TestCase):
     """Tests for SUPPORTED_STEPS constant."""
 
     def test_has_last_layer_steps(self) -> None:
         """Test that all LL steps are included."""
         ll_steps = ['LL', 'OLL', 'PLL', 'ZBLL', 'COLL', 'OLLCP']
         for step in ll_steps:
-            assert step in SUPPORTED_STEPS
+            self.assertIn(step, SUPPORTED_STEPS)
 
     def test_has_f2l_steps(self) -> None:
         """Test that F2L variants are included."""
         f2l_steps = ['F2L', 'ZZF2L', 'ZZRB', 'PetrusF2L']
         for step in f2l_steps:
-            assert step in SUPPORTED_STEPS
+            self.assertIn(step, SUPPORTED_STEPS)
 
     def test_has_last_slot_steps(self) -> None:
         """Test that last slot variants are included."""
         ls_steps = ['LS', 'ELS', 'ZZLS', 'CLS', 'WV', 'SV', 'VLS']
         for step in ls_steps:
-            assert step in SUPPORTED_STEPS
+            self.assertIn(step, SUPPORTED_STEPS)
 
     def test_has_roux_steps(self) -> None:
         """Test that Roux method steps are included."""
         roux_steps = ['CMLL', 'CMLLEO', 'SB']
         for step in roux_steps:
-            assert step in SUPPORTED_STEPS
+            self.assertIn(step, SUPPORTED_STEPS)
 
     def test_has_petrus_steps(self) -> None:
         """Test that Petrus method steps are included."""
         petrus_steps = ['Petrus2x2x3', 'PetrusEO']
         for step in petrus_steps:
-            assert step in SUPPORTED_STEPS
+            self.assertIn(step, SUPPORTED_STEPS)
 
     def test_total_count(self) -> None:
         """Test that we have 30+ steps as promised."""
-        assert len(SUPPORTED_STEPS) >= 30
+        self.assertGreaterEqual(len(SUPPORTED_STEPS), 30)

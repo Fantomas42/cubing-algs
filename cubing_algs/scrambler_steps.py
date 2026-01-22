@@ -9,7 +9,6 @@ from random import Random
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.scrambler import DEFAULT_RNG
 from cubing_algs.scrambler_pieces import arrange_pieces
 from cubing_algs.scrambler_pieces import derange_pieces
@@ -26,6 +25,7 @@ from cubing_algs.scrambler_utils import U_EDGES
 from cubing_algs.scrambler_utils import parse_piece_spec
 from cubing_algs.scrambler_utils import solve_to_algorithm
 from cubing_algs.scrambler_utils import vcube_to_kociemba_string
+from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.vcube import VCube
 
 # Supported step types
@@ -82,7 +82,7 @@ def _generate_step_state(
     eo = [0] * 12
 
     # Last Layer (LL) - permute and orient U layer
-    if step in ['LL', 'OLL', 'CLL', 'OLLCP']:
+    if step in {'LL', 'OLL', 'CLL', 'OLLCP'}:
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         eo = random_edge_orientation(U_EDGES, rng)
@@ -92,7 +92,7 @@ def _generate_step_state(
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
 
     # COLL, ZBLL - corners oriented, all permuted
-    elif step in ['COLL', 'ZBLL']:
+    elif step in {'COLL', 'ZBLL'}:
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 
@@ -131,7 +131,7 @@ def _generate_step_state(
         cp, co, ep, eo = random_permutation(U_CORNERS, [], rng)
 
     # CMLL, CMLLEO - Roux method steps
-    elif step in ['CMLL', 'CMLLEO']:
+    elif step in {'CMLL', 'CMLLEO'}:
         cmll_edges = parse_piece_spec('U DF DB', 'edge')
         cp, co, ep, eo = random_permutation(U_CORNERS, cmll_edges, rng)
         co = random_corner_orientation(U_CORNERS, rng)
@@ -163,7 +163,7 @@ def _generate_step_state(
         co = random_corner_orientation(ALL_CORNERS, rng)
 
     # ZZRB, PetrusF2L - right block steps
-    elif step in ['ZZRB', 'PETRUSF2L']:
+    elif step in {'ZZRB', 'PETRUSF2L'}:
         ru_corners = parse_piece_spec('R U', 'corner')
         ru_edges = parse_piece_spec('R U', 'edge')
         cp, co, ep, eo = random_permutation(ru_corners, ru_edges, rng)
@@ -178,7 +178,7 @@ def _generate_step_state(
         eo = random_edge_orientation(sb_edges, rng)
 
     # Last Slot (LS) steps
-    elif step in ['LS', 'ELS']:
+    elif step in {'LS', 'ELS'}:
         ls_corners = parse_piece_spec('U DFR', 'corner')
         ls_edges = parse_piece_spec('U FR', 'edge')
         cp, co, ep, eo = random_permutation(ls_corners, ls_edges, rng)
@@ -186,20 +186,20 @@ def _generate_step_state(
         eo = random_edge_orientation(ls_edges, rng)
 
     # ZZLS, TSLE - ZZ last slot
-    elif step in ['ZZLS', 'TSLE']:
+    elif step in {'ZZLS', 'TSLE'}:
         ls_corners = parse_piece_spec('U DFR', 'corner')
         ls_edges = parse_piece_spec('U FR', 'edge')
         cp, co, ep, eo = random_permutation(ls_corners, ls_edges, rng)
         co = random_corner_orientation(ls_corners, rng)
 
     # CLS, CPLS - Corner + Last Slot
-    elif step in ['CLS', 'CPLS']:
+    elif step in {'CLS', 'CPLS'}:
         cls_corners = parse_piece_spec('U DFR', 'corner')
         cp, co, ep, eo = random_permutation(cls_corners, U_EDGES, rng)
         co = random_corner_orientation(cls_corners, rng)
 
     # EJLS, EJF2L - Edge Just Last Slot
-    elif step in ['EJLS', 'EJF2L']:
+    elif step in {'EJLS', 'EJF2L'}:
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         # Randomize all U corners orientation
         co = random_corner_orientation(U_CORNERS, rng)
@@ -235,7 +235,7 @@ def _generate_step_state(
         cp, co, ep, eo, _ = temp_cube.to_cubies
 
     # VLS, VHLS - Valk Last Slot
-    elif step in ['VLS', 'VHLS']:
+    elif step in {'VLS', 'VHLS'}:
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         eo = random_edge_orientation(U_EDGES, rng)
@@ -306,7 +306,8 @@ def scramble_step(
     cp, co, ep, eo = _generate_step_state(step, rng)
 
     # Apply random AUF if requested
-    if include_auf and step.upper() not in ['WV', 'SV', 'VLS', 'VHLS', '2GLL', 'ZZLL']:
+    skip_auf_steps = {'WV', 'SV', 'VLS', 'VHLS', '2GLL', 'ZZLL'}
+    if include_auf and step.upper() not in skip_auf_steps:
         auf_moves = rng.choice(['', 'U', 'U2', "U'"])
         if auf_moves:
             temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
@@ -323,7 +324,7 @@ def scramble_step(
     solution = solve_to_algorithm(kociemba_state)
 
     # Parse and return as Algorithm (inverted, since kociemba returns solution)
-    if not solution or solution.strip() == '':
+    if not solution or not solution.strip():
         # Already solved
         return parse_moves('')
 
@@ -338,7 +339,8 @@ def scramble_ocll_case(
     Generate scramble for specific OCLL case pattern.
 
     Args:
-        case: Case name - "T", "U", "L", "H", "Pi", "Sune", "AntiSune", or "Solved".
+        case: Case name - "T", "U", "L", "H", "Pi", "Sune",
+            "AntiSune", or "Solved".
         rng: Random number generator (uses DEFAULT_RNG if None).
 
     Returns:
@@ -380,23 +382,23 @@ def scramble_ocll_case(
         co[0] = 1  # URF clockwise 1
         co[1] = 2  # UFL clockwise 2
 
-    elif case in ['PI', 'BRUNO']:
+    elif case in {'PI', 'BRUNO'}:
         co[2] = 1  # ULB clockwise 1
         co[1] = 2  # UFL clockwise 2
         co[3] = 1  # UBR clockwise 1
         co[0] = 2  # URF clockwise 2
 
-    elif case in ['S', 'SUNE']:
+    elif case in {'S', 'SUNE'}:
         co[0] = 2  # URF clockwise 2
         co[3] = 2  # UBR clockwise 2
         co[2] = 2  # ULB clockwise 2
 
-    elif case in ['AS', 'ANTISUNE', 'ANTI-SUNE']:
+    elif case in {'AS', 'ANTISUNE', 'ANTI-SUNE'}:
         co[0] = 1  # URF clockwise 1
         co[1] = 1  # UFL clockwise 1
         co[2] = 1  # ULB clockwise 1
 
-    elif case in ['0', 'O', 'SOLVED']:
+    elif case in {'0', 'O', 'SOLVED'}:
         # All corners already oriented
         pass
 
@@ -424,7 +426,7 @@ def scramble_ocll_case(
     solution = solve_to_algorithm(kociemba_state)
 
     # Parse and return as Algorithm (inverted, since kociemba returns solution)
-    if not solution or solution.strip() == '':
+    if not solution or not solution.strip():
         return parse_moves('')
 
     return mirror_moves(parse_moves(solution))
@@ -450,16 +452,22 @@ def scramble_with_piece_constraints(
     specify exactly which pieces should be solved, oriented, or scrambled.
 
     Args:
-        solve_corners: Corners to place in solved positions (e.g., "U", "URF UBR").
-        solve_edges: Edges to place in solved positions (e.g., "U", "UR UF").
-        orient_corners_spec: Corners to orient correctly (e.g., "all", "U").
+        solve_corners: Corners to place in solved positions
+            (e.g., "U", "URF UBR").
+        solve_edges: Edges to place in solved positions
+            (e.g., "U", "UR UF").
+        orient_corners_spec: Corners to orient correctly
+            (e.g., "all", "U").
         orient_edges_spec: Edges to orient correctly (e.g., "all", "D").
         derange_corners: Corners that must NOT be in solved positions.
         derange_edges: Edges that must NOT be in solved positions.
-        disorient_corners_spec: Corners that must NOT be correctly oriented.
+        disorient_corners_spec: Corners that must NOT be correctly
+            oriented.
         disorient_edges_spec: Edges that must NOT be correctly oriented.
-        buffer_corners: Corners to use as buffers for fixing constraints (default "D").
-        buffer_edges: Edges to use as buffers for fixing constraints (default "E").
+        buffer_corners: Corners to use as buffers for fixing constraints
+            (default "D").
+        buffer_edges: Edges to use as buffers for fixing constraints
+            (default "E").
         rng: Random number generator (uses DEFAULT_RNG if None).
 
     Returns:
@@ -505,10 +513,18 @@ def scramble_with_piece_constraints(
     eo = [0] * 12
 
     # Parse piece specifications
-    solve_corners_list = parse_piece_spec(solve_corners, 'corner') if solve_corners else []
-    solve_edges_list = parse_piece_spec(solve_edges, 'edge') if solve_edges else []
-    derange_corners_list = parse_piece_spec(derange_corners, 'corner') if derange_corners else []
-    derange_edges_list = parse_piece_spec(derange_edges, 'edge') if derange_edges else []
+    solve_corners_list = (
+        parse_piece_spec(solve_corners, 'corner') if solve_corners else []
+    )
+    solve_edges_list = (
+        parse_piece_spec(solve_edges, 'edge') if solve_edges else []
+    )
+    derange_corners_list = (
+        parse_piece_spec(derange_corners, 'corner') if derange_corners else []
+    )
+    derange_edges_list = (
+        parse_piece_spec(derange_edges, 'edge') if derange_edges else []
+    )
     buffer_corners_list = parse_piece_spec(buffer_corners, 'corner')
     buffer_edges_list = parse_piece_spec(buffer_edges, 'edge')
 
@@ -518,8 +534,12 @@ def scramble_with_piece_constraints(
     all_edges_set = set(range(12))
 
     # Pieces to scramble = all pieces - (solve pieces + buffer pieces)
-    scramble_corners = list(all_corners_set - set(solve_corners_list) - set(buffer_corners_list))
-    scramble_edges = list(all_edges_set - set(solve_edges_list) - set(buffer_edges_list))
+    scramble_corners = list(
+        all_corners_set - set(solve_corners_list) - set(buffer_corners_list),
+    )
+    scramble_edges = list(
+        all_edges_set - set(solve_edges_list) - set(buffer_edges_list),
+    )
 
     # Scramble non-solved pieces
     if scramble_corners or scramble_edges:
@@ -564,12 +584,20 @@ def scramble_with_piece_constraints(
         eo = orient_edges(eo, orient_edges_list, buffer_edges_list, rng)
 
     if disorient_corners_spec:
-        disorient_corners_list = parse_piece_spec(disorient_corners_spec, 'corner')
-        co = disorient_corners(co, disorient_corners_list, buffer_corners_list, rng)
+        disorient_corners_list = parse_piece_spec(
+            disorient_corners_spec, 'corner',
+        )
+        co = disorient_corners(
+            co, disorient_corners_list, buffer_corners_list, rng,
+        )
 
     if disorient_edges_spec:
-        disorient_edges_list = parse_piece_spec(disorient_edges_spec, 'edge')
-        eo = disorient_edges(eo, disorient_edges_list, buffer_edges_list, rng)
+        disorient_edges_list = parse_piece_spec(
+            disorient_edges_spec, 'edge',
+        )
+        eo = disorient_edges(
+            eo, disorient_edges_list, buffer_edges_list, rng,
+        )
 
     # Convert to VCube
     cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
@@ -581,7 +609,7 @@ def scramble_with_piece_constraints(
     solution = solve_to_algorithm(kociemba_state)
 
     # Parse and return as Algorithm (inverted, since kociemba returns solution)
-    if not solution or solution.strip() == '':
+    if not solution or not solution.strip():
         return parse_moves('')
 
     return mirror_moves(parse_moves(solution))
