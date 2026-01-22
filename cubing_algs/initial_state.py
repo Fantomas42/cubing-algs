@@ -25,3 +25,6 @@ def get_initial_state(size: int = 3) -> str:
     facelets_per_face = size * size
 
     return ''.join(face * facelets_per_face for face in FACE_ORDER)
+
+
+INITIAL_STATE_3x3x3 = get_initial_state(3)

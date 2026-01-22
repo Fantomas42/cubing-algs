@@ -1,6 +1,7 @@
 """Utility functions for advanced scrambler modules."""
 import kociemba
 
+from cubing_algs.initial_state import INITIAL_STATE_3x3x3
 from cubing_algs.vcube import VCube
 
 CORNER_NAMES: list[str] = [
@@ -173,5 +174,8 @@ def solve_to_algorithm(kociemba_state: str) -> str:
         Algorithm string to solve the cube (space-separated moves).
 
     """
+    if kociemba_state == INITIAL_STATE_3x3x3:
+        return ''
+
     solution: str = kociemba.solve(kociemba_state)
     return solution
