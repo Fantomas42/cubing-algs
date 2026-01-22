@@ -15,6 +15,9 @@ authors = [{name = "Fantomas42", email = "fantomas42@gmail.com"}]
 classifiers = [
   "Programming Language :: Python"
 ]
+dependencies = [
+    "kociemba==1.2.1",
+]
 
 [project.urls]
 repository = "https://github.com/Fantomas42/cubing-algs"
