@@ -1,8 +1,6 @@
 """Tests for scrambler utility functions."""
 import unittest
 
-import pytest
-
 from cubing_algs.scrambler_utils import ALL_CORNERS
 from cubing_algs.scrambler_utils import ALL_EDGES
 from cubing_algs.scrambler_utils import CORNER_NAMES
@@ -14,14 +12,13 @@ from cubing_algs.scrambler_utils import F_CORNERS
 from cubing_algs.scrambler_utils import U_CORNERS
 from cubing_algs.scrambler_utils import U_EDGES
 from cubing_algs.scrambler_utils import InvalidPieceSpecError
-from cubing_algs.scrambler_utils import SolverNotAvailableError
 from cubing_algs.scrambler_utils import parse_piece_spec
 from cubing_algs.scrambler_utils import solve_to_algorithm
 from cubing_algs.scrambler_utils import vcube_to_kociemba_string
 from cubing_algs.vcube import VCube
 
 
-class TestParsePieceSpec(unittest.TestCase):
+class TestParsePieceSpec(unittest.TestCase):  # noqa: PLR0904
     """Tests for parse_piece_spec function."""
 
     def test_parse_all_corners(self) -> None:
@@ -98,7 +95,7 @@ class TestParsePieceSpec(unittest.TestCase):
     def test_parse_mixed_layer_and_specific(self) -> None:
         """Test parsing mix of layer and specific pieces."""
         result = parse_piece_spec('U DFR', 'corner')
-        expected = sorted(U_CORNERS + [4])  # U corners + DFR (index 4)
+        expected = sorted([*U_CORNERS, 4])  # U corners + DFR (index 4)
         self.assertEqual(result, expected)
 
     def test_parse_case_insensitive(self) -> None:
@@ -116,17 +113,17 @@ class TestParsePieceSpec(unittest.TestCase):
 
     def test_parse_invalid_piece_type(self) -> None:
         """Test parsing with invalid piece type raises error."""
-        with pytest.raises(InvalidPieceSpecError, match='piece_type must be'):
+        with self.assertRaises(InvalidPieceSpecError):
             parse_piece_spec('U', 'invalid')
 
     def test_parse_invalid_corner_name(self) -> None:
         """Test parsing invalid corner name raises error."""
-        with pytest.raises(InvalidPieceSpecError, match='Unknown corner piece'):
+        with self.assertRaises(InvalidPieceSpecError):
             parse_piece_spec('XYZ', 'corner')
 
     def test_parse_invalid_edge_name(self) -> None:
         """Test parsing invalid edge name raises error."""
-        with pytest.raises(InvalidPieceSpecError, match='Unknown edge piece'):
+        with self.assertRaises(InvalidPieceSpecError):
             parse_piece_spec('XY', 'edge')
 
     def test_parse_no_duplicates(self) -> None:
@@ -175,48 +172,24 @@ class TestVCubeToKociemba(unittest.TestCase):
     def test_non_3x3x3_cube_raises_error(self) -> None:
         """Test that non-3x3x3 cubes raise ValueError."""
         cube = VCube(size=2)
-        with pytest.raises(ValueError, match='only supports 3x3x3'):
+        with self.assertRaises(ValueError):
             vcube_to_kociemba_string(cube)
 
 
 class TestSolveToAlgorithm(unittest.TestCase):
     """Tests for solve_to_algorithm function."""
 
-    def test_solver_not_available_raises_error(self) -> None:
-        """Test that missing kociemba package raises appropriate error."""
-        # This test assumes kociemba is not installed
-        # If it is installed, the test will be skipped
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-            pytest.skip('kociemba is installed, skipping unavailable test')
-        except ImportError:
-            pass
-
-        solved_state = 'U' * 9 + 'R' * 9 + 'F' * 9 + 'D' * 9 + 'L' * 9 + 'B' * 9
-        with pytest.raises(SolverNotAvailableError, match='pip install kociemba'):
-            solve_to_algorithm(solved_state)
-
     def test_solve_solved_cube(self) -> None:
         """Test solving an already solved cube."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         solved_state = 'U' * 9 + 'R' * 9 + 'F' * 9 + 'D' * 9 + 'L' * 9 + 'B' * 9
         solution = solve_to_algorithm(solved_state)
 
         # Solved cube should return empty or very short solution
         self.assertIsInstance(solution, str)
-        self.assertTrue(len(solution) == 0 or solution.strip() == '')
+        self.assertFalse(solution.strip())
 
     def test_solve_scrambled_cube(self) -> None:
         """Test solving a scrambled cube returns valid algorithm."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         cube = VCube()
         cube.rotate("R U R' U'")
         kociemba_str = vcube_to_kociemba_string(cube)

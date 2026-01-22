@@ -3,8 +3,6 @@
 import unittest
 from random import Random
 
-import pytest
-
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.scrambler_pieces import _calculate_parity
 from cubing_algs.scrambler_steps import SUPPORTED_STEPS
@@ -12,7 +10,6 @@ from cubing_algs.scrambler_steps import InvalidStepError
 from cubing_algs.scrambler_steps import _generate_step_state
 from cubing_algs.scrambler_steps import scramble_ocll_case
 from cubing_algs.scrambler_steps import scramble_step
-from cubing_algs.scrambler_utils import SolverNotAvailableError
 from cubing_algs.vcube import VCube
 
 
@@ -44,12 +41,12 @@ class TestGenerateStepState(unittest.TestCase):
 
     def test_invalid_step_raises(self) -> None:
         """Test that invalid step name raises error."""
-        with pytest.raises(InvalidStepError, match='not recognized'):
+        with self.assertRaises(InvalidStepError):
             _generate_step_state('INVALID_STEP', Random(42))
 
     def test_pll_only_permutation(self) -> None:
         """Test that PLL only permutes U layer."""
-        cp, co, ep, eo = _generate_step_state('PLL', Random(42))
+        _cp, co, _ep, eo = _generate_step_state('PLL', Random(42))
 
         # All orientations should be solved
         self.assertTrue(all(co[i] == 0 for i in range(8)))
@@ -63,7 +60,7 @@ class TestGenerateStepState(unittest.TestCase):
 
         # Try multiple times to ensure randomness
         for _ in range(10):
-            cp, co, ep, eo = _generate_step_state('OLL', rng)
+            _cp, co, _ep, eo = _generate_step_state('OLL', rng)
 
             # Check if U corners have orientation
             u_corners = [0, 1, 2, 3]
@@ -80,7 +77,7 @@ class TestGenerateStepState(unittest.TestCase):
 
     def test_f2l_permutes_all_corners(self) -> None:
         """Test that F2L permutes all corners."""
-        cp, co, ep, eo = _generate_step_state('F2L', Random(42))
+        cp, _co, _ep, _eo = _generate_step_state('F2L', Random(42))
 
         # All corners should potentially be permuted
         # Just check valid permutation
@@ -100,24 +97,8 @@ class TestGenerateStepState(unittest.TestCase):
 class TestScrambleStep(unittest.TestCase):
     """Tests for scramble_step function."""
 
-    def test_requires_kociemba(self) -> None:
-        """Test that scramble_step requires kociemba package."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-            pytest.skip('kociemba is installed, skipping unavailable test')
-        except ImportError:
-            pass
-
-        with pytest.raises(SolverNotAvailableError, match='pip install kociemba'):
-            scramble_step('PLL', Random(42))
-
     def test_all_steps_with_kociemba(self) -> None:
         """Test all step types with kociemba installed."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         rng = Random(42)
         for step in SUPPORTED_STEPS:
             scramble = scramble_step(step, rng, include_auf=False)
@@ -127,21 +108,11 @@ class TestScrambleStep(unittest.TestCase):
 
     def test_invalid_step_raises(self) -> None:
         """Test that invalid step raises error."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
-        with pytest.raises(InvalidStepError):
+        with self.assertRaises(InvalidStepError):
             scramble_step('INVALID', Random(42))
 
     def test_scramble_produces_correct_state(self) -> None:
         """Test that scramble produces expected step state."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         rng = Random(42)
         scramble = scramble_step('PLL', rng, include_auf=False)
 
@@ -150,7 +121,7 @@ class TestScrambleStep(unittest.TestCase):
         cube.rotate(str(scramble))
 
         # Check that only U layer is permuted (no orientation)
-        cp, co, ep, eo, _ = cube.to_cubies
+        _cp, co, _ep, eo, _ = cube.to_cubies
 
         # All orientations should be 0
         self.assertTrue(all(co[i] == 0 for i in range(8)))
@@ -158,11 +129,6 @@ class TestScrambleStep(unittest.TestCase):
 
     def test_with_auf(self) -> None:
         """Test scramble with AUF enabled."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         scramble_with = scramble_step('PLL', Random(42), include_auf=True)
         scramble_without = scramble_step('PLL', Random(42), include_auf=False)
 
@@ -173,11 +139,6 @@ class TestScrambleStep(unittest.TestCase):
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same scramble."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         scramble1 = scramble_step('PLL', Random(42), include_auf=False)
         scramble2 = scramble_step('PLL', Random(42), include_auf=False)
 
@@ -187,24 +148,8 @@ class TestScrambleStep(unittest.TestCase):
 class TestScrambleOCLLCase(unittest.TestCase):
     """Tests for scramble_ocll_case function."""
 
-    def test_requires_kociemba(self) -> None:
-        """Test that scramble_ocll_case requires kociemba package."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-            pytest.skip('kociemba is installed, skipping unavailable test')
-        except ImportError:
-            pass
-
-        with pytest.raises(SolverNotAvailableError):
-            scramble_ocll_case('T', Random(42))
-
     def test_all_ocll_cases(self) -> None:
         """Test all OCLL case types."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         cases = ['T', 'U', 'L', 'H', 'Pi', 'Sune', 'AntiSune', 'Solved']
         rng = Random(42)
 
@@ -216,34 +161,23 @@ class TestScrambleOCLLCase(unittest.TestCase):
 
     def test_invalid_case_raises(self) -> None:
         """Test that invalid case raises error."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
-        with pytest.raises(InvalidStepError, match='not recognized'):
+        with self.assertRaises(InvalidStepError):
             scramble_ocll_case('INVALID', Random(42))
 
     def test_case_insensitive(self) -> None:
         """Test that case names are case-insensitive."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         # These should all work
-        scramble_ocll_case('T', Random(42))
-        scramble_ocll_case('t', Random(42))
-        scramble_ocll_case('sune', Random(42))
-        scramble_ocll_case('SUNE', Random(42))
+        self.assertEqual(
+            scramble_ocll_case('T', Random(42)),
+            scramble_ocll_case('t', Random(42)),
+        )
+        self.assertEqual(
+            scramble_ocll_case('sune', Random(42)),
+            scramble_ocll_case('SUNE', Random(42)),
+        )
 
     def test_solved_case(self) -> None:
         """Test that solved case returns valid scramble."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         scramble = scramble_ocll_case('Solved', Random(42))
 
         # Apply to cube
@@ -251,7 +185,7 @@ class TestScrambleOCLLCase(unittest.TestCase):
         cube.rotate(str(scramble))
 
         # U corners should be oriented
-        cp, co, ep, eo, _ = cube.to_cubies
+        _cp, co, _ep, _eo, _ = cube.to_cubies
         u_corners = [0, 1, 2, 3]
 
         # All U corners should be oriented
@@ -259,11 +193,6 @@ class TestScrambleOCLLCase(unittest.TestCase):
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same scramble."""
-        try:
-            import kociemba  # type: ignore[import-not-found] # noqa: F401
-        except ImportError:
-            pytest.skip('kociemba not installed')
-
         scramble1 = scramble_ocll_case('T', Random(42))
         scramble2 = scramble_ocll_case('T', Random(42))
 

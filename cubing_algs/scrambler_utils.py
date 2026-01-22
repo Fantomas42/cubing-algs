@@ -1,4 +1,6 @@
 """Utility functions for advanced scrambler modules."""
+import kociemba
+
 from cubing_algs.vcube import VCube
 
 CORNER_NAMES: list[str] = [
@@ -33,10 +35,6 @@ ALL_EDGES: list[int] = list(range(12))
 
 class InvalidPieceSpecError(ValueError):
     """Raised when piece specification cannot be parsed."""
-
-
-class SolverNotAvailableError(Exception):
-    """Raised when cube solver is not available."""
 
 
 def parse_piece_spec(spec: str, piece_type: str) -> list[int]:
@@ -174,19 +172,6 @@ def solve_to_algorithm(kociemba_state: str) -> str:
     Returns:
         Algorithm string to solve the cube (space-separated moves).
 
-    Raises:
-        SolverNotAvailableError: If kociemba package is not installed.
-
     """
-    try:
-        import kociemba  # type: ignore[import-not-found]
-    except ImportError as e:
-        msg = (
-            'kociemba package is required for step scrambles. '
-            'Install it with: pip install kociemba'
-        )
-        raise SolverNotAvailableError(msg) from e
-
-    # Kociemba returns the solving algorithm
     solution: str = kociemba.solve(kociemba_state)
     return solution

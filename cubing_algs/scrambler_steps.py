@@ -49,9 +49,9 @@ class InvalidStepError(ValueError):
     """Raised when step name is not recognized."""
 
 
-def _generate_step_state(
-    step: str,
-    rng: Random | None = None,
+def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
+        step: str,
+        rng: Random | None = None,
 ) -> tuple[list[int], list[int], list[int], list[int]]:
     """
     Generate cube state for a specific speedcubing step.
@@ -271,9 +271,9 @@ def _generate_step_state(
 
 
 def scramble_step(
-    step: str,
-    rng: Random | None = None,
-    include_auf: bool = True,
+        step: str,
+        rng: Random | None = None,
+        *, include_auf: bool = True,
 ) -> Algorithm:
     """
     Generate a scramble for a specific speedcubing step.
@@ -288,10 +288,6 @@ def scramble_step(
 
     Returns:
         Algorithm scramble for the specified step.
-
-    Raises:
-        InvalidStepError: If step is not recognized.
-        SolverNotAvailableError: If kociemba package is not installed.
 
     Example:
         >>> scramble = scramble_step("PLL")
@@ -331,9 +327,9 @@ def scramble_step(
     return mirror_moves(parse_moves(solution))
 
 
-def scramble_ocll_case(
-    case: str,
-    rng: Random | None = None,
+def scramble_ocll_case(  # noqa: C901
+        case: str,
+        rng: Random | None = None,
 ) -> Algorithm:
     """
     Generate scramble for specific OCLL case pattern.
@@ -348,7 +344,6 @@ def scramble_ocll_case(
 
     Raises:
         InvalidStepError: If case is not recognized.
-        SolverNotAvailableError: If kociemba package is not installed.
 
     """
     if rng is None:
@@ -432,18 +427,18 @@ def scramble_ocll_case(
     return mirror_moves(parse_moves(solution))
 
 
-def scramble_with_piece_constraints(
-    solve_corners: str = '',
-    solve_edges: str = '',
-    orient_corners_spec: str = '',
-    orient_edges_spec: str = '',
-    derange_corners: str = '',
-    derange_edges: str = '',
-    disorient_corners_spec: str = '',
-    disorient_edges_spec: str = '',
-    buffer_corners: str = 'D',
-    buffer_edges: str = 'E',
-    rng: Random | None = None,
+def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
+        solve_corners: str = '',
+        solve_edges: str = '',
+        orient_corners_spec: str = '',
+        orient_edges_spec: str = '',
+        derange_corners: str = '',
+        derange_edges: str = '',
+        disorient_corners_spec: str = '',
+        disorient_edges_spec: str = '',
+        buffer_corners: str = 'D',
+        buffer_edges: str = 'E',
+        rng: Random | None = None,
 ) -> Algorithm:
     """
     Generate scramble with fine-grained piece-level constraints.
@@ -472,10 +467,6 @@ def scramble_with_piece_constraints(
 
     Returns:
         Algorithm scramble satisfying the specified constraints.
-
-    Raises:
-        SolverNotAvailableError: If kociemba package is not installed.
-        InvalidPieceSpecError: If piece specification is invalid.
 
     Examples:
         >>> # PLL-like state: U layer permuted, all pieces oriented

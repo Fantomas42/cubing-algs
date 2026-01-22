@@ -51,9 +51,9 @@ def _calculate_parity(permutation: list[int]) -> int:
 
 
 def random_permutation(
-    corners: list[int],
-    edges: list[int],
-    rng: Random | None = None,
+        corners: list[int],
+        edges: list[int],
+        rng: Random | None = None,
 ) -> tuple[list[int], list[int], list[int], list[int]]:
     """
     Generate random permutation for both corners and edges together.
@@ -104,7 +104,7 @@ def random_permutation(
         if len(corners) == 0:
             # No corners - must swap edges
             ep[edges[0]], ep[edges[1]] = ep[edges[1]], ep[edges[0]]
-        elif len(edges) == 0 or rng.random() < 0.5:
+        elif len(edges) == 0 or rng.random() < 0.5:  # noqa: PLR2004
             # Swap corners
             cp[corners[0]], cp[corners[1]] = cp[corners[1]], cp[corners[0]]
         else:
@@ -115,8 +115,8 @@ def random_permutation(
 
 
 def random_corner_orientation(
-    corners: list[int],
-    rng: Random | None = None,
+        corners: list[int],
+        rng: Random | None = None,
 ) -> list[int]:
     """
     Generate random corner orientation maintaining sum(co) % 3 == 0.
@@ -152,8 +152,8 @@ def random_corner_orientation(
 
 
 def random_edge_orientation(
-    edges: list[int],
-    rng: Random | None = None,
+        edges: list[int],
+        rng: Random | None = None,
 ) -> list[int]:
     """
     Generate random edge orientation maintaining sum(eo) % 2 == 0.
@@ -189,9 +189,9 @@ def random_edge_orientation(
 
 
 def flip_n_edges(
-    edges: list[int],
-    n: int,
-    rng: Random | None = None,
+        edges: list[int],
+        n: int,
+        rng: Random | None = None,
 ) -> list[int]:
     """
     Flip exactly n edges (n must be even).
@@ -229,16 +229,16 @@ def flip_n_edges(
     return eo
 
 
-def arrange_pieces(
-    cp: list[int],
-    co: list[int],
-    ep: list[int],
-    eo: list[int],
-    corners: list[int],
-    edges: list[int],
-    buffer_corners: list[int] | None = None,
-    buffer_edges: list[int] | None = None,
-    rng: Random | None = None,
+def arrange_pieces(  # noqa: C901, PLR0912 PLR0913, PLR0914, PLR0915, PLR0917
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+        corners: list[int],
+        edges: list[int],
+        buffer_corners: list[int] | None = None,
+        buffer_edges: list[int] | None = None,
+        rng: Random | None = None,
 ) -> tuple[list[int], list[int], list[int], list[int]]:
     """
     Arrange specified pieces to their solved positions.
@@ -249,7 +249,10 @@ def arrange_pieces(
     3. Fix parity using buffer pieces if needed
 
     Args:
-        cp, co, ep, eo: Current cubie state.
+        cp: Corner permutations.
+        co: Corner orientations.
+        ep: Edge permutions.
+        eo: Edge orientations.
         corners: Indices of corners to solve.
         edges: Indices of edges to solve.
         buffer_corners: Corners that can absorb parity fixes.
@@ -295,17 +298,20 @@ def arrange_pieces(
             eo[idx_i], eo[idx_j] = eo[idx_j], eo[idx_i]
 
     # Ensure initial parities match
-    if all_corners and all_edges:
-        if _calculate_parity(cp) != _calculate_parity(ep):
-            # Fix parity by swapping two buffer pieces
-            if len(buffer_edges) >= 2:
-                idx_1, idx_2 = buffer_edges[0], buffer_edges[1]
-                ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
-                eo[idx_1], eo[idx_2] = eo[idx_2], eo[idx_1]
-            elif len(buffer_corners) >= 2:
-                idx_1, idx_2 = buffer_corners[0], buffer_corners[1]
-                cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
-                co[idx_1], co[idx_2] = co[idx_2], co[idx_1]
+    if (
+            all_corners
+            and all_edges
+            and _calculate_parity(cp) != _calculate_parity(ep)
+    ):
+        # Fix parity by swapping two buffer pieces
+        if len(buffer_edges) >= 2:
+            idx_1, idx_2 = buffer_edges[0], buffer_edges[1]
+            ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
+            eo[idx_1], eo[idx_2] = eo[idx_2], eo[idx_1]
+        elif len(buffer_corners) >= 2:
+            idx_1, idx_2 = buffer_corners[0], buffer_corners[1]
+            cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
+            co[idx_1], co[idx_2] = co[idx_2], co[idx_1]
 
     # Now solve the specified pieces
     even_swaps = True
@@ -351,16 +357,16 @@ def arrange_pieces(
     return cp, co, ep, eo
 
 
-def derange_pieces(
-    cp: list[int],
-    co: list[int],
-    ep: list[int],
-    eo: list[int],
-    corners: list[int],
-    edges: list[int],
-    buffer_corners: list[int] | None = None,
-    buffer_edges: list[int] | None = None,
-    rng: Random | None = None,
+def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0915, PLR0917
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+        corners: list[int],
+        edges: list[int],
+        buffer_corners: list[int] | None = None,
+        buffer_edges: list[int] | None = None,
+        rng: Random | None = None,
 ) -> tuple[list[int], list[int], list[int], list[int]]:
     """
     Ensure specified pieces are NOT in solved positions (derangement).
@@ -371,7 +377,10 @@ def derange_pieces(
     3. Fix parity using buffer pieces if needed
 
     Args:
-        cp, co, ep, eo: Current cubie state.
+        cp: Corner permutations.
+        co: Corner orientations.
+        ep: Edge permutions.
+        eo: Edge orientations.
         corners: Indices of corners to derange.
         edges: Indices of edges to derange.
         buffer_corners: Corners that can absorb parity fixes.
@@ -486,10 +495,10 @@ def derange_pieces(
 
 
 def orient_corners(
-    co: list[int],
-    corners: list[int],
-    buffer_corners: list[int] | None = None,
-    rng: Random | None = None,
+        co: list[int],
+        corners: list[int],
+        buffer_corners: list[int] | None = None,
+        rng: Random | None = None,
 ) -> list[int]:
     """
     Orient specified corners to solved orientation (co=0).
@@ -532,10 +541,10 @@ def orient_corners(
 
 
 def disorient_corners(
-    co: list[int],
-    corners: list[int],
-    buffer_corners: list[int] | None = None,
-    rng: Random | None = None,
+        co: list[int],
+        corners: list[int],
+        buffer_corners: list[int] | None = None,
+        rng: Random | None = None,
 ) -> list[int]:
     """
     Ensure specified corners are NOT in solved orientation (co != 0).
@@ -593,10 +602,10 @@ def disorient_corners(
 
 
 def orient_edges(
-    eo: list[int],
-    edges: list[int],
-    buffer_edges: list[int] | None = None,
-    rng: Random | None = None,
+        eo: list[int],
+        edges: list[int],
+        buffer_edges: list[int] | None = None,
+        rng: Random | None = None,
 ) -> list[int]:
     """
     Orient specified edges to solved orientation (eo=0).
@@ -639,10 +648,10 @@ def orient_edges(
 
 
 def disorient_edges(
-    eo: list[int],
-    edges: list[int],
-    buffer_edges: list[int] | None = None,
-    rng: Random | None = None,
+        eo: list[int],
+        edges: list[int],
+        buffer_edges: list[int] | None = None,
+        rng: Random | None = None,
 ) -> list[int]:
     """
     Ensure specified edges are NOT in solved orientation (eo != 0).
