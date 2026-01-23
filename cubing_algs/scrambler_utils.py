@@ -33,6 +33,26 @@ E_EDGES: list[int] = [8, 9, 10, 11]  # FR, FL, BL, BR (middle slice)
 ALL_CORNERS: list[int] = list(range(8))
 ALL_EDGES: list[int] = list(range(12))
 
+# Layer maps for piece specification parsing (module-level for efficiency)
+LAYER_MAP_CORNERS: dict[str, list[int]] = {
+    'U': U_CORNERS,
+    'D': D_CORNERS,
+    'R': R_CORNERS,
+    'L': L_CORNERS,
+    'F': F_CORNERS,
+    'B': B_CORNERS,
+}
+
+LAYER_MAP_EDGES: dict[str, list[int]] = {
+    'U': U_EDGES,
+    'D': D_EDGES,
+    'R': R_EDGES,
+    'L': L_EDGES,
+    'F': F_EDGES,
+    'B': B_EDGES,
+    'E': E_EDGES,
+}
+
 
 class InvalidPieceSpecError(ValueError):
     """Raised when piece specification cannot be parsed."""
@@ -78,34 +98,12 @@ def parse_piece_spec(spec: str, piece_type: str) -> list[int]:
     if spec in {'ALL', 'EACH', 'EVERY', 'ANY', ''}:
         return ALL_CORNERS if piece_type == 'corner' else ALL_EDGES
 
-    if not spec:
-        return []
-
     # Parse space-separated tokens
     tokens = spec.split()
-    pieces = set()
-
-    layer_map_corners = {
-        'U': U_CORNERS,
-        'D': D_CORNERS,
-        'R': R_CORNERS,
-        'L': L_CORNERS,
-        'F': F_CORNERS,
-        'B': B_CORNERS,
-    }
-
-    layer_map_edges = {
-        'U': U_EDGES,
-        'D': D_EDGES,
-        'R': R_EDGES,
-        'L': L_EDGES,
-        'F': F_EDGES,
-        'B': B_EDGES,
-        'E': E_EDGES,
-    }
+    pieces: set[int] = set()
 
     names = CORNER_NAMES if piece_type == 'corner' else EDGE_NAMES
-    layer_map = layer_map_corners if piece_type == 'corner' else layer_map_edges
+    layer_map = LAYER_MAP_CORNERS if piece_type == 'corner' else LAYER_MAP_EDGES
 
     for token_raw in tokens:
         token = token_raw.strip()

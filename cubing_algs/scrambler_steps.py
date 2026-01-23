@@ -28,6 +28,101 @@ from cubing_algs.scrambler_utils import vcube_to_kociemba_string
 from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.vcube import VCube
 
+# Solved center orientation array
+SOLVED_CENTERS: list[int] = [0, 1, 2, 3, 4, 5]
+
+# AUF choices for random U layer adjustment
+AUF_CHOICES: list[str] = ['', 'U', 'U2', "U'"]
+
+# Type alias for cube state tuple
+CubeState = tuple[list[int], list[int], list[int], list[int]]
+
+
+def _apply_auf(
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+        rng: Random,
+) -> CubeState:
+    """
+    Apply random AUF (Adjustment of U Face) to cube state.
+
+    Args:
+        cp: Corner permutations.
+        co: Corner orientations.
+        ep: Edge permutations.
+        eo: Edge orientations.
+        rng: Random number generator.
+
+    Returns:
+        Tuple of (cp, co, ep, eo) with AUF applied.
+
+    """
+    auf_move = rng.choice(AUF_CHOICES)
+    if auf_move:
+        temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_CENTERS)
+        temp_cube.rotate(auf_move)
+        cp, co, ep, eo, _ = temp_cube.to_cubies
+    return cp, co, ep, eo
+
+
+def _apply_moves(
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+        moves: str,
+) -> CubeState:
+    """
+    Apply move sequence to cube state.
+
+    Args:
+        cp: Corner permutations.
+        co: Corner orientations.
+        ep: Edge permutations.
+        eo: Edge orientations.
+        moves: Move sequence string (e.g., "R U R'").
+
+    Returns:
+        Tuple of (cp, co, ep, eo) with moves applied.
+
+    """
+    temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_CENTERS)
+    temp_cube.rotate(moves)
+    cp, co, ep, eo, _ = temp_cube.to_cubies
+    return cp, co, ep, eo
+
+
+def _state_to_scramble(
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+) -> Algorithm:
+    """
+    Convert cube state to scramble algorithm using Kociemba solver.
+
+    Args:
+        cp: Corner permutations.
+        co: Corner orientations.
+        ep: Edge permutations.
+        eo: Edge orientations.
+
+    Returns:
+        Algorithm that produces this state from solved.
+
+    """
+    cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_CENTERS)
+    kociemba_state = vcube_to_kociemba_string(cube)
+    solution = solve_to_algorithm(kociemba_state)
+
+    if not solution or not solution.strip():
+        return parse_moves('')
+
+    return mirror_moves(parse_moves(solution))
+
+
 # Supported step types
 SUPPORTED_STEPS = [
     # Last Layer steps
@@ -98,13 +193,7 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 
     # 2GLL - specific pattern with phase edges
     elif step == '2GLL':
-        # Random AUF
-        auf_moves = rng.choice(['', 'U', 'U2', "U'"])
-        if auf_moves:
-            temp_cube = VCube()
-            temp_cube.rotate(auf_moves)
-            tcp, tco, tep, teo, _ = temp_cube.to_cubies
-            cp, co, ep, eo = tcp, tco, tep, teo
+        cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
 
         # Permute phase edges only (no corners)
         phase_edges = [1, 3]  # UF, UB
@@ -142,12 +231,7 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
         phase_edges = [1, 3]  # UF, UB
         cp, co, ep, eo = random_permutation(U_CORNERS, phase_edges, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        # Random AUF
-        auf_moves = rng.choice(['', 'U', 'U2', "U'"])
-        if auf_moves:
-            temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-            temp_cube.rotate(auf_moves)
-            cp, co, ep, eo, _ = temp_cube.to_cubies
+        cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
 
     # F2L - First Two Layers
     elif step == 'F2L':
@@ -220,29 +304,20 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
     elif step == 'WV':
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        # Apply R U R'
-        temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-        temp_cube.rotate("R U R'")
-        cp, co, ep, eo, _ = temp_cube.to_cubies
+        cp, co, ep, eo = _apply_moves(cp, co, ep, eo, "R U R'")
 
     # SV - Summer Variation
     elif step == 'SV':
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        # Apply R U' R'
-        temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-        temp_cube.rotate("R U' R'")
-        cp, co, ep, eo, _ = temp_cube.to_cubies
+        cp, co, ep, eo = _apply_moves(cp, co, ep, eo, "R U' R'")
 
     # VLS, VHLS - Valk Last Slot
     elif step in {'VLS', 'VHLS'}:
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         eo = random_edge_orientation(U_EDGES, rng)
-        # Apply R U' R'
-        temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-        temp_cube.rotate("R U' R'")
-        cp, co, ep, eo, _ = temp_cube.to_cubies
+        cp, co, ep, eo = _apply_moves(cp, co, ep, eo, "R U' R'")
 
     # Petrus2x2x3
     elif step == 'PETRUS2X2X3':
@@ -304,30 +379,12 @@ def scramble_step(
     # Apply random AUF if requested
     skip_auf_steps = {'WV', 'SV', 'VLS', 'VHLS', '2GLL', 'ZZLL'}
     if include_auf and step.upper() not in skip_auf_steps:
-        auf_moves = rng.choice(['', 'U', 'U2', "U'"])
-        if auf_moves:
-            temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-            temp_cube.rotate(auf_moves)
-            cp, co, ep, eo, _ = temp_cube.to_cubies
+        cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
 
-    # Convert to VCube
-    cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-
-    # Convert to Kociemba format
-    kociemba_state = vcube_to_kociemba_string(cube)
-
-    # Generate solving algorithm
-    solution = solve_to_algorithm(kociemba_state)
-
-    # Parse and return as Algorithm (inverted, since kociemba returns solution)
-    if not solution or not solution.strip():
-        # Already solved
-        return parse_moves('')
-
-    return mirror_moves(parse_moves(solution))
+    return _state_to_scramble(cp, co, ep, eo)
 
 
-def scramble_ocll_case(  # noqa: C901
+def scramble_ocll_case(
         case: str,
         rng: Random | None = None,
 ) -> Algorithm:
@@ -405,26 +462,9 @@ def scramble_ocll_case(  # noqa: C901
         raise InvalidStepError(msg)
 
     # Random AUF
-    auf_moves = rng.choice(['', 'U', 'U2', "U'"])
-    if auf_moves:
-        temp_cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-        temp_cube.rotate(auf_moves)
-        cp, co, ep, eo, _ = temp_cube.to_cubies
+    cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
 
-    # Convert to VCube
-    cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-
-    # Convert to Kociemba format
-    kociemba_state = vcube_to_kociemba_string(cube)
-
-    # Generate solving algorithm
-    solution = solve_to_algorithm(kociemba_state)
-
-    # Parse and return as Algorithm (inverted, since kociemba returns solution)
-    if not solution or not solution.strip():
-        return parse_moves('')
-
-    return mirror_moves(parse_moves(solution))
+    return _state_to_scramble(cp, co, ep, eo)
 
 
 def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
@@ -590,17 +630,4 @@ def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
             eo, disorient_edges_list, buffer_edges_list, rng,
         )
 
-    # Convert to VCube
-    cube = VCube.from_cubies(cp, co, ep, eo, [0, 1, 2, 3, 4, 5])
-
-    # Convert to Kociemba format
-    kociemba_state = vcube_to_kociemba_string(cube)
-
-    # Generate solving algorithm
-    solution = solve_to_algorithm(kociemba_state)
-
-    # Parse and return as Algorithm (inverted, since kociemba returns solution)
-    if not solution or not solution.strip():
-        return parse_moves('')
-
-    return mirror_moves(parse_moves(solution))
+    return _state_to_scramble(cp, co, ep, eo)

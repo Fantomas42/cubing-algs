@@ -14,6 +14,72 @@ from random import Random
 from cubing_algs.scrambler import DEFAULT_RNG
 
 
+def _shuffle_in_place(
+        perm: list[int],
+        orient: list[int],
+        indices: list[int],
+        rng: Random,
+) -> bool:
+    """
+    Fischer-Yates shuffle for pieces at specified indices.
+
+    Shuffles both permutation and orientation arrays in place.
+
+    Args:
+        perm: Permutation array (cp or ep).
+        orient: Orientation array (co or eo).
+        indices: Indices of pieces to shuffle.
+        rng: Random number generator.
+
+    Returns:
+        True if even number of swaps were made, False otherwise.
+
+    """
+    even_swaps = True
+    for i in range(len(indices) - 1):
+        j = rng.randint(i, len(indices) - 1)
+        if i != j:
+            idx_i = indices[i]
+            idx_j = indices[j]
+            perm[idx_i], perm[idx_j] = perm[idx_j], perm[idx_i]
+            orient[idx_i], orient[idx_j] = orient[idx_j], orient[idx_i]
+            even_swaps = not even_swaps
+    return even_swaps
+
+
+def _fix_parity_with_buffer(  # noqa: PLR0913, PLR0917
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+        buffer_corners: list[int],
+        buffer_edges: list[int],
+) -> None:
+    """
+    Fix parity mismatch by swapping two buffer pieces.
+
+    Swaps two pieces from either buffer_corners or buffer_edges to fix
+    the parity constraint (parity(cp) == parity(ep)).
+
+    Args:
+        cp: Corner permutations.
+        co: Corner orientations.
+        ep: Edge permutations.
+        eo: Edge orientations.
+        buffer_corners: Corners that can absorb parity fixes.
+        buffer_edges: Edges that can absorb parity fixes.
+
+    """
+    if len(buffer_edges) >= 2:
+        idx_1, idx_2 = buffer_edges[0], buffer_edges[1]
+        ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
+        eo[idx_1], eo[idx_2] = eo[idx_2], eo[idx_1]
+    elif len(buffer_corners) >= 2:
+        idx_1, idx_2 = buffer_corners[0], buffer_corners[1]
+        cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
+        co[idx_1], co[idx_2] = co[idx_2], co[idx_1]
+
+
 def _calculate_parity(permutation: list[int]) -> int:
     """
     Calculate the parity of a permutation.
@@ -229,7 +295,7 @@ def flip_n_edges(
     return eo
 
 
-def arrange_pieces(  # noqa: C901, PLR0912 PLR0913, PLR0914, PLR0915, PLR0917
+def arrange_pieces(  # noqa: PLR0913, PLR0917
         cp: list[int],
         co: list[int],
         ep: list[int],
@@ -279,23 +345,8 @@ def arrange_pieces(  # noqa: C901, PLR0912 PLR0913, PLR0914, PLR0915, PLR0917
     all_corners = corners + buffer_corners
     all_edges = edges + buffer_edges
 
-    # Fischer-Yates shuffle for corners
-    for i in range(len(all_corners) - 1):
-        j = rng.randint(i, len(all_corners) - 1)
-        if i != j:
-            idx_i = all_corners[i]
-            idx_j = all_corners[j]
-            cp[idx_i], cp[idx_j] = cp[idx_j], cp[idx_i]
-            co[idx_i], co[idx_j] = co[idx_j], co[idx_i]
-
-    # Fischer-Yates shuffle for edges
-    for i in range(len(all_edges) - 1):
-        j = rng.randint(i, len(all_edges) - 1)
-        if i != j:
-            idx_i = all_edges[i]
-            idx_j = all_edges[j]
-            ep[idx_i], ep[idx_j] = ep[idx_j], ep[idx_i]
-            eo[idx_i], eo[idx_j] = eo[idx_j], eo[idx_i]
+    _shuffle_in_place(cp, co, all_corners, rng)
+    _shuffle_in_place(ep, eo, all_edges, rng)
 
     # Ensure initial parities match
     if (
@@ -303,15 +354,9 @@ def arrange_pieces(  # noqa: C901, PLR0912 PLR0913, PLR0914, PLR0915, PLR0917
             and all_edges
             and _calculate_parity(cp) != _calculate_parity(ep)
     ):
-        # Fix parity by swapping two buffer pieces
-        if len(buffer_edges) >= 2:
-            idx_1, idx_2 = buffer_edges[0], buffer_edges[1]
-            ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
-            eo[idx_1], eo[idx_2] = eo[idx_2], eo[idx_1]
-        elif len(buffer_corners) >= 2:
-            idx_1, idx_2 = buffer_corners[0], buffer_corners[1]
-            cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
-            co[idx_1], co[idx_2] = co[idx_2], co[idx_1]
+        _fix_parity_with_buffer(
+            cp, co, ep, eo, buffer_corners, buffer_edges,
+        )
 
     # Now solve the specified pieces
     even_swaps = True
@@ -344,20 +389,14 @@ def arrange_pieces(  # noqa: C901, PLR0912 PLR0913, PLR0914, PLR0915, PLR0917
 
     # Fix parity if needed
     if not even_swaps:
-        # Try buffer corners first
-        if len(buffer_corners) >= 2:
-            idx_1, idx_2 = buffer_corners[0], buffer_corners[1]
-            cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
-            co[idx_1], co[idx_2] = co[idx_2], co[idx_1]
-        elif len(buffer_edges) >= 2:
-            idx_1, idx_2 = buffer_edges[0], buffer_edges[1]
-            ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
-            eo[idx_1], eo[idx_2] = eo[idx_2], eo[idx_1]
+        _fix_parity_with_buffer(
+            cp, co, ep, eo, buffer_corners, buffer_edges,
+        )
 
     return cp, co, ep, eo
 
 
-def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0915, PLR0917
+def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
         cp: list[int],
         co: list[int],
         ep: list[int],
@@ -407,23 +446,8 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0915, PLR0917
     all_corners = corners + buffer_corners
     all_edges = edges + buffer_edges
 
-    # Fischer-Yates shuffle for corners
-    for i in range(len(all_corners) - 1):
-        j = rng.randint(i, len(all_corners) - 1)
-        if i != j:
-            idx_i = all_corners[i]
-            idx_j = all_corners[j]
-            cp[idx_i], cp[idx_j] = cp[idx_j], cp[idx_i]
-            co[idx_i], co[idx_j] = co[idx_j], co[idx_i]
-
-    # Fischer-Yates shuffle for edges
-    for i in range(len(all_edges) - 1):
-        j = rng.randint(i, len(all_edges) - 1)
-        if i != j:
-            idx_i = all_edges[i]
-            idx_j = all_edges[j]
-            ep[idx_i], ep[idx_j] = ep[idx_j], ep[idx_i]
-            eo[idx_i], eo[idx_j] = eo[idx_j], eo[idx_i]
+    _shuffle_in_place(cp, co, all_corners, rng)
+    _shuffle_in_place(ep, eo, all_edges, rng)
 
     even_swaps = True
 
@@ -481,15 +505,9 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0915, PLR0917
 
     # Ensure final parities match
     if _calculate_parity(cp) != _calculate_parity(ep):
-        # Fix parity by swapping two buffer pieces
-        if len(buffer_corners) >= 2:
-            idx_1, idx_2 = buffer_corners[0], buffer_corners[1]
-            cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
-            co[idx_1], co[idx_2] = co[idx_2], co[idx_1]
-        elif len(buffer_edges) >= 2:
-            idx_1, idx_2 = buffer_edges[0], buffer_edges[1]
-            ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
-            eo[idx_1], eo[idx_2] = eo[idx_2], eo[idx_1]
+        _fix_parity_with_buffer(
+            cp, co, ep, eo, buffer_corners, buffer_edges,
+        )
 
     return cp, co, ep, eo
 
