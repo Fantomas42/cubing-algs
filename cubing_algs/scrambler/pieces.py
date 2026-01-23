@@ -145,28 +145,14 @@ def random_permutation(
     ep = list(range(12))
     eo = [0] * 12
 
-    even_num_swaps = True
-
-    # Fischer-Yates shuffle corners
-    for i in range(len(corners) - 1):
-        j = rng.randint(i, len(corners) - 1)
-        if i != j:
-            idx_i = corners[i]
-            idx_j = corners[j]
-            cp[idx_i], cp[idx_j] = cp[idx_j], cp[idx_i]
-            even_num_swaps = not even_num_swaps
-
-    # Fischer-Yates shuffle edges
-    for i in range(len(edges) - 1):
-        j = rng.randint(i, len(edges) - 1)
-        if i != j:
-            idx_i = edges[i]
-            idx_j = edges[j]
-            ep[idx_i], ep[idx_j] = ep[idx_j], ep[idx_i]
-            even_num_swaps = not even_num_swaps
+    # Use _shuffle_in_place for Fischer-Yates shuffle
+    # Note: co/eo are all zeros, so shuffling them has no effect
+    corners_even = _shuffle_in_place(cp, co, corners, rng)
+    edges_even = _shuffle_in_place(ep, eo, edges, rng)
 
     # Fix parity if needed by swapping within permuted pieces
-    if not even_num_swaps:
+    # Parity is odd if exactly one shuffle had odd swaps
+    if corners_even != edges_even:
         if len(corners) == 0:
             # No corners - must swap edges
             ep[edges[0]], ep[edges[1]] = ep[edges[1]], ep[edges[0]]
@@ -317,7 +303,7 @@ def arrange_pieces(  # noqa: PLR0913, PLR0917
     Args:
         cp: Corner permutations.
         co: Corner orientations.
-        ep: Edge permutions.
+        ep: Edge permutations.
         eo: Edge orientations.
         corners: Indices of corners to solve.
         edges: Indices of edges to solve.
@@ -418,7 +404,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
     Args:
         cp: Corner permutations.
         co: Corner orientations.
-        ep: Edge permutions.
+        ep: Edge permutations.
         eo: Edge orientations.
         corners: Indices of corners to derange.
         edges: Indices of edges to derange.

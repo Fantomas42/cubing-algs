@@ -9,9 +9,9 @@ from cubing_algs.scrambler import D_EDGES
 from cubing_algs.scrambler import E_EDGES
 from cubing_algs.scrambler import EDGE_NAMES
 from cubing_algs.scrambler import F_CORNERS
-from cubing_algs.scrambler import InvalidPieceSpecError
 from cubing_algs.scrambler import U_CORNERS
 from cubing_algs.scrambler import U_EDGES
+from cubing_algs.scrambler import InvalidPieceSpecError
 from cubing_algs.scrambler import parse_piece_spec
 from cubing_algs.scrambler import solve_to_algorithm
 from cubing_algs.scrambler import vcube_to_kociemba_string
