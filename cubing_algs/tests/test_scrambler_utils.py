@@ -1,17 +1,17 @@
 """Tests for scrambler utility functions."""
 import unittest
 
+from cubing_algs.constants import D_CORNERS
+from cubing_algs.constants import D_EDGES
+from cubing_algs.constants import E_EDGES
+from cubing_algs.constants import F_CORNERS
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EP
+from cubing_algs.constants import U_CORNERS
+from cubing_algs.constants import U_EDGES
 from cubing_algs.exceptions import InvalidPieceSpecError
-from cubing_algs.scrambler.utils import ALL_CORNERS
-from cubing_algs.scrambler.utils import ALL_EDGES
 from cubing_algs.scrambler.utils import CORNER_NAMES
-from cubing_algs.scrambler.utils import D_CORNERS
-from cubing_algs.scrambler.utils import D_EDGES
-from cubing_algs.scrambler.utils import E_EDGES
 from cubing_algs.scrambler.utils import EDGE_NAMES
-from cubing_algs.scrambler.utils import F_CORNERS
-from cubing_algs.scrambler.utils import U_CORNERS
-from cubing_algs.scrambler.utils import U_EDGES
 from cubing_algs.scrambler.utils import parse_piece_spec
 from cubing_algs.scrambler.utils import solve_to_algorithm
 from cubing_algs.scrambler.utils import vcube_to_kociemba_string
@@ -24,23 +24,23 @@ class TestParsePieceSpec(unittest.TestCase):  # noqa: PLR0904
     def test_parse_all_corners(self) -> None:
         """Test parsing 'all' returns all corners."""
         result = parse_piece_spec('all', 'corner')
-        self.assertEqual(result, ALL_CORNERS)
+        self.assertEqual(result, SOLVED_CP)
 
     def test_parse_all_edges(self) -> None:
         """Test parsing 'all' returns all edges."""
         result = parse_piece_spec('all', 'edge')
-        self.assertEqual(result, ALL_EDGES)
+        self.assertEqual(result, SOLVED_EP)
 
     def test_parse_empty_string(self) -> None:
         """Test parsing empty string returns all pieces."""
-        self.assertEqual(parse_piece_spec('', 'corner'), ALL_CORNERS)
-        self.assertEqual(parse_piece_spec('', 'edge'), ALL_EDGES)
+        self.assertEqual(parse_piece_spec('', 'corner'), SOLVED_CP)
+        self.assertEqual(parse_piece_spec('', 'edge'), SOLVED_EP)
 
     def test_parse_each_synonyms(self) -> None:
         """Test synonyms like 'each', 'every', 'any'."""
         for synonym in ['each', 'every', 'any']:
-            self.assertEqual(parse_piece_spec(synonym, 'corner'), ALL_CORNERS)
-            self.assertEqual(parse_piece_spec(synonym, 'edge'), ALL_EDGES)
+            self.assertEqual(parse_piece_spec(synonym, 'corner'), SOLVED_CP)
+            self.assertEqual(parse_piece_spec(synonym, 'edge'), SOLVED_EP)
 
     def test_parse_layer_u_corners(self) -> None:
         """Test parsing U layer returns U corners."""
@@ -225,7 +225,7 @@ class TestConstants(unittest.TestCase):
 
     def test_layer_groups_cover_all_corners(self) -> None:
         """Test U and D groups cover all corners."""
-        self.assertEqual(set(U_CORNERS) | set(D_CORNERS), set(ALL_CORNERS))
+        self.assertEqual(set(U_CORNERS) | set(D_CORNERS), set(SOLVED_CP))
 
     def test_layer_groups_no_overlap_edges(self) -> None:
         """Test U, D, and E edge groups don't overlap."""
@@ -237,5 +237,5 @@ class TestConstants(unittest.TestCase):
         """Test U, D, and E groups cover all edges."""
         self.assertEqual(
             set(U_EDGES) | set(D_EDGES) | set(E_EDGES),
-            set(ALL_EDGES),
+            set(SOLVED_EP),
         )

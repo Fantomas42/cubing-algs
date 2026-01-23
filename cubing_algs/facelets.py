@@ -19,6 +19,7 @@ from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACES
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
+from cubing_algs.constants import SOLVED_SO
 from cubing_algs.extensions import rotate_3x3x3
 
 
@@ -213,7 +214,7 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913, PLR0917
         Cube state in the Kociemba facelets representation string
 
     """
-    if so != [0, 1, 2, 3, 4, 5] and scheme:
+    if so != SOLVED_SO and scheme:
         rotations = OFFSET_ORIENTATION_MAP[str(so[0]) + str(so[2])]
         for rotation in rotations.split(' '):
             scheme = rotate_3x3x3.rotate_move(scheme, rotation)

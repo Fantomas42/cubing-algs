@@ -6,6 +6,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 from cubing_algs.constants import FACES
+from cubing_algs.constants import SOLVED_SO
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
@@ -118,7 +119,7 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        so = SOLVED_SO
         facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
         cube = VCube.from_cubies(cp, co, ep, eo, so)
@@ -135,7 +136,7 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        so = SOLVED_SO
         facelets = '111111011111011011011010010010001001110110000111111100'
 
         cube = VCube.from_cubies(
@@ -155,7 +156,7 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        so = SOLVED_SO
         facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
         self.assertEqual(

@@ -3,6 +3,10 @@
 import unittest
 from random import Random
 
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EP
+from cubing_algs.constants import U_CORNERS
+from cubing_algs.constants import U_EDGES
 from cubing_algs.scrambler.pieces import _calculate_parity
 from cubing_algs.scrambler.pieces import derange_pieces
 from cubing_algs.scrambler.pieces import disorient_corners
@@ -12,10 +16,6 @@ from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import orient_edges
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
-from cubing_algs.scrambler.utils import ALL_CORNERS
-from cubing_algs.scrambler.utils import ALL_EDGES
-from cubing_algs.scrambler.utils import U_CORNERS
-from cubing_algs.scrambler.utils import U_EDGES
 
 
 class TestCalculateParity(unittest.TestCase):
@@ -54,7 +54,7 @@ class TestRandomCornerOrientation(unittest.TestCase):
         """Test that sum(co) % 3 == 0."""
         rng = Random(42)
         for _ in range(20):
-            co = random_corner_orientation(ALL_CORNERS, rng=rng)
+            co = random_corner_orientation(SOLVED_CP, rng=rng)
             self.assertEqual(sum(co) % 3, 0)
 
     def test_partial_orientation_constraint(self) -> None:
@@ -66,13 +66,13 @@ class TestRandomCornerOrientation(unittest.TestCase):
 
     def test_all_values_valid(self) -> None:
         """Test that all orientation values are 0, 1, or 2."""
-        co = random_corner_orientation(ALL_CORNERS, rng=Random(42))
+        co = random_corner_orientation(SOLVED_CP, rng=Random(42))
         self.assertTrue(all(0 <= val <= 2 for val in co))
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same result."""
-        co1 = random_corner_orientation(ALL_CORNERS, rng=Random(42))
-        co2 = random_corner_orientation(ALL_CORNERS, rng=Random(42))
+        co1 = random_corner_orientation(SOLVED_CP, rng=Random(42))
+        co2 = random_corner_orientation(SOLVED_CP, rng=Random(42))
         self.assertEqual(co1, co2)
 
 
@@ -88,7 +88,7 @@ class TestRandomEdgeOrientation(unittest.TestCase):
         """Test that sum(eo) % 2 == 0."""
         rng = Random(42)
         for _ in range(20):
-            eo = random_edge_orientation(ALL_EDGES, rng=rng)
+            eo = random_edge_orientation(SOLVED_EP, rng=rng)
             self.assertEqual(sum(eo) % 2, 0)
 
     def test_partial_orientation_constraint(self) -> None:
@@ -100,13 +100,13 @@ class TestRandomEdgeOrientation(unittest.TestCase):
 
     def test_all_values_valid(self) -> None:
         """Test that all orientation values are 0 or 1."""
-        eo = random_edge_orientation(ALL_EDGES, rng=Random(42))
+        eo = random_edge_orientation(SOLVED_EP, rng=Random(42))
         self.assertTrue(all(val in {0, 1} for val in eo))
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same result."""
-        eo1 = random_edge_orientation(ALL_EDGES, rng=Random(42))
-        eo2 = random_edge_orientation(ALL_EDGES, rng=Random(42))
+        eo1 = random_edge_orientation(SOLVED_EP, rng=Random(42))
+        eo2 = random_edge_orientation(SOLVED_EP, rng=Random(42))
         self.assertEqual(eo1, eo2)
 
 
@@ -115,18 +115,18 @@ class TestFlipNEdges(unittest.TestCase):
 
     def test_flip_zero_edges(self) -> None:
         """Test flipping 0 edges returns solved state."""
-        eo = flip_n_edges(ALL_EDGES, 0, rng=Random(42))
+        eo = flip_n_edges(SOLVED_EP, 0, rng=Random(42))
         self.assertEqual(eo, [0] * 12)
 
     def test_flip_even_number(self) -> None:
         """Test flipping even number of edges."""
-        eo = flip_n_edges(ALL_EDGES, 4, rng=Random(42))
+        eo = flip_n_edges(SOLVED_EP, 4, rng=Random(42))
         self.assertEqual(sum(eo), 4)
 
     def test_flip_odd_number_raises(self) -> None:
         """Test that flipping odd number raises error."""
         with self.assertRaises(ValueError):
-            flip_n_edges(ALL_EDGES, 3, rng=Random(42))
+            flip_n_edges(SOLVED_EP, 3, rng=Random(42))
 
     def test_flip_too_many_raises(self) -> None:
         """Test that flipping too many edges raises error."""
@@ -136,7 +136,7 @@ class TestFlipNEdges(unittest.TestCase):
     def test_maintains_constraint(self) -> None:
         """Test that result maintains eo constraint."""
         for n in [0, 2, 4, 6, 8, 10, 12]:
-            eo = flip_n_edges(ALL_EDGES, n, rng=Random(42))
+            eo = flip_n_edges(SOLVED_EP, n, rng=Random(42))
             self.assertEqual(sum(eo) % 2, 0)
 
 
@@ -231,7 +231,7 @@ class TestOrientCorners(unittest.TestCase):
         """Test that orientation maintains sum(co) % 3 == 0."""
         rng = Random(42)
         for _ in range(10):
-            co = random_corner_orientation(ALL_CORNERS, rng=rng)
+            co = random_corner_orientation(SOLVED_CP, rng=rng)
             result = orient_corners(co, U_CORNERS, [4, 5], rng=rng)
             self.assertEqual(sum(result) % 3, 0)
 
@@ -284,7 +284,7 @@ class TestOrientEdges(unittest.TestCase):
         """Test that orientation maintains sum(eo) % 2 == 0."""
         rng = Random(42)
         for _ in range(10):
-            eo = random_edge_orientation(ALL_EDGES, rng=rng)
+            eo = random_edge_orientation(SOLVED_EP, rng=rng)
             result = orient_edges(eo, U_EDGES, [8, 9], rng=rng)
             self.assertEqual(sum(result) % 2, 0)
 

@@ -1,6 +1,7 @@
 """Virtual cube implementation for simulating moves and tracking state."""
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
@@ -29,7 +30,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     - NxNxN: 6*N*N-character string
     """
 
-    face_number: int = 6
+    face_number: int = FACE_NUMBER
 
     def __init__(self, initial: str | None = None, *,
                  size: int = 3,

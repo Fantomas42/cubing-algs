@@ -11,10 +11,10 @@ All functions use buffer pieces to absorb necessary fixes.
 """
 from random import Random
 
-from cubing_algs.integrity import CORNER_MODULUS
-from cubing_algs.integrity import CORNER_NUMBER
-from cubing_algs.integrity import EDGE_MODULUS
-from cubing_algs.integrity import EDGE_NUMBER
+from cubing_algs.constants import CORNER_MODULUS
+from cubing_algs.constants import CORNER_NUMBER
+from cubing_algs.constants import EDGE_MODULUS
+from cubing_algs.constants import EDGE_NUMBER
 from cubing_algs.scrambler.random import DEFAULT_RNG
 
 

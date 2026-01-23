@@ -1,6 +1,10 @@
 """Utility functions for advanced scrambler modules."""
 import kociemba
 
+from cubing_algs.constants import LAYER_MAP_CORNERS
+from cubing_algs.constants import LAYER_MAP_EDGES
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.exceptions import InvalidPieceSpecError
 from cubing_algs.initial_state import INITIAL_STATE_3x3x3
 from cubing_algs.vcube import VCube
@@ -14,45 +18,6 @@ EDGE_NAMES: list[str] = [
     'DR', 'DF', 'DL', 'DB',
     'FR', 'FL', 'BL', 'BR',
 ]
-
-# Layer piece groups
-U_CORNERS: list[int] = [0, 1, 2, 3]  # URF, UFL, ULB, UBR
-D_CORNERS: list[int] = [4, 5, 6, 7]  # DFR, DLF, DBL, DRB
-R_CORNERS: list[int] = [0, 3, 4, 7]  # URF, UBR, DFR, DRB
-L_CORNERS: list[int] = [1, 2, 5, 6]  # UFL, ULB, DLF, DBL
-F_CORNERS: list[int] = [0, 1, 4, 5]  # URF, UFL, DFR, DLF
-B_CORNERS: list[int] = [2, 3, 6, 7]  # ULB, UBR, DBL, DRB
-
-U_EDGES: list[int] = [0, 1, 2, 3]    # UR, UF, UL, UB
-D_EDGES: list[int] = [4, 5, 6, 7]    # DR, DF, DL, DB
-R_EDGES: list[int] = [0, 4, 8, 11]   # UR, DR, FR, BR
-L_EDGES: list[int] = [2, 6, 9, 10]   # UL, DL, FL, BL
-F_EDGES: list[int] = [1, 5, 8, 9]    # UF, DF, FR, FL
-B_EDGES: list[int] = [3, 7, 10, 11]  # UB, DB, BL, BR
-E_EDGES: list[int] = [8, 9, 10, 11]  # FR, FL, BL, BR (middle slice)
-
-ALL_CORNERS: list[int] = list(range(8))
-ALL_EDGES: list[int] = list(range(12))
-
-# Layer maps for piece specification parsing (module-level for efficiency)
-LAYER_MAP_CORNERS: dict[str, list[int]] = {
-    'U': U_CORNERS,
-    'D': D_CORNERS,
-    'R': R_CORNERS,
-    'L': L_CORNERS,
-    'F': F_CORNERS,
-    'B': B_CORNERS,
-}
-
-LAYER_MAP_EDGES: dict[str, list[int]] = {
-    'U': U_EDGES,
-    'D': D_EDGES,
-    'R': R_EDGES,
-    'L': L_EDGES,
-    'F': F_EDGES,
-    'B': B_EDGES,
-    'E': E_EDGES,
-}
 
 
 def parse_piece_spec(spec: str, piece_type: str) -> list[int]:
@@ -93,7 +58,7 @@ def parse_piece_spec(spec: str, piece_type: str) -> list[int]:
 
     # Handle "all" or empty spec
     if spec in {'ALL', 'EACH', 'EVERY', 'ANY', ''}:
-        return ALL_CORNERS if piece_type == 'corner' else ALL_EDGES
+        return SOLVED_CP if piece_type == 'corner' else SOLVED_EP
 
     # Parse space-separated tokens
     tokens = spec.split()

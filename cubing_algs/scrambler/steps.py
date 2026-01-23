@@ -8,6 +8,10 @@ a solver to generate the scramble algorithm.
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_SO
+from cubing_algs.constants import U_CORNERS
+from cubing_algs.constants import U_EDGES
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.parsing import parse_moves
 from cubing_algs.scrambler.pieces import arrange_pieces
@@ -20,17 +24,11 @@ from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_permutation
 from cubing_algs.scrambler.random import DEFAULT_RNG
-from cubing_algs.scrambler.utils import ALL_CORNERS
-from cubing_algs.scrambler.utils import U_CORNERS
-from cubing_algs.scrambler.utils import U_EDGES
 from cubing_algs.scrambler.utils import parse_piece_spec
 from cubing_algs.scrambler.utils import solve_to_algorithm
 from cubing_algs.scrambler.utils import vcube_to_kociemba_string
 from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.vcube import VCube
-
-# Solved center orientation array
-SOLVED_CENTERS: list[int] = [0, 1, 2, 3, 4, 5]
 
 # AUF choices for random U layer adjustment
 AUF_CHOICES: list[str] = ['', 'U', 'U2', "U'"]
@@ -62,7 +60,7 @@ def _apply_auf(
     """
     auf_move = rng.choice(AUF_CHOICES)
     if auf_move:
-        temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_CENTERS)
+        temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_SO)
         temp_cube.rotate(auf_move)
         cp, co, ep, eo, _ = temp_cube.to_cubies
     return cp, co, ep, eo
@@ -89,7 +87,7 @@ def _apply_moves(
         Tuple of (cp, co, ep, eo) with moves applied.
 
     """
-    temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_CENTERS)
+    temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_SO)
     temp_cube.rotate(moves)
     cp, co, ep, eo, _ = temp_cube.to_cubies
     return cp, co, ep, eo
@@ -114,7 +112,7 @@ def _state_to_scramble(
         Algorithm that produces this state from solved.
 
     """
-    cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_CENTERS)
+    cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_SO)
     kociemba_state = vcube_to_kociemba_string(cube)
     solution = solve_to_algorithm(kociemba_state)
 
@@ -227,15 +225,15 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
     # F2L - First Two Layers
     elif step == 'F2L':
         f2l_edges = parse_piece_spec('U FR FL BR BL', 'edge')
-        cp, co, ep, eo = random_permutation(ALL_CORNERS, f2l_edges, rng)
-        co = random_corner_orientation(ALL_CORNERS, rng)
+        cp, co, ep, eo = random_permutation(SOLVED_CP, f2l_edges, rng)
+        co = random_corner_orientation(SOLVED_CP, rng)
         eo = random_edge_orientation(f2l_edges, rng)
 
     # ZZF2L - ZZ method F2L
     elif step == 'ZZF2L':
         zzf2l_edges = parse_piece_spec('R U L', 'edge')
-        cp, co, ep, eo = random_permutation(ALL_CORNERS, zzf2l_edges, rng)
-        co = random_corner_orientation(ALL_CORNERS, rng)
+        cp, co, ep, eo = random_permutation(SOLVED_CP, zzf2l_edges, rng)
+        co = random_corner_orientation(SOLVED_CP, rng)
 
     # ZZRB, PetrusF2L - right block steps
     elif step in {'ZZRB', 'PETRUSF2L'}:

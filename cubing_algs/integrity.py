@@ -7,20 +7,16 @@ Checks include permutation validity, orientation constraints,
 color combinations, and mathematical consistency.
 """
 from cubing_algs.constants import CORNER_FACELET_MAP
+from cubing_algs.constants import CORNER_NUMBER
+from cubing_algs.constants import CORNER_VALID_ORIENTATIONS
 from cubing_algs.constants import EDGE_FACELET_MAP
+from cubing_algs.constants import EDGE_NUMBER
+from cubing_algs.constants import EDGE_VALID_ORIENTATIONS
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.facelets import facelets_to_cubies
-
-CORNER_NUMBER = 8
-CORNER_VALID_ORIENTATIONS = {0, 1, 2}
-CORNER_MODULUS = len(CORNER_VALID_ORIENTATIONS)
-
-EDGE_NUMBER = 12
-EDGE_VALID_ORIENTATIONS = {0, 1}
-EDGE_MODULUS = len(EDGE_VALID_ORIENTATIONS)
 
 
 def count_inversions(permutation: list[int]) -> int:
