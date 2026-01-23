@@ -8,6 +8,7 @@ a solver to generate the scramble algorithm.
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.parsing import parse_moves
 from cubing_algs.scrambler.pieces import arrange_pieces
 from cubing_algs.scrambler.pieces import derange_pieces
@@ -138,10 +139,6 @@ SUPPORTED_STEPS = [
     # Petrus method
     'Petrus2x2x3', 'PetrusEO',
 ]
-
-
-class InvalidStepError(ValueError):
-    """Raised when step name is not recognized."""
 
 
 def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915

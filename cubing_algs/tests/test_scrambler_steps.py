@@ -4,9 +4,9 @@ import unittest
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.scrambler.pieces import _calculate_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
-from cubing_algs.scrambler.steps import InvalidStepError
 from cubing_algs.scrambler.steps import _generate_step_state
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step

@@ -1,6 +1,7 @@
 """Utility functions for advanced scrambler modules."""
 import kociemba
 
+from cubing_algs.exceptions import InvalidPieceSpecError
 from cubing_algs.initial_state import INITIAL_STATE_3x3x3
 from cubing_algs.vcube import VCube
 
@@ -52,10 +53,6 @@ LAYER_MAP_EDGES: dict[str, list[int]] = {
     'B': B_EDGES,
     'E': E_EDGES,
 }
-
-
-class InvalidPieceSpecError(ValueError):
-    """Raised when piece specification cannot be parsed."""
 
 
 def parse_piece_spec(spec: str, piece_type: str) -> list[int]:

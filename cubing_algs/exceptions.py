@@ -32,3 +32,11 @@ class InvalidCaseNameError(ValueError):
 
 class InvalidCollectionNameError(ValueError):
     """Exception raised when requesting a collection with an invalid name."""
+
+
+class InvalidStepError(ValueError):
+    """Raised when step name is not recognized."""
+
+
+class InvalidPieceSpecError(ValueError):
+    """Raised when piece specification cannot be parsed."""

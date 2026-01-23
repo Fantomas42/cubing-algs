@@ -1,6 +1,7 @@
 """Tests for scrambler utility functions."""
 import unittest
 
+from cubing_algs.exceptions import InvalidPieceSpecError
 from cubing_algs.scrambler.utils import ALL_CORNERS
 from cubing_algs.scrambler.utils import ALL_EDGES
 from cubing_algs.scrambler.utils import CORNER_NAMES
@@ -11,7 +12,6 @@ from cubing_algs.scrambler.utils import EDGE_NAMES
 from cubing_algs.scrambler.utils import F_CORNERS
 from cubing_algs.scrambler.utils import U_CORNERS
 from cubing_algs.scrambler.utils import U_EDGES
-from cubing_algs.scrambler.utils import InvalidPieceSpecError
 from cubing_algs.scrambler.utils import parse_piece_spec
 from cubing_algs.scrambler.utils import solve_to_algorithm
 from cubing_algs.scrambler.utils import vcube_to_kociemba_string
