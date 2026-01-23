@@ -1,20 +1,20 @@
 """Tests for scrambler utility functions."""
 import unittest
 
-from cubing_algs.scrambler_utils import ALL_CORNERS
-from cubing_algs.scrambler_utils import ALL_EDGES
-from cubing_algs.scrambler_utils import CORNER_NAMES
-from cubing_algs.scrambler_utils import D_CORNERS
-from cubing_algs.scrambler_utils import D_EDGES
-from cubing_algs.scrambler_utils import E_EDGES
-from cubing_algs.scrambler_utils import EDGE_NAMES
-from cubing_algs.scrambler_utils import F_CORNERS
-from cubing_algs.scrambler_utils import U_CORNERS
-from cubing_algs.scrambler_utils import U_EDGES
-from cubing_algs.scrambler_utils import InvalidPieceSpecError
-from cubing_algs.scrambler_utils import parse_piece_spec
-from cubing_algs.scrambler_utils import solve_to_algorithm
-from cubing_algs.scrambler_utils import vcube_to_kociemba_string
+from cubing_algs.scrambler import ALL_CORNERS
+from cubing_algs.scrambler import ALL_EDGES
+from cubing_algs.scrambler import CORNER_NAMES
+from cubing_algs.scrambler import D_CORNERS
+from cubing_algs.scrambler import D_EDGES
+from cubing_algs.scrambler import E_EDGES
+from cubing_algs.scrambler import EDGE_NAMES
+from cubing_algs.scrambler import F_CORNERS
+from cubing_algs.scrambler import InvalidPieceSpecError
+from cubing_algs.scrambler import U_CORNERS
+from cubing_algs.scrambler import U_EDGES
+from cubing_algs.scrambler import parse_piece_spec
+from cubing_algs.scrambler import solve_to_algorithm
+from cubing_algs.scrambler import vcube_to_kociemba_string
 from cubing_algs.vcube import VCube
 
 

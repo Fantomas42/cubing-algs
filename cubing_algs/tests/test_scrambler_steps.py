@@ -4,12 +4,12 @@ import unittest
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.scrambler_pieces import _calculate_parity
-from cubing_algs.scrambler_steps import SUPPORTED_STEPS
-from cubing_algs.scrambler_steps import InvalidStepError
-from cubing_algs.scrambler_steps import _generate_step_state
-from cubing_algs.scrambler_steps import scramble_ocll_case
-from cubing_algs.scrambler_steps import scramble_step
+from cubing_algs.scrambler import SUPPORTED_STEPS
+from cubing_algs.scrambler import InvalidStepError
+from cubing_algs.scrambler import _calculate_parity
+from cubing_algs.scrambler import scramble_ocll_case
+from cubing_algs.scrambler import scramble_step
+from cubing_algs.scrambler.steps import _generate_step_state
 from cubing_algs.vcube import VCube
 
 

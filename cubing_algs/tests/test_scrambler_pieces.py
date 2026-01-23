@@ -3,19 +3,19 @@
 import unittest
 from random import Random
 
-from cubing_algs.scrambler_pieces import _calculate_parity
-from cubing_algs.scrambler_pieces import derange_pieces
-from cubing_algs.scrambler_pieces import disorient_corners
-from cubing_algs.scrambler_pieces import disorient_edges
-from cubing_algs.scrambler_pieces import flip_n_edges
-from cubing_algs.scrambler_pieces import orient_corners
-from cubing_algs.scrambler_pieces import orient_edges
-from cubing_algs.scrambler_pieces import random_corner_orientation
-from cubing_algs.scrambler_pieces import random_edge_orientation
-from cubing_algs.scrambler_utils import ALL_CORNERS
-from cubing_algs.scrambler_utils import ALL_EDGES
-from cubing_algs.scrambler_utils import U_CORNERS
-from cubing_algs.scrambler_utils import U_EDGES
+from cubing_algs.scrambler import ALL_CORNERS
+from cubing_algs.scrambler import ALL_EDGES
+from cubing_algs.scrambler import U_CORNERS
+from cubing_algs.scrambler import U_EDGES
+from cubing_algs.scrambler import _calculate_parity
+from cubing_algs.scrambler import derange_pieces
+from cubing_algs.scrambler import disorient_corners
+from cubing_algs.scrambler import disorient_edges
+from cubing_algs.scrambler import flip_n_edges
+from cubing_algs.scrambler import orient_corners
+from cubing_algs.scrambler import orient_edges
+from cubing_algs.scrambler import random_corner_orientation
+from cubing_algs.scrambler import random_edge_orientation
 
 
 class TestCalculateParity(unittest.TestCase):

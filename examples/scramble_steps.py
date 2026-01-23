@@ -28,9 +28,9 @@ Usage:
 import argparse
 from random import Random
 
-from cubing_algs.scrambler_steps import SUPPORTED_STEPS
-from cubing_algs.scrambler_steps import scramble_ocll_case
-from cubing_algs.scrambler_steps import scramble_step
+from cubing_algs.scrambler import SUPPORTED_STEPS
+from cubing_algs.scrambler import scramble_ocll_case
+from cubing_algs.scrambler import scramble_step
 from cubing_algs.vcube import VCube
 
 # OCLL cases available

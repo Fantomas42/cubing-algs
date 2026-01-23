@@ -11,7 +11,7 @@ All functions use buffer pieces to absorb necessary fixes.
 """
 from random import Random
 
-from cubing_algs.scrambler import DEFAULT_RNG
+from cubing_algs.scrambler.random import DEFAULT_RNG
 
 
 def _shuffle_in_place(
