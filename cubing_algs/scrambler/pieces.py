@@ -11,13 +11,11 @@ All functions use buffer pieces to absorb necessary fixes.
 """
 from random import Random
 
+from cubing_algs.integrity import CORNER_MODULUS
+from cubing_algs.integrity import CORNER_NUMBER
+from cubing_algs.integrity import EDGE_MODULUS
+from cubing_algs.integrity import EDGE_NUMBER
 from cubing_algs.scrambler.random import DEFAULT_RNG
-
-# Constants for piece types
-_CORNER_COUNT = 8
-_CORNER_MODULUS = 3
-_EDGE_COUNT = 12
-_EDGE_MODULUS = 2
 
 
 def _swap_pieces(
@@ -240,7 +238,7 @@ def random_corner_orientation(
     """
     if rng is None:
         rng = DEFAULT_RNG
-    return _random_orientation(corners, _CORNER_COUNT, _CORNER_MODULUS, rng)
+    return _random_orientation(corners, CORNER_NUMBER, CORNER_MODULUS, rng)
 
 
 def random_edge_orientation(
@@ -260,7 +258,7 @@ def random_edge_orientation(
     """
     if rng is None:
         rng = DEFAULT_RNG
-    return _random_orientation(edges, _EDGE_COUNT, _EDGE_MODULUS, rng)
+    return _random_orientation(edges, EDGE_NUMBER, EDGE_MODULUS, rng)
 
 
 def flip_n_edges(
@@ -573,7 +571,7 @@ def orient_corners(
     if rng is None:
         rng = DEFAULT_RNG
     return _orient_pieces(
-        co, corners, buffer_corners or [], _CORNER_MODULUS, rng,
+        co, corners, buffer_corners or [], CORNER_MODULUS, rng,
     )
 
 
@@ -616,14 +614,14 @@ def disorient_corners(
             total_twist += co[idx]
 
     # Fix constraint using buffer
-    if total_twist % _CORNER_MODULUS != 0:
+    if total_twist % CORNER_MODULUS != 0:
         if buffer_corners:
             victim = rng.choice(buffer_corners)
-            co[victim] = (co[victim] - total_twist) % _CORNER_MODULUS
+            co[victim] = (co[victim] - total_twist) % CORNER_MODULUS
         elif corners:
             # No buffer - try to adjust without solving
             victim = rng.choice(corners)
-            needed = (-total_twist) % _CORNER_MODULUS
+            needed = (-total_twist) % CORNER_MODULUS
             if needed != 0:
                 co[victim] = needed
             else:
@@ -631,8 +629,8 @@ def disorient_corners(
                 # Find another corner to adjust
                 for idx in corners:
                     if idx != victim:
-                        co[idx] = (co[idx] + 1) % _CORNER_MODULUS
-                        co[victim] = (co[victim] + 2) % _CORNER_MODULUS
+                        co[idx] = (co[idx] + 1) % CORNER_MODULUS
+                        co[victim] = (co[victim] + 2) % CORNER_MODULUS
                         break
 
     return co
@@ -661,7 +659,7 @@ def orient_edges(
     """
     if rng is None:
         rng = DEFAULT_RNG
-    return _orient_pieces(eo, edges, buffer_edges or [], _EDGE_MODULUS, rng)
+    return _orient_pieces(eo, edges, buffer_edges or [], EDGE_MODULUS, rng)
 
 
 def disorient_edges(
@@ -701,10 +699,10 @@ def disorient_edges(
             total_flips += eo[idx]
 
     # Fix constraint using buffer
-    if total_flips % _EDGE_MODULUS != 0:
+    if total_flips % EDGE_MODULUS != 0:
         if buffer_edges:
             victim = rng.choice(buffer_edges)
-            eo[victim] = (eo[victim] + 1) % _EDGE_MODULUS
+            eo[victim] = (eo[victim] + 1) % EDGE_MODULUS
         elif edges:
             # No buffer - unflip one edge
             victim = rng.choice(edges)

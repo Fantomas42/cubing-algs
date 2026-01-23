@@ -16,9 +16,11 @@ from cubing_algs.facelets import facelets_to_cubies
 
 CORNER_NUMBER = 8
 CORNER_VALID_ORIENTATIONS = {0, 1, 2}
+CORNER_MODULUS = len(CORNER_VALID_ORIENTATIONS)
 
 EDGE_NUMBER = 12
 EDGE_VALID_ORIENTATIONS = {0, 1}
+EDGE_MODULUS = len(EDGE_VALID_ORIENTATIONS)
 
 
 def count_inversions(permutation: list[int]) -> int:
