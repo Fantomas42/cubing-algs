@@ -179,6 +179,7 @@ class VCubeDisplay:
         mode_mask = ''
         display_method = self.display_cube
         default_orientation = ''
+        mode = mode.lower()
 
         # Only work for 3x3x3
         if mode == 'oll':
