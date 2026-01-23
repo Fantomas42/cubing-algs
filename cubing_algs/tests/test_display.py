@@ -143,6 +143,18 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(self.cube.state, initial_state)
         self.assertEqual(len(lines), 6)
 
+    def test_display_ll(self) -> None:
+        """Test display ll."""
+        self.cube.rotate("z2 L2 U' L2 D F2 R2 U R2 D' F2 z2")
+
+        initial_state = self.cube.state
+
+        result = self.printer.display(mode='ll')
+        lines = result.split('\n')
+
+        self.assertEqual(self.cube.state, initial_state)
+        self.assertEqual(len(lines), 6)
+
     def test_display_f2l(self) -> None:
         """Test display f2l."""
         self.cube.rotate("z2 R U R' U' z2")
