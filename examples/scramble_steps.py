@@ -28,9 +28,9 @@ Usage:
 import argparse
 from random import Random
 
-from cubing_algs.scrambler import SUPPORTED_STEPS
 from cubing_algs.scrambler import scramble_ocll_case
 from cubing_algs.scrambler import scramble_step
+from cubing_algs.scrambler.steps import SUPPORTED_STEPS
 from cubing_algs.vcube import VCube
 
 # OCLL cases available
@@ -38,31 +38,71 @@ OCLL_CASES = ['T', 'U', 'L', 'H', 'Pi', 'Sune', 'AntiSune', 'Solved']
 
 # Steps organized by method
 METHODS: dict[str, list[str]] = {
-    'cfop': ['F2L', 'OLL', 'PLL', 'LL'],
-    'cfop-ll': ['CLL', 'OLLCP', 'COLL', 'ZBLL', 'OCLL', 'ELL', 'EPLL', 'CPLL'],
-    'cfop-ls': ['LS', 'ELS', 'CLS', 'CPLS', 'EJLS', 'EJF2L', 'TTLL',
-                'WV', 'SV', 'VLS', 'VHLS'],
-    'zz': ['ZZF2L', 'ZZRB', 'ZZLS', 'TSLE', 'ZZLL', '2GLL'],
-    'roux': ['SB', 'CMLL', 'CMLLEO'],
-    'petrus': ['Petrus2x2x3', 'PetrusEO', 'PetrusF2L'],
+    'cfop': [
+        'F2L',
+        'OLL',
+        'PLL',
+        'LL',
+    ],
+    'cfop-ll': [
+        'CLL',
+        'OLLCP',
+        'COLL',
+        'ZBLL',
+        'OCLL',
+        'ELL',
+        'EPLL',
+        'CPLL',
+    ],
+    'cfop-ls': [
+        'LS',
+        'ELS',
+        'CLS',
+        'CPLS',
+        'EJLS',
+        'EJF2L',
+        'TTLL',
+        'WV',
+        'SV',
+        'VLS',
+        'VHLS',
+    ],
+    'zz': [
+        'ZZF2L',
+        'ZZRB',
+        'ZZLS',
+        'TSLE',
+        'ZZLL',
+        '2GLL',
+    ],
+    'roux': [
+        'SB',
+        'CMLL',
+        'CMLLEO',
+    ],
+    'petrus': [
+        'Petrus2x2x3',
+        'PetrusEO',
+        'PetrusF2L',
+    ],
 }
 
 # Step descriptions and display modes
 STEP_INFO: dict[str, tuple[str, str]] = {
     # Last Layer steps
-    'LL': ('Full Last Layer (orientation + permutation)', 'pll'),
+    'LL': ('Full Last Layer (orientation + permutation)', 'll'),
     'OLL': ('Orient Last Layer (make top face yellow)', 'oll'),
     'PLL': ('Permute Last Layer (oriented, needs permutation)', 'pll'),
     'CLL': ('Corners Last Layer (corners + edges scrambled)', 'oll'),
     'OLLCP': ('OLL + Corner Permutation', 'oll'),
     'COLL': ('Corner OLL (corners oriented+permuted)', 'oll'),
-    'ZBLL': ('Zborowski-Bruchem LL (corners oriented, all permuted)', 'oll'),
+    'ZBLL': ('Zborowski-Bruchem LL (corners oriented, all permuted)', 'll'),
     '2GLL': ('2-Gen Last Layer (phase edges only)', 'oll'),
     'OCLL': ('Orient Corners Last Layer (corner orientation only)', 'oll'),
     'ELL': ('Edge Last Layer (edge orientation + permutation)', 'pll'),
     'EPLL': ('Edge Permutation Last Layer (edges permuted only)', 'pll'),
     'CPLL': ('Corner Permutation Last Layer (corners permuted only)', 'pll'),
-    'ZZLL': ('ZZ Last Layer (phase edges, corners oriented)', 'oll'),
+    'ZZLL': ('ZZ Last Layer (phase edges, corners oriented)', 'll'),
     # F2L variants
     'F2L': ('First Two Layers (cross + 4 F2L pairs)', 'f2l'),
     'ZZF2L': ('ZZ F2L (edges oriented, R/U/L moveset)', 'f2l'),
