@@ -14,6 +14,7 @@ from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_MASK
+from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
 from cubing_algs.palettes import load_palette
@@ -178,6 +179,7 @@ class VCubeDisplay:
         mode_mask = ''
         display_method = self.display_cube
         default_orientation = ''
+        mode = mode.lower()
 
         # Only work for 3x3x3
         if mode == 'oll':
@@ -186,6 +188,10 @@ class VCubeDisplay:
             default_orientation = 'D'
         elif mode == 'pll':
             mode_mask = PLL_MASK
+            display_method = self.display_top_face
+            default_orientation = 'D'
+        elif mode == 'll':
+            mode_mask = L3_MASK
             display_method = self.display_top_face
             default_orientation = 'D'
         elif mode == 'cross':
