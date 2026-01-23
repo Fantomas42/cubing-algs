@@ -6,6 +6,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 from cubing_algs.constants import FACES
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
@@ -651,7 +652,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
         # Swap 0,1 = 1 inversion (odd)
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         # Identity = 0 inversions (even)
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
 
         with self.assertRaisesRegex(
                 InvalidCubeStateError,

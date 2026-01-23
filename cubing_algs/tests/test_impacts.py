@@ -3,6 +3,9 @@ import unittest
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.impacts import DistanceMetrics
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import analyze_cycles
@@ -155,9 +158,9 @@ class TestImpactData(unittest.TestCase):
                 'edges_moved': 2,
                 'corners_moved': 3,
             },
-            cubies_corner_permutation=[0, 1, 2, 3, 4, 5, 6, 7],
+            cubies_corner_permutation=SOLVED_CP,
             cubies_corner_orientation=[0, 1, 0, 0, 0, 0, 0, 0],
-            cubies_edge_permutation=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            cubies_edge_permutation=SOLVED_EP,
             cubies_edge_orientation=[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             cubies_corners_moved=2,
             cubies_corners_twisted=1,
@@ -2966,7 +2969,7 @@ class TestAnalyzeCycles(unittest.TestCase):
 
     def test_long_cycle(self) -> None:
         """Test long cycle."""
-        cycles = [[0, 1, 2, 3, 4, 5, 6, 7]]
+        cycles = [SOLVED_CP]
         result = analyze_cycles(cycles)
         self.assertEqual(result['cycle_count'], 1)
         self.assertEqual(result['min_cycle_length'], 8)
@@ -3083,8 +3086,8 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
 
     def test_first_layer_corners_solved(self) -> None:
         """Test first layer corners solved."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
-        co = [0, 0, 0, 0, 0, 0, 0, 0]
+        cp = SOLVED_CP
+        co = SOLVED_CO
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = [0] * 12
         patterns = classify_pattern(cp, co, ep, eo)
@@ -3094,7 +3097,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         """Test first layer edges solved."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = [0] * 8
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [0] * 12
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('FIRST_LAYER_EDGES_SOLVED', patterns)
@@ -3112,7 +3115,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         """Test cross solved."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = [0] * 8
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [0] * 12
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('CROSS_SOLVED', patterns)
@@ -3128,7 +3131,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
 
     def test_last_layer_oriented(self) -> None:
         """Test last layer oriented."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
+        cp = SOLVED_CP
         co = [0] * 8
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = [0] * 12
@@ -3148,7 +3151,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
 
     def test_pll_edges_only(self) -> None:
         """Test PLL with edges needing permutation outside U layer."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
+        cp = SOLVED_CP
         co = [0] * 8
         ep = [0, 4, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11]
         eo = [0] * 12
@@ -3159,23 +3162,23 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         """Test PLL with corners needing permutation outside U layer."""
         cp = [0, 4, 2, 3, 1, 5, 6, 7]
         co = [0] * 8
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [0] * 12
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('PLL_CORNERS_ONLY', patterns)
 
     def test_oll_case(self) -> None:
         """Test OLL case detection."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
+        cp = SOLVED_CP
         co = [1, 0, 0, 0, 0, 0, 0, 0]
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [0] * 12
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('OLL_CASE', patterns)
 
     def test_oll_case_with_f2l_incomplete(self) -> None:
         """Test OLL case when F2L is not complete."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
+        cp = SOLVED_CP
         co = [1, 0, 0, 0, 0, 0, 0, 0]
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 9, 8, 10, 11]
         eo = [0] * 12

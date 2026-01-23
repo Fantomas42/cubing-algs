@@ -23,7 +23,7 @@ class TestCalculateParity(unittest.TestCase):
 
     def test_solved_permutation_even(self) -> None:
         """Test that solved permutation has even parity."""
-        perm = [0, 1, 2, 3, 4, 5, 6, 7]
+        perm = SOLVED_CP
         self.assertEqual(_calculate_parity(perm), 0)
 
     def test_single_swap_odd(self) -> None:
