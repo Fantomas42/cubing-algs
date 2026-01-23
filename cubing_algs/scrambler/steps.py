@@ -183,8 +183,8 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
     elif step == 'PLL':
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
 
-    # COLL, ZBLL - corners oriented, all permuted
-    elif step in {'COLL', 'ZBLL'}:
+    # OCLL, COLL, ZBLL - corners oriented, all permuted
+    elif step in {'OCLL', 'COLL', 'ZBLL'}:
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 
@@ -195,12 +195,6 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
         # Permute phase edges only (no corners)
         phase_edges = [1, 3]  # UF, UB
         cp, co, ep, eo = random_permutation([], phase_edges, rng)
-        co = random_corner_orientation(U_CORNERS, rng)
-
-    # OCLL - only corner orientation on U layer
-    elif step == 'OCLL':
-        # TODO(me): check meaning + merge in COLL, ZBLL
-        cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 
     # ELL - edge orientation and permutation on U layer
