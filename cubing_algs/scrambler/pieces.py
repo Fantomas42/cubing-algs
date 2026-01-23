@@ -13,6 +13,32 @@ from random import Random
 
 from cubing_algs.scrambler.random import DEFAULT_RNG
 
+# Constants for piece types
+_CORNER_COUNT = 8
+_CORNER_MODULUS = 3
+_EDGE_COUNT = 12
+_EDGE_MODULUS = 2
+
+
+def _swap_pieces(
+        perm: list[int],
+        orient: list[int],
+        idx_a: int,
+        idx_b: int,
+) -> None:
+    """
+    Swap two pieces in permutation and orientation arrays.
+
+    Args:
+        perm: Permutation array (cp or ep).
+        orient: Orientation array (co or eo).
+        idx_a: First index to swap.
+        idx_b: Second index to swap.
+
+    """
+    perm[idx_a], perm[idx_b] = perm[idx_b], perm[idx_a]
+    orient[idx_a], orient[idx_b] = orient[idx_b], orient[idx_a]
+
 
 def _shuffle_in_place(
         perm: list[int],
@@ -39,10 +65,7 @@ def _shuffle_in_place(
     for i in range(len(indices) - 1):
         j = rng.randint(i, len(indices) - 1)
         if i != j:
-            idx_i = indices[i]
-            idx_j = indices[j]
-            perm[idx_i], perm[idx_j] = perm[idx_j], perm[idx_i]
-            orient[idx_i], orient[idx_j] = orient[idx_j], orient[idx_i]
+            _swap_pieces(perm, orient, indices[i], indices[j])
             even_swaps = not even_swaps
     return even_swaps
 
@@ -71,13 +94,9 @@ def _fix_parity_with_buffer(  # noqa: PLR0913, PLR0917
 
     """
     if len(buffer_edges) >= 2:
-        idx_1, idx_2 = buffer_edges[0], buffer_edges[1]
-        ep[idx_1], ep[idx_2] = ep[idx_2], ep[idx_1]
-        eo[idx_1], eo[idx_2] = eo[idx_2], eo[idx_1]
+        _swap_pieces(ep, eo, buffer_edges[0], buffer_edges[1])
     elif len(buffer_corners) >= 2:
-        idx_1, idx_2 = buffer_corners[0], buffer_corners[1]
-        cp[idx_1], cp[idx_2] = cp[idx_2], cp[idx_1]
-        co[idx_1], co[idx_2] = co[idx_2], co[idx_1]
+        _swap_pieces(cp, co, buffer_corners[0], buffer_corners[1])
 
 
 def _calculate_parity(permutation: list[int]) -> int:
@@ -155,15 +174,53 @@ def random_permutation(
     if corners_even != edges_even:
         if len(corners) == 0:
             # No corners - must swap edges
-            ep[edges[0]], ep[edges[1]] = ep[edges[1]], ep[edges[0]]
+            _swap_pieces(ep, eo, edges[0], edges[1])
         elif len(edges) == 0 or rng.random() < 0.5:  # noqa: PLR2004
             # Swap corners
-            cp[corners[0]], cp[corners[1]] = cp[corners[1]], cp[corners[0]]
+            _swap_pieces(cp, co, corners[0], corners[1])
         else:
             # Swap edges
-            ep[edges[0]], ep[edges[1]] = ep[edges[1]], ep[edges[0]]
+            _swap_pieces(ep, eo, edges[0], edges[1])
 
     return cp, co, ep, eo
+
+
+def _random_orientation(
+        pieces: list[int],
+        piece_count: int,
+        modulus: int,
+        rng: Random,
+) -> list[int]:
+    """
+    Generate random orientation maintaining sum constraint.
+
+    Args:
+        pieces: Indices of pieces to orient.
+        piece_count: Total number of pieces (8 for corners, 12 for edges).
+        modulus: Constraint modulus (3 for corners, 2 for edges).
+        rng: Random number generator.
+
+    Returns:
+        Orientation array with sum(orient[pieces]) % modulus == 0.
+
+    """
+    orient = [0] * piece_count
+
+    if not pieces:
+        return orient
+
+    # Randomize all but the last piece
+    total = 0
+    for i in range(len(pieces) - 1):
+        idx = pieces[i]
+        orient[idx] = rng.randint(0, modulus - 1)
+        total += orient[idx]
+
+    # Fix the last piece to maintain constraint
+    last_idx = pieces[-1]
+    orient[last_idx] = (-total) % modulus
+
+    return orient
 
 
 def random_corner_orientation(
@@ -183,24 +240,7 @@ def random_corner_orientation(
     """
     if rng is None:
         rng = DEFAULT_RNG
-
-    co = [0] * 8
-
-    if not corners:
-        return co
-
-    # Randomize all but the last corner
-    total = 0
-    for i in range(len(corners) - 1):
-        idx = corners[i]
-        co[idx] = rng.randint(0, 2)
-        total += co[idx]
-
-    # Fix the last corner to maintain constraint
-    last_idx = corners[-1]
-    co[last_idx] = (-total) % 3
-
-    return co
+    return _random_orientation(corners, _CORNER_COUNT, _CORNER_MODULUS, rng)
 
 
 def random_edge_orientation(
@@ -220,24 +260,7 @@ def random_edge_orientation(
     """
     if rng is None:
         rng = DEFAULT_RNG
-
-    eo = [0] * 12
-
-    if not edges:
-        return eo
-
-    # Randomize all but the last edge
-    total = 0
-    for i in range(len(edges) - 1):
-        idx = edges[i]
-        eo[idx] = rng.randint(0, 1)
-        total += eo[idx]
-
-    # Fix the last edge to maintain constraint
-    last_idx = edges[-1]
-    eo[last_idx] = total % 2
-
-    return eo
+    return _random_orientation(edges, _EDGE_COUNT, _EDGE_MODULUS, rng)
 
 
 def flip_n_edges(
@@ -351,26 +374,16 @@ def arrange_pieces(  # noqa: PLR0913, PLR0917
     for idx in corners:
         if cp[idx] == idx:
             continue
-
-        # Find where the correct piece is
         target_pos = cp.index(idx)
-
-        # Swap it into place
-        cp[idx], cp[target_pos] = cp[target_pos], cp[idx]
-        co[idx], co[target_pos] = co[target_pos], co[idx]
+        _swap_pieces(cp, co, idx, target_pos)
         even_swaps = not even_swaps
 
     # Solve edges
     for idx in edges:
         if ep[idx] == idx:
             continue
-
-        # Find where the correct piece is
         target_pos = ep.index(idx)
-
-        # Swap it into place
-        ep[idx], ep[target_pos] = ep[target_pos], ep[idx]
-        eo[idx], eo[target_pos] = eo[target_pos], eo[idx]
+        _swap_pieces(ep, eo, idx, target_pos)
         even_swaps = not even_swaps
 
     # Fix parity if needed
@@ -448,8 +461,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
             other_idx = corners[j]
             # Make sure swapping doesn't solve either piece
             if cp[other_idx] != idx and cp[idx] != other_idx:
-                cp[idx], cp[other_idx] = cp[other_idx], cp[idx]
-                co[idx], co[other_idx] = co[other_idx], co[idx]
+                _swap_pieces(cp, co, idx, other_idx)
                 even_swaps = not even_swaps
                 swapped = True
                 break
@@ -458,8 +470,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
         if not swapped:
             for other_idx in buffer_corners:
                 if cp[other_idx] != idx and cp[idx] != other_idx:
-                    cp[idx], cp[other_idx] = cp[other_idx], cp[idx]
-                    co[idx], co[other_idx] = co[other_idx], co[idx]
+                    _swap_pieces(cp, co, idx, other_idx)
                     even_swaps = not even_swaps
                     break
 
@@ -474,8 +485,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
             other_idx = edges[j]
             # Make sure swapping doesn't solve either piece
             if ep[other_idx] != idx and ep[idx] != other_idx:
-                ep[idx], ep[other_idx] = ep[other_idx], ep[idx]
-                eo[idx], eo[other_idx] = eo[other_idx], eo[idx]
+                _swap_pieces(ep, eo, idx, other_idx)
                 even_swaps = not even_swaps
                 swapped = True
                 break
@@ -484,8 +494,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
         if not swapped:
             for other_idx in buffer_edges:
                 if ep[other_idx] != idx and ep[idx] != other_idx:
-                    ep[idx], ep[other_idx] = ep[other_idx], ep[idx]
-                    eo[idx], eo[other_idx] = eo[other_idx], eo[idx]
+                    _swap_pieces(ep, eo, idx, other_idx)
                     even_swaps = not even_swaps
                     break
 
@@ -496,6 +505,48 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
         )
 
     return cp, co, ep, eo
+
+
+def _orient_pieces(
+        orient: list[int],
+        pieces: list[int],
+        buffer_pieces: list[int],
+        modulus: int,
+        rng: Random,
+) -> list[int]:
+    """
+    Orient specified pieces to solved orientation (orient=0).
+
+    Args:
+        orient: Current orientation array (co or eo).
+        pieces: Indices of pieces to orient.
+        buffer_pieces: Pieces that can absorb orientation fixes.
+        modulus: Constraint modulus (3 for corners, 2 for edges).
+        rng: Random number generator.
+
+    Returns:
+        Orientation array with specified pieces oriented.
+
+    """
+    orient = orient.copy()
+
+    # Orient specified pieces
+    total = 0
+    for idx in pieces:
+        total += orient[idx]
+        orient[idx] = 0
+
+    # Fix constraint using buffer
+    if total % modulus != 0:
+        if buffer_pieces:
+            victim = rng.choice(buffer_pieces)
+            orient[victim] = (orient[victim] + total) % modulus
+        elif pieces:
+            # No buffer - adjust one of the specified pieces
+            victim = rng.choice(pieces)
+            orient[victim] = total % modulus
+
+    return orient
 
 
 def orient_corners(
@@ -521,27 +572,9 @@ def orient_corners(
     """
     if rng is None:
         rng = DEFAULT_RNG
-
-    co = co.copy()
-    buffer_corners = buffer_corners or []
-
-    # Orient specified corners
-    total_twist = 0
-    for idx in corners:
-        total_twist += co[idx]
-        co[idx] = 0
-
-    # Fix constraint using buffer
-    if total_twist % 3 != 0:
-        if buffer_corners:
-            victim = rng.choice(buffer_corners)
-            co[victim] = (co[victim] + total_twist) % 3
-        elif corners:
-            # No buffer - adjust one of the specified corners
-            victim = rng.choice(corners)
-            co[victim] = total_twist % 3
-
-    return co
+    return _orient_pieces(
+        co, corners, buffer_corners or [], _CORNER_MODULUS, rng,
+    )
 
 
 def disorient_corners(
@@ -583,14 +616,14 @@ def disorient_corners(
             total_twist += co[idx]
 
     # Fix constraint using buffer
-    if total_twist % 3 != 0:
+    if total_twist % _CORNER_MODULUS != 0:
         if buffer_corners:
             victim = rng.choice(buffer_corners)
-            co[victim] = (co[victim] - total_twist) % 3
+            co[victim] = (co[victim] - total_twist) % _CORNER_MODULUS
         elif corners:
             # No buffer - try to adjust without solving
             victim = rng.choice(corners)
-            needed = (-total_twist) % 3
+            needed = (-total_twist) % _CORNER_MODULUS
             if needed != 0:
                 co[victim] = needed
             else:
@@ -598,8 +631,8 @@ def disorient_corners(
                 # Find another corner to adjust
                 for idx in corners:
                     if idx != victim:
-                        co[idx] = (co[idx] + 1) % 3
-                        co[victim] = (co[victim] + 2) % 3
+                        co[idx] = (co[idx] + 1) % _CORNER_MODULUS
+                        co[victim] = (co[victim] + 2) % _CORNER_MODULUS
                         break
 
     return co
@@ -628,27 +661,7 @@ def orient_edges(
     """
     if rng is None:
         rng = DEFAULT_RNG
-
-    eo = eo.copy()
-    buffer_edges = buffer_edges or []
-
-    # Orient specified edges
-    total_flips = 0
-    for idx in edges:
-        total_flips += eo[idx]
-        eo[idx] = 0
-
-    # Fix constraint using buffer
-    if total_flips % 2 != 0:
-        if buffer_edges:
-            victim = rng.choice(buffer_edges)
-            eo[victim] = (eo[victim] + 1) % 2
-        elif edges:
-            # No buffer - adjust one of the specified edges
-            victim = rng.choice(edges)
-            eo[victim] = 1
-
-    return eo
+    return _orient_pieces(eo, edges, buffer_edges or [], _EDGE_MODULUS, rng)
 
 
 def disorient_edges(
@@ -688,10 +701,10 @@ def disorient_edges(
             total_flips += eo[idx]
 
     # Fix constraint using buffer
-    if total_flips % 2 != 0:
+    if total_flips % _EDGE_MODULUS != 0:
         if buffer_edges:
             victim = rng.choice(buffer_edges)
-            eo[victim] = (eo[victim] + 1) % 2
+            eo[victim] = (eo[victim] + 1) % _EDGE_MODULUS
         elif edges:
             # No buffer - unflip one edge
             victim = rng.choice(edges)
