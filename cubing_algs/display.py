@@ -207,7 +207,7 @@ class VCubeDisplay:
 
         final_orientation = orientation or default_orientation
         if final_orientation:
-            cube = self.cube.oriented_copy(final_orientation, full=True)
+            cube = self.cube.oriented_copy(final_orientation)
         else:
             cube = self.cube
 
