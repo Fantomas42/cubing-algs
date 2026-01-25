@@ -40,3 +40,11 @@ class InvalidStepError(ValueError):
 
 class InvalidPieceSpecError(ValueError):
     """Raised when piece specification cannot be parsed."""
+
+
+class InvalidOrientationError(ValueError):
+    """Exception raised when requesting an orientation with an invalid value."""
+
+
+class InvalidFaceIndexError(ValueError):
+    """Exception raised when requesting an unexisting face index by center."""
