@@ -4,7 +4,9 @@ from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
+from cubing_algs.exceptions import InvalidFaceIndexError
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.exceptions import InvalidOrientationError
 from cubing_algs.extensions import rotate_2x2x2
 from cubing_algs.extensions import rotate_3x3x3
 from cubing_algs.extensions import rotate_dynamic
@@ -251,6 +253,9 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             A string of moves needed to achieve the desired orientation.
 
+        Raises:
+            InvalidOrientationError: If a orientation key is not valid.
+
         """
         top_face, front_face = self.check_face_orientations(faces)
 
@@ -259,7 +264,10 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         if front_face:
             orientation_key += str(self.get_face_index(front_face))
 
-        return OFFSET_ORIENTATION_MAP[orientation_key]
+        try:
+            return OFFSET_ORIENTATION_MAP[orientation_key]
+        except KeyError as e:
+            raise InvalidOrientationError(str(e)) from e
 
     def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
         """
@@ -275,7 +283,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """
         cube = self.copy(full=full)
 
-        moves = self.compute_orientation_moves(faces)
+        try:
+            moves = self.compute_orientation_moves(faces)
+        except (InvalidFaceIndexError, InvalidOrientationError):
+            # Can only happen with scrambled non fixed center cube.
+            # So it's not necessary to find a better orientation.
+            moves = ''
 
         if moves:
             cube.rotate(moves, history=full)
@@ -360,8 +373,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             The index (0-5) of the face with that center color.
 
+        Raises:
+            InvalidFaceIndexError: If a face is not found.
+
         """
-        return self.get_face_center_indexes().index(face)
+        try:
+            return self.get_face_center_indexes().index(face)
+        except ValueError as e:
+            raise InvalidFaceIndexError(str(e)) from e
 
     def get_face_by_center(self, face: str) -> str:
         """
