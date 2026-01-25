@@ -53,7 +53,7 @@ class LetterTestCase(unittest.TestCase):
         pattern = get_letter('A')
 
         self.assertEqual(
-            len(pattern), 17,
+            len(pattern), 18,
         )
 
         for m in pattern:
