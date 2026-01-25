@@ -35,11 +35,11 @@ class InvalidCollectionNameError(ValueError):
 
 
 class InvalidStepError(ValueError):
-    """Raised when step name is not recognized."""
+    """Exception raised when step name is not recognized."""
 
 
 class InvalidPieceSpecError(ValueError):
-    """Raised when piece specification cannot be parsed."""
+    """Exception raise when piece specification cannot be parsed."""
 
 
 class InvalidOrientationError(ValueError):
