@@ -4,6 +4,9 @@ import unittest
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.scrambler.pieces import _calculate_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
@@ -49,8 +52,8 @@ class TestGenerateStepState(unittest.TestCase):
         _cp, co, _ep, eo = _generate_step_state('PLL', Random(42))
 
         # All orientations should be solved
-        self.assertTrue(all(co[i] == 0 for i in range(8)))
-        self.assertTrue(all(eo[i] == 0 for i in range(12)))
+        self.assertEqual(co, SOLVED_CO)
+        self.assertEqual(eo, SOLVED_EO)
 
     def test_oll_has_orientation(self) -> None:
         """Test that OLL has some orientation on U layer."""
@@ -81,7 +84,7 @@ class TestGenerateStepState(unittest.TestCase):
 
         # All corners should potentially be permuted
         # Just check valid permutation
-        self.assertEqual(set(cp), set(range(8)))
+        self.assertEqual(set(cp), set(SOLVED_CP))
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same result."""
@@ -124,8 +127,8 @@ class TestScrambleStep(unittest.TestCase):
         _cp, co, _ep, eo, _ = cube.to_cubies
 
         # All orientations should be 0
-        self.assertTrue(all(co[i] == 0 for i in range(8)))
-        self.assertTrue(all(eo[i] == 0 for i in range(12)))
+        self.assertEqual(co, SOLVED_CO)
+        self.assertEqual(eo, SOLVED_EO)
 
     def test_with_auf(self) -> None:
         """Test scramble with AUF enabled."""

@@ -17,8 +17,13 @@ Performance improvements:
 """
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACES
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
 from cubing_algs.extensions import rotate_3x3x3
 
@@ -32,7 +37,7 @@ def _build_corner_lookup_table() -> dict[tuple[int, int], int]:
 
     """
     lookup = {}
-    for j in range(8):
+    for j in SOLVED_CP:
         col1 = CORNER_FACELET_MAP[j][1] // 9
         col2 = CORNER_FACELET_MAP[j][2] // 9
         lookup[col1, col2] = j
@@ -49,7 +54,7 @@ def _build_edge_lookup_table() -> dict[tuple[int, int], tuple[int, int]]:
 
     """
     lookup = {}
-    for j in range(12):
+    for j in SOLVED_EP:
         col1 = EDGE_FACELET_MAP[j][0] // 9
         col2 = EDGE_FACELET_MAP[j][1] // 9
         lookup[col1, col2] = (j, 0)  # Normal orientation
@@ -227,19 +232,19 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913, PLR0917
     facelets = [''] * 54
 
     if not scheme:
-        scheme_parts = [FACES[so[i]] * 9 for i in range(6)]
+        scheme_parts = [FACES[so[i]] * 9 for i in range(FACE_NUMBER)]
         scheme = ''.join(scheme_parts)
 
-    for i in range(6):
+    for i in range(FACE_NUMBER):
         facelets[9 * i + 4] = scheme[9 * i + 4]
 
-    for i in range(8):
+    for i in SOLVED_CP:
         for p in range(3):
             real_facelet_idx = CORNER_FACELET_MAP[i][(p + co[i]) % 3]
             original_facelet_idx = CORNER_FACELET_MAP[cp[i]][p]
             facelets[real_facelet_idx] = scheme[original_facelet_idx]
 
-    for i in range(12):
+    for i in SOLVED_EP:
         for p in range(2):
             real_facelet_idx = EDGE_FACELET_MAP[i][(p + eo[i]) % 2]
             original_facelet_idx = EDGE_FACELET_MAP[ep[i]][p]
@@ -286,23 +291,23 @@ def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
     if cached_result is not None:
         return cached_result
 
-    so = [_FACE_TO_INDEX[facelets[9 * i + 4]] for i in range(6)]
+    so = [_FACE_TO_INDEX[facelets[9 * i + 4]] for i in range(FACE_NUMBER)]
 
     # Invert spatial orientation efficiently
-    so_inv = [0] * 6
+    so_inv = [0] * FACE_NUMBER
     for i, face_idx in enumerate(so):
         so_inv[face_idx] = i
 
     f = [so_inv[_FACE_TO_INDEX[char]] for char in facelets]
 
     # Initialize arrays
-    cp = [0] * 8
-    co = [0] * 8
-    ep = [0] * 12
-    eo = [0] * 12
+    cp = SOLVED_CO.copy()
+    co = SOLVED_CO.copy()
+    ep = SOLVED_EO.copy()
+    eo = SOLVED_EO.copy()
 
     # Process corners
-    for i in range(8):
+    for i in SOLVED_CP:
         # Find orientation by looking for U or D face (0 or 3 in color mapping)
         ori = 0
         for ori in range(3):
@@ -319,7 +324,7 @@ def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
             cp[i] = _CORNER_LOOKUP[corner_key]
             co[i] = ori
         else:
-            for j in range(8):
+            for j in SOLVED_CP:
                 expected_col1 = CORNER_FACELET_MAP[j][1] // 9
                 expected_col2 = CORNER_FACELET_MAP[j][2] // 9
                 if col1 == expected_col1 and col2 == expected_col2:
@@ -328,7 +333,7 @@ def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
                     break
 
     # Process edges
-    for i in range(12):
+    for i in SOLVED_EP:
         color1 = f[EDGE_FACELET_MAP[i][0]]
         color2 = f[EDGE_FACELET_MAP[i][1]]
 
@@ -337,7 +342,7 @@ def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
         if piece_info is not None:
             ep[i], eo[i] = piece_info
         else:
-            for j in range(12):
+            for j in SOLVED_EP:
                 expected_color1 = EDGE_FACELET_MAP[j][0] // 9
                 expected_color2 = EDGE_FACELET_MAP[j][1] // 9
 

@@ -361,7 +361,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return [
             self.state[(i * self.face_size) + center_index]
-            for i in range(6)
+            for i in range(self.face_number)
         ]
 
     def get_face_index(self, face: str) -> int:

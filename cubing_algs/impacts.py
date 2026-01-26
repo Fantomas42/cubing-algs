@@ -14,11 +14,16 @@ from typing import TypedDict
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_EDGES_INDEX
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.constants import QTM_OPPOSITE_EDGE_OFFSETS
 from cubing_algs.constants import QTM_OPPOSITE_FACE_DOUBLE_PAIRS
 from cubing_algs.constants import QTM_SAME_FACE_OPPOSITE_PAIRS
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
@@ -680,7 +685,7 @@ def detect_symmetry(mask: str, cube: 'VCube') -> dict[str, bool]:
     """
     # Extract face masks
     faces = []
-    for i in range(6):
+    for i in range(FACE_NUMBER):
         start = i * cube.face_size
         end = start + cube.face_size
         faces.append(mask[start:end])
@@ -725,11 +730,11 @@ def analyze_layers(
 
     """
     # Center of each face (position 4 in 3x3 grid)
-    center_indices = {i * cube.face_size + 4 for i in range(6)}
+    center_indices = {i * cube.face_size + 4 for i in range(FACE_NUMBER)}
     edge_indices = set()
     corner_indices = set()
 
-    for face_idx in range(6):
+    for face_idx in range(FACE_NUMBER):
         face_start = face_idx * cube.face_size
         # Corners: positions 0, 2, 6, 8 in each face
         corner_indices.update({
@@ -853,8 +858,8 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
     patterns = []
 
     # Basic state checks
-    if (cp == list(range(8)) and co == [0] * 8 and
-        ep == list(range(12)) and eo == [0] * 12):
+    if (cp == SOLVED_CP and co == SOLVED_CO and
+        ep == SOLVED_EP and eo == SOLVED_EO):
         patterns.append('SOLVED')
         return patterns  # If solved, no other patterns apply
 
@@ -872,8 +877,8 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
         patterns.append('EDGES_ORIENTED')
 
     # Permutation patterns
-    corners_permuted = cp == list(range(8))
-    edges_permuted = ep == list(range(12))
+    corners_permuted = cp == SOLVED_CP
+    edges_permuted = ep == SOLVED_EP
 
     if corners_permuted and edges_permuted:
         patterns.append('ALL_PERMUTED')

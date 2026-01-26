@@ -15,6 +15,10 @@ from cubing_algs.constants import CORNER_MODULUS
 from cubing_algs.constants import CORNER_NUMBER
 from cubing_algs.constants import EDGE_MODULUS
 from cubing_algs.constants import EDGE_NUMBER
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.scrambler.random import DEFAULT_RNG
 
 
@@ -157,10 +161,10 @@ def random_permutation(
     if rng is None:
         rng = DEFAULT_RNG
 
-    cp = list(range(8))
-    co = [0] * 8
-    ep = list(range(12))
-    eo = [0] * 12
+    cp = SOLVED_CP.copy()
+    co = SOLVED_CO.copy()
+    ep = SOLVED_EP.copy()
+    eo = SOLVED_EO.copy()
 
     # Use _shuffle_in_place for Fischer-Yates shuffle
     # Note: co/eo are all zeros, so shuffling them has no effect
@@ -292,7 +296,7 @@ def flip_n_edges(
     if rng is None:
         rng = DEFAULT_RNG
 
-    eo = [0] * 12
+    eo = SOLVED_EO.copy()
 
     # Randomly select n edges to flip
     edges_to_flip = rng.sample(edges, n)
@@ -340,6 +344,7 @@ def arrange_pieces(  # noqa: PLR0913, PLR0917
         rng = DEFAULT_RNG
 
     # Work with copies
+    # TODO(why args)
     cp = cp.copy()
     co = co.copy()
     ep = ep.copy()

@@ -1,9 +1,9 @@
 """Tests for VCubeDisplay rendering and formatting."""
-
 import os
 import unittest
 from unittest.mock import patch
 
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.display import color_support
@@ -992,7 +992,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
             face_chars = [c for c in line if c.isalpha()]
 
             # Should have groups of 3 consecutive same characters
-            for j in range(6):  # 6 faces
+            for j in range(FACE_NUMBER):
                 start_idx = j * 3
                 face_group = face_chars[start_idx:start_idx + 3]
                 expected_face = FACE_ORDER[j]

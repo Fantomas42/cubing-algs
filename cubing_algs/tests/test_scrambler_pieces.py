@@ -3,7 +3,9 @@
 import unittest
 from random import Random
 
+from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
@@ -48,7 +50,7 @@ class TestRandomCornerOrientation(unittest.TestCase):
     def test_no_corners_returns_solved(self) -> None:
         """Test that orienting no corners returns solved state."""
         co = random_corner_orientation([])
-        self.assertEqual(co, [0] * 8)
+        self.assertEqual(co, SOLVED_CO)
 
     def test_orientation_constraint_maintained(self) -> None:
         """Test that sum(co) % 3 == 0."""
@@ -82,7 +84,7 @@ class TestRandomEdgeOrientation(unittest.TestCase):
     def test_no_edges_returns_solved(self) -> None:
         """Test that orienting no edges returns solved state."""
         eo = random_edge_orientation([])
-        self.assertEqual(eo, [0] * 12)
+        self.assertEqual(eo, SOLVED_EO)
 
     def test_orientation_constraint_maintained(self) -> None:
         """Test that sum(eo) % 2 == 0."""
@@ -116,7 +118,7 @@ class TestFlipNEdges(unittest.TestCase):
     def test_flip_zero_edges(self) -> None:
         """Test flipping 0 edges returns solved state."""
         eo = flip_n_edges(SOLVED_EP, 0, rng=Random(42))
-        self.assertEqual(eo, [0] * 12)
+        self.assertEqual(eo, SOLVED_EO)
 
     def test_flip_even_number(self) -> None:
         """Test flipping even number of edges."""
@@ -145,8 +147,8 @@ class TestDerangePieces(unittest.TestCase):
 
     def test_derange_corners_not_solved(self) -> None:
         """Test deranging corners ensures they're not solved."""
-        cp, co = list(range(8)), [0] * 8
-        ep, eo = list(range(12)), [0] * 12
+        cp, co = SOLVED_CP, SOLVED_CO
+        ep, eo = SOLVED_EP, SOLVED_EO
 
         cp, co, ep, eo = derange_pieces(
             cp,
@@ -165,8 +167,8 @@ class TestDerangePieces(unittest.TestCase):
 
     def test_derange_edges_not_solved(self) -> None:
         """Test deranging edges ensures they're not solved."""
-        cp, co = list(range(8)), [0] * 8
-        ep, eo = list(range(12)), [0] * 12
+        cp, co = SOLVED_CP, SOLVED_CO
+        ep, eo = SOLVED_EP, SOLVED_EO
 
         cp, co, ep, eo = derange_pieces(
             cp,
@@ -187,8 +189,8 @@ class TestDerangePieces(unittest.TestCase):
         """Test that derangement maintains parity."""
         rng = Random(42)
         for _ in range(10):
-            cp, co = list(range(8)), [0] * 8
-            ep, eo = list(range(12)), [0] * 12
+            cp, co = SOLVED_CP, SOLVED_CO
+            ep, eo = SOLVED_EP, SOLVED_EO
 
             cp, co, ep, eo = derange_pieces(
                 cp,
@@ -241,7 +243,7 @@ class TestDisorientCorners(unittest.TestCase):
 
     def test_disorient_corners_not_zero(self) -> None:
         """Test disorienting corners makes them non-zero."""
-        co = [0] * 8
+        co = SOLVED_CO
         result = disorient_corners(
             co,
             U_CORNERS,
@@ -257,7 +259,7 @@ class TestDisorientCorners(unittest.TestCase):
         """Test that disorientation maintains sum(co) % 3 == 0."""
         rng = Random(42)
         for _ in range(10):
-            co = [0] * 8
+            co = SOLVED_CO
             result = disorient_corners(co, U_CORNERS, [4, 5], rng=rng)
             self.assertEqual(sum(result) % 3, 0)
 
@@ -294,7 +296,7 @@ class TestDisorientEdges(unittest.TestCase):
 
     def test_disorient_edges_not_zero(self) -> None:
         """Test disorienting edges makes them non-zero."""
-        eo = [0] * 12
+        eo = SOLVED_EO
         result = disorient_edges(
             eo, U_EDGES,
             buffer_edges=[8, 9],
@@ -309,6 +311,6 @@ class TestDisorientEdges(unittest.TestCase):
         """Test that disorientation maintains sum(eo) % 2 == 0."""
         rng = Random(42)
         for _ in range(10):
-            eo = [0] * 12
+            eo = SOLVED_EO
             result = disorient_edges(eo, U_EDGES, [8, 9], rng=rng)
             self.assertEqual(sum(result) % 2, 0)

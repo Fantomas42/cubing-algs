@@ -8,7 +8,10 @@ a solver to generate the scramble algorithm.
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
 from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
@@ -166,10 +169,10 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
     step = step.upper()
 
     # Initialize with solved state
-    cp = list(range(8))
-    co = [0] * 8
-    ep = list(range(12))
-    eo = [0] * 12
+    cp = SOLVED_CP.copy()
+    co = SOLVED_CO.copy()
+    ep = SOLVED_EP.copy()
+    eo = SOLVED_EO.copy()
 
     # Last Layer (LL) - permute and orient U layer
     if step in {'LL', 'OLL', 'CLL', 'OLLCP'}:
@@ -527,10 +530,10 @@ def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
         rng = DEFAULT_RNG
 
     # Start with solved state
-    cp = list(range(8))
-    co = [0] * 8
-    ep = list(range(12))
-    eo = [0] * 12
+    cp = SOLVED_CP.copy()
+    co = SOLVED_CO.copy()
+    ep = SOLVED_EP.copy()
+    eo = SOLVED_EO.copy()
 
     # Parse piece specifications
     solve_corners_list = (
@@ -550,8 +553,8 @@ def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
 
     # Step 1: Handle position constraints (solve/derange)
     # First, scramble everything that's not explicitly solved
-    all_corners_set = set(range(8))
-    all_edges_set = set(range(12))
+    all_corners_set = set(SOLVED_CP)
+    all_edges_set = set(SOLVED_EP)
 
     # Pieces to scramble = all pieces - (solve pieces + buffer pieces)
     scramble_corners = list(
