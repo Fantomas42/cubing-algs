@@ -12,6 +12,9 @@ from typing import NamedTuple
 from typing import TypedDict
 
 from cubing_algs.constants import CORNER_FACELET_MAP
+from cubing_algs.constants import D_CORNERS
+from cubing_algs.constants import D_EDGES
+from cubing_algs.constants import E_EDGES
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_EDGES_INDEX
 from cubing_algs.constants import FACE_NUMBER
@@ -24,6 +27,8 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
+from cubing_algs.constants import U_CORNERS
+from cubing_algs.constants import U_EDGES
 from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
@@ -274,7 +279,7 @@ def compute_opposite_face_manhattan_distance(
         Manhattan distance across opposite faces.
 
     """
-    if orig.face_position == 4:
+    if orig.face_position == cube.center_index:
         return cube.size * 2
 
     translated_pos = transform_opposite_position(
@@ -730,7 +735,10 @@ def analyze_layers(
 
     """
     # Center of each face (position 4 in 3x3 grid)
-    center_indices = {i * cube.face_size + 4 for i in range(FACE_NUMBER)}
+    center_indices = {
+        i * cube.face_size + cube.center_index
+        for i in range(FACE_NUMBER)
+    }
     edge_indices = set()
     corner_indices = set()
 
@@ -911,16 +919,15 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
 
     # Layer-by-layer patterns
     # Check if first layer (D face) corners are solved
-    d_corners = [4, 5, 6, 7]  # DFR, DLF, DBL, DRB
     d_corners_solved = all(
         cp[i] == i and co[i] == 0
-        for i in d_corners
+        for i in D_CORNERS
     )
     if d_corners_solved:
         patterns.append('FIRST_LAYER_CORNERS_SOLVED')
 
     # Check if first layer edges are solved
-    d_edges = [4, 5, 6, 7]  # DR, DF, DL, DB
+    d_edges = D_EDGES
     d_edges_solved = all(
         ep[i] == i and eo[i] == 0
         for i in d_edges
@@ -938,28 +945,24 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
     # F2L specific patterns
     if d_corners_solved and d_edges_solved:
         # Check if F2L is complete (D layer + E slice edges)
-        e_slice_edges = [8, 9, 10, 11]  # FR, FL, BL, BR
         f2l_edges_solved = all(
             ep[i] == i and eo[i] == 0
-            for i in e_slice_edges
+            for i in E_EDGES
         )
         if f2l_edges_solved:
             patterns.append('F2L_COMPLETE')
 
     # Last layer patterns
-    u_corners = [0, 1, 2, 3]  # URF, UFL, ULB, UBR
-    u_edges = [0, 1, 2, 3]  # UR, UF, UL, UB
-
-    u_corners_oriented = all(co[i] == 0 for i in u_corners)
-    u_edges_oriented = all(eo[i] == 0 for i in u_edges)
+    u_corners_oriented = all(co[i] == 0 for i in U_CORNERS)
+    u_edges_oriented = all(eo[i] == 0 for i in U_EDGES)
 
     if u_corners_oriented and u_edges_oriented:
         patterns.append('LAST_LAYER_ORIENTED')
 
     # PLL patterns (all oriented, but permuted)
     if u_corners_oriented and u_edges_oriented:
-        u_corners_permuted = all(cp[i] in u_corners for i in u_corners)
-        u_edges_permuted = all(ep[i] in u_edges for i in u_edges)
+        u_corners_permuted = all(cp[i] in U_CORNERS for i in U_CORNERS)
+        u_edges_permuted = all(ep[i] in U_EDGES for i in U_EDGES)
 
         if not u_corners_permuted or not u_edges_permuted:
             patterns.append('PLL_CASE')
