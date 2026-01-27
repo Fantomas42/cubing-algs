@@ -1,6 +1,8 @@
 """Utility functions for advanced scrambler modules."""
 import kociemba
 
+from cubing_algs.constants import CORNER_NAMES
+from cubing_algs.constants import EDGE_NAMES
 from cubing_algs.constants import LAYER_MAP_CORNERS
 from cubing_algs.constants import LAYER_MAP_EDGES
 from cubing_algs.constants import SOLVED_CP
@@ -8,17 +10,6 @@ from cubing_algs.constants import SOLVED_EP
 from cubing_algs.exceptions import InvalidPieceSpecError
 from cubing_algs.initial_state import INITIAL_STATE_3x3x3
 from cubing_algs.vcube import VCube
-
-# TODO
-CORNER_NAMES: list[str] = [
-    'URF', 'UFL', 'ULB', 'UBR',
-    'DFR', 'DLF', 'DBL', 'DRB',
-]
-EDGE_NAMES: list[str] = [
-    'UR', 'UF', 'UL', 'UB',
-    'DR', 'DF', 'DL', 'DB',
-    'FR', 'FL', 'BL', 'BR',
-]
 
 
 def parse_piece_spec(spec: str, piece_type: str) -> list[int]:
