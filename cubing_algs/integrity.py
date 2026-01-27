@@ -59,6 +59,80 @@ def compute_parity(permutation: list[int]) -> int:
     return parity
 
 
+def find_permutation_cycles(permutation: list[int]) -> list[list[int]]:
+    """
+    Find cycles in a permutation.
+
+    A cycle is a sequence of positions where each position maps to the next,
+    forming a closed loop. For example, [1, 2, 0] contains the cycle [0, 1, 2]
+    meaning position 0 goes to 1, 1 goes to 2, and 2 goes back to 0.
+
+    Args:
+        permutation: List where permutation[i] is the destination of position i.
+
+    Returns:
+        List of cycles, each cycle is a list of position indices.
+        Fixed points (where permutation[i] == i) are not included.
+
+    """
+    visited = [False] * len(permutation)
+    cycles = []
+
+    for i in range(len(permutation)):
+        if not visited[i] and permutation[i] != i:
+            cycle = []
+            current = i
+            while not visited[current]:
+                visited[current] = True
+                cycle.append(current)
+                current = permutation[current]
+            if len(cycle) > 1:  # pragma: no branch
+                cycles.append(cycle)
+
+    return cycles
+
+
+def is_valid_permutation(permutation: list[int], expected_size: int) -> bool:
+    """
+    Check if a list is a valid permutation of 0 to expected_size-1.
+
+    Args:
+        permutation: List to validate.
+        expected_size: Expected number of elements (must contain 0 to size-1).
+
+    Returns:
+        True if valid permutation, False otherwise.
+
+    """
+    return (
+        len(permutation) == expected_size
+        and set(permutation) == set(range(expected_size))
+    )
+
+
+def is_valid_orientation(
+        orientation: list[int],
+        expected_size: int,
+        valid_values: set[int],
+) -> bool:
+    """
+    Check if orientation values are all within valid range.
+
+    Args:
+        orientation: List of orientation values to validate.
+        expected_size: Expected number of elements.
+        valid_values: Set of valid orientation values.
+
+    Returns:
+        True if all orientations are valid, False otherwise.
+
+    """
+    return (
+        len(orientation) == expected_size
+        and all(o in valid_values for o in orientation)
+    )
+
+
 class VCubeIntegrityChecker:
     """
     Check integrity of VCube.
@@ -184,7 +258,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If corner permutation is invalid.
 
         """
-        if len(cp) != CORNER_NUMBER or set(cp) != set(range(CORNER_NUMBER)):
+        if not is_valid_permutation(cp, CORNER_NUMBER):
             msg = (
                 'Corner permutation must contain exactly '
                 'one instance of each corner (0-7)'
@@ -200,9 +274,8 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If corner orientations are invalid.
 
         """
-        if len(co) != CORNER_NUMBER or any(
-                orientation not in CORNER_VALID_ORIENTATIONS
-                for orientation in co
+        if not is_valid_orientation(
+                co, CORNER_NUMBER, CORNER_VALID_ORIENTATIONS,
         ):
             msg = 'Corner orientation must be 0, 1, or 2 for each corner'
             raise InvalidCubeStateError(msg)
@@ -261,7 +334,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If edge permutation is invalid.
 
         """
-        if len(ep) != EDGE_NUMBER or set(ep) != set(range(EDGE_NUMBER)):
+        if not is_valid_permutation(ep, EDGE_NUMBER):
             msg = (
                 'Edge permutation must contain exactly '
                 'one instance of each edge (0-11)'
@@ -277,10 +350,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If edge orientations are invalid.
 
         """
-        if len(eo) != EDGE_NUMBER or any(
-                orientation not in EDGE_VALID_ORIENTATIONS
-                for orientation in eo
-        ):
+        if not is_valid_orientation(eo, EDGE_NUMBER, EDGE_VALID_ORIENTATIONS):
             msg = 'Edge orientation must be 0 or 1 for each edge'
             raise InvalidCubeStateError(msg)
 

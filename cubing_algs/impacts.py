@@ -33,6 +33,7 @@ from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.integrity import compute_parity
+from cubing_algs.integrity import find_permutation_cycles
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -610,38 +611,6 @@ def compute_distance_metrics(
         max=distance_max,
         sum=distance_sum,
     )
-
-
-def find_permutation_cycles(permutation: list[int]) -> list[list[int]]:
-    """
-    Find cycles in a permutation.
-
-    A cycle is a sequence of positions where each position maps to the next,
-    forming a closed loop. For example, [1, 2, 0] contains the cycle [0, 1, 2]
-    meaning position 0 goes to 1, 1 goes to 2, and 2 goes back to 0.
-
-    Args:
-        permutation: List where permutation[i] is the destination of position i.
-
-    Returns:
-        List of cycles, each cycle is a list of position indices.
-
-    """
-    visited = [False] * len(permutation)
-    cycles = []
-
-    for i in range(len(permutation)):
-        if not visited[i] and permutation[i] != i:
-            cycle = []
-            current = i
-            while not visited[current]:
-                visited[current] = True
-                cycle.append(current)
-                current = permutation[current]
-            if len(cycle) > 1:  # pragma: no branch
-                cycles.append(cycle)
-
-    return cycles
 
 
 def compute_face_to_face_matrix(
