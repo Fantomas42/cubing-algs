@@ -8,7 +8,7 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.exceptions import InvalidStepError
-from cubing_algs.scrambler.pieces import _calculate_parity
+from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
 from cubing_algs.scrambler.steps import _generate_step_state
 from cubing_algs.scrambler.steps import scramble_ocll_case
@@ -37,8 +37,8 @@ class TestGenerateStepState(unittest.TestCase):
 
             # Check parity constraint
             self.assertEqual(
-                _calculate_parity(cp),
-                _calculate_parity(ep),
+                compute_parity(cp),
+                compute_parity(ep),
                 f'Step {step}: parity mismatch',
             )
 

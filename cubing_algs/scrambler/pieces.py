@@ -19,6 +19,7 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
+from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.random import DEFAULT_RNG
 
 
@@ -99,42 +100,6 @@ def _fix_parity_with_buffer(  # noqa: PLR0913, PLR0917
         _swap_pieces(ep, eo, buffer_edges[0], buffer_edges[1])
     elif len(buffer_corners) >= 2:
         _swap_pieces(cp, co, buffer_corners[0], buffer_corners[1])
-
-
-def _calculate_parity(permutation: list[int]) -> int:
-    """
-    Calculate the parity of a permutation.
-
-    Parity is 0 for even permutations (even number of swaps) and
-    1 for odd permutations (odd number of swaps).
-
-    Args:
-        permutation: Permutation array.
-
-    Returns:
-        0 for even parity, 1 for odd parity.
-
-    """
-    n = len(permutation)
-    visited = [False] * n
-    parity = 0
-
-    for i in range(n):
-        if visited[i] or permutation[i] == i:
-            continue
-
-        # Count cycle length
-        cycle_len = 0
-        j = i
-        while not visited[j]:
-            visited[j] = True
-            j = permutation[j]
-            cycle_len += 1
-
-        # Cycle of length k contributes (k-1) swaps
-        parity ^= (cycle_len - 1) % 2
-
-    return parity
 
 
 def random_permutation(
@@ -364,7 +329,7 @@ def arrange_pieces(  # noqa: PLR0913, PLR0917
     if (
             all_corners
             and all_edges
-            and _calculate_parity(cp) != _calculate_parity(ep)
+            and compute_parity(cp) != compute_parity(ep)
     ):
         _fix_parity_with_buffer(
             cp, co, ep, eo, buffer_corners, buffer_edges,
@@ -502,7 +467,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
                     break
 
     # Ensure final parities match
-    if _calculate_parity(cp) != _calculate_parity(ep):
+    if compute_parity(cp) != compute_parity(ep):
         _fix_parity_with_buffer(
             cp, co, ep, eo, buffer_corners, buffer_edges,
         )

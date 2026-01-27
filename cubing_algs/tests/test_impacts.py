@@ -19,7 +19,6 @@ from cubing_algs.impacts import compute_face_to_face_matrix
 from cubing_algs.impacts import compute_impacts
 from cubing_algs.impacts import compute_manhattan_distance
 from cubing_algs.impacts import compute_opposite_face_manhattan_distance
-from cubing_algs.impacts import compute_parity
 from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
 from cubing_algs.impacts import find_permutation_cycles
@@ -2839,58 +2838,6 @@ class TestAnalyzeLayers(unittest.TestCase):
         permutations = {pos: (pos + 1) % 54 for pos in corner_positions}
         result = analyze_layers(permutations, self.cube)
         self.assertEqual(result['corners_moved'], 24)
-
-
-class TestComputeParity(unittest.TestCase):
-    """Test the compute_parity function."""
-
-    def test_identity_permutation(self) -> None:
-        """Test identity permutation has even parity."""
-        permutation = SOLVED_CP
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 0)
-
-    def test_single_swap_odd_parity(self) -> None:
-        """Test single swap has odd parity."""
-        permutation = [1, 0, 2, 3, 4, 5, 6, 7]
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 1)
-
-    def test_two_swaps_even_parity(self) -> None:
-        """Test two swaps have even parity."""
-        permutation = [1, 0, 3, 2, 4, 5, 6, 7]
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 0)
-
-    def test_three_cycle_even_parity(self) -> None:
-        """Test 3-cycle has even parity."""
-        permutation = [1, 2, 0, 3, 4, 5, 6, 7]
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 0)
-
-    def test_four_cycle_odd_parity(self) -> None:
-        """Test 4-cycle has odd parity."""
-        permutation = [1, 2, 3, 0, 4, 5, 6, 7]
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 1)
-
-    def test_five_cycle_even_parity(self) -> None:
-        """Test 5-cycle has even parity."""
-        permutation = [1, 2, 3, 4, 0, 5, 6, 7]
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 0)
-
-    def test_empty_permutation(self) -> None:
-        """Test empty permutation."""
-        permutation: list[int] = []
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 0)
-
-    def test_complex_permutation(self) -> None:
-        """Test complex permutation."""
-        permutation = [1, 0, 3, 2, 5, 4, 7, 6]
-        parity = compute_parity(permutation)
-        self.assertEqual(parity, 0)
 
 
 class TestAnalyzeCycles(unittest.TestCase):

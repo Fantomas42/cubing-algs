@@ -9,7 +9,7 @@ from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
-from cubing_algs.scrambler.pieces import _calculate_parity
+from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.pieces import derange_pieces
 from cubing_algs.scrambler.pieces import disorient_corners
 from cubing_algs.scrambler.pieces import disorient_edges
@@ -18,30 +18,6 @@ from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import orient_edges
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
-
-
-class TestCalculateParity(unittest.TestCase):
-    """Tests for _calculate_parity helper function."""
-
-    def test_solved_permutation_even(self) -> None:
-        """Test that solved permutation has even parity."""
-        perm = SOLVED_CP
-        self.assertEqual(_calculate_parity(perm), 0)
-
-    def test_single_swap_odd(self) -> None:
-        """Test that single swap has odd parity."""
-        perm = [1, 0, 2, 3, 4, 5, 6, 7]
-        self.assertEqual(_calculate_parity(perm), 1)
-
-    def test_double_swap_even(self) -> None:
-        """Test that two swaps have even parity."""
-        perm = [1, 0, 3, 2, 4, 5, 6, 7]
-        self.assertEqual(_calculate_parity(perm), 0)
-
-    def test_cycle_parity(self) -> None:
-        """Test parity of a 3-cycle."""
-        perm = [1, 2, 0, 3, 4, 5, 6, 7]  # (0 1 2) is even (2 swaps)
-        self.assertEqual(_calculate_parity(perm), 0)
 
 
 class TestRandomCornerOrientation(unittest.TestCase):
@@ -204,7 +180,7 @@ class TestDerangePieces(unittest.TestCase):
                 rng=rng,
             )
 
-            self.assertEqual(_calculate_parity(cp), _calculate_parity(ep))
+            self.assertEqual(compute_parity(cp), compute_parity(ep))
 
 
 class TestOrientCorners(unittest.TestCase):

@@ -19,29 +19,44 @@ from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.facelets import facelets_to_cubies
 
 
-def count_inversions(permutation: list[int]) -> int:
+def compute_parity(permutation: list[int]) -> int:
     """
-    Count the number of inversions in a permutation.
+    Compute the parity of a permutation using cycle detection.
 
-    An inversion occurs when a larger element appears before
-    a smaller element in the sequence. This is used to determine
-    permutation parity for cube state validation.
+    Parity is 0 for even permutations (even number of transpositions)
+    and 1 for odd permutations (odd number of transpositions).
+
+    This uses an O(n) cycle-based algorithm: a cycle of length k
+    requires (k-1) transpositions, so cycles of even length contribute
+    odd parity and cycles of odd length contribute even parity.
 
     Args:
-        permutation: List of integers representing a permutation.
+        permutation: List where permutation[i] is the value at position i.
 
     Returns:
-        Number of inversions in the permutation.
+        0 for even parity, 1 for odd parity.
 
     """
-    inversions = 0
+    n = len(permutation)
+    visited = [False] * n
+    parity = 0
 
-    for i, val_i in enumerate(permutation):
-        for val_j in permutation[i + 1:]:
-            if val_i > val_j:
-                inversions += 1
+    for i in range(n):
+        if visited[i] or permutation[i] == i:
+            continue
 
-    return inversions
+        # Count cycle length
+        cycle_len = 0
+        j = i
+        while not visited[j]:
+            visited[j] = True
+            j = permutation[j]
+            cycle_len += 1
+
+        # Cycle of length k contributes (k-1) swaps
+        parity ^= (cycle_len - 1) % 2
+
+    return parity
 
 
 class VCubeIntegrityChecker:
@@ -319,10 +334,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If permutation parities do not match.
 
         """
-        corner_parity = count_inversions(cp) % 2
-        edge_parity = count_inversions(ep) % 2
-
-        if corner_parity != edge_parity:
+        if compute_parity(cp) != compute_parity(ep):
             msg = 'Corner and edge permutation parities must be equal'
             raise InvalidCubeStateError(msg)
 

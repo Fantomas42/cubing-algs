@@ -32,6 +32,7 @@ from cubing_algs.constants import U_EDGES
 from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
+from cubing_algs.integrity import compute_parity
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -775,38 +776,6 @@ def analyze_layers(
     }
 
 
-def compute_parity(permutation: list[int]) -> int:
-    """
-    Compute the parity of a permutation.
-
-    Args:
-        permutation: List where permutation[i] is the destination of position i.
-
-    Returns:
-        Parity value (0 for even, 1 for odd).
-
-    """
-    parity = 0
-    visited = [False] * len(permutation)
-
-    for i in range(len(permutation)):
-        if visited[i] or permutation[i] == i:
-            continue
-
-        cycle_length = 0
-        current = i
-        while not visited[current]:
-            visited[current] = True
-            current = permutation[current]
-            cycle_length += 1
-
-        # Cycles of even length contribute odd parity
-        if cycle_length % 2 == 0:
-            parity ^= 1
-
-    return parity
-
-
 def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
     """
     Analyze cycle structure in detail.
@@ -844,7 +813,7 @@ def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
     }
 
 
-def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
+def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         cp: list[int], co: list[int],
         ep: list[int], eo: list[int],
 ) -> list[str]:
