@@ -308,13 +308,6 @@ def arrange_pieces(  # noqa: PLR0913, PLR0917
     if rng is None:
         rng = DEFAULT_RNG
 
-    # Work with copies
-    # TODO(why args)
-    cp = cp.copy()
-    co = co.copy()
-    ep = ep.copy()
-    eo = eo.copy()
-
     buffer_corners = buffer_corners or []
     buffer_edges = buffer_edges or []
 
@@ -400,16 +393,10 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
     if rng is None:
         rng = DEFAULT_RNG
 
-    # Work with copies
-    cp = cp.copy()
-    co = co.copy()
-    ep = ep.copy()
-    eo = eo.copy()
-
     buffer_corners = buffer_corners or []
     buffer_edges = buffer_edges or []
 
-    # Randomly permute IN PLACE
+    # Randomly permute in place
     all_corners = corners + buffer_corners
     all_edges = edges + buffer_edges
 
