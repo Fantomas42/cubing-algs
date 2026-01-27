@@ -40,35 +40,6 @@ AUF_CHOICES: list[str] = ['', 'U', 'U2', "U'"]
 CubeState = tuple[list[int], list[int], list[int], list[int]]
 
 
-def _apply_auf(
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
-        rng: Random,
-) -> CubeState:
-    """
-    Apply random AUF (Adjustment of U Face) to cube state.
-
-    Args:
-        cp: Corner permutations.
-        co: Corner orientations.
-        ep: Edge permutations.
-        eo: Edge orientations.
-        rng: Random number generator.
-
-    Returns:
-        Tuple of (cp, co, ep, eo) with AUF applied.
-
-    """
-    auf_move = rng.choice(AUF_CHOICES)
-    if auf_move:
-        temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_SO)
-        temp_cube.rotate(auf_move)
-        cp, co, ep, eo, _ = temp_cube.to_cubies
-    return cp, co, ep, eo
-
-
 def _apply_moves(
         cp: list[int],
         co: list[int],
@@ -93,6 +64,33 @@ def _apply_moves(
     temp_cube = VCube.from_cubies(cp, co, ep, eo, SOLVED_SO)
     temp_cube.rotate(moves)
     cp, co, ep, eo, _ = temp_cube.to_cubies
+    return cp, co, ep, eo
+
+
+def _apply_auf(
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+        rng: Random,
+) -> CubeState:
+    """
+    Apply random AUF (Adjustment of U Face) to cube state.
+
+    Args:
+        cp: Corner permutations.
+        co: Corner orientations.
+        ep: Edge permutations.
+        eo: Edge orientations.
+        rng: Random number generator.
+
+    Returns:
+        Tuple of (cp, co, ep, eo) with AUF applied.
+
+    """
+    auf_move = rng.choice(AUF_CHOICES)
+    if auf_move:
+        return _apply_moves(cp, co, ep, eo, auf_move)
     return cp, co, ep, eo
 
 
