@@ -10,12 +10,13 @@ import re
 from re import Match
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import RegexPattern
 from cubing_algs.transform.mirror import mirror_moves
 
 # Compiled regex patterns for performance
-_MULT_INV_PATTERN = re.compile(r"\(([^()]*)\)(\d+)'")
-_MULT_PATTERN = re.compile(r'\(([^()]*)\)(\d+)')
-_INV_PATTERN = re.compile(r"\(([^()]*)\)'")
+_MULT_INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)(\d+)'")
+_MULT_PATTERN: RegexPattern = re.compile(r'\(([^()]*)\)(\d+)')
+_INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)'")
 
 
 def apply_multiplier(content: str, multiplier: int) -> str:

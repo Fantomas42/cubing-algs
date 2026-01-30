@@ -9,8 +9,21 @@ type PieceType = Literal['corner', 'edge']
 type Permutation = list[int]
 type Orientation = list[int]
 
-# Cube cubies tuple (cp, co, ep, eo)
-type CubeCubies = tuple[Permutation, Orientation, Permutation, Orientation]
+# Cube facelets
+type CubeFacelets = str
+
+# Cube cubies tuple (cp, co, ep, eo) - without spatial orientation
+type CubeCubies = tuple[
+    Permutation, Orientation,
+    Permutation, Orientation,
+]
+
+# Cube cubies tuple (cp, co, ep, eo, so) - with spatial orientation
+type CubeCubiesOriented = tuple[
+    Permutation, Orientation,
+    Permutation, Orientation,
+    Orientation,
+]
 
 # Regex pattern type
 type RegexPattern = re.Pattern[str]

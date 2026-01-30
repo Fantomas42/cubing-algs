@@ -4,6 +4,7 @@ import os
 import re
 from typing import TYPE_CHECKING
 
+from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import F2L_ADJACENT_FACES
 from cubing_algs.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.constants import F2L_FACES
@@ -41,7 +42,7 @@ USE_COLORS = color_support()
 DEFAULT_EFFECT = os.getenv('CUBING_ALGS_EFFECT', '')
 DEFAULT_PALETTE = os.getenv('CUBING_ALGS_PALETTE', 'default')
 
-ANSI_TO_RGB = re.compile(
+ANSI_TO_RGB: RegexPattern = re.compile(
     r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
 )
 

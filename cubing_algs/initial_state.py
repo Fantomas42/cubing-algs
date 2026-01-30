@@ -1,8 +1,9 @@
 """Generate initial state for different cube size."""
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.constants import FACE_ORDER
 
 
-def get_initial_state(size: int = 3) -> str:
+def get_initial_state(size: int = 3) -> CubeFacelets:
     """
     Get the initial solved state for a cube of given size.
 

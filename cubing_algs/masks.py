@@ -1,4 +1,5 @@
 """Binary masks for identifying and manipulating cube regions and pieces."""
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.initial_state import INITIAL_STATE_3x3x3
@@ -83,7 +84,7 @@ _MASK_CACHE: dict[str, tuple[bool, ...]] = {}
 _CACHE_SIZE_LIMIT = 1000  # Prevent unbounded memory growth
 
 
-def facelets_masked(facelets: str, mask: str) -> str:
+def facelets_masked(facelets: CubeFacelets, mask: str) -> CubeFacelets:
     """
     Apply a binary mask to a facelets string.
 
@@ -125,7 +126,7 @@ def facelets_masked(facelets: str, mask: str) -> str:
     )
 
 
-def state_masked(state: str, mask: str) -> str:
+def state_masked(state: CubeFacelets, mask: str) -> CubeFacelets:
     """
     Apply a binary mask to a cube state.
 

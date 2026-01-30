@@ -8,6 +8,8 @@ transformations, and visual display.
 """
 import re
 
+from cubing_algs.annotations import RegexPattern
+
 MAX_ITERATIONS = 50
 
 RESLICE_THRESHOLD = 50
@@ -320,11 +322,11 @@ UNWIDE_SLICE_MOVES.update(
 )
 
 
-MOVE_SPLIT = re.compile(
+MOVE_SPLIT: RegexPattern = re.compile(
     r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-)(?:@\d+)?|\.(?:@\d+)?)",
 )
 
-LAYER_SPLIT = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
+LAYER_SPLIT: RegexPattern = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
 
 SYMMETRY_M = {
     'F': 'F', 'S': 'S', 'z': 'z',
