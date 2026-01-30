@@ -1,17 +1,17 @@
 """Tests for scrambler utility functions."""
 import unittest
 
+from cubing_algs.constants import CORNER_NAMES
 from cubing_algs.constants import D_CORNERS
 from cubing_algs.constants import D_EDGES
 from cubing_algs.constants import E_EDGES
+from cubing_algs.constants import EDGE_NAMES
 from cubing_algs.constants import F_CORNERS
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
 from cubing_algs.exceptions import InvalidPieceSpecError
-from cubing_algs.scrambler.utils import CORNER_NAMES
-from cubing_algs.scrambler.utils import EDGE_NAMES
 from cubing_algs.scrambler.utils import parse_piece_spec
 from cubing_algs.scrambler.utils import solve_to_algorithm
 from cubing_algs.scrambler.utils import vcube_to_kociemba_string

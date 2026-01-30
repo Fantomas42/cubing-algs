@@ -17,6 +17,9 @@ from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.parsing import parse_moves
+from cubing_algs.scrambler.constants import DEFAULT_RNG
+from cubing_algs.scrambler.constants import MOVES_EASY_CROSS
+from cubing_algs.scrambler.moves import random_moves
 from cubing_algs.scrambler.pieces import arrange_pieces
 from cubing_algs.scrambler.pieces import derange_pieces
 from cubing_algs.scrambler.pieces import disorient_corners
@@ -26,7 +29,6 @@ from cubing_algs.scrambler.pieces import orient_edges
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_permutation
-from cubing_algs.scrambler.random import DEFAULT_RNG
 from cubing_algs.scrambler.utils import parse_piece_spec
 from cubing_algs.scrambler.utils import solve_to_algorithm
 from cubing_algs.scrambler.utils import vcube_to_kociemba_string
@@ -621,3 +623,20 @@ def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
         )
 
     return _state_to_scramble(cp, co, ep, eo)
+
+
+def scramble_easy_cross(rng: Random | None = None) -> Algorithm:
+    """
+    Generate an easy cross scramble using only basic face moves.
+
+    Creates a simple scramble suitable for practicing cross patterns
+    in speedcubing methods like CFOP.
+
+    Args:
+        rng: Optional random number generator.
+
+    Returns:
+        Algorithm with 10 random moves from F, R, B, L faces.
+
+    """
+    return random_moves(3, MOVES_EASY_CROSS, 10, rng)

@@ -21,7 +21,6 @@ from cubing_algs.impacts import compute_manhattan_distance
 from cubing_algs.impacts import compute_opposite_face_manhattan_distance
 from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
-from cubing_algs.impacts import find_permutation_cycles
 from cubing_algs.impacts import parse_facelet_position
 from cubing_algs.impacts import positions_on_adjacent_corners
 from cubing_algs.vcube import VCube
@@ -2583,78 +2582,6 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
             result2.facelets_fixed_count + result2.facelets_mobilized_count,
             54,
         )
-
-
-class TestFindPermutationCycles(unittest.TestCase):
-    """Test the find_permutation_cycles function."""
-
-    def test_identity_permutation(self) -> None:
-        """Test permutation where nothing moves."""
-        permutation = SOLVED_CP
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(cycles, [])
-
-    def test_single_two_cycle(self) -> None:
-        """Test single swap (2-cycle)."""
-        permutation = [1, 0, 2, 3, 4, 5, 6, 7]
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(len(cycles), 1)
-        self.assertEqual(len(cycles[0]), 2)
-        self.assertIn(0, cycles[0])
-        self.assertIn(1, cycles[0])
-
-    def test_single_three_cycle(self) -> None:
-        """Test single 3-cycle."""
-        permutation = [1, 2, 0, 3, 4, 5, 6, 7]
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(len(cycles), 1)
-        self.assertEqual(len(cycles[0]), 3)
-        self.assertEqual(set(cycles[0]), {0, 1, 2})
-
-    def test_multiple_cycles(self) -> None:
-        """Test multiple independent cycles."""
-        permutation = [1, 0, 3, 2, 5, 4, 6, 7]
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(len(cycles), 3)
-        cycle_sets = [set(cycle) for cycle in cycles]
-        self.assertIn({0, 1}, cycle_sets)
-        self.assertIn({2, 3}, cycle_sets)
-        self.assertIn({4, 5}, cycle_sets)
-
-    def test_single_long_cycle(self) -> None:
-        """Test single cycle involving all elements."""
-        permutation = [1, 2, 3, 4, 5, 6, 7, 0]
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(len(cycles), 1)
-        self.assertEqual(len(cycles[0]), 8)
-
-    def test_four_cycle(self) -> None:
-        """Test 4-cycle."""
-        permutation = [1, 2, 3, 0, 4, 5, 6, 7]
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(len(cycles), 1)
-        self.assertEqual(len(cycles[0]), 4)
-        self.assertEqual(set(cycles[0]), {0, 1, 2, 3})
-
-    def test_mixed_cycles(self) -> None:
-        """Test mix of different cycle lengths."""
-        permutation = [1, 0, 3, 4, 2, 5, 6, 7]
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(len(cycles), 2)
-        cycle_lengths = sorted([len(c) for c in cycles])
-        self.assertEqual(cycle_lengths, [2, 3])
-
-    def test_empty_permutation(self) -> None:
-        """Test empty permutation."""
-        permutation: list[int] = []
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(cycles, [])
-
-    def test_single_element(self) -> None:
-        """Test single element permutation."""
-        permutation = [0]
-        cycles = find_permutation_cycles(permutation)
-        self.assertEqual(cycles, [])
 
 
 class TestComputeFaceToFaceMatrix(unittest.TestCase):

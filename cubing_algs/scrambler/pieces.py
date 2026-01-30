@@ -20,7 +20,7 @@ from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.integrity import compute_parity
-from cubing_algs.scrambler.random import DEFAULT_RNG
+from cubing_algs.scrambler.constants import DEFAULT_RNG
 
 
 def _swap_pieces(

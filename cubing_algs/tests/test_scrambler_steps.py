@@ -11,6 +11,7 @@ from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
 from cubing_algs.scrambler.steps import _generate_step_state
+from cubing_algs.scrambler.steps import scramble_easy_cross
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
 from cubing_algs.vcube import VCube
@@ -238,3 +239,73 @@ class TestSupportedSteps(unittest.TestCase):
     def test_total_count(self) -> None:
         """Test that we have 30+ steps as promised."""
         self.assertGreaterEqual(len(SUPPORTED_STEPS), 30)
+
+
+class TestScrambleEasyCross(unittest.TestCase):
+    """Tests for easy cross scramble generation."""
+
+    def test_scramble_easy_cross(self) -> None:
+        """Test scramble easy cross."""
+        moves = scramble_easy_cross()
+
+        self.assertEqual(
+            len(moves), 10,
+        )
+        self.assertTrue(
+            'U' not in moves,
+        )
+        self.assertTrue(
+            'D' not in moves,
+        )
+
+
+class TestRNGParameter(unittest.TestCase):
+    """Tests for random number generator parameter functionality."""
+
+    def test_scramble_easy_cross_deterministic_with_seed(self) -> None:
+        """Test scramble_easy_cross produces identical results with seed."""
+        rng1 = Random(42)
+        rng2 = Random(42)
+
+        result1 = scramble_easy_cross(rng1)
+        result2 = scramble_easy_cross(rng2)
+
+        self.assertEqual(
+            str(result1),
+            str(result2),
+            'Same seed should produce identical easy cross scrambles',
+        )
+        self.assertEqual(
+            len(result1),
+            10,
+            'Easy cross scramble should have 10 moves',
+        )
+
+    def test_scramble_easy_cross_different_seeds_produce_different_results(
+            self) -> None:
+        """Test scramble_easy_cross produces different results."""
+        rng1 = Random(42)
+        rng2 = Random(777)
+
+        result1 = scramble_easy_cross(rng1)
+        result2 = scramble_easy_cross(rng2)
+
+        self.assertNotEqual(
+            str(result1),
+            str(result2),
+            'Different seeds should produce different easy cross scrambles',
+        )
+
+    def test_scramble_easy_cross_uses_default_rng_when_none(self) -> None:
+        """Test scramble_easy_cross works without explicit rng parameter."""
+        result = scramble_easy_cross()
+
+        self.assertEqual(
+            len(result),
+            10,
+            'Should generate easy cross scramble with default RNG',
+        )
+        self.assertFalse(
+            any(str(move).startswith(('U', 'D')) for move in result),
+            'Easy cross should not contain U or D moves',
+        )
