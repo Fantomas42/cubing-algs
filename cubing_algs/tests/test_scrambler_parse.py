@@ -106,6 +106,11 @@ class TestParsePieceSpec(unittest.TestCase):  # noqa: PLR0904
         result = parse_piece_spec('  URF   UBR  ', 'corner')
         self.assertEqual(result, [0, 3])
 
+    def test_parse_with_multiple_spaces_between(self) -> None:
+        """Test parsing handles multiple spaces between tokens."""
+        result = parse_piece_spec('URF     UBR', 'corner')
+        self.assertEqual(result, [0, 3])
+
     def test_parse_invalid_piece_type(self) -> None:
         """Test parsing with invalid piece type raises error."""
         with self.assertRaises(InvalidPieceSpecError):
