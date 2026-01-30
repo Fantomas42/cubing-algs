@@ -42,7 +42,7 @@ AUF_CHOICES: list[str] = ['', 'U', 'U2', "U'"]
 CubeState = tuple[list[int], list[int], list[int], list[int]]
 
 
-def _apply_moves(
+def apply_moves(
         cp: list[int],
         co: list[int],
         ep: list[int],
@@ -69,7 +69,7 @@ def _apply_moves(
     return cp, co, ep, eo
 
 
-def _apply_auf(
+def apply_auf(
         cp: list[int],
         co: list[int],
         ep: list[int],
@@ -92,11 +92,11 @@ def _apply_auf(
     """
     auf_move = rng.choice(AUF_CHOICES)
     if auf_move:
-        return _apply_moves(cp, co, ep, eo, auf_move)
+        return apply_moves(cp, co, ep, eo, auf_move)
     return cp, co, ep, eo
 
 
-def _state_to_scramble(
+def state_to_scramble(
         cp: list[int],
         co: list[int],
         ep: list[int],
@@ -191,7 +191,7 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 
     # 2GLL - specific pattern with phase edges
     elif step == '2GLL':
-        cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
+        cp, co, ep, eo = apply_auf(cp, co, ep, eo, rng)
 
         # Permute phase edges only (no corners)
         phase_edges = [1, 3]  # UF, UB
@@ -223,7 +223,7 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
         phase_edges = [1, 3]  # UF, UB
         cp, co, ep, eo = random_permutation(U_CORNERS, phase_edges, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
+        cp, co, ep, eo = apply_auf(cp, co, ep, eo, rng)
 
     # F2L - First Two Layers
     elif step == 'F2L':
@@ -296,20 +296,20 @@ def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
     elif step == 'WV':
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        cp, co, ep, eo = _apply_moves(cp, co, ep, eo, "R U R'")
+        cp, co, ep, eo = apply_moves(cp, co, ep, eo, "R U R'")
 
     # SV - Summer Variation
     elif step == 'SV':
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        cp, co, ep, eo = _apply_moves(cp, co, ep, eo, "R U' R'")
+        cp, co, ep, eo = apply_moves(cp, co, ep, eo, "R U' R'")
 
     # VLS, VHLS - Valk Last Slot
     elif step in {'VLS', 'VHLS'}:
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         eo = random_edge_orientation(U_EDGES, rng)
-        cp, co, ep, eo = _apply_moves(cp, co, ep, eo, "R U' R'")
+        cp, co, ep, eo = apply_moves(cp, co, ep, eo, "R U' R'")
 
     # Petrus2x2x3
     elif step == 'PETRUS2X2X3':
@@ -371,9 +371,9 @@ def scramble_step(
     # Apply random AUF if requested
     skip_auf_steps = {'WV', 'SV', 'VLS', 'VHLS', '2GLL', 'ZZLL'}
     if include_auf and step.upper() not in skip_auf_steps:
-        cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
+        cp, co, ep, eo = apply_auf(cp, co, ep, eo, rng)
 
-    return _state_to_scramble(cp, co, ep, eo)
+    return state_to_scramble(cp, co, ep, eo)
 
 
 def scramble_ocll_case(
@@ -454,9 +454,9 @@ def scramble_ocll_case(
         raise InvalidStepError(msg)
 
     # Random AUF
-    cp, co, ep, eo = _apply_auf(cp, co, ep, eo, rng)
+    cp, co, ep, eo = apply_auf(cp, co, ep, eo, rng)
 
-    return _state_to_scramble(cp, co, ep, eo)
+    return state_to_scramble(cp, co, ep, eo)
 
 
 def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
@@ -622,7 +622,7 @@ def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
             eo, disorient_edges_list, buffer_edges_list, rng,
         )
 
-    return _state_to_scramble(cp, co, ep, eo)
+    return state_to_scramble(cp, co, ep, eo)
 
 
 def scramble_easy_cross(rng: Random | None = None) -> Algorithm:
