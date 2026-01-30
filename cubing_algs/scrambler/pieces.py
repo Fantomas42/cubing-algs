@@ -230,47 +230,6 @@ def random_edge_orientation(
     return random_orientation(edges, EDGE_NUMBER, EDGE_MODULUS, rng)
 
 
-def flip_n_edges(
-        edges: list[int],
-        n: int,
-        rng: Random | None = None,
-) -> list[int]:
-    """
-    Flip exactly n edges (n must be even).
-
-    Args:
-        edges: Indices of edges that can be flipped.
-        n: Number of edges to flip (must be even).
-        rng: Random number generator (uses DEFAULT_RNG if None).
-
-    Returns:
-        Edge orientation array with exactly n edges flipped.
-
-    Raises:
-        ValueError: If n is odd or n > len(edges).
-
-    """
-    if n % 2 != 0:
-        msg = f'Cannot flip an odd number of edges (n={n})'
-        raise ValueError(msg)
-
-    if n > len(edges):
-        msg = f'Cannot flip {n} edges, only {len(edges)} edges available'
-        raise ValueError(msg)
-
-    if rng is None:
-        rng = DEFAULT_RNG
-
-    eo = SOLVED_EO.copy()
-
-    # Randomly select n edges to flip
-    edges_to_flip = rng.sample(edges, n)
-    for idx in edges_to_flip:
-        eo[idx] = 1
-
-    return eo
-
-
 def arrange_pieces(  # noqa: PLR0913, PLR0917
         cp: list[int],
         co: list[int],

@@ -13,7 +13,6 @@ from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.pieces import derange_pieces
 from cubing_algs.scrambler.pieces import disorient_corners
 from cubing_algs.scrambler.pieces import disorient_edges
-from cubing_algs.scrambler.pieces import flip_n_edges
 from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import orient_edges
 from cubing_algs.scrambler.pieces import random_corner_orientation
@@ -86,36 +85,6 @@ class TestRandomEdgeOrientation(unittest.TestCase):
         eo1 = random_edge_orientation(SOLVED_EP, rng=Random(42))
         eo2 = random_edge_orientation(SOLVED_EP, rng=Random(42))
         self.assertEqual(eo1, eo2)
-
-
-class TestFlipNEdges(unittest.TestCase):
-    """Tests for flip_n_edges function."""
-
-    def test_flip_zero_edges(self) -> None:
-        """Test flipping 0 edges returns solved state."""
-        eo = flip_n_edges(SOLVED_EP, 0, rng=Random(42))
-        self.assertEqual(eo, SOLVED_EO)
-
-    def test_flip_even_number(self) -> None:
-        """Test flipping even number of edges."""
-        eo = flip_n_edges(SOLVED_EP, 4, rng=Random(42))
-        self.assertEqual(sum(eo), 4)
-
-    def test_flip_odd_number_raises(self) -> None:
-        """Test that flipping odd number raises error."""
-        with self.assertRaises(ValueError):
-            flip_n_edges(SOLVED_EP, 3, rng=Random(42))
-
-    def test_flip_too_many_raises(self) -> None:
-        """Test that flipping too many edges raises error."""
-        with self.assertRaises(ValueError):
-            flip_n_edges(U_EDGES, 6, rng=Random(42))
-
-    def test_maintains_constraint(self) -> None:
-        """Test that result maintains eo constraint."""
-        for n in [0, 2, 4, 6, 8, 10, 12]:
-            eo = flip_n_edges(SOLVED_EP, n, rng=Random(42))
-            self.assertEqual(sum(eo) % 2, 0)
 
 
 class TestDerangePieces(unittest.TestCase):
