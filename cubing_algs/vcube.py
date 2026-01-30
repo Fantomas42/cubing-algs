@@ -16,6 +16,7 @@ from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
+from cubing_algs.solver import facelets_to_facelets_algorithm
 from cubing_algs.visual_cube import visual_cube_cube
 
 
@@ -397,6 +398,19 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         index = self.get_face_index(face)
 
         return self._state[index * self.face_size: (index + 1) * self.face_size]
+
+    def to_algorithm(self, other: 'VCube') -> Algorithm:
+        """
+        Build Algorithm to pass from a cube state to another.
+
+        Args:
+            other: Another VCube instance.
+
+        Returns:
+            An algorithm to apply.
+
+        """
+        return facelets_to_facelets_algorithm(self._state, other.state)
 
     @property
     def visual_cube_url(self) -> str:

@@ -48,3 +48,7 @@ class InvalidOrientationError(ValueError):
 
 class InvalidFaceIndexError(ValueError):
     """Exception raised when requesting an unexisting face index by center."""
+
+
+class InvalidFaceletsSolveError(ValueError):
+    """Exception raised when the solver encounter invalid facelet format."""

@@ -1849,3 +1849,131 @@ class TestVCubeOrientation(unittest.TestCase):
 
         cube = VCube(''.join(state), check=False)
         self.assertEqual(cube.orientation, 'DU')
+
+
+class VCubeToAlgorithmTestCase(unittest.TestCase):
+    """Tests for VCube.to_algorithm method."""
+
+    def test_solved_to_solved(self) -> None:
+        """Test algorithm from solved to solved cube."""
+        cube1 = VCube()
+        cube2 = VCube()
+
+        algorithm = cube1.to_algorithm(cube2)
+
+        cube = VCube()
+        cube.rotate(algorithm)
+
+        self.assertEqual(cube.state, cube2.state)
+        self.assertTrue(cube.is_solved)
+
+    def test_solved_to_scrambled(self) -> None:
+        """Test algorithm from solved to scrambled cube."""
+        cube1 = VCube()
+        cube2 = VCube()
+        cube2.rotate("R U R' U'")
+
+        algorithm = cube1.to_algorithm(cube2)
+
+        cube = VCube()
+        cube.rotate(algorithm)
+
+        self.assertEqual(cube.state, cube2.state)
+
+    def test_scrambled_to_solved(self) -> None:
+        """Test algorithm from scrambled to solved cube."""
+        cube1 = VCube()
+        cube1.rotate("R U R' U' R' F R2 U' R' U' R U R' F'")
+        cube2 = VCube()
+
+        algorithm = cube1.to_algorithm(cube2)
+
+        cube = VCube(cube1.state)
+        cube.rotate(algorithm)
+
+        self.assertEqual(cube.state, cube2.state)
+        self.assertTrue(cube.is_solved)
+
+    def test_scrambled_to_scrambled(self) -> None:
+        """Test algorithm from one scrambled cube to another."""
+        cube1 = VCube()
+        cube1.rotate("R U R' U'")
+
+        cube2 = VCube()
+        cube2.rotate("F R U' R' U' R U R' F'")
+
+        algorithm = cube1.to_algorithm(cube2)
+
+        cube = VCube(cube1.state)
+        cube.rotate(algorithm)
+
+        self.assertEqual(cube.state, cube2.state)
+
+    def test_multiple_state_transitions(self) -> None:
+        """Test multiple different state transitions."""
+        test_cases = [
+            ("R U R' U'", "F R U' R' U' R U R' F'"),
+            ('R2 U2', 'F2 D2'),
+            ("R U R' U' R' F R F'", ''),
+        ]
+
+        for source_scramble, dest_scramble in test_cases:
+            with self.subTest(
+                source=source_scramble,
+                dest=dest_scramble,
+            ):
+                cube1 = VCube()
+                if source_scramble:
+                    cube1.rotate(source_scramble)
+
+                cube2 = VCube()
+                if dest_scramble:
+                    cube2.rotate(dest_scramble)
+
+                algorithm = cube1.to_algorithm(cube2)
+
+                cube = VCube(cube1.state)
+                cube.rotate(algorithm)
+
+                self.assertEqual(cube.state, cube2.state)
+
+    def test_same_cube_instance(self) -> None:
+        """Test algorithm from cube to itself."""
+        cube1 = VCube()
+        cube1.rotate("R U R' U'")
+
+        algorithm = cube1.to_algorithm(cube1)
+
+        cube = VCube(cube1.state)
+        cube.rotate(algorithm)
+
+        self.assertEqual(cube.state, cube1.state)
+
+    def test_complex_transformation(self) -> None:
+        """Test complex cube transformation."""
+        cube1 = VCube()
+        cube1.rotate("D R2 U' R2 U' R2 U R2")
+
+        cube2 = VCube()
+        cube2.rotate("F2 D' F2 U' B L' D2")
+
+        algorithm = cube1.to_algorithm(cube2)
+
+        cube = VCube(cube1.state)
+        cube.rotate(algorithm)
+
+        self.assertEqual(cube.state, cube2.state)
+
+    def test_algorithm_returns_valid_moves(self) -> None:
+        """Test that algorithm contains valid moves."""
+        cube1 = VCube()
+        cube2 = VCube()
+        cube2.rotate("R U R' U' R' F R F'")
+
+        algorithm = cube1.to_algorithm(cube2)
+
+        self.assertGreater(len(algorithm), 0)
+
+        for move in algorithm:
+            self.assertTrue(move.is_valid)
+            self.assertIn(move.modifier, ['', "'", '2'])
