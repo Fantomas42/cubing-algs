@@ -49,7 +49,7 @@ def swap_pieces(
 def shuffle_in_place(
         perm: Permutation,
         orient: Orientation,
-        indices: list[int],
+        indices: Permutation,
         rng: Random,
 ) -> bool:
     """
@@ -81,8 +81,8 @@ def fix_parity_with_buffer(  # noqa: PLR0913, PLR0917
         co: Orientation,
         ep: Permutation,
         eo: Orientation,
-        buffer_corners: list[int],
-        buffer_edges: list[int],
+        buffer_corners: Permutation,
+        buffer_edges: Permutation,
 ) -> None:
     """
     Fix parity mismatch by swapping two buffer pieces.
@@ -106,8 +106,8 @@ def fix_parity_with_buffer(  # noqa: PLR0913, PLR0917
 
 
 def random_permutation(
-        corners: list[int],
-        edges: list[int],
+        corners: Permutation,
+        edges: Permutation,
         rng: Random | None = None,
 ) -> CubeCubies:
     """
@@ -156,7 +156,7 @@ def random_permutation(
 
 
 def random_orientation(
-        pieces: list[int],
+        pieces: Orientation,
         piece_count: int,
         modulus: int,
         rng: Random,
@@ -194,7 +194,7 @@ def random_orientation(
 
 
 def random_corner_orientation(
-        corners: list[int],
+        corners: Permutation,
         rng: Random | None = None,
 ) -> Orientation:
     """
@@ -214,7 +214,7 @@ def random_corner_orientation(
 
 
 def random_edge_orientation(
-        edges: list[int],
+        edges: Permutation,
         rng: Random | None = None,
 ) -> Orientation:
     """
@@ -238,10 +238,10 @@ def arrange_pieces(  # noqa: PLR0913, PLR0917
         co: Orientation,
         ep: Permutation,
         eo: Orientation,
-        corners: list[int],
-        edges: list[int],
-        buffer_corners: list[int] | None = None,
-        buffer_edges: list[int] | None = None,
+        corners: Permutation,
+        edges: Permutation,
+        buffer_corners: Permutation | None = None,
+        buffer_edges: Permutation | None = None,
         rng: Random | None = None,
 ) -> CubeCubies:
     """
@@ -329,10 +329,10 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
         co: Orientation,
         ep: Permutation,
         eo: Orientation,
-        corners: list[int],
-        edges: list[int],
-        buffer_corners: list[int] | None = None,
-        buffer_edges: list[int] | None = None,
+        corners: Permutation,
+        edges: Permutation,
+        buffer_corners: Permutation | None = None,
+        buffer_edges: Permutation | None = None,
         rng: Random | None = None,
 ) -> CubeCubies:
     """
@@ -438,8 +438,8 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
 
 def orient_pieces(
         orient: Orientation,
-        pieces: list[int],
-        buffer_pieces: list[int],
+        pieces: Permutation,
+        buffer_pieces: Permutation,
         modulus: int,
         rng: Random,
 ) -> Orientation:
@@ -480,8 +480,8 @@ def orient_pieces(
 
 def orient_corners(
         co: Orientation,
-        corners: list[int],
-        buffer_corners: list[int] | None = None,
+        corners: Permutation,
+        buffer_corners: Permutation | None = None,
         rng: Random | None = None,
 ) -> Orientation:
     """
@@ -508,8 +508,8 @@ def orient_corners(
 
 def disorient_corners(
         co: Orientation,
-        corners: list[int],
-        buffer_corners: list[int] | None = None,
+        corners: Permutation,
+        buffer_corners: Permutation | None = None,
         rng: Random | None = None,
 ) -> Orientation:
     """
@@ -569,8 +569,8 @@ def disorient_corners(
 
 def orient_edges(
         eo: Orientation,
-        edges: list[int],
-        buffer_edges: list[int] | None = None,
+        edges: Permutation,
+        buffer_edges: Permutation | None = None,
         rng: Random | None = None,
 ) -> Orientation:
     """
@@ -595,8 +595,8 @@ def orient_edges(
 
 def disorient_edges(
         eo: Orientation,
-        edges: list[int],
-        buffer_edges: list[int] | None = None,
+        edges: Permutation,
+        buffer_edges: Permutation | None = None,
         rng: Random | None = None,
 ) -> Orientation:
     """
