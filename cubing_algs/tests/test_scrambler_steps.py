@@ -14,6 +14,7 @@ from cubing_algs.scrambler.steps import generate_step_state
 from cubing_algs.scrambler.steps import scramble_easy_cross
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
+from cubing_algs.scrambler.steps import scramble_with_piece_constraints
 from cubing_algs.vcube import VCube
 
 
@@ -97,6 +98,38 @@ class TestGenerateStepState(unittest.TestCase):
         self.assertEqual(ep1, ep2)
         self.assertEqual(eo1, eo2)
 
+    def test_default_rng_when_none(self) -> None:
+        """Test that default RNG is used when None is passed."""
+        cp, co, ep, eo = generate_step_state('PLL', None)
+
+        # Should generate valid state
+        self.assertEqual(len(cp), 8)
+        self.assertEqual(len(co), 8)
+        self.assertEqual(len(ep), 12)
+        self.assertEqual(len(eo), 12)
+
+    def test_ejls_dfr_corner_disorientation(self) -> None:
+        """Test EJLS and EJF2L steps ensure DFR corner is disoriented."""
+        # Test many seeds to ensure DFR is always disoriented
+        # Note: The code always enters the if co[4] == 0 branch because
+        # random_corner_orientation(U_CORNERS) doesn't touch co[4]
+        for seed in range(100):
+            for step in ['EJLS', 'EJF2L']:
+                rng = Random(seed)
+                _cp, co, _ep, _eo = generate_step_state(step, rng)
+
+                # DFR is corner index 4, should be disoriented
+                self.assertNotEqual(
+                    co[4], 0,
+                    f'{step}: DFR should be disoriented (seed {seed})',
+                )
+
+                # Orientation sum constraint should hold
+                self.assertEqual(
+                    sum(co) % 3, 0,
+                    f'{step}: Orientation constraint failed (seed {seed})',
+                )
+
 
 class TestScrambleStep(unittest.TestCase):
     """Tests for scramble_step function."""
@@ -147,6 +180,13 @@ class TestScrambleStep(unittest.TestCase):
         scramble2 = scramble_step('PLL', Random(42), include_auf=False)
 
         self.assertEqual(str(scramble1), str(scramble2))
+
+    def test_default_rng_when_none(self) -> None:
+        """Test that default RNG is used when None is passed."""
+        scramble = scramble_step('PLL', None, include_auf=False)
+
+        # Should return valid Algorithm
+        self.assertIsInstance(scramble, Algorithm)
 
 
 class TestScrambleOCLLCase(unittest.TestCase):
@@ -201,6 +241,13 @@ class TestScrambleOCLLCase(unittest.TestCase):
         scramble2 = scramble_ocll_case('T', Random(42))
 
         self.assertEqual(str(scramble1), str(scramble2))
+
+    def test_default_rng_when_none(self) -> None:
+        """Test that default RNG is used when None is passed."""
+        scramble = scramble_ocll_case('T', None)
+
+        # Should return valid Algorithm
+        self.assertIsInstance(scramble, Algorithm)
 
 
 class TestSupportedSteps(unittest.TestCase):
@@ -257,6 +304,247 @@ class TestScrambleEasyCross(unittest.TestCase):
         self.assertTrue(
             'D' not in moves,
         )
+
+
+class TestScrambleWithPieceConstraints(unittest.TestCase):
+    """Tests for scramble_with_piece_constraints function."""
+
+    def test_default_rng_when_none(self) -> None:
+        """Test that default RNG is used when None is passed."""
+        scramble = scramble_with_piece_constraints(rng=None)
+
+        # Should return valid Algorithm
+        self.assertIsInstance(scramble, Algorithm)
+
+    def test_solve_corners_only(self) -> None:
+        """Test solving only corners."""
+        scramble = scramble_with_piece_constraints(
+            solve_corners='U',
+            rng=Random(42),
+        )
+
+        # Should return Algorithm
+        self.assertIsInstance(scramble, Algorithm)
+
+        # Apply and verify U corners are solved
+        cube = VCube()
+        cube.rotate(str(scramble))
+        cp, _co, _ep, _eo, _ = cube.to_cubies
+
+        # U corner indices: URF=0, UFL=1, ULB=2, UBR=3
+        u_corners = [0, 1, 2, 3]
+        for idx in u_corners:
+            self.assertEqual(cp[idx], idx)
+
+    def test_solve_edges_only(self) -> None:
+        """Test solving only edges."""
+        scramble = scramble_with_piece_constraints(
+            solve_edges='U',
+            rng=Random(42),
+        )
+
+        # Should return Algorithm
+        self.assertIsInstance(scramble, Algorithm)
+
+        # Apply and verify U edges are solved
+        cube = VCube()
+        cube.rotate(str(scramble))
+        _cp, _co, ep, _eo, _ = cube.to_cubies
+
+        # U edge indices: UR=0, UF=1, UL=2, UB=3
+        u_edges = [0, 1, 2, 3]
+        for idx in u_edges:
+            self.assertEqual(ep[idx], idx)
+
+    def test_orient_corners_all(self) -> None:
+        """Test orienting all corners."""
+        scramble = scramble_with_piece_constraints(
+            orient_corners_spec='all',
+            rng=Random(42),
+        )
+
+        # Apply and verify all corners are oriented
+        cube = VCube()
+        cube.rotate(str(scramble))
+        _cp, co, _ep, _eo, _ = cube.to_cubies
+
+        # All corners should have orientation 0
+        self.assertEqual(co, SOLVED_CO)
+
+    def test_orient_edges_all(self) -> None:
+        """Test orienting all edges."""
+        scramble = scramble_with_piece_constraints(
+            orient_edges_spec='all',
+            rng=Random(42),
+        )
+
+        # Apply and verify all edges are oriented
+        cube = VCube()
+        cube.rotate(str(scramble))
+        _cp, _co, _ep, eo, _ = cube.to_cubies
+
+        # All edges should have orientation 0
+        self.assertEqual(eo, SOLVED_EO)
+
+    def test_orient_specific_pieces(self) -> None:
+        """Test orienting specific pieces."""
+        scramble = scramble_with_piece_constraints(
+            orient_corners_spec='U',
+            orient_edges_spec='U',
+            rng=Random(42),
+        )
+
+        # Apply and verify U layer is oriented
+        cube = VCube()
+        cube.rotate(str(scramble))
+        _cp, co, _ep, eo, _ = cube.to_cubies
+
+        # U corners should be oriented
+        u_corners = [0, 1, 2, 3]
+        for idx in u_corners:
+            self.assertEqual(co[idx], 0)
+
+        # U edges should be oriented
+        u_edges = [0, 1, 2, 3]
+        for idx in u_edges:
+            self.assertEqual(eo[idx], 0)
+
+    def test_derange_corners(self) -> None:
+        """Test that derange ensures pieces are not in solved positions."""
+        scramble = scramble_with_piece_constraints(
+            derange_corners='U',
+            rng=Random(42),
+        )
+
+        # Apply and verify U corners are not all solved
+        cube = VCube()
+        cube.rotate(str(scramble))
+        cp, _co, _ep, _eo, _ = cube.to_cubies
+
+        # At least one U corner should not be in solved position
+        u_corners = [0, 1, 2, 3]
+        unsolved_count = sum(1 for idx in u_corners if cp[idx] != idx)
+        self.assertGreater(unsolved_count, 0)
+
+    def test_derange_edges(self) -> None:
+        """Test that derange ensures edges are not in solved positions."""
+        scramble = scramble_with_piece_constraints(
+            derange_edges='U',
+            rng=Random(42),
+        )
+
+        # Apply and verify U edges are not all solved
+        cube = VCube()
+        cube.rotate(str(scramble))
+        _cp, _co, ep, _eo, _ = cube.to_cubies
+
+        # At least one U edge should not be in solved position
+        u_edges = [0, 1, 2, 3]
+        unsolved_count = sum(1 for idx in u_edges if ep[idx] != idx)
+        self.assertGreater(unsolved_count, 0)
+
+    def test_disorient_corners(self) -> None:
+        """Test that disorient ensures corners are not correctly oriented."""
+        scramble = scramble_with_piece_constraints(
+            disorient_corners_spec='U',
+            rng=Random(42),
+        )
+
+        # Apply and verify U corners are not all oriented
+        cube = VCube()
+        cube.rotate(str(scramble))
+        _cp, co, _ep, _eo, _ = cube.to_cubies
+
+        # At least one U corner should not be oriented
+        u_corners = [0, 1, 2, 3]
+        disoriented_count = sum(1 for idx in u_corners if co[idx] != 0)
+        self.assertGreater(disoriented_count, 0)
+
+    def test_disorient_edges(self) -> None:
+        """Test that disorient ensures edges are not correctly oriented."""
+        scramble = scramble_with_piece_constraints(
+            disorient_edges_spec='U',
+            rng=Random(42),
+        )
+
+        # Apply and verify U edges are not all oriented
+        cube = VCube()
+        cube.rotate(str(scramble))
+        _cp, _co, _ep, eo, _ = cube.to_cubies
+
+        # At least one U edge should not be oriented
+        u_edges = [0, 1, 2, 3]
+        disoriented_count = sum(1 for idx in u_edges if eo[idx] != 0)
+        self.assertGreater(disoriented_count, 0)
+
+    def test_combined_constraints(self) -> None:
+        """Test multiple constraints together."""
+        scramble = scramble_with_piece_constraints(
+            solve_corners='D',
+            solve_edges='D E',
+            orient_corners_spec='all',
+            orient_edges_spec='all',
+            buffer_corners='U',
+            buffer_edges='U',
+            rng=Random(42),
+        )
+
+        # Should return valid Algorithm
+        self.assertIsInstance(scramble, Algorithm)
+
+        # Apply and verify
+        cube = VCube()
+        cube.rotate(str(scramble))
+        cp, co, _ep, eo, _ = cube.to_cubies
+
+        # D corners should be solved
+        d_corners = [4, 5, 6, 7]
+        for idx in d_corners:
+            self.assertEqual(cp[idx], idx)
+
+        # All corners should be oriented
+        self.assertEqual(co, SOLVED_CO)
+
+        # All edges should be oriented
+        self.assertEqual(eo, SOLVED_EO)
+
+    def test_custom_buffer_pieces(self) -> None:
+        """Test using custom buffer pieces."""
+        scramble = scramble_with_piece_constraints(
+            orient_corners_spec='U',
+            buffer_corners='D',
+            buffer_edges='E',
+            rng=Random(42),
+        )
+
+        # Should return valid Algorithm
+        self.assertIsInstance(scramble, Algorithm)
+
+    def test_empty_constraints(self) -> None:
+        """Test with no constraints returns random scramble."""
+        scramble = scramble_with_piece_constraints(rng=Random(42))
+
+        # Should return valid Algorithm
+        self.assertIsInstance(scramble, Algorithm)
+
+    def test_all_parameters(self) -> None:
+        """Test with all parameters specified."""
+        scramble = scramble_with_piece_constraints(
+            solve_corners='DFR',
+            solve_edges='FR',
+            orient_corners_spec='U',
+            orient_edges_spec='U',
+            derange_corners='',
+            derange_edges='',
+            disorient_corners_spec='',
+            disorient_edges_spec='',
+            buffer_corners='D',
+            buffer_edges='E',
+            rng=Random(42),
+        )
+
+        # Should return valid Algorithm
+        self.assertIsInstance(scramble, Algorithm)
 
 
 class TestRNGParameter(unittest.TestCase):

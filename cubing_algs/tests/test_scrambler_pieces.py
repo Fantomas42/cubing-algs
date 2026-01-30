@@ -188,6 +188,33 @@ class TestOrientCorners(unittest.TestCase):
             result = orient_corners(co, U_CORNERS, [4, 5], rng=rng)
             self.assertEqual(sum(result) % 3, 0)
 
+    def test_orient_corners_without_buffer(self) -> None:
+        """Test orienting corners without buffer pieces."""
+        co = [1, 2, 0, 0, 0, 0, 0, 0]
+        result = orient_corners(
+            co, U_CORNERS,
+            buffer_corners=[],
+            rng=Random(42),
+        )
+
+        # Should still maintain constraint
+        self.assertEqual(sum(result) % 3, 0)
+        # U corners should be oriented
+        # but one might have orientation to fix constraint
+        zero_count = sum(1 for idx in U_CORNERS if result[idx] == 0)
+        self.assertGreaterEqual(zero_count, len(U_CORNERS) - 1)
+
+    def test_orient_corners_default_rng(self) -> None:
+        """Test orient_corners with default RNG."""
+        co = [1, 2, 0, 0, 0, 0, 0, 0]
+        result = orient_corners(co, U_CORNERS, buffer_corners=[4, 5])
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 3, 0)
+        # U corners should be oriented
+        for idx in U_CORNERS:
+            self.assertEqual(result[idx], 0)
+
 
 class TestDisorientCorners(unittest.TestCase):
     """Tests for disorient_corners function."""
@@ -252,6 +279,17 @@ class TestDisorientCorners(unittest.TestCase):
         # Corner should be disoriented
         self.assertNotEqual(result[0], 0)
 
+    def test_disorient_corners_default_rng(self) -> None:
+        """Test disorient_corners with default RNG."""
+        co = SOLVED_CO.copy()
+        result = disorient_corners(co, U_CORNERS, buffer_corners=[4, 5])
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 3, 0)
+        # At least some corners should be disoriented
+        non_zero = sum(1 for idx in U_CORNERS if result[idx] != 0)
+        self.assertGreater(non_zero, 0)
+
 
 class TestOrientEdges(unittest.TestCase):
     """Tests for orient_edges function."""
@@ -278,6 +316,17 @@ class TestOrientEdges(unittest.TestCase):
             eo = random_edge_orientation(SOLVED_EP, rng=rng)
             result = orient_edges(eo, U_EDGES, [8, 9], rng=rng)
             self.assertEqual(sum(result) % 2, 0)
+
+    def test_orient_edges_default_rng(self) -> None:
+        """Test orient_edges with default RNG."""
+        eo = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+        result = orient_edges(eo, U_EDGES, buffer_edges=[8, 9])
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 2, 0)
+        # U edges should be oriented
+        for idx in U_EDGES:
+            self.assertEqual(result[idx], 0)
 
 
 class TestDisorientEdges(unittest.TestCase):
@@ -322,6 +371,29 @@ class TestDisorientEdges(unittest.TestCase):
 
         # Should maintain constraint
         self.assertEqual(sum(result) % 2, 0)
+
+    def test_disorient_edges_no_buffer_unflip_case(self) -> None:
+        """Test disorienting edges without buffer when unflip is needed."""
+        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edges = [0, 1, 2]  # Odd number of edges to trigger unflip
+        result = disorient_edges(eo, edges, buffer_edges=[], rng=Random(42))
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 2, 0)
+        # At least some edges should be disoriented
+        non_zero = sum(1 for idx in edges if result[idx] != 0)
+        self.assertGreater(non_zero, 0)
+
+    def test_disorient_edges_default_rng(self) -> None:
+        """Test disorient_edges with default RNG."""
+        eo = SOLVED_EO.copy()
+        result = disorient_edges(eo, U_EDGES, buffer_edges=[8, 9])
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 2, 0)
+        # At least some edges should be disoriented
+        non_zero = sum(1 for idx in U_EDGES if result[idx] != 0)
+        self.assertGreater(non_zero, 0)
 
 
 class TestSwapPieces(unittest.TestCase):
