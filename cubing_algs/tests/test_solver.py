@@ -102,6 +102,19 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         self.assertEqual(str(algorithm), "R2 U2 R' U2 R2")
 
+    def test_kociemba_exception(self) -> None:
+        """
+        Test solved to solved, known to provide invalid results.
+
+        https://github.com/muodov/kociemba/issues/56
+        """
+        algorithm = facelets_to_facelets_algorithm(
+            INITIAL_STATE,
+            INITIAL_STATE,
+        )
+
+        self.assertEqual(str(algorithm), '')
+
     def test_invalid_facelets_raises_error(self) -> None:
         """Test that invalid facelets raise InvalidFaceletsSolveError."""
         invalid_facelets = 'U' * 54

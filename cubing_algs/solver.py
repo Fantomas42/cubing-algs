@@ -9,6 +9,8 @@ from cubing_algs.exceptions import InvalidFaceletsSolveError
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.parsing import parse_moves
 
+KOCIEMBA_SOLVED_SPECIAL_CASE = "R L U2 R L' B2 U2 R2 F2 L2 D2 L2 F2"
+
 
 def facelets_to_facelets_algorithm(
         source: CubeFacelets,
@@ -37,7 +39,12 @@ def facelets_to_facelets_algorithm(
         )
         raise InvalidFaceletsSolveError(msg) from e
 
-    return parse_moves(solution)
+    algorithm = parse_moves(solution)
+
+    if str(algorithm) == KOCIEMBA_SOLVED_SPECIAL_CASE:
+        return Algorithm()
+
+    return algorithm
 
 
 def cubies_to_cubies_algorithm(
