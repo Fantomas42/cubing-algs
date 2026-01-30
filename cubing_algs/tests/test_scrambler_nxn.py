@@ -10,11 +10,11 @@ from statistics import stdev
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
-from cubing_algs.scrambler.random import build_cube_move_set
-from cubing_algs.scrambler.random import is_valid_next_move
-from cubing_algs.scrambler.random import random_moves
-from cubing_algs.scrambler.random import scramble
-from cubing_algs.scrambler.random import scramble_easy_cross
+from cubing_algs.scrambler.nxn import build_cube_move_set
+from cubing_algs.scrambler.nxn import is_valid_next_move
+from cubing_algs.scrambler.nxn import random_moves
+from cubing_algs.scrambler.nxn import scramble
+from cubing_algs.scrambler.nxn import scramble_easy_cross
 from cubing_algs.vcube import VCube
 
 

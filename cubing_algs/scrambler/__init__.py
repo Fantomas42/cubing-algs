@@ -8,13 +8,13 @@ This module provides comprehensive scramble generation functionality:
 - Utility functions for cube state manipulation
 
 Submodules:
-- random: Basic random scramble generation
+- nxn: Basic random scramble generation
 - utils: Utility functions and constants
 - pieces: Low-level piece manipulation
 - steps: Step-based scramble generation
 """
-from cubing_algs.scrambler.random import scramble
-from cubing_algs.scrambler.random import scramble_easy_cross
+from cubing_algs.scrambler.nxn import scramble
+from cubing_algs.scrambler.nxn import scramble_easy_cross
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
 from cubing_algs.scrambler.steps import scramble_with_piece_constraints
