@@ -20,6 +20,7 @@ from cubing_algs.parsing import parse_moves
 from cubing_algs.scrambler.constants import DEFAULT_RNG
 from cubing_algs.scrambler.constants import MOVES_EASY_CROSS
 from cubing_algs.scrambler.moves import random_moves
+from cubing_algs.scrambler.parse import parse_piece_spec
 from cubing_algs.scrambler.pieces import arrange_pieces
 from cubing_algs.scrambler.pieces import derange_pieces
 from cubing_algs.scrambler.pieces import disorient_corners
@@ -29,7 +30,6 @@ from cubing_algs.scrambler.pieces import orient_edges
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_permutation
-from cubing_algs.scrambler.utils import parse_piece_spec
 from cubing_algs.scrambler.utils import solve_to_algorithm
 from cubing_algs.scrambler.utils import vcube_to_kociemba_string
 from cubing_algs.transform.mirror import mirror_moves
