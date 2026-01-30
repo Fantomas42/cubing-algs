@@ -140,7 +140,7 @@ SUPPORTED_STEPS = [
 ]
 
 
-def _generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
+def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
         step: str,
         rng: Random | None = None,
 ) -> tuple[list[int], list[int], list[int], list[int]]:
@@ -361,7 +361,7 @@ def scramble_step(
         rng = DEFAULT_RNG
 
     # Generate the step state
-    cp, co, ep, eo = _generate_step_state(step, rng)
+    cp, co, ep, eo = generate_step_state(step, rng)
 
     # Apply random AUF if requested
     skip_auf_steps = {'WV', 'SV', 'VLS', 'VHLS', '2GLL', 'ZZLL'}

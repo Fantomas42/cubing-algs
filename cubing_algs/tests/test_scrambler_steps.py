@@ -10,7 +10,7 @@ from cubing_algs.constants import SOLVED_EO
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
-from cubing_algs.scrambler.steps import _generate_step_state
+from cubing_algs.scrambler.steps import generate_step_state
 from cubing_algs.scrambler.steps import scramble_easy_cross
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
@@ -18,13 +18,13 @@ from cubing_algs.vcube import VCube
 
 
 class TestGenerateStepState(unittest.TestCase):
-    """Tests for _generate_step_state function."""
+    """Tests for generate_step_state function."""
 
     def test_all_supported_steps_generate(self) -> None:
         """Test that all supported steps generate valid states."""
         rng = Random(42)
         for step in SUPPORTED_STEPS:
-            cp, co, ep, eo = _generate_step_state(step, rng)
+            cp, co, ep, eo = generate_step_state(step, rng)
 
             # Check basic validity
             self.assertEqual(len(cp), 8)
@@ -46,11 +46,11 @@ class TestGenerateStepState(unittest.TestCase):
     def test_invalid_step_raises(self) -> None:
         """Test that invalid step name raises error."""
         with self.assertRaises(InvalidStepError):
-            _generate_step_state('INVALID_STEP', Random(42))
+            generate_step_state('INVALID_STEP', Random(42))
 
     def test_pll_only_permutation(self) -> None:
         """Test that PLL only permutes U layer."""
-        _cp, co, _ep, eo = _generate_step_state('PLL', Random(42))
+        _cp, co, _ep, eo = generate_step_state('PLL', Random(42))
 
         # All orientations should be solved
         self.assertEqual(co, SOLVED_CO)
@@ -64,7 +64,7 @@ class TestGenerateStepState(unittest.TestCase):
 
         # Try multiple times to ensure randomness
         for _ in range(10):
-            _cp, co, _ep, eo = _generate_step_state('OLL', rng)
+            _cp, co, _ep, eo = generate_step_state('OLL', rng)
 
             # Check if U corners have orientation
             u_corners = [0, 1, 2, 3]
@@ -81,7 +81,7 @@ class TestGenerateStepState(unittest.TestCase):
 
     def test_f2l_permutes_all_corners(self) -> None:
         """Test that F2L permutes all corners."""
-        cp, _co, _ep, _eo = _generate_step_state('F2L', Random(42))
+        cp, _co, _ep, _eo = generate_step_state('F2L', Random(42))
 
         # All corners should potentially be permuted
         # Just check valid permutation
@@ -89,8 +89,8 @@ class TestGenerateStepState(unittest.TestCase):
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same result."""
-        cp1, co1, ep1, eo1 = _generate_step_state('PLL', Random(42))
-        cp2, co2, ep2, eo2 = _generate_step_state('PLL', Random(42))
+        cp1, co1, ep1, eo1 = generate_step_state('PLL', Random(42))
+        cp2, co2, ep2, eo2 = generate_step_state('PLL', Random(42))
 
         self.assertEqual(cp1, cp2)
         self.assertEqual(co1, co2)
