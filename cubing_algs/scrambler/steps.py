@@ -18,6 +18,7 @@ from cubing_algs.constants import U_EDGES
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.parsing import parse_moves
 from cubing_algs.scrambler.constants import DEFAULT_RNG
+from cubing_algs.scrambler.constants import MOVES_AUF
 from cubing_algs.scrambler.constants import MOVES_EASY_CROSS
 from cubing_algs.scrambler.moves import random_moves
 from cubing_algs.scrambler.parse import parse_piece_spec
@@ -34,9 +35,6 @@ from cubing_algs.scrambler.utils import solve_to_algorithm
 from cubing_algs.scrambler.utils import vcube_to_kociemba_string
 from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.vcube import VCube
-
-# AUF choices for random U layer adjustment
-AUF_CHOICES: list[str] = ['', 'U', 'U2', "U'"]
 
 # Type alias for cube state tuple
 CubeState = tuple[list[int], list[int], list[int], list[int]]
@@ -90,7 +88,7 @@ def apply_auf(
         Tuple of (cp, co, ep, eo) with AUF applied.
 
     """
-    auf_move = rng.choice(AUF_CHOICES)
+    auf_move = rng.choice(MOVES_AUF)
     if auf_move:
         return apply_moves(cp, co, ep, eo, auf_move)
     return cp, co, ep, eo

@@ -13,6 +13,13 @@ MOVES_EASY_CROSS = [
     'L',
 ]
 
+MOVES_AUF = [
+    '',
+    'U',
+    'U2',
+    "U'",
+]
+
 EXCLUDE_ODD_FACES_RH = {'D', 'L', 'B'}
 EXCLUDE_ODD_FACES_LH = {'D', 'R', 'B'}
 
