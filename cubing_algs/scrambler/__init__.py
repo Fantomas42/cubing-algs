@@ -14,10 +14,10 @@ Submodules:
 - steps: Step-based scramble generation
 """
 from cubing_algs.scrambler.nxn import scramble
+from cubing_algs.scrambler.pieces import scramble_with_piece_constraints
 from cubing_algs.scrambler.steps import scramble_easy_cross
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
-from cubing_algs.scrambler.steps import scramble_with_piece_constraints
 
 __all__ = [
     'scramble',

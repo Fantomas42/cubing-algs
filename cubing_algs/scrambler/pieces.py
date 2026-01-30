@@ -11,6 +11,7 @@ All functions use buffer pieces to absorb necessary fixes.
 """
 from random import Random
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CubeCubies
 from cubing_algs.annotations import Orientation
 from cubing_algs.annotations import Permutation
@@ -24,6 +25,8 @@ from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.constants import DEFAULT_RNG
+from cubing_algs.scrambler.converters import cubies_to_algorithm
+from cubing_algs.scrambler.parse import parse_piece_spec
 
 
 def swap_pieces(
@@ -640,3 +643,169 @@ def disorient_edges(
             eo[victim] = 0
 
     return eo
+
+
+def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
+        solve_corners: str = '',
+        solve_edges: str = '',
+        orient_corners_spec: str = '',
+        orient_edges_spec: str = '',
+        derange_corners: str = '',
+        derange_edges: str = '',
+        disorient_corners_spec: str = '',
+        disorient_edges_spec: str = '',
+        buffer_corners: str = 'D',
+        buffer_edges: str = 'E',
+        rng: Random | None = None,
+) -> Algorithm:
+    """
+    Generate scramble with fine-grained piece-level constraints.
+
+    This function provides maximum control over cube state by allowing you to
+    specify exactly which pieces should be solved, oriented, or scrambled.
+
+    Args:
+        solve_corners: Corners to place in solved positions
+            (e.g., "U", "URF UBR").
+        solve_edges: Edges to place in solved positions
+            (e.g., "U", "UR UF").
+        orient_corners_spec: Corners to orient correctly
+            (e.g., "all", "U").
+        orient_edges_spec: Edges to orient correctly (e.g., "all", "D").
+        derange_corners: Corners that must NOT be in solved positions.
+        derange_edges: Edges that must NOT be in solved positions.
+        disorient_corners_spec: Corners that must NOT be correctly
+            oriented.
+        disorient_edges_spec: Edges that must NOT be correctly oriented.
+        buffer_corners: Corners to use as buffers for fixing constraints
+            (default "D").
+        buffer_edges: Edges to use as buffers for fixing constraints
+            (default "E").
+        rng: Random number generator (uses DEFAULT_RNG if None).
+
+    Returns:
+        Algorithm scramble satisfying the specified constraints.
+
+    Examples:
+        >>> # PLL-like state: U layer permuted, all pieces oriented
+        >>> scramble_with_piece_constraints(
+        ...     orient_corners_spec="all",
+        ...     orient_edges_spec="all",
+        ...     buffer_corners="D",
+        ...     buffer_edges="E"
+        ... )
+
+        >>> # F2L solved, last layer scrambled
+        >>> scramble_with_piece_constraints(
+        ...     solve_corners="D",
+        ...     solve_edges="D E",
+        ...     buffer_corners="U",
+        ...     buffer_edges="U"
+        ... )
+
+        >>> # ZBLL-like: Last layer oriented
+        >>> scramble_with_piece_constraints(
+        ...     orient_corners_spec="U",
+        ...     orient_edges_spec="U",
+        ...     buffer_corners="D",
+        ...     buffer_edges="E"
+        ... )
+
+    """
+    if rng is None:
+        rng = DEFAULT_RNG
+
+    # Start with solved state
+    cp = SOLVED_CP.copy()
+    co = SOLVED_CO.copy()
+    ep = SOLVED_EP.copy()
+    eo = SOLVED_EO.copy()
+
+    # Parse piece specifications
+    solve_corners_list = (
+        parse_piece_spec(solve_corners, 'corner') if solve_corners else []
+    )
+    solve_edges_list = (
+        parse_piece_spec(solve_edges, 'edge') if solve_edges else []
+    )
+    derange_corners_list = (
+        parse_piece_spec(derange_corners, 'corner') if derange_corners else []
+    )
+    derange_edges_list = (
+        parse_piece_spec(derange_edges, 'edge') if derange_edges else []
+    )
+    buffer_corners_list = parse_piece_spec(buffer_corners, 'corner')
+    buffer_edges_list = parse_piece_spec(buffer_edges, 'edge')
+
+    # Step 1: Handle position constraints (solve/derange)
+    # First, scramble everything that's not explicitly solved
+    all_corners_set = set(SOLVED_CP)
+    all_edges_set = set(SOLVED_EP)
+
+    # Pieces to scramble = all pieces - (solve pieces + buffer pieces)
+    scramble_corners = list(
+        all_corners_set - set(solve_corners_list) - set(buffer_corners_list),
+    )
+    scramble_edges = list(
+        all_edges_set - set(solve_edges_list) - set(buffer_edges_list),
+    )
+
+    # Scramble non-solved pieces
+    if scramble_corners or scramble_edges:
+        cp, co, ep, eo = derange_pieces(
+            cp, co, ep, eo,
+            scramble_corners or [],
+            scramble_edges or [],
+            buffer_corners_list,
+            buffer_edges_list,
+            rng,
+        )
+
+    # Arrange solved pieces
+    if solve_corners_list or solve_edges_list:
+        cp, co, ep, eo = arrange_pieces(
+            cp, co, ep, eo,
+            solve_corners_list,
+            solve_edges_list,
+            buffer_corners_list,
+            buffer_edges_list,
+            rng,
+        )
+
+    # Handle derange constraint (make sure these are NOT solved)
+    if derange_corners_list or derange_edges_list:
+        cp, co, ep, eo = derange_pieces(
+            cp, co, ep, eo,
+            derange_corners_list,
+            derange_edges_list,
+            buffer_corners_list,
+            buffer_edges_list,
+            rng,
+        )
+
+    # Step 2: Handle orientation constraints
+    if orient_corners_spec:
+        orient_corners_list = parse_piece_spec(orient_corners_spec, 'corner')
+        co = orient_corners(co, orient_corners_list, buffer_corners_list, rng)
+
+    if orient_edges_spec:
+        orient_edges_list = parse_piece_spec(orient_edges_spec, 'edge')
+        eo = orient_edges(eo, orient_edges_list, buffer_edges_list, rng)
+
+    if disorient_corners_spec:
+        disorient_corners_list = parse_piece_spec(
+            disorient_corners_spec, 'corner',
+        )
+        co = disorient_corners(
+            co, disorient_corners_list, buffer_corners_list, rng,
+        )
+
+    if disorient_edges_spec:
+        disorient_edges_list = parse_piece_spec(
+            disorient_edges_spec, 'edge',
+        )
+        eo = disorient_edges(
+            eo, disorient_edges_list, buffer_edges_list, rng,
+        )
+
+    return cubies_to_algorithm((cp, co, ep, eo))
