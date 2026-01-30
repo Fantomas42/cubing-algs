@@ -1,4 +1,5 @@
 """Parsing for advanced scrambler piece selection."""
+from cubing_algs.annotations import PieceType
 from cubing_algs.constants import CORNER_NAMES
 from cubing_algs.constants import EDGE_NAMES
 from cubing_algs.constants import LAYER_MAP_CORNERS
@@ -8,7 +9,7 @@ from cubing_algs.constants import SOLVED_EP
 from cubing_algs.exceptions import InvalidPieceSpecError
 
 
-def parse_piece_spec(spec: str, piece_type: str) -> list[int]:
+def parse_piece_spec(spec: str, piece_type: PieceType) -> list[int]:
     """
     Parse piece specification string into list of cubie indices.
 

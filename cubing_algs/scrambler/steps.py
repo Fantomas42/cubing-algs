@@ -6,8 +6,12 @@ speedcubing steps (e.g., PLL, OLL, F2L) by manipulating cube state and using
 a solver to generate the scramble algorithm.
 """
 from random import Random
+from typing import Final
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import CubeCubies
+from cubing_algs.annotations import Orientation
+from cubing_algs.annotations import Permutation
 from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
@@ -36,17 +40,14 @@ from cubing_algs.scrambler.utils import vcube_to_kociemba_string
 from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.vcube import VCube
 
-# Type alias for cube state tuple
-CubeState = tuple[list[int], list[int], list[int], list[int]]
-
 
 def apply_moves(
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
+        cp: Permutation,
+        co: Orientation,
+        ep: Permutation,
+        eo: Orientation,
         moves: str,
-) -> CubeState:
+) -> CubeCubies:
     """
     Apply move sequence to cube state.
 
@@ -68,12 +69,12 @@ def apply_moves(
 
 
 def apply_auf(
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
+        cp: Permutation,
+        co: Orientation,
+        ep: Permutation,
+        eo: Orientation,
         rng: Random,
-) -> CubeState:
+) -> CubeCubies:
     """
     Apply random AUF (Adjustment of U Face) to cube state.
 
@@ -95,10 +96,10 @@ def apply_auf(
 
 
 def state_to_scramble(
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
+        cp: Permutation,
+        co: Orientation,
+        ep: Permutation,
+        eo: Orientation,
 ) -> Algorithm:
     """
     Convert cube state to scramble algorithm using Kociemba solver.
@@ -124,7 +125,7 @@ def state_to_scramble(
 
 
 # Supported step types
-SUPPORTED_STEPS = [
+SUPPORTED_STEPS: Final[list[str]] = [
     # Last Layer steps
     'LL', 'OLL', 'PLL', 'CLL', 'OLLCP', 'COLL', 'ZBLL', '2GLL',
     'OCLL', 'ELL', 'EPLL', 'CPLL', 'ZZLL',
@@ -143,7 +144,7 @@ SUPPORTED_STEPS = [
 def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
         step: str,
         rng: Random | None = None,
-) -> tuple[list[int], list[int], list[int], list[int]]:
+) -> CubeCubies:
     """
     Generate cube state for a specific speedcubing step.
 

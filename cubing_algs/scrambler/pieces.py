@@ -11,6 +11,9 @@ All functions use buffer pieces to absorb necessary fixes.
 """
 from random import Random
 
+from cubing_algs.annotations import CubeCubies
+from cubing_algs.annotations import Orientation
+from cubing_algs.annotations import Permutation
 from cubing_algs.constants import CORNER_MODULUS
 from cubing_algs.constants import CORNER_NUMBER
 from cubing_algs.constants import EDGE_MODULUS
@@ -24,8 +27,8 @@ from cubing_algs.scrambler.constants import DEFAULT_RNG
 
 
 def swap_pieces(
-        perm: list[int],
-        orient: list[int],
+        perm: Permutation,
+        orient: Orientation,
         idx_a: int,
         idx_b: int,
 ) -> None:
@@ -44,8 +47,8 @@ def swap_pieces(
 
 
 def shuffle_in_place(
-        perm: list[int],
-        orient: list[int],
+        perm: Permutation,
+        orient: Orientation,
         indices: list[int],
         rng: Random,
 ) -> bool:
@@ -74,10 +77,10 @@ def shuffle_in_place(
 
 
 def fix_parity_with_buffer(  # noqa: PLR0913, PLR0917
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
+        cp: Permutation,
+        co: Orientation,
+        ep: Permutation,
+        eo: Orientation,
         buffer_corners: list[int],
         buffer_edges: list[int],
 ) -> None:
@@ -106,7 +109,7 @@ def random_permutation(
         corners: list[int],
         edges: list[int],
         rng: Random | None = None,
-) -> tuple[list[int], list[int], list[int], list[int]]:
+) -> CubeCubies:
     """
     Generate random permutation for both corners and edges together.
 
@@ -157,7 +160,7 @@ def random_orientation(
         piece_count: int,
         modulus: int,
         rng: Random,
-) -> list[int]:
+) -> Orientation:
     """
     Generate random orientation maintaining sum constraint.
 
@@ -193,7 +196,7 @@ def random_orientation(
 def random_corner_orientation(
         corners: list[int],
         rng: Random | None = None,
-) -> list[int]:
+) -> Orientation:
     """
     Generate random corner orientation maintaining sum(co) % 3 == 0.
 
@@ -213,7 +216,7 @@ def random_corner_orientation(
 def random_edge_orientation(
         edges: list[int],
         rng: Random | None = None,
-) -> list[int]:
+) -> Orientation:
     """
     Generate random edge orientation maintaining sum(eo) % 2 == 0.
 
@@ -231,16 +234,16 @@ def random_edge_orientation(
 
 
 def arrange_pieces(  # noqa: PLR0913, PLR0917
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
+        cp: Permutation,
+        co: Orientation,
+        ep: Permutation,
+        eo: Orientation,
         corners: list[int],
         edges: list[int],
         buffer_corners: list[int] | None = None,
         buffer_edges: list[int] | None = None,
         rng: Random | None = None,
-) -> tuple[list[int], list[int], list[int], list[int]]:
+) -> CubeCubies:
     """
     Arrange specified pieces to their solved positions.
 
@@ -322,16 +325,16 @@ def arrange_pieces(  # noqa: PLR0913, PLR0917
 
 
 def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
+        cp: Permutation,
+        co: Orientation,
+        ep: Permutation,
+        eo: Orientation,
         corners: list[int],
         edges: list[int],
         buffer_corners: list[int] | None = None,
         buffer_edges: list[int] | None = None,
         rng: Random | None = None,
-) -> tuple[list[int], list[int], list[int], list[int]]:
+) -> CubeCubies:
     """
     Ensure specified pieces are NOT in solved positions (derangement).
 
@@ -434,12 +437,12 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
 
 
 def orient_pieces(
-        orient: list[int],
+        orient: Orientation,
         pieces: list[int],
         buffer_pieces: list[int],
         modulus: int,
         rng: Random,
-) -> list[int]:
+) -> Orientation:
     """
     Orient specified pieces to solved orientation (orient=0).
 
@@ -476,11 +479,11 @@ def orient_pieces(
 
 
 def orient_corners(
-        co: list[int],
+        co: Orientation,
         corners: list[int],
         buffer_corners: list[int] | None = None,
         rng: Random | None = None,
-) -> list[int]:
+) -> Orientation:
     """
     Orient specified corners to solved orientation (co=0).
 
@@ -504,11 +507,11 @@ def orient_corners(
 
 
 def disorient_corners(
-        co: list[int],
+        co: Orientation,
         corners: list[int],
         buffer_corners: list[int] | None = None,
         rng: Random | None = None,
-) -> list[int]:
+) -> Orientation:
     """
     Ensure specified corners are NOT in solved orientation (co != 0).
 
@@ -565,11 +568,11 @@ def disorient_corners(
 
 
 def orient_edges(
-        eo: list[int],
+        eo: Orientation,
         edges: list[int],
         buffer_edges: list[int] | None = None,
         rng: Random | None = None,
-) -> list[int]:
+) -> Orientation:
     """
     Orient specified edges to solved orientation (eo=0).
 
@@ -591,11 +594,11 @@ def orient_edges(
 
 
 def disorient_edges(
-        eo: list[int],
+        eo: Orientation,
         edges: list[int],
         buffer_edges: list[int] | None = None,
         rng: Random | None = None,
-) -> list[int]:
+) -> Orientation:
     """
     Ensure specified edges are NOT in solved orientation (eo != 0).
 

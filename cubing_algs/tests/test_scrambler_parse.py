@@ -109,7 +109,7 @@ class TestParsePieceSpec(unittest.TestCase):  # noqa: PLR0904
     def test_parse_invalid_piece_type(self) -> None:
         """Test parsing with invalid piece type raises error."""
         with self.assertRaises(InvalidPieceSpecError):
-            parse_piece_spec('U', 'invalid')
+            parse_piece_spec('U', 'invalid')  # type: ignore[arg-type]
 
     def test_parse_invalid_corner_name(self) -> None:
         """Test parsing invalid corner name raises error."""
