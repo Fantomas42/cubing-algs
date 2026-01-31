@@ -1,6 +1,11 @@
 """Generate solved state for different cube size."""
+from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.constants import EDGE_NUMBER
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_SO
 
 
 def get_solved_facelets(size: int = 3) -> CubeFacelets:
@@ -28,4 +33,27 @@ def get_solved_facelets(size: int = 3) -> CubeFacelets:
     return ''.join(face * facelets_per_face for face in FACE_ORDER)
 
 
+def get_solved_cubies(size: int = 3) -> CubeCubiesOriented:
+    """
+    Get the cubies in solved state for a cube of given size.
+
+    Args:
+        size: The size of the cube (1, 2, 3, 4, etc.)
+
+    Returns:
+        A tuple of cubies state
+
+    Notes:
+        Actually does not represent center cubies for cube > 3.
+
+    """
+    if size == 1:
+        return [], [], [], [], SOLVED_SO
+
+    edges = EDGE_NUMBER * (size - 2)
+
+    return SOLVED_CP, SOLVED_CO, list(range(edges)), [0] * edges, SOLVED_SO
+
+
 SOLVED_FACELETS_3x3x3 = get_solved_facelets(3)
+SOLVED_CUBIES_3x3x3 = get_solved_cubies(3)
