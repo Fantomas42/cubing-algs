@@ -1,7 +1,6 @@
 """Tests for binary mask operations."""
 import unittest
 
-from cubing_algs.initial_state import get_initial_state
 from cubing_algs.masks import _CACHE_SIZE_LIMIT
 from cubing_algs.masks import _MASK_CACHE
 from cubing_algs.masks import FULL_MASK
@@ -10,8 +9,9 @@ from cubing_algs.masks import intersection_masks
 from cubing_algs.masks import negate_mask
 from cubing_algs.masks import state_masked
 from cubing_algs.masks import union_masks
+from cubing_algs.solved_state import get_solved_facelets
 
-INITIAL_STATE = get_initial_state(3)
+INITIAL_STATE = get_solved_facelets(3)
 
 
 class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904

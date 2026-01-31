@@ -11,15 +11,15 @@ from cubing_algs.constants import SOLVED_SO
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.vcube import VCube
 
-INITIAL_STATE = get_initial_state(3)
+INITIAL_STATE = get_solved_facelets(3)
 
 
 class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904

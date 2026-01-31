@@ -15,11 +15,11 @@ from cubing_algs.facelets import disable_cache
 from cubing_algs.facelets import enable_cache
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.facelets import get_cache_info
-from cubing_algs.initial_state import get_initial_state
 from cubing_algs.masks import F2L_MASK
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.vcube import VCube
 
-INITIAL_STATE = get_initial_state(3)
+INITIAL_STATE = get_solved_facelets(3)
 
 
 class CubiesToFaceletsTestCase(unittest.TestCase):

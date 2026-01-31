@@ -2,7 +2,7 @@
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
-from cubing_algs.initial_state import INITIAL_STATE_3x3x3
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 
 
 def union_masks(*masks: str) -> str:
@@ -145,7 +145,7 @@ def state_masked(state: CubeFacelets, mask: str) -> CubeFacelets:
     return cubies_to_facelets(
         *facelets_to_cubies(state),
         facelets_masked(
-            INITIAL_STATE_3x3x3,
+            SOLVED_FACELETS_3x3x3,
             mask,
         ),
     )

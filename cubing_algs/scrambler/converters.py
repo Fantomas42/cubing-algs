@@ -6,14 +6,14 @@ from cubing_algs.annotations import CubeCubies
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.constants import SOLVED_SO
 from cubing_algs.facelets import cubies_to_facelets
-from cubing_algs.initial_state import INITIAL_STATE_3x3x3
 from cubing_algs.parsing import parse_moves
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.transform.mirror import mirror_moves
 
 
 def facelets_to_algorithm(
         source: CubeFacelets,
-        destination: CubeFacelets = INITIAL_STATE_3x3x3,
+        destination: CubeFacelets = SOLVED_FACELETS_3x3x3,
 ) -> Algorithm:
     """
     Return algorithm to reach a certain state.

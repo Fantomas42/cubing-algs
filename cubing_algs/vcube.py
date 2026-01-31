@@ -13,9 +13,9 @@ from cubing_algs.extensions import rotate_3x3x3
 from cubing_algs.extensions import rotate_dynamic
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
-from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solver import facelets_to_facelets_algorithm
 from cubing_algs.visual_cube import visual_cube_cube
 
@@ -58,7 +58,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             if check:
                 self.check_integrity()
         else:
-            self._state = get_initial_state(size)
+            self._state = get_solved_facelets(size)
 
         self.history: list[str] = history or []
 

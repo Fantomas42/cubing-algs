@@ -7,9 +7,9 @@ from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
-from cubing_algs.initial_state import INITIAL_STATE_3x3x3
 from cubing_algs.scrambler.converters import cubies_to_algorithm
 from cubing_algs.scrambler.converters import facelets_to_algorithm
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
 
 
@@ -18,7 +18,10 @@ class TestFaceletsToAlgorithm(unittest.TestCase):
 
     def test_solved_to_solved_produces_algorithm(self) -> None:
         """Test that solving solved state produces valid algorithm."""
-        result = facelets_to_algorithm(INITIAL_STATE_3x3x3, INITIAL_STATE_3x3x3)
+        result = facelets_to_algorithm(
+            SOLVED_FACELETS_3x3x3,
+            SOLVED_FACELETS_3x3x3,
+        )
         self.assertIsInstance(result, Algorithm)
 
         # Apply result to solved cube should keep it solved
@@ -28,7 +31,7 @@ class TestFaceletsToAlgorithm(unittest.TestCase):
 
     def test_solved_to_solved_default_destination(self) -> None:
         """Test that default destination is solved state."""
-        result = facelets_to_algorithm(INITIAL_STATE_3x3x3)
+        result = facelets_to_algorithm(SOLVED_FACELETS_3x3x3)
         self.assertIsInstance(result, Algorithm)
 
         # Apply result to solved cube should keep it solved

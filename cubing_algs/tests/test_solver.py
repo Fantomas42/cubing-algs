@@ -7,12 +7,12 @@ from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.exceptions import InvalidFaceletsSolveError
-from cubing_algs.initial_state import get_initial_state
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solver import cubies_to_cubies_algorithm
 from cubing_algs.solver import facelets_to_facelets_algorithm
 from cubing_algs.vcube import VCube
 
-INITIAL_STATE = get_initial_state(3)
+INITIAL_STATE = get_solved_facelets(3)
 
 
 class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):

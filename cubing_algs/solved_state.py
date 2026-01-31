@@ -1,11 +1,11 @@
-"""Generate initial state for different cube size."""
+"""Generate solved state for different cube size."""
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.constants import FACE_ORDER
 
 
-def get_initial_state(size: int = 3) -> CubeFacelets:
+def get_solved_facelets(size: int = 3) -> CubeFacelets:
     """
-    Get the initial solved state for a cube of given size.
+    Get the facelets in solved state for a cube of given size.
 
     Args:
         size: The size of the cube (2, 3, 4, etc.)
@@ -17,9 +17,9 @@ def get_initial_state(size: int = 3) -> CubeFacelets:
         For NxNxN: 6*N*N characters
 
     Examples:
-        >>> get_initial_state(2)
+        >>> get_solved_facelets(2)
         'UUUURRRRFFFFDDDDLLLLBBBB'
-        >>> get_initial_state(3)
+        >>> get_solved_facelets(3)
         'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB'
 
     """
@@ -28,4 +28,4 @@ def get_initial_state(size: int = 3) -> CubeFacelets:
     return ''.join(face * facelets_per_face for face in FACE_ORDER)
 
 
-INITIAL_STATE_3x3x3 = get_initial_state(3)
+SOLVED_FACELETS_3x3x3 = get_solved_facelets(3)

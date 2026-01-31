@@ -3,12 +3,12 @@ import unittest
 
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.extensions.rotate_dynamic import rotate_move
-from cubing_algs.initial_state import get_initial_state
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 4x4x4 state: 96 facelets (6 faces * 16 facelets each)
 # Face order: U, R, F, D, L, B
-SOLVED_4X4X4 = get_initial_state(4)
+SOLVED_4X4X4 = get_solved_facelets(4)
 
 # Expected states after moves (generated from magiccube)
 EXPECTED_4X4X4_R = (
