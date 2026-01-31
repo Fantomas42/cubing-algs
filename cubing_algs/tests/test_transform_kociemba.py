@@ -2,7 +2,6 @@
 import unittest
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.exceptions import InvalidFaceletsSolveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.kociemba import kociemba_moves
@@ -160,9 +159,19 @@ class TransformKociembaTestCase(unittest.TestCase):  # noqa: PLR0904
     def test_wide_move_conversion(self) -> None:
         """Test wide move raises error due to orientation change."""
         provide = parse_moves('Rw')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), 'L x')
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_wide_moves_algorithm(self) -> None:
         """Test algorithm with paired wide moves produces equivalent state."""
@@ -185,68 +194,138 @@ class TransformKociembaTestCase(unittest.TestCase):  # noqa: PLR0904
     def test_rotation_x(self) -> None:
         """Test x rotation raises error due to orientation change."""
         provide = parse_moves('x')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), 'x')
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_rotation_y(self) -> None:
         """Test y rotation raises error due to orientation change."""
         provide = parse_moves('y')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), 'y')
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_rotation_z(self) -> None:
         """Test z rotation raises error due to orientation change."""
         provide = parse_moves('z')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
 
-    def test_rotation_with_moves(self) -> None:
-        """
-        Test rotation combined with moves
-        raises error due to orientation change.
-        """
-        provide = parse_moves("x R U R' U'")
+        cube2 = VCube()
+        cube2.rotate(result)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), 'z')
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_multiple_rotations(self) -> None:
         """Test multiple rotations raise error due to orientation change."""
         provide = parse_moves('x y z')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), 'y z2')
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_slice_move_m(self) -> None:
         """Test M slice move raises error due to orientation change."""
         provide = parse_moves('M')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), "R L' x'")
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_slice_move_e(self) -> None:
         """Test E slice move raises error due to orientation change."""
         provide = parse_moves('E')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), "U D' y'")
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_slice_move_s(self) -> None:
         """Test S slice move raises error due to orientation change."""
         provide = parse_moves('S')
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), "F' B z")
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_complex_algorithm_with_orientation_changing_moves(self) -> None:
         """Test algorithm with orientation-changing moves raises error."""
         provide = parse_moves("x R U R' U'")
+        result = kociemba_moves(provide)
 
-        with self.assertRaises(InvalidFaceletsSolveError):
-            kociemba_moves(provide)
+        cube1 = VCube()
+        cube1.rotate(provide)
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), "R F R' F' x")
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
 
     def test_inverse_algorithm(self) -> None:
         """Test inverse of algorithm produces equivalent state."""

@@ -410,7 +410,20 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             An algorithm to apply.
 
         """
-        return facelets_to_facelets_algorithm(self._state, other.state)
+        self_uf = self.oriented_copy('UF', full=False)
+        other_uf = other.oriented_copy('UF', full=False)
+
+        algorithm = facelets_to_facelets_algorithm(
+            self_uf.state,
+            other_uf.state,
+        )
+
+        orientation = other_uf.compute_orientation_moves(other.orientation)
+
+        if orientation:
+            algorithm += orientation
+
+        return algorithm
 
     @property
     def visual_cube_url(self) -> str:
