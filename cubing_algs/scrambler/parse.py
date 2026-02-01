@@ -57,11 +57,7 @@ def parse_piece_spec(spec: str, piece_type: PieceType) -> Permutation:
     names = CORNER_NAMES if piece_type == 'corner' else EDGE_NAMES
     layer_map = LAYER_MAP_CORNERS if piece_type == 'corner' else LAYER_MAP_EDGES
 
-    for token_raw in tokens:
-        token = token_raw.strip()
-        if not token:
-            continue
-
+    for token in tokens:
         # Check if it's a layer specifier
         if len(token) == 1 and token in layer_map:
             pieces.update(layer_map[token])

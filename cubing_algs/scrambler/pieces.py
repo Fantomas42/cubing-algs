@@ -570,19 +570,10 @@ def disorient_corners(
             victim = rng.choice(buffer_corners)
             co[victim] = (co[victim] - total_twist) % CORNER_MODULUS
         elif corners:
-            # No buffer - try to adjust without solving
+            # No buffer - adjust one corner to fix constraint
+            # This may result in re-solving the corner if it's the only one
             victim = rng.choice(corners)
-            needed = (-total_twist) % CORNER_MODULUS
-            if needed != 0:
-                co[victim] = needed
-            else:
-                # Can't fix without solving a corner
-                # Find another corner to adjust
-                for idx in corners:
-                    if idx != victim:
-                        co[idx] = (co[idx] + 1) % CORNER_MODULUS
-                        co[victim] = (co[victim] + 2) % CORNER_MODULUS
-                        break
+            co[victim] = (co[victim] - total_twist) % CORNER_MODULUS
 
     return co
 
