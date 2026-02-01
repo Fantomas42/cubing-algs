@@ -21,7 +21,7 @@ Usage:
     python scramble_steps.py -s PLL OLL       # Show specific steps
     python scramble_steps.py --ocll           # Show all OCLL cases
     python scramble_steps.py --ocll Sune T    # Show specific OCLL cases
-    python scramble_steps.py --no-auf         # Disable AUF
+    python scramble_steps.py --auf            # Enable AUF
     python scramble_steps.py --seed 123       # Set random seed
 """
 
@@ -132,7 +132,7 @@ STEP_INFO: dict[str, tuple[str, str]] = {
 }
 
 
-def show_step(name: str, rng: Random, *, auf: bool = True) -> None:
+def show_step(name: str, rng: Random, *, auf: bool = False) -> None:
     """Display a step scramble with cube visualization."""
     description, mode = STEP_INFO.get(name, (name, 'oll'))
     print(f'\n   {name}: {description}')
@@ -190,7 +190,7 @@ def print_list() -> None:
     print('=' * 60)
 
 
-def demo_method(method: str, rng: Random, *, auf: bool = True) -> None:
+def demo_method(method: str, rng: Random, *, auf: bool = False) -> None:
     """Demonstrate steps for a specific method."""
     titles = {
         'cfop': 'CFOP Method (Cross → F2L → OLL → PLL)',
@@ -206,7 +206,7 @@ def demo_method(method: str, rng: Random, *, auf: bool = True) -> None:
         show_step(step, rng, auf=auf)
 
 
-def demo_steps(steps: list[str], rng: Random, *, auf: bool = True) -> None:
+def demo_steps(steps: list[str], rng: Random, *, auf: bool = False) -> None:
     """Demonstrate specific steps."""
     section('Selected Steps')
     for step in steps:
@@ -247,7 +247,7 @@ def demo_ocll(cases: list[str] | None, rng: Random) -> None:
             show_ocll_case(case, rng)
 
 
-def demo_all(rng: Random, *, auf: bool = True) -> None:
+def demo_all(rng: Random, *, auf: bool = False) -> None:
     """Run all demos."""
     section('Step Scramble Examples - All Speedcubing Methods')
 
@@ -255,13 +255,6 @@ def demo_all(rng: Random, *, auf: bool = True) -> None:
         demo_method(method, rng, auf=auf)
 
     demo_ocll(None, rng)
-
-    # AUF control examples
-    section('AUF Control Examples')
-    print('\nWith AUF (random U adjustment):')
-    show_step('PLL', rng, auf=True)
-    print('\nWithout AUF (no U adjustment):')
-    show_step('PLL', rng, auf=False)
 
     print_list()
 
@@ -286,7 +279,7 @@ Examples:
   %(prog)s -s PLL OLL F2L       Show specific steps
   %(prog)s --ocll               Show all OCLL cases
   %(prog)s --ocll Sune T        Show specific OCLL cases
-  %(prog)s --no-auf             Disable AUF (Adjust U Face)
+  %(prog)s --auf                Enable AUF (Adjust U Face)
   %(prog)s --seed 123           Set random seed for reproducibility
 """,
     )
@@ -320,9 +313,9 @@ Examples:
     )
 
     parser.add_argument(
-        '--no-auf',
+        '--auf',
         action='store_true',
-        help='Disable AUF (Adjust U Face)',
+        help='Enable AUF (Adjust U Face)',
     )
 
     parser.add_argument(
@@ -342,7 +335,7 @@ def main() -> None:
     # Initialize RNG with seed
     rng = Random(args.seed)  # noqa: S311
 
-    auf = not args.no_auf
+    auf = args.auf
 
     # Handle --list
     if args.list:

@@ -141,8 +141,8 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 
     # 2GLL - specific pattern with phase edges permutation only
     elif step == '2GLL':
-        phase_edges = [1, 3]  # UF, UB
-        cp, co, ep, eo = random_permutation([], phase_edges, rng)
+        cp, co, ep, eo = apply_auf((cp, co, ep, eo), rng)
+        cp, co, ep, eo = random_permutation([], U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
 
     # ELL - edge orientation and permutation on U layer
@@ -167,7 +167,7 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 
     # ZZLL - ZZ method last layer
     elif step == 'ZZLL':
-        phase_edges = [1, 3]  # UF, UB
+        phase_edges = parse_piece_spec('UF UB', 'edge')
         cp, co, ep, eo = random_permutation(U_CORNERS, phase_edges, rng)
         co = random_corner_orientation(U_CORNERS, rng)
         cp, co, ep, eo = apply_auf((cp, co, ep, eo), rng)
@@ -287,7 +287,7 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 def scramble_step(
         step: str,
         rng: Random | None = None,
-        *, include_auf: bool = True,
+        *, include_auf: bool = False,
 ) -> Algorithm:
     """
     Generate a scramble for a specific speedcubing step.
@@ -312,12 +312,9 @@ def scramble_step(
     if rng is None:
         rng = DEFAULT_RNG
 
-    # Generate the step state
     cubies = generate_step_state(step, rng)
 
-    # Apply random AUF if requested
-    skip_auf_steps = {'WV', 'SV', 'VLS', 'VHLS', '2GLL', 'ZZLL'}
-    if include_auf and step.upper() not in skip_auf_steps:
+    if include_auf:
         cubies = apply_auf(cubies, rng)
 
     return cubies_to_scramble(cubies)
