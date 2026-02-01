@@ -409,7 +409,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
         for j in range(i + 1, len(corners)):
             other_idx = corners[j]
             # Make sure swapping doesn't solve either piece
-            if cp[other_idx] != idx and cp[idx] != other_idx:
+            if cp[other_idx] != idx and cp[idx] != other_idx:  # pragma: no branch # noqa: E501
                 swap_pieces(cp, co, idx, other_idx)
                 even_swaps = not even_swaps
                 swapped = True
@@ -417,8 +417,8 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
 
         # Try buffer corners if no swap found
         if not swapped:
-            for other_idx in buffer_corners:
-                if cp[other_idx] != idx and cp[idx] != other_idx:
+            for other_idx in buffer_corners:  # pragma: no branch
+                if cp[other_idx] != idx and cp[idx] != other_idx:  # pragma: no branch # noqa: E501
                     swap_pieces(cp, co, idx, other_idx)
                     even_swaps = not even_swaps
                     break
@@ -433,7 +433,7 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
         for j in range(i + 1, len(edges)):
             other_idx = edges[j]
             # Make sure swapping doesn't solve either piece
-            if ep[other_idx] != idx and ep[idx] != other_idx:
+            if ep[other_idx] != idx and ep[idx] != other_idx:  # pragma: no branch # noqa: E501
                 swap_pieces(ep, eo, idx, other_idx)
                 even_swaps = not even_swaps
                 swapped = True
@@ -441,8 +441,8 @@ def derange_pieces(  # noqa: C901, PLR0912, PLR0913, PLR0917
 
         # Try buffer edges if no swap found
         if not swapped:
-            for other_idx in buffer_edges:
-                if ep[other_idx] != idx and ep[idx] != other_idx:
+            for other_idx in buffer_edges:  # pragma: no branch
+                if ep[other_idx] != idx and ep[idx] != other_idx:  # pragma: no branch # noqa: E501
                     swap_pieces(ep, eo, idx, other_idx)
                     even_swaps = not even_swaps
                     break
@@ -490,7 +490,7 @@ def orient_pieces(
         if buffer_pieces:
             victim = rng.choice(buffer_pieces)
             orient[victim] = (orient[victim] + total) % modulus
-        elif pieces:
+        elif pieces:  # pragma: no branch
             # No buffer - adjust one of the specified pieces
             victim = rng.choice(pieces)
             orient[victim] = total % modulus
@@ -567,7 +567,7 @@ def disorient_corners(
         if buffer_corners:
             victim = rng.choice(buffer_corners)
             co[victim] = (co[victim] - total_twist) % CORNER_MODULUS
-        elif corners:
+        elif corners:  # pragma: no branch
             # No buffer - adjust one corner to fix constraint
             # This may result in re-solving the corner if it's the only one
             victim = rng.choice(corners)
@@ -641,7 +641,7 @@ def disorient_edges(
         if buffer_edges:
             victim = rng.choice(buffer_edges)
             eo[victim] = (eo[victim] + 1) % EDGE_MODULUS
-        elif edges:
+        elif edges:  # pragma: no branch
             # No buffer - unflip one edge
             victim = rng.choice(edges)
             eo[victim] = 0
