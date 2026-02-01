@@ -452,10 +452,6 @@ class VCubeIntegrityChecker:
             msg = f'Too much faces ({ len(faces) })'
             raise InvalidFaceError(msg)
 
-        if len(faces) == 2 and faces not in ORIENTATIONS:
-            msg = f'Too much faces ({ len(faces) })'
-            raise InvalidFaceError(msg)
-
         top_face = faces[0]
         front_face = (len(faces) > 1 and faces[1]) or ''
 
@@ -469,6 +465,10 @@ class VCubeIntegrityChecker:
 
         if front_face and front_face not in OPPOSITE_FACES:
             msg = f'{ front_face } is an invalid face'
+            raise InvalidFaceError(msg)
+
+        if len(faces) == 2 and faces not in ORIENTATIONS:
+            msg = f'{ faces } is not a valid orientation'
             raise InvalidFaceError(msg)
 
         return top_face, front_face
