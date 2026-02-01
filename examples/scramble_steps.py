@@ -6,7 +6,7 @@ This demonstrates how to generate scrambles for various speedcubing methods:
 - CFOP (Fridrich): F2L, OLL, PLL, and variants
 - ZZ Method: ZZF2L, ZZRB, ZZLS, ZZLL
 - Roux Method: SB, CMLL, CMLLEO
-- Petrus Method: Petrus2x2x3, PetrusEO, PetrusF2L
+- Petrus Method: PETRUS2x2x3, PETRUSEO, PETRUSF2L
 - Last Layer variants: LL, CLL, OLLCP, COLL, ZBLL, 2GLL, OCLL, ELL, EPLL, CPLL
 - Last Slot variants: LS, ELS, TSLE, CLS, CPLS, EJLS, EJF2L, TTLL, WV, SV,
   VLS, VHLS
@@ -81,9 +81,9 @@ METHODS: dict[str, list[str]] = {
         'CMLLEO',
     ],
     'petrus': [
-        'Petrus2x2x3',
-        'PetrusEO',
-        'PetrusF2L',
+        'PETRUS2x2x3',
+        'PETRUSEO',
+        'PETRUSF2L',
     ],
 }
 
@@ -107,7 +107,7 @@ STEP_INFO: dict[str, tuple[str, str]] = {
     'F2L': ('First Two Layers (cross + 4 F2L pairs)', 'f2l'),
     'ZZF2L': ('ZZ F2L (edges oriented, R/U/L moveset)', 'f2l'),
     'ZZRB': ('ZZ Right Block (R+U pieces scrambled)', 'f2l'),
-    'PetrusF2L': ('Petrus F2L (R+U block remaining)', 'f2l'),
+    'PETRUSF2L': ('Petrus F2L (R+U block remaining)', 'f2l'),
     # Last Slot variants
     'LS': ('Last Slot (one F2L pair + last layer)', 'f2l'),
     'ELS': ('Edge Last Slot (LS with edge orientation)', 'f2l'),
@@ -127,8 +127,8 @@ STEP_INFO: dict[str, tuple[str, str]] = {
     'CMLLEO': ('CMLL + Edge Orientation (Roux)', 'oll'),
     'SB': ('Second Block (Roux R+U+DF+DB)', 'f2l'),
     # Petrus method
-    'Petrus2x2x3': ('Petrus 2x2x3 block (U+R+F scrambled)', 'f2l'),
-    'PetrusEO': ('Petrus Edge Orientation (U+F scrambled)', 'f2l'),
+    'PETRUS2x2x3': ('Petrus 2x2x3 block (U+R+F scrambled)', 'f2l'),
+    'PETRUSEO': ('Petrus Edge Orientation (U+F scrambled)', 'f2l'),
 }
 
 

@@ -82,14 +82,14 @@ SUPPORTED_STEPS: Final[list[str]] = [
     'LL', 'OLL', 'PLL', 'CLL', 'OLLCP', 'COLL', 'ZBLL', '2GLL',
     'OCLL', 'ELL', 'EPLL', 'CPLL', 'ZZLL',
     # F2L variants
-    'F2L', 'ZZF2L', 'ZZRB', 'PetrusF2L',
+    'F2L', 'ZZF2L', 'ZZRB', 'PETRUSF2L',
     # Last Slot variants
     'LS', 'ELS', 'ZZLS', 'TSLE', 'CLS', 'CPLS', 'EJLS', 'EJF2L',
     'TTLL', 'WV', 'SV', 'VLS', 'VHLS',
     # Roux method
     'CMLL', 'CMLLEO', 'SB',
     # Petrus method
-    'Petrus2x2x3', 'PetrusEO',
+    'PETRUS2x2x3', 'PETRUSEO',
 ]
 
 
