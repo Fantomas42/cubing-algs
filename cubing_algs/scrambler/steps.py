@@ -24,6 +24,7 @@ from cubing_algs.scrambler.constants import MOVES_EASY_CROSS
 from cubing_algs.scrambler.moves import random_moves
 from cubing_algs.scrambler.parse import parse_piece_spec
 from cubing_algs.scrambler.pieces import cubies_to_scramble
+from cubing_algs.scrambler.pieces import disorient_corners
 from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
@@ -223,16 +224,11 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 
     # EJLS, EJF2L - Edge Just Last Slot
     elif step in {'EJLS', 'EJF2L'}:
+        ejls_corners = parse_piece_spec('U DFR', 'corner')
+        ejls_corner = parse_piece_spec('DFR', 'corner')
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
-        # Randomize all U corners orientation
-        co = random_corner_orientation(U_CORNERS, rng)
-        # Ensure DFR (index 4) is disoriented
-        if co[4] == 0:
-            # Make it non-zero
-            co[4] = rng.choice([1, 2])
-            # Fix constraint using a U corner
-            victim = rng.choice(U_CORNERS)
-            co[victim] = (co[victim] - co[4]) % 3
+        co = random_corner_orientation(ejls_corners, rng)
+        co = disorient_corners(co, ejls_corner, U_CORNERS, rng)
 
     # TTLL - Two-Twist Last Layer
     elif step == 'TTLL':

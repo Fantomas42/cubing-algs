@@ -561,8 +561,6 @@ def disorient_corners(
             twist = rng.choice([1, 2])
             co[idx] = twist
             total_twist += twist
-        else:
-            total_twist += co[idx]
 
     # Fix constraint using buffer
     if total_twist % CORNER_MODULUS != 0:
@@ -637,8 +635,6 @@ def disorient_edges(
         if eo[idx] == 0:
             eo[idx] = 1
             total_flips += 1
-        else:
-            total_flips += eo[idx]
 
     # Fix constraint using buffer
     if total_flips % EDGE_MODULUS != 0:
