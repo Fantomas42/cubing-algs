@@ -21,9 +21,9 @@ from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.scrambler.constants import DEFAULT_RNG
 from cubing_algs.scrambler.constants import MOVES_AUF
 from cubing_algs.scrambler.constants import MOVES_EASY_CROSS
-from cubing_algs.scrambler.converters import cubies_to_algorithm
 from cubing_algs.scrambler.moves import random_moves
 from cubing_algs.scrambler.parse import parse_piece_spec
+from cubing_algs.scrambler.pieces import cubies_to_scramble
 from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
@@ -320,7 +320,7 @@ def scramble_step(
     if include_auf and step.upper() not in skip_auf_steps:
         cubies = apply_auf(cubies, rng)
 
-    return cubies_to_algorithm(cubies)
+    return cubies_to_scramble(cubies)
 
 
 def scramble_ocll_case(
@@ -403,7 +403,7 @@ def scramble_ocll_case(
     # Random AUF
     cubies = apply_auf((cp, co, ep, eo), rng)
 
-    return cubies_to_algorithm(cubies)
+    return cubies_to_scramble(cubies)
 
 
 def scramble_easy_cross(rng: Random | None = None) -> Algorithm:

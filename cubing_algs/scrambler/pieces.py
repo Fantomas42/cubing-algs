@@ -23,10 +23,27 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
+from cubing_algs.constants import SOLVED_SO
 from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.constants import DEFAULT_RNG
-from cubing_algs.scrambler.converters import cubies_to_algorithm
 from cubing_algs.scrambler.parse import parse_piece_spec
+from cubing_algs.vcube import VCube
+
+
+def cubies_to_scramble(cubies: CubeCubies) -> Algorithm:
+    """
+    Generate an Algorithm to pass from solved state to scrambled state.
+
+    Args:
+        cubies: Cubies configuration.
+
+    Returns:
+        Algorithm to reach cubies's state.
+
+    """
+    cube = VCube.from_cubies(*cubies, SOLVED_SO)
+
+    return VCube().to_algorithm(cube)
 
 
 def swap_pieces(
@@ -808,4 +825,4 @@ def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
             eo, disorient_edges_list, buffer_edges_list, rng,
         )
 
-    return cubies_to_algorithm((cp, co, ep, eo))
+    return cubies_to_scramble((cp, co, ep, eo))
