@@ -152,6 +152,11 @@ class TestScrambleStep(unittest.TestCase):
         rng = Random(42)
         scramble = scramble_step('PLL', rng, include_auf=False)
 
+        self.assertEqual(
+            str(scramble),
+            "U' F B' R2 F B' L2 U' F2 U B2 U' R2 B2 D' B2",
+        )
+
         # Apply scramble to solved cube
         cube = VCube()
         cube.rotate(str(scramble))
@@ -168,10 +173,16 @@ class TestScrambleStep(unittest.TestCase):
         scramble_with = scramble_step('PLL', Random(42), include_auf=True)
         scramble_without = scramble_step('PLL', Random(42), include_auf=False)
 
-        # Different RNG seeds, so might be same or different
-        # Just verify both work
         self.assertIsInstance(scramble_with, Algorithm)
         self.assertIsInstance(scramble_without, Algorithm)
+        self.assertEqual(
+            str(scramble_with),
+            "U' F B' R2 F B' L2 U' F2 U B2 U' R2 B2 D' B2",
+        )
+        self.assertEqual(
+            str(scramble_without),
+            "U' F B' R2 F B' L2 U' F2 U B2 U' R2 B2 D' B2",
+        )
 
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same scramble."""
@@ -179,6 +190,10 @@ class TestScrambleStep(unittest.TestCase):
         scramble2 = scramble_step('PLL', Random(42), include_auf=False)
 
         self.assertEqual(str(scramble1), str(scramble2))
+        self.assertEqual(
+            str(scramble1),
+            "U' F B' R2 F B' L2 U' F2 U B2 U' R2 B2 D' B2",
+        )
 
     def test_default_rng_when_none(self) -> None:
         """Test that default RNG is used when None is passed."""
@@ -193,14 +208,23 @@ class TestScrambleOCLLCase(unittest.TestCase):
 
     def test_all_ocll_cases(self) -> None:
         """Test all OCLL case types."""
-        cases = ['T', 'U', 'L', 'H', 'Pi', 'Sune', 'AntiSune', 'Solved']
+        expected = {
+            'T': "R U R D R' U' R B2 U' L2 U L2 D' B2 R2 U'",
+            'U': "R F2 L' D2 L F2 R D' F2 U F2 U2 R2 D B2 U2",
+            'L': "R' B L' F2 L B' R U' F2 L2 U2 F2 U' L2 F2 U L2",
+            'H': "R' U' R2 U' R U2 R2 U' R' U B2 U B2 D' R2 D R2 U2",
+            'Pi': "U2 F U2 F' U L2 B' U' B L2 B2 U F2 D' R2 B2 D F2 L2",
+            'Sune': "L' U' L U' L' U2 L' U' F2 U F2 L2 D F2 D' F2 U2",
+            'AntiSune': "F2 R U' R' U' R U2 R' D F2 D' F2 U' F2 L2 U L2 U2",
+            'Solved': "U F2 R L B2 R L' D B2 R2 U' B2 U F2 U' B2 L2",
+        }
         rng = Random(42)
 
-        for case in cases:
+        for case, expected_scramble in expected.items():
             scramble = scramble_ocll_case(case, rng)
 
-            # Should return an Algorithm
             self.assertIsInstance(scramble, Algorithm)
+            self.assertEqual(str(scramble), expected_scramble)
 
     def test_invalid_case_raises(self) -> None:
         """Test that invalid case raises error."""
@@ -210,18 +234,30 @@ class TestScrambleOCLLCase(unittest.TestCase):
     def test_case_insensitive(self) -> None:
         """Test that case names are case-insensitive."""
         # These should all work
+        t_upper = scramble_ocll_case('T', Random(42))
+        t_lower = scramble_ocll_case('t', Random(42))
+        sune_lower = scramble_ocll_case('sune', Random(42))
+        sune_upper = scramble_ocll_case('SUNE', Random(42))
+
+        self.assertEqual(t_upper, t_lower)
+        self.assertEqual(sune_lower, sune_upper)
         self.assertEqual(
-            scramble_ocll_case('T', Random(42)),
-            scramble_ocll_case('t', Random(42)),
+            str(t_upper),
+            "R U R D R' U' R B2 U' L2 U L2 D' B2 R2 U'",
         )
         self.assertEqual(
-            scramble_ocll_case('sune', Random(42)),
-            scramble_ocll_case('SUNE', Random(42)),
+            str(sune_lower),
+            "B' U' B U' F' L2 F' D B2 L2 U B2 U' F2 U R2 U",
         )
 
     def test_solved_case(self) -> None:
         """Test that solved case returns valid scramble."""
         scramble = scramble_ocll_case('Solved', Random(42))
+
+        self.assertEqual(
+            str(scramble),
+            "U' F B' R2 F B' L2 U' F2 U B2 U' R2 B2 D' B2",
+        )
 
         # Apply to cube
         cube = VCube()
@@ -240,6 +276,10 @@ class TestScrambleOCLLCase(unittest.TestCase):
         scramble2 = scramble_ocll_case('T', Random(42))
 
         self.assertEqual(str(scramble1), str(scramble2))
+        self.assertEqual(
+            str(scramble1),
+            "R U R D R' U' R B2 U' L2 U L2 D' B2 R2 U'",
+        )
 
     def test_default_rng_when_none(self) -> None:
         """Test that default RNG is used when None is passed."""
@@ -320,6 +360,10 @@ class TestRNGParameter(unittest.TestCase):
             str(result1),
             str(result2),
             'Same seed should produce identical easy cross scrambles',
+        )
+        self.assertEqual(
+            str(result1),
+            'F R F L F R F R B R',
         )
         self.assertEqual(
             len(result1),

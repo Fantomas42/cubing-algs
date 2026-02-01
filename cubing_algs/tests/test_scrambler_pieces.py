@@ -49,8 +49,11 @@ class TestCubiesToScramble(unittest.TestCase):
         cubies = (cp, co, ep, eo)
         scramble = cubies_to_scramble(cubies)
 
-        # Should return valid algorithm
         self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "R2 U F2 R' U2 D2 L D L2 U2 F2 U' L2 F2 D F2",
+        )
 
 
 class TestRandomCornerOrientation(unittest.TestCase):
@@ -1101,8 +1104,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
-        # Should return Algorithm
         self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "L2 D' F2 U2 L F2 B2 R L2 D' B2 U' B2 L2 D B2 U2 B2",
+        )
 
         # Apply and verify U corners are solved
         cube = VCube()
@@ -1121,8 +1127,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
-        # Should return Algorithm
         self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "L' D L U R2 U R' D' R' U R2 D' L2 U R2 U F2 R2 D2",
+        )
 
         # Apply and verify U edges are solved
         cube = VCube()
@@ -1141,6 +1150,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
+        self.assertEqual(
+            str(scramble),
+            "U R2 U' R L2 U R2 L2 U2 D L' D2 L2 B2 D' L2 U R2 D' L2 D",
+        )
+
         # Apply and verify all corners are oriented
         cube = VCube()
         cube.rotate(str(scramble))
@@ -1154,6 +1168,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         scramble = scramble_with_piece_constraints(
             orient_edges_spec='all',
             rng=Random(42),
+        )
+
+        self.assertEqual(
+            str(scramble),
+            "U R2 U' R L2 U R2 L2 U2 D L' D2 L2 B2 D' L2 U R2 D' L2 D",
         )
 
         # Apply and verify all edges are oriented
@@ -1170,6 +1189,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             orient_corners_spec='U',
             orient_edges_spec='U',
             rng=Random(42),
+        )
+
+        self.assertEqual(
+            str(scramble),
+            "U R2 U' R L2 U R2 L2 U2 D L' D2 L2 B2 D' L2 U R2 D' L2 D",
         )
 
         # Apply and verify U layer is oriented
@@ -1194,6 +1218,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
+        self.assertEqual(
+            str(scramble),
+            "D2 R' D2 B2 U' R F2 L' D' R' U D F2 U B2 L2 D B2 U' F2",
+        )
+
         # Apply and verify U corners are not all solved
         cube = VCube()
         cube.rotate(str(scramble))
@@ -1209,6 +1238,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         scramble = scramble_with_piece_constraints(
             derange_edges='U',
             rng=Random(42),
+        )
+
+        self.assertEqual(
+            str(scramble),
+            "F2 R' D2 L2 F2 D2 L2 F2 R D' B2 D R2 F2 U R2 U' L2 D",
         )
 
         # Apply and verify U edges are not all solved
@@ -1228,6 +1262,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
+        self.assertEqual(
+            str(scramble),
+            "U R D' B2 R D F2 R' D R F2 R2 U2 F2 R2 U2 L2 U' L2 U",
+        )
+
         # Apply and verify U corners are not all oriented
         cube = VCube()
         cube.rotate(str(scramble))
@@ -1243,6 +1282,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         scramble = scramble_with_piece_constraints(
             disorient_edges_spec='U',
             rng=Random(42),
+        )
+
+        self.assertEqual(
+            str(scramble),
+            "U2 F U2 D' F2 D' B L D F B2 R L2 U' R2 D' F2 U' F2 U R2",
         )
 
         # Apply and verify U edges are not all oriented
@@ -1267,8 +1311,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
-        # Should return valid Algorithm
         self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U L2 U' L2 D L2 D' B2 U B2 L2",
+        )
 
         # Apply and verify
         cube = VCube()
@@ -1295,15 +1342,21 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
-        # Should return valid Algorithm
         self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U R2 U' R L2 U R2 L2 U2 D L' D2 L2 B2 D' L2 U R2 D' L2 D",
+        )
 
     def test_empty_constraints(self) -> None:
         """Test with no constraints returns random scramble."""
         scramble = scramble_with_piece_constraints(rng=Random(42))
 
-        # Should return valid Algorithm
         self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U R2 U' R L2 U R2 L2 U2 D L' D2 L2 B2 D' L2 U R2 D' L2 D",
+        )
 
     def test_all_parameters(self) -> None:
         """Test with all parameters specified."""
@@ -1321,8 +1374,11 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
             rng=Random(42),
         )
 
-        # Should return valid Algorithm
         self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U2 F2 D' L' U2 D2 B2 D2 B2 R L2 U' R2 U' F2 U2 L2 U' L2 B2",
+        )
 
 
 class TestDerangePiecesEdgeCases(unittest.TestCase):
