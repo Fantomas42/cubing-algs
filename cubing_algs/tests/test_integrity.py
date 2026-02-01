@@ -264,7 +264,3 @@ class TestIsValidOrientation(unittest.TestCase):
     def test_empty_orientation(self) -> None:
         """Test that empty orientation is valid for size 0."""
         self.assertTrue(is_valid_orientation([], 0, set()))
-
-
-if __name__ == '__main__':
-    unittest.main()

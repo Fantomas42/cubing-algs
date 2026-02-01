@@ -14,6 +14,7 @@ from cubing_algs.constants import EDGE_NUMBER
 from cubing_algs.constants import EDGE_VALID_ORIENTATIONS
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.constants import ORIENTATIONS
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.facelets import facelets_to_cubies
@@ -448,6 +449,10 @@ class VCubeIntegrityChecker:
             raise InvalidFaceError(msg)
 
         if len(faces) > 2:
+            msg = f'Too much faces ({ len(faces) })'
+            raise InvalidFaceError(msg)
+
+        if len(faces) == 2 and faces not in ORIENTATIONS:
             msg = f'Too much faces ({ len(faces) })'
             raise InvalidFaceError(msg)
 

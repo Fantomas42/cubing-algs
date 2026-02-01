@@ -304,6 +304,11 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         with self.assertRaises(InvalidFaceError):
             self.cube.compute_orientation_moves('LR')
 
+    def test_compute_orientation_moves_same_faces(self) -> None:
+        """Test same face for compute_orientation_moves."""
+        with self.assertRaises(InvalidFaceError):
+            self.cube.compute_orientation_moves('UU')
+
     def test_compute_orientation_moves_state_preservation(self) -> None:
         """Test that compute_orientation_moves doesn't modify cube state."""
         # Apply some moves to create a non-trivial state
