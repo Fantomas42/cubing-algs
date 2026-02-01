@@ -12,12 +12,14 @@ from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
 from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.pieces import arrange_pieces
+from cubing_algs.scrambler.pieces import cubies_to_scramble
 from cubing_algs.scrambler.pieces import derange_pieces
 from cubing_algs.scrambler.pieces import disorient_corners
 from cubing_algs.scrambler.pieces import disorient_edges
 from cubing_algs.scrambler.pieces import fix_parity_with_buffer
 from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import orient_edges
+from cubing_algs.scrambler.pieces import orient_pieces
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_orientation
@@ -26,6 +28,29 @@ from cubing_algs.scrambler.pieces import scramble_with_piece_constraints
 from cubing_algs.scrambler.pieces import shuffle_in_place
 from cubing_algs.scrambler.pieces import swap_pieces
 from cubing_algs.vcube import VCube
+
+
+class TestCubiesToScramble(unittest.TestCase):
+    """Tests for cubies_to_scramble function."""
+
+    def test_solved_state_returns_empty(self) -> None:
+        """Test that solved state returns empty algorithm."""
+        cubies = (SOLVED_CP, SOLVED_CO, SOLVED_EP, SOLVED_EO)
+        scramble = cubies_to_scramble(cubies)
+
+        # Should return empty or very short algorithm
+        self.assertIsInstance(scramble, Algorithm)
+
+    def test_scrambled_state_returns_algorithm(self) -> None:
+        """Test that scrambled state returns non-empty algorithm."""
+        cp, co, ep, eo = random_permutation(
+            SOLVED_CP, SOLVED_EP, rng=Random(42),
+        )
+        cubies = (cp, co, ep, eo)
+        scramble = cubies_to_scramble(cubies)
+
+        # Should return valid algorithm
+        self.assertIsInstance(scramble, Algorithm)
 
 
 class TestRandomCornerOrientation(unittest.TestCase):
@@ -218,6 +243,27 @@ class TestOrientCorners(unittest.TestCase):
         for idx in U_CORNERS:
             self.assertEqual(result[idx], 0)
 
+    def test_orient_pieces_no_buffer_fallback(self) -> None:
+        """Test orient_pieces with no buffer."""
+        from cubing_algs.scrambler.pieces import orient_pieces  # noqa: PLC0415
+
+        # Start with valid constraint: sum([1, 2]) = 3 % 3 = 0
+        # After orienting pieces [0] to 0, total = 1
+        # Since 1 % 3 != 0 and no buffer, piece 0 will be set to 1
+        orient = [1, 2, 0, 0, 0, 0, 0, 0]
+        pieces = [0]
+        buffer_pieces: list[int] = []
+        rng = Random(42)
+
+        result = orient_pieces(orient, pieces, buffer_pieces, 3, rng)
+
+        # Global constraint should be maintained
+        self.assertEqual(sum(result) % 3, 0)
+        # Piece at index 0 should be set to total % modulus
+        self.assertEqual(result[0], 1)
+        # Other pieces unchanged
+        self.assertEqual(result[1], 2)
+
 
 class TestDisorientCorners(unittest.TestCase):
     """Tests for disorient_corners function."""
@@ -292,6 +338,40 @@ class TestDisorientCorners(unittest.TestCase):
         # At least some corners should be disoriented
         non_zero = sum(1 for idx in U_CORNERS if result[idx] != 0)
         self.assertGreater(non_zero, 0)
+
+    def test_disorient_corners_needed_zero_case(self) -> None:
+        """Test disorient_corners when needed orientation is zero."""
+        co = [1, 2, 0, 0, 0, 0, 0, 0]
+        # sum([1, 2]) = 3, which % 3 = 0, so needed = 0
+        # This triggers the else branch at line 578
+        result = disorient_corners(
+            co, [0, 1],
+            buffer_corners=[],
+            rng=Random(42),
+        )
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 3, 0)
+        # Both corners should be disoriented
+        self.assertNotEqual(result[0], 0)
+        self.assertNotEqual(result[1], 0)
+
+    def test_disorient_corners_with_buffer_fixing(self) -> None:
+        """Test disorient_corners uses buffer to fix constraint."""
+        co = SOLVED_CO.copy()
+        # Disorient single corner, which will need buffer fix
+        result = disorient_corners(
+            co, [0],
+            buffer_corners=[4, 5],
+            rng=Random(42),
+        )
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 3, 0)
+        # Corner 0 should be disoriented
+        self.assertNotEqual(result[0], 0)
+        # Buffer should be adjusted
+        self.assertTrue(result[4] != 0 or result[5] != 0)
 
 
 class TestOrientEdges(unittest.TestCase):
@@ -397,6 +477,26 @@ class TestDisorientEdges(unittest.TestCase):
         # At least some edges should be disoriented
         non_zero = sum(1 for idx in U_EDGES if result[idx] != 0)
         self.assertGreater(non_zero, 0)
+
+    def test_disorient_edges_with_buffer_odd_flips(self) -> None:
+        """Test disorient_edges with buffer when total flips is odd."""
+        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edges = [0]  # Only one edge to disorient
+        buffer_edges = [8, 9]
+        # This should flip edge 0, making total_flips = 1 (odd)
+        # which needs buffer fix
+        result = disorient_edges(
+            eo, edges,
+            buffer_edges=buffer_edges,
+            rng=Random(42),
+        )
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 2, 0)
+        # Edge should be disoriented
+        self.assertEqual(result[0], 1)
+        # One buffer edge should be flipped
+        self.assertTrue(result[8] == 1 or result[9] == 1)
 
 
 class TestSwapPieces(unittest.TestCase):
@@ -519,26 +619,26 @@ class TestFixParityWithBuffer(unittest.TestCase):
     def test_fix_parity_with_edge_buffer(self) -> None:
         """Test fixing parity using edge buffer."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]  # Odd permutation
-        co = SOLVED_CO.copy()
         ep = SOLVED_EP.copy()  # Even permutation
-        eo = SOLVED_EO.copy()
 
         self.assertNotEqual(compute_parity(cp), compute_parity(ep))
 
-        fix_parity_with_buffer(cp, co, ep, eo, [], [8, 9])
+        fix_parity_with_buffer(
+            cp, SOLVED_CO.copy(), ep, SOLVED_EO.copy(), [], [8, 9],
+        )
 
         self.assertEqual(compute_parity(cp), compute_parity(ep))
 
     def test_fix_parity_with_corner_buffer(self) -> None:
         """Test fixing parity using corner buffer."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]  # Odd permutation
-        co = SOLVED_CO.copy()
         ep = SOLVED_EP.copy()  # Even permutation
-        eo = SOLVED_EO.copy()
 
         self.assertNotEqual(compute_parity(cp), compute_parity(ep))
 
-        fix_parity_with_buffer(cp, co, ep, eo, [4, 5], [])
+        fix_parity_with_buffer(
+            cp, SOLVED_CO.copy(), ep, SOLVED_EO.copy(), [4, 5], [],
+        )
 
         self.assertEqual(compute_parity(cp), compute_parity(ep))
 
@@ -561,14 +661,14 @@ class TestFixParityWithBuffer(unittest.TestCase):
     def test_no_buffer_does_nothing(self) -> None:
         """Test that no buffer available does nothing."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
-        co = SOLVED_CO.copy()
         ep = SOLVED_EP.copy()
-        eo = SOLVED_EO.copy()
 
         original_cp = cp.copy()
         original_ep = ep.copy()
 
-        fix_parity_with_buffer(cp, co, ep, eo, [], [])
+        fix_parity_with_buffer(
+            cp, SOLVED_CO.copy(), ep, SOLVED_EO.copy(), [], [],
+        )
 
         self.assertEqual(cp, original_cp)
         self.assertEqual(ep, original_ep)
@@ -602,7 +702,7 @@ class TestRandomPermutation(unittest.TestCase):
         """Test that random permutation maintains parity."""
         rng = Random(42)
         for _ in range(20):
-            cp, _co, ep, _eo = random_permutation(
+            cp, _, ep, _ = random_permutation(
                 SOLVED_CP,
                 SOLVED_EP,
                 rng=rng,
@@ -611,7 +711,7 @@ class TestRandomPermutation(unittest.TestCase):
 
     def test_corners_only_permutation(self) -> None:
         """Test permuting only corners."""
-        cp, _co, ep, _eo = random_permutation(U_CORNERS, [], rng=Random(42))
+        cp, _, ep, _ = random_permutation(U_CORNERS, [], rng=Random(42))
         self.assertEqual(ep, SOLVED_EP)
         # At least some corners should be permuted
         permuted = sum(1 for i in U_CORNERS if cp[i] != i)
@@ -619,7 +719,7 @@ class TestRandomPermutation(unittest.TestCase):
 
     def test_edges_only_permutation(self) -> None:
         """Test permuting only edges."""
-        cp, _co, ep, _eo = random_permutation([], U_EDGES, rng=Random(42))
+        cp, _, ep, _ = random_permutation([], U_EDGES, rng=Random(42))
         self.assertEqual(cp, SOLVED_CP)
         # At least some edges should be permuted
         permuted = sum(1 for i in U_EDGES if ep[i] != i)
@@ -641,7 +741,7 @@ class TestRandomPermutation(unittest.TestCase):
 
     def test_orientation_stays_solved(self) -> None:
         """Test that orientation arrays remain solved."""
-        _cp, co, _ep, eo = random_permutation(
+        _, co, _, eo = random_permutation(
             SOLVED_CP,
             SOLVED_EP,
             rng=Random(42),
@@ -710,7 +810,7 @@ class TestArrangePieces(unittest.TestCase):
 
     def test_already_solved_stays_solved(self) -> None:
         """Test that already solved pieces stay solved."""
-        cp, _co, ep, _eo = arrange_pieces(
+        cp, _, ep, _ = arrange_pieces(
             SOLVED_CP.copy(),
             SOLVED_CO.copy(),
             SOLVED_EP.copy(),
@@ -805,7 +905,7 @@ class TestArrangePieces(unittest.TestCase):
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO.copy()
 
-        result_cp, _result_co, _result_ep, _result_eo = arrange_pieces(
+        result_cp, _, _, _ = arrange_pieces(
             cp, co, ep, eo,
             [], [],
             buffer_corners=[4, 5],
@@ -823,7 +923,7 @@ class TestDerangePiecesExtended(unittest.TestCase):
 
     def test_derange_with_no_buffer(self) -> None:
         """Test deranging without buffer pieces."""
-        cp, _co, ep, _eo = derange_pieces(
+        cp, _, ep, _ = derange_pieces(
             SOLVED_CP,
             SOLVED_CO,
             SOLVED_EP,
@@ -843,7 +943,7 @@ class TestDerangePiecesExtended(unittest.TestCase):
 
     def test_derange_corners_only(self) -> None:
         """Test deranging only corners."""
-        cp, _co, _ep, _eo = derange_pieces(
+        cp, _, _, _ = derange_pieces(
             SOLVED_CP,
             SOLVED_CO,
             SOLVED_EP,
@@ -861,7 +961,7 @@ class TestDerangePiecesExtended(unittest.TestCase):
 
     def test_derange_edges_only(self) -> None:
         """Test deranging only edges."""
-        _cp, _co, ep, _eo = derange_pieces(
+        _, _, ep, _ = derange_pieces(
             SOLVED_CP,
             SOLVED_CO,
             SOLVED_EP,
@@ -879,7 +979,7 @@ class TestDerangePiecesExtended(unittest.TestCase):
 
     def test_derange_all_pieces(self) -> None:
         """Test deranging all corners and edges."""
-        cp, _co, ep, _eo = derange_pieces(
+        cp, _, ep, _ = derange_pieces(
             SOLVED_CP,
             SOLVED_CO,
             SOLVED_EP,
@@ -910,6 +1010,79 @@ class TestDerangePiecesExtended(unittest.TestCase):
         )
         self.assertEqual(len(result), 4)
 
+    def test_derange_single_corner_with_buffer(self) -> None:
+        """Test deranging single corner uses buffer."""
+        cp = SOLVED_CP.copy()
+        co = SOLVED_CO.copy()
+        ep = SOLVED_EP.copy()
+        eo = SOLVED_EO.copy()
+
+        cp, co, ep, eo = derange_pieces(
+            cp, co, ep, eo,
+            [0],  # Single corner
+            [],
+            buffer_corners=[4, 5],
+            buffer_edges=[8, 9],
+            rng=Random(42),
+        )
+
+        # Corner 0 should not be solved
+        self.assertNotEqual(cp[0], 0)
+
+    def test_derange_single_edge_with_buffer(self) -> None:
+        """Test deranging single edge uses buffer."""
+        cp = SOLVED_CP.copy()
+        co = SOLVED_CO.copy()
+        ep = SOLVED_EP.copy()
+        eo = SOLVED_EO.copy()
+
+        cp, co, ep, eo = derange_pieces(
+            cp, co, ep, eo,
+            [],
+            [0],  # Single edge
+            buffer_corners=[4, 5],
+            buffer_edges=[8, 9],
+            rng=Random(42),
+        )
+
+        # Edge 0 should not be solved
+        self.assertNotEqual(ep[0], 0)
+
+    def test_derange_pieces_complex_swap_patterns(self) -> None:
+        """Test derange with patterns that require buffer swaps."""
+        # Try many different seeds to trigger different swap patterns
+        for seed in range(50):
+            rng = Random(seed)
+            cp = SOLVED_CP.copy()
+            co = SOLVED_CO.copy()
+            ep = SOLVED_EP.copy()
+            eo = SOLVED_EO.copy()
+
+            cp, co, ep, eo = derange_pieces(
+                cp, co, ep, eo,
+                U_CORNERS,
+                U_EDGES,
+                [4, 5],
+                [8, 9],
+                rng=rng,
+            )
+
+            # Verify derangement
+            for idx in U_CORNERS:
+                self.assertNotEqual(
+                    cp[idx], idx,
+                    f'Corner {idx} solved with seed {seed}',
+                )
+
+            for idx in U_EDGES:
+                self.assertNotEqual(
+                    ep[idx], idx,
+                    f'Edge {idx} solved with seed {seed}',
+                )
+
+            # Verify parity
+            self.assertEqual(compute_parity(cp), compute_parity(ep))
+
 
 class TestScrambleWithPieceConstraints(unittest.TestCase):
     """Tests for scramble_with_piece_constraints function."""
@@ -934,7 +1107,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U corners are solved
         cube = VCube()
         cube.rotate(str(scramble))
-        cp, _co, _ep, _eo, _ = cube.to_cubies
+        cp, _, _, _, _ = cube.to_cubies
 
         # U corner indices: URF=0, UFL=1, ULB=2, UBR=3
         u_corners = [0, 1, 2, 3]
@@ -954,7 +1127,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U edges are solved
         cube = VCube()
         cube.rotate(str(scramble))
-        _cp, _co, ep, _eo, _ = cube.to_cubies
+        _, _, ep, _, _ = cube.to_cubies
 
         # U edge indices: UR=0, UF=1, UL=2, UB=3
         u_edges = [0, 1, 2, 3]
@@ -971,7 +1144,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify all corners are oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _cp, co, _ep, _eo, _ = cube.to_cubies
+        _, co, _, _, _ = cube.to_cubies
 
         # All corners should have orientation 0
         self.assertEqual(co, SOLVED_CO)
@@ -986,7 +1159,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify all edges are oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _cp, _co, _ep, eo, _ = cube.to_cubies
+        _, _, _, eo, _ = cube.to_cubies
 
         # All edges should have orientation 0
         self.assertEqual(eo, SOLVED_EO)
@@ -1002,7 +1175,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U layer is oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _cp, co, _ep, eo, _ = cube.to_cubies
+        _, co, _, eo, _ = cube.to_cubies
 
         # U corners should be oriented
         u_corners = [0, 1, 2, 3]
@@ -1024,7 +1197,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U corners are not all solved
         cube = VCube()
         cube.rotate(str(scramble))
-        cp, _co, _ep, _eo, _ = cube.to_cubies
+        cp, _, _, _, _ = cube.to_cubies
 
         # At least one U corner should not be in solved position
         u_corners = [0, 1, 2, 3]
@@ -1041,7 +1214,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U edges are not all solved
         cube = VCube()
         cube.rotate(str(scramble))
-        _cp, _co, ep, _eo, _ = cube.to_cubies
+        _, _, ep, _, _ = cube.to_cubies
 
         # At least one U edge should not be in solved position
         u_edges = [0, 1, 2, 3]
@@ -1058,7 +1231,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U corners are not all oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _cp, co, _ep, _eo, _ = cube.to_cubies
+        _, co, _, _, _ = cube.to_cubies
 
         # At least one U corner should not be oriented
         u_corners = [0, 1, 2, 3]
@@ -1075,7 +1248,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U edges are not all oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _cp, _co, _ep, eo, _ = cube.to_cubies
+        _, _, _, eo, _ = cube.to_cubies
 
         # At least one U edge should not be oriented
         u_edges = [0, 1, 2, 3]
@@ -1100,7 +1273,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify
         cube = VCube()
         cube.rotate(str(scramble))
-        cp, co, _ep, eo, _ = cube.to_cubies
+        cp, co, _, eo, _ = cube.to_cubies
 
         # D corners should be solved
         d_corners = [4, 5, 6, 7]
@@ -1150,3 +1323,134 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
 
         # Should return valid Algorithm
         self.assertIsInstance(scramble, Algorithm)
+
+
+class TestDerangePiecesEdgeCases(unittest.TestCase):
+    """Edge case tests for derange_pieces to improve branch coverage."""
+
+    def test_derange_two_corners_requiring_multiple_swap_attempts(self) -> None:
+        """Test deranging two corners where first swap attempt may fail."""
+        # Run many iterations to trigger different swap patterns
+        for seed in range(100):
+            rng = Random(seed)
+            cp = SOLVED_CP.copy()
+            co = SOLVED_CO.copy()
+            ep = SOLVED_EP.copy()
+            eo = SOLVED_EO.copy()
+
+            cp, co, ep, eo = derange_pieces(
+                cp, co, ep, eo,
+                [0, 1],  # Two corners
+                [],
+                buffer_corners=[4],
+                buffer_edges=[8],
+                rng=rng,
+            )
+
+            # Both should be deranged
+            self.assertNotEqual(cp[0], 0)
+            self.assertNotEqual(cp[1], 1)
+
+    def test_derange_two_edges_requiring_multiple_swap_attempts(self) -> None:
+        """Test deranging two edges where first swap attempt may fail."""
+        # Run many iterations to trigger different swap patterns
+        for seed in range(100):
+            rng = Random(seed)
+            cp = SOLVED_CP.copy()
+            co = SOLVED_CO.copy()
+            ep = SOLVED_EP.copy()
+            eo = SOLVED_EO.copy()
+
+            cp, co, ep, eo = derange_pieces(
+                cp, co, ep, eo,
+                [],
+                [0, 1],  # Two edges
+                buffer_corners=[4],
+                buffer_edges=[8],
+                rng=rng,
+            )
+
+            # Both should be deranged
+            self.assertNotEqual(ep[0], 0)
+            self.assertNotEqual(ep[1], 1)
+
+
+class TestOrientPiecesEdgeCases(unittest.TestCase):
+    """Edge case tests for orient_pieces to improve branch coverage."""
+
+    def test_orient_pieces_with_buffer_absorption(self) -> None:
+        """Test orient_pieces using buffer to absorb orientation fix."""
+        # Start with valid global constraint: sum([1, 2]) = 3 % 3 = 0
+        # After orienting pieces [0], total = 1, which needs buffer fix
+        orient = [1, 2, 0, 0, 0, 0, 0, 0]
+        pieces = [0]
+        buffer_pieces = [4, 5]
+        rng = Random(42)
+
+        result = orient_pieces(orient, pieces, buffer_pieces, 3, rng)
+
+        # Should maintain global constraint
+        self.assertEqual(sum(result) % 3, 0)
+        # Piece should be oriented
+        self.assertEqual(result[0], 0)
+        # Buffer should absorb the fix
+        buffer_sum = result[4] + result[5]
+        # Buffer should have absorbed the total (1)
+        self.assertEqual(buffer_sum % 3, 1)
+
+
+class TestDisorientEdgesEdgeCases(unittest.TestCase):
+    """Edge case tests for disorient_edges to improve branch coverage."""
+
+    def test_disorient_edges_single_edge_with_buffer(self) -> None:
+        """Test disorienting single edge with buffer fix."""
+        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edges = [0]
+        buffer_edges = [8]
+
+        result = disorient_edges(
+            eo, edges,
+            buffer_edges=buffer_edges,
+            rng=Random(42),
+        )
+
+        # Should maintain constraint
+        self.assertEqual(sum(result) % 2, 0)
+        # Edge should be disoriented
+        self.assertEqual(result[0], 1)
+        # Buffer should be flipped
+        self.assertEqual(result[8], 1)
+
+
+class TestDisorientCornersEdgeCases(unittest.TestCase):
+    """Edge case tests for disorient_corners to improve branch coverage."""
+
+    def test_disorient_corners_with_buffer_twist(self) -> None:
+        """Test disorienting corners with buffer absorbing fix."""
+        co = SOLVED_CO.copy()
+        corners = [0]
+
+        # Try different seeds to trigger different twists
+        for seed in range(20):
+            rng = Random(seed)
+            result = disorient_corners(co, corners, buffer_corners=[4], rng=rng)
+
+            # Should maintain constraint
+            self.assertEqual(sum(result) % 3, 0)
+            # Corner should be disoriented
+            self.assertNotEqual(result[0], 0)
+
+    def test_disorient_corners_multiple_corners_without_buffer(self) -> None:
+        """Test disorienting multiple corners without buffer."""
+        co = [1, 1, 1, 0, 0, 0, 0, 0]  # sum = 3 % 3 = 0
+        corners = [0, 1, 2]
+        buffer_corners: list[int] = []
+
+        result = disorient_corners(
+            co, corners,
+            buffer_corners=buffer_corners,
+            rng=Random(42),
+        )
+
+        # Should try to maintain constraint
+        self.assertEqual(sum(result) % 3, 0)

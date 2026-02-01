@@ -135,3 +135,8 @@ class TestParsePieceSpec(unittest.TestCase):  # noqa: PLR0904
         """Test parsing returns sorted indices."""
         result = parse_piece_spec('UBR URF', 'corner')
         self.assertEqual(result, [0, 3])  # Sorted: 0, 3
+
+    def test_parse_with_empty_tokens(self) -> None:
+        """Test parsing handles empty tokens from multiple spaces."""
+        result = parse_piece_spec('URF  UBR', 'corner')
+        self.assertEqual(result, [0, 3])
