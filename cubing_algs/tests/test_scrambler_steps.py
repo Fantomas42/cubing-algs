@@ -300,7 +300,7 @@ class TestSupportedSteps(unittest.TestCase):
 
     def test_has_f2l_steps(self) -> None:
         """Test that F2L variants are included."""
-        f2l_steps = ['F2L', 'ZZF2L', 'ZZRB', 'PetrusF2L']
+        f2l_steps = ['F2L', 'ZZF2L', 'ZZRB', 'PETRUSF2L']
         for step in f2l_steps:
             self.assertIn(step, SUPPORTED_STEPS)
 
@@ -318,7 +318,7 @@ class TestSupportedSteps(unittest.TestCase):
 
     def test_has_petrus_steps(self) -> None:
         """Test that Petrus method steps are included."""
-        petrus_steps = ['Petrus2x2x3', 'PetrusEO']
+        petrus_steps = ['PETRUS2x2x3', 'PETRUSEO']
         for step in petrus_steps:
             self.assertIn(step, SUPPORTED_STEPS)
 
