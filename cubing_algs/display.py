@@ -13,10 +13,10 @@ from cubing_algs.effects import load_effect
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
-from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import F2L_CLL_MASK
 from cubing_algs.masks import F2L_ELL_MASK
 from cubing_algs.masks import F2L_LL_MASK
+from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
