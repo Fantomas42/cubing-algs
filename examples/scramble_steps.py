@@ -138,7 +138,7 @@ def show_step(name: str, rng: Random, *, auf: bool = False) -> None:
     print(f'\n   {name}: {description}')
 
     scramble = scramble_step(name, rng=rng, include_auf=auf)
-    print(f'   Scramble: {scramble}')
+    print(f'   Scramble: z2 {scramble}')
     print(f'   Moves: {len(scramble)}')
 
     cube = VCube()
