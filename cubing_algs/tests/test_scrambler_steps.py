@@ -330,45 +330,70 @@ class TestSupportedSteps(unittest.TestCase):
 class TestScrambleEasyCross(unittest.TestCase):
     """Tests for easy cross scramble generation."""
 
-    def test_scramble_easy_cross(self) -> None:
-        """Test scramble easy cross."""
-        moves = scramble_easy_cross()
+    def test_scramble_easy_cross_easy(self) -> None:
+        """Test scramble_easy_cross with easy difficulty."""
+        _, solution = scramble_easy_cross('easy')
 
         self.assertEqual(
-            len(moves), 10,
-        )
-        self.assertTrue(
-            'U' not in moves,
-        )
-        self.assertTrue(
-            'D' not in moves,
+            len(solution),
+            3,
         )
 
+    def test_scramble_easy_cross_normal(self) -> None:
+        """Test scramble_easy_cross with normal difficulty."""
+        _, solution = scramble_easy_cross('normal')
 
-class TestRNGParameter(unittest.TestCase):
-    """Tests for random number generator parameter functionality."""
+        self.assertEqual(
+            len(solution),
+            5,
+        )
+
+    def test_scramble_easy_cross_hard(self) -> None:
+        """Test scramble_easy_cross with hard difficulty."""
+        _, solution = scramble_easy_cross('hard')
+
+        self.assertEqual(
+            len(solution),
+            7,
+        )
+
+    def test_scramble_easy_cross_invalid_difficulty(self) -> None:
+        """Test scramble_easy_cross with invalid difficulty."""
+        _, solution = scramble_easy_cross('invalid')
+
+        self.assertEqual(
+            len(solution),
+            5,
+        )
 
     def test_scramble_easy_cross_deterministic_with_seed(self) -> None:
         """Test scramble_easy_cross produces identical results with seed."""
         rng1 = Random(42)
         rng2 = Random(42)
 
-        result1 = scramble_easy_cross(rng1)
-        result2 = scramble_easy_cross(rng2)
+        scramble_1, solution_1 = scramble_easy_cross(rng=rng1)
+        scramble_2, solution_2 = scramble_easy_cross(rng=rng2)
 
         self.assertEqual(
-            str(result1),
-            str(result2),
+            str(scramble_1),
+            str(scramble_2),
             'Same seed should produce identical easy cross scrambles',
         )
+
         self.assertEqual(
-            str(result1),
-            'F R F L F R F R B R',
+            str(solution_1),
+            str(solution_2),
+            'Same seed should produce identical easy cross solutions',
         )
+
         self.assertEqual(
-            len(result1),
-            10,
-            'Easy cross scramble should have 10 moves',
+            str(scramble_1),
+            "U2 F2 B2 R2 F' U' D2 B D' F' B' R U R2 D' F2 B2 D2 R2 D F2 D",
+        )
+
+        self.assertEqual(
+            str(solution_1),
+            "U' F U2 L F2",
         )
 
     def test_scramble_easy_cross_different_seeds_produce_different_results(
@@ -377,25 +402,17 @@ class TestRNGParameter(unittest.TestCase):
         rng1 = Random(42)
         rng2 = Random(777)
 
-        result1 = scramble_easy_cross(rng1)
-        result2 = scramble_easy_cross(rng2)
+        scramble_1, solution_1 = scramble_easy_cross(rng=rng1)
+        scramble_2, solution_2 = scramble_easy_cross(rng=rng2)
 
         self.assertNotEqual(
-            str(result1),
-            str(result2),
-            'Different seeds should produce different easy cross scrambles',
+            str(scramble_1),
+            str(scramble_2),
+            'Different seed should produce different easy cross scrambles',
         )
 
-    def test_scramble_easy_cross_uses_default_rng_when_none(self) -> None:
-        """Test scramble_easy_cross works without explicit rng parameter."""
-        result = scramble_easy_cross()
-
-        self.assertEqual(
-            len(result),
-            10,
-            'Should generate easy cross scramble with default RNG',
-        )
-        self.assertFalse(
-            any(str(move).startswith(('U', 'D')) for move in result),
-            'Easy cross should not contain U or D moves',
+        self.assertNotEqual(
+            str(solution_1),
+            str(solution_2),
+            'Different seed should produce different easy cross solutions',
         )

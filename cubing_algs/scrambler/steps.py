@@ -19,8 +19,9 @@ from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.scrambler.constants import DEFAULT_RNG
+from cubing_algs.scrambler.constants import EASY_CROSS_DIFFICULTIES
 from cubing_algs.scrambler.constants import MOVES_AUF
-from cubing_algs.scrambler.constants import MOVES_EASY_CROSS
+from cubing_algs.scrambler.moves import build_cube_move_set
 from cubing_algs.scrambler.moves import random_moves
 from cubing_algs.scrambler.parse import parse_piece_spec
 from cubing_algs.scrambler.pieces import cubies_to_scramble
@@ -29,12 +30,13 @@ from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_permutation
+from cubing_algs.transform.mirror import mirror_moves
 from cubing_algs.vcube import VCube
 
 
 def apply_moves(
         cubies: CubeCubies,
-        moves: str,
+        moves: str | Algorithm,
 ) -> CubeCubies:
     """
     Apply move sequence to cube state.
@@ -402,7 +404,10 @@ def scramble_ocll_case(
     return cubies_to_scramble(cubies)
 
 
-def scramble_easy_cross(rng: Random | None = None) -> Algorithm:
+def scramble_easy_cross(
+        difficulty: str = 'normal',
+        rng: Random | None = None,
+) -> tuple[Algorithm, Algorithm]:
     """
     Generate an easy cross scramble using only basic face moves.
 
@@ -410,10 +415,29 @@ def scramble_easy_cross(rng: Random | None = None) -> Algorithm:
     in speedcubing methods like CFOP.
 
     Args:
+        difficulty: Optional difficulty string.
         rng: Optional random number generator.
 
     Returns:
-        Algorithm with 10 random moves from F, R, B, L faces.
+        Algorithms to reach the scramble and cross solution
 
     """
-    return random_moves(3, MOVES_EASY_CROSS, 10, rng)
+    # Scramble keeping the cross
+    f2l_edges = parse_piece_spec('U FR FL BR BL', 'edge')
+
+    cp, co, ep, eo = random_permutation(SOLVED_CP, f2l_edges, rng)
+    co = random_corner_orientation(SOLVED_CP, rng)
+    eo = random_edge_orientation(f2l_edges, rng)
+
+    # Apply moves to break the cross
+    move_set = build_cube_move_set(3)
+    move_iterations = EASY_CROSS_DIFFICULTIES.get(difficulty, 5)
+    moves = random_moves(3, move_set, move_iterations, rng)
+
+    cubies = apply_moves((cp, co, ep, eo), moves)
+
+    # Build scramble and solution
+    scramble = cubies_to_scramble(cubies)
+    solution = moves.transform(mirror_moves)
+
+    return scramble, solution
