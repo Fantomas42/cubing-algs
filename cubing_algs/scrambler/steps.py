@@ -103,6 +103,9 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
     This function implements the logic for each step type, manipulating
     the cubie arrays (cp, co, ep, eo) to create the desired partial-solve state.
 
+    Notes: The cubies are user oriented, so to change the face colors impacted
+    a rotation of the cube or an algorithm translation should be applied.
+
     Args:
         step: Step name (must be in SUPPORTED_STEPS).
         rng: Random number generator (uses DEFAULT_RNG if None).
