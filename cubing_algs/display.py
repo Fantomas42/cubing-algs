@@ -14,6 +14,8 @@ from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_MASK
+from cubing_algs.masks import F2L_CLL_MASK
+from cubing_algs.masks import F2L_ELL_MASK
 from cubing_algs.masks import F2L_LL_MASK
 from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
@@ -163,7 +165,7 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, mode: str = '', orientation: str = '',
+    def display(self, mode: str = '', orientation: str = '',  # noqa: C901
                 mask: str = '') -> str:
         """
         Generate formatted visual representation of the cube state.
@@ -203,6 +205,12 @@ class VCubeDisplay:
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'f2l+ll':
             mode_mask = F2L_LL_MASK
+            default_orientation = f'D{ self.compute_f2l_front_face() }'
+        elif mode == 'f2l+cll':
+            mode_mask = F2L_CLL_MASK
+            default_orientation = f'D{ self.compute_f2l_front_face() }'
+        elif mode == 'f2l+ell':
+            mode_mask = F2L_ELL_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'extended':
             display_method = self.display_extended_net
