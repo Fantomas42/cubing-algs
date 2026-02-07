@@ -1,5 +1,4 @@
 """Visual representation and display formatting for virtual cube states."""
-
 import os
 import re
 from typing import TYPE_CHECKING
@@ -15,6 +14,7 @@ from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_MASK
+from cubing_algs.masks import F2L_LL_MASK
 from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
@@ -200,6 +200,9 @@ class VCubeDisplay:
             default_orientation = 'FU'
         elif mode in {'f2l', 'af2l'}:
             mode_mask = F2L_MASK
+            default_orientation = f'D{ self.compute_f2l_front_face() }'
+        elif mode == 'f2l+ll':
+            mode_mask = F2L_LL_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'extended':
             display_method = self.display_extended_net
