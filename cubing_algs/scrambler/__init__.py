@@ -16,13 +16,17 @@ Submodules:
 from cubing_algs.scrambler.nxn import scramble
 from cubing_algs.scrambler.pieces import scramble_with_piece_constraints
 from cubing_algs.scrambler.steps import scramble_easy_cross
+from cubing_algs.scrambler.steps import scramble_f2l
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
+from cubing_algs.scrambler.steps import scramble_x_cross
 
 __all__ = [
     'scramble',
     'scramble_easy_cross',
+    'scramble_f2l',
     'scramble_ocll_case',
     'scramble_step',
     'scramble_with_piece_constraints',
+    'scramble_x_cross',
 ]
