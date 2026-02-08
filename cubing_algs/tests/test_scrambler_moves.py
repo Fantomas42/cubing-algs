@@ -1,43 +1,124 @@
 """Tests for scramble movesets."""
+import string
 import unittest
 from random import Random
 
+from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.scrambler.moves import build_cube_move_set
-from cubing_algs.scrambler.moves import is_valid_next_move
+from cubing_algs.scrambler.moves import build_valid_next_moves
 from cubing_algs.scrambler.moves import random_moves
 
 
-class TestValidNextMove(unittest.TestCase):
-    """Tests for valid next move generation in scrambling."""
+class TestBuildValidNextMoves(unittest.TestCase):
+    """Tests for valid next moves precomputation."""
 
-    def test_is_valid_next_move_valid(self) -> None:
-        """Test that valid next moves are recognized."""
-        self.assertTrue(is_valid_next_move('F', 'R'))
-        self.assertTrue(is_valid_next_move("F'", 'R'))
-        self.assertTrue(is_valid_next_move('F2', "R'"))
+    def test_contains_all_moves_as_keys(self) -> None:
+        """Test that every move in the set has an entry."""
+        move_set = build_cube_move_set(3)
+        result = build_valid_next_moves(move_set)
 
-    def test_is_valid_next_move_invalid_same_face(self) -> None:
-        """Test that moves on the same face are invalid."""
-        self.assertFalse(is_valid_next_move('F', 'F'))
-        self.assertFalse(is_valid_next_move('F', "F'"))
-        self.assertFalse(is_valid_next_move('F2', 'F'))
+        self.assertEqual(sorted(result.keys()), sorted(move_set))
 
-    def test_is_valid_next_move_invalid_none(self) -> None:
-        """Test that moves does not matche."""
-        self.assertFalse(is_valid_next_move('', 'F'))
-        self.assertFalse(is_valid_next_move('F', ''))
-        self.assertFalse(is_valid_next_move('Z', 'F'))
+    def test_excludes_same_face(self) -> None:
+        """Test that same-face moves are excluded from valid next moves."""
+        move_set = build_cube_move_set(3)
+        result = build_valid_next_moves(move_set)
 
-    def test_is_valid_next_move_invalid_opposite_faces(self) -> None:
-        """Test that moves on opposite faces are invalid."""
-        self.assertFalse(is_valid_next_move('F', 'B'))
-        self.assertFalse(is_valid_next_move('R', 'L'))
-        self.assertFalse(is_valid_next_move('U', 'D'))
+        self.assertNotIn('R', result['R'])
+        self.assertNotIn("R'", result['R'])
+        self.assertNotIn('R2', result['R'])
 
-    def test_is_valid_next_move_with_modifiers(self) -> None:
-        """Test that modifiers don't affect face validation."""
-        self.assertFalse(is_valid_next_move('Fw', 'F'))
-        self.assertFalse(is_valid_next_move('Fw', 'B'))
+    def test_excludes_opposite_face(self) -> None:
+        """Test that opposite-face moves are excluded from valid next moves."""
+        move_set = build_cube_move_set(3)
+        result = build_valid_next_moves(move_set)
+
+        self.assertNotIn('L', result['R'])
+        self.assertNotIn("L'", result['R'])
+        self.assertNotIn('L2', result['R'])
+
+    def test_includes_adjacent_faces(self) -> None:
+        """Test that adjacent-face moves are included in valid next moves."""
+        move_set = build_cube_move_set(3)
+        result = build_valid_next_moves(move_set)
+
+        for adjacent in ('F', "F'", 'F2', 'U', "U'", 'U2',
+                         'B', "B'", 'B2', 'D', "D'", 'D2'):
+            self.assertIn(adjacent, result['R'])
+
+    def test_valid_count_3x3(self) -> None:
+        """Test that each move has 12 valid successors for 3x3."""
+        move_set = build_cube_move_set(3)
+        result = build_valid_next_moves(move_set)
+
+        for move, valid in result.items():
+            self.assertEqual(
+                len(valid), 12,
+                f'{move} should have 12 valid next moves (4 faces x 3)',
+            )
+
+    def test_all_opposite_pairs_excluded(self) -> None:
+        """Test that all opposite face pairs are properly excluded."""
+        move_set = build_cube_move_set(3)
+        result = build_valid_next_moves(move_set)
+
+        for move, valid_moves in result.items():
+            move_face = move[0]
+            for valid_move in valid_moves:
+                valid_face = valid_move[0]
+                self.assertNotEqual(
+                    move_face, valid_face,
+                    f'{valid_move} should not follow {move} (same face)',
+                )
+                self.assertNotEqual(
+                    OPPOSITE_FACES[move_face], valid_face,
+                    f'{valid_move} should not follow {move} (opposite face)',
+                )
+
+    def test_wide_moves_grouped_by_face(self) -> None:
+        """Test that wide moves are correctly grouped with their face."""
+        move_set = build_cube_move_set(4)
+        result = build_valid_next_moves(move_set)
+
+        # Rw should have same valid set as R (both are R-face)
+        self.assertEqual(result['R'], result['Rw'])
+        self.assertNotIn('Rw', result['R'])
+        self.assertNotIn('R', result['Rw'])
+
+    def test_inner_layer_moves_grouped_by_face(self) -> None:
+        """Test that inner layer moves are correctly grouped with their face."""
+        move_set = build_cube_move_set(4, inner_layers=True)
+        result = build_valid_next_moves(move_set)
+
+        # 2R should have same valid set as R (both are R-face)
+        self.assertEqual(result['R'], result['2R'])
+        self.assertNotIn('2R', result['R'])
+
+    def test_same_face_moves_share_list(self) -> None:
+        """Test that moves on the same face share the same list object."""
+        move_set = build_cube_move_set(3)
+        result = build_valid_next_moves(move_set)
+
+        self.assertIs(result['R'], result["R'"])
+        self.assertIs(result['R'], result['R2'])
+
+    def test_big_cube_valid_count(self) -> None:
+        """Test valid move counts for 7x7 move set."""
+        move_set = build_cube_move_set(7)
+        result = build_valid_next_moves(move_set)
+        total = len(move_set)
+
+        for move, valid in result.items():
+            move_face = move.lstrip(string.digits)[0]
+            opposite = OPPOSITE_FACES[move_face]
+            blocked = sum(
+                1 for m in move_set
+                if m.lstrip(string.digits)[0] in {move_face, opposite}
+            )
+            self.assertEqual(
+                len(valid), total - blocked,
+                f'{move} valid count mismatch',
+            )
 
 
 class TestCubeMoveSet(unittest.TestCase):  # noqa: PLR0904

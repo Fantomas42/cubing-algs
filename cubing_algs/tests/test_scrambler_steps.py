@@ -391,12 +391,12 @@ class TestScrambleEasyCross(unittest.TestCase):
 
         self.assertEqual(
             str(scramble_1),
-            "U2 F2 B2 R2 F' U' D2 B D' F' B' R U R2 D' F2 B2 D2 R2 D F2 D",
+            "R L' U' B R F2 R' D R2 U' L' B2 U R2 U' F2 U' F2 D' R2 D",
         )
 
         self.assertEqual(
             str(solution_1),
-            "U' F U2 L F2",
+            "F U2 L' D2 F2",
         )
 
     def test_scramble_easy_cross_different_seeds_produce_different_results(
@@ -469,11 +469,11 @@ class TestScrambleXCross(unittest.TestCase):
         self.assertIsInstance(solution, Algorithm)
         self.assertEqual(
             str(scramble),
-            "U2 R2 F' R2 D B' R' L2 U F L' U D R2 D' R2 B2 U' L2 D2 R2",
+            "U' B' D' L2 B' R L2 U' D' F' D B2 U2 B2 U' L2 F2 U R2 L2",
         )
         self.assertEqual(
             str(solution),
-            "L U' F U2 L F2 R'",
+            "R2 F U2 L' D2 F2 R'",
         )
 
     def test_scramble_x_cross_slot_fl(self) -> None:
@@ -485,11 +485,11 @@ class TestScrambleXCross(unittest.TestCase):
         self.assertIsInstance(solution, Algorithm)
         self.assertEqual(
             str(scramble),
-            "U2 R2 B' U2 F D B U F' R' L U' L2 F2 D' R2 U B2 U2 L2 B2",
+            "U' R2 F B U' F U2 R2 U2 D L U2 F2 U2 F2 R2 D' L2 U L2 F2",
         )
         self.assertEqual(
             str(solution),
-            "L U' F U2 L F2 R'",
+            "R2 F U2 L' D2 F2 R'",
         )
 
     def test_scramble_x_cross_slot_br(self) -> None:
@@ -501,11 +501,11 @@ class TestScrambleXCross(unittest.TestCase):
         self.assertIsInstance(solution, Algorithm)
         self.assertEqual(
             str(scramble),
-            "F' L' D R' F B2 U B2 R' B' R U L2 D' F2 L2 U R2 F2 D'",
+            "R B2 U' R' B R2 B2 U L2 B R2 U F2 U L2 D2 B2 L2 D B2",
         )
         self.assertEqual(
             str(solution),
-            "L U' F U2 L F2 R'",
+            "R2 F U2 L' D2 F2 R'",
         )
 
     def test_scramble_x_cross_slot_bl(self) -> None:
@@ -517,11 +517,11 @@ class TestScrambleXCross(unittest.TestCase):
         self.assertIsInstance(solution, Algorithm)
         self.assertEqual(
             str(scramble),
-            "L2 B2 U F' B' L' F' D2 R' U R D F2 R2 U B2 U' R2 D' R2 D",
+            "R' B2 U' F' B' D2 F' L2 D' B' R L2 D' F2 L2 D R2 L2 U L2 U2",
         )
         self.assertEqual(
             str(solution),
-            "L U' F U2 L F2 R'",
+            "R2 F U2 L' D2 F2 R'",
         )
 
     def test_scramble_x_cross_deterministic_with_seed(self) -> None:
@@ -546,12 +546,12 @@ class TestScrambleXCross(unittest.TestCase):
 
         self.assertEqual(
             str(scramble_1),
-            "U2 R2 F' R2 D B' R' L2 U F L' U D R2 D' R2 B2 U' L2 D2 R2",
+            "U' B' D' L2 B' R L2 U' D' F' D B2 U2 B2 U' L2 F2 U R2 L2",
         )
 
         self.assertEqual(
             str(solution_1),
-            "L U' F U2 L F2 R'",
+            "R2 F U2 L' D2 F2 R'",
         )
 
     def test_scramble_x_cross_different_seeds_produce_different_results(
