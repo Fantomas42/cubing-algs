@@ -406,6 +406,13 @@ F2L_ADJACENT_FACES = {
     'F': ('R', 'L'),
 }
 
+F2L_EDGE_CORNERS = {  # Edge: Corner
+    'FL': 'DLF',
+    'FR': 'DFR',
+    'BL': 'DBL',
+    'BR': 'DRB',
+}
+
 ITERATIONS_BY_CUBE_SIZE = {
     2: (9, 11),
     3: (25, 30),

@@ -14,6 +14,7 @@ from cubing_algs.scrambler.steps import generate_step_state
 from cubing_algs.scrambler.steps import scramble_easy_cross
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
+from cubing_algs.scrambler.steps import scramble_x_cross
 from cubing_algs.vcube import VCube
 
 
@@ -416,3 +417,217 @@ class TestScrambleEasyCross(unittest.TestCase):
             str(solution_2),
             'Different seed should produce different easy cross solutions',
         )
+
+
+class TestScrambleXCross(unittest.TestCase):
+    """Tests for x-cross scramble generation."""
+
+    def test_scramble_x_cross_easy(self) -> None:
+        """Test scramble_x_cross with easy difficulty."""
+        _, solution = scramble_x_cross('easy')
+
+        self.assertEqual(
+            len(solution),
+            5,
+        )
+
+    def test_scramble_x_cross_normal(self) -> None:
+        """Test scramble_x_cross with normal difficulty."""
+        _, solution = scramble_x_cross('normal')
+
+        self.assertEqual(
+            len(solution),
+            7,
+        )
+
+    def test_scramble_x_cross_hard(self) -> None:
+        """Test scramble_x_cross with hard difficulty."""
+        _, solution = scramble_x_cross('hard')
+
+        self.assertEqual(
+            len(solution),
+            9,
+        )
+
+    def test_scramble_x_cross_invalid_difficulty(self) -> None:
+        """Test scramble_x_cross with invalid difficulty."""
+        _, solution = scramble_x_cross('invalid')
+
+        self.assertEqual(
+            len(solution),
+            7,
+        )
+
+    def test_scramble_x_cross_slot_fr(self) -> None:
+        """Test scramble_x_cross targeting FR slot."""
+        rng = Random(42)
+        scramble, solution = scramble_x_cross(slot='FR', rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertIsInstance(solution, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U2 R2 F' R2 D B' R' L2 U F L' U D R2 D' R2 B2 U' L2 D2 R2",
+        )
+        self.assertEqual(
+            str(solution),
+            "L U' F U2 L F2 R'",
+        )
+
+    def test_scramble_x_cross_slot_fl(self) -> None:
+        """Test scramble_x_cross targeting FL slot."""
+        rng = Random(42)
+        scramble, solution = scramble_x_cross(slot='FL', rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertIsInstance(solution, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U2 R2 B' U2 F D B U F' R' L U' L2 F2 D' R2 U B2 U2 L2 B2",
+        )
+        self.assertEqual(
+            str(solution),
+            "L U' F U2 L F2 R'",
+        )
+
+    def test_scramble_x_cross_slot_br(self) -> None:
+        """Test scramble_x_cross targeting BR slot."""
+        rng = Random(42)
+        scramble, solution = scramble_x_cross(slot='BR', rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertIsInstance(solution, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "F' L' D R' F B2 U B2 R' B' R U L2 D' F2 L2 U R2 F2 D'",
+        )
+        self.assertEqual(
+            str(solution),
+            "L U' F U2 L F2 R'",
+        )
+
+    def test_scramble_x_cross_slot_bl(self) -> None:
+        """Test scramble_x_cross targeting BL slot."""
+        rng = Random(42)
+        scramble, solution = scramble_x_cross(slot='BL', rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertIsInstance(solution, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "L2 B2 U F' B' L' F' D2 R' U R D F2 R2 U B2 U' R2 D' R2 D",
+        )
+        self.assertEqual(
+            str(solution),
+            "L U' F U2 L F2 R'",
+        )
+
+    def test_scramble_x_cross_deterministic_with_seed(self) -> None:
+        """Test scramble_x_cross produces identical results with seed."""
+        rng1 = Random(42)
+        rng2 = Random(42)
+
+        scramble_1, solution_1 = scramble_x_cross(rng=rng1)
+        scramble_2, solution_2 = scramble_x_cross(rng=rng2)
+
+        self.assertEqual(
+            str(scramble_1),
+            str(scramble_2),
+            'Same seed should produce identical x-cross scrambles',
+        )
+
+        self.assertEqual(
+            str(solution_1),
+            str(solution_2),
+            'Same seed should produce identical x-cross solutions',
+        )
+
+        self.assertEqual(
+            str(scramble_1),
+            "U2 R2 F' R2 D B' R' L2 U F L' U D R2 D' R2 B2 U' L2 D2 R2",
+        )
+
+        self.assertEqual(
+            str(solution_1),
+            "L U' F U2 L F2 R'",
+        )
+
+    def test_scramble_x_cross_different_seeds_produce_different_results(
+            self) -> None:
+        """Test scramble_x_cross produces different results."""
+        rng1 = Random(42)
+        rng2 = Random(777)
+
+        scramble_1, solution_1 = scramble_x_cross(rng=rng1)
+        scramble_2, solution_2 = scramble_x_cross(rng=rng2)
+
+        self.assertNotEqual(
+            str(scramble_1),
+            str(scramble_2),
+            'Different seed should produce different x-cross scrambles',
+        )
+
+        self.assertNotEqual(
+            str(solution_1),
+            str(solution_2),
+            'Different seed should produce different x-cross solutions',
+        )
+
+    def test_scramble_x_cross_different_slots_produce_different_results(
+            self) -> None:
+        """Test scramble_x_cross produces different results for slots."""
+        rng1 = Random(123)
+        rng2 = Random(123)
+
+        scramble_fr, _ = scramble_x_cross(slot='FR', rng=rng1)
+        scramble_bl, _ = scramble_x_cross(slot='BL', rng=rng2)
+
+        self.assertNotEqual(
+            str(scramble_fr),
+            str(scramble_bl),
+            'Different slots should produce different x-cross scrambles',
+        )
+
+    def test_scramble_x_cross_returns_valid_algorithms(self) -> None:
+        """Test scramble_x_cross returns valid Algorithm instances."""
+        scramble, solution = scramble_x_cross('normal', 'FR', Random(42))
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertIsInstance(solution, Algorithm)
+
+    def test_scramble_x_cross_default_parameters(self) -> None:
+        """Test scramble_x_cross with all default parameters."""
+        scramble, solution = scramble_x_cross()
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertIsInstance(solution, Algorithm)
+        self.assertGreater(len(scramble), 0)
+        self.assertGreater(len(solution), 0)
+
+    def test_scramble_x_cross_all_slots(self) -> None:
+        """Test scramble_x_cross works with all valid slots."""
+        valid_slots = ['FR', 'FL', 'BR', 'BL']
+        rng = Random(42)
+
+        for slot in valid_slots:
+            scramble, solution = scramble_x_cross(slot=slot, rng=rng)
+
+            self.assertIsInstance(scramble, Algorithm)
+            self.assertIsInstance(solution, Algorithm)
+            self.assertGreater(len(scramble), 0)
+            self.assertGreater(len(solution), 0)
+
+    def test_scramble_x_cross_all_difficulties(self) -> None:
+        """Test scramble_x_cross works with all valid difficulties."""
+        valid_difficulties = ['easy', 'normal', 'hard']
+        rng = Random(42)
+
+        for difficulty in valid_difficulties:
+            scramble, solution = scramble_x_cross(
+                difficulty=difficulty, rng=rng,
+            )
+
+            self.assertIsInstance(scramble, Algorithm)
+            self.assertIsInstance(solution, Algorithm)
+            self.assertGreater(len(scramble), 0)
+            self.assertGreater(len(solution), 0)

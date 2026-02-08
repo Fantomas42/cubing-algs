@@ -10,6 +10,7 @@ from typing import Final
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CubeCubies
+from cubing_algs.constants import F2L_EDGE_CORNERS
 from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
@@ -18,8 +19,8 @@ from cubing_algs.constants import SOLVED_SO
 from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
 from cubing_algs.exceptions import InvalidStepError
+from cubing_algs.scrambler.constants import CROSS_DIFFICULTIES
 from cubing_algs.scrambler.constants import DEFAULT_RNG
-from cubing_algs.scrambler.constants import EASY_CROSS_DIFFICULTIES
 from cubing_algs.scrambler.constants import MOVES_AUF
 from cubing_algs.scrambler.moves import build_cube_move_set
 from cubing_algs.scrambler.moves import random_moves
@@ -431,7 +432,57 @@ def scramble_easy_cross(
 
     # Apply moves to break the cross
     move_set = build_cube_move_set(3)
-    move_iterations = EASY_CROSS_DIFFICULTIES.get(difficulty, 5)
+    move_iterations = CROSS_DIFFICULTIES.get(difficulty, 5)
+    moves = random_moves(3, move_set, move_iterations, rng)
+
+    cubies = apply_moves((cp, co, ep, eo), moves)
+
+    # Build scramble and solution
+    scramble = cubies_to_scramble(cubies)
+    solution = moves.transform(mirror_moves)
+
+    return scramble, solution
+
+
+def scramble_x_cross(
+        difficulty: str = 'normal',
+        slot: str = 'FR',
+        rng: Random | None = None,
+) -> tuple[Algorithm, Algorithm]:
+    """
+    Generate an x-cross scramble using only basic face moves.
+
+    Creates a simple scramble suitable for practicing x-cross patterns
+    in speedcubing methods like CFOP.
+
+    Args:
+        difficulty: Optional difficulty string.
+        slot: Optional F2L aimed.
+        rng: Optional random number generator.
+
+    Returns:
+        Algorithms to reach the scramble and cross solution
+
+    """
+    # Scramble keeping the cross and a F2L slot
+    corners = []
+    edges = []
+
+    for edge, corner in F2L_EDGE_CORNERS.items():
+        if edge != slot:
+            corners.append(corner)
+            edges.append(edge)
+
+    f2l_corners = parse_piece_spec(f'U { " ".join(corners) }', 'corner')
+    f2l_edges = parse_piece_spec(f'U { " ".join(edges) }', 'edge')
+
+    cp, co, ep, eo = random_permutation(f2l_corners, f2l_edges, rng)
+    co = random_corner_orientation(f2l_corners, rng)
+    eo = random_edge_orientation(f2l_edges, rng)
+
+    # Apply moves to break the x-cross
+    move_set = build_cube_move_set(3)
+    move_iterations = CROSS_DIFFICULTIES.get(difficulty, 5) + 2
     moves = random_moves(3, move_set, move_iterations, rng)
 
     cubies = apply_moves((cp, co, ep, eo), moves)
