@@ -52,7 +52,7 @@ def show_easy_cross(difficulty: str, rng: Random) -> None:
 
 def section(title: str) -> None:
     """Print a section header."""
-    print('\n' + '=' * 60)
+    print('=' * 60)
     print(title)
     print('=' * 60)
 

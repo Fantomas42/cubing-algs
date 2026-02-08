@@ -18,6 +18,7 @@ from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
 from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
+from cubing_algs.exceptions import InvalidSlotSpecError
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.scrambler.constants import CROSS_DIFFICULTIES
 from cubing_algs.scrambler.constants import DEFAULT_RNG
@@ -444,32 +445,53 @@ def scramble_easy_cross(
     return scramble, solution
 
 
-def scramble_x_cross(
+def scramble_x_cross(  # noqa: PLR0914
         difficulty: str = 'normal',
-        slot: str = 'FR',
+        slots: list[str] | None = None,
         rng: Random | None = None,
 ) -> tuple[Algorithm, Algorithm]:
     """
     Generate an x-cross scramble using only basic face moves.
 
     Creates a simple scramble suitable for practicing x-cross patterns
-    in speedcubing methods like CFOP.
+    in speedcubing methods like CFOP. Supports preserving one or more
+    F2L slots (x-cross, xx-cross, xxx-cross).
 
     Args:
         difficulty: Optional difficulty string.
-        slot: Optional F2L aimed.
+        slots: F2L slots to preserve (e.g., ['FR'] for x-cross,
+            ['FR', 'FL'] for xx-cross). Valid slots: FR, FL, BR, BL.
+            Defaults to ['FR'].
         rng: Optional random number generator.
 
     Returns:
-        Algorithms to reach the scramble and cross solution
+        Algorithms to reach the scramble and cross solution.
+
+    Raises:
+        InvalidSlotSpecError: If a slot is not a valid F2L slot or too many
+            slots are specified.
 
     """
-    # Scramble keeping the cross and a F2L slot
+    if slots is None:
+        slots = ['FR']
+
+    if invalid := set(slots) - set(F2L_EDGE_CORNERS):
+        msg = (
+            f"Invalid F2L slot(s): {', '.join(sorted(invalid))}. "
+            f"Valid slots: {', '.join(sorted(F2L_EDGE_CORNERS))}"
+        )
+        raise InvalidSlotSpecError(msg)
+
+    if len(slots) >= len(F2L_EDGE_CORNERS):
+        msg = 'Cannot preserve all F2L slots'
+        raise InvalidSlotSpecError(msg)
+
+    # Scramble keeping the cross and preserved F2L slot(s)
     corners = []
     edges = []
 
     for edge, corner in F2L_EDGE_CORNERS.items():
-        if edge != slot:
+        if edge not in slots:
             corners.append(corner)
             edges.append(edge)
 
@@ -482,7 +504,7 @@ def scramble_x_cross(
 
     # Apply moves to break the x-cross
     move_set = build_cube_move_set(3)
-    move_iterations = CROSS_DIFFICULTIES.get(difficulty, 5) + 2
+    move_iterations = CROSS_DIFFICULTIES.get(difficulty, 5) + 2 * len(slots)
     moves = random_moves(3, move_set, move_iterations, rng)
 
     cubies = apply_moves((cp, co, ep, eo), moves)

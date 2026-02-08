@@ -38,6 +38,10 @@ class InvalidStepError(ValueError):
     """Exception raised when step name is not recognized."""
 
 
+class InvalidSlotSpecError(ValueError):
+    """Exception raised when an invalid F2L slot is specified."""
+
+
 class InvalidPieceSpecError(ValueError):
     """Exception raise when piece specification cannot be parsed."""
 

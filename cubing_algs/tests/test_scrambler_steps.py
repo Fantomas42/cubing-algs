@@ -7,6 +7,7 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
+from cubing_algs.exceptions import InvalidSlotSpecError
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
@@ -461,7 +462,7 @@ class TestScrambleXCross(unittest.TestCase):
     def test_scramble_x_cross_slot_fr(self) -> None:
         """Test scramble_x_cross targeting FR slot."""
         rng = Random(42)
-        scramble, solution = scramble_x_cross(slot='FR', rng=rng)
+        scramble, solution = scramble_x_cross(slots=['FR'], rng=rng)
 
         self.assertIsInstance(scramble, Algorithm)
         self.assertIsInstance(solution, Algorithm)
@@ -477,7 +478,7 @@ class TestScrambleXCross(unittest.TestCase):
     def test_scramble_x_cross_slot_fl(self) -> None:
         """Test scramble_x_cross targeting FL slot."""
         rng = Random(42)
-        scramble, solution = scramble_x_cross(slot='FL', rng=rng)
+        scramble, solution = scramble_x_cross(slots=['FL'], rng=rng)
 
         self.assertIsInstance(scramble, Algorithm)
         self.assertIsInstance(solution, Algorithm)
@@ -493,7 +494,7 @@ class TestScrambleXCross(unittest.TestCase):
     def test_scramble_x_cross_slot_br(self) -> None:
         """Test scramble_x_cross targeting BR slot."""
         rng = Random(42)
-        scramble, solution = scramble_x_cross(slot='BR', rng=rng)
+        scramble, solution = scramble_x_cross(slots=['BR'], rng=rng)
 
         self.assertIsInstance(scramble, Algorithm)
         self.assertIsInstance(solution, Algorithm)
@@ -509,7 +510,7 @@ class TestScrambleXCross(unittest.TestCase):
     def test_scramble_x_cross_slot_bl(self) -> None:
         """Test scramble_x_cross targeting BL slot."""
         rng = Random(42)
-        scramble, solution = scramble_x_cross(slot='BL', rng=rng)
+        scramble, solution = scramble_x_cross(slots=['BL'], rng=rng)
 
         self.assertIsInstance(scramble, Algorithm)
         self.assertIsInstance(solution, Algorithm)
@@ -579,8 +580,8 @@ class TestScrambleXCross(unittest.TestCase):
         rng1 = Random(123)
         rng2 = Random(123)
 
-        scramble_fr, _ = scramble_x_cross(slot='FR', rng=rng1)
-        scramble_bl, _ = scramble_x_cross(slot='BL', rng=rng2)
+        scramble_fr, _ = scramble_x_cross(slots=['FR'], rng=rng1)
+        scramble_bl, _ = scramble_x_cross(slots=['BL'], rng=rng2)
 
         self.assertNotEqual(
             str(scramble_fr),
@@ -590,7 +591,7 @@ class TestScrambleXCross(unittest.TestCase):
 
     def test_scramble_x_cross_returns_valid_algorithms(self) -> None:
         """Test scramble_x_cross returns valid Algorithm instances."""
-        scramble, solution = scramble_x_cross('normal', 'FR', Random(42))
+        scramble, solution = scramble_x_cross('normal', ['FR'], Random(42))
 
         self.assertIsInstance(scramble, Algorithm)
         self.assertIsInstance(solution, Algorithm)
@@ -610,7 +611,7 @@ class TestScrambleXCross(unittest.TestCase):
         rng = Random(42)
 
         for slot in valid_slots:
-            scramble, solution = scramble_x_cross(slot=slot, rng=rng)
+            scramble, solution = scramble_x_cross(slots=[slot], rng=rng)
 
             self.assertIsInstance(scramble, Algorithm)
             self.assertIsInstance(solution, Algorithm)
@@ -631,3 +632,58 @@ class TestScrambleXCross(unittest.TestCase):
             self.assertIsInstance(solution, Algorithm)
             self.assertGreater(len(scramble), 0)
             self.assertGreater(len(solution), 0)
+
+    def test_scramble_x_cross_invalid_slot(self) -> None:
+        """Test scramble_x_cross raises error for invalid slot."""
+        with self.assertRaises(InvalidSlotSpecError):
+            scramble_x_cross(slots=['XX'])
+
+    def test_scramble_x_cross_invalid_slot_in_list(self) -> None:
+        """Test scramble_x_cross raises error for invalid slot in list."""
+        with self.assertRaises(InvalidSlotSpecError):
+            scramble_x_cross(slots=['FR', 'XX'])
+
+    def test_scramble_x_cross_all_four_slots_raises(self) -> None:
+        """Test scramble_x_cross raises error when all slots preserved."""
+        with self.assertRaises(InvalidSlotSpecError):
+            scramble_x_cross(slots=['FR', 'FL', 'BR', 'BL'])
+
+
+class TestScrambleMultiSlotCross(unittest.TestCase):
+    """Tests for xx-cross and xxx-cross scramble generation."""
+
+    def test_scramble_xx_cross_easy(self) -> None:
+        """Test xx-cross easy solution length (3 + 2*2 = 7)."""
+        _, solution = scramble_x_cross('easy', ['FR', 'FL'])
+
+        self.assertEqual(len(solution), 7)
+
+    def test_scramble_xx_cross_normal(self) -> None:
+        """Test xx-cross normal solution length (5 + 2*2 = 9)."""
+        _, solution = scramble_x_cross('normal', ['FR', 'FL'])
+
+        self.assertEqual(len(solution), 9)
+
+    def test_scramble_xx_cross_hard(self) -> None:
+        """Test xx-cross hard solution length (7 + 2*2 = 11)."""
+        _, solution = scramble_x_cross('hard', ['FR', 'FL'])
+
+        self.assertEqual(len(solution), 11)
+
+    def test_scramble_xxx_cross_easy(self) -> None:
+        """Test xxx-cross easy solution length (3 + 2*3 = 9)."""
+        _, solution = scramble_x_cross('easy', ['FR', 'FL', 'BR'])
+
+        self.assertEqual(len(solution), 9)
+
+    def test_scramble_xxx_cross_normal(self) -> None:
+        """Test xxx-cross normal solution length (5 + 2*3 = 11)."""
+        _, solution = scramble_x_cross('normal', ['FR', 'FL', 'BR'])
+
+        self.assertEqual(len(solution), 11)
+
+    def test_scramble_xxx_cross_hard(self) -> None:
+        """Test xxx-cross hard solution length (7 + 2*3 = 13)."""
+        _, solution = scramble_x_cross('hard', ['FR', 'FL', 'BR'])
+
+        self.assertEqual(len(solution), 13)
