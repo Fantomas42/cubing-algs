@@ -13,6 +13,7 @@ from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
 from cubing_algs.scrambler.steps import generate_step_state
 from cubing_algs.scrambler.steps import scramble_easy_cross
+from cubing_algs.scrambler.steps import scramble_f2l
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
 from cubing_algs.scrambler.steps import scramble_x_cross
@@ -687,3 +688,165 @@ class TestScrambleMultiSlotCross(unittest.TestCase):
         _, solution = scramble_x_cross('hard', ['FR', 'FL', 'BR'])
 
         self.assertEqual(len(solution), 13)
+
+
+class TestScrambleF2L(unittest.TestCase):
+    """Tests for F2L scramble generation."""
+
+    def test_scramble_f2l_slot_fr(self) -> None:
+        """Test scramble_f2l targeting FR slot."""
+        rng = Random(42)
+        scramble = scramble_f2l(slots=['FR'], rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "R U' R U B U' B U' F2 L2 D L2 F2 U2 B2 U' R2",
+        )
+
+    def test_scramble_f2l_slot_fl(self) -> None:
+        """Test scramble_f2l targeting FL slot."""
+        rng = Random(42)
+        scramble = scramble_f2l(slots=['FL'], rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U F U2 R U R2 F R' F2 U' R2 D R2 D' F2 U R2 F2",
+        )
+
+    def test_scramble_f2l_slot_br(self) -> None:
+        """Test scramble_f2l targeting BR slot."""
+        rng = Random(42)
+        scramble = scramble_f2l(slots=['BR'], rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U' B' R B R F D' F' D2 L2 D' F2 R2 U B2 R2 F2 R2",
+        )
+
+    def test_scramble_f2l_slot_bl(self) -> None:
+        """Test scramble_f2l targeting BL slot."""
+        rng = Random(42)
+        scramble = scramble_f2l(slots=['BL'], rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "L2 U2 L B D L D2 B' D L2 B2 L2 U' L2 U B2 U2 L2",
+        )
+
+    def test_scramble_f2l_default_parameters(self) -> None:
+        """Test scramble_f2l with all default parameters."""
+        scramble = scramble_f2l()
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertGreater(len(scramble), 0)
+
+    def test_scramble_f2l_default_slot_is_fr(self) -> None:
+        """Test scramble_f2l defaults to FR slot."""
+        rng1 = Random(42)
+        rng2 = Random(42)
+
+        scramble_default = scramble_f2l(rng=rng1)
+        scramble_fr = scramble_f2l(slots=['FR'], rng=rng2)
+
+        self.assertEqual(str(scramble_default), str(scramble_fr))
+
+    def test_scramble_f2l_deterministic_with_seed(self) -> None:
+        """Test scramble_f2l produces identical results with same seed."""
+        rng1 = Random(42)
+        rng2 = Random(42)
+
+        scramble_1 = scramble_f2l(rng=rng1)
+        scramble_2 = scramble_f2l(rng=rng2)
+
+        self.assertEqual(
+            str(scramble_1),
+            str(scramble_2),
+            'Same seed should produce identical F2L scrambles',
+        )
+        self.assertEqual(
+            str(scramble_1),
+            "R U' R U B U' B U' F2 L2 D L2 F2 U2 B2 U' R2",
+        )
+
+    def test_scramble_f2l_different_seeds_produce_different_results(
+            self) -> None:
+        """Test scramble_f2l produces different results with different seeds."""
+        rng1 = Random(42)
+        rng2 = Random(777)
+
+        scramble_1 = scramble_f2l(slots=['FR'], rng=rng1)
+        scramble_2 = scramble_f2l(slots=['FR'], rng=rng2)
+
+        self.assertNotEqual(
+            str(scramble_1),
+            str(scramble_2),
+            'Different seeds should produce different F2L scrambles',
+        )
+
+    def test_scramble_f2l_different_slots_produce_different_results(
+            self) -> None:
+        """Test scramble_f2l produces different results for different slots."""
+        rng1 = Random(123)
+        rng2 = Random(123)
+
+        scramble_fr = scramble_f2l(slots=['FR'], rng=rng1)
+        scramble_bl = scramble_f2l(slots=['BL'], rng=rng2)
+
+        self.assertNotEqual(
+            str(scramble_fr),
+            str(scramble_bl),
+            'Different slots should produce different F2L scrambles',
+        )
+
+    def test_scramble_f2l_multiple_slots(self) -> None:
+        """Test scramble_f2l works with multiple slots."""
+        rng = Random(42)
+        scramble = scramble_f2l(slots=['FR', 'FL'], rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U' L2 B2 D R D2 R' U F2 D F2 R2 B2 U2 L2 D F2",
+        )
+
+    def test_scramble_f2l_all_four_slots(self) -> None:
+        """Test scramble_f2l works with all four slots."""
+        rng = Random(42)
+        scramble = scramble_f2l(slots=['FR', 'FL', 'BR', 'BL'], rng=rng)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertEqual(
+            str(scramble),
+            "U F U2 L2 D' B D2 R F2 R D B2 D2 F2 L2 U B2 L2 B2 L2",
+        )
+
+    def test_scramble_f2l_invalid_slot_raises(self) -> None:
+        """Test scramble_f2l raises error for invalid slot."""
+        with self.assertRaises(InvalidSlotSpecError):
+            scramble_f2l(slots=['XX'])
+
+    def test_scramble_f2l_invalid_slot_in_list_raises(self) -> None:
+        """Test scramble_f2l raises error for invalid slot in list."""
+        with self.assertRaises(InvalidSlotSpecError):
+            scramble_f2l(slots=['FR', 'XX'])
+
+    def test_scramble_f2l_returns_algorithm_instance(self) -> None:
+        """Test scramble_f2l returns a valid Algorithm instance."""
+        scramble = scramble_f2l(slots=['FR'], rng=Random(42))
+
+        self.assertIsInstance(scramble, Algorithm)
+
+    def test_scramble_f2l_all_slots_valid(self) -> None:
+        """Test scramble_f2l works with each individual valid slot."""
+        valid_slots = ['FR', 'FL', 'BR', 'BL']
+        rng = Random(42)
+
+        for slot in valid_slots:
+            scramble = scramble_f2l(slots=[slot], rng=rng)
+
+            self.assertIsInstance(scramble, Algorithm)
+            self.assertGreater(len(scramble), 0)

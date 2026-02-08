@@ -465,7 +465,7 @@ def scramble_x_cross(  # noqa: PLR0914
         rng: Optional random number generator.
 
     Returns:
-        Algorithms to reach the scramble and cross solution.
+        Algorithms to reach the scramble and x-cross solution.
 
     Raises:
         InvalidSlotSpecError: If a slot is not a valid F2L slot or too many
@@ -514,3 +514,54 @@ def scramble_x_cross(  # noqa: PLR0914
     solution = moves.transform(mirror_moves)
 
     return scramble, solution
+
+
+def scramble_f2l(
+        slots: list[str] | None = None,
+        rng: Random | None = None,
+) -> Algorithm:
+    """
+    Generate an F2L scramble using only basic face moves.
+
+    Creates a simple scramble suitable for practicing F2L slots
+    in speedcubing methods like CFOP.
+
+    Args:
+        slots: F2L slots to scramble (e.g., ['FR'] or ['FR', 'FL'].
+            Valid slots: FR, FL, BR, BL. Defaults to ['FR'].
+        rng: Optional random number generator.
+
+    Returns:
+        Algorithm to reach the F2L scramble.
+
+    Raises:
+        InvalidSlotSpecError: If a slot is not a valid F2L slot or too many
+            slots are specified.
+
+    """
+    if slots is None:
+        slots = ['FR']
+
+    if invalid := set(slots) - set(F2L_EDGE_CORNERS):
+        msg = (
+            f"Invalid F2L slot(s): {', '.join(sorted(invalid))}. "
+            f"Valid slots: {', '.join(sorted(F2L_EDGE_CORNERS))}"
+        )
+        raise InvalidSlotSpecError(msg)
+
+    corners = []
+    edges = []
+
+    for edge, corner in F2L_EDGE_CORNERS.items():
+        if edge in slots:
+            corners.append(corner)
+            edges.append(edge)
+
+    f2l_corners = parse_piece_spec(f'U { " ".join(corners) }', 'corner')
+    f2l_edges = parse_piece_spec(f'U { " ".join(edges) }', 'edge')
+
+    cp, co, ep, eo = random_permutation(f2l_corners, f2l_edges, rng)
+    co = random_corner_orientation(f2l_corners, rng)
+    eo = random_edge_orientation(f2l_edges, rng)
+
+    return cubies_to_scramble((cp, co, ep, eo))
