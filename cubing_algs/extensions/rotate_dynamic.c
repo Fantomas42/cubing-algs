@@ -40,9 +40,6 @@ typedef struct {
     int x, y, z;
 } Coord3D;
 
-// Face order: U, R, F, D, L, B
-static const char FACE_ORDER[] = "URFBLB";
-
 /**
  * Get 3D coordinates for all facelets on a specific face.
  *
@@ -129,35 +126,6 @@ static int get_face_coordinates(char face, int size, Coord3D* coords) {
 }
 
 /**
- * Build a mapping from 3D coordinates to facelet indices.
- *
- * Returns a hash-like lookup where coord_to_facelet[x][y][z] = facelet_idx
- */
-static void build_coord_to_facelet_map(int size, int coord_map[MAX_CUBE_SIZE][MAX_CUBE_SIZE][MAX_CUBE_SIZE]) {
-    // Initialize with -1 (invalid)
-    for (int x = 0; x < MAX_CUBE_SIZE; x++) {
-        for (int y = 0; y < MAX_CUBE_SIZE; y++) {
-            for (int z = 0; z < MAX_CUBE_SIZE; z++) {
-                coord_map[x][y][z] = -1;
-            }
-        }
-    }
-
-    Coord3D coords[MAX_CUBE_SIZE * MAX_CUBE_SIZE];
-    int facelet_idx = 0;
-
-    for (int face_idx = 0; face_idx < 6; face_idx++) {
-        char face = FACE_ORDER[face_idx];
-        int num_coords = get_face_coordinates(face, size, coords);
-
-        for (int i = 0; i < num_coords; i++) {
-            coord_map[coords[i].x][coords[i].y][coords[i].z] = facelet_idx;
-            facelet_idx++;
-        }
-    }
-}
-
-/**
  * Rotate a 3D coordinate 90 degrees around an axis.
  *
  * Args:
@@ -190,26 +158,6 @@ INLINE Coord3D rotate_coord_90(Coord3D coord, int axis, int size, int direction)
     }
 
     return result;
-}
-
-/**
- * Get which axes a coordinate is on the surface of.
- */
-INLINE int get_axes_for_coord(Coord3D coord, int size, int* RESTRICT axes) {
-    const int size_m1 = size - 1;
-    int count = 0;
-
-    if (coord.x == 0 || coord.x == size_m1) {
-        axes[count++] = 0;
-    }
-    if (coord.y == 0 || coord.y == size_m1) {
-        axes[count++] = 1;
-    }
-    if (coord.z == 0 || coord.z == size_m1) {
-        axes[count++] = 2;
-    }
-
-    return count;
 }
 
 /**
@@ -734,7 +682,6 @@ static PyObject* rotate_move(PyObject* self, PyObject* args, PyObject* kwargs) {
                 const int orig_idx0 = orig_cf->facelets[0].facelet_idx;
                 const int orig_idx1 = orig_cf->facelets[1].facelet_idx;
                 const int target_axis0 = rotated_axes[0];
-                const int target_axis1 = rotated_axes[1];
 
                 if (new_cf->facelets[0].axis == target_axis0) {
                     temp_perm[orig_idx0] = new_cf->facelets[0].facelet_idx;
@@ -786,6 +733,177 @@ static PyObject* rotate_move(PyObject* self, PyObject* args, PyObject* kwargs) {
     return PyUnicode_FromString(new_state);
 }
 
+// Batch function for rotating multiple moves at once
+static PyObject* rotate_moves(PyObject* self, PyObject* args, PyObject* kwargs) {
+    const char* state;
+    const char* moves;
+    int size = 3;  // Default size
+
+    static char* kwlist[] = {"state", "moves", "size", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ss|i", kwlist, &state, &moves, &size)) {
+        return NULL;
+    }
+
+    // Validate size
+    if (size < 2 || size > MAX_CUBE_SIZE) {
+        PyErr_Format(PyExc_ValueError, "Cube size must be between 2 and %d", MAX_CUBE_SIZE);
+        return NULL;
+    }
+
+    // Copy state for modification
+    char current_state[MAX_STATE_SIZE];
+    const int expected_len = 6 * size * size;
+    memcpy(current_state, state, expected_len);
+    current_state[expected_len] = '\0';
+
+    // Working buffer for moves string (we'll modify it)
+    size_t moves_len = strlen(moves);
+    char* moves_copy = (char*)malloc(moves_len + 1);
+    if (!moves_copy) {
+        PyErr_SetString(PyExc_MemoryError, "Failed to allocate memory for moves");
+        return NULL;
+    }
+    strcpy(moves_copy, moves);
+
+    // Parse and apply each move
+    char* token = strtok(moves_copy, " ");
+    while (token != NULL) {
+        // Skip empty tokens
+        if (token[0] == '\0') {
+            token = strtok(NULL, " ");
+            continue;
+        }
+
+        // Call the internal rotation logic directly without Python objects
+        // Parse move
+        char base_move;
+        int layers[MAX_CUBE_SIZE];
+        int num_rotations, counter_clockwise;
+        int num_layers = parse_move(token, &base_move, layers, &num_rotations, &counter_clockwise);
+
+        if (num_layers < 0) {
+            free(moves_copy);
+            char error_msg[256];
+            snprintf(error_msg, sizeof(error_msg), "Invalid move: %s", token);
+            PyErr_SetString(PyExc_ValueError, error_msg);
+            return NULL;
+        }
+
+        // Validate layers
+        for (int i = 0; i < num_layers; i++) {
+            if (layers[i] >= size) {
+                free(moves_copy);
+                char error_msg[256];
+                snprintf(error_msg, sizeof(error_msg), "Layer %d exceeds cube size %d", layers[i] + 1, size);
+                PyErr_SetString(PyExc_ValueError, error_msg);
+                return NULL;
+            }
+        }
+
+        // Get axis and direction
+        int axis, base_direction;
+        get_move_axis_and_direction(base_move, &axis, &base_direction);
+
+        if (axis < 0) {
+            free(moves_copy);
+            char error_msg[256];
+            snprintf(error_msg, sizeof(error_msg), "Unsupported move type: %c", base_move);
+            PyErr_SetString(PyExc_ValueError, error_msg);
+            return NULL;
+        }
+
+        if (counter_clockwise) {
+            base_direction *= -1;
+        }
+
+        // Get affected coordinates
+        Coord3D affected_coords[MAX_COORDS];
+        int num_affected = get_affected_coords(base_move, size, layers, num_layers, affected_coords);
+
+        if (num_affected < 0) {
+            free(moves_copy);
+            char error_msg[256];
+            snprintf(error_msg, sizeof(error_msg), "%c moves are only allowed on odd-sized cubes. Current cube size is %dx%dx%d.",
+                     base_move, size, size, size);
+            PyErr_SetString(PyExc_ValueError, error_msg);
+            return NULL;
+        }
+
+        // Build coordinate mappings (reuse static structure or allocate)
+        static CoordFacelets coord_facelets[MAX_CUBE_SIZE][MAX_CUBE_SIZE][MAX_CUBE_SIZE];
+        build_coord_to_facelets_map(size, coord_facelets);
+
+        // Initialize permutation
+        const int total_facelets = 6 * size * size;
+        int permutation[MAX_STATE_SIZE];
+        for (int i = 0; i < total_facelets; i++) {
+            permutation[i] = i;
+        }
+
+        // Apply rotations
+        for (int rot = 0; rot < num_rotations; rot++) {
+            int temp_perm[MAX_STATE_SIZE];
+            for (int i = 0; i < total_facelets; i++) {
+                temp_perm[i] = i;
+            }
+
+            // Rotate each affected coordinate
+            for (int i = 0; i < num_affected; i++) {
+                const Coord3D orig = affected_coords[i];
+                const Coord3D rotated = rotate_coord_90(orig, axis, size, base_direction);
+
+                CoordFacelets* orig_cf = &coord_facelets[orig.x][orig.y][orig.z];
+                CoordFacelets* new_cf = &coord_facelets[rotated.x][rotated.y][rotated.z];
+
+                const int num_axes = orig_cf->count;
+                if (num_axes != new_cf->count) continue;
+
+                int orig_axes[3];
+                for (int j = 0; j < num_axes; j++) {
+                    orig_axes[j] = orig_cf->facelets[j].axis;
+                }
+
+                int rotated_axes[3];
+                rotate_piece_orientation(orig_axes, num_axes, axis, rotated_axes);
+
+                for (int j = 0; j < num_axes; j++) {
+                    const int orig_idx = orig_cf->facelets[j].facelet_idx;
+                    const int target_axis = rotated_axes[j];
+
+                    for (int k = 0; k < num_axes; k++) {
+                        if (new_cf->facelets[k].axis == target_axis) {
+                            temp_perm[orig_idx] = new_cf->facelets[k].facelet_idx;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Compose permutations
+            int composed[MAX_STATE_SIZE];
+            for (int i = 0; i < total_facelets; i++) {
+                composed[i] = temp_perm[permutation[i]];
+            }
+            memcpy(permutation, composed, total_facelets * sizeof(int));
+        }
+
+        // Apply permutation to state
+        char new_state[MAX_STATE_SIZE];
+        for (int i = 0; i < total_facelets; i++) {
+            new_state[permutation[i]] = current_state[i];
+        }
+        new_state[total_facelets] = '\0';
+
+        memcpy(current_state, new_state, expected_len + 1);
+
+        token = strtok(NULL, " ");
+    }
+
+    free(moves_copy);
+    return PyUnicode_FromString(current_state);
+}
+
 // Method definitions
 static PyMethodDef RotateDynamicMethods[] = {
     {"rotate_move", (PyCFunction)rotate_move, METH_VARARGS | METH_KEYWORDS,
@@ -796,6 +914,14 @@ static PyMethodDef RotateDynamicMethods[] = {
      "    size: Size of the cube (default 3)\n\n"
      "Returns:\n"
      "    New cube state after applying the move"},
+    {"rotate_moves", (PyCFunction)rotate_moves, METH_VARARGS | METH_KEYWORDS,
+     "Apply multiple moves to a cube state.\n\n"
+     "Args:\n"
+     "    state: Current cube state as facelet string\n"
+     "    moves: Space-separated moves to apply (e.g., 'R U R\\' U\\'')\n"
+     "    size: Size of the cube (default 3)\n\n"
+     "Returns:\n"
+     "    New cube state after applying all moves"},
     {NULL, NULL, 0, NULL}
 };
 

@@ -247,7 +247,11 @@ class Case:  # noqa: PLR0904
     @cached_property
     def cubing_fache_url(self) -> str:
         """Return cubing.fache.fr URL."""
-        if self.method == 'CFOP' and self.step in {'OLL', 'PLL', 'F2L', 'AF2L'}:
+        if (
+                self.method == 'CFOP'
+                and self.step in {'OLL', 'PLL', 'F2L', 'AF2L'}
+                and self.code != 'SKIP'
+        ):
             return f'https://cubing.fache.fr/{ self.step }/{ self.code }.html'
         return ''
 

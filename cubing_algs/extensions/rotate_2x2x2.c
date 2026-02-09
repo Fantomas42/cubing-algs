@@ -1,21 +1,14 @@
 #include <Python.h>
 #include <string.h>
 
-// Main function for rotating a move on 2x2x2 cube
-static PyObject* rotate_move(PyObject* self, PyObject* args) {
-    const char* state;
-    const char* move;
-
-    if (!PyArg_ParseTuple(args, "ss", &state, &move)) {
-        return NULL;
-    }
-
-    // Copy state for modification (2x2x2 has 25 chars including null terminator)
-    char new_state[25];
-    strcpy(new_state, state);
+// Core rotation logic - applies a single move to the state
+// Returns 0 on success, -1 on error (error_msg will be set)
+static int apply_move_to_state(char* restrict new_state, const char* restrict state, const char* restrict move, char* restrict error_msg) {
+    // Copy state for modification (24 chars for 2x2x2 + null terminator)
+    memcpy(new_state, state, 25);
 
     char temp_state[25];
-    strcpy(temp_state, new_state);
+    memcpy(temp_state, new_state, 25);
 
     // Parse the move - optimized for speed
     char face = move[0];
@@ -41,16 +34,16 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
         } else if (third == '2') {
             direction = 2; // 180°
         } else if (third != '\0') {
-            PyErr_Format(PyExc_ValueError, "Invalid move modifier: '%c'", third);
-            return NULL;
+            sprintf(error_msg, "Invalid move modifier: '%c'", third);
+            return -1;
         }
     } else if (second == '\'') {
         direction = 3; // Anticlockwise
     } else if (second == '2') {
         direction = 2; // 180°
     } else if (second != '\0') {
-        PyErr_Format(PyExc_ValueError, "Invalid move modifier: '%c'", second);
-        return NULL;
+        sprintf(error_msg, "Invalid move modifier: '%c'", second);
+        return -1;
     }
 
     switch (face) {
@@ -805,34 +798,124 @@ static PyObject* rotate_move(PyObject* self, PyObject* args) {
 
         // Slice moves are not allowed on 2x2x2
         case 'M':
-            PyErr_SetString(PyExc_ValueError,
-                "M moves are only allowed on odd-sized cubes. "
-                "The current cube is a 2x2x2.");
-            return NULL;
+            sprintf(error_msg, "M moves are only allowed on odd-sized cubes. The current cube is a 2x2x2.");
+            return -1;
 
         case 'E':
-            PyErr_SetString(PyExc_ValueError,
-                "E moves are only allowed on odd-sized cubes. "
-                "The current cube is a 2x2x2.");
-            return NULL;
+            sprintf(error_msg, "E moves are only allowed on odd-sized cubes. The current cube is a 2x2x2.");
+            return -1;
 
         case 'S':
-            PyErr_SetString(PyExc_ValueError,
-                "S moves are only allowed on odd-sized cubes. "
-                "The current cube is a 2x2x2.");
-            return NULL;
+            sprintf(error_msg, "S moves are only allowed on odd-sized cubes. The current cube is a 2x2x2.");
+            return -1;
 
         default:
-            PyErr_Format(PyExc_ValueError, "Invalid move face: '%c'", face);
-            return NULL;
+            sprintf(error_msg, "Invalid move face: '%c'", face);
+            return -1;
+    }
+
+    return 0;  // Success
+}
+
+// Main function for rotating a move on 2x2x2 cube
+static PyObject* rotate_move(PyObject* self, PyObject* args) {
+    const char* state;
+    const char* move;
+
+    if (!PyArg_ParseTuple(args, "ss", &state, &move)) {
+        return NULL;
+    }
+
+    char new_state[25];
+    char error_msg[256] = {0};
+
+    if (apply_move_to_state(new_state, state, move, error_msg) != 0) {
+        PyErr_SetString(PyExc_ValueError, error_msg);
+        return NULL;
     }
 
     return PyUnicode_FromString(new_state);
 }
 
+// Batch function for rotating multiple moves at once
+static PyObject* rotate_moves(PyObject* self, PyObject* args) {
+    const char* state;
+    const char* moves;
+
+    if (!PyArg_ParseTuple(args, "ss", &state, &moves)) {
+        return NULL;
+    }
+
+    // Copy state for modification (use memcpy - we know it's 24 bytes)
+    char current_state[25];
+    memcpy(current_state, state, 24);
+    current_state[24] = '\0';
+
+    char temp_state[25];
+    char error_msg[256] = {0};
+
+    // Working buffer for moves string - use stack for small sequences
+    const size_t moves_len = strlen(moves);
+    char stack_buffer[512];
+    char* moves_copy;
+    int use_heap = 0;
+
+    if (moves_len < 512) {
+        // Small sequence - use stack buffer (faster, no malloc overhead)
+        moves_copy = stack_buffer;
+        memcpy(moves_copy, moves, moves_len + 1);
+    } else {
+        // Large sequence - use heap
+        moves_copy = (char*)malloc(moves_len + 1);
+        if (!moves_copy) {
+            PyErr_SetString(PyExc_MemoryError, "Failed to allocate memory for moves");
+            return NULL;
+        }
+        memcpy(moves_copy, moves, moves_len + 1);
+        use_heap = 1;
+    }
+
+    // Parse and apply each move - optimized manual parsing
+    char* token = moves_copy;
+    char* next_space;
+
+    while (*token) {
+        // Skip leading spaces
+        while (*token == ' ') token++;
+        if (*token == '\0') break;
+
+        // Find next space or end
+        next_space = token;
+        while (*next_space && *next_space != ' ') next_space++;
+
+        // Temporarily null-terminate
+        char saved_char = *next_space;
+        *next_space = '\0';
+
+        // Apply move directly in C without creating Python objects
+        if (apply_move_to_state(temp_state, current_state, token, error_msg) != 0) {
+            if (use_heap) free(moves_copy);
+            PyErr_SetString(PyExc_ValueError, error_msg);
+            return NULL;
+        }
+
+        // Use memcpy instead of strcpy (we know size)
+        memcpy(current_state, temp_state, 25);
+
+        // Restore and advance
+        *next_space = saved_char;
+        token = (*next_space == ' ') ? next_space + 1 : next_space;
+    }
+
+    if (use_heap) free(moves_copy);
+
+    return PyUnicode_FromString(current_state);
+}
+
 // Module method definitions
 static PyMethodDef RotateMethods[] = {
     {"rotate_move", rotate_move, METH_VARARGS, "Rotate 2x2x2 cube state with given move"},
+    {"rotate_moves", rotate_moves, METH_VARARGS, "Rotate 2x2x2 cube state with multiple moves"},
     {NULL, NULL, 0, NULL}
 };
 

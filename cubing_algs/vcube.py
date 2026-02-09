@@ -1,18 +1,22 @@
 """Virtual cube implementation for simulating moves and tracking state."""
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
-from cubing_algs.display import VCubeDisplay
+from cubing_algs.display.vcube import VCubeDisplay
+from cubing_algs.exceptions import InvalidFaceIndexError
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.exceptions import InvalidOrientationError
 from cubing_algs.extensions import rotate_2x2x2
 from cubing_algs.extensions import rotate_3x3x3
 from cubing_algs.extensions import rotate_dynamic
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
-from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
+from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solver import facelets_to_facelets_algorithm
 from cubing_algs.visual_cube import visual_cube_cube
 
 
@@ -29,7 +33,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     - NxNxN: 6*N*N-character string
     """
 
-    face_number: int = 6
+    face_number: int = FACE_NUMBER
 
     def __init__(self, initial: str | None = None, *,
                  size: int = 3,
@@ -54,7 +58,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             if check:
                 self.check_integrity()
         else:
-            self._state = get_initial_state(size)
+            self._state = get_solved_facelets(size)
 
         self.history: list[str] = history or []
 
@@ -193,46 +197,29 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             The new state of the cube after applying the moves.
 
+        Raises:
+            InvalidMoveError: If a move is invalid.
+
         """
         moves_str = str(moves)
 
         if not moves_str:
             return self._state
 
-        for move in moves_str.split(' '):
-            self.rotate_move(move, history=history)
-
-        return self._state
-
-    def rotate_move(self, move: str, *, history: bool = True) -> str:
-        """
-        Apply a single move to the cube.
-
-        Args:
-            move: The move string to apply.
-            history: If True, record the move in the cube's history.
-
-        Returns:
-            The new state of the cube after applying the move.
-
-        Raises:
-            InvalidMoveError: If the move is invalid.
-
-        """
         try:
             if self.size == 2:
-                self._state = rotate_2x2x2.rotate_move(self._state, move)
+                self._state = rotate_2x2x2.rotate_moves(self._state, moves_str)
             elif self.size == 3:
-                self._state = rotate_3x3x3.rotate_move(self._state, move)
+                self._state = rotate_3x3x3.rotate_moves(self._state, moves_str)
             else:
-                self._state = rotate_dynamic.rotate_move(
-                    self._state, move, size=self.size,
+                self._state = rotate_dynamic.rotate_moves(
+                    self._state, moves_str, size=self.size,
                 )
         except ValueError as e:
             raise InvalidMoveError(str(e)) from e
         else:
             if history:
-                self.history.append(move)
+                self.history.extend(moves_str.split(' '))
             return self._state
 
     def copy(self, *, full: bool = False) -> 'VCube':
@@ -268,6 +255,9 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             A string of moves needed to achieve the desired orientation.
 
+        Raises:
+            InvalidOrientationError: If a orientation key is not valid.
+
         """
         top_face, front_face = self.check_face_orientations(faces)
 
@@ -276,7 +266,10 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         if front_face:
             orientation_key += str(self.get_face_index(front_face))
 
-        return OFFSET_ORIENTATION_MAP[orientation_key]
+        try:
+            return OFFSET_ORIENTATION_MAP[orientation_key]
+        except KeyError as e:
+            raise InvalidOrientationError(str(e)) from e
 
     def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
         """
@@ -292,7 +285,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """
         cube = self.copy(full=full)
 
-        moves = self.compute_orientation_moves(faces)
+        try:
+            moves = self.compute_orientation_moves(faces)
+        except (InvalidFaceIndexError, InvalidOrientationError):
+            # Can only happen with scrambled non fixed center cube.
+            # So it's not necessary to find a better orientation.
+            moves = ''
 
         if moves:
             cube.rotate(moves, history=full)
@@ -301,7 +299,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
                 mask: str = '', palette: str = '',
-                effect: str = '', facelet: str = '') -> str:
+                effect: str = '', facelet: str = '',
+                style: str = '') -> str:
         """
         Generate a visual representation of the cube.
 
@@ -312,23 +311,26 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             palette: Color palette to use.
             effect: Visual effect to apply.
             facelet: Facelet mode for display.
+            style: Letter style preset to apply.
 
         Returns:
             A string containing the visual representation of the cube.
 
         """
-        return VCubeDisplay(self, palette, effect, facelet).display(
+        return VCubeDisplay(self, palette, effect, facelet, style).display(
             mode, orientation, mask,
         )
 
     def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
              mask: str = '', palette: str = '',
-             effect: str = '', facelet: str = '') -> None:
+             effect: str = '', facelet: str = '',
+             style: str = '') -> None:
         """Print a visual representation of the cube."""
         print(  # noqa: T201
             self.display(
                 mode, orientation, mask,
                 palette, effect, facelet,
+                style,
             ),
             end='',
         )
@@ -364,7 +366,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return [
             self.state[(i * self.face_size) + center_index]
-            for i in range(6)
+            for i in range(self.face_number)
         ]
 
     def get_face_index(self, face: str) -> int:
@@ -377,8 +379,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             The index (0-5) of the face with that center color.
 
+        Raises:
+            InvalidFaceIndexError: If a face is not found.
+
         """
-        return self.get_face_center_indexes().index(face)
+        try:
+            return self.get_face_center_indexes().index(face)
+        except ValueError as e:
+            raise InvalidFaceIndexError(str(e)) from e
 
     def get_face_by_center(self, face: str) -> str:
         """
@@ -394,6 +402,32 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         index = self.get_face_index(face)
 
         return self._state[index * self.face_size: (index + 1) * self.face_size]
+
+    def to_algorithm(self, other: 'VCube') -> Algorithm:
+        """
+        Build Algorithm to pass from a cube state to another.
+
+        Args:
+            other: Another VCube instance.
+
+        Returns:
+            An algorithm to apply.
+
+        """
+        self_uf = self.oriented_copy('UF', full=False)
+        other_uf = other.oriented_copy('UF', full=False)
+
+        algorithm = facelets_to_facelets_algorithm(
+            self_uf.state,
+            other_uf.state,
+        )
+
+        orientation = other_uf.compute_orientation_moves(other.orientation)
+
+        if orientation:
+            algorithm += orientation
+
+        return algorithm
 
     @property
     def visual_cube_url(self) -> str:

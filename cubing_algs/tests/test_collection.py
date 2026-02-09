@@ -1,6 +1,7 @@
 """Tests for the CaseCollection class."""
 import json
 import unittest
+from os import sep
 from pathlib import Path
 from unittest.mock import mock_open
 from unittest.mock import patch
@@ -533,7 +534,7 @@ class TestCaseCollectionStringMethods(unittest.TestCase):
 
         result = repr(collection)
 
-        expected = "CaseCollection('CFOP', '/fake/path/OLL.json')"
+        expected = f"CaseCollection('CFOP', '{sep}fake{sep}path{sep}OLL.json')"
         self.assertEqual(result, expected)
 
     def test_repr_with_different_paths(self) -> None:

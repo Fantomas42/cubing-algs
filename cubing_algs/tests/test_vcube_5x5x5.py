@@ -1,13 +1,14 @@
 """Tests for 5x5x5 cube rotation using dynamic rotation system."""
 import unittest
 
+from cubing_algs.constants import FACE_ORDER
 from cubing_algs.extensions.rotate_dynamic import rotate_move
-from cubing_algs.initial_state import get_initial_state
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 5x5x5 state: 150 facelets (6 faces * 25 facelets each)
 # Face order: U, R, F, D, L, B
-SOLVED_5X5X5 = get_initial_state(5)
+SOLVED_5X5X5 = get_solved_facelets(5)
 
 # Expected states for slice moves (M, E, S) - verified against MagicCube
 EXPECTED_5X5X5 = {
@@ -137,7 +138,7 @@ class Test5x5x5VCube(unittest.TestCase):
 
         self.assertEqual(
             self.cube.get_face_center_indexes(),
-            ['U', 'R', 'F', 'D', 'L', 'B'],
+            FACE_ORDER,
         )
 
         self.cube.rotate('z2')
@@ -160,6 +161,46 @@ class Test5x5x5VCube(unittest.TestCase):
         )
 
 
+class Test5x5x5ScrambledVCube(unittest.TestCase):
+    """Test VCube implementation for 4x4x4."""
+
+    def test_scrambled_oriented_copy_issue_01(self) -> None:
+        """Test issue with scrambled center."""
+        cube = VCube(size=5)
+        cube.rotate(
+            "U B2 2U2 L B2 L Uw B2 U' B' 2R2 "
+            "U F2 2D2 Rw2 B' 2L' 2U2 F' Rw' U' "
+            "B' D R2 F' 2D2 B L' Fw2 R2 U' Fw "
+            "Uw' L2 D F' L' F2 Rw2 U' L U L2 "
+            "D2 2L2 B2 R",
+        )
+
+        for orientation in ('DF', 'UF'):
+            with self.subTest(orientation=orientation):
+                self.assertIsInstance(
+                    cube.oriented_copy(orientation),
+                    VCube,
+                )
+
+    def test_scrambled_oriented_copy_issue_02(self) -> None:
+        """Test issue with scrambled center."""
+        cube = VCube(size=5)
+        cube.rotate(
+            "F2 U2 F2 2L' D2 R' Dw' 2R' Fw2 "
+            "2L' 2U2 R' Dw2 2R F2 U' B' 2L2 "
+            "Dw2 2R2 Fw' R' D2 L F U' B' Lw2 "
+            "2U2 2L2 Fw U2 B2 U2 B2 L2 F Lw' "
+            "D2 L2 B2 2L' B' R2 B' D' R2 2D2",
+        )
+
+        for orientation in ('DF', 'UF'):
+            with self.subTest(orientation=orientation):
+                self.assertIsInstance(
+                    cube.oriented_copy(orientation),
+                    VCube,
+                )
+
+
 class Test5x5x5BasicMoves(unittest.TestCase):
     """Test basic face moves on 5x5x5 cube."""
 
@@ -169,8 +210,7 @@ class Test5x5x5BasicMoves(unittest.TestCase):
         self.assertEqual(len(SOLVED_5X5X5), 150)
 
         # Verify each face has 25 facelets
-        faces = ['U', 'R', 'F', 'D', 'L', 'B']
-        for i, face in enumerate(faces):
+        for i, face in enumerate(FACE_ORDER):
             start = i * 25
             end = start + 25
             face_colors = SOLVED_5X5X5[start:end]

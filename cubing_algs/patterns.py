@@ -91,3 +91,48 @@ def get_pattern(pattern_name: str) -> Algorithm:
 
     """
     return parse_moves(PATTERNS.get(pattern_name, ''))
+
+
+ALPHABET = {
+    'A': "B2 U2 F2 R2 D L2 R2 U' B2 U2 L U F' U2 F U' L U2",
+    'B': "D B2 U2 B2 R2 U R2 U' R2 D' F L2 D2 L2 F' U' R2",
+    'C': "D' L2 U' F2 D R2 U' R2 U2 F2 L' F U L2 U' L' F'",
+    'D': "L2 B2 D2 U' L2 U2 R2 B2 U' B2 R' B' D' L2 R2 U F R'",
+    'E': "U2 F2 L2 D2 L2 F2 U' R2 U' B' R' U' B2 U B R'",
+    'F': "B2 R2 D' L2 F2 U2 R2 U' B2 R2 B U2 B L F' L D F'",
+    'G': "R2 B D' L D2 L' D B' U2 L2 U2 D' R2 U' B2 U R2",
+    'H': "F2 U' R2 B2 L2 D2 B2 R2 F2 U' F2",
+    'I': "D' F2 D2 U' B2 R2 U R2 D' R2 F' R U' R2 U R' F' R2",
+    'J': "R2 F2 U2 B2 D L2 D' B2 U2 R F D' F2 D F' R",
+    'K': "D' F2 D' R2 F2 D2 F2 R2 D2 F2 R F U F2 U' R' F'",
+    'L': "L F U L2 U' L' F' D F2 D B2 R2 U' R2 B2 D2 F2",
+    'M': "F2 R2 F2 D L2 D' R2 D L2 B' D B L B2 L B2 L2 D2",
+    'N': "U B2 D R2 D' F2 U F2 U' B2 L' U F' U2 F U' L",
+    'O': "D F2 U2 L2 R2 U F2 R2 D' B2 R U F' L2 F U' R' U L2",
+    'P': "B2 L2 U' F2 U L2 D' B2 U R2 U'",
+    'Q': "D' B2 U L2 U' B2 R2 D' B2 U2 B' U L' U2 L F2 U' B' D2",
+    'R': "B2 L2 D' B2 D R2 B2 U B2 D' B' F' D2 B F' U'",
+    'S': "R2 B2 D L2 B2 D U2 L2 B2 L2 F' D' F U2 L' R2 F2 L U",
+    'T': "F' D F U' D R' D' R' F2 D' B2 U L2 U' B2 U F2",
+    'U': "L2 U2 R2 U F2 D R2 D' R2 U L F U' F2 U F' L",
+    'V': "B2 R2 D2 B2 D L2 F2 R2 U' F2 L' D' F D2 F' D L'",
+    'W': "B2 D2 L2 U' F2 R2 U F2 U L2 R F' R F D R B' D B",
+    'X': "U F2 U' R2 U B2 U' F2 U B2 R F' U F2 U' F R' U'",
+    'Y': "L2 F2 D2 L2 D2 L B D' B' F' R F' L2 R'",
+    'Z': "F2 R2 D' B2 D2 R2 D' R2 D' B2 L F D' F' L' F D2 F",
+}
+
+
+def get_letter(letter_name: str) -> Algorithm:
+    """
+    Get an algorithm for a cube pattern representing a letter
+    of the alphabet by name.
+
+    Args:
+        letter_name: Name of the letter to retrieve.
+
+    Returns:
+        Algorithm object representing the pattern moves.
+
+    """
+    return parse_moves(ALPHABET.get(letter_name, ''))

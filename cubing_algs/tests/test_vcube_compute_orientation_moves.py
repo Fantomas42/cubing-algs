@@ -1,5 +1,4 @@
 """Tests for cube orientation move computation."""
-
 import unittest
 
 from cubing_algs.constants import FACE_ORDER
@@ -305,12 +304,17 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         with self.assertRaises(InvalidFaceError):
             self.cube.compute_orientation_moves('LR')
 
+    def test_compute_orientation_moves_same_faces(self) -> None:
+        """Test same face for compute_orientation_moves."""
+        with self.assertRaises(InvalidFaceError):
+            self.cube.compute_orientation_moves('UU')
+
     def test_compute_orientation_moves_state_preservation(self) -> None:
         """Test that compute_orientation_moves doesn't modify cube state."""
         # Apply some moves to create a non-trivial state
         initial_moves = "R U2 R' D' R U' R' D"
         self.cube.rotate(initial_moves)
-        initial_state = self.cube.state
+        solved_state = self.cube.state
         initial_history_length = len(self.cube.history)
 
         # Compute orientations for various faces
@@ -322,7 +326,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
                 orientation_moves = self.cube.compute_orientation_moves(faces)
 
                 # Verify state is unchanged
-                self.assertEqual(self.cube.state, initial_state)
+                self.assertEqual(self.cube.state, solved_state)
                 self.assertEqual(len(self.cube.history), initial_history_length)
 
                 # Verify result is valid

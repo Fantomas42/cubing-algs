@@ -1,22 +1,28 @@
 """Visual representation and display formatting for virtual cube states."""
-
 import os
 import re
 from typing import TYPE_CHECKING
 
+from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import F2L_ADJACENT_FACES
 from cubing_algs.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.effects import load_effect
+from cubing_algs.display.effects import load_effect
+from cubing_algs.display.palettes import load_palette
+from cubing_algs.display.styles import get_piece_type
+from cubing_algs.display.styles import load_style
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
+from cubing_algs.masks import F2L_CLL_MASK
+from cubing_algs.masks import F2L_ELL_MASK
+from cubing_algs.masks import F2L_LL_MASK
 from cubing_algs.masks import F2L_MASK
+from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
-from cubing_algs.palettes import load_palette
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
@@ -39,8 +45,9 @@ USE_COLORS = color_support()
 
 DEFAULT_EFFECT = os.getenv('CUBING_ALGS_EFFECT', '')
 DEFAULT_PALETTE = os.getenv('CUBING_ALGS_PALETTE', 'default')
+DEFAULT_STYLE = os.getenv('CUBING_ALGS_STYLE', 'default')
 
-ANSI_TO_RGB = re.compile(
+ANSI_TO_RGB: RegexPattern = re.compile(
     r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
 )
 
@@ -65,8 +72,10 @@ class VCubeDisplay:
     facelet_size = 3
 
     def __init__(self, cube: 'VCube',
-                 palette_name: str = '', effect_name: str = '',
-                 facelet_type: str = '') -> None:
+                 palette_name: str = '',
+                 effect_name: str = '',
+                 facelet_type: str = '',
+                 style_name: str = '') -> None:
         """Initialize display handler with cube instance and visual settings."""
         self.cube = cube
         self.cube_size: int = cube.size
@@ -75,10 +84,12 @@ class VCubeDisplay:
 
         self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
         self.palette_name = (palette_name or DEFAULT_PALETTE).lower()
+        self.style_name = (style_name or DEFAULT_STYLE).lower()
         self.facelet_type = facelet_type.lower()
 
         self.palette = load_palette(self.palette_name)
         self.effect = load_effect(self.effect_name, self.palette_name)
+        self.style = load_style(self.style_name)
 
         if self.facelet_type == 'compact':
             self.facelet_size = 2
@@ -161,7 +172,7 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, mode: str = '', orientation: str = '',
+    def display(self, mode: str = '', orientation: str = '',  # noqa: C901
                 mask: str = '') -> str:
         """
         Generate formatted visual representation of the cube state.
@@ -178,6 +189,7 @@ class VCubeDisplay:
         mode_mask = ''
         display_method = self.display_cube
         default_orientation = ''
+        mode = mode.lower()
 
         # Only work for 3x3x3
         if mode == 'oll':
@@ -188,11 +200,24 @@ class VCubeDisplay:
             mode_mask = PLL_MASK
             display_method = self.display_top_face
             default_orientation = 'D'
+        elif mode == 'll':
+            mode_mask = L3_MASK
+            display_method = self.display_top_face
+            default_orientation = 'D'
         elif mode == 'cross':
             mode_mask = CROSS_MASK
             default_orientation = 'FU'
         elif mode in {'f2l', 'af2l'}:
             mode_mask = F2L_MASK
+            default_orientation = f'D{ self.compute_f2l_front_face() }'
+        elif mode == 'f2l+ll':
+            mode_mask = F2L_LL_MASK
+            default_orientation = f'D{ self.compute_f2l_front_face() }'
+        elif mode == 'f2l+cll':
+            mode_mask = F2L_CLL_MASK
+            default_orientation = f'D{ self.compute_f2l_front_face() }'
+        elif mode == 'f2l+ell':
+            mode_mask = F2L_ELL_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'extended':
             display_method = self.display_extended_net
@@ -201,7 +226,7 @@ class VCubeDisplay:
 
         final_orientation = orientation or default_orientation
         if final_orientation:
-            cube = self.cube.oriented_copy(final_orientation, full=True)
+            cube = self.cube.oriented_copy(final_orientation)
         else:
             cube = self.cube
 
@@ -228,7 +253,7 @@ class VCubeDisplay:
 
         return ' ' * (self.facelet_size * count)
 
-    def display_facelet(self, facelet: str, mask: str = '',
+    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901
                         facelet_index: int | None = None,
                         *, adjacent: bool = False) -> str:
         """
@@ -244,6 +269,12 @@ class VCubeDisplay:
             Formatted string with ANSI color codes for terminal display.
 
         """
+        if self.facelet_type == 'emoji':
+            return EMOJIS[facelet]
+
+        if not USE_COLORS or self.facelet_type == 'no-color':
+            return f' { facelet } '
+
         if facelet not in FACE_ORDER:
             face_color = self.palette['hidden']
         else:
@@ -253,9 +284,6 @@ class VCubeDisplay:
             elif adjacent:
                 face_key += '_adjacent'
             face_color = self.palette[face_key]
-
-        if not USE_COLORS or self.facelet_type == 'no-color':
-            return f' { facelet } '
 
         if self.effect and not adjacent and facelet_index is not None:
             face_color = self.position_based_effect(
@@ -283,12 +311,17 @@ class VCubeDisplay:
                 f'{ self.palette["reset"] }'
             )
 
-        if self.facelet_type == 'emoji':
-            return EMOJIS[facelet]
+        style_start = ''
+        style_end = ''
+
+        if not adjacent and facelet_index is not None:
+            style_start, style_end = self.letter_style_ansi(
+                facelet_index, face_color,
+            )
 
         return (
             f'{ face_color }'
-            f' { facelet } '
+            f' { style_start }{ facelet }{ style_end } '
             f'{ self.palette["reset"] }'
         )
 
@@ -767,3 +800,25 @@ class VCubeDisplay:
             f'\x1b[48;2;{ ";".join(str(c) for c in new_background_rgb) }m'
             f'\x1b[38;2;{ ";".join(str(c) for c in foreground_rgb) }m'
         )
+
+    def letter_style_ansi(self, facelet_index: int,
+                          face_color: str) -> tuple[str, str]:
+        """
+        Resolve ANSI letter style codes for a facelet position.
+
+        Args:
+            facelet_index: Global facelet index, or None if unknown.
+            face_color: Current ANSI face color to restore after style reset.
+
+        Returns:
+            Tuple of (style_start, style_end) ANSI sequences.
+
+        """
+        style_ansi = self.style[
+            get_piece_type(facelet_index, self.cube_size)
+        ]
+
+        if not style_ansi:
+            return '', ''
+
+        return style_ansi, f'\x1b[0m{ face_color }'

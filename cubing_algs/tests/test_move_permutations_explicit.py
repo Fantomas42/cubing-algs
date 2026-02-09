@@ -1,5 +1,4 @@
 """Tests for explicit move permutation verification."""
-
 import unittest
 
 from cubing_algs.vcube import VCube

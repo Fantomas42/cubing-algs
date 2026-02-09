@@ -1,6 +1,11 @@
 """Tests for facelet and cubie conversion functions."""
 import unittest
 
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
+from cubing_algs.constants import SOLVED_EP
+from cubing_algs.constants import SOLVED_SO
 from cubing_algs.facelets import _CORNER_LOOKUP
 from cubing_algs.facelets import _EDGE_LOOKUP
 from cubing_algs.facelets import _cache
@@ -10,11 +15,11 @@ from cubing_algs.facelets import disable_cache
 from cubing_algs.facelets import enable_cache
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.facelets import get_cache_info
-from cubing_algs.initial_state import get_initial_state
 from cubing_algs.masks import F2L_MASK
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.vcube import VCube
 
-INITIAL_STATE = get_initial_state(3)
+INITIAL_STATE = get_solved_facelets(3)
 
 
 class CubiesToFaceletsTestCase(unittest.TestCase):
@@ -22,11 +27,11 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
 
     def test_cubies_to_facelets_solved(self) -> None:
         """Test cubies to facelets solved."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
-        co = [0, 0, 0, 0, 0, 0, 0, 0]
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        so = SOLVED_SO
         facelets = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB'
 
         self.assertEqual(
@@ -40,10 +45,10 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
 
     def test_cubies_to_facelets_solved_oriented(self) -> None:
         """Test cubies to facelets solved oriented."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
-        co = [0, 0, 0, 0, 0, 0, 0, 0]
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
         so = [3, 4, 2, 0, 1, 5]
         facelets = (
             'DDDDDDDDD'
@@ -69,7 +74,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        so = SOLVED_SO
         facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
         self.assertEqual(
@@ -86,7 +91,7 @@ class CubiesToFaceletsTestCase(unittest.TestCase):
         cp = [4, 0, 1, 3, 7, 5, 6, 2]
         co = [2, 0, 0, 1, 1, 0, 0, 2]
         ep = [8, 0, 1, 2, 11, 5, 6, 7, 4, 9, 10, 3]
-        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        eo = SOLVED_EO
         so = [2, 1, 3, 5, 4, 0]
         facelets = 'FFRFFDFFDRRURRURRURRBDDBDDBBBUBBUBBLDDDLLLLLLFLLFUUFUU'
 
@@ -105,11 +110,11 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
 
     def test_facelets_to_cubies_solved(self) -> None:
         """Test facelets to cubies solved."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
-        co = [0, 0, 0, 0, 0, 0, 0, 0]
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        so = SOLVED_SO
         facelets = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB'
 
         self.assertEqual(
@@ -127,7 +132,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
         co = [1, 2, 0, 2, 1, 1, 0, 2]
         ep = [1, 9, 2, 3, 11, 8, 6, 7, 4, 5, 10, 0]
         eo = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        so = SOLVED_SO
         facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
         self.assertEqual(
@@ -144,7 +149,7 @@ class FaceletsToCubiesTestCase(unittest.TestCase):
         cp = [4, 0, 1, 3, 7, 5, 6, 2]
         co = [2, 0, 0, 1, 1, 0, 0, 2]
         ep = [8, 0, 1, 2, 11, 5, 6, 7, 4, 9, 10, 3]
-        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        eo = SOLVED_EO
         so = [2, 1, 3, 5, 4, 0]
         facelets = 'FFRFFDFFDRRURRURRURRBDDBDDBBBUBBUBBLDDDLLLLLLFLLFUUFUU'
 
@@ -164,11 +169,11 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
     def test_custom_state_basic_functionality(self) -> None:
         """Test that custom_state parameter works with basic cube states."""
         # Solved state
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
-        co = [0, 0, 0, 0, 0, 0, 0, 0]
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        so = SOLVED_SO
 
         # Custom state with different pattern
         # (54 chars, each face has its color)
@@ -184,11 +189,11 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
 
     def test_custom_state_vs_standard_solved(self) -> None:
         """Test that scheme=None behaves same as no scheme for solved cube."""
-        cp = [0, 1, 2, 3, 4, 5, 6, 7]
-        co = [0, 0, 0, 0, 0, 0, 0, 0]
-        ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        so = [0, 1, 2, 3, 4, 5]
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        so = SOLVED_SO
 
         result_standard = cubies_to_facelets(cp, co, ep, eo, so)
         result_custom_none = cubies_to_facelets(
@@ -492,11 +497,11 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         # Add some items to cache
         facelets_to_cubies(INITIAL_STATE)
         cubies_to_facelets(
-            [0, 1, 2, 3, 4, 5, 6, 7],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5],
+            SOLVED_CP,
+            SOLVED_CO,
+            SOLVED_EP,
+            SOLVED_EO,
+            SOLVED_SO,
         )
 
         info = get_cache_info()
@@ -561,25 +566,25 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             # Fill cache beyond max size
             cubies_states = [
                 (
-                    [0, 1, 2, 3, 4, 5, 6, 7],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 2, 3, 4, 5],
+                    SOLVED_CP,
+                    SOLVED_CO,
+                    SOLVED_EP,
+                    SOLVED_EO,
+                    SOLVED_SO,
                 ),
                 (
-                    [0, 1, 2, 3, 4, 5, 6, 7],
+                    SOLVED_CP,
                     [1, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 2, 3, 4, 5],
+                    SOLVED_EP,
+                    SOLVED_EO,
+                    SOLVED_SO,
                 ),
                 (
-                    [0, 1, 2, 3, 4, 5, 6, 7],
+                    SOLVED_CP,
                     [2, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 2, 3, 4, 5],
+                    SOLVED_EP,
+                    SOLVED_EO,
+                    SOLVED_SO,
                 ),
             ]
 
@@ -689,11 +694,11 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
 
         # Test cubies_to_facelets cache hit
         cubies_args = (
-            [0, 1, 2, 3, 4, 5, 6, 7],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5],
+            SOLVED_CP,
+            SOLVED_CO,
+            SOLVED_EP,
+            SOLVED_EO,
+            SOLVED_SO,
         )
 
         # First call - cache miss
@@ -711,11 +716,11 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
     def test_cubies_to_facelets_with_scheme(self) -> None:
         """Test cubies_to_facelets with custom scheme parameter."""
         cubies_args = (
-            [0, 1, 2, 3, 4, 5, 6, 7],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5],
+            SOLVED_CP,
+            SOLVED_CO,
+            SOLVED_EP,
+            SOLVED_EO,
+            SOLVED_SO,
         )
 
         # Test with None scheme (default path)
@@ -747,11 +752,11 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
 
         # Test cubies_to_facelets
         cubies_args = (
-            [0, 1, 2, 3, 4, 5, 6, 7],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 2, 3, 4, 5],
+            SOLVED_CP,
+            SOLVED_CO,
+            SOLVED_EP,
+            SOLVED_EO,
+            SOLVED_SO,
         )
 
         result3 = cubies_to_facelets(*cubies_args)

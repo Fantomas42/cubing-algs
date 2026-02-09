@@ -1,38 +1,41 @@
 """Tests for visual effects and color transformations."""
-
 import unittest
 from unittest.mock import patch
 
-from cubing_algs.effects import EFFECTS
-from cubing_algs.effects import FACE_POSITIONS
-from cubing_algs.effects import brighten
-from cubing_algs.effects import checkerboard
-from cubing_algs.effects import chrome
-from cubing_algs.effects import contrast
-from cubing_algs.effects import copper
-from cubing_algs.effects import diamond
-from cubing_algs.effects import dim
-from cubing_algs.effects import face_visible
-from cubing_algs.effects import frosted
-from cubing_algs.effects import get_position_factor
-from cubing_algs.effects import global_light_position_factor
-from cubing_algs.effects import glossy
-from cubing_algs.effects import gold
-from cubing_algs.effects import holographic
-from cubing_algs.effects import load_effect
-from cubing_algs.effects import load_single_effect
-from cubing_algs.effects import matte
-from cubing_algs.effects import neon
-from cubing_algs.effects import noop
-from cubing_algs.effects import parse_effect_name
-from cubing_algs.effects import parse_effect_parameters
-from cubing_algs.effects import plasma
-from cubing_algs.effects import rainbow
-from cubing_algs.effects import shine
-from cubing_algs.effects import silver
-from cubing_algs.effects import spiral
-from cubing_algs.effects import stripes
-from cubing_algs.effects import vintage
+from cubing_algs.constants import FACE_NUMBER
+from cubing_algs.display.effects import EFFECTS
+from cubing_algs.display.effects import FACE_POSITIONS
+from cubing_algs.display.effects import EffectConfig
+from cubing_algs.display.effects import brighten
+from cubing_algs.display.effects import checkerboard
+from cubing_algs.display.effects import chrome
+from cubing_algs.display.effects import contrast
+from cubing_algs.display.effects import copper
+from cubing_algs.display.effects import diamond
+from cubing_algs.display.effects import dim
+from cubing_algs.display.effects import face_visible
+from cubing_algs.display.effects import frosted
+from cubing_algs.display.effects import get_position_factor
+from cubing_algs.display.effects import global_light_position_factor
+from cubing_algs.display.effects import glossy
+from cubing_algs.display.effects import gold
+from cubing_algs.display.effects import holographic
+from cubing_algs.display.effects import load_effect
+from cubing_algs.display.effects import load_single_effect
+from cubing_algs.display.effects import matte
+from cubing_algs.display.effects import neon
+from cubing_algs.display.effects import noop
+from cubing_algs.display.effects import parse_effect_name
+from cubing_algs.display.effects import parse_effect_parameters
+from cubing_algs.display.effects import plasma
+from cubing_algs.display.effects import rainbow
+from cubing_algs.display.effects import register_effect
+from cubing_algs.display.effects import shine
+from cubing_algs.display.effects import silver
+from cubing_algs.display.effects import spiral
+from cubing_algs.display.effects import stripes
+from cubing_algs.display.effects import vintage
+from cubing_algs.exceptions import EffectAlreadyExistsError
 
 
 class TestPositioningFunctions(unittest.TestCase):
@@ -40,8 +43,8 @@ class TestPositioningFunctions(unittest.TestCase):
 
     def test_face_positions_constant(self) -> None:
         """Test FACE_POSITIONS constant has correct structure."""
-        self.assertEqual(len(FACE_POSITIONS), 6)
-        for face_index in range(6):
+        self.assertEqual(len(FACE_POSITIONS), FACE_NUMBER)
+        for face_index in range(FACE_NUMBER):
             self.assertIn(face_index, FACE_POSITIONS)
             self.assertEqual(len(FACE_POSITIONS[face_index]), 2)
             self.assertIsInstance(FACE_POSITIONS[face_index][0], int)
@@ -67,7 +70,7 @@ class TestPositioningFunctions(unittest.TestCase):
         cube_size = 3
         face_size = cube_size * cube_size
 
-        for face_index in range(6):
+        for face_index in range(FACE_NUMBER):
             for local_index in range(face_size):
                 facelet_index = face_index * face_size + local_index
                 result = global_light_position_factor(facelet_index, cube_size)
@@ -1143,7 +1146,7 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         }
 
         with patch.dict(
-                'cubing_algs.effects.EFFECTS',
+                'cubing_algs.display.effects.EFFECTS',
                 {'test_effect': mock_effect_config},
         ):
             effect_func = load_single_effect('test_effect', {}, 'default')
@@ -1169,7 +1172,7 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         }
 
         with patch.dict(
-                'cubing_algs.effects.EFFECTS',
+                'cubing_algs.display.effects.EFFECTS',
                 {'test_effect': mock_effect_config},
         ):
             effect_func = load_single_effect('test_effect', {}, 'default')
@@ -1202,3 +1205,115 @@ class TestEnhancedLoadEffect(unittest.TestCase):
             for component in result:
                 self.assertGreaterEqual(component, 0)
                 self.assertLessEqual(component, 255)
+
+
+class TestRegisterEffect(unittest.TestCase):
+    """Test the register_effect function."""
+
+    def tearDown(self) -> None:  # noqa: PLR6301
+        """Clean up registered effects after each test."""
+        for name in list(EFFECTS):
+            if name.startswith('custom_test_'):
+                del EFFECTS[name]
+
+    def test_register_effect_basic(self) -> None:
+        """Test registering a custom effect."""
+        config: EffectConfig = {'function': noop}
+        register_effect('custom_test_basic', config)
+
+        self.assertIn('custom_test_basic', EFFECTS)
+        self.assertEqual(EFFECTS['custom_test_basic'], config)
+
+    def test_register_effect_with_parameters(self) -> None:
+        """Test registering a custom effect with parameters."""
+        config: EffectConfig = {
+            'function': shine,
+            'parameters': {
+                'intensity': 0.9,
+                'facelet_mode': 'local',
+                'position_mode': 'light',
+            },
+        }
+        register_effect('custom_test_params', config)
+
+        self.assertIn('custom_test_params', EFFECTS)
+        self.assertEqual(EFFECTS['custom_test_params'], config)
+
+    def test_register_effect_can_be_loaded(self) -> None:
+        """Test that a registered effect can be loaded with load_effect."""
+        config: EffectConfig = {
+            'function': dim,
+            'parameters': {'factor': 0.5},
+        }
+        register_effect('custom_test_loadable', config)
+
+        effect_func = load_effect('custom_test_loadable', 'default')
+        self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+        self.assertEqual(result, (50, 50, 50))
+
+    def test_register_effect_raises_on_duplicate_name(self) -> None:
+        """Test that registering with an existing name raises exception."""
+        config: EffectConfig = {'function': noop}
+        with self.assertRaises(EffectAlreadyExistsError):
+            register_effect('shine', config)
+
+    def test_register_effect_error_message_contains_name(self) -> None:
+        """Test that the error message contains the effect name."""
+        config: EffectConfig = {'function': noop}
+
+        with self.assertRaises(EffectAlreadyExistsError) as context:
+            register_effect('neon', config)
+
+        error_message = str(context.exception)
+        self.assertIn('neon', error_message)
+        self.assertIn('already exists', error_message.lower())
+
+    def test_register_effect_raises_on_duplicate_builtin(self) -> None:
+        """Test that built-in effect names cannot be overwritten."""
+        builtin_names = ['shine', 'chrome', 'gold', 'noop']
+        config: EffectConfig = {'function': noop}
+        for name in builtin_names:
+            with (
+                self.subTest(name=name),
+                self.assertRaises(EffectAlreadyExistsError),
+            ):
+                register_effect(name, config)
+
+    def test_register_effect_with_custom_function(self) -> None:
+        """Test registering an effect with a custom function."""
+        def custom_effect(
+            rgb: tuple[int, int, int],
+            facelet_index: int,  # noqa: ARG001
+            cube_size: int,  # noqa: ARG001
+        ) -> tuple[int, int, int]:
+            r, g, b = rgb
+            return min(255, r + 10), min(255, g + 10), min(255, b + 10)
+
+        config: EffectConfig = {'function': custom_effect}
+        register_effect('custom_test_func', config)
+
+        effect_func = load_effect('custom_test_func', 'default')
+        self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
+
+        result = effect_func((100, 100, 100), 0, 3)
+        self.assertEqual(result, (110, 110, 110))
+
+    def test_register_effect_usable_in_chain(self) -> None:
+        """Test that a registered effect can be used in effect chains."""
+        config: EffectConfig = {'function': noop}
+        register_effect('custom_test_chain', config)
+
+        effect_func = load_effect(
+            'custom_test_chain|dim(factor=0.5)', 'default',
+        )
+        self.assertIsNotNone(effect_func)
+        assert effect_func is not None  # noqa: S101
+
+        test_rgb = (100, 100, 100)
+        result = effect_func(test_rgb, 0, 3)
+        self.assertEqual(result, (50, 50, 50))

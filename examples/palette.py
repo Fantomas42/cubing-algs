@@ -3,15 +3,13 @@
 import argparse
 
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.initial_state import get_initial_state
+from cubing_algs.display.palettes import PALETTES
+from cubing_algs.display.palettes import load_palette
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import facelets_masked
-from cubing_algs.palettes import PALETTES
-from cubing_algs.palettes import load_palette
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
-
-INITIAL_STATE = get_initial_state(3)
 
 
 def print_colorized(string: str, colors: list[str], line: str = '-') -> None:
@@ -55,7 +53,7 @@ def show_cube_palette(palette_name: str) -> None:
     cube_moved.rotate("F R U D L B R2 F' D2 B'")
 
     cube_hidden = VCube(
-        facelets_masked(INITIAL_STATE, F2L_MASK),
+        facelets_masked(SOLVED_FACELETS_3x3x3, F2L_MASK),
         check=False,
     )
 

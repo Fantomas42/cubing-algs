@@ -7,6 +7,8 @@ from collections.abc import Callable
 from typing import TypedDict
 from typing import Unpack
 
+from cubing_algs.exceptions import EffectAlreadyExistsError
+
 FACE_POSITIONS = {
     0: [0, 1],
     1: [1, 2],
@@ -1035,6 +1037,28 @@ EFFECTS: dict[str, EffectConfig] = {
         'function': noop,
     },
 }
+
+
+def register_effect(
+        name: str,
+        config: EffectConfig,
+) -> None:
+    """
+    Register a custom visual effect.
+
+    Args:
+        name: Unique name for the effect.
+        config: Effect configuration with function and optional parameters.
+
+    Raises:
+        EffectAlreadyExistsError: If the effect's name already exists.
+
+    """
+    if name in EFFECTS:
+        msg = f'Effect already exists: {name}'
+        raise EffectAlreadyExistsError(msg)
+
+    EFFECTS[name] = config
 
 
 def parse_effect_parameters(param_string: str) -> dict[
