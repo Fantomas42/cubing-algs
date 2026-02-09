@@ -7,7 +7,7 @@ name = "cubing-algs"
 dynamic = ["version"]
 description = "Python module providing tools manipulating cubing algorithms."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 keywords = ["rubick", "cube", "speedcubing", "solve", "algorithm"]
