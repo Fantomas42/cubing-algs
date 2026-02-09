@@ -3,6 +3,7 @@
 from typing import TypedDict
 
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.exceptions import PaletteAlreadyExistsError
 
 LOADED_PALETTES: dict[str, dict[str, str]] = {}
 
@@ -709,6 +710,28 @@ def build_ansi_palette(
         palette[f'{ face }_adjacent'] = ansi_face_adjacent
 
     return palette
+
+
+def register_palette(
+        name: str,
+        config: PaletteConfig,
+) -> None:
+    """
+    Register a custom color palette.
+
+    Args:
+        name: Unique name for the palette.
+        config: Palette configuration with face colors and optional settings.
+
+    Raises:
+        PaletteAlreadyExistsError: If the palette's name already exists.
+
+    """
+    if name in PALETTES:
+        msg = f'Palette already exists: {name}'
+        raise PaletteAlreadyExistsError(msg)
+
+    PALETTES[name] = config
 
 
 def load_palette(palette_name: str) -> dict[str, str]:

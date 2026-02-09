@@ -56,3 +56,7 @@ class InvalidFaceIndexError(ValueError):
 
 class InvalidFaceletsSolveError(ValueError):
     """Exception raised when the solver encounter invalid facelet format."""
+
+
+class PaletteAlreadyExistsError(ValueError):
+    """Exception raised when registering a palette that already exists."""
