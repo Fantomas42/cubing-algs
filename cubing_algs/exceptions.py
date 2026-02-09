@@ -60,3 +60,7 @@ class InvalidFaceletsSolveError(ValueError):
 
 class PaletteAlreadyExistsError(ValueError):
     """Exception raised when registering a palette that already exists."""
+
+
+class EffectAlreadyExistsError(ValueError):
+    """Exception raised when registering an effect that already exists."""
