@@ -21,6 +21,8 @@ from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
 from cubing_algs.palettes import load_palette
+from cubing_algs.styles import get_piece_type
+from cubing_algs.styles import load_style
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover
@@ -43,6 +45,7 @@ USE_COLORS = color_support()
 
 DEFAULT_EFFECT = os.getenv('CUBING_ALGS_EFFECT', '')
 DEFAULT_PALETTE = os.getenv('CUBING_ALGS_PALETTE', 'default')
+DEFAULT_STYLE = os.getenv('CUBING_ALGS_STYLE', 'default')
 
 ANSI_TO_RGB: RegexPattern = re.compile(
     r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
@@ -69,8 +72,10 @@ class VCubeDisplay:
     facelet_size = 3
 
     def __init__(self, cube: 'VCube',
-                 palette_name: str = '', effect_name: str = '',
-                 facelet_type: str = '') -> None:
+                 palette_name: str = '',
+                 effect_name: str = '',
+                 facelet_type: str = '',
+                 style_name: str = '') -> None:
         """Initialize display handler with cube instance and visual settings."""
         self.cube = cube
         self.cube_size: int = cube.size
@@ -79,10 +84,12 @@ class VCubeDisplay:
 
         self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
         self.palette_name = (palette_name or DEFAULT_PALETTE).lower()
+        self.style_name = (style_name or DEFAULT_STYLE).lower()
         self.facelet_type = facelet_type.lower()
 
         self.palette = load_palette(self.palette_name)
         self.effect = load_effect(self.effect_name, self.palette_name)
+        self.style = load_style(self.style_name)
 
         if self.facelet_type == 'compact':
             self.facelet_size = 2
@@ -246,7 +253,7 @@ class VCubeDisplay:
 
         return ' ' * (self.facelet_size * count)
 
-    def display_facelet(self, facelet: str, mask: str = '',
+    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901
                         facelet_index: int | None = None,
                         *, adjacent: bool = False) -> str:
         """
@@ -304,9 +311,17 @@ class VCubeDisplay:
                 f'{ self.palette["reset"] }'
             )
 
+        style_start = ''
+        style_end = ''
+
+        if not adjacent and facelet_index is not None:
+            style_start, style_end = self.letter_style_ansi(
+                facelet_index, face_color,
+            )
+
         return (
             f'{ face_color }'
-            f' { facelet } '
+            f' { style_start }{ facelet }{ style_end } '
             f'{ self.palette["reset"] }'
         )
 
@@ -785,3 +800,25 @@ class VCubeDisplay:
             f'\x1b[48;2;{ ";".join(str(c) for c in new_background_rgb) }m'
             f'\x1b[38;2;{ ";".join(str(c) for c in foreground_rgb) }m'
         )
+
+    def letter_style_ansi(self, facelet_index: int,
+                          face_color: str) -> tuple[str, str]:
+        """
+        Resolve ANSI letter style codes for a facelet position.
+
+        Args:
+            facelet_index: Global facelet index, or None if unknown.
+            face_color: Current ANSI face color to restore after style reset.
+
+        Returns:
+            Tuple of (style_start, style_end) ANSI sequences.
+
+        """
+        style_ansi = self.style[
+            get_piece_type(facelet_index, self.cube_size)
+        ]
+
+        if not style_ansi:
+            return '', ''
+
+        return style_ansi, f'\x1b[0m{ face_color }'

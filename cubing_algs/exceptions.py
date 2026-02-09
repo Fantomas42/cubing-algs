@@ -64,3 +64,7 @@ class PaletteAlreadyExistsError(ValueError):
 
 class EffectAlreadyExistsError(ValueError):
     """Exception raised when registering an effect that already exists."""
+
+
+class StyleAlreadyExistsError(ValueError):
+    """Exception raised when registering a style that already exists."""

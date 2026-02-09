@@ -41,5 +41,8 @@ type CubeCubiesOriented = tuple[
     Orientation,
 ]
 
+# Facelet piece type
+type FaceletPieceType = Literal['corner', 'edge', 'center', 'fixed_center']
+
 # Regex pattern type
 type RegexPattern = re.Pattern[str]

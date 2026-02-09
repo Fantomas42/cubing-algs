@@ -299,7 +299,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
                 mask: str = '', palette: str = '',
-                effect: str = '', facelet: str = '') -> str:
+                effect: str = '', facelet: str = '',
+                style: str = '') -> str:
         """
         Generate a visual representation of the cube.
 
@@ -310,23 +311,26 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             palette: Color palette to use.
             effect: Visual effect to apply.
             facelet: Facelet mode for display.
+            style: Letter style preset to apply.
 
         Returns:
             A string containing the visual representation of the cube.
 
         """
-        return VCubeDisplay(self, palette, effect, facelet).display(
+        return VCubeDisplay(self, palette, effect, facelet, style).display(
             mode, orientation, mask,
         )
 
     def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
              mask: str = '', palette: str = '',
-             effect: str = '', facelet: str = '') -> None:
+             effect: str = '', facelet: str = '',
+             style: str = '') -> None:
         """Print a visual representation of the cube."""
         print(  # noqa: T201
             self.display(
                 mode, orientation, mask,
                 palette, effect, facelet,
+                style,
             ),
             end='',
         )
