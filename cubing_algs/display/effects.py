@@ -1268,11 +1268,11 @@ def load_single_effect(
         return None
 
     effect_config: EffectConfig = EFFECTS[effect_name]
-    effect_function: Callable[..., tuple[
-        RGB,
-        RGB]] = effect_config[
-            'function'
-        ]
+    effect_function: Callable[
+        ..., tuple[
+            RGB, RGB,
+        ],
+    ] = effect_config['function']
 
     effect_parameters: dict[str, float | int | str | bool] = (
         effect_config.get('parameters', {}).copy()
@@ -1314,9 +1314,13 @@ def load_single_effect(
     return effect
 
 
-def load_effect(effect_name: str, palette_name: str) -> Callable[
-        [RGB, RGB, int, int],
-        tuple[RGB, RGB]] | None:
+def load_effect(
+        effect_name: str | None,
+        palette_name: str,
+) -> Callable[
+    [RGB, RGB, int, int],
+    tuple[RGB, RGB],
+] | None:
     """
     Load and configure effect function(s) with parameters.
     Supports chaining multiple effects using pipe separator.

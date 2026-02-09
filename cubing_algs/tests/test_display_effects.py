@@ -757,7 +757,9 @@ class TestUtilityEffects(unittest.TestCase):
         result1 = noop(self.test_rgb, self.test_rgb, 0, 2)
         result2 = noop(
             self.test_rgb, self.test_rgb,
-            100, 10, intensity=5.0, random_param='test',
+            100, 10,
+            intensity=5.0,
+            saturation=1.0,
         )
         self.assertEqual(result1, (self.test_rgb, self.test_rgb))
         self.assertEqual(result2, (self.test_rgb, self.test_rgb))
@@ -1305,8 +1307,13 @@ class TestEnhancedLoadEffect(unittest.TestCase):
             assert effect_func is not None  # noqa: S101
 
             # Test that the effect function works
-            result = effect_func((100, 100, 100), 0, 3)
-            self.assertEqual(result, (100, 100, 100))  # noop returns unchanged
+            result = effect_func(
+                (100, 100, 100),
+                (100, 100, 100),
+                0, 3,
+            )
+            # noop returns unchanged
+            self.assertEqual(result, ((100, 100, 100), (100, 100, 100)))
 
     def test_load_effect_real_world_combinations(self) -> None:
         """Test real-world effect combinations."""
@@ -1324,18 +1331,20 @@ class TestEnhancedLoadEffect(unittest.TestCase):
             self.assertIsNotNone(effect_func, f'Failed to load: {combination}')
             assert effect_func is not None  # noqa: S101
 
-            result = effect_func(test_rgb, test_rgb, 4, 3)
-            self.assertIsInstance(result, tuple)
-            self.assertEqual(len(result), 3)
-            for component in result:
-                self.assertGreaterEqual(component, 0)
-                self.assertLessEqual(component, 255)
+            results = effect_func(test_rgb, test_rgb, 4, 3)
+            for result in results:
+                self.assertIsInstance(result, tuple)
+                self.assertEqual(len(result), 3)
+                for component in result:
+                    self.assertGreaterEqual(component, 0)
+                    self.assertLessEqual(component, 255)
 
 
 class TestRegisterEffect(unittest.TestCase):
     """Test the register_effect function."""
 
-    def tearDown(self) -> None:  # noqa: PLR6301
+    @staticmethod
+    def tearDown() -> None:
         """Clean up registered effects after each test."""
         for name in list(EFFECTS):
             if name.startswith('custom_test_'):
@@ -1377,8 +1386,8 @@ class TestRegisterEffect(unittest.TestCase):
         assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
-        result = effect_func(test_rgb, 0, 3)
-        self.assertEqual(result, (50, 50, 50))
+        result = effect_func(test_rgb, test_rgb, 0, 3)
+        self.assertEqual(result, ((50, 50, 50), test_rgb))
 
     def test_register_effect_raises_on_duplicate_name(self) -> None:
         """Test that registering with an existing name raises exception."""
@@ -1411,12 +1420,17 @@ class TestRegisterEffect(unittest.TestCase):
     def test_register_effect_with_custom_function(self) -> None:
         """Test registering an effect with a custom function."""
         def custom_effect(
-            rgb: tuple[int, int, int],
-            facelet_index: int,  # noqa: ARG001
-            cube_size: int,  # noqa: ARG001
-        ) -> tuple[int, int, int]:
-            r, g, b = rgb
-            return min(255, r + 10), min(255, g + 10), min(255, b + 10)
+            background_rgb: tuple[int, int, int],
+            foreground_rgb: tuple[int, int, int],
+            _facelet_index: int,
+            _cube_size: int,
+        ) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+            r, g, b = background_rgb
+            return (
+                min(255, r + 10),
+                min(255, g + 10),
+                min(255, b + 10),
+            ), foreground_rgb
 
         config: EffectConfig = {'function': custom_effect}
         register_effect('custom_test_func', config)
@@ -1425,8 +1439,12 @@ class TestRegisterEffect(unittest.TestCase):
         self.assertIsNotNone(effect_func)
         assert effect_func is not None  # noqa: S101
 
-        result = effect_func((100, 100, 100), 0, 3)
-        self.assertEqual(result, (110, 110, 110))
+        result = effect_func(
+            (100, 100, 100),
+            (100, 100, 100),
+            0, 3,
+        )
+        self.assertEqual(result, ((110, 110, 110), (100, 100, 100)))
 
     def test_register_effect_usable_in_chain(self) -> None:
         """Test that a registered effect can be used in effect chains."""
@@ -1440,5 +1458,5 @@ class TestRegisterEffect(unittest.TestCase):
         assert effect_func is not None  # noqa: S101
 
         test_rgb = (100, 100, 100)
-        result = effect_func(test_rgb, 0, 3)
-        self.assertEqual(result, (50, 50, 50))
+        result = effect_func(test_rgb, test_rgb, 0, 3)
+        self.assertEqual(result, ((50, 50, 50), test_rgb))
