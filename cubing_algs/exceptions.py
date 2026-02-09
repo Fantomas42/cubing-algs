@@ -34,9 +34,25 @@ class InvalidCollectionNameError(ValueError):
     """Exception raised when requesting a collection with an invalid name."""
 
 
+class InvalidStepError(ValueError):
+    """Exception raised when step name is not recognized."""
+
+
+class InvalidSlotSpecError(ValueError):
+    """Exception raised when an invalid F2L slot is specified."""
+
+
+class InvalidPieceSpecError(ValueError):
+    """Exception raise when piece specification cannot be parsed."""
+
+
 class InvalidOrientationError(ValueError):
     """Exception raised when requesting an orientation with an invalid value."""
 
 
 class InvalidFaceIndexError(ValueError):
     """Exception raised when requesting an unexisting face index by center."""
+
+
+class InvalidFaceletsSolveError(ValueError):
+    """Exception raised when the solver encounter invalid facelet format."""

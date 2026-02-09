@@ -10,6 +10,7 @@ import re
 from collections.abc import Iterable
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import RegexPattern
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
 from cubing_algs.constants import MOVE_SPLIT
 from cubing_algs.exceptions import InvalidMoveError
@@ -21,8 +22,8 @@ from cubing_algs.transform.trim import trim_moves
 
 logger = logging.getLogger(__name__)
 
-CLEAN_PATTERNS = [
-    (re.compile(r'[`’]'), "'"),  # # noqa: RUF001
+CLEAN_PATTERNS: list[tuple[RegexPattern, str]] = [
+    (re.compile(r'[`’]'), "'"),  # noqa: RUF001
     (re.compile(r'[():,\[\]]'), ' '),
     (re.compile(r'\s+'), ' '),
     (re.compile(r"2'"), '2'),

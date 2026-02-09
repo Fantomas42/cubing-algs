@@ -12,16 +12,28 @@ from typing import NamedTuple
 from typing import TypedDict
 
 from cubing_algs.constants import CORNER_FACELET_MAP
+from cubing_algs.constants import D_CORNERS
+from cubing_algs.constants import D_EDGES
+from cubing_algs.constants import E_EDGES
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_EDGES_INDEX
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.constants import QTM_OPPOSITE_EDGE_OFFSETS
 from cubing_algs.constants import QTM_OPPOSITE_FACE_DOUBLE_PAIRS
 from cubing_algs.constants import QTM_SAME_FACE_OPPOSITE_PAIRS
+from cubing_algs.constants import SOLVED_CO
+from cubing_algs.constants import SOLVED_CP
+from cubing_algs.constants import SOLVED_EO
+from cubing_algs.constants import SOLVED_EP
+from cubing_algs.constants import U_CORNERS
+from cubing_algs.constants import U_EDGES
 from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
+from cubing_algs.integrity import compute_parity
+from cubing_algs.integrity import find_permutation_cycles
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -269,7 +281,7 @@ def compute_opposite_face_manhattan_distance(
         Manhattan distance across opposite faces.
 
     """
-    if orig.face_position == 4:
+    if orig.face_position == cube.center_index:
         return cube.size * 2
 
     translated_pos = transform_opposite_position(
@@ -601,38 +613,6 @@ def compute_distance_metrics(
     )
 
 
-def find_permutation_cycles(permutation: list[int]) -> list[list[int]]:
-    """
-    Find cycles in a permutation.
-
-    A cycle is a sequence of positions where each position maps to the next,
-    forming a closed loop. For example, [1, 2, 0] contains the cycle [0, 1, 2]
-    meaning position 0 goes to 1, 1 goes to 2, and 2 goes back to 0.
-
-    Args:
-        permutation: List where permutation[i] is the destination of position i.
-
-    Returns:
-        List of cycles, each cycle is a list of position indices.
-
-    """
-    visited = [False] * len(permutation)
-    cycles = []
-
-    for i in range(len(permutation)):
-        if not visited[i] and permutation[i] != i:
-            cycle = []
-            current = i
-            while not visited[current]:
-                visited[current] = True
-                cycle.append(current)
-                current = permutation[current]
-            if len(cycle) > 1:  # pragma: no branch
-                cycles.append(cycle)
-
-    return cycles
-
-
 def compute_face_to_face_matrix(
         permutations: dict[int, int],
         cube: 'VCube',
@@ -680,7 +660,7 @@ def detect_symmetry(mask: str, cube: 'VCube') -> dict[str, bool]:
     """
     # Extract face masks
     faces = []
-    for i in range(6):
+    for i in range(FACE_NUMBER):
         start = i * cube.face_size
         end = start + cube.face_size
         faces.append(mask[start:end])
@@ -725,11 +705,14 @@ def analyze_layers(
 
     """
     # Center of each face (position 4 in 3x3 grid)
-    center_indices = {i * cube.face_size + 4 for i in range(6)}
+    center_indices = {
+        i * cube.face_size + cube.center_index
+        for i in range(FACE_NUMBER)
+    }
     edge_indices = set()
     corner_indices = set()
 
-    for face_idx in range(6):
+    for face_idx in range(FACE_NUMBER):
         face_start = face_idx * cube.face_size
         # Corners: positions 0, 2, 6, 8 in each face
         corner_indices.update({
@@ -760,38 +743,6 @@ def analyze_layers(
         'edges_moved': edges_moved,
         'corners_moved': corners_moved,
     }
-
-
-def compute_parity(permutation: list[int]) -> int:
-    """
-    Compute the parity of a permutation.
-
-    Args:
-        permutation: List where permutation[i] is the destination of position i.
-
-    Returns:
-        Parity value (0 for even, 1 for odd).
-
-    """
-    parity = 0
-    visited = [False] * len(permutation)
-
-    for i in range(len(permutation)):
-        if visited[i] or permutation[i] == i:
-            continue
-
-        cycle_length = 0
-        current = i
-        while not visited[current]:
-            visited[current] = True
-            current = permutation[current]
-            cycle_length += 1
-
-        # Cycles of even length contribute odd parity
-        if cycle_length % 2 == 0:
-            parity ^= 1
-
-    return parity
 
 
 def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
@@ -831,7 +782,7 @@ def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
     }
 
 
-def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
+def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         cp: list[int], co: list[int],
         ep: list[int], eo: list[int],
 ) -> list[str]:
@@ -853,8 +804,8 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
     patterns = []
 
     # Basic state checks
-    if (cp == list(range(8)) and co == [0] * 8 and
-        ep == list(range(12)) and eo == [0] * 12):
+    if (cp == SOLVED_CP and co == SOLVED_CO and
+        ep == SOLVED_EP and eo == SOLVED_EO):
         patterns.append('SOLVED')
         return patterns  # If solved, no other patterns apply
 
@@ -872,8 +823,8 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
         patterns.append('EDGES_ORIENTED')
 
     # Permutation patterns
-    corners_permuted = cp == list(range(8))
-    edges_permuted = ep == list(range(12))
+    corners_permuted = cp == SOLVED_CP
+    edges_permuted = ep == SOLVED_EP
 
     if corners_permuted and edges_permuted:
         patterns.append('ALL_PERMUTED')
@@ -906,16 +857,15 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
 
     # Layer-by-layer patterns
     # Check if first layer (D face) corners are solved
-    d_corners = [4, 5, 6, 7]  # DFR, DLF, DBL, DRB
     d_corners_solved = all(
         cp[i] == i and co[i] == 0
-        for i in d_corners
+        for i in D_CORNERS
     )
     if d_corners_solved:
         patterns.append('FIRST_LAYER_CORNERS_SOLVED')
 
     # Check if first layer edges are solved
-    d_edges = [4, 5, 6, 7]  # DR, DF, DL, DB
+    d_edges = D_EDGES
     d_edges_solved = all(
         ep[i] == i and eo[i] == 0
         for i in d_edges
@@ -933,28 +883,24 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915, PLR0914
     # F2L specific patterns
     if d_corners_solved and d_edges_solved:
         # Check if F2L is complete (D layer + E slice edges)
-        e_slice_edges = [8, 9, 10, 11]  # FR, FL, BL, BR
         f2l_edges_solved = all(
             ep[i] == i and eo[i] == 0
-            for i in e_slice_edges
+            for i in E_EDGES
         )
         if f2l_edges_solved:
             patterns.append('F2L_COMPLETE')
 
     # Last layer patterns
-    u_corners = [0, 1, 2, 3]  # URF, UFL, ULB, UBR
-    u_edges = [0, 1, 2, 3]  # UR, UF, UL, UB
-
-    u_corners_oriented = all(co[i] == 0 for i in u_corners)
-    u_edges_oriented = all(eo[i] == 0 for i in u_edges)
+    u_corners_oriented = all(co[i] == 0 for i in U_CORNERS)
+    u_edges_oriented = all(eo[i] == 0 for i in U_EDGES)
 
     if u_corners_oriented and u_edges_oriented:
         patterns.append('LAST_LAYER_ORIENTED')
 
     # PLL patterns (all oriented, but permuted)
     if u_corners_oriented and u_edges_oriented:
-        u_corners_permuted = all(cp[i] in u_corners for i in u_corners)
-        u_edges_permuted = all(ep[i] in u_edges for i in u_edges)
+        u_corners_permuted = all(cp[i] in U_CORNERS for i in U_CORNERS)
+        u_edges_permuted = all(ep[i] in U_EDGES for i in U_EDGES)
 
         if not u_corners_permuted or not u_edges_permuted:
             patterns.append('PLL_CASE')

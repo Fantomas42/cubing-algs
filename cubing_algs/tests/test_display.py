@@ -1,9 +1,9 @@
 """Tests for VCubeDisplay rendering and formatting."""
-
 import os
 import unittest
 from unittest.mock import patch
 
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display import VCubeDisplay
 from cubing_algs.display import color_support
@@ -168,6 +168,30 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.cube.rotate("z2 B' U' B F U F' U2")
 
         result = self.printer.display(mode='af2l')
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 10)
+
+    def test_display_f2l_ll(self) -> None:
+        """Test display f2l+ll."""
+        self.cube.rotate("z2 R U R' U' z2")
+
+        result = self.printer.display(mode='f2l+ll')
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 10)
+
+    def test_display_f2l_cll(self) -> None:
+        """Test display f2l+cll."""
+        self.cube.rotate("z2 R U R' U' z2")
+
+        result = self.printer.display(mode='f2l+cll')
+        lines = result.split('\n')
+        self.assertEqual(len(lines), 10)
+
+    def test_display_f2l_ell(self) -> None:
+        """Test display f2l+ell."""
+        self.cube.rotate("z2 R U R' U' z2")
+
+        result = self.printer.display(mode='f2l+ell')
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
 
@@ -992,7 +1016,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
             face_chars = [c for c in line if c.isalpha()]
 
             # Should have groups of 3 consecutive same characters
-            for j in range(6):  # 6 faces
+            for j in range(FACE_NUMBER):
                 start_idx = j * 3
                 face_group = face_chars[start_idx:start_idx + 3]
                 expected_face = FACE_ORDER[j]

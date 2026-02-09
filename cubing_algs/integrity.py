@@ -7,43 +7,131 @@ Checks include permutation validity, orientation constraints,
 color combinations, and mathematical consistency.
 """
 from cubing_algs.constants import CORNER_FACELET_MAP
+from cubing_algs.constants import CORNER_NUMBER
+from cubing_algs.constants import CORNER_VALID_ORIENTATIONS
 from cubing_algs.constants import EDGE_FACELET_MAP
+from cubing_algs.constants import EDGE_NUMBER
+from cubing_algs.constants import EDGE_VALID_ORIENTATIONS
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.constants import ORIENTATIONS
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.facelets import facelets_to_cubies
 
-CORNER_NUMBER = 8
-CORNER_VALID_ORIENTATIONS = {0, 1, 2}
 
-EDGE_NUMBER = 12
-EDGE_VALID_ORIENTATIONS = {0, 1}
-
-
-def count_inversions(permutation: list[int]) -> int:
+def compute_parity(permutation: list[int]) -> int:
     """
-    Count the number of inversions in a permutation.
+    Compute the parity of a permutation using cycle detection.
 
-    An inversion occurs when a larger element appears before
-    a smaller element in the sequence. This is used to determine
-    permutation parity for cube state validation.
+    Parity is 0 for even permutations (even number of transpositions)
+    and 1 for odd permutations (odd number of transpositions).
+
+    This uses an O(n) cycle-based algorithm: a cycle of length k
+    requires (k-1) transpositions, so cycles of even length contribute
+    odd parity and cycles of odd length contribute even parity.
 
     Args:
-        permutation: List of integers representing a permutation.
+        permutation: List where permutation[i] is the value at position i.
 
     Returns:
-        Number of inversions in the permutation.
+        0 for even parity, 1 for odd parity.
 
     """
-    inversions = 0
+    n = len(permutation)
+    visited = [False] * n
+    parity = 0
 
-    for i, val_i in enumerate(permutation):
-        for val_j in permutation[i + 1:]:
-            if val_i > val_j:
-                inversions += 1
+    for i in range(n):
+        if visited[i] or permutation[i] == i:
+            continue
 
-    return inversions
+        # Count cycle length
+        cycle_len = 0
+        j = i
+        while not visited[j]:
+            visited[j] = True
+            j = permutation[j]
+            cycle_len += 1
+
+        # Cycle of length k contributes (k-1) swaps
+        parity ^= (cycle_len - 1) % 2
+
+    return parity
+
+
+def find_permutation_cycles(permutation: list[int]) -> list[list[int]]:
+    """
+    Find cycles in a permutation.
+
+    A cycle is a sequence of positions where each position maps to the next,
+    forming a closed loop. For example, [1, 2, 0] contains the cycle [0, 1, 2]
+    meaning position 0 goes to 1, 1 goes to 2, and 2 goes back to 0.
+
+    Args:
+        permutation: List where permutation[i] is the destination of position i.
+
+    Returns:
+        List of cycles, each cycle is a list of position indices.
+        Fixed points (where permutation[i] == i) are not included.
+
+    """
+    visited = [False] * len(permutation)
+    cycles = []
+
+    for i in range(len(permutation)):
+        if not visited[i] and permutation[i] != i:
+            cycle = []
+            current = i
+            while not visited[current]:
+                visited[current] = True
+                cycle.append(current)
+                current = permutation[current]
+            if len(cycle) > 1:  # pragma: no branch
+                cycles.append(cycle)
+
+    return cycles
+
+
+def is_valid_permutation(permutation: list[int], expected_size: int) -> bool:
+    """
+    Check if a list is a valid permutation of 0 to expected_size-1.
+
+    Args:
+        permutation: List to validate.
+        expected_size: Expected number of elements (must contain 0 to size-1).
+
+    Returns:
+        True if valid permutation, False otherwise.
+
+    """
+    return (
+        len(permutation) == expected_size
+        and set(permutation) == set(range(expected_size))
+    )
+
+
+def is_valid_orientation(
+        orientation: list[int],
+        expected_size: int,
+        valid_values: set[int],
+) -> bool:
+    """
+    Check if orientation values are all within valid range.
+
+    Args:
+        orientation: List of orientation values to validate.
+        expected_size: Expected number of elements.
+        valid_values: Set of valid orientation values.
+
+    Returns:
+        True if all orientations are valid, False otherwise.
+
+    """
+    return (
+        len(orientation) == expected_size
+        and all(o in valid_values for o in orientation)
+    )
 
 
 class VCubeIntegrityChecker:
@@ -171,7 +259,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If corner permutation is invalid.
 
         """
-        if len(cp) != CORNER_NUMBER or set(cp) != set(range(CORNER_NUMBER)):
+        if not is_valid_permutation(cp, CORNER_NUMBER):
             msg = (
                 'Corner permutation must contain exactly '
                 'one instance of each corner (0-7)'
@@ -187,9 +275,8 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If corner orientations are invalid.
 
         """
-        if len(co) != CORNER_NUMBER or any(
-                orientation not in CORNER_VALID_ORIENTATIONS
-                for orientation in co
+        if not is_valid_orientation(
+                co, CORNER_NUMBER, CORNER_VALID_ORIENTATIONS,
         ):
             msg = 'Corner orientation must be 0, 1, or 2 for each corner'
             raise InvalidCubeStateError(msg)
@@ -248,7 +335,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If edge permutation is invalid.
 
         """
-        if len(ep) != EDGE_NUMBER or set(ep) != set(range(EDGE_NUMBER)):
+        if not is_valid_permutation(ep, EDGE_NUMBER):
             msg = (
                 'Edge permutation must contain exactly '
                 'one instance of each edge (0-11)'
@@ -264,10 +351,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If edge orientations are invalid.
 
         """
-        if len(eo) != EDGE_NUMBER or any(
-                orientation not in EDGE_VALID_ORIENTATIONS
-                for orientation in eo
-        ):
+        if not is_valid_orientation(eo, EDGE_NUMBER, EDGE_VALID_ORIENTATIONS):
             msg = 'Edge orientation must be 0 or 1 for each edge'
             raise InvalidCubeStateError(msg)
 
@@ -321,10 +405,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If permutation parities do not match.
 
         """
-        corner_parity = count_inversions(cp) % 2
-        edge_parity = count_inversions(ep) % 2
-
-        if corner_parity != edge_parity:
+        if compute_parity(cp) != compute_parity(ep):
             msg = 'Corner and edge permutation parities must be equal'
             raise InvalidCubeStateError(msg)
 
@@ -384,6 +465,10 @@ class VCubeIntegrityChecker:
 
         if front_face and front_face not in OPPOSITE_FACES:
             msg = f'{ front_face } is an invalid face'
+            raise InvalidFaceError(msg)
+
+        if len(faces) == 2 and faces not in ORIENTATIONS:
+            msg = f'{ faces } is not a valid orientation'
             raise InvalidFaceError(msg)
 
         return top_face, front_face

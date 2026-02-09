@@ -1,6 +1,7 @@
 """Virtual cube implementation for simulating moves and tracking state."""
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_INDEXES
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display import VCubeDisplay
@@ -12,9 +13,10 @@ from cubing_algs.extensions import rotate_3x3x3
 from cubing_algs.extensions import rotate_dynamic
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
-from cubing_algs.initial_state import get_initial_state
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
+from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solver import facelets_to_facelets_algorithm
 from cubing_algs.visual_cube import visual_cube_cube
 
 
@@ -31,7 +33,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     - NxNxN: 6*N*N-character string
     """
 
-    face_number: int = 6
+    face_number: int = FACE_NUMBER
 
     def __init__(self, initial: str | None = None, *,
                  size: int = 3,
@@ -56,7 +58,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             if check:
                 self.check_integrity()
         else:
-            self._state = get_initial_state(size)
+            self._state = get_solved_facelets(size)
 
         self.history: list[str] = history or []
 
@@ -360,7 +362,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return [
             self.state[(i * self.face_size) + center_index]
-            for i in range(6)
+            for i in range(self.face_number)
         ]
 
     def get_face_index(self, face: str) -> int:
@@ -396,6 +398,32 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         index = self.get_face_index(face)
 
         return self._state[index * self.face_size: (index + 1) * self.face_size]
+
+    def to_algorithm(self, other: 'VCube') -> Algorithm:
+        """
+        Build Algorithm to pass from a cube state to another.
+
+        Args:
+            other: Another VCube instance.
+
+        Returns:
+            An algorithm to apply.
+
+        """
+        self_uf = self.oriented_copy('UF', full=False)
+        other_uf = other.oriented_copy('UF', full=False)
+
+        algorithm = facelets_to_facelets_algorithm(
+            self_uf.state,
+            other_uf.state,
+        )
+
+        orientation = other_uf.compute_orientation_moves(other.orientation)
+
+        if orientation:
+            algorithm += orientation
+
+        return algorithm
 
     @property
     def visual_cube_url(self) -> str:

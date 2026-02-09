@@ -3,6 +3,7 @@
 import unittest
 from unittest.mock import patch
 
+from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.effects import EFFECTS
 from cubing_algs.effects import FACE_POSITIONS
 from cubing_algs.effects import brighten
@@ -40,8 +41,8 @@ class TestPositioningFunctions(unittest.TestCase):
 
     def test_face_positions_constant(self) -> None:
         """Test FACE_POSITIONS constant has correct structure."""
-        self.assertEqual(len(FACE_POSITIONS), 6)
-        for face_index in range(6):
+        self.assertEqual(len(FACE_POSITIONS), FACE_NUMBER)
+        for face_index in range(FACE_NUMBER):
             self.assertIn(face_index, FACE_POSITIONS)
             self.assertEqual(len(FACE_POSITIONS[face_index]), 2)
             self.assertIsInstance(FACE_POSITIONS[face_index][0], int)
@@ -67,7 +68,7 @@ class TestPositioningFunctions(unittest.TestCase):
         cube_size = 3
         face_size = cube_size * cube_size
 
-        for face_index in range(6):
+        for face_index in range(FACE_NUMBER):
             for local_index in range(face_size):
                 facelet_index = face_index * face_size + local_index
                 result = global_light_position_factor(facelet_index, cube_size)

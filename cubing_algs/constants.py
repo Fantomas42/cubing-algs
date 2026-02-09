@@ -8,6 +8,8 @@ transformations, and visual display.
 """
 import re
 
+from cubing_algs.annotations import RegexPattern
+
 MAX_ITERATIONS = 50
 
 RESLICE_THRESHOLD = 50
@@ -320,11 +322,11 @@ UNWIDE_SLICE_MOVES.update(
 )
 
 
-MOVE_SPLIT = re.compile(
+MOVE_SPLIT: RegexPattern = re.compile(
     r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-)(?:@\d+)?|\.(?:@\d+)?)",
 )
 
-LAYER_SPLIT = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
+LAYER_SPLIT: RegexPattern = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
 
 SYMMETRY_M = {
     'F': 'F', 'S': 'S', 'z': 'z',
@@ -379,38 +381,14 @@ ADJACENT_FACES = {
 
 FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
 
+FACE_NUMBER = len(FACE_ORDER)
+
 FACE_INDEXES = {
     face: i
     for i, face in enumerate(FACE_ORDER)
 }
 
 FACES = ''.join(FACE_ORDER)
-
-CORNER_FACELET_MAP = [
-    [8, 9, 20],    # URF
-    [6, 18, 38],   # UFL
-    [0, 36, 47],   # ULB
-    [2, 45, 11],   # UBR
-    [29, 26, 15],  # DFR
-    [27, 44, 24],  # DLF
-    [33, 53, 42],  # DBL
-    [35, 17, 51],  # DRB
-]
-
-EDGE_FACELET_MAP = [
-    [5, 10],   # UR
-    [7, 19],   # UF
-    [3, 37],   # UL
-    [1, 46],   # UB
-    [32, 16],  # DR
-    [28, 25],  # DF
-    [30, 43],  # DL
-    [34, 52],  # DB
-    [23, 12],  # FR
-    [21, 41],  # FL
-    [50, 39],  # BL
-    [48, 14],  # BR
-]
 
 F2L_FACES = ['F', 'L', 'R', 'B']
 
@@ -426,6 +404,13 @@ F2L_ADJACENT_FACES = {
     'L': ('F', 'B'),
     'B': ('L', 'R'),
     'F': ('R', 'L'),
+}
+
+F2L_EDGE_CORNERS = {  # Edge: Corner
+    'FL': 'DLF',
+    'FR': 'DFR',
+    'BL': 'DBL',
+    'BR': 'DRB',
 }
 
 ITERATIONS_BY_CUBE_SIZE = {
@@ -505,4 +490,90 @@ QTM_OPPOSITE_EDGE_OFFSETS = {
     7: -6,
     3: 2,
     5: -2,
+}
+
+# 3x3x3 constants
+CORNER_NUMBER = 8
+CORNER_VALID_ORIENTATIONS = {0, 1, 2}
+CORNER_MODULUS = len(CORNER_VALID_ORIENTATIONS)
+
+EDGE_NUMBER = 12
+EDGE_VALID_ORIENTATIONS = {0, 1}
+EDGE_MODULUS = len(EDGE_VALID_ORIENTATIONS)
+
+SOLVED_CP = list(range(CORNER_NUMBER))
+SOLVED_CO = [0] * CORNER_NUMBER
+SOLVED_EP = list(range(EDGE_NUMBER))
+SOLVED_EO = [0] * EDGE_NUMBER
+SOLVED_SO = list(range(FACE_NUMBER))
+
+CORNER_FACELET_MAP = [
+    [8, 9, 20],    # URF
+    [6, 18, 38],   # UFL
+    [0, 36, 47],   # ULB
+    [2, 45, 11],   # UBR
+    [29, 26, 15],  # DFR
+    [27, 44, 24],  # DLF
+    [33, 53, 42],  # DBL
+    [35, 17, 51],  # DRB
+]
+
+EDGE_FACELET_MAP = [
+    [5, 10],   # UR
+    [7, 19],   # UF
+    [3, 37],   # UL
+    [1, 46],   # UB
+    [32, 16],  # DR
+    [28, 25],  # DF
+    [30, 43],  # DL
+    [34, 52],  # DB
+    [23, 12],  # FR
+    [21, 41],  # FL
+    [50, 39],  # BL
+    [48, 14],  # BR
+]
+
+CORNER_NAMES = [
+    'URF', 'UFL', 'ULB', 'UBR',
+    'DFR', 'DLF', 'DBL', 'DRB',
+]
+
+EDGE_NAMES = [
+    'UR', 'UF', 'UL', 'UB',
+    'DR', 'DF', 'DL', 'DB',
+    'FR', 'FL', 'BL', 'BR',
+]
+
+U_CORNERS = [0, 1, 2, 3]  # URF, UFL, ULB, UBR
+D_CORNERS = [4, 5, 6, 7]  # DFR, DLF, DBL, DRB
+R_CORNERS = [0, 3, 4, 7]  # URF, UBR, DFR, DRB
+L_CORNERS = [1, 2, 5, 6]  # UFL, ULB, DLF, DBL
+F_CORNERS = [0, 1, 4, 5]  # URF, UFL, DFR, DLF
+B_CORNERS = [2, 3, 6, 7]  # ULB, UBR, DBL, DRB
+
+U_EDGES = [0, 1, 2, 3]    # UR, UF, UL, UB
+D_EDGES = [4, 5, 6, 7]    # DR, DF, DL, DB
+R_EDGES = [0, 4, 8, 11]   # UR, DR, FR, BR
+L_EDGES = [2, 6, 9, 10]   # UL, DL, FL, BL
+F_EDGES = [1, 5, 8, 9]    # UF, DF, FR, FL
+B_EDGES = [3, 7, 10, 11]  # UB, DB, BL, BR
+E_EDGES = [8, 9, 10, 11]  # FR, FL, BL, BR
+
+LAYER_MAP_CORNERS: dict[str, list[int]] = {
+    'U': U_CORNERS,
+    'D': D_CORNERS,
+    'R': R_CORNERS,
+    'L': L_CORNERS,
+    'F': F_CORNERS,
+    'B': B_CORNERS,
+}
+
+LAYER_MAP_EDGES: dict[str, list[int]] = {
+    'U': U_EDGES,
+    'D': D_EDGES,
+    'R': R_EDGES,
+    'L': L_EDGES,
+    'F': F_EDGES,
+    'B': B_EDGES,
+    'E': E_EDGES,
 }

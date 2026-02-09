@@ -1,7 +1,8 @@
 """Binary masks for identifying and manipulating cube regions and pieces."""
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
-from cubing_algs.initial_state import get_initial_state
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 
 
 def union_masks(*masks: str) -> str:
@@ -83,7 +84,7 @@ _MASK_CACHE: dict[str, tuple[bool, ...]] = {}
 _CACHE_SIZE_LIMIT = 1000  # Prevent unbounded memory growth
 
 
-def facelets_masked(facelets: str, mask: str) -> str:
+def facelets_masked(facelets: CubeFacelets, mask: str) -> CubeFacelets:
     """
     Apply a binary mask to a facelets string.
 
@@ -125,7 +126,7 @@ def facelets_masked(facelets: str, mask: str) -> str:
     )
 
 
-def state_masked(state: str, mask: str) -> str:
+def state_masked(state: CubeFacelets, mask: str) -> CubeFacelets:
     """
     Apply a binary mask to a cube state.
 
@@ -144,7 +145,7 @@ def state_masked(state: str, mask: str) -> str:
     return cubies_to_facelets(
         *facelets_to_cubies(state),
         facelets_masked(
-            get_initial_state(3),
+            SOLVED_FACELETS_3x3x3,
             mask,
         ),
     )
@@ -258,6 +259,33 @@ F2L_BL_MASK = (
     '000000000'
     '100100000'
     '001001000'
+)
+
+F2L_LL_MASK = (
+    '111111111'
+    '111111000'
+    '111111000'
+    '111111111'
+    '111111000'
+    '111111000'
+)
+
+F2L_CLL_MASK = (
+    '111111111'
+    '111111000'
+    '111111000'
+    '101010101'
+    '111111000'
+    '111111000'
+)
+
+F2L_ELL_MASK = (
+    '111111111'
+    '111111000'
+    '111111000'
+    '010111010'
+    '111111000'
+    '111111000'
 )
 
 OLL_MASK = (

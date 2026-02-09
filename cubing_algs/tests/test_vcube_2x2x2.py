@@ -3,12 +3,12 @@ import unittest
 
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.extensions.rotate_2x2x2 import rotate_move
-from cubing_algs.initial_state import get_initial_state
+from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 2x2x2 state: 24 facelets (6 faces * 4 facelets each)
 # Face order: U, R, F, D, L, B
-SOLVED_2X2X2 = get_initial_state(2)
+SOLVED_2X2X2 = get_solved_facelets(2)
 
 # Expected states after moves
 EXPECTED_2X2X2_R = 'UFUFRRRRFDFDDBDBLLLLUBUB'

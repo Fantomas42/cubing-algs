@@ -1,29 +1,17 @@
-"""Random scramble generation for Rubik's cubes of various sizes."""
-
+"""Moves utils for cubing_algs.scrambler."""
 import math
-import re
+import string
+from collections import defaultdict
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import ITERATIONS_BY_CUBE_SIZE
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.constants import OUTER_BASIC_MOVES
 from cubing_algs.parsing import parse_moves
-
-FACE_REGEXP = re.compile(rf"({ '|'.join(FACE_ORDER) })")
-
-MOVES_EASY_CROSS = [
-    'F',
-    'R',
-    'B',
-    'L',
-]
-
-EXCLUDE_ODD_FACES_RH = {'D', 'L', 'B'}
-EXCLUDE_ODD_FACES_LH = {'D', 'R', 'B'}
-
-DEFAULT_RNG = Random()  # noqa: S311
+from cubing_algs.scrambler.constants import DEFAULT_RNG
+from cubing_algs.scrambler.constants import EXCLUDE_ODD_FACES_LH
+from cubing_algs.scrambler.constants import EXCLUDE_ODD_FACES_RH
 
 
 def build_cube_move_set(cube_size: int, *,
@@ -108,34 +96,43 @@ def build_cube_move_set(cube_size: int, *,
     return moves
 
 
-def is_valid_next_move(current: str, previous: str) -> bool:
+def build_valid_next_moves(move_set: list[str]) -> dict[str, list[str]]:
     """
-    Check if a move is valid to follow another move in a scramble.
+    Precompute valid follow-up moves for each move in the set.
 
-    Prevents consecutive moves on the same face or opposite faces
-    to ensure efficient scrambles.
+    Groups moves by face, then for each move builds a list of all moves
+    whose face is neither the same nor opposite. This eliminates the need
+    for rejection sampling in random_moves.
 
     Args:
-        current: The current move being considered.
-        previous: The previous move in the sequence.
+        move_set: List of available moves.
 
     Returns:
-        True if the current move can validly follow the previous move.
+        Dictionary mapping each move to its list of valid next moves.
 
     """
-    current_move_search = FACE_REGEXP.search(current)
-    previous_move_search = FACE_REGEXP.search(previous)
+    by_face: dict[str, list[str]] = defaultdict(list)
+    move_face: dict[str, str] = {}
 
-    if not current_move_search or not previous_move_search:
-        return False
+    for move in move_set:
+        face = move.lstrip(string.digits)[0]
+        move_face[move] = face
+        by_face[face].append(move)
 
-    current_move = current_move_search[0]
-    previous_move = previous_move_search[0]
+    valid_by_face: dict[str, list[str]] = {
+        face: [
+            m
+            for other_face, face_moves in by_face.items()
+            if other_face != face and OPPOSITE_FACES[other_face] != face
+            for m in face_moves
+        ]
+        for face in by_face
+    }
 
-    if current_move == previous_move:
-        return False
-
-    return OPPOSITE_FACES[current_move] != previous_move
+    return {
+        move: valid_by_face[face]
+        for move, face in move_face.items()
+    }
 
 
 def random_moves(cube_size: int,
@@ -161,66 +158,17 @@ def random_moves(cube_size: int,
     if rng is None:
         rng = DEFAULT_RNG
 
+    valid_next = build_valid_next_moves(move_set)
+
     value = rng.choice(move_set)
     moves = [value]
-    previous = value
 
     if not iterations:
         iterations_range = ITERATIONS_BY_CUBE_SIZE[min(cube_size, 7)]
         iterations = rng.randint(*iterations_range)
 
-    while len(moves) < iterations:
-        while not is_valid_next_move(value, previous):
-            value = rng.choice(move_set)
-
-        previous = value
+    for _ in range(iterations - 1):
+        value = rng.choice(valid_next[value])
         moves.append(value)
 
     return parse_moves(moves)
-
-
-def scramble(cube_size: int, iterations: int = 0, *,
-             inner_layers: bool = False,
-             right_handed: bool = True,
-             rng: Random | None = None) -> Algorithm:
-    """
-    Generate a random scramble for a cube of the specified size.
-
-    Creates an appropriate move set for the cube size and generates
-    a random sequence to scramble the cube.
-
-    Args:
-        cube_size: Size of the cube (e.g., 3 for 3x3x3).
-        iterations: Number of moves in the scramble (0 for automatic).
-        inner_layers: Whether to include inner layer moves.
-        right_handed: Whether to optimize for right-handed solving.
-        rng: Optional random number generator.
-
-    Returns:
-        Algorithm containing the scramble sequence.
-
-    """
-    move_set = build_cube_move_set(
-        cube_size,
-        inner_layers=inner_layers,
-        right_handed=right_handed,
-    )
-
-    return random_moves(cube_size, move_set, iterations, rng)
-
-
-def scramble_easy_cross(rng: Random | None = None) -> Algorithm:
-    """
-    Generate an easy cross scramble using only basic face moves.
-
-    Creates a simple scramble suitable for practicing cross patterns
-    in speedcubing methods like CFOP.
-
-    Args:
-        rng: Optional random number generator.
-
-    Returns:
-        Algorithm with 10 random moves from F, R, B, L faces.
-
-    """
-    return random_moves(3, MOVES_EASY_CROSS, 10, rng)
