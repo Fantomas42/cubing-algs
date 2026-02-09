@@ -1,6 +1,4 @@
 """Visual effects and color transformations for cube display rendering."""
-
-# ruff: noqa: ARG001
 import math
 import re
 from collections.abc import Callable
@@ -17,6 +15,8 @@ FACE_POSITIONS = {
     4: [1, 0],
     5: [1, 3],
 }
+
+type RGB = tuple[int, int, int]
 
 
 class EffectParams(TypedDict, total=False):
@@ -43,14 +43,14 @@ class EffectConfig(TypedDict, total=False):
 
     function: Callable[
         [
-            tuple[int, int, int],
-            tuple[int, int, int],
+            RGB,
+            RGB,
             int, int,
         ],
         tuple[
-            tuple[int, int, int],
-            tuple[int, int, int],
-        ]
+            RGB,
+            RGB,
+        ],
     ]
     parameters: dict[str, float | int | str | bool]
 
@@ -132,16 +132,20 @@ def get_position_factor(facelet_index: int, cube_size: int,
 
 # Effects
 
-def shine(background_rgb: tuple[int, int, int],
-          foreground_rgb: tuple[int, int, int],
-          facelet_index: int, cube_size: int,
-          **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+
+def shine(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply shine effect with smooth brightness variation
     across the surface.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -167,15 +171,18 @@ def shine(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def neon(background_rgb: tuple[int, int, int],
-         foreground_rgb: tuple[int, int, int],
-         facelet_index: int, cube_size: int,
-         **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def neon(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply neon glow effect with saturated colors and bright highlights.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity and saturation.
@@ -203,16 +210,19 @@ def neon(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def chrome(background_rgb: tuple[int, int, int],
-           foreground_rgb: tuple[int, int, int],
-           facelet_index: int, cube_size: int,
-           **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def chrome(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply chrome effect with metallic highlights
     and reflective appearance.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity and metallic.
@@ -246,15 +256,18 @@ def chrome(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def gold(background_rgb: tuple[int, int, int],
-         foreground_rgb: tuple[int, int, int],
-         facelet_index: int, cube_size: int,
-         **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def gold(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply golden metallic effect with warm yellow highlights.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity and warmth.
@@ -281,15 +294,18 @@ def gold(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def silver(background_rgb: tuple[int, int, int],
-           foreground_rgb: tuple[int, int, int],
-           facelet_index: int, cube_size: int,
-           **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def silver(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply silver metallic effect with cool highlights.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -316,15 +332,18 @@ def silver(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def copper(background_rgb: tuple[int, int, int],
-           foreground_rgb: tuple[int, int, int],
-           facelet_index: int, cube_size: int,
-           **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def copper(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply copper metallic effect with warm red-orange tints.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity and warmth.
@@ -349,15 +368,18 @@ def copper(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def diamond(background_rgb: tuple[int, int, int],
-            foreground_rgb: tuple[int, int, int],
-            facelet_index: int, cube_size: int,
-            **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def diamond(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply diamond effect with bright sparkle points at specific positions.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -390,15 +412,18 @@ def diamond(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def rainbow(background_rgb: tuple[int, int, int],
-            foreground_rgb: tuple[int, int, int],
-            facelet_index: int, cube_size: int,
-            **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def rainbow(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply rainbow prismatic effect with color shifting based on position.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters.
@@ -438,16 +463,19 @@ def rainbow(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def matte(background_rgb: tuple[int, int, int],
-          foreground_rgb: tuple[int, int, int],
-          _facelet_index: int, _cube_size: int,
-          **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def matte(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply matte effect by reducing brightness for a flat,
     non-reflective appearance.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including reduction.
@@ -468,15 +496,18 @@ def matte(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def glossy(background_rgb: tuple[int, int, int],
-           foreground_rgb: tuple[int, int, int],
-           facelet_index: int, cube_size: int,
-           **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def glossy(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply glossy effect with sharp highlights like polished plastic.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -500,15 +531,18 @@ def glossy(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def frosted(background_rgb: tuple[int, int, int],
-            foreground_rgb: tuple[int, int, int],
-            facelet_index: int, cube_size: int,
-            **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def frosted(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply frosted effect with soft, diffused lighting.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -532,16 +566,18 @@ def frosted(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def checkerboard(background_rgb: tuple[int, int, int],
-                 foreground_rgb: tuple[int, int, int],
-                 facelet_index: int, cube_size: int,
-                 **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int],
-                                     tuple[int, int, int]]:
+def checkerboard(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply checkerboard pattern with alternating light and dark squares.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -567,15 +603,18 @@ def checkerboard(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def stripes(background_rgb: tuple[int, int, int],
-            foreground_rgb: tuple[int, int, int],
-            facelet_index: int, cube_size: int,
-            **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def stripes(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply stripe pattern in horizontal, vertical, or diagonal directions.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including direction, frequency, and intensity.
@@ -609,15 +648,18 @@ def stripes(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def spiral(background_rgb: tuple[int, int, int],
-           foreground_rgb: tuple[int, int, int],
-           facelet_index: int, cube_size: int,
-           **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def spiral(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply spiral pattern radiating from the center of each face.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -651,15 +693,18 @@ def spiral(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def plasma(background_rgb: tuple[int, int, int],
-           foreground_rgb: tuple[int, int, int],
-           facelet_index: int, cube_size: int,
-           **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def plasma(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply plasma effect with multiple interference wave patterns.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -690,16 +735,19 @@ def plasma(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def holographic(background_rgb: tuple[int, int, int],
-                foreground_rgb: tuple[int, int, int],
-                facelet_index: int, cube_size: int,
-                **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def holographic(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply holographic effect with color shifting
     that simulates viewing angle changes.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including intensity.
@@ -725,15 +773,18 @@ def holographic(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def dim(background_rgb: tuple[int, int, int],
-        foreground_rgb: tuple[int, int, int],
+def dim(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
         _facelet_index: int, _cube_size: int,
-        **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Reduce brightness uniformly across all color channels.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including factor.
@@ -754,15 +805,18 @@ def dim(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def brighten(background_rgb: tuple[int, int, int],
-             foreground_rgb: tuple[int, int, int],
-             _facelet_index: int, _cube_size: int,
-             **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def brighten(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Increase brightness uniformly across all color channels.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including factor.
@@ -782,15 +836,18 @@ def brighten(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def contrast(background_rgb: tuple[int, int, int],
-             foreground_rgb: tuple[int, int, int],
-             _facelet_index: int, _cube_size: int,
-             **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def contrast(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Enhance contrast by amplifying differences from middle gray.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including factor.
@@ -811,16 +868,19 @@ def contrast(background_rgb: tuple[int, int, int],
     return (r, g, b), foreground_rgb
 
 
-def face_visible(background_rgb: tuple[int, int, int],
-                 foreground_rgb: tuple[int, int, int],
-                 facelet_index: int, cube_size: int,
-             **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def face_visible(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Adjust brightness based on face visibility
     with front faces brighter than back faces.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including lighten and darken.
@@ -840,15 +900,18 @@ def face_visible(background_rgb: tuple[int, int, int],
     return dim(background_rgb, foreground_rgb, facelet_index, cube_size, **kw)
 
 
-def vintage(background_rgb: tuple[int, int, int],
-            foreground_rgb: tuple[int, int, int],
-            _facelet_index: int, _cube_size: int,
-            **kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def vintage(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     Apply vintage effect with desaturation and sepia tinting.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **kw: Effect parameters including sepia and desaturation.
@@ -876,15 +939,18 @@ def vintage(background_rgb: tuple[int, int, int],
     return (sepia_r, sepia_g, sepia_b), foreground_rgb
 
 
-def noop(background_rgb: tuple[int, int, int],
-         foreground_rgb: tuple[int, int, int],
-         _facelet_index: int, _cube_size: int,
-         **_kw: Unpack[EffectParams]) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+def noop(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **_kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
     """
     No-operation effect that returns the input color unchanged.
 
     Args:
-        rgb: RGB color tuple.
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
         facelet_index: Index of the facelet in the cube's state.
         cube_size: Size of the cube (3 for 3x3x3).
         **_kw: Unused effect parameters.
@@ -1090,10 +1156,7 @@ EFFECTS: dict[str, EffectConfig] = {
 }
 
 
-def register_effect(
-        name: str,
-        config: EffectConfig,
-) -> None:
+def register_effect(name: str, config: EffectConfig) -> None:
     """
     Register a custom visual effect.
 
@@ -1185,8 +1248,10 @@ def load_single_effect(
         effect_name: str,
         custom_params: dict[str, float | int | str | bool],
         palette_name: str,
-) -> Callable[[tuple[int, int, int], tuple[int, int, int], int, int],
-              tuple[tuple[int, int, int], tuple[int, int, int]]] | None:
+) -> Callable[
+    [RGB, RGB, int, int],
+    tuple[RGB, RGB],
+] | None:
     """
     Load and configure a single effect function with its parameters.
 
@@ -1204,8 +1269,8 @@ def load_single_effect(
 
     effect_config: EffectConfig = EFFECTS[effect_name]
     effect_function: Callable[..., tuple[
-        tuple[int, int, int],
-        tuple[int, int, int]]] = effect_config[
+        RGB,
+        RGB]] = effect_config[
             'function'
         ]
 
@@ -1222,17 +1287,17 @@ def load_single_effect(
 
     effect_parameters.update(custom_params)
 
-    def effect(background_rgb: tuple[int, int, int],
-               foreground_rgb: tuple[int, int, int],
+    def effect(background_rgb: RGB,
+               foreground_rgb: RGB,
                facelet_index: int, cube_size: int) -> tuple[
-                   tuple[int, int, int],
-                   tuple[int, int, int],
+                   RGB, RGB,
                ]:
         """
         Apply the configured effect function with pre-loaded parameters.
 
         Args:
-            rgb: RGB color tuple.
+            background_rgb: Background RGB color tuple.
+            foreground_rgb: Foreground RGB color tuple.
             facelet_index: Index of the facelet in the cube's state.
             cube_size: Size of the cube (3 for 3x3x3).
 
@@ -1250,8 +1315,8 @@ def load_single_effect(
 
 
 def load_effect(effect_name: str, palette_name: str) -> Callable[
-        [tuple[int, int, int], tuple[int, int, int], int, int],
-        tuple[tuple[int, int, int], tuple[int, int, int]]] | None:
+        [RGB, RGB, int, int],
+        tuple[RGB, RGB]] | None:
     """
     Load and configure effect function(s) with parameters.
     Supports chaining multiple effects using pipe separator.
@@ -1288,18 +1353,17 @@ def load_effect(effect_name: str, palette_name: str) -> Callable[
     if len(effects) == 1:
         return effects[0]
 
-
-    def chained_effect(background_rgb: tuple[int, int, int],
-                       foreground_rgb: tuple[int, int, int],
+    def chained_effect(background_rgb: RGB,
+                       foreground_rgb: RGB,
                        facelet_index: int, cube_size: int) -> tuple[
-                           tuple[int, int, int],
-                           tuple[int, int, int],
+                           RGB, RGB,
                        ]:
         """
         Apply multiple effects in sequence to create combined visuals.
 
         Args:
-            rgb: RGB color tuple.
+            background_rgb: Background RGB color tuple.
+            foreground_rgb: Foreground RGB color tuple.
             facelet_index: Index of the facelet in the cube's state.
             cube_size: Size of the cube (3 for 3x3x3).
 
