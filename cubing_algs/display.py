@@ -262,6 +262,12 @@ class VCubeDisplay:
             Formatted string with ANSI color codes for terminal display.
 
         """
+        if self.facelet_type == 'emoji':
+            return EMOJIS[facelet]
+
+        if not USE_COLORS or self.facelet_type == 'no-color':
+            return f' { facelet } '
+
         if facelet not in FACE_ORDER:
             face_color = self.palette['hidden']
         else:
@@ -271,9 +277,6 @@ class VCubeDisplay:
             elif adjacent:
                 face_key += '_adjacent'
             face_color = self.palette[face_key]
-
-        if not USE_COLORS or self.facelet_type == 'no-color':
-            return f' { facelet } '
 
         if self.effect and not adjacent and facelet_index is not None:
             face_color = self.position_based_effect(
@@ -300,9 +303,6 @@ class VCubeDisplay:
                 f'◼︎'
                 f'{ self.palette["reset"] }'
             )
-
-        if self.facelet_type == 'emoji':
-            return EMOJIS[facelet]
 
         return (
             f'{ face_color }'
