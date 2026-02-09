@@ -321,7 +321,7 @@ class TestSupportedSteps(unittest.TestCase):
 
     def test_has_petrus_steps(self) -> None:
         """Test that Petrus method steps are included."""
-        petrus_steps = ['PETRUS2x2x3', 'PETRUSEO']
+        petrus_steps = ['PETRUS2X2X3', 'PETRUSEO']
         for step in petrus_steps:
             self.assertIn(step, SUPPORTED_STEPS)
 

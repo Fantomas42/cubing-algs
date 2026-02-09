@@ -8,8 +8,10 @@ This module provides comprehensive scramble generation functionality:
 - Utility functions for cube state manipulation
 
 Submodules:
+- constants: Constants used for scrambling
+- moves: Moves utilities
 - nxn: Basic random scramble generation
-- utils: Utility functions and constants
+- parse: Parsing of piece specification
 - pieces: Low-level piece manipulation
 - steps: Step-based scramble generation
 """

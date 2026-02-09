@@ -126,7 +126,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
             )
 
         error_msg = str(context.exception)
-        self.assertIn('Solver encountred an error', error_msg)
+        self.assertIn('Solver encountered an error', error_msg)
         self.assertIn('probably the facelets are not UF oriented', error_msg)
 
     def test_invalid_destination_raises_error(self) -> None:

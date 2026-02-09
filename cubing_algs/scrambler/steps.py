@@ -93,7 +93,7 @@ SUPPORTED_STEPS: Final[list[str]] = [
     # Roux method
     'CMLL', 'CMLLEO', 'SB',
     # Petrus method
-    'PETRUS2x2x3', 'PETRUSEO',
+    'PETRUS2X2X3', 'PETRUSEO',
 ]
 
 

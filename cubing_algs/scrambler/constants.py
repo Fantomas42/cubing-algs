@@ -1,12 +1,6 @@
 """Constants for scramble generation."""
-import re
 from random import Random
 from typing import Final
-
-from cubing_algs.annotations import RegexPattern
-from cubing_algs.constants import FACE_ORDER
-
-FACE_REGEXP: RegexPattern = re.compile(rf"({ '|'.join(FACE_ORDER) })")
 
 CROSS_DIFFICULTIES = {
     'easy': 3,

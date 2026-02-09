@@ -34,7 +34,7 @@ def facelets_to_facelets_algorithm(
         solution: str = solve(source, destination)
     except ValueError as e:
         msg = (
-            'Solver encountred an error, '
+            'Solver encountered an error, '
             'probably the facelets are not UF oriented.'
         )
         raise InvalidFaceletsSolveError(msg) from e

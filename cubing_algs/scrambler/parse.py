@@ -48,7 +48,7 @@ def parse_piece_spec(spec: str, piece_type: PieceType) -> Permutation:
 
     # Handle "all" or empty spec
     if spec in {'ALL', 'EACH', 'EVERY', 'ANY', ''}:
-        return SOLVED_CP if piece_type == 'corner' else SOLVED_EP
+        return SOLVED_CP.copy() if piece_type == 'corner' else SOLVED_EP.copy()
 
     # Parse space-separated tokens
     tokens = spec.split()
