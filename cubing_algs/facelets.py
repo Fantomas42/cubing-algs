@@ -301,9 +301,9 @@ def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
     f = [so_inv[_FACE_TO_INDEX[char]] for char in facelets]
 
     # Initialize arrays
-    cp = SOLVED_CO.copy()
+    cp = SOLVED_CP.copy()
     co = SOLVED_CO.copy()
-    ep = SOLVED_EO.copy()
+    ep = SOLVED_EP.copy()
     eo = SOLVED_EO.copy()
 
     # Process corners
