@@ -1,6 +1,6 @@
 """Demonstrate all available letter styles for cube display."""
 # ruff: noqa: T201
-from cubing_algs.styles import STYLES
+from cubing_algs.display.styles import STYLES
 from cubing_algs.vcube import VCube
 
 

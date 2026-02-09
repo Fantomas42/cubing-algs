@@ -4,7 +4,7 @@ from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
-from cubing_algs.display import VCubeDisplay
+from cubing_algs.display.vcube import VCubeDisplay
 from cubing_algs.exceptions import InvalidFaceIndexError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.exceptions import InvalidOrientationError

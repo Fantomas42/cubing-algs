@@ -9,7 +9,10 @@ from cubing_algs.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.effects import load_effect
+from cubing_algs.display.effects import load_effect
+from cubing_algs.display.palettes import load_palette
+from cubing_algs.display.styles import get_piece_type
+from cubing_algs.display.styles import load_style
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
@@ -20,9 +23,6 @@ from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
-from cubing_algs.palettes import load_palette
-from cubing_algs.styles import get_piece_type
-from cubing_algs.styles import load_style
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube  # pragma: no cover

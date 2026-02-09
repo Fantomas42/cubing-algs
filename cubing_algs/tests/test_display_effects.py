@@ -1,41 +1,40 @@
 """Tests for visual effects and color transformations."""
-
 import unittest
 from unittest.mock import patch
 
 from cubing_algs.constants import FACE_NUMBER
-from cubing_algs.effects import EFFECTS
-from cubing_algs.effects import FACE_POSITIONS
-from cubing_algs.effects import EffectConfig
-from cubing_algs.effects import brighten
-from cubing_algs.effects import checkerboard
-from cubing_algs.effects import chrome
-from cubing_algs.effects import contrast
-from cubing_algs.effects import copper
-from cubing_algs.effects import diamond
-from cubing_algs.effects import dim
-from cubing_algs.effects import face_visible
-from cubing_algs.effects import frosted
-from cubing_algs.effects import get_position_factor
-from cubing_algs.effects import global_light_position_factor
-from cubing_algs.effects import glossy
-from cubing_algs.effects import gold
-from cubing_algs.effects import holographic
-from cubing_algs.effects import load_effect
-from cubing_algs.effects import load_single_effect
-from cubing_algs.effects import matte
-from cubing_algs.effects import neon
-from cubing_algs.effects import noop
-from cubing_algs.effects import parse_effect_name
-from cubing_algs.effects import parse_effect_parameters
-from cubing_algs.effects import plasma
-from cubing_algs.effects import rainbow
-from cubing_algs.effects import register_effect
-from cubing_algs.effects import shine
-from cubing_algs.effects import silver
-from cubing_algs.effects import spiral
-from cubing_algs.effects import stripes
-from cubing_algs.effects import vintage
+from cubing_algs.display.effects import EFFECTS
+from cubing_algs.display.effects import FACE_POSITIONS
+from cubing_algs.display.effects import EffectConfig
+from cubing_algs.display.effects import brighten
+from cubing_algs.display.effects import checkerboard
+from cubing_algs.display.effects import chrome
+from cubing_algs.display.effects import contrast
+from cubing_algs.display.effects import copper
+from cubing_algs.display.effects import diamond
+from cubing_algs.display.effects import dim
+from cubing_algs.display.effects import face_visible
+from cubing_algs.display.effects import frosted
+from cubing_algs.display.effects import get_position_factor
+from cubing_algs.display.effects import global_light_position_factor
+from cubing_algs.display.effects import glossy
+from cubing_algs.display.effects import gold
+from cubing_algs.display.effects import holographic
+from cubing_algs.display.effects import load_effect
+from cubing_algs.display.effects import load_single_effect
+from cubing_algs.display.effects import matte
+from cubing_algs.display.effects import neon
+from cubing_algs.display.effects import noop
+from cubing_algs.display.effects import parse_effect_name
+from cubing_algs.display.effects import parse_effect_parameters
+from cubing_algs.display.effects import plasma
+from cubing_algs.display.effects import rainbow
+from cubing_algs.display.effects import register_effect
+from cubing_algs.display.effects import shine
+from cubing_algs.display.effects import silver
+from cubing_algs.display.effects import spiral
+from cubing_algs.display.effects import stripes
+from cubing_algs.display.effects import vintage
 from cubing_algs.exceptions import EffectAlreadyExistsError
 
 
@@ -1147,7 +1146,7 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         }
 
         with patch.dict(
-                'cubing_algs.effects.EFFECTS',
+                'cubing_algs.display.effects.EFFECTS',
                 {'test_effect': mock_effect_config},
         ):
             effect_func = load_single_effect('test_effect', {}, 'default')
@@ -1173,7 +1172,7 @@ class TestEnhancedLoadEffect(unittest.TestCase):
         }
 
         with patch.dict(
-                'cubing_algs.effects.EFFECTS',
+                'cubing_algs.display.effects.EFFECTS',
                 {'test_effect': mock_effect_config},
         ):
             effect_func = load_single_effect('test_effect', {}, 'default')

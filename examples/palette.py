@@ -3,11 +3,11 @@
 import argparse
 
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display.palettes import PALETTES
+from cubing_algs.display.palettes import load_palette
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import facelets_masked
-from cubing_algs.palettes import PALETTES
-from cubing_algs.palettes import load_palette
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
 

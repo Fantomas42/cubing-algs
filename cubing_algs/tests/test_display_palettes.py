@@ -3,18 +3,18 @@ import os
 import unittest
 from unittest.mock import patch
 
+from cubing_algs.display.palettes import LOADED_PALETTES
+from cubing_algs.display.palettes import PALETTES
+from cubing_algs.display.palettes import PaletteConfig
+from cubing_algs.display.palettes import background_hex_to_ansi
+from cubing_algs.display.palettes import build_ansi_color
+from cubing_algs.display.palettes import build_ansi_palette
+from cubing_algs.display.palettes import foreground_hex_to_ansi
+from cubing_algs.display.palettes import hex_to_ansi
+from cubing_algs.display.palettes import hex_to_rgb
+from cubing_algs.display.palettes import load_palette
+from cubing_algs.display.palettes import register_palette
 from cubing_algs.exceptions import PaletteAlreadyExistsError
-from cubing_algs.palettes import LOADED_PALETTES
-from cubing_algs.palettes import PALETTES
-from cubing_algs.palettes import PaletteConfig
-from cubing_algs.palettes import background_hex_to_ansi
-from cubing_algs.palettes import build_ansi_color
-from cubing_algs.palettes import build_ansi_palette
-from cubing_algs.palettes import foreground_hex_to_ansi
-from cubing_algs.palettes import hex_to_ansi
-from cubing_algs.palettes import hex_to_rgb
-from cubing_algs.palettes import load_palette
-from cubing_algs.palettes import register_palette
 
 
 class TestHexToAnsi(unittest.TestCase):

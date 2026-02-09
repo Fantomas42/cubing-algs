@@ -1,16 +1,16 @@
 """Tests for letter style system."""
 import unittest
 
+from cubing_algs.display.styles import ANSI_STYLES
+from cubing_algs.display.styles import LOADED_STYLES
+from cubing_algs.display.styles import STYLES
+from cubing_algs.display.styles import StyleConfig
+from cubing_algs.display.styles import build_style
+from cubing_algs.display.styles import get_piece_type
+from cubing_algs.display.styles import load_style
+from cubing_algs.display.styles import register_style
+from cubing_algs.display.styles import resolve_style_ansi
 from cubing_algs.exceptions import StyleAlreadyExistsError
-from cubing_algs.styles import ANSI_STYLES
-from cubing_algs.styles import LOADED_STYLES
-from cubing_algs.styles import STYLES
-from cubing_algs.styles import StyleConfig
-from cubing_algs.styles import build_style
-from cubing_algs.styles import get_piece_type
-from cubing_algs.styles import load_style
-from cubing_algs.styles import register_style
-from cubing_algs.styles import resolve_style_ansi
 
 
 class TestResolveStyleAnsi(unittest.TestCase):

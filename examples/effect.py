@@ -1,6 +1,6 @@
 """Demonstrate all available visual effects for cube display."""
 # ruff: noqa: T201
-from cubing_algs.effects import EFFECTS
+from cubing_algs.display.effects import EFFECTS
 from cubing_algs.vcube import VCube
 
 
