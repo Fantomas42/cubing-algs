@@ -36,6 +36,7 @@ class EffectParams(TypedDict, total=False):
     factor: float
     lighten: float
     darken: float
+    color: str
 
 
 class EffectConfig(TypedDict, total=False):
@@ -920,6 +921,77 @@ def contrast(
     return (r, g, b), foreground_rgb
 
 
+def face_visible(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Adjust brightness based on face visibility
+    with front faces brighter than back faces.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
+        facelet_index: Index of the facelet in the cube's state.
+        cube_size: Size of the cube (3 for 3x3x3).
+        **kw: Effect parameters including lighten and darken.
+
+    Returns:
+        Modified RGB color tuple with visibility-based brightness adjustment.
+
+    """
+    face_size = cube_size * cube_size
+
+    face_index = facelet_index // face_size
+    kw['factor'] = kw.get('darken', 0.7)
+
+    if face_index < 3:
+        kw['factor'] = kw.get('lighten', 1.0)
+
+    return dim(background_rgb, foreground_rgb, facelet_index, cube_size, **kw)
+
+
+def vintage(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Apply vintage effect with desaturation and sepia tinting.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
+        facelet_index: Index of the facelet in the cube's state.
+        cube_size: Size of the cube (3 for 3x3x3).
+        **kw: Effect parameters including sepia and desaturation.
+
+    Returns:
+        Modified RGB color tuple with vintage effect applied.
+
+    """
+    r, g, b = background_rgb
+
+    sepia_strength = kw.get('sepia', 0.5)
+    desaturation = kw.get('desaturation', 0.3)
+
+    # Desaturate
+    gray = int(0.299 * r + 0.587 * g + 0.114 * b)
+    r = int(r * (1 - desaturation) + gray * desaturation)
+    g = int(g * (1 - desaturation) + gray * desaturation)
+    b = int(b * (1 - desaturation) + gray * desaturation)
+
+    # Apply sepia tint
+    sepia_r = min(255, int(r + sepia_strength * 40))
+    sepia_g = min(255, int(g + sepia_strength * 20))
+    sepia_b = max(0, int(b - sepia_strength * 30))
+
+    return (sepia_r, sepia_g, sepia_b), foreground_rgb
+
+
 def contrast_font(
         background_rgb: RGB,
         foreground_rgb: RGB,
@@ -1006,75 +1078,34 @@ def hidden_font(
     return background_rgb, background_rgb
 
 
-def face_visible(
+def set_font(
         background_rgb: RGB,
-        foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
-        **kw: Unpack[EffectParams],
-) -> tuple[RGB, RGB]:
-    """
-    Adjust brightness based on face visibility
-    with front faces brighter than back faces.
-
-    Args:
-        background_rgb: Background RGB color tuple.
-        foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
-        **kw: Effect parameters including lighten and darken.
-
-    Returns:
-        Modified RGB color tuple with visibility-based brightness adjustment.
-
-    """
-    face_size = cube_size * cube_size
-
-    face_index = facelet_index // face_size
-    kw['factor'] = kw.get('darken', 0.7)
-
-    if face_index < 3:
-        kw['factor'] = kw.get('lighten', 1.0)
-
-    return dim(background_rgb, foreground_rgb, facelet_index, cube_size, **kw)
-
-
-def vintage(
-        background_rgb: RGB,
-        foreground_rgb: RGB,
+        _foreground_rgb: RGB,
         _facelet_index: int, _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
-    Apply vintage effect with desaturation and sepia tinting.
+    Return the foreground with fixed value.
 
     Args:
         background_rgb: Background RGB color tuple.
-        foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
-        **kw: Effect parameters including sepia and desaturation.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameters.
+        _cube_size: Unused cube size parameters.
+        **kw: Effect parameters. color sets background color.
 
     Returns:
-        Modified RGB color tuple with vintage effect applied.
+        Double RGB color tuple with background.
 
     """
-    r, g, b = background_rgb
+    foreground_rgb: RGB = tuple(  # type: ignore[assignment]
+        map(
+            int,
+            kw.get('color', '127;127;127').split(';'),
+        ),
+    )[:3]
 
-    sepia_strength = kw.get('sepia', 0.5)
-    desaturation = kw.get('desaturation', 0.3)
-
-    # Desaturate
-    gray = int(0.299 * r + 0.587 * g + 0.114 * b)
-    r = int(r * (1 - desaturation) + gray * desaturation)
-    g = int(g * (1 - desaturation) + gray * desaturation)
-    b = int(b * (1 - desaturation) + gray * desaturation)
-
-    # Apply sepia tint
-    sepia_r = min(255, int(r + sepia_strength * 40))
-    sepia_g = min(255, int(g + sepia_strength * 20))
-    sepia_b = max(0, int(b - sepia_strength * 30))
-
-    return (sepia_r, sepia_g, sepia_b), foreground_rgb
+    return background_rgb, foreground_rgb
 
 
 def noop(
@@ -1296,6 +1327,9 @@ EFFECTS: dict[str, EffectConfig] = {
     },
     'hidden-font': {
         'function': hidden_font,
+    },
+    'set-font': {
+        'function': set_font,
     },
     'noop': {
         'function': noop,
