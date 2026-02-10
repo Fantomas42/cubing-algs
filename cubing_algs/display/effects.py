@@ -983,6 +983,29 @@ def contrast_font(
     )
 
 
+def hidden_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **_kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Return the foreground as the background.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameters.
+        _cube_size: Unused cube size parameters.
+        **_kw: Unused effect parameters.
+
+    Returns:
+        Double RGB color tuple with background.
+
+    """
+    return background_rgb, background_rgb
+
+
 def face_visible(
         background_rgb: RGB,
         foreground_rgb: RGB,
@@ -1270,6 +1293,9 @@ EFFECTS: dict[str, EffectConfig] = {
         'parameters': {
             'factor': 4.5,
         },
+    },
+    'hidden-font': {
+        'function': hidden_font,
     },
     'noop': {
         'function': noop,
