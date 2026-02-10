@@ -1,4 +1,5 @@
 """Visual effects and color transformations for cube display rendering."""
+import colorsys
 import math
 import re
 from collections.abc import Callable
@@ -181,6 +182,37 @@ def contrast_ratio(lum1: float, lum2: float) -> float:
     lighter = max(lum1, lum2)
     darker = min(lum1, lum2)
     return (lighter + 0.05) / (darker + 0.05)
+
+
+def rgb_to_hls(rgb: RGB) -> tuple[float, float, float]:
+    """
+    Convert 0-255 RGB to colorsys HLS (all 0.0-1.0).
+
+    Returns:
+        Tuple of (hue, lightness, saturation).
+
+    """
+    return colorsys.rgb_to_hls(
+        rgb[0] / 255, rgb[1] / 255, rgb[2] / 255,
+    )
+
+
+def hls_to_rgb(
+        hue: float, lit: float, sat: float,
+) -> RGB:
+    """
+    Convert colorsys HLS (0.0-1.0) to 0-255 RGB tuple.
+
+    Returns:
+        RGB tuple with values 0-255.
+
+    """
+    r, g, b = colorsys.hls_to_rgb(hue, lit, sat)
+    return (
+        min(255, max(0, int(r * 255))),
+        min(255, max(0, int(g * 255))),
+        min(255, max(0, int(b * 255))),
+    )
 
 
 # Effects
@@ -1203,6 +1235,240 @@ def set_font(
     return background_rgb, foreground_rgb
 
 
+def hue_shift_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Shift background hue by a fraction and use as foreground.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **kw: Effect parameters. factor controls hue shift
+              as fraction of full rotation (default 0.5 = 180).
+
+    Returns:
+        Background unchanged, foreground with shifted hue.
+
+    """
+    h, lit, s = rgb_to_hls(background_rgb)
+    shift = kw.get('factor', 0.5)
+    return background_rgb, hls_to_rgb(
+        (h + shift) % 1.0, lit, s,
+    )
+
+
+def warm_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Derive foreground with warm-shifted hue and inverted luminance.
+
+    Shifts background hue toward orange (~30 degrees) and inverts
+    lightness for readability against the background.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **kw: Effect parameters. factor controls hue bias
+              toward warm (default 1.0 = fully warm).
+
+    Returns:
+        Background unchanged, foreground with warm tint.
+
+    """
+    h, lit, s = rgb_to_hls(background_rgb)
+    factor = kw.get('factor', 1.0)
+    warm_hue = 0.083  # ~30 degrees (orange)
+    new_h = (h + (warm_hue - h) * factor) % 1.0
+    return background_rgb, hls_to_rgb(
+        new_h, 1.0 - lit, max(s, 0.3),
+    )
+
+
+def cool_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Derive foreground with cool-shifted hue and inverted luminance.
+
+    Shifts background hue toward blue (~210 degrees) and inverts
+    lightness for readability against the background.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **kw: Effect parameters. factor controls hue bias
+              toward cool (default 1.0 = fully cool).
+
+    Returns:
+        Background unchanged, foreground with cool tint.
+
+    """
+    h, lit, s = rgb_to_hls(background_rgb)
+    factor = kw.get('factor', 1.0)
+    cool_hue = 0.583  # ~210 degrees (blue)
+    new_h = (h + (cool_hue - h) * factor) % 1.0
+    return background_rgb, hls_to_rgb(
+        new_h, 1.0 - lit, max(s, 0.3),
+    )
+
+
+def invert_luma_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **_kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Keep background hue and saturation, invert lightness.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **_kw: Unused effect parameters.
+
+    Returns:
+        Background unchanged, foreground with inverted lightness.
+
+    """
+    h, lit, s = rgb_to_hls(background_rgb)
+    return background_rgb, hls_to_rgb(h, 1.0 - lit, s)
+
+
+def grayscale_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **_kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Convert background to BT.601 grayscale and use as foreground.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **_kw: Unused effect parameters.
+
+    Returns:
+        Background unchanged, foreground as grayscale.
+
+    """
+    r, g, b = background_rgb
+    gray = int(0.299 * r + 0.587 * g + 0.114 * b)
+    return background_rgb, (gray, gray, gray)
+
+
+def pastel_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Desaturate and lighten background as foreground.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **kw: Effect parameters. saturation scales saturation
+              (default 0.3), lighten sets target lightness
+              (default 0.8).
+
+    Returns:
+        Background unchanged, foreground as pastel color.
+
+    """
+    h, _, s = rgb_to_hls(background_rgb)
+    sat_factor = kw.get('saturation', 0.3)
+    lightness = kw.get('lighten', 0.8)
+    return background_rgb, hls_to_rgb(
+        h, lightness, s * sat_factor,
+    )
+
+
+def vivid_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Maximize saturation of background hue as foreground.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **kw: Effect parameters. saturation sets target
+              saturation (default 1.0).
+
+    Returns:
+        Background unchanged, foreground with max saturation.
+
+    """
+    h, lit, _ = rgb_to_hls(background_rgb)
+    sat = kw.get('saturation', 1.0)
+    return background_rgb, hls_to_rgb(h, lit, sat)
+
+
+def gradient_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        facelet_index: int, cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Vary foreground lightness across the face using position.
+
+    Keeps background hue and saturation, lightness interpolates
+    between lighten and darken bounds based on facelet position.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        facelet_index: Index of the facelet in the cube's state.
+        cube_size: Size of the cube (3 for 3x3x3).
+        **kw: Effect parameters. lighten sets minimum lightness
+              (default 0.2), darken sets maximum (default 0.8).
+
+    Returns:
+        Background unchanged, foreground with position-based
+        lightness.
+
+    """
+    h, _, s = rgb_to_hls(background_rgb)
+    position = get_position_factor(
+        facelet_index, cube_size, **kw,
+    )
+    lo = kw.get('lighten', 0.2)
+    hi = kw.get('darken', 0.8)
+    lit = lo + (hi - lo) * position
+    return background_rgb, hls_to_rgb(h, lit, s)
+
+
 def noop(
         background_rgb: RGB,
         foreground_rgb: RGB,
@@ -1439,6 +1705,58 @@ EFFECTS: dict[str, EffectConfig] = {
         'function': set_font,
         'parameters': {
             'color': '27;27;27',
+        },
+    },
+    'hue-shift-font': {
+        'function': hue_shift_font,
+        'parameters': {
+            'factor': 0.5,
+        },
+    },
+    'analogous-font': {
+        'function': hue_shift_font,
+        'parameters': {
+            'factor': 0.083,
+        },
+    },
+    'warm-font': {
+        'function': warm_font,
+        'parameters': {
+            'factor': 1.0,
+        },
+    },
+    'cool-font': {
+        'function': cool_font,
+        'parameters': {
+            'factor': 1.0,
+        },
+    },
+    'invert-luma-font': {
+        'function': invert_luma_font,
+    },
+    'grayscale-font': {
+        'function': grayscale_font,
+    },
+    'pastel-font': {
+        'function': pastel_font,
+        'parameters': {
+            'saturation': 0.3,
+            'lighten': 0.8,
+        },
+    },
+    'vivid-font': {
+        'function': vivid_font,
+        'parameters': {
+            'saturation': 1.0,
+        },
+    },
+    'gradient-font': {
+        'function': gradient_font,
+        'parameters': {
+            'lighten': 0.2,
+            'darken': 0.8,
+            'facelet_mode': 'local',
+            'position_mode': 'light',
         },
     },
     'noop': {

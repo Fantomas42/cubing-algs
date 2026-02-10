@@ -6,10 +6,15 @@ from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.display.effects import EFFECTS
 from cubing_algs.display.effects import FACE_POSITIONS
 from cubing_algs.display.effects import EffectConfig
+from cubing_algs.display.effects import b_w_font
 from cubing_algs.display.effects import brighten
 from cubing_algs.display.effects import checkerboard
 from cubing_algs.display.effects import chrome
+from cubing_algs.display.effects import complement_font
 from cubing_algs.display.effects import contrast
+from cubing_algs.display.effects import contrast_font
+from cubing_algs.display.effects import contrast_ratio
+from cubing_algs.display.effects import cool_font
 from cubing_algs.display.effects import copper
 from cubing_algs.display.effects import diamond
 from cubing_algs.display.effects import dim
@@ -19,7 +24,14 @@ from cubing_algs.display.effects import get_position_factor
 from cubing_algs.display.effects import global_light_position_factor
 from cubing_algs.display.effects import glossy
 from cubing_algs.display.effects import gold
+from cubing_algs.display.effects import gradient_font
+from cubing_algs.display.effects import grayscale_font
+from cubing_algs.display.effects import hidden_font
+from cubing_algs.display.effects import hls_to_rgb
 from cubing_algs.display.effects import holographic
+from cubing_algs.display.effects import hue_shift_font
+from cubing_algs.display.effects import invert_luma_font
+from cubing_algs.display.effects import linearize_srgb
 from cubing_algs.display.effects import load_effect
 from cubing_algs.display.effects import load_single_effect
 from cubing_algs.display.effects import matte
@@ -27,14 +39,21 @@ from cubing_algs.display.effects import neon
 from cubing_algs.display.effects import noop
 from cubing_algs.display.effects import parse_effect_name
 from cubing_algs.display.effects import parse_effect_parameters
+from cubing_algs.display.effects import pastel_font
 from cubing_algs.display.effects import plasma
 from cubing_algs.display.effects import rainbow
 from cubing_algs.display.effects import register_effect
+from cubing_algs.display.effects import relative_luminance
+from cubing_algs.display.effects import rgb_to_hls
+from cubing_algs.display.effects import set_font
+from cubing_algs.display.effects import shade_font
 from cubing_algs.display.effects import shine
 from cubing_algs.display.effects import silver
 from cubing_algs.display.effects import spiral
 from cubing_algs.display.effects import stripes
 from cubing_algs.display.effects import vintage
+from cubing_algs.display.effects import vivid_font
+from cubing_algs.display.effects import warm_font
 from cubing_algs.exceptions import EffectAlreadyExistsError
 
 
@@ -1460,3 +1479,511 @@ class TestRegisterEffect(unittest.TestCase):
         test_rgb = (100, 100, 100)
         result = effect_func(test_rgb, test_rgb, 0, 3)
         self.assertEqual(result, ((50, 50, 50), test_rgb))
+
+
+class TestColorUtilities(unittest.TestCase):
+    """Test color utility functions."""
+
+    def test_linearize_srgb_zero(self) -> None:
+        """Test linearize_srgb with zero input."""
+        self.assertAlmostEqual(linearize_srgb(0), 0.0)
+
+    def test_linearize_srgb_white(self) -> None:
+        """Test linearize_srgb with max input."""
+        self.assertAlmostEqual(linearize_srgb(255), 1.0, places=2)
+
+    def test_linearize_srgb_below_threshold(self) -> None:
+        """Test linearize_srgb with value in linear region."""
+        # 0.04045 * 255 ≈ 10.3, so value=10 is below threshold
+        result = linearize_srgb(10)
+        self.assertAlmostEqual(result, (10 / 255) / 12.92, places=6)
+
+    def test_linearize_srgb_above_threshold(self) -> None:
+        """Test linearize_srgb with value in gamma region."""
+        result = linearize_srgb(128)
+        v = 128 / 255
+        expected = ((v + 0.055) / 1.055) ** 2.4
+        self.assertAlmostEqual(result, expected, places=6)
+
+    def test_relative_luminance_black(self) -> None:
+        """Test relative luminance of black is 0."""
+        self.assertAlmostEqual(relative_luminance((0, 0, 0)), 0.0)
+
+    def test_relative_luminance_white(self) -> None:
+        """Test relative luminance of white is ~1."""
+        result = relative_luminance((255, 255, 255))
+        self.assertAlmostEqual(result, 1.0, places=2)
+
+    def test_relative_luminance_green_dominates(self) -> None:
+        """Test that green channel contributes most to luminance."""
+        lum_r = relative_luminance((255, 0, 0))
+        lum_g = relative_luminance((0, 255, 0))
+        lum_b = relative_luminance((0, 0, 255))
+        self.assertGreater(lum_g, lum_r)
+        self.assertGreater(lum_g, lum_b)
+
+    def test_contrast_ratio_same_luminance(self) -> None:
+        """Test contrast ratio of identical luminances is 1."""
+        self.assertAlmostEqual(contrast_ratio(0.5, 0.5), 1.0, places=2)
+
+    def test_contrast_ratio_black_white(self) -> None:
+        """Test contrast ratio of black vs white is 21."""
+        self.assertAlmostEqual(contrast_ratio(0.0, 1.0), 21.0)
+
+    def test_contrast_ratio_order_independent(self) -> None:
+        """Test contrast ratio is the same regardless of argument order."""
+        self.assertEqual(
+            contrast_ratio(0.2, 0.8),
+            contrast_ratio(0.8, 0.2),
+        )
+
+    def test_rgb_to_hls_red(self) -> None:
+        """Test RGB to HLS conversion for pure red."""
+        hue, lit, sat = rgb_to_hls((255, 0, 0))
+        self.assertAlmostEqual(hue, 0.0)
+        self.assertAlmostEqual(lit, 0.5)
+        self.assertAlmostEqual(sat, 1.0)
+
+    def test_rgb_to_hls_gray(self) -> None:
+        """Test RGB to HLS conversion for gray (zero saturation)."""
+        _, lit, sat = rgb_to_hls((128, 128, 128))
+        self.assertAlmostEqual(sat, 0.0)
+        self.assertAlmostEqual(lit, 128 / 255, places=2)
+
+    def test_hls_to_rgb_red(self) -> None:
+        """Test HLS to RGB conversion for pure red."""
+        self.assertEqual(hls_to_rgb(0.0, 0.5, 1.0), (255, 0, 0))
+
+    def test_hls_to_rgb_clamping(self) -> None:
+        """Test HLS to RGB clamps to 0-255."""
+        result = hls_to_rgb(0.0, 1.5, 1.0)
+        for c in result:
+            self.assertGreaterEqual(c, 0)
+            self.assertLessEqual(c, 255)
+
+    def test_hls_rgb_roundtrip(self) -> None:
+        """Test HLS → RGB → HLS roundtrip preserves values."""
+        original = (200, 100, 50)
+        hue, lit, sat = rgb_to_hls(original)
+        result = hls_to_rgb(hue, lit, sat)
+        for orig, res in zip(original, result, strict=True):
+            self.assertAlmostEqual(orig, res, delta=2)
+
+
+class TestContrastAndHiddenFontEffects(RGBTestCase):
+    """Test contrast_font and hidden_font effects."""
+
+    def setUp(self) -> None:
+        """Set up common test data."""
+        self.fg: tuple[int, int, int] = (127, 127, 127)
+        self.idx = 0
+        self.size = 3
+
+    def test_contrast_font_sufficient_contrast(self) -> None:
+        """Test contrast_font returns unchanged when ok."""
+        bg = (0, 0, 0)
+        fg = (255, 255, 255)
+        result_bg, result_fg = contrast_font(
+            bg, fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertEqual(result_fg, fg)
+
+    def test_contrast_font_adjusts_low_contrast(self) -> None:
+        """Test contrast_font adjusts fg when contrast low."""
+        bg = (30, 30, 30)
+        fg = (40, 40, 40)
+        result_bg, result_fg = contrast_font(
+            bg, fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertGreater(sum(result_fg), sum(fg))
+
+    def test_contrast_font_light_background(self) -> None:
+        """Test contrast_font toward black on light bg."""
+        bg = (240, 240, 240)
+        fg = (220, 220, 220)
+        result_bg, result_fg = contrast_font(
+            bg, fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertLess(sum(result_fg), sum(fg))
+
+    def test_contrast_font_custom_ratio(self) -> None:
+        """Test contrast_font with custom min ratio."""
+        bg = (100, 100, 100)
+        fg = (120, 120, 120)
+        _, result_fg = contrast_font(
+            bg, fg, self.idx, self.size, factor=7.0,
+        )
+        self._validate_rgb_output(result_fg)
+
+    def test_contrast_font_achieves_target_ratio(self) -> None:
+        """Test adjusted fg achieves target contrast."""
+        bg = (50, 50, 50)
+        fg = (60, 60, 60)
+        min_ratio = 4.5
+        _, result_fg = contrast_font(
+            bg, fg, self.idx, self.size, factor=min_ratio,
+        )
+        bg_lum = relative_luminance(bg)
+        fg_lum = relative_luminance(result_fg)
+        actual = contrast_ratio(bg_lum, fg_lum)
+        self.assertGreaterEqual(actual, min_ratio - 0.1)
+
+    def test_hidden_font_returns_bg_as_fg(self) -> None:
+        """Test hidden_font sets fg equal to bg."""
+        bg = (100, 200, 50)
+        result_bg, result_fg = hidden_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertEqual(result_fg, bg)
+
+
+class TestBWAndComplementFontEffects(RGBTestCase):
+    """Test b_w_font and complement_font effects."""
+
+    def setUp(self) -> None:
+        """Set up common test data."""
+        self.fg: tuple[int, int, int] = (127, 127, 127)
+        self.idx = 0
+        self.size = 3
+
+    def test_b_w_font_dark_gives_white(self) -> None:
+        """Test b_w_font returns white fg on dark bg."""
+        _, result_fg = b_w_font(
+            (20, 20, 20), self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_fg, (255, 255, 255))
+
+    def test_b_w_font_light_gives_black(self) -> None:
+        """Test b_w_font returns black fg on light bg."""
+        _, result_fg = b_w_font(
+            (230, 230, 230), self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_fg, (0, 0, 0))
+
+    def test_b_w_font_preserves_background(self) -> None:
+        """Test b_w_font does not modify the background."""
+        bg = (200, 50, 30)
+        result_bg, _ = b_w_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+
+    def test_complement_font_basic(self) -> None:
+        """Test complement_font returns RGB complement."""
+        bg = (100, 150, 200)
+        result_bg, result_fg = complement_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertEqual(result_fg, (155, 105, 55))
+
+    def test_complement_font_black(self) -> None:
+        """Test complement of black is white."""
+        _, result_fg = complement_font(
+            (0, 0, 0), self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_fg, (255, 255, 255))
+
+    def test_complement_font_white(self) -> None:
+        """Test complement of white is black."""
+        _, result_fg = complement_font(
+            (255, 255, 255), self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_fg, (0, 0, 0))
+
+
+class TestShadeAndSetFontEffects(RGBTestCase):
+    """Test shade_font and set_font effects."""
+
+    def setUp(self) -> None:
+        """Set up common test data."""
+        self.fg: tuple[int, int, int] = (127, 127, 127)
+        self.idx = 0
+        self.size = 3
+
+    def test_shade_font_dark_bg_lightens(self) -> None:
+        """Test shade_font lightens fg on dark bg."""
+        dark_bg = (20, 20, 20)
+        _, result_fg = shade_font(
+            dark_bg, self.fg, self.idx, self.size,
+        )
+        self.assertGreater(sum(result_fg), sum(dark_bg))
+
+    def test_shade_font_light_bg_darkens(self) -> None:
+        """Test shade_font darkens fg on light bg."""
+        light_bg = (230, 230, 230)
+        _, result_fg = shade_font(
+            light_bg, self.fg, self.idx, self.size,
+        )
+        self.assertLess(sum(result_fg), sum(light_bg))
+
+    def test_shade_font_custom_factor(self) -> None:
+        """Test shade_font with custom blend factor."""
+        _, result_fg = shade_font(
+            (20, 20, 20), self.fg, self.idx, self.size,
+            factor=0.8,
+        )
+        self._validate_rgb_output(result_fg)
+
+    def test_shade_font_preserves_background(self) -> None:
+        """Test shade_font does not modify the background."""
+        bg = (200, 50, 30)
+        result_bg, _ = shade_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+
+    def test_set_font_default_color(self) -> None:
+        """Test set_font with default color parameter."""
+        bg = (100, 100, 100)
+        result_bg, result_fg = set_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertEqual(result_fg, (127, 127, 127))
+
+    def test_set_font_custom_color(self) -> None:
+        """Test set_font with custom color string."""
+        bg = (100, 100, 100)
+        _, result_fg = set_font(
+            bg, self.fg, self.idx, self.size,
+            color='255;0;128',
+        )
+        self.assertEqual(result_fg, (255, 0, 128))
+
+
+class TestHueShiftFontEffects(RGBTestCase):
+    """Test hue_shift_font, warm_font, and cool_font effects."""
+
+    def setUp(self) -> None:
+        """Set up common test data."""
+        self.fg: tuple[int, int, int] = (127, 127, 127)
+        self.idx = 0
+        self.size = 3
+
+    def test_hue_shift_font_half_rotation(self) -> None:
+        """Test hue_shift_font shifts hue by 180 degrees."""
+        bg = (255, 0, 0)
+        result_bg, result_fg = hue_shift_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self._validate_rgb_output(result_fg)
+        self.assertGreater(result_fg[2], result_fg[0])
+
+    def test_hue_shift_font_custom_factor(self) -> None:
+        """Test hue_shift_font with custom shift."""
+        bg = (255, 0, 0)
+        _, result_fg = hue_shift_font(
+            bg, self.fg, self.idx, self.size, factor=0.333,
+        )
+        self._validate_rgb_output(result_fg)
+
+    def test_warm_font_produces_warm_hue(self) -> None:
+        """Test warm_font shifts toward orange/warm tones."""
+        bg = (0, 0, 255)
+        result_bg, result_fg = warm_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self._validate_rgb_output(result_fg)
+
+    def test_warm_font_inverts_lightness(self) -> None:
+        """Test warm_font inverts lightness."""
+        bg = (20, 20, 20)
+        _, result_fg = warm_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertGreater(sum(result_fg), sum(bg))
+
+    def test_cool_font_produces_cool_hue(self) -> None:
+        """Test cool_font shifts toward blue/cool tones."""
+        bg = (255, 0, 0)
+        result_bg, result_fg = cool_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self._validate_rgb_output(result_fg)
+
+    def test_cool_font_inverts_lightness(self) -> None:
+        """Test cool_font inverts lightness."""
+        bg = (200, 200, 200)
+        _, result_fg = cool_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertLess(sum(result_fg), sum(bg))
+
+
+class TestLumaAndGrayscaleFontEffects(RGBTestCase):
+    """Test invert_luma_font and grayscale_font effects."""
+
+    def setUp(self) -> None:
+        """Set up common test data."""
+        self.fg: tuple[int, int, int] = (127, 127, 127)
+        self.idx = 0
+        self.size = 3
+
+    def test_invert_luma_font_dark_bg(self) -> None:
+        """Test invert_luma_font light fg on dark bg."""
+        bg = (30, 30, 30)
+        result_bg, result_fg = invert_luma_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertGreater(sum(result_fg), sum(bg))
+
+    def test_invert_luma_font_light_bg(self) -> None:
+        """Test invert_luma_font dark fg on light bg."""
+        bg = (220, 220, 220)
+        _, result_fg = invert_luma_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertLess(sum(result_fg), sum(bg))
+
+    def test_grayscale_font_produces_gray(self) -> None:
+        """Test grayscale_font produces equal RGB channels."""
+        bg = (200, 100, 50)
+        result_bg, result_fg = grayscale_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self.assertEqual(result_fg[0], result_fg[1])
+        self.assertEqual(result_fg[1], result_fg[2])
+
+    def test_grayscale_font_bt601_weights(self) -> None:
+        """Test grayscale_font uses BT.601 luma weights."""
+        bg = (200, 100, 50)
+        _, result_fg = grayscale_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        gray = int(0.299 * 200 + 0.587 * 100 + 0.114 * 50)
+        self.assertEqual(result_fg, (gray, gray, gray))
+
+
+class TestColorModFontEffects(RGBTestCase):
+    """Test pastel_font, vivid_font, and gradient_font effects."""
+
+    def setUp(self) -> None:
+        """Set up common test data."""
+        self.fg: tuple[int, int, int] = (127, 127, 127)
+        self.idx = 0
+        self.size = 3
+
+    def test_pastel_font_basic(self) -> None:
+        """Test pastel_font produces desaturated output."""
+        bg = (255, 0, 0)
+        result_bg, result_fg = pastel_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self._validate_rgb_output(result_fg)
+
+    def test_pastel_font_custom_params(self) -> None:
+        """Test pastel_font with custom params."""
+        bg = (0, 200, 100)
+        _, result_fg = pastel_font(
+            bg, self.fg, self.idx, self.size,
+            saturation=0.5, lighten=0.9,
+        )
+        self._validate_rgb_output(result_fg)
+
+    def test_vivid_font_maximizes_saturation(self) -> None:
+        """Test vivid_font produces saturated output."""
+        bg = (200, 100, 100)
+        result_bg, result_fg = vivid_font(
+            bg, self.fg, self.idx, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+        self._validate_rgb_output(result_fg)
+
+    def test_vivid_font_custom_saturation(self) -> None:
+        """Test vivid_font with custom saturation."""
+        bg = (150, 100, 50)
+        _, result_fg = vivid_font(
+            bg, self.fg, self.idx, self.size, saturation=0.6,
+        )
+        self._validate_rgb_output(result_fg)
+
+    def test_gradient_font_varies_by_position(self) -> None:
+        """Test gradient_font differs at positions."""
+        bg = (200, 50, 50)
+        _, fg_pos0 = gradient_font(bg, self.fg, 0, self.size)
+        _, fg_pos8 = gradient_font(bg, self.fg, 8, self.size)
+        self._validate_rgb_output(fg_pos0)
+        self._validate_rgb_output(fg_pos8)
+        self.assertNotEqual(fg_pos0, fg_pos8)
+
+    def test_gradient_font_custom_bounds(self) -> None:
+        """Test gradient_font with custom lightness."""
+        bg = (100, 100, 200)
+        _, result_fg = gradient_font(
+            bg, self.fg, 4, self.size,
+            lighten=0.1, darken=0.9,
+        )
+        self._validate_rgb_output(result_fg)
+
+    def test_gradient_font_preserves_background(self) -> None:
+        """Test gradient_font keeps background unchanged."""
+        bg = (100, 150, 200)
+        result_bg, _ = gradient_font(
+            bg, self.fg, 0, self.size,
+        )
+        self.assertEqual(result_bg, bg)
+
+
+class TestFontEffectsConfiguration(unittest.TestCase):
+    """Test that font effects are present in the EFFECTS dictionary."""
+
+    def test_font_effects_in_effects_dict(self) -> None:
+        """Test all font effects are registered in EFFECTS."""
+        font_effects = [
+            'contrast-font',
+            'hidden-font',
+            'complement-font',
+            'shade-font',
+            'b-w-font',
+            'set-font',
+            'hue-shift-font',
+            'analogous-font',
+            'warm-font',
+            'cool-font',
+            'invert-luma-font',
+            'grayscale-font',
+            'pastel-font',
+            'vivid-font',
+            'gradient-font',
+        ]
+        for name in font_effects:
+            self.assertIn(name, EFFECTS, f'Missing font effect: {name}')
+
+    def test_font_effects_loadable(self) -> None:
+        """Test all font effects can be loaded and executed."""
+        font_effects = [
+            'contrast-font', 'hidden-font', 'complement-font',
+            'shade-font', 'b-w-font', 'set-font', 'hue-shift-font',
+            'analogous-font', 'warm-font', 'cool-font',
+            'invert-luma-font', 'grayscale-font', 'pastel-font',
+            'vivid-font', 'gradient-font',
+        ]
+        bg = (100, 100, 100)
+        fg = (50, 50, 50)
+        for name in font_effects:
+            effect_func = load_effect(name, 'default')
+            self.assertIsNotNone(effect_func, f'Failed to load: {name}')
+            assert effect_func is not None  # noqa: S101
+            result = effect_func(bg, fg, 0, 3)
+            self.assertIsInstance(result, tuple)
+            self.assertEqual(len(result), 2)
+
+    def test_analogous_font_small_shift(self) -> None:
+        """Test analogous-font uses a small hue shift."""
+        params = EFFECTS['analogous-font'].get('parameters', {})
+        assert isinstance(params, dict)  # noqa: S101
+        # 0.083 ≈ 30 degrees
+        self.assertAlmostEqual(  # type: ignore[misc]
+            params['factor'], 0.083, places=3,  # type: ignore[arg-type]
+        )
