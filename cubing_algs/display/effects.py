@@ -1078,6 +1078,101 @@ def hidden_font(
     return background_rgb, background_rgb
 
 
+def b_w_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **_kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Return black or white foreground based on background luminance.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **_kw: Unused effect parameters.
+
+    Returns:
+        Background unchanged, foreground set to black or white.
+
+    """
+    bg_lum = relative_luminance(background_rgb)
+    foreground: RGB = (
+        (255, 255, 255) if bg_lum < _LUMINANCE_FLIP_POINT
+        else (0, 0, 0)
+    )
+    return background_rgb, foreground
+
+
+def complement_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **_kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Set foreground to the complementary color of the background.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **_kw: Unused effect parameters.
+
+    Returns:
+        Background unchanged, foreground set to complementary color.
+
+    """
+    r, g, b = background_rgb
+    return background_rgb, (255 - r, 255 - g, 255 - b)
+
+
+def shade_font(
+        background_rgb: RGB,
+        _foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Derive foreground from background by lightening or darkening.
+
+    Lightens the background as foreground when the background is dark,
+    darkens it when the background is light.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        _foreground_rgb: Unused foreground RGB color tuple.
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
+        **kw: Effect parameters. factor controls blend amount
+              (default 0.4).
+
+    Returns:
+        Background unchanged, foreground set to shaded background.
+
+    """
+    r, g, b = background_rgb
+    factor = kw.get('factor', 0.4)
+
+    bg_lum = relative_luminance(background_rgb)
+
+    if bg_lum < _LUMINANCE_FLIP_POINT:
+        # Dark background: lighten toward white
+        fr = min(255, int(r + (255 - r) * factor))
+        fg = min(255, int(g + (255 - g) * factor))
+        fb = min(255, int(b + (255 - b) * factor))
+    else:
+        # Light background: darken toward black
+        fr = max(0, int(r * (1 - factor)))
+        fg = max(0, int(g * (1 - factor)))
+        fb = max(0, int(b * (1 - factor)))
+
+    return background_rgb, (fr, fg, fb)
+
+
 def set_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
@@ -1328,8 +1423,23 @@ EFFECTS: dict[str, EffectConfig] = {
     'hidden-font': {
         'function': hidden_font,
     },
+    'complement-font': {
+        'function': complement_font,
+    },
+    'shade-font': {
+        'function': shade_font,
+        'parameters': {
+            'factor': 0.4,
+        },
+    },
+    'b-w-font': {
+        'function': b_w_font,
+    },
     'set-font': {
         'function': set_font,
+        'parameters': {
+            'color': '27;27;27',
+        },
     },
     'noop': {
         'function': noop,
