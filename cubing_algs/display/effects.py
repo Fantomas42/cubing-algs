@@ -54,7 +54,6 @@ class EffectConfig(TypedDict, total=False):
     ]
     parameters: dict[str, float | int | str | bool]
 
-
 # Positioning
 
 
@@ -129,6 +128,59 @@ def get_position_factor(facelet_index: int, cube_size: int,
         )
 
     return position_factor
+
+# Color tools
+
+
+# sRGB linearization threshold per IEC 61966-2-1
+_SRGB_LINEAR_THRESHOLD = 0.04045
+
+# WCAG luminance threshold where both black and white
+# achieve ~4.5:1 contrast ratio
+_LUMINANCE_FLIP_POINT = 0.179
+
+
+def linearize_srgb(value: int) -> float:
+    """
+    Linearize an sRGB channel value (0-255) to linear RGB (0.0-1.0).
+
+    Returns:
+        Linearized channel value.
+
+    """
+    v = value / 255
+    if v <= _SRGB_LINEAR_THRESHOLD:
+        return v / 12.92
+    return float(((v + 0.055) / 1.055) ** 2.4)
+
+
+def relative_luminance(rgb: RGB) -> float:
+    """
+    Calculate WCAG 2.0 relative luminance from an RGB color.
+
+    Returns:
+        Relative luminance value between 0.0 and 1.0.
+
+    """
+    return (
+        0.2126 * linearize_srgb(rgb[0])
+        + 0.7152 * linearize_srgb(rgb[1])
+        + 0.0722 * linearize_srgb(rgb[2])
+    )
+
+
+def contrast_ratio(lum1: float, lum2: float) -> float:
+    """
+    Calculate WCAG 2.0 contrast ratio between two luminance values.
+
+    Returns:
+        Contrast ratio between 1.0 and 21.0.
+
+    """
+    lighter = max(lum1, lum2)
+    darker = min(lum1, lum2)
+    return (lighter + 0.05) / (darker + 0.05)
+
 
 # Effects
 
@@ -868,6 +920,69 @@ def contrast(
     return (r, g, b), foreground_rgb
 
 
+def contrast_font(
+        background_rgb: RGB,
+        foreground_rgb: RGB,
+        _facelet_index: int, _cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> tuple[RGB, RGB]:
+    """
+    Enhance contrast of the foreground against the background.
+
+    Uses WCAG 2.0 relative luminance and contrast ratio to determine
+    if adjustment is needed. When contrast is insufficient, blends
+    the foreground toward white (on dark backgrounds) or black
+    (on light backgrounds) by the minimum amount needed.
+
+    Args:
+        background_rgb: Background RGB color tuple.
+        foreground_rgb: Foreground RGB color tuple.
+        facelet_index: Index of the facelet in the cube's state.
+        cube_size: Size of the cube (3 for 3x3x3).
+        **kw: Effect parameters. factor sets minimum contrast ratio
+              (default 4.5 for WCAG AA).
+
+    Returns:
+        Modified RGB color tuple with font contrast adjustment applied.
+
+    """
+    bg_lum = relative_luminance(background_rgb)
+    fg_lum = relative_luminance(foreground_rgb)
+
+    min_ratio = kw.get('factor', 4.5)
+
+    if contrast_ratio(bg_lum, fg_lum) >= min_ratio:
+        return background_rgb, foreground_rgb
+
+    r, g, b = foreground_rgb
+
+    # Blend toward white if bg is dark, toward black if bg is light
+    target: RGB = (
+        (255, 255, 255) if bg_lum < _LUMINANCE_FLIP_POINT
+        else (0, 0, 0)
+    )
+
+    # Binary search for minimal blend that achieves target contrast
+    lo, hi = 0.0, 1.0
+    for _ in range(16):
+        mid = (lo + hi) / 2
+        blended: RGB = (
+            int(r + (target[0] - r) * mid),
+            int(g + (target[1] - g) * mid),
+            int(b + (target[2] - b) * mid),
+        )
+        if contrast_ratio(bg_lum, relative_luminance(blended)) >= min_ratio:
+            hi = mid
+        else:
+            lo = mid
+
+    return background_rgb, (
+        int(r + (target[0] - r) * hi),
+        int(g + (target[1] - g) * hi),
+        int(b + (target[2] - b) * hi),
+    )
+
+
 def face_visible(
         background_rgb: RGB,
         foreground_rgb: RGB,
@@ -1148,6 +1263,12 @@ EFFECTS: dict[str, EffectConfig] = {
         'parameters': {
             'lighten': 1.0,
             'darken': 0.7,
+        },
+    },
+    'contrast-font': {
+        'function': contrast_font,
+        'parameters': {
+            'factor': 4.5,
         },
     },
     'noop': {
