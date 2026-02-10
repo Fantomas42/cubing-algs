@@ -791,14 +791,14 @@ class VCubeDisplay:
 
         assert self.effect is not None  # noqa: S101
 
-        new_background_rgb = self.effect(
-            background_rgb, facelet_index,
+        new_background_rgb, new_foreground_rgb = self.effect(
+            background_rgb, foreground_rgb, facelet_index,
             self.cube_size,
         )
 
         return (
             f'\x1b[48;2;{ ";".join(str(c) for c in new_background_rgb) }m'
-            f'\x1b[38;2;{ ";".join(str(c) for c in foreground_rgb) }m'
+            f'\x1b[38;2;{ ";".join(str(c) for c in new_foreground_rgb) }m'
         )
 
     def letter_style_ansi(self, facelet_index: int,
