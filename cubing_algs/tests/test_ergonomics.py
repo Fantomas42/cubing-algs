@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ERGONOMIC_WEIGHTS
+from cubing_algs.ergonomics import HAND_ASSIGNMENTS
 from cubing_algs.ergonomics import TRANSITION_PENALTIES
 from cubing_algs.ergonomics import TRIGGER_PATTERNS
 from cubing_algs.ergonomics import ErgonomicsData
@@ -252,6 +253,17 @@ class TestGetTransitionPenalty(unittest.TestCase):
         penalty = get_transition_penalty(Move('M'), Move('E'))
         self.assertEqual(penalty, TRANSITION_PENALTIES['adjacent'])
 
+    def test_hand_switch_penalty_via_patched_assignments(self) -> None:
+        """Test hand switch penalty for non-adjacent, non-opposite moves."""
+        # M and E have base_move not in ADJACENT_FACES/OPPOSITE_FACES.
+        # Patch hand assignments so they trigger the hand_switch branch.
+        patched = dict(HAND_ASSIGNMENTS)
+        patched['M'] = 'right'
+        patched['E'] = 'left'
+        with patch('cubing_algs.ergonomics.HAND_ASSIGNMENTS', patched):
+            penalty = get_transition_penalty(Move('M'), Move('E'))
+        self.assertEqual(penalty, TRANSITION_PENALTIES['hand_switch'])
+
 
 class TestCalculateFlowScore(unittest.TestCase):
     """Test the calculate_flow_score function."""
@@ -351,6 +363,16 @@ class TestCalculateTriggerBonus(unittest.TestCase):
         self.assertGreater(bonus, 0.0)
         self.assertGreater(multiplier, 1.0)
 
+    def test_empty_matched_moves(self) -> None:
+        """Test bonus calculation when matched_moves is empty."""
+        pattern = TRIGGER_PATTERNS[0]
+        match = TriggerMatch(
+            pattern=pattern, start_index=0, end_index=0, matched_moves='',
+        )
+        bonus, multiplier = calculate_trigger_bonus([match])
+        self.assertGreaterEqual(bonus, 0.0)
+        self.assertEqual(multiplier, 1.0)
+
     def test_bonus_capped(self) -> None:
         """Test that bonus is capped at 0.3."""
         # Create many fake matches with high bonuses
@@ -376,6 +398,11 @@ class TestEstimateTpsPotential(unittest.TestCase):
         """Test TPS for empty algorithm."""
         alg = Algorithm.parse_moves('')
         self.assertEqual(estimate_tps_potential(alg), 0.0)
+
+    def test_all_pause_algorithm(self) -> None:
+        """Test TPS for non-empty algorithm with only pauses."""
+        alg = Algorithm([Move('.')])
+        self.assertEqual(estimate_tps_potential(alg), 8.0)
 
     def test_easy_algorithm(self) -> None:
         """Test TPS for easy algorithm."""
@@ -406,6 +433,11 @@ class TestCalculateErgonomicScore(unittest.TestCase):
     def test_empty_algorithm(self) -> None:
         """Test score for empty algorithm."""
         alg = Algorithm.parse_moves('')
+        self.assertEqual(calculate_ergonomic_score(alg), 1.0)
+
+    def test_all_pause_algorithm(self) -> None:
+        """Test score for non-empty algorithm with only pauses."""
+        alg = Algorithm([Move('.')])
         self.assertEqual(calculate_ergonomic_score(alg), 1.0)
 
     def test_easy_algorithm_high_score(self) -> None:
@@ -440,6 +472,11 @@ class TestClassifyAlgorithmDifficulty(unittest.TestCase):
         difficulty = classify_algorithm_difficulty(alg)
         self.assertIn(difficulty, ['Beginner', 'Intermediate'])
 
+    def test_expert_classification(self) -> None:
+        """Test that rotation-heavy algorithms classify as Expert."""
+        alg = Algorithm.parse_moves('x x x x x x x x')
+        self.assertEqual(classify_algorithm_difficulty(alg), 'Expert')
+
     def test_valid_classifications(self) -> None:
         """Test that classification returns valid values."""
         valid = {'Beginner', 'Intermediate', 'Advanced', 'Expert'}
@@ -467,6 +504,11 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
         alg = Algorithm.parse_moves('')
         suggestions = suggest_ergonomic_improvements(alg)
         self.assertEqual(suggestions, [])
+
+    def test_all_pause_algorithm(self) -> None:
+        """Test suggestions for non-empty algorithm with only pauses."""
+        alg = Algorithm([Move('.')])
+        self.assertEqual(suggest_ergonomic_improvements(alg), [])
 
     def test_returns_list_of_strings(self) -> None:
         """Test that suggestions are strings."""
@@ -851,6 +893,11 @@ class TestComputeFingertrickDifficulty(unittest.TestCase):
         alg = Algorithm.parse_moves('')
         difficulty = compute_fingertrick_difficulty(alg)
         self.assertEqual(difficulty, 0.0)
+
+    def test_all_pause_algorithm(self) -> None:
+        """Test difficulty for non-empty algorithm with only pauses."""
+        alg = Algorithm([Move('.')])
+        self.assertEqual(compute_fingertrick_difficulty(alg), 0.0)
 
     def test_easy_moves(self) -> None:
         """Test algorithm with easy moves has low difficulty."""
