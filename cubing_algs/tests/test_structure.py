@@ -1168,6 +1168,39 @@ class ScoreStructureTestCase(unittest.TestCase):
         # Shorter setup with longer action should score better
         self.assertGreater(score1, score2)
 
+    def test_score_commutator_higher_than_conjugate(self) -> None:
+        """
+        Test that commutator scores higher than conjugate for same parts.
+
+        Commutator [A, B] = A B A' B' saves |A|+|B| moves from 2|A|+2|B|
+        (50% compression), while conjugate [A: B] = A B A' saves |A| moves
+        from 2|A|+|B| (less than 50%).
+        """
+        setup = Algorithm.parse_moves('R')
+        action = Algorithm.parse_moves('U')
+
+        conj_score = score_structure(setup, action)
+        comm_score = score_structure(setup, action, is_commutator=True)
+
+        self.assertGreater(comm_score, conj_score)
+
+    def test_score_commutator_compression_ratio(self) -> None:
+        """
+        Test that commutator compression ratio is always 50%.
+
+        [A, B] = A B A' B' has 2|A|+2|B| moves, bracket notation uses
+        |A|+|B|, so the compression ratio is always 0.5.
+        """
+        setup = Algorithm.parse_moves('R U')
+        action = Algorithm.parse_moves('F D')
+
+        # Manually compute expected score
+        # compression_ratio = 0.5 (always for commutators)
+        expected = 0.5 * 0.2 * 1.0 * 100
+        score = score_structure(setup, action, is_commutator=True)
+
+        self.assertAlmostEqual(score, expected)
+
 
 class IsInverseAtTestCase(unittest.TestCase):
     """Test inverse checking at position."""

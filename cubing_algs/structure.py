@@ -436,7 +436,12 @@ def is_inverse_at(
     return algo[start:start + len(inverse)] == inverse
 
 
-def score_structure(setup: 'Algorithm', action: 'Algorithm') -> float:
+def score_structure(
+    setup: 'Algorithm',
+    action: 'Algorithm',
+    *,
+    is_commutator: bool = False,
+) -> float:
     """
     Score a potential structure based on compression ratio and meaningfulness.
 
@@ -448,6 +453,8 @@ def score_structure(setup: 'Algorithm', action: 'Algorithm') -> float:
     Args:
         setup: The setup (A) part of the structure.
         action: The action (B) part of the structure.
+        is_commutator: True for commutator [A, B] = A B A' B',
+            False for conjugate [A: B] = A B A'.
 
     Returns:
         Quality score (higher is better, 0-100+ range).
@@ -457,7 +464,12 @@ def score_structure(setup: 'Algorithm', action: 'Algorithm') -> float:
         return 0.0
 
     # Compression ratio: how much we save by using bracket notation
-    original_length = len(setup) * 2 + len(action)
+    # Conjugate [A: B] = A B A' → original = 2|A| + |B|
+    # Commutator [A, B] = A B A' B' → original = 2|A| + 2|B|
+    if is_commutator:
+        original_length = len(setup) * 2 + len(action) * 2
+    else:
+        original_length = len(setup) * 2 + len(action)
     compressed_length = len(setup) + len(action)
     compression_ratio = (original_length - compressed_length) / original_length
 
@@ -522,7 +534,9 @@ def detect_conjugate(
             if is_inverse_at(
                 algo, action_end, setup, inverse_cache,
             ):
-                score = score_structure(setup, action)
+                score = score_structure(
+                    setup, action, is_commutator=False,
+                )
 
                 if best_structure is None or score > best_structure.score:
                     # Classify and analyze the conjugate
@@ -605,7 +619,9 @@ def detect_commutator(
                     algo, b_end + a_len, b_part, inverse_cache,
                 )
             ):
-                score = score_structure(a_part, b_part)
+                score = score_structure(
+                    a_part, b_part, is_commutator=True,
+                )
 
                 if best_structure is None or score > best_structure.score:
                     # Get/compute inverse for cancellation check
