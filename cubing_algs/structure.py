@@ -964,6 +964,8 @@ def count_all_structures(
 def calculate_nesting_depth(
     structures: list[Structure],
     structure_cache: dict[str, list[Structure]] | None = None,
+    max_depth: int = DEFAULT_MAX_NESTING_DEPTH,
+    current_depth: int = 0,
 ) -> tuple[int, int]:
     """
     Calculate the maximum nesting depth and count of nested structures.
@@ -971,6 +973,8 @@ def calculate_nesting_depth(
     Args:
         structures: List of structures to analyze
         structure_cache: Cache for detected structures (key: str(algo))
+        max_depth: Maximum recursion depth (default: 10)
+        current_depth: Current recursion depth (used internally)
 
     Returns:
         Tuple of (maximum nesting depth, number of nested structures).
@@ -979,7 +983,11 @@ def calculate_nesting_depth(
     if structure_cache is None:
         structure_cache = {}
 
-    max_depth = 0
+    # Early termination if max depth reached
+    if current_depth >= max_depth:
+        return (1 if structures else 0), 0
+
+    depth = 0
     nested_count = 0
 
     for struct in structures:
@@ -999,18 +1007,24 @@ def calculate_nesting_depth(
             nested_count += 1
             # Recursively calculate depth
             setup_depth, _ = (
-                calculate_nesting_depth(setup_structures, structure_cache)
+                calculate_nesting_depth(
+                    setup_structures, structure_cache,
+                    max_depth, current_depth + 1,
+                )
                 if setup_structures else (0, 0)
             )
             action_depth, _ = (
-                calculate_nesting_depth(action_structures, structure_cache)
+                calculate_nesting_depth(
+                    action_structures, structure_cache,
+                    max_depth, current_depth + 1,
+                )
                 if action_structures else (0, 0)
             )
-            max_depth = max(max_depth, 1 + max(setup_depth, action_depth))
+            depth = max(depth, 1 + max(setup_depth, action_depth))
         else:
-            max_depth = max(max_depth, 1)
+            depth = max(depth, 1)
 
-    return max_depth, nested_count
+    return depth, nested_count
 
 
 def calculate_efficiency_rating(

@@ -1433,6 +1433,23 @@ class CalculateNestingDepthTestCase(unittest.TestCase):
         self.assertGreaterEqual(len(cache), 0)
         self.assertGreaterEqual(max_depth, 1)
 
+    def test_calculate_nesting_depth_respects_max_depth(self) -> None:
+        """Test that max depth guard stops recursion."""
+        # F [R, U] F' has nesting depth 2 normally
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+        structures = detect_structures(algo, min_score=0)
+
+        # With max_depth=0, recursion stops immediately
+        depth_capped, nested_capped = calculate_nesting_depth(
+            structures, max_depth=0, current_depth=0,
+        )
+        self.assertEqual(depth_capped, 1)
+        self.assertEqual(nested_capped, 0)
+
+        # With default max_depth, should find deeper nesting
+        depth_full, _ = calculate_nesting_depth(structures)
+        self.assertGreaterEqual(depth_full, depth_capped)
+
 
 class CompressRecursiveTestCase(unittest.TestCase):
     """Test recursive compression with caching."""
