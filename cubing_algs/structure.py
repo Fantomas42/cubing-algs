@@ -362,6 +362,7 @@ def classify_commutator(
 
 def classify_conjugate(
         setup: 'Algorithm', action: 'Algorithm',
+        nesting_depth: int = 0,
 ) -> StructureClassification:
     """
     Classify a conjugate based on structure and efficiency.
@@ -375,6 +376,7 @@ def classify_conjugate(
     Args:
         setup: The setup (A) part of the conjugate.
         action: The action (B) part of the conjugate.
+        nesting_depth: The nesting depth
 
     Returns:
         Classification string (simple, nested, multi-setup, or standard).
@@ -382,15 +384,19 @@ def classify_conjugate(
     """
     setup_len = len(setup)
 
-    # Check if action contains nested structures
-    # Use very low threshold to detect any potential nested structure
-    max_setup = calculate_max_setup_length(len(action))
-    action_structures = detect_structures(
-        action,
-        max_setup_len=max_setup,
-        min_score=CLASSIFICATION_MIN_SCORE,
-    )
-    has_nested = any(s.type == 'commutator' for s in action_structures)
+    # Check if action contains nested structures (skip at max depth to
+    # guard against unbounded recursion: classify_conjugate →
+    # detect_structures → detect_conjugate → classify_conjugate)
+    has_nested = False
+    if nesting_depth < DEFAULT_MAX_NESTING_DEPTH:
+        max_setup = calculate_max_setup_length(len(action))
+        action_structures = detect_structures(
+            action,
+            max_setup_len=max_setup,
+            min_score=CLASSIFICATION_MIN_SCORE,
+            nesting_depth=nesting_depth + 1,
+        )
+        has_nested = any(s.type == 'commutator' for s in action_structures)
 
     if has_nested:
         return 'nested'
@@ -489,6 +495,7 @@ def detect_conjugate(
     start: int,
     max_setup_len: int,
     inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
+    nesting_depth: int = 0,
 ) -> Structure | None:
     """
     Detect a conjugate pattern [A: B] = A B A' starting at the given position.
@@ -498,6 +505,7 @@ def detect_conjugate(
         start: Starting position
         max_setup_len: Maximum setup length
         inverse_cache: Cache for inverse sequences (key: str(algo))
+        nesting_depth: The nesting depth
 
     Returns:
         Best conjugate structure found, or None if no valid structure exists.
@@ -540,7 +548,10 @@ def detect_conjugate(
 
                 if best_structure is None or score > best_structure.score:
                     # Classify and analyze the conjugate
-                    classification = classify_conjugate(setup, action)
+                    classification = classify_conjugate(
+                        setup, action,
+                        nesting_depth,
+                    )
                     has_cancel = detect_move_cancellations(setup, action)
                     move_count = setup_len * 2 + action_len
 
@@ -668,6 +679,7 @@ def detect_structures(
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,
+    nesting_depth: int = 0,
 ) -> list[Structure]:
     """
     Detect all meaningful conjugate and commutator structures in an algorithm.
@@ -679,6 +691,7 @@ def detect_structures(
         algo: The algorithm to analyze
         max_setup_len: Maximum setup sequence length (auto-calculated)
         min_score: Minimum structure score (auto-calculated)
+        nesting_depth: The nesting depth
 
     Returns:
         List of detected structures, sorted by position
@@ -708,6 +721,7 @@ def detect_structures(
         # Try to detect conjugate (shares same cache)
         conjugate = detect_conjugate(
             algo, i, max_setup_len, inverse_cache,
+            nesting_depth,
         )
 
         # Pick the best one
@@ -811,6 +825,8 @@ def compress(
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,
+    structures: list[Structure] | None = None,
+    structure_cache: dict[str, list[Structure]] | None = None,
 ) -> str:
     """
     Compress an algorithm into bracket notation showing its structure.
@@ -826,6 +842,8 @@ def compress(
         algo: The algorithm to compress
         max_setup_len: Maximum setup sequence length (auto-calculated)
         min_score: Minimum structure score (auto-calculated)
+        structures: Pre-computed structures to skip redundant detection
+        structure_cache: Shared cache for nested structure detection
 
     Returns:
         Compressed notation string
@@ -840,11 +858,13 @@ def compress(
         '[F: [R, U]]'
 
     """
-    structures = detect_structures(algo, max_setup_len, min_score)
+    if structures is None:
+        structures = detect_structures(algo, max_setup_len, min_score)
 
     # Early return for single structure (no sorting/filtering needed)
     if len(structures) <= 1:
-        structure_cache: dict[str, list[Structure]] = {}
+        if structure_cache is None:
+            structure_cache = {}
         return compress_recursive(algo, structures, 0, structure_cache)
 
     # Build a non-overlapping set of structures using greedy approach
@@ -859,8 +879,9 @@ def compress(
             non_overlapping.append(struct)
             last_end = struct.end
 
-    # Create cache for nested structure detection (use string keys)
-    structure_cache = {}
+    # Use provided cache or create new one for nested structure detection
+    if structure_cache is None:
+        structure_cache = {}
     return compress_recursive(algo, non_overlapping, 0, structure_cache)
 
 
@@ -1087,8 +1108,12 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
     # Create shared cache for all nested structure detection (use string keys)
     structure_cache: dict[str, list[Structure]] = {}
 
-    # Use cached compression
-    compressed_str = compress(algo, max_setup_len, min_score)
+    # Compress using pre-computed structures and shared cache
+    compressed_str = compress(
+        algo, max_setup_len, min_score,
+        structures,
+        structure_cache,
+    )
 
     # Count structure types (including nested structures) with cache
     total_count, conjugate_count, commutator_count = (

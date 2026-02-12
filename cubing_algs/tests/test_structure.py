@@ -1572,3 +1572,76 @@ class ClassificationIntegrationTestCase(unittest.TestCase):
                 struct = compute_structure(algo, min_score=0)
 
                 self.assertIn(struct.efficiency_rating, expected_ratings)
+
+
+class NestingDepthGuardTestCase(unittest.TestCase):
+    """Test that classify_conjugate has a recursion depth guard."""
+
+    def test_classify_conjugate_respects_max_depth(self) -> None:
+        """At max depth, classify_conjugate skips nested detection."""
+        setup = Algorithm.parse_moves('F')
+        # Action contains a commutator [R, U] — normally classified 'nested'
+        action = Algorithm.parse_moves("R U R' U'")
+
+        # At depth 0, should detect nested structure
+        normal = classify_conjugate(setup, action, nesting_depth=0)
+        self.assertEqual(normal, 'nested')
+
+        # At max depth, should skip nested detection and fall through
+        capped = classify_conjugate(setup, action, nesting_depth=10)
+        self.assertEqual(capped, 'simple')
+
+    def test_classify_conjugate_depth_propagates(self) -> None:
+        """Depth propagates through detect_structures → detect_conjugate."""
+        # F [R [U, D] R'] F' — nested conjugate containing a commutator
+        algo = Algorithm.parse_moves("F R U D U' D' R' F'")
+        # Should detect structures at default depth without error
+        structures = detect_structures(algo, min_score=0)
+        self.assertGreaterEqual(len(structures), 1)
+
+
+class SharedCacheTestCase(unittest.TestCase):
+    """Test that compute_structure shares cache across compress and counting."""
+
+    def test_compress_accepts_precomputed_structures(self) -> None:
+        """compress() with structures skips redundant detect_structures."""
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+        structures = detect_structures(algo, min_score=0)
+
+        # Passing pre-computed structures should produce same result
+        result_normal = compress(algo, min_score=0)
+        result_precomputed = compress(
+            algo, min_score=0, structures=structures,
+        )
+        self.assertEqual(result_normal, result_precomputed)
+
+    def test_compress_uses_shared_cache(self) -> None:
+        """compress() populates a shared structure_cache."""
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+        structures = detect_structures(algo, min_score=0)
+        cache: dict[str, list[Structure]] = {}
+
+        compress(
+            algo, min_score=0,
+            structures=structures,
+            structure_cache=cache,
+        )
+
+        # Cache should be populated with nested structure lookups
+        self.assertGreater(len(cache), 0)
+
+    def test_compute_structure_shares_cache(self) -> None:
+        """compute_structure result is consistent (shared cache correctness)."""
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+
+        struct = compute_structure(algo, min_score=0)
+
+        # Verify compressed output matches standalone compress
+        standalone = compress(algo, min_score=0)
+        self.assertEqual(struct.compressed, standalone)
+
+        # Verify counts are consistent
+        self.assertEqual(
+            struct.total_structures,
+            struct.conjugate_count + struct.commutator_count,
+        )
