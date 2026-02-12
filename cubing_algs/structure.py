@@ -18,12 +18,12 @@ Classification System:
 The module follows speedcubing conventions and the Beyer-Hardwick (BH)
 classification system for systematic algorithm analysis.
 """
-
 import typing
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import Literal
 from typing import NamedTuple
 
 if TYPE_CHECKING:
@@ -132,17 +132,27 @@ class BoundedCache[K, V](MutableMapping[K, V]):
         return len(self._cache)
 
 
+type StructureType = Literal['conjugate', 'commutator']
+type StructureClassification = Literal[
+    'pure', 'A9',
+    'orthogonal', 'extended',
+    'other', 'simple',
+    'nested', 'multi-setup',
+    'standard', '',
+]
+
+
 @dataclass
 class Structure:
     """Represents a detected structure (conjugate or commutator)."""
 
-    type: str  # 'conjugate' or 'commutator'
+    type: StructureType
     setup: 'Algorithm'  # The A part
     action: 'Algorithm'  # The B part
     start: int  # Start index in original algorithm
     end: int  # End index in original algorithm
     score: float  # Quality score (higher is better)
-    classification: str = ''  # Classification type (pure, A9, orthogonal, etc.)
+    classification: StructureClassification
     has_cancellations: bool = False  # Whether moves cancel
     move_count: int = 0  # Total move count
     is_pure: bool = False  # Pure commutator (8 moves)
@@ -296,7 +306,7 @@ def classify_commutator(
     setup: 'Algorithm',
     action: 'Algorithm',
     inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
-) -> str:
+) -> StructureClassification:
     """
     Classify a commutator based on speedcubing taxonomy.
 
@@ -350,7 +360,9 @@ def classify_commutator(
     return 'other'
 
 
-def classify_conjugate(setup: 'Algorithm', action: 'Algorithm') -> str:
+def classify_conjugate(
+        setup: 'Algorithm', action: 'Algorithm',
+) -> StructureClassification:
     """
     Classify a conjugate based on structure and efficiency.
 
@@ -479,6 +491,8 @@ def detect_conjugate(
         Best conjugate structure found, or None if no valid structure exists.
 
     """
+    from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
+
     best_structure: Structure | None = None
 
     # Cache algorithm length to avoid repeated calls
@@ -492,8 +506,6 @@ def detect_conjugate(
         # Early termination: if we have a very high-scoring structure
         if best_structure and best_structure.score >= EARLY_TERMINATION_SCORE:
             break
-
-        from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
 
         setup = Algo(algo[start:start + setup_len])
 
@@ -557,6 +569,8 @@ def detect_commutator(
         Best commutator structure found, or None if no valid structure exists.
 
     """
+    from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
+
     best_structure: Structure | None = None
 
     # Cache algorithm length to avoid repeated calls
@@ -570,8 +584,6 @@ def detect_commutator(
         # Early termination: if we have a very high-scoring structure
         if best_structure and best_structure.score >= EARLY_TERMINATION_SCORE:
             break
-
-        from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
 
         a_part = Algo(algo[start:start + a_len])
 
@@ -640,7 +652,6 @@ def detect_structures(
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,
-    max_depth: int = DEFAULT_MAX_NESTING_DEPTH,  # noqa: ARG001
 ) -> list[Structure]:
     """
     Detect all meaningful conjugate and commutator structures in an algorithm.
@@ -652,7 +663,6 @@ def detect_structures(
         algo: The algorithm to analyze
         max_setup_len: Maximum setup sequence length (auto-calculated)
         min_score: Minimum structure score (auto-calculated)
-        max_depth: Max recursion depth for nested detection (default: 10)
 
     Returns:
         List of detected structures, sorted by position
@@ -666,7 +676,6 @@ def detect_structures(
         min_score = calculate_min_score(algo_len)
 
     # Create single shared cache for both commutator and conjugate detection
-    # Now safe because we eliminated the string_cache with id() keys
     inverse_cache: BoundedCache[str, Algorithm] = BoundedCache(
         MAX_INVERSE_CACHE_SIZE,
     )
@@ -879,7 +888,6 @@ def count_all_structures(
         if setup_key not in structure_cache:
             structure_cache[setup_key] = detect_structures(
                 struct.setup,
-                max_depth=max_depth - current_depth - 1,
             )
         setup_structures = structure_cache[setup_key]
 
@@ -887,7 +895,6 @@ def count_all_structures(
         if action_key not in structure_cache:
             structure_cache[action_key] = detect_structures(
                 struct.action,
-                max_depth=max_depth - current_depth - 1,
             )
         action_structures = structure_cache[action_key]
 

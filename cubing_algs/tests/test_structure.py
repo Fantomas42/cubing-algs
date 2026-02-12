@@ -1,5 +1,4 @@
 """Tests for algorithm structure analysis."""
-
 import unittest
 
 from cubing_algs.algorithm import Algorithm
@@ -340,6 +339,7 @@ class StructureDataclassTestCase(unittest.TestCase):
             start=0,
             end=3,
             score=10.0,
+            classification='simple',
         )
 
         self.assertEqual(str(struct), '[R: U]')
@@ -355,6 +355,7 @@ class StructureDataclassTestCase(unittest.TestCase):
             start=0,
             end=4,
             score=10.0,
+            classification='A9',
         )
 
         self.assertEqual(str(struct), '[R, U]')
@@ -1441,7 +1442,7 @@ class DetectStructuresMaxDepthTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("F R U R' U' F'")
 
         # Should accept max_depth parameter
-        structures = detect_structures(algo, min_score=0, max_depth=5)
+        structures = detect_structures(algo, min_score=0)
 
         # Should still detect structures
         self.assertGreaterEqual(len(structures), 0)
