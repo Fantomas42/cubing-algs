@@ -154,8 +154,10 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """Set a move at a specific index in the algorithm."""
         if isinstance(item, Move):
             self.data[i] = item
-        else:
+        elif isinstance(i, slice):
             self.data[i] = self.parse_moves(item)
+        else:
+            self.data[i] = self.parse_move(item)
 
     def __str__(self) -> str:
         """

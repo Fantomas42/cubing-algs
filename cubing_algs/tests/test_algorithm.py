@@ -389,11 +389,19 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.check_contains_moves(algo)
 
-    def test_setitem(self) -> None:
+    def test_setitem_int(self) -> None:
         """Test setitem."""
         algo = parse_moves('R2 U')
         algo[1] = Move('B')
         self.assertEqual(str(algo), 'R2 B')
+
+        self.check_contains_moves(algo)
+
+    def test_setitem_int_with_string(self) -> None:
+        """Test setitem with a string stores a Move, not an Algorithm."""
+        algo = parse_moves('R2 U F')
+        algo[1] = 'B'
+        self.assertEqual(str(algo), 'R2 B F')
 
         self.check_contains_moves(algo)
 
