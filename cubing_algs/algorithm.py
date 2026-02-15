@@ -15,6 +15,8 @@ from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
+from cubing_algs.memory import MemoryData
+from cubing_algs.memory import compute_memory
 from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
@@ -335,6 +337,11 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         """
         return compute_structure(self)
+
+    @property
+    def memory(self) -> MemoryData:
+        """Analyze the memorisation difficulty of this algorithm."""
+        return compute_memory(self)
 
     @property
     def min_cube_size(self) -> int:
