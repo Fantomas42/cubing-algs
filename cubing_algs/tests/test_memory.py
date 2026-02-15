@@ -1,6 +1,7 @@
 """Tests for memory difficulty analysis."""
 import unittest
 from typing import ClassVar
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.memory import MemoryData
@@ -170,6 +171,16 @@ class FaceDiversityScoreTestCase(unittest.TestCase):
         score = compute_face_diversity_score([])
         self.assertEqual(score, 0.0)
 
+    def test_all_faces_fully_familiar(self) -> None:
+        """When all face familiarity weights are 1.0, normalized is 0."""
+        all_familiar = dict.fromkeys('RUFLDB', 1.0)
+        algo = Algorithm.parse_moves('R U F')
+        moves = [m for m in algo if not m.is_pause]
+        with patch('cubing_algs.memory.FACE_FAMILIARITY', all_familiar):
+            score = compute_face_diversity_score(moves)
+        # Only the face_count_score component contributes (3/6 * 60 = 30)
+        self.assertAlmostEqual(score, 30.0, delta=1.0)
+
     def test_unfamiliar_faces_penalized(self) -> None:
         """B and D moves should increase score more than R and U."""
         algo_ru = Algorithm.parse_moves("R U R' U'")
@@ -258,6 +269,10 @@ class MemoryRatingTestCase(unittest.TestCase):
         self.assertEqual(get_memory_rating(0.0), 'Trivial')
         self.assertEqual(get_memory_rating(10.0), 'Trivial')
         self.assertEqual(get_memory_rating(19.9), 'Trivial')
+
+    def test_negative_score(self) -> None:
+        """Negative score → Trivial (fallback)."""
+        self.assertEqual(get_memory_rating(-1.0), 'Trivial')
 
     def test_easy(self) -> None:
         """Score 20-40 → Easy."""
