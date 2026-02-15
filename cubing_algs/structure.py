@@ -45,9 +45,7 @@ LONG_ALGO_MIN_SCORE = 5.0  # Min score for long algorithms
 # Classification constants
 PURE_COMMUTATOR_SETUP_LEN = 2  # Setup length for pure commutators
 PURE_COMMUTATOR_ACTION_LEN = 2  # Action length for pure commutators
-PURE_COMMUTATOR_TOTAL_MOVES = 8  # Total moves in pure commutator
 COMMUTATOR_A9_TOTAL_MOVES = 10  # Total moves in A9 commutator (before cancel)
-SIMPLE_CONJUGATE_MAX_SETUP = 2  # Max setup length for "simple" conjugates
 MULTI_SETUP_MIN_LENGTH = 3  # Min setup length for "multi-setup" conjugates
 
 # Efficiency rating constants
@@ -62,13 +60,8 @@ DEFAULT_MAX_NESTING_DEPTH = 10  # Maximum recursion depth for nested structures
 # Very permissive score for classification checks
 CLASSIFICATION_MIN_SCORE = 0.1
 
-# Early termination threshold
-EARLY_TERMINATION_SCORE = 50.0  # Stop searching if structure score exceeds this
-
 # Cache size limits (LRU behavior)
 MAX_INVERSE_CACHE_SIZE = 1000  # Maximum entries in inverse cache
-MAX_STRING_CACHE_SIZE = 1000  # Maximum entries in string cache
-MAX_STRUCTURE_CACHE_SIZE = 500  # Maximum entries in structure cache
 
 
 class BoundedCache[K, V](MutableMapping[K, V]):
@@ -138,7 +131,7 @@ type StructureClassification = Literal[
     'orthogonal', 'extended',
     'other', 'simple',
     'nested', 'multi-setup',
-    'standard', '',
+    '',
 ]
 
 
@@ -371,7 +364,6 @@ def classify_conjugate(
     - 'simple': Short setup (1-2 moves) with commutator action
     - 'nested': Action contains a structure
     - 'multi-setup': Long setup (3+ moves)
-    - 'standard': Regular conjugate pattern
 
     Args:
         setup: The setup (A) part of the conjugate.
@@ -379,7 +371,7 @@ def classify_conjugate(
         nesting_depth: The nesting depth
 
     Returns:
-        Classification string (simple, nested, multi-setup, or standard).
+        Classification string (simple, nested or multi-setup).
 
     """
     setup_len = len(setup)
@@ -401,13 +393,10 @@ def classify_conjugate(
     if has_nested:
         return 'nested'
 
-    if setup_len <= SIMPLE_CONJUGATE_MAX_SETUP:
-        return 'simple'
-
     if setup_len >= MULTI_SETUP_MIN_LENGTH:
         return 'multi-setup'
 
-    return 'standard'
+    return 'simple'
 
 
 def is_inverse_at(
@@ -523,19 +512,11 @@ def detect_conjugate(
         if start + setup_len * 2 > algo_len:
             break
 
-        # Early termination: if we have a very high-scoring structure
-        if best_structure and best_structure.score >= EARLY_TERMINATION_SCORE:
-            break
-
         setup = Algo(algo[start:start + setup_len])
 
         # Look for A' after some action B
         for action_len in range(1, algo_len - start - setup_len * 2 + 1):
             action_end = start + setup_len + action_len
-
-            if action_end + setup_len > algo_len:
-                break
-
             action = Algo(algo[start + setup_len:action_end])
 
             # Check if A' appears after B (uses cached inverse)
@@ -567,10 +548,6 @@ def detect_conjugate(
                         move_count=move_count,
                         is_pure=False,
                     )
-
-                    # Early termination: if score is very high, stop searching
-                    if score >= EARLY_TERMINATION_SCORE:
-                        return best_structure
 
     return best_structure
 
@@ -606,10 +583,6 @@ def detect_commutator(
         if start + a_len * 2 > algo_len:
             break
 
-        # Early termination: if we have a very high-scoring structure
-        if best_structure and best_structure.score >= EARLY_TERMINATION_SCORE:
-            break
-
         a_part = Algo(algo[start:start + a_len])
 
         # Try different B lengths
@@ -634,43 +607,36 @@ def detect_commutator(
                     a_part, b_part, is_commutator=True,
                 )
 
-                if best_structure is None or score > best_structure.score:
-                    # Get/compute inverse for cancellation check
-                    a_part_key = str(a_part)
-                    if a_part_key not in inverse_cache:
-                        inverse_cache[a_part_key] = inverse_sequence(a_part)
-                    a_part_inv = inverse_cache[a_part_key]
+                # Get cached inverse (already populated by is_inverse_at)
+                a_part_key = str(a_part)
+                a_part_inv = inverse_cache[a_part_key]
 
-                    # Classify and analyze the commutator
-                    classification = classify_commutator(
-                        a_part, b_part, inverse_cache,
-                    )
-                    has_cancel = (
-                        detect_move_cancellations(a_part, b_part) or
-                        detect_move_cancellations(b_part, a_part_inv)
-                    )
-                    move_count = a_len * 2 + b_len * 2
-                    is_pure_comm = (
-                        a_len == PURE_COMMUTATOR_SETUP_LEN
-                        and b_len == PURE_COMMUTATOR_ACTION_LEN
-                    )
+                # Classify and analyze the commutator
+                classification = classify_commutator(
+                    a_part, b_part, inverse_cache,
+                )
+                has_cancel = (
+                    detect_move_cancellations(a_part, b_part) or
+                    detect_move_cancellations(b_part, a_part_inv)
+                )
+                move_count = a_len * 2 + b_len * 2
+                is_pure_comm = (
+                    a_len == PURE_COMMUTATOR_SETUP_LEN
+                    and b_len == PURE_COMMUTATOR_ACTION_LEN
+                )
 
-                    best_structure = Structure(
-                        type='commutator',
-                        setup=a_part,
-                        action=b_part,
-                        start=start,
-                        end=b_end + a_len + b_len,
-                        score=score,
-                        classification=classification,
-                        has_cancellations=has_cancel,
-                        move_count=move_count,
-                        is_pure=is_pure_comm,
-                    )
-
-                    # Early termination: if score is very high, stop searching
-                    if score >= EARLY_TERMINATION_SCORE:
-                        return best_structure
+                best_structure = Structure(
+                    type='commutator',
+                    setup=a_part,
+                    action=b_part,
+                    start=start,
+                    end=b_end + a_len + b_len,
+                    score=score,
+                    classification=classification,
+                    has_cancellations=has_cancel,
+                    move_count=move_count,
+                    is_pure=is_pure_comm,
+                )
 
     return best_structure
 
@@ -724,15 +690,14 @@ def detect_structures(
             nesting_depth,
         )
 
-        # Pick the best one
+        # Pick the best one (every commutator A B A' B' contains
+        # conjugate A B A', so conjugate is always found when commutator is)
         best = None
         if commutator and conjugate:
             best = (
                 commutator if commutator.score >= conjugate.score
                 else conjugate
             )
-        elif commutator:
-            best = commutator
         elif conjugate:
             best = conjugate
 
