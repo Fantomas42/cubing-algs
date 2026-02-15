@@ -445,7 +445,7 @@ class VCubeIntegrityChecker:
 
         """
         if not faces:
-            msg = 'Specify at leat one face to orient'
+            msg = 'Specify at least one face to orient'
             raise InvalidFaceError(msg)
 
         if len(faces) > 2:
