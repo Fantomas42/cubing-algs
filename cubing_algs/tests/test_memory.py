@@ -4,7 +4,6 @@ from typing import ClassVar
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.memory import MemoryData
-from cubing_algs.memory import _find_repeated_subsequences
 from cubing_algs.memory import compute_chunk_score
 from cubing_algs.memory import compute_face_diversity_score
 from cubing_algs.memory import compute_flow_memory_score
@@ -13,9 +12,8 @@ from cubing_algs.memory import compute_memory
 from cubing_algs.memory import compute_move_familiarity_score
 from cubing_algs.memory import compute_repetition_score
 from cubing_algs.memory import compute_structure_score
+from cubing_algs.memory import find_repeated_subsequences
 from cubing_algs.memory import get_memory_rating
-
-# --- Unit Tests for Helper Functions ---
 
 
 class LengthScoreTestCase(unittest.TestCase):
@@ -116,22 +114,22 @@ class StructureScoreTestCase(unittest.TestCase):
 
 
 class RepetitionScoreTestCase(unittest.TestCase):
-    """Tests for _find_repeated_subsequences and compute_repetition_score."""
+    """Tests for find_repeated_subsequences and compute_repetition_score."""
 
     def test_no_repeats(self) -> None:
         """No repeated subsequences."""
-        repeats = _find_repeated_subsequences(['R', 'U', 'F', 'L'])
+        repeats = find_repeated_subsequences(['R', 'U', 'F', 'L'])
         self.assertEqual(repeats, 0)
 
     def test_simple_repeat(self) -> None:
         """Detect simple 2-move repeat."""
         moves = ['R', 'U', "R'", "U'", 'R', 'U', "R'", "U'"]
-        repeats = _find_repeated_subsequences(moves)
+        repeats = find_repeated_subsequences(moves)
         self.assertGreater(repeats, 0)
 
     def test_too_short(self) -> None:
         """Too few moves for any repeat."""
-        repeats = _find_repeated_subsequences(['R', 'U'])
+        repeats = find_repeated_subsequences(['R', 'U'])
         self.assertEqual(repeats, 0)
 
     def test_repetition_score_no_repeats(self) -> None:

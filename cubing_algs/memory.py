@@ -184,7 +184,7 @@ def compute_structure_score(
     return max(0.0, 100.0 * (1.0 - total_benefit))
 
 
-def _find_repeated_subsequences(
+def find_repeated_subsequences(
     moves: list[str],
     min_len: int = REPETITION_MIN_LEN,
     max_len: int = REPETITION_MAX_LEN,
@@ -243,7 +243,7 @@ def compute_repetition_score(repeated_patterns: int, stm: int) -> float:
     return max(0.0, 100.0 - reduction)
 
 
-def _get_move_face(move: Move) -> str | None:
+def get_move_face(move: Move) -> str | None:
     """
     Extract the face letter from a move.
 
@@ -277,7 +277,7 @@ def compute_face_diversity_score(moves: list[Move]) -> float:
     """
     faces_used: set[str] = set()
     for move in moves:
-        face = _get_move_face(move)
+        face = get_move_face(move)
         if face is not None:
             faces_used.add(face)
 
@@ -448,13 +448,13 @@ def compute_memory(algorithm: Algorithm) -> MemoryData:  # noqa: PLR0914
 
     # --- Repetition score ---
     move_strings = [str(m) for m in non_pause_moves]
-    repeated_patterns = _find_repeated_subsequences(move_strings)
+    repeated_patterns = find_repeated_subsequences(move_strings)
     repetition_score = compute_repetition_score(repeated_patterns, stm)
 
     # --- Face diversity score ---
     face_div_score = compute_face_diversity_score(non_pause_moves)
     faces_used = {
-        _get_move_face(m) for m in non_pause_moves
+        get_move_face(m) for m in non_pause_moves
     } - {None}
     distinct_faces = len(faces_used)
 

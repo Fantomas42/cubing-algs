@@ -498,7 +498,7 @@ def calculate_flow_score(algorithm: Algorithm) -> float:
     return max(0.0, 1.0 - (avg_penalty / max_possible_penalty))
 
 
-def _normalize_algorithm_string(algorithm: Algorithm) -> str:
+def normalize_algorithm_string(algorithm: Algorithm) -> str:
     """
     Convert algorithm to normalized string for pattern matching.
 
@@ -506,7 +506,9 @@ def _normalize_algorithm_string(algorithm: Algorithm) -> str:
         Space-separated string of non-pause moves.
 
     """
-    return ' '.join(str(move) for move in algorithm if not move.is_pause)
+    from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+
+    return str(algorithm.transform(unpause_moves))
 
 
 def find_trigger_patterns(
@@ -527,7 +529,7 @@ def find_trigger_patterns(
     if len(algorithm) == 0:
         return []
 
-    algorithm_str = _normalize_algorithm_string(algorithm)
+    algorithm_str = normalize_algorithm_string(algorithm)
     algorithm_moves = algorithm_str.split()
 
     matches: list[TriggerMatch] = []
