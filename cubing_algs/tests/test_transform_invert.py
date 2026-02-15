@@ -1,23 +1,22 @@
-"""Tests for mirror transformation functions."""
-
+"""Tests for invert transformation functions."""
 import unittest
 
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 
 
-class TransformMirrorTestCase(unittest.TestCase):
-    """Tests for mirror transformation that reflects algorithms."""
+class TransformInvertTestCase(unittest.TestCase):
+    """Tests for invert transformation."""
 
-    def test_mirror_moves(self) -> None:
-        """Test mirror moves."""
+    def test_invert_moves(self) -> None:
+        """Test invert moves."""
         provide = parse_moves(
             "F R U2 F'",
         )
         expect = parse_moves("F U2 R' F'")
 
-        result = mirror_moves(provide)
+        result = invert_moves(provide)
 
         self.assertEqual(
             result,
@@ -27,14 +26,14 @@ class TransformMirrorTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
-    def test_mirror_big_moves(self) -> None:
-        """Test mirror big moves."""
+    def test_invert_big_moves(self) -> None:
+        """Test invert big moves."""
         provide = parse_moves(
             "2Fw R 3U2 3f'",
         )
         expect = parse_moves("3f 3U2 R' 2Fw'")
 
-        result = mirror_moves(provide)
+        result = invert_moves(provide)
 
         self.assertEqual(
             result,
@@ -51,7 +50,7 @@ class TransformMirrorTestCase(unittest.TestCase):
         )
         expect = parse_moves("F@4 U2@3 R'@2 F'@1")
 
-        result = mirror_moves(provide)
+        result = invert_moves(provide)
 
         self.assertEqual(
             result,
@@ -68,7 +67,7 @@ class TransformMirrorTestCase(unittest.TestCase):
         )
         expect = parse_moves("F@5 U2@4 R'@3 .@2 F'@1")
 
-        result = mirror_moves(provide)
+        result = invert_moves(provide)
 
         self.assertEqual(
             result,

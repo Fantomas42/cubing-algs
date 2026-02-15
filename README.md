@@ -12,7 +12,7 @@ pip install cubing-algs
 
 - **Dual Representation System**: Work with both facelet (visual) and cubie (mathematical) representations
 - **Algorithm Analysis**: Comprehensive metrics, impact analysis, ergonomics, and structure detection
-- **Powerful Transformations**: Mirror, rotate, compress, and compose algorithms with a clean pipeline API
+- **Powerful Transformations**: Invert, rotate, compress, and compose algorithms with a clean pipeline API
 - **Virtual Cube Simulation**: Full 3x3x3 cube state tracking with orientation support
 - **Advanced Notation**: Commutators `[A, B]`, conjugates `[A: B]`, wide moves, slice moves, rotations
 - **Pattern Library**: 70+ classic cube patterns (Superflip, Checkerboard, etc.)
@@ -122,14 +122,14 @@ Apply various transformations to algorithms using the transform pipeline:
 
 ```python
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.size import compress_moves, expand_moves
 from cubing_algs.transform.symmetry import symmetry_m_moves
 
 algo = parse_moves("R U R' U'")
 
-# Mirror an algorithm
-mirrored = algo.transform(mirror_moves)  # L' U' L U
+# Invert an algorithm
+inverse = algo.transform(invert_moves)  # U R U' R'
 
 # Compression (optimize with cancellations)
 compressed = parse_moves("R R U U U").transform(compress_moves)  # R2 U'
@@ -138,7 +138,7 @@ compressed = parse_moves("R R U U U").transform(compress_moves)  # R2 U'
 expanded = parse_moves("R2 U'").transform(expand_moves)  # R R U'
 
 # Chain multiple transformations
-result = algo.transform(mirror_moves, compress_moves, symmetry_m_moves)
+result = algo.transform(invert_moves, compress_moves, symmetry_m_moves)
 
 # Transform until fixed point (apply repeatedly until stable)
 messy = parse_moves("R R F F' R2 U F2")
@@ -148,7 +148,7 @@ clean = messy.transform(compress_moves, to_fixpoint=True)  # U F2
 ### Available Transformations
 
 **Basic transformations:**
-- `mirror_moves` - Mirror across M plane (R ↔ L)
+- `invert_moves` - Invert moves
 - `compress_moves` - Optimize with move cancellations (R R → R2, R R' → ∅)
 - `expand_moves` - Convert double moves to pairs (R2 → R R)
 
@@ -636,16 +636,16 @@ The library is optimized for performance:
 
 ## Examples
 
-### Generating a mirror of an OLL algorithm
+### Generating the inverse of an OLL algorithm
 
 ```python
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs import VCube
 
 oll = parse_moves("F U F' R' F R U' R' F' R")  # OLL 14 Anti-Gun
-oll_mirror = oll.transform(mirror_moves)
-print(oll_mirror)  # R' F R U R' F' R F U' F'
+oll_invert = oll.transform(invert_moves)
+print(oll_invert)  # R' F R U R' F' R F U' F'
 
 cube = VCube()
 cube.rotate('z2')
@@ -751,7 +751,7 @@ cube.show()  # Cross solved, FR slot scrambled
 
 ```python
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.symmetry import symmetry_m_moves
 from cubing_algs import VCube
 from cubing_algs.scrambler import scramble
@@ -760,14 +760,14 @@ from cubing_algs.scrambler import scramble
 base_alg = parse_moves("[R U R', D]")  # R U R' D R U' R' D'
 
 # Generate variations
-mirrored = base_alg.transform(mirror_moves)
+inverse = base_alg.transform(invert_moves)
 m_symmetric = base_alg.transform(symmetry_m_moves)
 
 # Analyze algorithms
 print(f"Original: {base_alg} ({base_alg.metrics.htm} HTM)")
 print(f"Comfort: {base_alg.ergonomics.comfort_rating}/10")
 print(f"Affected pieces: {base_alg.impacts.affected_facelet_count}")
-print(f"Mirrored: {mirrored} ({mirrored.metrics.htm} HTM)")
+print(f"Inverse: {inverse} ({inverse.metrics.htm} HTM)")
 
 # Test on virtual cube
 cube = VCube()

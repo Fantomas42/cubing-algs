@@ -1,4 +1,4 @@
-"""Mirror transformation for creating inverse algorithms."""
+"""Inverse transformation."""
 
 from typing import TYPE_CHECKING
 
@@ -8,9 +8,9 @@ if TYPE_CHECKING:
     from cubing_algs.move import Move  # pragma: no cover
 
 
-def mirror_moves(old_moves: Algorithm) -> Algorithm:
+def invert_moves(old_moves: Algorithm) -> Algorithm:
     """
-    Create the mirror inverse of an algorithm.
+    Create the inversed version of an algorithm.
 
     Reverses the order of moves and inverts each move to create
     the sequence that undoes the original algorithm.

@@ -2,7 +2,7 @@
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.exceptions import InvalidBracketError
 from cubing_algs.exceptions import InvalidOperatorError
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 
 
 def find_innermost_brackets(text: str) -> tuple[int, int] | None:
@@ -66,7 +66,7 @@ def split_on_separator(text: str, separator: str) -> tuple[str, str] | None:
     return None
 
 
-def invert_moves(old_moves: str) -> str:
+def invert_moves_str(old_moves: str) -> str:
     """
     Invert an algorithm string (reverse order and invert each move).
 
@@ -79,7 +79,7 @@ def invert_moves(old_moves: str) -> str:
     """
     algo = Algorithm.parse_moves(old_moves)
 
-    return str(algo.transform(mirror_moves))
+    return str(algo.transform(invert_moves))
 
 
 def expand_commutators_and_conjugates(moves: str) -> str:
@@ -122,7 +122,7 @@ def expand_commutators_and_conjugates(moves: str) -> str:
             a_expanded = expand_commutators_and_conjugates(a_part)
             b_expanded = expand_commutators_and_conjugates(b_part)
 
-            a_inverted = invert_moves(a_expanded)
+            a_inverted = invert_moves_str(a_expanded)
             expanded = f'{a_expanded} {b_expanded} {a_inverted}'
 
         elif comma_split is not None:
@@ -131,8 +131,8 @@ def expand_commutators_and_conjugates(moves: str) -> str:
             a_expanded = expand_commutators_and_conjugates(a_part)
             b_expanded = expand_commutators_and_conjugates(b_part)
 
-            a_inverted = invert_moves(a_expanded)
-            b_inverted = invert_moves(b_expanded)
+            a_inverted = invert_moves_str(a_expanded)
+            b_inverted = invert_moves_str(b_expanded)
             expanded = f'{a_expanded} {b_expanded} {a_inverted} {b_inverted}'
 
         else:

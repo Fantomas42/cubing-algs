@@ -269,9 +269,9 @@ def inverse_sequence(algo: 'Algorithm') -> 'Algorithm':
         The inverted algorithm.
 
     """
-    from cubing_algs.transform.mirror import mirror_moves  # noqa: PLC0415
+    from cubing_algs.transform.invert import invert_moves  # noqa: PLC0415
 
-    return algo.transform(mirror_moves)
+    return algo.transform(invert_moves)
 
 
 def detect_move_cancellations(

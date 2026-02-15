@@ -11,12 +11,12 @@ from re import Match
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import RegexPattern
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 
 # Compiled regex patterns for performance
-_MULT_INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)(\d+)'")
-_MULT_PATTERN: RegexPattern = re.compile(r'\(([^()]*)\)(\d+)')
-_INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)'")
+MULT_INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)(\d+)'")
+MULT_PATTERN: RegexPattern = re.compile(r'\(([^()]*)\)(\d+)')
+INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)'")
 
 
 def apply_multiplier(content: str, multiplier: int) -> str:
@@ -42,7 +42,7 @@ def apply_inversion(old_moves: str) -> str:
     """
     algo = Algorithm.parse_moves(old_moves)
 
-    return str(algo.transform(mirror_moves))
+    return str(algo.transform(invert_moves))
 
 
 def find_innermost_parenthesis_with_modifier(
@@ -62,17 +62,17 @@ def find_innermost_parenthesis_with_modifier(
 
     """
     # Try multiplier with inversion: (...)N'
-    match = _MULT_INV_PATTERN.search(text)
+    match = MULT_INV_PATTERN.search(text)
     if match:
         return (match.start(), match.end(), 'mult_inv', match)
 
     # Try just multiplier: (...)N
-    match = _MULT_PATTERN.search(text)
+    match = MULT_PATTERN.search(text)
     if match:
         return (match.start(), match.end(), 'mult', match)
 
     # Try just inversion: (...)'
-    match = _INV_PATTERN.search(text)
+    match = INV_PATTERN.search(text)
     if match:
         return (match.start(), match.end(), 'inv', match)
 

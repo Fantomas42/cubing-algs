@@ -32,7 +32,7 @@ from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_permutation
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.vcube import VCube
 
 
@@ -440,7 +440,7 @@ def scramble_easy_cross(
 
     # Build scramble and solution
     scramble = cubies_to_scramble(cubies)
-    solution = moves.transform(mirror_moves)
+    solution = moves.transform(invert_moves)
 
     return scramble, solution
 
@@ -511,7 +511,7 @@ def scramble_x_cross(  # noqa: PLR0914
 
     # Build scramble and solution
     scramble = cubies_to_scramble(cubies)
-    solution = moves.transform(mirror_moves)
+    solution = moves.transform(invert_moves)
 
     return scramble, solution
 
