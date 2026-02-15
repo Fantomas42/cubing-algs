@@ -1,5 +1,4 @@
 """Tests for solver functions."""
-
 import unittest
 
 from cubing_algs.constants import SOLVED_CO

@@ -1,5 +1,4 @@
 """Degrip transformations for converting rotation moves into face moves."""
-
 from collections.abc import Callable
 
 from cubing_algs.algorithm import Algorithm

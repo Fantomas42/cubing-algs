@@ -1,5 +1,4 @@
 """Tests for algorithm metrics computation."""
-
 import unittest
 
 from cubing_algs.metrics import MetricsData

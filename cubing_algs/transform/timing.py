@@ -1,5 +1,4 @@
 """Timing information removal transformations for algorithm moves."""
-
 from typing import TYPE_CHECKING
 
 from cubing_algs.algorithm import Algorithm

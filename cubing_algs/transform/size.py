@@ -1,5 +1,4 @@
 """Algorithm compression and expansion transformations for move optimization."""
-
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.transform.optimize import optimize_do_undo_moves

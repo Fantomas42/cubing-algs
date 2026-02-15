@@ -1,5 +1,4 @@
 """Tests for move permutation calculations."""
-
 import unittest
 from typing import Any
 

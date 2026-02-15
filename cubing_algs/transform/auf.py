@@ -1,5 +1,4 @@
 """AUF (Adjust U Face) transformations for optimizing last layer adjustments."""
-
 from collections.abc import Iterable
 from itertools import takewhile
 

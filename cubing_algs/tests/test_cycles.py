@@ -1,5 +1,4 @@
 """Tests for cycle order calculation."""
-
 import unittest
 
 from cubing_algs.algorithm import Algorithm

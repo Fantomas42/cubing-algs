@@ -6,7 +6,6 @@ between adjacent faces on a Rubik's cube. These transformations account for
 the rotation and orientation changes that occur when a facelet moves from
 one face to another.
 """
-
 from collections.abc import Callable
 
 

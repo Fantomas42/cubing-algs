@@ -4,7 +4,6 @@ Compression round-trip integrity tests.
 These tests ensure that compressed algorithms can be parsed back
 to produce the same result as the original algorithm.
 """
-
 import unittest
 
 from cubing_algs.algorithm import Algorithm

@@ -1,5 +1,4 @@
 """Inverse transformation."""
-
 from typing import TYPE_CHECKING
 
 from cubing_algs.algorithm import Algorithm

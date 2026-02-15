@@ -1,5 +1,4 @@
 """Color palette management and conversion utilities for cube visualization."""
-
 from typing import TypedDict
 
 from cubing_algs.constants import FACE_ORDER
