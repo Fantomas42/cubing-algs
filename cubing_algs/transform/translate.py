@@ -18,16 +18,18 @@ def translate_moves(
     Returns:
         Function that translates algorithms based on the orientation.
 
+    Raises:
+        InvalidMoveError: If orientations_moves contain non rotation moves.
+
     """
+    for orientation_move in orientation_moves:
+        if not orientation_move.is_rotation_move:
+            msg = f'{ orientation_move } is not a rotation move'
+            raise InvalidMoveError(msg)
 
     def _translate_moves(old_moves: Algorithm) -> Algorithm:
         if not orientation_moves or not old_moves:
             return old_moves
-
-        for orientation_move in orientation_moves:
-            if not orientation_move.is_rotation_move:
-                msg = f'{ orientation_move } is not a rotation move'
-                raise InvalidMoveError(msg)
 
         new_moves = old_moves.copy()
         for orientation_move in orientation_moves:
