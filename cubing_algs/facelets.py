@@ -176,6 +176,11 @@ class ConversionCache:
         """Disable caching."""
         self._enabled = False
 
+    @property
+    def is_enabled(self) -> bool:
+        """Whether the cache is currently enabled."""
+        return self._enabled
+
 
 # Global cache instance
 _cache = ConversionCache()
@@ -389,5 +394,5 @@ def get_cache_info() -> dict[str, int]:
         'facelets_cached': len(_cache.facelets_cache),
         'cubies_cached': len(_cache.cubies_cache),
         'max_size': _cache.max_size,
-        'enabled': _cache._enabled,  # noqa: SLF001
+        'enabled': _cache.is_enabled,
     }
