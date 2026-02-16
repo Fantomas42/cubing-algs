@@ -221,9 +221,8 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
     return Algorithm(moves)
 
 
-def parse_moves_cfop(
-        raw_moves: Iterable[Move | str] | Move | str,
-) -> Algorithm:
+def parse_moves_cfop(raw_moves: Iterable[Move | str] | Move | str,
+                     *, secure: bool = True) -> Algorithm:
     """
     Parse moves specifically for CFOP method algorithms.
 
@@ -234,12 +233,13 @@ def parse_moves_cfop(
 
     Args:
         raw_moves: The moves to parse, as a string, iterable, or Algorithm.
+        secure: If True, skip cleaning and validation steps.
 
     Returns:
         An Algorithm with leading/trailing y and U moves removed.
 
     """
-    algo = parse_moves(raw_moves, secure=False)
+    algo = parse_moves(raw_moves, secure=secure)
 
     return algo.transform(
         trim_moves('y'),
