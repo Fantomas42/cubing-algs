@@ -314,21 +314,21 @@ ERGONOMIC_WEIGHTS: dict[str, float] = {
 AWKWARD_THRESHOLD = 0.6
 
 # Difficulty classification thresholds
-_BEGINNER_SCORE = 0.8
-_BEGINNER_FLOW = 0.8
-_BEGINNER_REGRIPS = 1
-_INTERMEDIATE_SCORE = 0.65
-_INTERMEDIATE_FLOW = 0.6
-_INTERMEDIATE_REGRIPS = 3
-_ADVANCED_SCORE = 0.45
-_ADVANCED_REGRIPS = 6
+BEGINNER_SCORE = 0.8
+BEGINNER_FLOW = 0.8
+BEGINNER_REGRIPS = 1
+INTERMEDIATE_SCORE = 0.65
+INTERMEDIATE_FLOW = 0.6
+INTERMEDIATE_REGRIPS = 3
+ADVANCED_SCORE = 0.45
+ADVANCED_REGRIPS = 6
 
 # Suggestion thresholds
-_REGRIP_RATIO_THRESHOLD = 0.2
-_BALANCE_THRESHOLD = 0.6
-_FLOW_THRESHOLD = 0.6
-_WEIGHT_THRESHOLD = 0.6
-_ROTATION_RATIO_THRESHOLD = 0.15
+REGRIP_RATIO_THRESHOLD = 0.2
+BALANCE_THRESHOLD = 0.6
+FLOW_THRESHOLD = 0.6
+WEIGHT_THRESHOLD = 0.6
+ROTATION_RATIO_THRESHOLD = 0.15
 
 # Face adjacency mapping for transition analysis
 ADJACENT_FACES: dict[str, set[str]] = {
@@ -729,14 +729,14 @@ def classify_algorithm_difficulty(
     regrips = compute_regrip_count(algorithm)
     flow = calculate_flow_score(algorithm)
 
-    if (score >= _BEGINNER_SCORE
-            and regrips <= _BEGINNER_REGRIPS and flow >= _BEGINNER_FLOW):
+    if (score >= BEGINNER_SCORE
+            and regrips <= BEGINNER_REGRIPS and flow >= BEGINNER_FLOW):
         return 'Beginner'
-    if (score >= _INTERMEDIATE_SCORE
-            and regrips <= _INTERMEDIATE_REGRIPS
-            and flow >= _INTERMEDIATE_FLOW):
+    if (score >= INTERMEDIATE_SCORE
+            and regrips <= INTERMEDIATE_REGRIPS
+            and flow >= INTERMEDIATE_FLOW):
         return 'Intermediate'
-    if score >= _ADVANCED_SCORE and regrips <= _ADVANCED_REGRIPS:
+    if score >= ADVANCED_SCORE and regrips <= ADVANCED_REGRIPS:
         return 'Advanced'
     return 'Expert'
 
@@ -763,17 +763,17 @@ def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
     if non_pause_count == 0:
         return []
 
-    if regrips > non_pause_count * _REGRIP_RATIO_THRESHOLD:
+    if regrips > non_pause_count * REGRIP_RATIO_THRESHOLD:
         suggestions.append(
             'Consider reducing cube rotations to minimize regrips',
         )
 
     _, _, _, balance_ratio = compute_hand_balance(algorithm)
-    if balance_ratio * 2 < _BALANCE_THRESHOLD:
+    if balance_ratio * 2 < BALANCE_THRESHOLD:
         suggestions.append('Try to balance moves between both hands')
 
     flow = calculate_flow_score(algorithm)
-    if flow < _FLOW_THRESHOLD:
+    if flow < FLOW_THRESHOLD:
         suggestions.append(
             'Look for alternatives to reduce awkward move transitions',
         )
@@ -783,13 +783,13 @@ def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
         for move in algorithm if not move.is_pause
     ]
     avg_weight = sum(move_weights) / len(move_weights) if move_weights else 1.0
-    if avg_weight < _WEIGHT_THRESHOLD:
+    if avg_weight < WEIGHT_THRESHOLD:
         suggestions.append(
             'Consider alternatives to D, B, and slice moves where possible',
         )
 
     rotation_count = sum(1 for move in algorithm if move.is_rotation_move)
-    if rotation_count > non_pause_count * _ROTATION_RATIO_THRESHOLD:
+    if rotation_count > non_pause_count * ROTATION_RATIO_THRESHOLD:
         suggestions.append('Try to find rotation-free alternatives')
 
     return suggestions
