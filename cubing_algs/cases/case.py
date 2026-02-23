@@ -32,10 +32,19 @@ class RecognitionData(TypedDict):
     moves: list[str]
 
 
+class BadmephistoRawData(TypedDict):
+    """BadMephisto raw algorithm information (from JSON)."""
+
+    algos: list[str]
+    comment: str
+    difficulty: int
+    uid: str
+
+
 class BadmephistoData(TypedDict):
     """BadMephisto algorithm information."""
 
-    algos: list[str]
+    algos: list[Algorithm]
     comment: str
     difficulty: int
     uid: str
@@ -77,7 +86,7 @@ class CaseData(TypedDict):
     probability_label: NotRequired[str]
     main: NotRequired[str]
     algorithms: NotRequired[list[str]]
-    badmephisto: NotRequired[BadmephistoData]
+    badmephisto: NotRequired[BadmephistoRawData]
     logiqx: NotRequired[list[LogiqxAlgorithm]]
     sarah: NotRequired[dict[str, str]]
 
@@ -207,7 +216,19 @@ class Case:  # noqa: PLR0904
 
         http://badmephisto.com/
         """
-        return self.data.get('badmephisto')
+        raw = self.data.get('badmephisto')
+
+        if raw is None:
+            return None
+
+        return BadmephistoData(
+            algos=[
+                parse_moves(algo_str) for algo_str in raw['algos']
+            ],
+            comment=raw['comment'],
+            difficulty=raw['difficulty'],
+            uid=raw['uid'],
+        )
 
     @cached_property
     def logiqx(self) -> list[LogiqxAlgorithm] | None:
