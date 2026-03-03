@@ -398,7 +398,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """Get a VisualCube URL for this algorithm."""
         return visual_cube_algorithm(self)
 
-    def show(self, mode: str = '', orientation: str = '') -> 'VCube':
+    def show(self, mode: str = '') -> 'VCube':
         """
         Visualize the algorithm's effect on a cube.
 
@@ -407,18 +407,17 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         Args:
             mode: Display mode for the cube visualization.
-            orientation: Orientation of the cube for display.
 
         Returns:
             A VCube object with the algorithm applied.
 
         """
-        cube = self.impacts.cube
+        impacts = self.impacts
+        cube = impacts.cube
 
         cube.show(
             mode=mode,
-            orientation=orientation,
-            mask=self.impacts.facelets_transformation_mask,
+            mask=impacts.facelets_transformation_mask,
         )
 
         return cube

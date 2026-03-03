@@ -780,7 +780,7 @@ class AlgorithmShowTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("R U R'")
 
         with redirect_stdout(StringIO()):
-            result = algo.show(mode='oll', orientation='FU')
+            result = algo.show(mode='oll')
 
         self.assertIsInstance(result, VCube)
 
