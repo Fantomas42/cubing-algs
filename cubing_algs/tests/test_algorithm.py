@@ -389,6 +389,14 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.check_contains_moves(algo)
 
+    def test_setitem_slice_with_move(self) -> None:
+        """Test setitem slice with a Move value replaces the slice correctly."""
+        algo = parse_moves('R2 U F L D')
+        algo[1:3] = Move('R2')
+        self.assertEqual(str(algo), 'R2 R2 L D')
+
+        self.check_contains_moves(algo)
+
     def test_setitem_int(self) -> None:
         """Test setitem."""
         algo = parse_moves('R2 U')

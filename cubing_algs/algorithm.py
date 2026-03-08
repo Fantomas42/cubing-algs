@@ -152,10 +152,10 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
     def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def] # noqa: ANN001
         """Set a move at a specific index in the algorithm."""
-        if isinstance(item, Move):
-            self.data[i] = item
-        elif isinstance(i, slice):
+        if isinstance(i, slice):
             self.data[i] = self.parse_moves(item)
+        elif isinstance(item, Move):
+            self.data[i] = item
         else:
             self.data[i] = self.parse_move(item)
 
