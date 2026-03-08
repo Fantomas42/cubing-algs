@@ -487,6 +487,31 @@ class TransformOptimizeTestCase(unittest.TestCase):
             expect,
         )
 
+        # Moves on different layers must not be combined
+        provide = parse_moves('R2 3R')
+        expect = parse_moves('R2 3R')
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('2R 3R2')
+        expect = parse_moves('2R 3R2')
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('2R 2R2')
+        expect = parse_moves("2R'")
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )
+
         self.assertEqual(
             optimize_triple_moves(provide, 0),
             provide,

@@ -149,7 +149,10 @@ def optimize_triple_moves(
     moves = old_moves.copy()
 
     while i < len(moves) - 1:
-        if moves[i].base_move == moves[i + 1].base_move:
+        if (
+                moves[i].base_move == moves[i + 1].base_move
+                and moves[i].layer == moves[i + 1].layer
+        ):
             if moves[i].is_double and not moves[i + 1].is_double:
                 moves[i:i + 2] = [moves[i + 1].inverted]
                 changed = True
