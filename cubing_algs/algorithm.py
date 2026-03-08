@@ -220,7 +220,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
     def cycles(self) -> int:
         """
         Get the number of times this algorithm must be applied
-        to return a cube to its solved state.
+        to return a 3x3x3 cube to its solved state.
 
         This property calculates the "order" of the algorithm - how many times
         you need to execute the sequence of moves to bring a solved cube back
