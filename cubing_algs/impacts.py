@@ -881,6 +881,7 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         patterns.append('CROSS_SOLVED')
 
     # F2L specific patterns
+    f2l_edges_solved = False
     if d_corners_solved and d_edges_solved:
         # Check if F2L is complete (D layer + E slice edges)
         f2l_edges_solved = all(
