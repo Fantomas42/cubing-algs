@@ -39,6 +39,18 @@ if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
     from cubing_algs.vcube import VCube  # pragma: no cover
 
+# Precomputed lookup: facelet index → piece index for O(1) same-piece checks.
+CACHED_FACELET_TO_EDGE_PIECE: dict[int, int] = {
+    facelet: i
+    for i, edge in enumerate(EDGE_FACELET_MAP)
+    for facelet in edge
+}
+CACHED_FACELET_TO_CORNER_PIECE: dict[int, int] = {
+    facelet: i
+    for i, corner in enumerate(CORNER_FACELET_MAP)
+    for facelet in corner
+}
+
 
 class CycleAnalysis(TypedDict):
     """Analysis of permutation cycle structure."""
@@ -188,17 +200,12 @@ def positions_on_same_piece(pos1: int, pos2: int) -> bool:
         True if both positions are on the same physical piece.
 
     """
-    # Check if they're on the same edge piece
-    for edge_map in EDGE_FACELET_MAP:
-        if pos1 in edge_map and pos2 in edge_map:
-            return True
+    e1 = CACHED_FACELET_TO_EDGE_PIECE.get(pos1)
+    if e1 is not None and e1 == CACHED_FACELET_TO_EDGE_PIECE.get(pos2):
+        return True
 
-    # Check if they're on the same corner piece
-    for corner_map in CORNER_FACELET_MAP:
-        if pos1 in corner_map and pos2 in corner_map:
-            return True
-
-    return False
+    c1 = CACHED_FACELET_TO_CORNER_PIECE.get(pos1)
+    return c1 is not None and c1 == CACHED_FACELET_TO_CORNER_PIECE.get(pos2)
 
 
 def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
