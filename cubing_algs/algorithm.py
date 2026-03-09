@@ -201,14 +201,15 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A new Algorithm with all transformations applied.
 
         """
-        new_moves = self.copy()
         mod_moves = self.copy()
 
-        max_iterations = 1
-        if to_fixpoint:
-            max_iterations = MAX_ITERATIONS
+        if not to_fixpoint:
+            for process in processes:
+                mod_moves = process(mod_moves)
+            return mod_moves
 
-        for _ in range(max_iterations):
+        new_moves = self.copy()
+        for _ in range(MAX_ITERATIONS):
             for process in processes:
                 mod_moves = process(mod_moves)
 

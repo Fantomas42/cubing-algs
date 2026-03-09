@@ -2,12 +2,14 @@
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
 from cubing_algs.vcube import VCube
@@ -559,6 +561,20 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
             ),
             expected,
         )
+
+    def test_transform_to_fixpoint_exhausted(self) -> None:
+        """
+        Test transform to fixpoint when MAX_ITERATIONS is exhausted
+        without convergence.
+        """
+        algo = parse_moves("R U R' U'")
+
+        # invert_moves alternates: original → inverted → original → ...
+        # never converges; after 2 iterations mod_moves is back to the original
+        with patch('cubing_algs.algorithm.MAX_ITERATIONS', 2):
+            result = algo.transform(invert_moves, to_fixpoint=True)
+
+        self.assertEqual(result, algo)
 
     def test_min_cube_size(self) -> None:
         """Test min cube size."""
