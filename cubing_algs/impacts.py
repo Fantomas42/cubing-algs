@@ -1002,7 +1002,7 @@ def compute_cubie_complexity(
 
 def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     """
-    Compute comprehensive impact metrics for an algorithm.
+    Compute comprehensive impact metrics for an algorithm on a 3x3x3 cube.
 
     Analyzes both facelet-level (visual/spatial) and cubie-level (piece)
     impacts of the algorithm on the cube state.
@@ -1046,7 +1046,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     from cubing_algs.transform.timing import untime_moves
     from cubing_algs.vcube import VCube
 
-    cube = VCube()
+    cube = VCube(size=3)
     cube.rotate(untime_moves(algorithm))
     cube = cube.oriented_copy('UF')
 

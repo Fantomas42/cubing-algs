@@ -267,7 +267,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
     @property
     def impacts(self) -> ImpactData:
         """
-        Analyze the spatial impact of this algorithm on cube facelets.
+        Analyze the spatial impact of this algorithm on 3x3x3 cube.
 
         Computes comprehensive metrics about how the algorithm affects
         individual facelets on the cube, including movement patterns,
@@ -400,7 +400,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
     def show(self, mode: str = '') -> 'VCube':
         """
-        Visualize the algorithm's effect on a cube.
+        Visualize the algorithm's effect on a 3x3x3 cube.
 
         Creates a VCube, applies this algorithm to it, and displays the result
         with a mask showing which facelets are affected by the algorithm.
