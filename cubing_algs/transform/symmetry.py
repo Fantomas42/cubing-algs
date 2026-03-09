@@ -1,5 +1,7 @@
 """Symmetry transformations for applying cube symmetry operations."""
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import DOUBLE_CHAR
+from cubing_algs.constants import INVERT_CHAR
 from cubing_algs.constants import SYMMETRY_TABLE
 from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.move import Move
@@ -36,19 +38,21 @@ def symmetry_moves(
             if move.is_wide_move:
                 symmetry_move += WIDE_CHAR
 
+            modifier = ''
+            if move.is_double:
+                modifier = DOUBLE_CHAR
+            elif move.is_clockwise:
+                modifier = INVERT_CHAR
+
             new_move = Move(
-                move.layer + symmetry_move + move.time,
+                move.layer + symmetry_move
+                + modifier + move.time,
             )
 
             if move.is_sign_move:
                 new_move = new_move.to_sign
 
-            if move.is_double:
-                moves.append(new_move.doubled)
-            elif move.is_clockwise:
-                moves.append(new_move.inverted)
-            else:
-                moves.append(new_move)
+            moves.append(new_move)
 
     return Algorithm(moves)
 
