@@ -69,7 +69,7 @@ References
 - https://www.speedsolving.com/wiki/index.php?title=God%27s_Number
 
 """
-import operator
+from collections import defaultdict
 from typing import TYPE_CHECKING
 from typing import NamedTuple
 
@@ -317,58 +317,12 @@ def compute_score(mode: str,
     )
 
 
-def compute_generators(moves: 'Algorithm') -> list[str]:
-    """
-    Identify the most frequently used move faces in an algorithm.
-
-    This function counts how many times each face is turned (ignoring
-    direction and whether it's a single or double turn) and returns them in
-    order of frequency. Rotations and pauses are excluded from this analysis.
-
-    This is useful for understanding which faces an algorithm primarily
-    affects, which can help with method classification (e.g., RU algorithms
-    only use R and U).
-
-    Args:
-        moves: The algorithm to analyze.
-
-    Returns:
-        List of face names sorted by frequency (most frequent first).
-
-    Examples:
-        >>> compute_generators(parse_moves("R U R' U'"))
-        ['R', 'U']
-
-        >>> compute_generators(parse_moves("R U R U R U' R'"))
-        ['R', 'U']  # R appears 4 times, U appears 3 times
-
-        >>> compute_generators(parse_moves("M2 U M2 U2"))
-        ['M', 'U']  # M appears 2 times, U appears 2 times
-
-    """
-    count: dict[str, int] = {}
-    for move in moves:
-        if move.is_rotation_move or move.is_pause:
-            continue
-
-        count.setdefault(move.raw_base_move, 0)
-        count[move.raw_base_move] += 1
-
-    return [
-        k
-        for k, v in sorted(
-                count.items(),
-                key=operator.itemgetter(1),
-                reverse=True,
-        )
-    ]
-
-
 def regroup_moves(
         moves: 'Algorithm',
-) -> tuple[list[Move], list[Move], list[Move], list[Move]]:
+) -> tuple[list[Move], list[Move], list[Move], list[Move], list[str]]:
     """
-    Categorize moves into pause, rotation, outer, and inner move types.
+    Categorize moves into pause, rotation, outer, and inner move types,
+    and compute the generators (most frequently used faces) in a single pass.
 
     This separation is necessary for accurate metric calculations, as different
     move types are counted differently depending on the metric.
@@ -377,25 +331,32 @@ def regroup_moves(
         moves: The algorithm to categorize.
 
     Returns:
-        Tuple of (pauses, rotations, outer_moves, inner_moves) lists.
+        Tuple of (pauses, rotations, outer_moves, inner_moves, generators)
+        where generators is a list of face names sorted by frequency
+        (most frequent first), excluding rotations and pauses.
 
     """
     pauses = []
     rotations = []
     outer_moves = []
     inner_moves = []
+    count: defaultdict[str, int] = defaultdict(int)
 
     for move in moves:
         if move.is_pause:
             pauses.append(move)
         elif move.is_outer_move:
             outer_moves.append(move)
+            count[move.raw_base_move] += 1
         elif move.is_inner_move:
             inner_moves.append(move)
+            count[move.raw_base_move] += 1
         else:
             rotations.append(move)
 
-    return pauses, rotations, outer_moves, inner_moves
+    generators = sorted(count, key=count.__getitem__, reverse=True)
+
+    return pauses, rotations, outer_moves, inner_moves, generators
 
 
 def compute_metrics(moves: 'Algorithm') -> MetricsData:
@@ -468,7 +429,11 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
         of layers as a single move.
 
     """
-    pauses, rotations, outer_moves, inner_moves = regroup_moves(moves)
+    (
+        pauses, rotations,
+        outer_moves, inner_moves,
+        generators,
+    ) = regroup_moves(moves)
 
     return MetricsData(
         pauses=len(pauses),
@@ -481,5 +446,5 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
         etm=compute_score('etm', rotations, outer_moves, inner_moves),
         rtm=compute_score('rtm', rotations, outer_moves, inner_moves),
         qstm=compute_score('qstm', rotations, outer_moves, inner_moves),
-        generators=compute_generators(moves),
+        generators=generators,
     )
