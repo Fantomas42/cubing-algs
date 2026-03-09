@@ -1,5 +1,4 @@
 """Parsing and expansion functions for commutator and conjugate notation."""
-from cubing_algs.algorithm import Algorithm
 from cubing_algs.exceptions import InvalidBracketError
 from cubing_algs.exceptions import InvalidOperatorError
 from cubing_algs.transform.invert import invert_moves
@@ -77,7 +76,9 @@ def invert_moves_str(old_moves: str) -> str:
         The inverted algorithm string.
 
     """
-    algo = Algorithm.parse_moves(old_moves)
+    from cubing_algs.parsing import parse_moves  # noqa: PLC0415
+
+    algo = parse_moves(old_moves, is_secure=False)
 
     return str(algo.transform(invert_moves))
 

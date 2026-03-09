@@ -9,7 +9,6 @@ This module handles expansion of:
 import re
 from re import Match
 
-from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.transform.invert import invert_moves
 
@@ -40,7 +39,9 @@ def apply_inversion(old_moves: str) -> str:
         Content with moves reversed and each move inverted.
 
     """
-    algo = Algorithm.parse_moves(old_moves)
+    from cubing_algs.parsing import parse_moves  # noqa: PLC0415
+
+    algo = parse_moves(old_moves, is_secure=False)
 
     return str(algo.transform(invert_moves))
 

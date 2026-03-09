@@ -172,7 +172,7 @@ class TransformCompressTestCase(unittest.TestCase):
             "U (R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R') "
             "(R U2 R' U' R U' R')",
-            #secure=False,
+            is_secure=False,
         )
 
         result = compress_moves(provide, 0)
