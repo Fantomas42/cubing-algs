@@ -146,7 +146,7 @@ def check_moves(moves: list[Move]) -> bool:
 
 
 def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
-                *, secure: bool = True) -> Algorithm:
+                *, is_secure: bool = True) -> Algorithm:
     """
     Parse raw move data into an Algorithm object.
 
@@ -163,7 +163,7 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
 
     Args:
         raw_moves: The moves to parse, as a string, iterable, or Algorithm.
-        secure: If True, skip cleaning and validation steps.
+        is_secure: If True, skip cleaning and validation steps.
 
     Returns:
         An Algorithm object containing the parsed moves.
@@ -209,12 +209,12 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
         expanded_moves,
     )
 
-    if not secure:
+    if not is_secure:
         moves = split_moves(clean_moves(expanded_moves))
     else:
         moves = split_moves(expanded_moves)
 
-    if not secure and not check_moves(moves):
+    if not is_secure and not check_moves(moves):
         error = f'{ raw_moves } contains invalid move'
         raise InvalidMoveError(error)
 
@@ -222,7 +222,7 @@ def parse_moves(raw_moves: Iterable[Move | str] | Move | str,
 
 
 def parse_moves_cfop(raw_moves: Iterable[Move | str] | Move | str,
-                     *, secure: bool = True) -> Algorithm:
+                     *, is_secure: bool = True) -> Algorithm:
     """
     Parse moves specifically for CFOP method algorithms.
 
@@ -233,13 +233,13 @@ def parse_moves_cfop(raw_moves: Iterable[Move | str] | Move | str,
 
     Args:
         raw_moves: The moves to parse, as a string, iterable, or Algorithm.
-        secure: If True, skip cleaning and validation steps.
+        is_secure: If True, skip cleaning and validation steps.
 
     Returns:
         An Algorithm with leading/trailing y and U moves removed.
 
     """
-    algo = parse_moves(raw_moves, secure=secure)
+    algo = parse_moves(raw_moves, is_secure=is_secure)
 
     return algo.transform(
         trim_moves('y'),

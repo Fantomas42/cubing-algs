@@ -44,13 +44,15 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             self.data.extend(initlist)
 
     @staticmethod
-    def parse_moves(items: Iterable[Move | str] | Move | str) -> 'Algorithm':
+    def parse_moves(items: Iterable[Move | str] | Move | str,
+                    *, is_secure: bool = False) -> 'Algorithm':
         """
         Parse a string or list of strings into an Algorithm object.
 
         Args:
             items: A string or iterable of Move objects or strings
                 representing moves.
+            is_secure: If True, skip cleaning and validation steps.
 
         Returns:
             An Algorithm object containing the parsed moves.
@@ -58,7 +60,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """
         from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
-        return parse_moves(items, secure=False)
+        return parse_moves(items, is_secure=is_secure)
 
     @staticmethod
     def parse_move(item: Move | str) -> Move:

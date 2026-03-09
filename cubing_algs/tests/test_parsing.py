@@ -158,7 +158,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=False,
+            is_secure=False,
         )
 
     def test_parse_moves_invalid_case_but_corrected(self) -> None:
@@ -166,14 +166,14 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         moves = ['R2', 'X2']
         expect = ['R2', 'x2']
         self.assertEqual(
-            parse_moves(moves, secure=False),
+            parse_moves(moves, is_secure=False),
             expect,
         )
 
         moves = ['R2', 'm2']
         expect = ['R2', 'M2']
         self.assertEqual(
-            parse_moves(moves, secure=False),
+            parse_moves(moves, is_secure=False),
             expect,
         )
 
@@ -212,7 +212,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
             InvalidMoveError,
             parse_moves,
             moves,
-            secure=False,
+            is_secure=False,
         )
 
     def test_parse_moves_conjugate(self) -> None:
@@ -237,7 +237,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidBracketError,
             parse_moves, moves,
-            secure=False,
+            is_secure=False,
         )
 
     def test_parse_moves_conjugate_invalid_moves(self) -> None:
@@ -247,13 +247,13 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=False,
+            is_secure=False,
         )
 
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=True,
+            is_secure=True,
         )
 
     def test_parse_moves_conjugate_nested(self) -> None:
@@ -294,7 +294,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidBracketError,
             parse_moves, moves,
-            secure=False,
+            is_secure=False,
         )
 
     def test_parse_moves_commutator_invalid_moves(self) -> None:
@@ -304,13 +304,13 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=False,
+            is_secure=False,
         )
 
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=True,
+            is_secure=True,
         )
 
     def test_parse_moves_commutator_nested(self) -> None:
@@ -335,7 +335,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidOperatorError,
             parse_moves, moves,
-            secure=False,
+            is_secure=False,
         )
 
     def test_parse_moves_complex_1(self) -> None:
@@ -826,7 +826,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         multiline_moves = """R U R' U' // first part
         D' R D // second part"""
 
-        result = parse_moves(multiline_moves, secure=True)
+        result = parse_moves(multiline_moves, is_secure=True)
         expected = ['R', 'U', "R'", "U'", "D'", 'R', 'D']
         self.assertEqual(list(result), expected)
 
@@ -835,7 +835,7 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         multiline_moves = """R U R' U' // first part
         D' R D // second part"""
 
-        result = parse_moves(multiline_moves, secure=False)
+        result = parse_moves(multiline_moves, is_secure=False)
         expected = ['R', 'U', "R'", "U'", "D'", 'R', 'D']
         self.assertEqual(list(result), expected)
 
