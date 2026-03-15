@@ -28,7 +28,6 @@ from cubing_algs.scrambler.moves import random_moves
 from cubing_algs.scrambler.parse import parse_piece_spec
 from cubing_algs.scrambler.pieces import cubies_to_scramble
 from cubing_algs.scrambler.pieces import disorient_corners
-from cubing_algs.scrambler.pieces import orient_corners
 from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_permutation
@@ -323,6 +322,25 @@ def scramble_step(
     return cubies_to_scramble(cubies)
 
 
+# OCLL case corner orientations (U corner indices: URF=0, UFL=1, ULB=2, UBR=3)
+OCLL_CASES: Final[dict[str, dict[int, int]]] = {
+    'T':  {2: 1, 3: 2},
+    'U':  {2: 2, 3: 1},
+    'L':  {0: 1, 2: 2},
+    'H':  {0: 1, 1: 2, 2: 1, 3: 2},
+    'PI': {0: 2, 1: 2, 2: 1, 3: 1},
+    'S':  {0: 2, 2: 2, 3: 2},
+    'AS': {0: 1, 1: 1, 2: 1},
+    'O':  {},
+}
+OCLL_CASES['BRUNO'] = OCLL_CASES['PI']
+OCLL_CASES['SUNE'] = OCLL_CASES['S']
+OCLL_CASES['ANTISUNE'] = OCLL_CASES['AS']
+OCLL_CASES['ANTI-SUNE'] = OCLL_CASES['AS']
+OCLL_CASES['SOLVED'] = OCLL_CASES['O']
+OCLL_CASES['0'] = OCLL_CASES['O']
+
+
 def scramble_ocll_case(
         case: str,
         rng: Random | None = None,
@@ -347,58 +365,20 @@ def scramble_ocll_case(
 
     case = case.upper()
 
-    # Start with solved state and permute U layer
-    cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
-
-    # Orient U corners first
-    co = orient_corners(co, U_CORNERS, [], rng)
-
-    # Apply specific corner twists
-    # U corner indices: URF=0, UFL=1, ULB=2, UBR=3
-    if case == 'T':
-        co[2] = 1  # ULB clockwise 1
-        co[3] = 2  # UBR clockwise 2
-
-    elif case == 'U':
-        co[2] = 2  # ULB clockwise 2
-        co[3] = 1  # UBR clockwise 1
-
-    elif case == 'L':
-        co[2] = 2  # ULB clockwise 2
-        co[0] = 1  # URF clockwise 1
-
-    elif case == 'H':
-        co[2] = 1  # ULB clockwise 1
-        co[3] = 2  # UBR clockwise 2
-        co[0] = 1  # URF clockwise 1
-        co[1] = 2  # UFL clockwise 2
-
-    elif case in {'PI', 'BRUNO'}:
-        co[2] = 1  # ULB clockwise 1
-        co[1] = 2  # UFL clockwise 2
-        co[3] = 1  # UBR clockwise 1
-        co[0] = 2  # URF clockwise 2
-
-    elif case in {'S', 'SUNE'}:
-        co[0] = 2  # URF clockwise 2
-        co[3] = 2  # UBR clockwise 2
-        co[2] = 2  # ULB clockwise 2
-
-    elif case in {'AS', 'ANTISUNE', 'ANTI-SUNE'}:
-        co[0] = 1  # URF clockwise 1
-        co[1] = 1  # UFL clockwise 1
-        co[2] = 1  # ULB clockwise 1
-
-    elif case in {'0', 'O', 'SOLVED'}:
-        # All corners already oriented
-        pass
-
-    else:
+    ocll = OCLL_CASES.get(case)
+    if ocll is None:
         msg = (
             f"OCLL case '{case}' not recognized. "
             "Valid cases: T, U, L, H, Pi, Sune, AntiSune, Solved"
         )
         raise InvalidStepError(msg)
+
+    # Start with solved state and permute U layer
+    cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
+
+    # Apply corner orientation for the OCLL case
+    for idx, value in ocll.items():
+        co[idx] = value
 
     # Random AUF
     cubies = apply_auf((cp, co, ep, eo), rng)
