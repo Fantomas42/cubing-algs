@@ -113,7 +113,7 @@ def facelets_masked(facelets: CubeFacelets, mask: str) -> CubeFacelets:
 
     # Manage cache size to prevent memory bloat
     if len(_MASK_CACHE) >= _CACHE_SIZE_LIMIT:
-        # Remove oldest half of cache entries (simple LRU-like behavior)
+        # Remove oldest half of cache entries (batch-FIFO eviction)
         items = list(_MASK_CACHE.items())
         _MASK_CACHE.clear()
         _MASK_CACHE.update(items[_CACHE_SIZE_LIMIT // 2:])

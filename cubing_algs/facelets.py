@@ -79,7 +79,7 @@ _FACE_TO_INDEX = _build_face_lookup_table()
 
 
 class ConversionCache:
-    """Simple cache for facelets conversions with LRU-like behavior."""
+    """Simple cache for facelets conversions with FIFO eviction."""
 
     def __init__(self, max_size: int = 512) -> None:
         """
