@@ -12,6 +12,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from cubing_algs.constants import ADJACENT_FACES
+from cubing_algs.constants import OPPOSITE_FACES
+
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
     from cubing_algs.move import Move  # pragma: no cover
@@ -329,22 +332,6 @@ BALANCE_THRESHOLD = 0.6
 FLOW_THRESHOLD = 0.6
 WEIGHT_THRESHOLD = 0.6
 ROTATION_RATIO_THRESHOLD = 0.15
-
-# Face adjacency mapping for transition analysis
-ADJACENT_FACES: dict[str, set[str]] = {
-    'R': {'U', 'F', 'D', 'B'},
-    'L': {'U', 'F', 'D', 'B'},
-    'U': {'R', 'F', 'L', 'B'},
-    'D': {'R', 'F', 'L', 'B'},
-    'F': {'R', 'U', 'L', 'D'},
-    'B': {'R', 'U', 'L', 'D'},
-}
-
-OPPOSITE_FACES: dict[str, str] = {
-    'R': 'L', 'L': 'R',
-    'U': 'D', 'D': 'U',
-    'F': 'B', 'B': 'F',
-}
 
 TRANSITION_PENALTIES: dict[str, float] = {
     'same_face': 0.0,
