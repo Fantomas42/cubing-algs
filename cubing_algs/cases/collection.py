@@ -103,6 +103,7 @@ class CaseCollection:
 
 
 CASES_DIRECTORY: Final[Path] = Path(__file__).parent
+
 COLLECTIONS: dict[str, CaseCollection] = {}
 
 for method_directory in sorted(CASES_DIRECTORY.iterdir()):
@@ -114,4 +115,4 @@ for method_directory in sorted(CASES_DIRECTORY.iterdir()):
 
     for cases_path in method_directory.glob('*.json'):
         cc = CaseCollection(method_directory.name, cases_path)
-        COLLECTIONS[f'{method_directory.name.upper()}/{cc.name}'] = cc
+        COLLECTIONS[f'{ method_directory.name.upper() }/{ cc.name }'] = cc
