@@ -465,6 +465,23 @@ class TransformOptimizeDoubleRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_optimize_double_rotations_chained(self) -> None:
+        """
+        Test that a newly produced rotation is further
+        combined with adjacent double rotations.
+        """
+        # x2 y2 z2 y2: first pair x2,y2 → z2,
+        # then z2,z2 skipped (same), z2,y2 → x2
+        # but the resulting z2,x2 pair must be further combined into y2
+        provide = parse_moves('x2 y2 z2 y2')
+        expect = parse_moves('y2')
+
+        result = optimize_double_rotations(provide)
+
+        self.assertEqual(result, expect)
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_optimize_double_rotations_max(self) -> None:
         """Test optimize double rotations max."""
         provide = parse_moves('x2 y2')
@@ -591,6 +608,22 @@ class TransformOptimizeConjugateRotationsTestCase(unittest.TestCase):
             expect,
         )
 
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_optimize_conjugate_rotations_chained_double(self) -> None:
+        """
+        Test that two conjugate patterns whose results
+        form a double-rotation pair are fully combined.
+        """
+        # y x2 y' → z2, then y z2 y' → x2 —
+        # the resulting z2 x2 must be further combined into y2
+        provide = parse_moves("y x2 y' y z2 y'")
+        expect = parse_moves('z2 x2')
+
+        result = optimize_conjugate_rotations(provide)
+
+        self.assertEqual(result, expect)
         for m in result:
             self.assertTrue(isinstance(m, Move))
 

@@ -161,7 +161,7 @@ def optimize_double_rotations(
             i += 1
 
     if changed:
-        return optimize_double_moves(moves, max_depth - 1)
+        return optimize_double_rotations(moves, max_depth - 1)
 
     return moves
 
@@ -209,7 +209,7 @@ def optimize_conjugate_rotations(
             i += 1
 
     if changed:
-        return optimize_double_moves(moves, max_depth - 1)
+        return optimize_conjugate_rotations(moves, max_depth - 1)
 
     return moves
 
