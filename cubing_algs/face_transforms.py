@@ -96,14 +96,9 @@ def offset_up(position: int) -> int:
     }[position]
 
 
-def offset_down(position: int) -> int:
+def identity(position: int) -> int:
     """
-    Transform a position with no change (identity transformation).
-
-    Maps positions as follows (in 3x3 grid):
-    0 1 2    0 1 2
-    3 4 5 -> 3 4 5
-    6 7 8    6 7 8
+    Return the position unchanged (identity transformation).
 
     Args:
         position: The original position (0-8).
@@ -112,17 +107,7 @@ def offset_down(position: int) -> int:
         The same position unchanged.
 
     """
-    return {
-        0: 0,
-        1: 1,
-        2: 2,
-        3: 3,
-        4: 4,
-        5: 5,
-        6: 6,
-        7: 7,
-        8: 8,
-    }[position]
+    return position
 
 
 def offset_horizontal_mirror(position: int) -> int:
@@ -189,38 +174,38 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
     'U': {
         'R': offset_right,
         'L': offset_left,
-        'F': offset_down,
+        'F': identity,
         'B': offset_up,
     },
     'R': {
-        'F': offset_down,
-        'B': offset_down,
+        'F': identity,
+        'B': identity,
         'U': offset_left,
         'D': offset_right,
     },
     'F': {
-        'U': offset_down,
-        'D': offset_down,
-        'L': offset_down,
-        'R': offset_down,
+        'U': identity,
+        'D': identity,
+        'L': identity,
+        'R': identity,
     },
     'D': {
         'L': offset_right,
         'R': offset_left,
-        'F': offset_down,
+        'F': identity,
         'B': offset_up,
     },
     'L': {
-        'F': offset_down,
-        'B': offset_down,
+        'F': identity,
+        'B': identity,
         'U': offset_right,
         'D': offset_left,
     },
     'B': {
         'U': offset_up,
         'D': offset_up,
-        'L': offset_down,
-        'R': offset_down,
+        'L': identity,
+        'R': identity,
     },
 }
 

@@ -2,7 +2,7 @@
 import unittest
 
 from cubing_algs.face_transforms import ADJACENT_FACE_TRANSFORMATIONS
-from cubing_algs.face_transforms import offset_down
+from cubing_algs.face_transforms import identity
 from cubing_algs.face_transforms import offset_left
 from cubing_algs.face_transforms import offset_right
 from cubing_algs.face_transforms import offset_up
@@ -176,39 +176,32 @@ class TestOffsetUp(unittest.TestCase):
                 offset_up(position)
 
 
-class TestOffsetDown(unittest.TestCase):
-    """Test offset_down transformation (identity transformation)."""
+class TestIdentity(unittest.TestCase):
+    """Test identity transformation."""
 
-    def test_offset_down_all_positions(self) -> None:
-        """Test offset_down is identity transformation for all positions."""
+    def test_identity_all_positions(self) -> None:
+        """Test identity transformation for all positions."""
         for position in range(9):
             with self.subTest(position=position):
-                self.assertEqual(offset_down(position), position)
+                self.assertEqual(identity(position), position)
 
-    def test_offset_down_center_invariant(self) -> None:
+    def test_identity_center_invariant(self) -> None:
         """Test that center position (4) remains at center."""
-        self.assertEqual(offset_down(4), 4)
+        self.assertEqual(identity(4), 4)
 
-    def test_offset_down_corners(self) -> None:
+    def test_identity_corners(self) -> None:
         """Test corner positions remain unchanged (0, 2, 6, 8)."""
-        self.assertEqual(offset_down(0), 0)
-        self.assertEqual(offset_down(2), 2)
-        self.assertEqual(offset_down(6), 6)
-        self.assertEqual(offset_down(8), 8)
+        self.assertEqual(identity(0), 0)
+        self.assertEqual(identity(2), 2)
+        self.assertEqual(identity(6), 6)
+        self.assertEqual(identity(8), 8)
 
-    def test_offset_down_edges(self) -> None:
+    def test_identity_edges(self) -> None:
         """Test edge positions remain unchanged (1, 3, 5, 7)."""
-        self.assertEqual(offset_down(1), 1)
-        self.assertEqual(offset_down(3), 3)
-        self.assertEqual(offset_down(5), 5)
-        self.assertEqual(offset_down(7), 7)
-
-    def test_offset_down_invalid_position_raises_key_error(self) -> None:
-        """Test that invalid positions raise KeyError."""
-        invalid_positions = [-1, 9, 10, 100, -100]
-        for position in invalid_positions:
-            with self.subTest(position=position), self.assertRaises(KeyError):
-                offset_down(position)
+        self.assertEqual(identity(1), 1)
+        self.assertEqual(identity(3), 3)
+        self.assertEqual(identity(5), 5)
+        self.assertEqual(identity(7), 7)
 
 
 class TestTransformationInverses(unittest.TestCase):
@@ -232,11 +225,11 @@ class TestTransformationInverses(unittest.TestCase):
                 result = offset_up(offset_up(position))
                 self.assertEqual(result, position)
 
-    def test_offset_down_is_identity(self) -> None:
-        """Test that offset_down composed with itself is still identity."""
+    def test_identity_is_identity(self) -> None:
+        """Test that identity composed with itself is still identity."""
         for position in range(9):
             with self.subTest(position=position):
-                result = offset_down(offset_down(position))
+                result = identity(identity(position))
                 self.assertEqual(result, position)
 
 
@@ -262,7 +255,7 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
         self.assertEqual(set(u_transforms.keys()), {'R', 'L', 'F', 'B'})
         self.assertIs(u_transforms['R'], offset_right)
         self.assertIs(u_transforms['L'], offset_left)
-        self.assertIs(u_transforms['F'], offset_down)
+        self.assertIs(u_transforms['F'], identity)
         self.assertIs(u_transforms['B'], offset_up)
 
     def test_r_face_transformations(self) -> None:
@@ -270,8 +263,8 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
         r_transforms = ADJACENT_FACE_TRANSFORMATIONS['R']
 
         self.assertEqual(set(r_transforms.keys()), {'F', 'B', 'U', 'D'})
-        self.assertIs(r_transforms['F'], offset_down)
-        self.assertIs(r_transforms['B'], offset_down)
+        self.assertIs(r_transforms['F'], identity)
+        self.assertIs(r_transforms['B'], identity)
         self.assertIs(r_transforms['U'], offset_left)
         self.assertIs(r_transforms['D'], offset_right)
 
@@ -280,10 +273,10 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
         f_transforms = ADJACENT_FACE_TRANSFORMATIONS['F']
 
         self.assertEqual(set(f_transforms.keys()), {'U', 'D', 'L', 'R'})
-        self.assertIs(f_transforms['U'], offset_down)
-        self.assertIs(f_transforms['D'], offset_down)
-        self.assertIs(f_transforms['L'], offset_down)
-        self.assertIs(f_transforms['R'], offset_down)
+        self.assertIs(f_transforms['U'], identity)
+        self.assertIs(f_transforms['D'], identity)
+        self.assertIs(f_transforms['L'], identity)
+        self.assertIs(f_transforms['R'], identity)
 
     def test_d_face_transformations(self) -> None:
         """Test D face adjacent transformations."""
@@ -292,7 +285,7 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
         self.assertEqual(set(d_transforms.keys()), {'R', 'L', 'F', 'B'})
         self.assertIs(d_transforms['R'], offset_left)
         self.assertIs(d_transforms['L'], offset_right)
-        self.assertIs(d_transforms['F'], offset_down)
+        self.assertIs(d_transforms['F'], identity)
         self.assertIs(d_transforms['B'], offset_up)
 
     def test_l_face_transformations(self) -> None:
@@ -300,8 +293,8 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
         l_transforms = ADJACENT_FACE_TRANSFORMATIONS['L']
 
         self.assertEqual(set(l_transforms.keys()), {'F', 'B', 'U', 'D'})
-        self.assertIs(l_transforms['F'], offset_down)
-        self.assertIs(l_transforms['B'], offset_down)
+        self.assertIs(l_transforms['F'], identity)
+        self.assertIs(l_transforms['B'], identity)
         self.assertIs(l_transforms['U'], offset_right)
         self.assertIs(l_transforms['D'], offset_left)
 
@@ -312,8 +305,8 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
         self.assertEqual(set(b_transforms.keys()), {'U', 'D', 'L', 'R'})
         self.assertIs(b_transforms['U'], offset_up)
         self.assertIs(b_transforms['D'], offset_up)
-        self.assertIs(b_transforms['L'], offset_down)
-        self.assertIs(b_transforms['R'], offset_down)
+        self.assertIs(b_transforms['L'], identity)
+        self.assertIs(b_transforms['R'], identity)
 
     def test_transformation_functions_are_callable(self) -> None:
         """Test that all transformation functions in the map are callable."""
@@ -393,8 +386,8 @@ class TestTransformationCompositions(unittest.TestCase):
                     self.assertEqual(result1, 4)
                     self.assertEqual(result2, 4)
 
-    def test_offset_down_composed_with_any_transform_is_identity(self) -> None:
-        """Test offset_down with any transform equals that transform."""
+    def test_identity_composed_with_any_transform_is_identity(self) -> None:
+        """Test identity with any transform equals that transform."""
         transforms = [offset_right, offset_left, offset_up]
 
         for transform in transforms:
@@ -402,10 +395,10 @@ class TestTransformationCompositions(unittest.TestCase):
                 with self.subTest(
                     transform=transform.__name__, position=position,
                 ):
-                    # offset_down first
-                    result1 = transform(offset_down(position))
-                    # offset_down second
-                    result2 = offset_down(transform(position))
+                    # identity first
+                    result1 = transform(identity(position))
+                    # identity second
+                    result2 = identity(transform(position))
                     # Both should equal just applying the transform
                     self.assertEqual(result1, transform(position))
                     self.assertEqual(result2, transform(position))
@@ -416,7 +409,7 @@ class TestTransformationEdgeCases(unittest.TestCase):
 
     def test_all_transformations_preserve_range(self) -> None:
         """Test all transformations map valid positions to valid ones."""
-        transforms = [offset_right, offset_left, offset_up, offset_down]
+        transforms = [offset_right, offset_left, offset_up, identity]
 
         for transform in transforms:
             for position in range(9):
@@ -428,7 +421,7 @@ class TestTransformationEdgeCases(unittest.TestCase):
 
     def test_transformations_are_bijective(self) -> None:
         """Test that transformations are one-to-one and onto."""
-        transforms = [offset_right, offset_left, offset_up, offset_down]
+        transforms = [offset_right, offset_left, offset_up, identity]
 
         for transform in transforms:
             with self.subTest(transform=transform.__name__):
@@ -459,7 +452,7 @@ class TestTransformationEdgeCases(unittest.TestCase):
 
     def test_center_position_invariant_under_all_transformations(self) -> None:
         """Test position 4 (center) is invariant under all transforms."""
-        transforms = [offset_right, offset_left, offset_up, offset_down]
+        transforms = [offset_right, offset_left, offset_up, identity]
 
         for transform in transforms:
             with self.subTest(transform=transform.__name__):
@@ -480,7 +473,7 @@ class TestTransformAdjacentPosition(unittest.TestCase):
         self.assertEqual(transform_adjacent_position('U', 'L', 0), 2)
         self.assertEqual(transform_adjacent_position('U', 'L', 1), 5)
 
-        # U -> F uses offset_down (identity)
+        # U -> F uses identity
         self.assertEqual(transform_adjacent_position('U', 'F', 0), 0)
         self.assertEqual(transform_adjacent_position('U', 'F', 1), 1)
 
