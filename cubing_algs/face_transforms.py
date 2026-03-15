@@ -138,7 +138,6 @@ def offset_horizontal_mirror(position: int) -> int:
         position: The original position (0-8).
 
     Returns:
-        The same position unchanged.
         The transformed position after horizontal mirroring.
 
     """
@@ -168,7 +167,6 @@ def offset_vertical_mirror(position: int) -> int:
         position: The original position (0-8).
 
     Returns:
-        The same position unchanged.
         The transformed position after vertical mirroring.
 
     """

@@ -43,7 +43,7 @@ class InvalidSlotSpecError(ValueError):
 
 
 class InvalidPieceSpecError(ValueError):
-    """Exception raise when piece specification cannot be parsed."""
+    """Exception raised when a piece specification cannot be parsed."""
 
 
 class InvalidOrientationError(ValueError):
