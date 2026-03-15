@@ -78,7 +78,7 @@ def invert_moves_str(old_moves: str) -> str:
     """
     from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
-    algo = parse_moves(old_moves, is_secure=False)
+    algo = parse_moves(old_moves, trust_input=False)
 
     return str(algo.transform(invert_moves))
 
