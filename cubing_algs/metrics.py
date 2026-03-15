@@ -213,7 +213,6 @@ MOVE_COUNTS = {
     'etm': {'rotation': [1, 0], 'outer': [1, 0], 'inner': [1, 0]},
     'rtm': {'rotation': [0, 1], 'outer': [0, 0], 'inner': [0, 0]},
     'qstm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 1]},
-    'obtm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [2, 0]},
 }
 
 
@@ -254,7 +253,7 @@ def move_score(mode: str, field: str,
     base_count + (quantum_count * quantum_multiplier) for each move.
 
     Args:
-        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm, obtm).
+        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm).
         field: The move field type (rotation, outer, inner).
         moves: List of moves to score.
 
@@ -292,7 +291,7 @@ def compute_score(mode: str,
     according to the rules of the specified metric.
 
     Args:
-        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm, obtm).
+        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm).
         rotations: List of rotation moves (x, y, z).
         outer: List of outer face moves (R, U, F, Rw, etc.).
         inner: List of inner slice moves (M, E, S).
