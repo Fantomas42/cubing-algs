@@ -1115,22 +1115,11 @@
         "status": "OK"
     },
     {
-        "algorithms": [],
-        "aliases": [],
-        "arrows": "",
         "code": "SKIP",
         "description": "Skipped case",
-        "family": "",
-        "groups": [],
-        "main": "",
         "name": "AF2L Skipped",
-        "optimal_cycles": 0,
-        "optimal_htm": 0,
-        "optimal_stm": 0,
         "probability": 0.023809523809523808,
         "probability_label": "1/42",
-        "recognition": {},
-        "status": "OK",
-        "symmetry": ""
+        "status": "OK"
     }
 ]
