@@ -217,3 +217,30 @@ class TransformRemoveAUFTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_remove_auf_moves_all_auf(self) -> None:
+        """Test remove auf moves when algorithm is entirely AUF moves."""
+        provide = parse_moves("U U' U2")
+        expect = parse_moves('')
+
+        result = remove_auf_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+    def test_remove_auf_moves_pauses_between_non_auf(self) -> None:
+        """Test pauses and AUF between non-AUF moves are not trimmed."""
+        provide = parse_moves('F . U . B')
+        expect = parse_moves('F . U . B')
+
+        result = remove_auf_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
