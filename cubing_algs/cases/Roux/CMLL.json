@@ -1,0 +1,777 @@
+[
+    {
+        "name": "CMLL O Adjacent",
+        "code": "01",
+        "description": "All corners oriented, adjacent corners need permutation",
+        "aliases": [
+            "Adjacent swap",
+            "T-perm corners"
+        ],
+        "family": "O",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R U R' F' R U R' U' R' F R2 U' R'",
+        "algorithms": [
+            "R U R' F' R U R' U' R' F R2 U' R'",
+            "R U R' U' R' F R2 U' R' U' R U R' F'",
+            "r U R' F' R U R' U' R' F R2 U' r'",
+            "R U2 R' U' R U2 r' F R' F' r"
+        ]
+    },
+    {
+        "name": "CMLL O Diagonal",
+        "code": "02",
+        "description": "All corners oriented, diagonal corners need permutation",
+        "aliases": [
+            "Diagonal swap",
+            "Y-perm corners"
+        ],
+        "symmetry": "double",
+        "family": "O",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "F R U' R' U' R U R' F' R U R' U' R' F R F'",
+        "algorithms": [
+            "F R U' R' U' R U R' F' R U R' U' R' F R F'",
+            "R U' R2 F R F' R U' B U2 B' R'",
+            "F R' F R2 U' R' U' R U R' F' R U R' U' F'",
+            "r2 D' r U' r' D r2 F' r' U r F"
+        ]
+    },
+    {
+        "name": "CMLL H Columns",
+        "code": "03",
+        "description": "H orientation with columns permutation pattern",
+        "symmetry": "double",
+        "family": "H",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U R U R' U R U' R' U R U2 R'",
+        "algorithms": [
+            "U R U R' U R U' R' U R U2 R'",
+            "R U2 R' U' R U R' U' R U' R'",
+            "r U' r' U' r U r' U r U r'",
+            "r U' r' U' r U' r' U r U r'"
+        ]
+    },
+    {
+        "name": "CMLL H Rows",
+        "code": "04",
+        "description": "H orientation with rows permutation pattern",
+        "symmetry": "double",
+        "family": "H",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "F R U R' U' R U R' U' R U R' U' F'",
+        "algorithms": [
+            "F R U R' U' R U R' U' R U R' U' F'",
+            "F U R U' R' U R U' R' U R U' R' F'",
+            "F U' R2 D R' U2 R D' R2 U F'",
+            "F R U r' U' R U R' U' R U R' M' U' F'"
+        ]
+    },
+    {
+        "name": "CMLL H Column",
+        "code": "05",
+        "description": "H orientation with single column permutation pattern",
+        "family": "H",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R' F2 D R2 U R2 D' F2 R",
+        "algorithms": [
+            "R' F2 D R2 U R2 D' F2 R",
+            "U R U2 R2 F R F' U2 R' F R F'",
+            "U' F R U R' U' R U' R' U R U R' F'",
+            "U F R U R' U' F' R U R' U' R' F R F'"
+        ]
+    },
+    {
+        "name": "CMLL H Row",
+        "code": "06",
+        "description": "H orientation with single row permutation pattern",
+        "family": "H",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 r U' r2 D' r U' r' D r2 U r'",
+        "algorithms": [
+            "U2 r U' r2 D' r U' r' D r2 U r'",
+            "U' R U R' U R U r' F R' F' r",
+            "U' R U R' U R U L' U R' U' L",
+            "U2 R U' R2 D' r U' r' D R2 U R'"
+        ]
+    },
+    {
+        "name": "CMLL Pi Right Bar",
+        "code": "07",
+        "description": "Pi orientation with right bar permutation pattern",
+        "family": "Pi",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "F R U R' U' R U R' U' F'",
+        "algorithms": [
+            "F R U R' U' R U R' U' F'",
+            "r' U r2 U' r2 U' r2 U r'",
+            "U2 F U R U' R' U R U' R' F'",
+            "R U2 R2 U' R2 U' R2 U2 R"
+        ]
+    },
+    {
+        "name": "CMLL Pi Down Slash",
+        "code": "08",
+        "description": "Pi orientation with down slash permutation pattern",
+        "family": "Pi",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U F R' F' R U2 R U' R' U R U2 R'",
+        "algorithms": [
+            "U F R' F' R U2 R U' R' U R U2 R'",
+            "U F U R U' R2 F' R U2 R U2 R'",
+            "U M F R' F' r U2 R U' R' U R U2 R'",
+            "R' U2 R U R' U' R U2 R f' U' f"
+        ]
+    },
+    {
+        "name": "CMLL Pi X",
+        "code": "09",
+        "description": "Pi orientation with X permutation pattern",
+        "symmetry": "double",
+        "family": "Pi",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R' F2 D R2 U' R2 D' F2 R",
+        "algorithms": [
+            "R' F2 D R2 U' R2 D' F2 R",
+            "U' R' F R U F U' R U R' U' F'",
+            "r' F2 D R2 U' R2 D' F2 r",
+            "U' F R U' R' U' R U R' U R U' R' F'"
+        ]
+    },
+    {
+        "name": "CMLL Pi Up Slash",
+        "code": "10",
+        "description": "Pi orientation with up slash permutation pattern",
+        "family": "Pi",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R U2 R' U' R U R' U2 R' F R F'",
+        "algorithms": [
+            "R U2 R' U' R U R' U2 R' F R F'",
+            "R U2 R' U2 R' F R2 U R' U' F'",
+            "R U2 R' U' R U R' U2 r' F R F' M'",
+            "R U R' U' R' F R2 U R' U' R U R' U' F'"
+        ]
+    },
+    {
+        "name": "CMLL Pi Columns",
+        "code": "11",
+        "description": "Pi orientation with columns permutation pattern",
+        "family": "Pi",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' r U' r2 D' r U r' D r2 U r'",
+        "algorithms": [
+            "U' r U' r2 D' r U r' D r2 U r'",
+            "U2 R' F R F' r U' r' U' R U' R'",
+            "U2 R' F R F' r U' R' U' R U' r'",
+            "U2 L' U R U' L U' R' U' R U' R'"
+        ]
+    },
+    {
+        "name": "CMLL Pi Left Bar",
+        "code": "12",
+        "description": "Pi orientation with left bar permutation pattern",
+        "family": "Pi",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' R' U' R' F R F' R U' R' U2 R",
+        "algorithms": [
+            "U' R' U' R' F R F' R U' R' U2 R",
+            "R' F' U' F U' R U R' U R",
+            "U2 R U R' U R U' B U' B' R'",
+            "U' r U R' U R' F R F' R U' R' U R U2 r'"
+        ]
+    },
+    {
+        "name": "CMLL U Up Slash",
+        "code": "13",
+        "description": "U orientation with up slash permutation pattern",
+        "family": "U",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 R2 D R' U2 R D' R' U2 R'",
+        "algorithms": [
+            "U2 R2 D R' U2 R D' R' U2 R'",
+            "U2 R r D r' U2 r D' r' U2 R'",
+            "F R' F' U2 R U R U' R' U R' U R",
+            "R' U2 R U2 F U' R' U R U F'"
+        ]
+    },
+    {
+        "name": "CMLL U Down Slash",
+        "code": "14",
+        "description": "U orientation with down slash permutation pattern",
+        "family": "U",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R2 D' R U2 R' D R U2 R",
+        "algorithms": [
+            "R2 D' R U2 R' D R U2 R",
+            "R' F R U R' F R U F U2 F'",
+            "U2 L2 D' L U2 L' D L U2 L",
+            "R U' R' U R U' R' U' F R' F' R2 U R'"
+        ]
+    },
+    {
+        "name": "CMLL U Bottom Row",
+        "code": "15",
+        "description": "U orientation with bottom row permutation pattern",
+        "family": "U",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R' U' R U' R' U2 R2 U R' U R U2 R'",
+        "algorithms": [
+            "R' U' R U' R' U2 R2 U R' U R U2 R'",
+            "U' R2 F2 r U r' F R2 U2 r' U' r",
+            "R2 F U' F U F2 R2 U' R' F R",
+            "U2 R U R' U R U2 R2 U' R U' R' U2 R"
+        ]
+    },
+    {
+        "name": "CMLL U Rows",
+        "code": "16",
+        "description": "U orientation with rows permutation pattern",
+        "family": "U",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' F R2 D R' U R D' R2 U' F'",
+        "algorithms": [
+            "U' F R2 D R' U R D' R2 U' F'",
+            "F U R2 D R' U' R D' R2 F'",
+            "U' R' U' R F R2 D' R U R' D R2 U' F'",
+            "R' F R U' R' U' R U R' F' R U R' U' R' F R F' R"
+        ]
+    },
+    {
+        "name": "CMLL U X",
+        "code": "17",
+        "description": "U orientation with X permutation pattern",
+        "symmetry": "double",
+        "family": "U",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 r U' r' U r' D' r U' r' D r",
+        "algorithms": [
+            "U2 r U' r' U r' D' r U' r' D r",
+            "r' U r' D' r U r' D r U' r",
+            "U' R' D R U' R U' R' U R' D' R",
+            "F R U' R' U R U R' U R U' R' F'"
+        ]
+    },
+    {
+        "name": "CMLL U Upper Row",
+        "code": "18",
+        "description": "U orientation with upper row permutation pattern",
+        "family": "U",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' F R U R' U' F'",
+        "algorithms": [
+            "U' F R U R' U' F'",
+            "U F U R U' R' F'",
+            "U' F U' R' U R U F' R' U2 R",
+            "R' F' U' F U R"
+        ]
+    },
+    {
+        "name": "CMLL T Left Bar",
+        "code": "19",
+        "description": "T orientation with left bar permutation pattern",
+        "family": "T",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' R U R' U' R' F R F'",
+        "algorithms": [
+            "U' R U R' U' R' F R F'",
+            "U' r U R' U' r' F R F'",
+            "y' R U R' U' R' F R F'",
+            "U L U L' U' L' f U f'"
+        ]
+    },
+    {
+        "name": "CMLL T Right Bar",
+        "code": "20",
+        "description": "T orientation with right bar permutation pattern",
+        "family": "T",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U L' U' L U L F' L' F",
+        "algorithms": [
+            "U L' U' L U L F' L' F",
+            "U r' F' r U r U' r' F",
+            "U' F R U' R' U R U R' F'",
+            "U2 R' U' R' D' R U R' D R2"
+        ]
+    },
+    {
+        "name": "CMLL T Rows",
+        "code": "21",
+        "description": "T orientation with rows permutation pattern",
+        "family": "T",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R U2 R' U' R U' R2 U2 R U R' U R",
+        "algorithms": [
+            "R U2 R' U' R U' R2 U2 R U R' U R",
+            "F R' F R2 U' R' U' R U R' F2",
+            "r' U r U2 R2 F' r U' r' F2 R2",
+            "U' R U R' U R U2 R2 F' r U' r' F2 R"
+        ]
+    },
+    {
+        "name": "CMLL T Bottom Row",
+        "code": "22",
+        "description": "T orientation with bottom row permutation pattern",
+        "family": "T",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "r' U r U2 R2 F R F' R",
+        "algorithms": [
+            "r' U r U2 R2 F R F' R",
+            "R U R2 F R F' U r U r'",
+            "U2 r U' r' U' F R' F' R2 U' R'",
+            "R' U r U2 R2 F R F' r"
+        ]
+    },
+    {
+        "name": "CMLL T Top Row",
+        "code": "23",
+        "description": "T orientation with top row permutation pattern",
+        "family": "T",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "r' D' r U r' D r U' r U r'",
+        "algorithms": [
+            "r' D' r U r' D r U' r U r'",
+            "U R' D R U' R U R' U R' D' R",
+            "U2 F R U R' U' R U' R' U' R U R' F'",
+            "R F R' U' R F' R' U R' F' R"
+        ]
+    },
+    {
+        "name": "CMLL T Columns",
+        "code": "24",
+        "description": "T orientation with columns permutation pattern",
+        "family": "T",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 r U' r2 D' r U2 r' D r2 U r'",
+        "algorithms": [
+            "U2 r U' r2 D' r U2 r' D r2 U r'",
+            "U2 r2 D' r U r' D r2 U' r' U' r",
+            "R' U R2 D r' U2 r D' R2 U' R",
+            "U2 R' F R2 F R' U2 R F' R2 F' R"
+        ]
+    },
+    {
+        "name": "CMLL Sune Left Bar",
+        "code": "25",
+        "description": "Sune orientation with left bar permutation pattern",
+        "family": "Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U R U R' U R U2 R'",
+        "algorithms": [
+            "U R U R' U R U2 R'",
+            "R' U2 R U R' U R",
+            "U r U R' U R U2 r'",
+            "U' L U L' U L U2 L'"
+        ]
+    },
+    {
+        "name": "CMLL Sune X",
+        "code": "26",
+        "description": "Sune orientation with X permutation pattern",
+        "family": "Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U L' U2 L U2 r U' r' F",
+        "algorithms": [
+            "U L' U2 L U2 r U' r' F",
+            "U r' F2 r U2 r U' r' F",
+            "U L' U2 L U2 L F' L' F",
+            "U R' F2 R U2 R U' r' F M'"
+        ]
+    },
+    {
+        "name": "CMLL Sune Up Slash",
+        "code": "27",
+        "description": "Sune orientation with up slash permutation pattern",
+        "family": "Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U F R' F' R U2 R U2 R'",
+        "algorithms": [
+            "U F R' F' R U2 R U2 R'",
+            "U M F R' F' R U2 R U2 r'",
+            "U M F R' F' r U2 R U2 R'",
+            "U F U R U' R2 F' R U R U' R'"
+        ]
+    },
+    {
+        "name": "CMLL Sune Columns",
+        "code": "28",
+        "description": "Sune orientation with columns permutation pattern",
+        "family": "Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U R U R' U R U' R D R' U' R D' R2",
+        "algorithms": [
+            "U R U R' U R U' R D R' U' R D' R2",
+            "R U R' U R U' R D R' U' R D' R2",
+            "U2 r' F' r2 U R' F' r' F R2 U' R'",
+            "F R' U2 R F' R' F U2 F' R"
+        ]
+    },
+    {
+        "name": "CMLL Sune Right Bar",
+        "code": "29",
+        "description": "Sune orientation with right bar permutation pattern",
+        "family": "Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' R U R' U R' F R F' R U2 R'",
+        "algorithms": [
+            "U' R U R' U R' F R F' R U2 R'",
+            "U' R U R' U r' F R F' r U2 R'",
+            "U' R U R' U' R' F R2 U R' U' F'",
+            "U' R U R' U L' U R U' L U2 R'"
+        ]
+    },
+    {
+        "name": "CMLL Sune Down Slash",
+        "code": "30",
+        "description": "Sune orientation with down slash permutation pattern",
+        "family": "Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U r U' r' F R' F' R",
+        "algorithms": [
+            "U r U' r' F R' F' R",
+            "U R U' r' F R' F' r",
+            "U R U' L' U R' U' L",
+            "U' L U' R' U L' U' R"
+        ]
+    },
+    {
+        "name": "CMLL Anti Sune Right Bar",
+        "code": "31",
+        "description": "Anti-Sune orientation with right bar permutation pattern",
+        "family": "Anti Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U R' U' R U' R' U2 R",
+        "algorithms": [
+            "U R' U' R U' R' U2 R",
+            "U2 R U2 R' U' R U' R'",
+            "U' L' U' L U' L' U2 L",
+            "U r' U' R U' R' U2 r"
+        ]
+    },
+    {
+        "name": "CMLL Anti Sune Columns",
+        "code": "32",
+        "description": "Anti-Sune orientation with columns permutation pattern",
+        "family": "Anti Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 R U R2 F' r F R U' r2 F r",
+        "algorithms": [
+            "U2 R U R2 F' r F R U' r2 F r",
+            "U2 R' U' R U' R' U R' D' R U R' D R2",
+            "U' R' F U2 F' R F R' U2 R F'",
+            "U' R2 D R' U R D' R' U R' U' R U' R'"
+        ]
+    },
+    {
+        "name": "CMLL Anti Sune Down Slash",
+        "code": "33",
+        "description": "Anti-Sune orientation with down slash permutation pattern",
+        "family": "Anti Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' F' r U r' U2 r' F2 r",
+        "algorithms": [
+            "U' F' r U r' U2 r' F2 r",
+            "U' F' L F L' U2 L' U2 L",
+            "U' F' r U r' U2 L' U2 L",
+            "U2 F R U' R' U R U2 R' U' F'"
+        ]
+    },
+    {
+        "name": "CMLL Anti Sune X",
+        "code": "34",
+        "description": "Anti-Sune orientation with X permutation pattern",
+        "family": "Anti Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' R U2 R' U2 R' F R F'",
+        "algorithms": [
+            "U' R U2 R' U2 R' F R F'",
+            "U' R U2 R' U2 r' F R F' M'",
+            "U' R U R' U' R' F R2 U R' U' F'",
+            "U' r U2 R' U2 R' F R F' M'"
+        ]
+    },
+    {
+        "name": "CMLL Anti Sune Up Slash",
+        "code": "35",
+        "description": "Anti-Sune orientation with up slash permutation pattern",
+        "family": "Anti Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' R' F R F' r U r'",
+        "algorithms": [
+            "U' R' F R F' r U r'",
+            "U' r' F R F' r U R'",
+            "U' L' U R U' L U R'",
+            "U R' U L U' R U L'"
+        ]
+    },
+    {
+        "name": "CMLL Anti Sune Left Bar",
+        "code": "36",
+        "description": "Anti-Sune orientation with left bar permutation pattern",
+        "family": "Anti Sune",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U R U2 R' F R' F' R U' R U' R'",
+        "algorithms": [
+            "U R U2 R' F R' F' R U' R U' R'",
+            "R' U' R U' R' U R' F R F' U R",
+            "U R U2 r' F R' F' r U' R U' R'",
+            "U L' U' L U' L F' L' F L' U2 L"
+        ]
+    },
+    {
+        "name": "CMLL L Best",
+        "code": "37",
+        "description": "L orientation with best (no AUF) permutation pattern",
+        "family": "L",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U' F' r U r' U' r' F r",
+        "algorithms": [
+            "U' F' r U r' U' r' F r",
+            "U2 F R U' R' U' R U R' F'",
+            "R2 D' R U' R' D R U R",
+            "U' F' L F L' U' L' U L"
+        ]
+    },
+    {
+        "name": "CMLL L Good",
+        "code": "38",
+        "description": "L orientation with good permutation pattern",
+        "family": "L",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 F R' F' R U R U' R'",
+        "algorithms": [
+            "U2 F R' F' R U R U' R'",
+            "U2 F R' F' r U R U' r'",
+            "U2 R U R' U' R' F R F' R U R' U' R' F R F'",
+            "U' r U' r' U' F' U F"
+        ]
+    },
+    {
+        "name": "CMLL L Pure",
+        "code": "39",
+        "description": "L orientation with pure (no permutation) pattern",
+        "family": "L",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "R U R' U R U' R' U R U' R' U R U2 R'",
+        "algorithms": [
+            "R U R' U R U' R' U R U' R' U R U2 R'",
+            "R U2 R' U' R U R' U' R U R' U' R U' R'",
+            "U' R' U2 R U R' U' R U R' U' R U R' U R",
+            "R U R' U r U' R' U R U' R' U R U2 r'"
+        ]
+    },
+    {
+        "name": "CMLL L Front Commutator",
+        "code": "40",
+        "description": "L orientation with front commutator permutation pattern",
+        "family": "L",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 R U2 R D R' U2 R D' R2",
+        "algorithms": [
+            "U2 R U2 R D R' U2 R D' R2",
+            "U2 R U2 r D r' U2 r D' r' R'",
+            "R U R' U R' F R F' U2 R' F R F'",
+            "U r' D' r U2 r' D r U2 r U r'"
+        ]
+    },
+    {
+        "name": "CMLL L Diagonal",
+        "code": "41",
+        "description": "L orientation with diagonal permutation pattern",
+        "family": "L",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U2 R U2 R2 F R F' R U2 R'",
+        "algorithms": [
+            "U2 R U2 R2 F R F' R U2 R'",
+            "U2 r U2 R2 F R F' R U2 r'",
+            "R' U' R U R' F' R U R' U' R' F R2",
+            "U R U2 R' F R' F' R2 U2 R'"
+        ]
+    },
+    {
+        "name": "CMLL L Back Commutator",
+        "code": "42",
+        "description": "L orientation with back commutator permutation pattern",
+        "family": "L",
+        "groups": [
+            "CMLL",
+            "Roux"
+        ],
+        "status": "OK",
+        "main": "U R' U2 R' D' R U2 R' D R2",
+        "algorithms": [
+            "U R' U2 R' D' R U2 R' D R2",
+            "U2 R U R' U' R' F R2 U' R' U R U R' F'",
+            "U2 r D r' U2 r D' r' U2 r' U' r",
+            "U R' U2 r' D' r U2 r' D r R"
+        ]
+    },
+    {
+        "code": "SKIP",
+        "description": "Skipped case",
+        "name": "CMLL Skipped",
+        "status": "OK"
+    }
+]
