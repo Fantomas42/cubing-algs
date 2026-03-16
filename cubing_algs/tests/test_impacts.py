@@ -291,7 +291,7 @@ class TestComputeFaceImpact(unittest.TestCase):
         result = compute_face_impact(mask, self.cube)
 
         # Should have entries for all faces in FACE_ORDER
-        self.assertEqual(list(result.keys()), FACE_ORDER)
+        self.assertEqual(tuple(result.keys()), FACE_ORDER)
 
 
 class TestComputeManhattanDistance(unittest.TestCase):

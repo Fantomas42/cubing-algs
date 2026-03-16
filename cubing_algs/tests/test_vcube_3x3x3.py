@@ -4,6 +4,7 @@ from io import StringIO
 from unittest.mock import Mock
 from unittest.mock import patch
 
+from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import FACES
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
@@ -301,14 +302,14 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(
             cube.get_face_center_indexes(),
-            ['U', 'R', 'F', 'D', 'L', 'B'],
+            FACE_ORDER,
         )
 
         cube.rotate('z2')
 
         self.assertEqual(
             cube.get_face_center_indexes(),
-            ['D', 'L', 'F', 'U', 'R', 'B'],
+            ('D', 'L', 'F', 'U', 'R', 'B'),
         )
 
     def test_str(self) -> None:

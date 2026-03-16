@@ -145,7 +145,7 @@ class Test5x5x5VCube(unittest.TestCase):
 
         self.assertEqual(
             self.cube.get_face_center_indexes(),
-            ['D', 'L', 'F', 'U', 'R', 'B'],
+            ('D', 'L', 'F', 'U', 'R', 'B'),
         )
 
     def test_orientation(self) -> None:

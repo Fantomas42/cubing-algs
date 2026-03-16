@@ -119,17 +119,18 @@ OFFSET_Z_CW = {
 }
 
 OFFSET_Z_CC = {
-    'D': 'L',
-    'L': 'U',
-    'R': 'D',
     'U': 'R',
+    'D': 'L',
+
+    'R': 'D',
+    'L': 'U',
 
     'M': "E'",
     'E': 'M',
 
     'x': "y'",
     'y': 'x',
-  }
+}
 
 
 OFFSET_TABLE = {
@@ -379,7 +380,7 @@ ADJACENT_FACES = {
     'B': ('U', 'D', 'L', 'R'),
 }
 
-FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
+FACE_ORDER = ('U', 'R', 'F', 'D', 'L', 'B')
 
 FACE_NUMBER = len(FACE_ORDER)
 
@@ -390,7 +391,7 @@ FACE_INDEXES = {
 
 FACES = ''.join(FACE_ORDER)
 
-F2L_FACES = ['F', 'L', 'R', 'B']
+F2L_FACES = ('F', 'L', 'R', 'B')
 
 F2L_FACE_ORIENTATIONS = {
     'FL': 'F',

@@ -349,7 +349,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         index = FACE_INDEXES[face]
         return self._state[index * self.face_size: (index + 1) * self.face_size]
 
-    def get_face_center_indexes(self) -> list[str]:
+    def get_face_center_indexes(self) -> tuple[str, ...]:
         """
         Get the center facelet colors for all faces.
 
@@ -358,16 +358,16 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         the calculated center position.
 
         Returns:
-            A list of center colors for all six faces in order
+            A tuple of center colors for all six faces in order
             (U, R, F, D, L, B).
 
         """
         center_index = self.center_index
 
-        return [
+        return tuple(
             self.state[(i * self.face_size) + center_index]
             for i in range(self.face_number)
-        ]
+        )
 
     def get_face_index(self, face: str) -> int:
         """

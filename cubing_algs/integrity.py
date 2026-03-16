@@ -149,7 +149,7 @@ class VCubeIntegrityChecker:
 
     _state: str
 
-    def get_face_center_indexes(self) -> list[str]:
+    def get_face_center_indexes(self) -> tuple[str, ...]:
         """
         Return the center facelet characters for each face.
 
