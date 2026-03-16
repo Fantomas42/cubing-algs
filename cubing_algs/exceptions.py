@@ -26,6 +26,10 @@ class InvalidOperatorError(InvalidMoveError):
     """Exception raised when an invalid operator is encountered."""
 
 
+class InvalidPatternNameError(ValueError):
+    """Exception raised when requesting a pattern with an invalid name."""
+
+
 class InvalidCaseNameError(ValueError):
     """Exception raised when requesting a case with an invalid name."""
 

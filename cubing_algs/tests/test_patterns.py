@@ -1,11 +1,14 @@
 """Tests for cube pattern recognition and generation."""
 import unittest
 
+from cubing_algs.exceptions import InvalidPatternNameError
 from cubing_algs.move import Move
 from cubing_algs.patterns import ALPHABET
 from cubing_algs.patterns import PATTERNS
 from cubing_algs.patterns import get_letter
 from cubing_algs.patterns import get_pattern
+from cubing_algs.patterns import list_letters
+from cubing_algs.patterns import list_patterns
 
 
 class PatternsTestCase(unittest.TestCase):
@@ -31,11 +34,16 @@ class PatternsTestCase(unittest.TestCase):
 
     def test_get_pattern_inexistant(self) -> None:
         """Test get pattern inexistant."""
-        pattern = get_pattern('El Matadore')
+        with self.assertRaises(InvalidPatternNameError):
+            get_pattern('El Matadore')
 
-        self.assertEqual(
-            len(pattern), 0,
-        )
+    def test_list_patterns(self) -> None:
+        """Test list patterns returns all pattern names."""
+        names = list_patterns()
+
+        self.assertEqual(len(names), 68)
+        self.assertIn('DontCrossLine', names)
+        self.assertIn('Superflip', names)
 
 
 class LetterTestCase(unittest.TestCase):
@@ -61,8 +69,13 @@ class LetterTestCase(unittest.TestCase):
 
     def test_get_letter_inexistant(self) -> None:
         """Test get letter inexistant."""
-        pattern = get_letter('5')
+        with self.assertRaises(InvalidPatternNameError):
+            get_letter('5')
 
-        self.assertEqual(
-            len(pattern), 0,
-        )
+    def test_list_letters(self) -> None:
+        """Test list letters returns all letter names."""
+        names = list_letters()
+
+        self.assertEqual(len(names), 26)
+        self.assertIn('A', names)
+        self.assertIn('Z', names)
