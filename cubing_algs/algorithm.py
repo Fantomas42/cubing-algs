@@ -170,7 +170,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A space-separated string of all moves in the algorithm.
 
         """
-        return ' '.join([str(m) for m in self])
+        return ' '.join(str(m) for m in self)
 
     def __repr__(self) -> str:
         """
@@ -181,7 +181,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A Python expression that can recreate this Algorithm object.
 
         """
-        return f'Algorithm("{ "".join([str(m) for m in self]) }")'
+        return f'Algorithm("{ " ".join(str(m) for m in self) }")'
 
     def transform(
             self,
@@ -280,9 +280,9 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         Example:
             >>> alg = Algorithm.parse_moves("R U R' U'")
             >>> impacts = alg.impacts
-            >>> impacts['mobilized_count']
+            >>> impacts.facelets_mobilized_count
             18  # 18 out of 54 facelets are affected
-            >>> impacts['scrambled_percent']
+            >>> impacts.facelets_scrambled_percent
             0.33  # About 33% of the cube is scrambled
 
         """

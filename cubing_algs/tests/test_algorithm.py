@@ -490,7 +490,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         """Test repr."""
         algo = parse_moves('R2 U')
 
-        self.assertEqual(repr(algo), 'Algorithm("R2U")')
+        self.assertEqual(repr(algo), 'Algorithm("R2 U")')
 
     def test_eq(self) -> None:
         """Test eq."""
