@@ -203,7 +203,7 @@ TRIGGER_PATTERNS = [
         category='setup',
         ergonomic_bonus=0.05,
         speed_multiplier=1.05,
-        variations=["L U2 L'", "R U2' R'"],
+        variations=["L U2 L'"],
     ),
 
     # Wide move patterns
