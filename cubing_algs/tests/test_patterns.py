@@ -15,7 +15,7 @@ class PatternsTestCase(unittest.TestCase):
         """Test patterns size."""
         self.assertEqual(
             len(PATTERNS.keys()),
-            69,
+            68,
         )
 
     def test_get_pattern(self) -> None:

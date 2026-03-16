@@ -73,7 +73,6 @@ PATTERNS = {
     'UnionJack': "U F B' L2 U2 L2 F' B U2 L2 U",
     'VerticalStripes': "F U F R L2 B D' R D2 L D' B R2 L F U F",
     'Wire': 'R L F B R L F B R L F B R2 B2 L2 R2 B2 L2',
-    'YanYing': "L R F B U' D' L' R'",
     'YinYang': "R L B F R L U' D' F' B' U D",
     'ZZLine': "R L U2 R L' U2 F2 R2 U2 F2 D2 B2 L2 U2 L2",
 }
