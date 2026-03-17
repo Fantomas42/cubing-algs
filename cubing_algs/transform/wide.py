@@ -133,6 +133,7 @@ def rewide(
         return rewide(
             Algorithm(moves), config,
             max_depth - 1,
+            threshold,
         )
 
     return Algorithm(moves)
