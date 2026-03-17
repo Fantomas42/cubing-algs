@@ -1,10 +1,6 @@
 """Algorithm inversion transformation for reversing move sequences."""
-from typing import TYPE_CHECKING
-
 from cubing_algs.algorithm import Algorithm
-
-if TYPE_CHECKING:
-    from cubing_algs.move import Move  # pragma: no cover
+from cubing_algs.move import Move
 
 
 def invert_moves(old_moves: Algorithm) -> Algorithm:
@@ -14,6 +10,8 @@ def invert_moves(old_moves: Algorithm) -> Algorithm:
     Reverses the order of moves and inverts each move to create
     the sequence that undoes the original algorithm.
 
+    Timing information is preserved from the original positions.
+
     Args:
         old_moves: The algorithm to invert.
 
@@ -21,6 +19,18 @@ def invert_moves(old_moves: Algorithm) -> Algorithm:
         A new Algorithm that is the inverse of the input.
 
     """
-    moves: list[Move] = [move.inverted for move in reversed(old_moves)]
+    times: list[str] = [
+        move.time
+        for move in old_moves
+    ]
+    inverted: list[Move] = [
+        move.inverted.untimed
+        for move in reversed(old_moves)
+    ]
+
+    moves: list[Move] = [
+        Move(f'{ move }{ time }') if time else move
+        for move, time in zip(inverted, times, strict=True)
+    ]
 
     return Algorithm(moves)

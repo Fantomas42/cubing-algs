@@ -66,7 +66,7 @@ class TransformInvertTestCase(unittest.TestCase):
         provide = parse_moves(
             "F@1 R@2 U2@3 F'@4",
         )
-        expect = parse_moves("F@4 U2@3 R'@2 F'@1")
+        expect = parse_moves("F@1 U2@2 R'@3 F'@4")
 
         result = invert_moves(provide)
 
@@ -83,7 +83,7 @@ class TransformInvertTestCase(unittest.TestCase):
         provide = parse_moves(
             "F@1 .@2 R@3 U2@4 F'@5",
         )
-        expect = parse_moves("F@5 U2@4 R'@3 .@2 F'@1")
+        expect = parse_moves("F@1 U2@2 R'@3 .@4 F'@5")
 
         result = invert_moves(provide)
 
