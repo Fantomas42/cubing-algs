@@ -61,13 +61,12 @@ def try_match_pattern(
     if pattern in config:
         return config[pattern]
 
-    # Try normalized match (sorted alphabetically)
+    # Try normalized match (sorted alphabetically).
+    # Config keys must be in sorted order.
     moves = pattern.split()
     normalized = ' '.join(sorted(moves))
-    if normalized in config:
-        return config[normalized]
 
-    return None
+    return config.get(normalized)
 
 
 def is_within_threshold(
@@ -78,6 +77,10 @@ def is_within_threshold(
 
     Returns True if threshold is 0, or if all consecutive moves
     are within the threshold time.
+
+    Notes:
+        Algorithms are either fully timed or fully untimed,
+        mixed timing does not occur.
 
     Args:
         moves_to_check: List of moves to check.
@@ -153,7 +156,7 @@ def reslice(
     Args:
         old_moves: Algorithm to process.
         config: Configuration mapping move patterns to slice moves.
-        max_depth: Maximum recursion depth for optimization.
+        max_depth: Maximum number of reslicing iterations.
         threshold: Maximum time difference for grouping moves.
         pattern_lengths: Tuple of pattern lengths to try matching.
 
