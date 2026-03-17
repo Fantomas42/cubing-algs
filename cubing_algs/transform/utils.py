@@ -28,17 +28,16 @@ def expand_moves(
 
     for move in old_moves:
         move_untimed = str(move.untimed)
+        cached = move_cache.get(move_untimed)
 
-        if move_untimed in config:
+        if cached is not None:
             if move.is_timed:
                 moves.extend(
-                    [
-                        Move(x + move.time)
-                        for x in move_cache[move_untimed]
-                    ],
+                    Move(x + move.time)
+                    for x in cached
                 )
             else:
-                moves.extend(move_cache[move_untimed])
+                moves.extend(cached)
         else:
             moves.append(move)
 
