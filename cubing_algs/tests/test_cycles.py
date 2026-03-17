@@ -3,6 +3,7 @@ import unittest
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.cycles import compute_cycles
+from cubing_algs.cycles import permutation_order
 
 
 class ComputeCyclesTestCase(unittest.TestCase):  # noqa: PLR0904
@@ -205,3 +206,31 @@ class ComputeCyclesTestCase(unittest.TestCase):  # noqa: PLR0904
         algorithm = Algorithm.parse_moves("R2 u' l' 2F'")
         result = compute_cycles(algorithm)
         self.assertEqual(result, -1)
+
+
+class PermutationOrderTestCase(unittest.TestCase):
+    """Test cases for the permutation_order function."""
+
+    def test_identity(self) -> None:
+        """Test that the identity permutation has order 1."""
+        self.assertEqual(permutation_order([0, 1, 2, 3]), 1)
+
+    def test_single_transposition(self) -> None:
+        """Test a single 2-cycle (swap)."""
+        self.assertEqual(permutation_order([1, 0, 2, 3]), 2)
+
+    def test_single_3_cycle(self) -> None:
+        """Test a single 3-cycle."""
+        self.assertEqual(permutation_order([1, 2, 0, 3]), 3)
+
+    def test_disjoint_cycles_lcm(self) -> None:
+        """Test disjoint 3-cycle and 2-cycle: lcm(3, 2) = 6."""
+        self.assertEqual(permutation_order([1, 2, 0, 4, 3]), 6)
+
+    def test_full_cycle(self) -> None:
+        """Test a single cycle covering all elements."""
+        self.assertEqual(permutation_order([1, 2, 3, 0]), 4)
+
+    def test_empty(self) -> None:
+        """Test empty permutation."""
+        self.assertEqual(permutation_order([]), 1)
