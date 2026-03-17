@@ -132,7 +132,7 @@ def is_within_threshold(
         if (
             current.is_timed
             and next_move.is_timed
-            and abs(next_move.timed - current.timed) > threshold
+            and next_move.timed - current.timed > threshold
         ):
             return False
 

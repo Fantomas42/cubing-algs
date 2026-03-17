@@ -156,7 +156,7 @@ def rewide_timed_moves(
         threshold: int = REWIDE_THRESHOLD,
 ) -> Callable[[Algorithm], Algorithm]:
     """
-    Create a timed reslicing function
+    Create a timed rewiding function
     for all slice moves with configurable threshold.
 
     Args:
