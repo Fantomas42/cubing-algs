@@ -93,8 +93,8 @@ disable_error_code = ["import-untyped"]
 exclude = ["poc"]
 python_version = 3.12
 
-[tool.pytest.ini_options]
-addopts = "--cov=cubing_algs"
+[tool.pytest]
+addopts = ["--cov=cubing_algs"]
 
 [tool.coverage.run]
 branch = true
