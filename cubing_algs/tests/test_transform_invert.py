@@ -43,6 +43,24 @@ class TransformInvertTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_invert_empty_algorithm(self) -> None:
+        """Test inverting an empty algorithm returns an empty algorithm."""
+        provide = parse_moves('')
+        expect = parse_moves('')
+
+        result = invert_moves(provide)
+
+        self.assertEqual(result, expect)
+
+    def test_invert_double_moves(self) -> None:
+        """Test that double moves remain unchanged when inverted."""
+        provide = parse_moves('R2')
+        expect = parse_moves('R2')
+
+        result = invert_moves(provide)
+
+        self.assertEqual(result, expect)
+
     def test_timed_moves(self) -> None:
         """Test timed moves."""
         provide = parse_moves(

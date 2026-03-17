@@ -1,4 +1,4 @@
-"""Inverse transformation."""
+"""Algorithm inversion transformation for reversing move sequences."""
 from typing import TYPE_CHECKING
 
 from cubing_algs.algorithm import Algorithm
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 def invert_moves(old_moves: Algorithm) -> Algorithm:
     """
-    Create the inversed version of an algorithm.
+    Create the inverse of an algorithm.
 
     Reverses the order of moves and inverts each move to create
     the sequence that undoes the original algorithm.
