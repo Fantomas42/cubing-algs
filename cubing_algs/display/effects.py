@@ -1778,7 +1778,7 @@ def register_effect(name: str, config: EffectConfig) -> None:
 
     """
     if name in EFFECTS:
-        msg = f'Effect already exists: {name}'
+        msg = f'Effect already exists: { name }'
         raise EffectAlreadyExistsError(msg)
 
     EFFECTS[name] = config

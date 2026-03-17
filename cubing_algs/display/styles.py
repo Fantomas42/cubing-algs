@@ -24,10 +24,10 @@ class StyleConfig(TypedDict, total=False):
     fixed_center: str
 
 
-PIECE_TYPES: list[FaceletPieceType] = [
+PIECE_TYPES: tuple[FaceletPieceType, ...] = (
     'corner', 'edge',
     'center', 'fixed_center',
-]
+)
 
 STYLES: dict[str, StyleConfig] = {
     'default': {
@@ -137,7 +137,7 @@ def register_style(
 
     """
     if name in STYLES:
-        msg = f'Style already exists: {name}'
+        msg = f'Style already exists: { name }'
         raise StyleAlreadyExistsError(msg)
 
     STYLES[name] = config
@@ -169,6 +169,7 @@ def get_piece_type(facelet_index: int, cube_size: int) -> FaceletPieceType:
         return 'edge'
 
     if cube_size % 2 == 1 and row == cube_size // 2 and col == cube_size // 2:
+        # For odd-sized cube only
         return 'fixed_center'
 
     return 'center'

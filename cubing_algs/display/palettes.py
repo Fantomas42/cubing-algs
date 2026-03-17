@@ -727,7 +727,7 @@ def register_palette(
 
     """
     if name in PALETTES:
-        msg = f'Palette already exists: {name}'
+        msg = f'Palette already exists: { name }'
         raise PaletteAlreadyExistsError(msg)
 
     PALETTES[name] = config
