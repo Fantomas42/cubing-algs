@@ -43,6 +43,27 @@ class TransformUntimeTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_untime_empty_algorithm(self) -> None:
+        """Test untime moves on an empty algorithm."""
+        provide = parse_moves('')
+        expect = parse_moves('')
+
+        result = untime_moves(provide)
+
+        self.assertEqual(result, expect)
+
+    def test_untime_moves_with_pauses(self) -> None:
+        """Test untime moves with timed pauses."""
+        provide = parse_moves('R .@5 U .@3 F')
+        expect = parse_moves('R . U . F')
+
+        result = untime_moves(provide)
+
+        self.assertEqual(result, expect)
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
     def test_untime_moves_untimed(self) -> None:
         """Test untime moves untimed."""
         provide = parse_moves(
