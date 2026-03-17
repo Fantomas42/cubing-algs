@@ -34,6 +34,7 @@ from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.integrity import compute_parity
 from cubing_algs.integrity import find_permutation_cycles
+from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -1050,24 +1051,24 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     cube.rotate(untime_moves(algorithm))
     cube = cube.oriented_copy('UF')
 
-    # Create unique state with each facelet having a unique character
-    state_unique = ''.join(
-        [
-            chr(ord('A') + i)
-            for i in range(cube.face_size * cube.face_number)
-        ],
+    state_unique_moved = cubies_to_facelets(
+        *cube.to_cubies,
+        UNIQUE_FACELETS_3x3x3,
     )
-    state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
 
     mask = ''.join(
         '0' if f1 == f2 else '1'
-        for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
+        for f1, f2 in zip(
+                UNIQUE_FACELETS_3x3x3,
+                state_unique_moved,
+                strict=True,
+        )
     )
 
     permutations = {}
-    for original_pos in range(len(state_unique)):
+    for original_pos in range(len(UNIQUE_FACELETS_3x3x3)):
         final_pos = state_unique_moved.find(
-            state_unique[original_pos],
+            UNIQUE_FACELETS_3x3x3[original_pos],
         )
 
         if final_pos != original_pos:
@@ -1084,7 +1085,9 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     fixed_count = mask.count('0')
     mobilized_count = mask.count('1')
     # Center facelets should not move
-    scrambled_percent = mobilized_count / (len(state_unique) - cube.face_number)
+    scrambled_percent = mobilized_count / (
+        len(UNIQUE_FACELETS_3x3x3) - cube.face_number
+    )
 
     face_mobility = compute_face_impact(mask, cube)
 
