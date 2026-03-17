@@ -137,7 +137,7 @@ def build_valid_next_moves(move_set: list[str]) -> dict[str, list[str]]:
 
 def random_moves(cube_size: int,
                  move_set: list[str],
-                 iterations: int = 0,
+                 iterations: int | None = None,
                  rng: Random | None = None) -> Algorithm:
     """
     Generate a random sequence of moves from a given move set.
@@ -148,7 +148,7 @@ def random_moves(cube_size: int,
     Args:
         cube_size: Size of the cube.
         move_set: List of available moves to choose from.
-        iterations: Number of moves to generate (0 for automatic).
+        iterations: Number of moves to generate (None for automatic).
         rng: Optional random number generator.
 
     Returns:
@@ -163,7 +163,7 @@ def random_moves(cube_size: int,
     value = rng.choice(move_set)
     moves = [value]
 
-    if not iterations:
+    if iterations is None:
         iterations_range = ITERATIONS_BY_CUBE_SIZE[min(cube_size, 7)]
         iterations = rng.randint(*iterations_range)
 

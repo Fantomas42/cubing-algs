@@ -5,6 +5,10 @@ class CubingAlgsError(Exception):
     """Base exception for all cubing-algs library errors."""
 
 
+class InvalidCubeSizeError(CubingAlgsError):
+    """Exception raised when a cube size is invalid (e.g., less than 2)."""
+
+
 class InvalidFaceError(CubingAlgsError):
     """Exception raised when an invalid face is encountered."""
 

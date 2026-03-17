@@ -688,7 +688,7 @@ class TestRandomMoves(unittest.TestCase):
 
     def test_random_moves_2x2x2(self) -> None:
         """Test random moves 2x2x2."""
-        moves = random_moves(2, ['F', 'R', 'U'], 0)
+        moves = random_moves(2, ['F', 'R', 'U'])
 
         self.assertGreaterEqual(
             len(moves), 9,
@@ -773,8 +773,8 @@ class TestRNGParameter(unittest.TestCase):
         rng1 = Random(42)  # noqa: S311
         rng2 = Random(42)  # noqa: S311
 
-        result1 = random_moves(3, move_set, 0, rng1)
-        result2 = random_moves(3, move_set, 0, rng2)
+        result1 = random_moves(3, move_set, None, rng1)
+        result2 = random_moves(3, move_set, None, rng2)
 
         self.assertEqual(
             len(result1),
