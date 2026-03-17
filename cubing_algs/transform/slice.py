@@ -11,43 +11,7 @@ from cubing_algs.constants import RESLICE_THRESHOLD
 from cubing_algs.constants import UNSLICE_ROTATION_MOVES
 from cubing_algs.constants import UNSLICE_WIDE_MOVES
 from cubing_algs.move import Move
-
-
-def unslice(old_moves: Algorithm, config: dict[str, list[str]]) -> Algorithm:
-    """
-    Convert slice moves to their component moves using configuration.
-
-    Args:
-        old_moves: Algorithm to process.
-        config: Mapping of slice moves to their component move sequences.
-
-    Returns:
-        Algorithm with slice moves expanded to component moves.
-
-    """
-    moves: list[Move] = []
-
-    move_cache: dict[Move, list[Move]] = {}
-    for move_str, replacements in config.items():
-        move_cache[Move(move_str)] = [Move(m) for m in replacements]
-
-    for move in old_moves:
-        move_untimed = move.untimed
-
-        if move_untimed in config:
-            if move.is_timed:
-                moves.extend(
-                    [
-                        Move(x + move.time)
-                        for x in move_cache[move_untimed]
-                    ],
-                )
-            else:
-                moves.extend(move_cache[move_untimed])
-        else:
-            moves.append(move)
-
-    return Algorithm(moves)
+from cubing_algs.transform.utils import expand_moves
 
 
 def unslice_wide_moves(old_moves: Algorithm) -> Algorithm:
@@ -61,7 +25,7 @@ def unslice_wide_moves(old_moves: Algorithm) -> Algorithm:
         Algorithm with slice moves converted to wide moves.
 
     """
-    return unslice(old_moves, UNSLICE_WIDE_MOVES)
+    return expand_moves(old_moves, UNSLICE_WIDE_MOVES)
 
 
 def unslice_rotation_moves(old_moves: Algorithm) -> Algorithm:
@@ -75,7 +39,7 @@ def unslice_rotation_moves(old_moves: Algorithm) -> Algorithm:
         Algorithm with slice moves converted to face and rotation moves.
 
     """
-    return unslice(old_moves, UNSLICE_ROTATION_MOVES)
+    return expand_moves(old_moves, UNSLICE_ROTATION_MOVES)
 
 
 def try_match_pattern(
