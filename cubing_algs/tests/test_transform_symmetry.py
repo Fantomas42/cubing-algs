@@ -7,7 +7,6 @@ from cubing_algs.transform.symmetry import symmetry_c_moves
 from cubing_algs.transform.symmetry import symmetry_e_moves
 from cubing_algs.transform.symmetry import symmetry_m_moves
 from cubing_algs.transform.symmetry import symmetry_s_moves
-from cubing_algs.transform.symmetry import symmetry_type_moves
 
 
 class TransformSymmetryTestCase(unittest.TestCase):
@@ -165,4 +164,3 @@ class TransformSymmetryTestCase(unittest.TestCase):
         self.assertEqual(symmetry_s_moves(pauses), pauses)
         self.assertEqual(symmetry_e_moves(pauses), pauses)
         self.assertEqual(symmetry_c_moves(pauses), pauses)
-
