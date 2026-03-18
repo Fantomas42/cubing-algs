@@ -131,5 +131,7 @@ def symmetry_c_moves(old_moves: Algorithm) -> Algorithm:
         Algorithm with combined M and S symmetry applied.
 
     """
+    # M symmetry mirrors L↔R, then S symmetry mirrors F↔B,
+    # yielding a diagonal "corner" symmetry across both slices.
     moves = symmetry_m_moves(old_moves)
     return symmetry_s_moves(moves)
