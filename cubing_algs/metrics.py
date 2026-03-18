@@ -71,12 +71,31 @@ References
 """
 from collections import defaultdict
 from typing import TYPE_CHECKING
+from typing import Literal
 from typing import NamedTuple
 
 from cubing_algs.move import Move
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
+
+MetricMode = Literal['htm', 'qtm', 'stm', 'etm', 'rtm', 'qstm']
+MoveField = Literal['rotation', 'outer', 'inner']
+
+
+class ScoringRule(NamedTuple):
+    """
+    A scoring rule defining how a move type is counted in a metric.
+
+    Attributes:
+        base: Base count added for each move regardless of angle.
+        quantum: Multiplied by the move's quantum count
+            (1 for quarter, 2 for half).
+
+    """
+
+    base: int
+    quantum: int
 
 
 class MetricsData(NamedTuple):
@@ -206,13 +225,37 @@ class MetricsData(NamedTuple):
 #   HTM: 2 + (2 * 0) = 2    (slice moves count double)
 #   QTM: 0 + (2 * 2) = 4    (slice quarter = 2, slice half = 4)
 #   STM: 1 + (2 * 0) = 1    (slice moves count as 1)
-MOVE_COUNTS = {
-    'htm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [2, 0]},
-    'qtm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 2]},
-    'stm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [1, 0]},
-    'etm': {'rotation': [1, 0], 'outer': [1, 0], 'inner': [1, 0]},
-    'rtm': {'rotation': [0, 1], 'outer': [0, 0], 'inner': [0, 0]},
-    'qstm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 1]},
+MOVE_COUNTS: dict[MetricMode, dict[MoveField, ScoringRule]] = {
+    'htm': {
+        'outer': ScoringRule(1, 0),
+        'inner': ScoringRule(2, 0),
+        'rotation': ScoringRule(0, 0),
+    },
+    'qtm': {
+        'outer': ScoringRule(0, 1),
+        'inner': ScoringRule(0, 2),
+        'rotation': ScoringRule(0, 0),
+    },
+    'stm': {
+        'outer': ScoringRule(1, 0),
+        'inner': ScoringRule(1, 0),
+        'rotation': ScoringRule(0, 0),
+    },
+    'etm': {
+        'outer': ScoringRule(1, 0),
+        'inner': ScoringRule(1, 0),
+        'rotation': ScoringRule(1, 0),
+    },
+    'rtm': {
+        'outer': ScoringRule(0, 0),
+        'inner': ScoringRule(0, 0),
+        'rotation': ScoringRule(0, 1),
+    },
+    'qstm': {
+        'outer': ScoringRule(0, 1),
+        'inner': ScoringRule(0, 1),
+        'rotation': ScoringRule(0, 0),
+    },
 }
 
 
@@ -243,7 +286,7 @@ def amount(move: Move) -> int:
     return 1
 
 
-def move_score(mode: str, field: str,
+def move_score(mode: MetricMode, field: MoveField,
                moves: list[Move]) -> int:
     """
     Calculate the score for a specific group of moves under a given metric.
@@ -272,15 +315,15 @@ def move_score(mode: str, field: str,
             Total: 3
 
     """
-    datas = MOVE_COUNTS[mode][field]
+    rule = MOVE_COUNTS[mode][field]
 
     return sum(
-        datas[0] + (amount(move) * datas[1])
+        rule.base + (amount(move) * rule.quantum)
         for move in moves
     )
 
 
-def compute_score(mode: str,
+def compute_score(mode: MetricMode,
                   rotations: list[Move],
                   outer: list[Move],
                   inner: list[Move]) -> int:
