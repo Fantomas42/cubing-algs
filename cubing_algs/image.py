@@ -23,7 +23,7 @@ def _parse_rotation(rotation: str) -> list[tuple[str, int]]:
     Parse a rotation string into axis-angle pairs.
 
     Args:
-        rotation: Rotation string like "y-45x34".
+        rotation: Rotation string like "y45x-25".
 
     Returns:
         List of (axis, degrees) tuples.
@@ -35,7 +35,7 @@ def _parse_rotation(rotation: str) -> list[tuple[str, int]]:
     if not _ROTATION_PATTERN.match(rotation):
         msg = (
             f'Invalid rotation string: {rotation!r}. '
-            f'Expected format like "y-45x34".'
+            f'Expected format like "y45x-25".'
         )
         raise ValueError(msg)
 
@@ -63,7 +63,7 @@ def _rotate_point(
     x, y, z = point
 
     for axis, degrees in rotations:
-        rad = math.radians(degrees)
+        rad = math.radians(-degrees)
         cos_a = math.cos(rad)
         sin_a = math.sin(rad)
 
@@ -533,7 +533,7 @@ def render_cube(
     source: VCube | Algorithm,
     *,
     size: int = 200,
-    rotation: str = 'y-45x34',
+    rotation: str = 'y45x-25',
     path: str | Path | None = None,
 ) -> str | None:
     """

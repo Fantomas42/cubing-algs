@@ -33,8 +33,8 @@ class ParseRotationTestCase(unittest.TestCase):
 
     def test_two_axes(self) -> None:
         """Test parsing two axis rotations."""
-        result = _parse_rotation('y-45x34')
-        self.assertEqual(result, [('y', -45), ('x', 34)])
+        result = _parse_rotation('y45x-25')
+        self.assertEqual(result, [('y', 45), ('x', -25)])
 
     def test_three_axes(self) -> None:
         """Test parsing three axis rotations."""
@@ -86,27 +86,27 @@ class RotatePointTestCase(unittest.TestCase):
         self.assertAlmostEqual(result[2], 0.0)
 
     def test_y_rotation_90(self) -> None:
-        """Test 90-degree Y rotation moves X to Z."""
+        """Test 90-degree Y rotation (clockwise from above)."""
         point = (1.0, 0.0, 0.0)
         result = _rotate_point(point, [('y', 90)])
         self.assertAlmostEqual(result[0], 0.0, places=5)
         self.assertAlmostEqual(result[1], 0.0, places=5)
-        self.assertAlmostEqual(result[2], -1.0, places=5)
+        self.assertAlmostEqual(result[2], 1.0, places=5)
 
     def test_x_rotation_90(self) -> None:
-        """Test 90-degree X rotation moves Y to Z."""
+        """Test 90-degree X rotation (clockwise from right)."""
         point = (0.0, 1.0, 0.0)
         result = _rotate_point(point, [('x', 90)])
         self.assertAlmostEqual(result[0], 0.0, places=5)
         self.assertAlmostEqual(result[1], 0.0, places=5)
-        self.assertAlmostEqual(result[2], 1.0, places=5)
+        self.assertAlmostEqual(result[2], -1.0, places=5)
 
     def test_z_rotation_90(self) -> None:
-        """Test 90-degree Z rotation moves X to Y."""
+        """Test 90-degree Z rotation (clockwise from front)."""
         point = (1.0, 0.0, 0.0)
         result = _rotate_point(point, [('z', 90)])
         self.assertAlmostEqual(result[0], 0.0, places=5)
-        self.assertAlmostEqual(result[1], 1.0, places=5)
+        self.assertAlmostEqual(result[1], -1.0, places=5)
         self.assertAlmostEqual(result[2], 0.0, places=5)
 
     def test_combined_rotation(self) -> None:
@@ -135,8 +135,8 @@ class VisibleFacesTestCase(unittest.TestCase):
     """Tests for face visibility computation."""
 
     def test_default_rotation_shows_three_faces(self) -> None:
-        """Default rotation y-45x34 shows exactly 3 faces."""
-        rotations = [('y', -45), ('x', 34)]
+        """Default rotation y45x-25 shows exactly 3 faces."""
+        rotations = [('y', 45), ('x', -25)]
         faces = _compute_visible_faces(rotations)
         self.assertEqual(len(faces), 3)
 
