@@ -33,6 +33,9 @@ dev = [
 notebooks = [
     "jupyterlab",
 ]
+image = [
+    "cairosvg>=2.7",
+]
 
 [tool.setuptools.packages.find]
 include = ["cubing_algs*"]
