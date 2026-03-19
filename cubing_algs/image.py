@@ -174,6 +174,7 @@ _FACE_COLORS: dict[str, str] = {
     'B': '#0000ff',
 }
 
+# Gap between stickers as a fraction of face size (divided by 3 per cell)
 _STICKER_GAP = 0.08
 
 
@@ -425,7 +426,6 @@ def _build_svg(
         return (cx + p[0] * scale, cy - p[1] * scale)
 
     defs_parts: list[str] = []
-    body_parts: list[str] = []
     face_groups: list[str] = []
 
     for face_name, corners_2d, face_state_idx in visible:
@@ -433,11 +433,11 @@ def _build_svg(
             to_svg_coords(c) for c in corners_2d
         ]
 
-        body_parts.append(
+        body_polygon = (
             f'  <polygon'
             f' points="{_points_to_svg(svg_corners)}"'
             f' fill="#111111" stroke="#111111"'
-            f' stroke-width="0.5"/>',
+            f' stroke-width="0.5"/>'
         )
 
         face_start = face_state_idx * 9
@@ -450,19 +450,19 @@ def _build_svg(
 
         face_groups.append(
             f'<g class="face-{face_name}">\n'
+            + body_polygon + '\n'
             + '\n'.join(face_stickers)
             + '\n</g>',
         )
 
     return _assemble_svg(
-        size, defs_parts, body_parts, face_groups,
+        size, defs_parts, face_groups,
     )
 
 
 def _assemble_svg(
     size: int,
     defs_parts: list[str],
-    body_parts: list[str],
     face_groups: list[str],
 ) -> str:
     """
@@ -484,11 +484,6 @@ def _assemble_svg(
         lines.append('<defs>')
         lines.extend(defs_parts)
         lines.append('</defs>')
-
-    if body_parts:
-        lines.append('<g class="cube-body">')
-        lines.extend(body_parts)
-        lines.append('</g>')
 
     lines.extend(face_groups)
     lines.append('</svg>')
