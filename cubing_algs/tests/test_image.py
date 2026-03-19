@@ -163,6 +163,16 @@ class VisibleFacesTestCase(unittest.TestCase):
         faces = _compute_visible_faces(rotations)
         self.assertTrue(len(faces) >= 1)
 
+    def test_exact_90_no_degenerate_faces(self) -> None:
+        """Exact 90-degree rotation doesn't produce edge-on faces."""
+        rotations = [('y', 90)]
+        faces = _compute_visible_faces(rotations)
+        face_names = [f[0] for f in faces]
+        # At y90, only the R face should be visible (not F or B)
+        self.assertIn('R', face_names)
+        self.assertNotIn('F', face_names)
+        self.assertNotIn('B', face_names)
+
 
 class BuildSvgTestCase(unittest.TestCase):
     """Tests for SVG generation."""
@@ -223,6 +233,41 @@ class BuildSvgTestCase(unittest.TestCase):
         self.assertIn('class="face-', svg)
 
 
+class StickerColorCorrectnessTestCase(unittest.TestCase):
+    """Tests that sticker colors match the facelet state."""
+
+    def test_r_move_changes_u_face_gradients(self) -> None:
+        """After R move, U-face gradients should include F colors."""
+        cube = VCube()
+        cube.rotate('R')
+        svg = _build_svg(
+            cube.state, 200, [('y', 45), ('x', -25)],
+        )
+        # R move brings F-face facelets onto the U face.
+        # U-face gradient ids for affected stickers should use
+        # F-color derived values (tinted green), not white.
+        # Gradient g-U-0-2 should be green-derived, not white.
+        u_02_start = svg.index('id="g-U-0-2"')
+        u_02_end = svg.index('</linearGradient>', u_02_start)
+        u_02_grad = svg[u_02_start:u_02_end]
+        # White stickers produce #ffffff tint; green ones don't
+        self.assertNotIn('#ffffff', u_02_grad)
+
+    def test_solved_cube_u_face_all_white(self) -> None:
+        """Solved cube U-face gradients should all be white-derived."""
+        svg = _build_svg(
+            SOLVED_STATE, 200, [('y', 45), ('x', -25)],
+        )
+        for row in range(3):
+            for col in range(3):
+                grad_id = f'id="g-U-{row}-{col}"'
+                start = svg.index(grad_id)
+                end = svg.index('</linearGradient>', start)
+                grad = svg[start:end]
+                # All U stickers should use white-derived colors
+                self.assertIn('#ffffff', grad)
+
+
 class RenderCubeFromVCubeTestCase(unittest.TestCase):
     """Tests for render_cube with VCube input."""
 
@@ -247,7 +292,7 @@ class RenderCubeFromVCubeTestCase(unittest.TestCase):
         cube = VCube()
         result = render_cube(cube, size=400)
         self.assertIsNotNone(result)
-        self.assertIn('viewBox="0 0 400 400"', result)  # type: ignore[operator]
+        self.assertIn('viewBox="0 0 400 400"', result)
 
     def test_custom_rotation(self) -> None:
         """Test rendering with custom rotation."""

@@ -115,11 +115,11 @@ _CUBE_VERTICES: list[_Point3D] = [
 # Face definitions: (name, normal, vertex_indices, face_state_index)
 _FACE_DEFS: list[tuple[str, _Point3D, list[int], int]] = [
     ('U', (0, 1, 0), [3, 2, 6, 7], 0),
-    ('D', (0, -1, 0), [0, 1, 5, 4], 3),
-    ('R', (1, 0, 0), [1, 2, 6, 5], 1),
-    ('L', (-1, 0, 0), [0, 3, 7, 4], 4),
-    ('F', (0, 0, 1), [4, 5, 6, 7], 2),
-    ('B', (0, 0, -1), [0, 1, 2, 3], 5),
+    ('D', (0, -1, 0), [4, 5, 1, 0], 3),
+    ('R', (1, 0, 0), [6, 2, 1, 5], 1),
+    ('L', (-1, 0, 0), [3, 7, 4, 0], 4),
+    ('F', (0, 0, 1), [7, 6, 5, 4], 2),
+    ('B', (0, 0, -1), [2, 3, 0, 1], 5),
 ]
 
 _FaceData = tuple[str, list[_Point2D], int]
@@ -148,7 +148,7 @@ def _compute_visible_faces(
     for name, normal, indices, state_idx in _FACE_DEFS:
         rn = _rotate_point(normal, rotations)
 
-        if rn[2] > 0:
+        if rn[2] > _VISIBILITY_EPSILON:
             corners_3d = [rotated[i] for i in indices]
             corners_2d = [_project(c) for c in corners_3d]
             avg_z = sum(c[2] for c in corners_3d) / 4
@@ -176,6 +176,7 @@ _FACE_COLORS: dict[str, str] = {
 
 # Gap between stickers as a fraction of face size (divided by 3 per cell)
 _STICKER_GAP = 0.08
+_VISIBILITY_EPSILON = 1e-9
 
 
 def _hex_to_rgb(
@@ -318,6 +319,7 @@ def _build_sticker_polygon(
     t0_row = row / 3
     t1_row = (row + 1) / 3
 
+    # Gap is per-cell: divide by 3 since the face is a 3x3 grid
     gap = _STICKER_GAP / 3
     t0_col += gap
     t1_col -= gap
