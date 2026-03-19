@@ -306,6 +306,7 @@ def _build_sticker_polygon(
     row: int,
     col: int,
     grad_id: str,
+    cube_size: int,
 ) -> str:
     """
     Build an SVG polygon element for a single sticker.
@@ -314,12 +315,13 @@ def _build_sticker_polygon(
         SVG polygon element string.
 
     """
-    t0_col = col / 3
-    t1_col = (col + 1) / 3
-    t0_row = row / 3
-    t1_row = (row + 1) / 3
+    n = cube_size
+    t0_col = col / n
+    t1_col = (col + 1) / n
+    t0_row = row / n
+    t1_row = (row + 1) / n
 
-    # Gap is per-cell: divide by 3 since the face is a 3x3 grid
+    # Gap is per-cell: divide by n since the face is an nxn grid
     gap = _STICKER_GAP / 3
     t0_col += gap
     t1_col -= gap
@@ -357,6 +359,7 @@ def _build_face_elements(
     svg_corners: list[_Point2D],
     facelets: str,
     size: int,
+    cube_size: int,
 ) -> tuple[list[str], list[str]]:
     """
     Build gradient defs and sticker polygons for one face.
@@ -381,9 +384,9 @@ def _build_face_elements(
     gy2 = size - gy1
     coords: _GradientCoords = (gx1, gy1, gx2, gy2)
 
-    for row in range(3):
-        for col in range(3):
-            idx = row * 3 + col
+    for row in range(cube_size):
+        for col in range(cube_size):
+            idx = row * cube_size + col
             color_key = facelets[idx]
             base_color = _FACE_COLORS.get(
                 color_key, '#888888',
@@ -395,6 +398,7 @@ def _build_face_elements(
             ))
             stickers.append(_build_sticker_polygon(
                 svg_corners, row, col, grad_id,
+                cube_size,
             ))
 
     return defs, stickers
@@ -404,14 +408,16 @@ def _build_svg(
     state: str,
     size: int,
     rotations: list[tuple[str, int]],
+    cube_size: int = 3,
 ) -> str:
     """
     Build an SVG string for the cube state.
 
     Args:
-        state: 54-character facelet string.
+        state: Facelet string (6 * cube_size² characters).
         size: Image dimension in pixels.
         rotations: List of (axis, degrees) rotation pairs.
+        cube_size: Cube dimension (2 for 2x2, 3 for 3x3, etc.).
 
     Returns:
         Complete SVG document as a string.
@@ -429,6 +435,7 @@ def _build_svg(
 
     defs_parts: list[str] = []
     face_groups: list[str] = []
+    face_size = cube_size * cube_size
 
     for face_name, corners_2d, face_state_idx in visible:
         svg_corners = [
@@ -442,11 +449,12 @@ def _build_svg(
             f' stroke-width="0.5"/>'
         )
 
-        face_start = face_state_idx * 9
-        facelets = state[face_start:face_start + 9]
+        face_start = face_state_idx * face_size
+        facelets = state[face_start:face_start + face_size]
 
         face_defs, face_stickers = _build_face_elements(
             face_name, svg_corners, facelets, size,
+            cube_size,
         )
         defs_parts.extend(face_defs)
 
@@ -493,15 +501,19 @@ def _assemble_svg(
     return '\n'.join(lines)
 
 
-def _get_state(source: VCube | Algorithm) -> str:
+def _get_state(
+    source: VCube | Algorithm,
+    cube_size: int | None,
+) -> tuple[str, int]:
     """
-    Extract 54-char facelet state from source.
+    Extract facelet state and cube size from source.
 
     Args:
         source: VCube instance or Algorithm.
+        cube_size: Explicit cube size, or None to infer.
 
     Returns:
-        54-character facelet state string.
+        Tuple of (facelet state string, cube_size).
 
     Raises:
         TypeError: If source is not VCube or Algorithm.
@@ -511,13 +523,15 @@ def _get_state(source: VCube | Algorithm) -> str:
     from cubing_algs.vcube import VCube as Cube  # noqa: PLC0415
 
     if isinstance(source, Cube):
-        return source.state
+        n = cube_size if cube_size is not None else source.size
+        return source.state, n
 
     if isinstance(source, Algo):
-        cube = Cube()
+        n = cube_size if cube_size is not None else 3
+        cube = Cube(size=n)
         if source:
             cube.rotate(source)
-        return cube.state
+        return cube.state, n
 
     msg = (
         f'source must be VCube or Algorithm, '
@@ -532,6 +546,7 @@ def render_cube(
     size: int = 200,
     rotation: str = 'y45x-25',
     path: str | Path | None = None,
+    cube_size: int | None = None,
 ) -> str | None:
     """
     Render a 3D isometric cube image.
@@ -542,6 +557,8 @@ def render_cube(
         rotation: Axis-angle rotation string.
         path: If provided, write to file (SVG or PNG).
             Returns None. If None, return SVG string.
+        cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
+            etc.). Inferred from source if None.
 
     Returns:
         SVG string if path is None, otherwise None.
@@ -556,8 +573,8 @@ def render_cube(
         raise ValueError(msg)
 
     rotations = _parse_rotation(rotation)
-    state = _get_state(source)
-    svg = _build_svg(state, size, rotations)
+    state, n = _get_state(source, cube_size)
+    svg = _build_svg(state, size, rotations, n)
 
     if path is None:
         return svg

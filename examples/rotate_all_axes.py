@@ -14,13 +14,19 @@ parser.add_argument(
     default='',
     help='Algorithm to apply before rendering',
 )
+parser.add_argument(
+    '--cube-size',
+    type=int,
+    default=3,
+    help='Cube size (2 for 2x2, 3 for 3x3, etc.)',
+)
 args = parser.parse_args()
 
-cube = VCube()
+cube = VCube(size=args.cube_size)
 if args.algorithm:
     cube.rotate(parse_moves(args.algorithm, trust_input=False))
 
-print(f'Algorithm: {args.algorithm}')
+print(f'Algorithm: {args.algorithm}, Cube size: {args.cube_size}')
 
 axes = [
     ('x', 'X Axis', 'x{angle}'),
