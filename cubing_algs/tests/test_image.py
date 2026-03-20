@@ -3,14 +3,18 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.display.image import assemble_svg
 from cubing_algs.display.image import build_svg
 from cubing_algs.display.image import compute_visible_faces
 from cubing_algs.display.image import parse_rotation
 from cubing_algs.display.image import project
 from cubing_algs.display.image import render_cube
 from cubing_algs.display.image import rotate_point
+from cubing_algs.display.image import to_png
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.vcube import VCube
 
@@ -412,3 +416,56 @@ class RenderCubeFileOutputTestCase(unittest.TestCase):
                 sys.modules['cairosvg'] = original
             else:
                 sys.modules.pop('cairosvg', None)
+
+    def test_png_with_cairosvg(self) -> None:
+        """Test PNG export calls cairosvg.svg2png."""
+        mock_cairosvg = MagicMock()
+        with (
+            patch.dict(sys.modules, {'cairosvg': mock_cairosvg}),
+            tempfile.TemporaryDirectory() as tmpdir,
+        ):
+            png_path = Path(tmpdir) / 'test.png'
+            to_png('<svg></svg>', png_path, 256)
+        self.assertEqual(mock_cairosvg.svg2png.call_count, 1)
+        mock_cairosvg.svg2png.assert_called_once_with(
+            bytestring=b'<svg></svg>',
+            write_to=str(png_path),
+            output_width=256,
+            output_height=256,
+        )
+
+
+class AssembleSvgTestCase(unittest.TestCase):
+    """Tests for SVG assembly."""
+
+    def test_empty_defs(self) -> None:
+        """Test assemble_svg with no defs_parts."""
+        result = assemble_svg(100, [], ['<g>content</g>'])
+        self.assertNotIn('<defs>', result)
+        self.assertIn('<g>content</g>', result)
+
+    def test_with_defs(self) -> None:
+        """Test assemble_svg with defs_parts."""
+        result = assemble_svg(
+            100, ['<clipPath id="c"/>'], ['<g>content</g>'],
+        )
+        self.assertIn('<defs>', result)
+        self.assertIn('<clipPath id="c"/>', result)
+
+
+class RotatePointCombinedTestCase(unittest.TestCase):
+    """Tests for rotate_point with z-axis in combined rotations."""
+
+    def test_z_then_x_rotation(self) -> None:
+        """Test z rotation followed by another axis."""
+        point = (1.0, 0.0, 0.0)
+        result = rotate_point(point, [('z', 90), ('x', 90)])
+        self.assertAlmostEqual(result[0], 0.0, places=5)
+        self.assertAlmostEqual(result[1], 0.0, places=5)
+        self.assertAlmostEqual(result[2], 1.0, places=5)
+
+    def test_unknown_axis_ignored(self) -> None:
+        """Test that unknown axis is silently skipped."""
+        point = (1.0, 2.0, 3.0)
+        result = rotate_point(point, [('w', 90)])
+        self.assertEqual(result, point)

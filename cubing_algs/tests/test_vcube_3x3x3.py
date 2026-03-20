@@ -8,6 +8,7 @@ from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import FACES
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
@@ -26,6 +27,16 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
     """Tests for core VCube functionality including state and rotation."""
 
     maxDiff = None
+
+    def test_size_zero_raises(self) -> None:
+        """Test that size=0 raises InvalidCubeSizeError."""
+        with self.assertRaises(InvalidCubeSizeError):
+            VCube(size=0)
+
+    def test_size_negative_raises(self) -> None:
+        """Test that negative size raises InvalidCubeSizeError."""
+        with self.assertRaises(InvalidCubeSizeError):
+            VCube(size=-1)
 
     def test_state(self) -> None:
         """Test cube state property and rotation state updates."""
