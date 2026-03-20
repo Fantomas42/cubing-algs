@@ -438,7 +438,7 @@ def build_svg(
     visible = compute_visible_faces(rotations)
 
     margin = size * 0.10
-    max_extent = math.sqrt(3)
+    max_extent = 1.0 if len(visible) == 1 else math.sqrt(3)
     scale = (size - 2 * margin) / (2 * max_extent)
     cx, cy = size / 2, size / 2
 
@@ -584,7 +584,10 @@ def render_cube(
         msg = f'Cube size must be positive, got {size}'
         raise InvalidCubeSizeError(msg)
 
-    rotations = parse_rotation(rotation)
+    if rotation == 'plan':
+        rotations = [('x', -90)]
+    else:
+        rotations = parse_rotation(rotation)
     state, n = get_state(source, cube_size)
     svg = build_svg(state, size, rotations, n)
 
