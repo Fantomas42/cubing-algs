@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from cubing_algs.image import render_cube
+from cubing_algs.display.image import render_cube
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
 
@@ -159,6 +159,6 @@ speedSlider.addEventListener('input', () => {
 </html>
 """)
 
-out = Path(__file__).parent / 'rotate_all_axes.html'
+out = Path(__file__).parent.parent / 'rotate_all_axes.html'
 out.write_text(''.join(html_parts))
 print(f'Saved {out}')

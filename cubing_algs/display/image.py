@@ -97,7 +97,7 @@ def _project(point: _Point3D) -> _Point2D:
         The (x, y) projected point.
 
     """
-    return (point[0], point[1])
+    return point[:2]
 
 
 # Vertices of unit cube at (+/-1, +/-1, +/-1)
@@ -179,9 +179,7 @@ _STICKER_GAP = 0.08
 _VISIBILITY_EPSILON = 1e-9
 
 
-def _hex_to_rgb(
-    hex_color: str,
-) -> tuple[int, int, int]:
+def _hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     """
     Convert hex color to RGB tuple.
 
@@ -190,11 +188,7 @@ def _hex_to_rgb(
 
     """
     h = hex_color.lstrip('#')
-    return (
-        int(h[0:2], 16),
-        int(h[2:4], 16),
-        int(h[4:6], 16),
-    )
+    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
 
 
 def _rgb_to_hex(r: int, g: int, b: int) -> str:
@@ -208,6 +202,31 @@ def _rgb_to_hex(r: int, g: int, b: int) -> str:
     return f'#{r:02x}{g:02x}{b:02x}'
 
 
+def _adjust_color(
+    hex_color: str,
+    factor: float,
+    toward: int,
+) -> str:
+    """
+    Adjust a color toward a target value (0=darken, 255=lighten).
+
+    Args:
+        hex_color: Base hex color string.
+        factor: Blend factor between 0.0 (no change) and 1.0 (full target).
+        toward: Target value per channel (0 to darken, 255 to lighten).
+
+    Returns:
+        Adjusted hex color string.
+
+    """
+    r, g, b = _hex_to_rgb(hex_color)
+    return _rgb_to_hex(
+        min(255, max(0, int(r + (toward - r) * factor))),
+        min(255, max(0, int(g + (toward - g) * factor))),
+        min(255, max(0, int(b + (toward - b) * factor))),
+    )
+
+
 def _tint_color(hex_color: str, factor: float) -> str:
     """
     Lighten a color by mixing with white.
@@ -216,11 +235,7 @@ def _tint_color(hex_color: str, factor: float) -> str:
         Lightened hex color string.
 
     """
-    r, g, b = _hex_to_rgb(hex_color)
-    r = min(255, int(r + (255 - r) * factor))
-    g = min(255, int(g + (255 - g) * factor))
-    b = min(255, int(b + (255 - b) * factor))
-    return _rgb_to_hex(r, g, b)
+    return _adjust_color(hex_color, factor, toward=255)
 
 
 def _shade_color(hex_color: str, factor: float) -> str:
@@ -231,11 +246,7 @@ def _shade_color(hex_color: str, factor: float) -> str:
         Darkened hex color string.
 
     """
-    r, g, b = _hex_to_rgb(hex_color)
-    r = max(0, int(r * (1 - factor)))
-    g = max(0, int(g * (1 - factor)))
-    b = max(0, int(b * (1 - factor)))
-    return _rgb_to_hex(r, g, b)
+    return _adjust_color(hex_color, factor, toward=0)
 
 
 def _lerp_2d(
@@ -315,11 +326,10 @@ def _build_sticker_polygon(
         SVG polygon element string.
 
     """
-    n = cube_size
-    t0_col = col / n
-    t1_col = (col + 1) / n
-    t0_row = row / n
-    t1_row = (row + 1) / n
+    t0_col = col / cube_size
+    t1_col = (col + 1) / cube_size
+    t0_row = row / cube_size
+    t1_row = (row + 1) / cube_size
 
     # Gap is per-cell: divide by n since the face is an nxn grid
     gap = _STICKER_GAP / 3

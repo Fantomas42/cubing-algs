@@ -5,12 +5,12 @@ import unittest
 from pathlib import Path
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.image import _build_svg
-from cubing_algs.image import _compute_visible_faces
-from cubing_algs.image import _parse_rotation
-from cubing_algs.image import _project
-from cubing_algs.image import _rotate_point
-from cubing_algs.image import render_cube
+from cubing_algs.display.image import _build_svg
+from cubing_algs.display.image import _compute_visible_faces
+from cubing_algs.display.image import _parse_rotation
+from cubing_algs.display.image import _project
+from cubing_algs.display.image import _rotate_point
+from cubing_algs.display.image import render_cube
 from cubing_algs.vcube import VCube
 
 SOLVED_STATE = (
