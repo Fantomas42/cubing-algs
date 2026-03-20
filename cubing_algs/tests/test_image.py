@@ -5,12 +5,13 @@ import unittest
 from pathlib import Path
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.display.image import _build_svg
-from cubing_algs.display.image import _compute_visible_faces
-from cubing_algs.display.image import _parse_rotation
-from cubing_algs.display.image import _project
-from cubing_algs.display.image import _rotate_point
+from cubing_algs.display.image import build_svg
+from cubing_algs.display.image import compute_visible_faces
+from cubing_algs.display.image import parse_rotation
+from cubing_algs.display.image import project
 from cubing_algs.display.image import render_cube
+from cubing_algs.display.image import rotate_point
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.vcube import VCube
 
 SOLVED_STATE = (
@@ -28,50 +29,50 @@ class ParseRotationTestCase(unittest.TestCase):
 
     def test_single_axis(self) -> None:
         """Test parsing a single axis rotation."""
-        result = _parse_rotation('y45')
+        result = parse_rotation('y45')
         self.assertEqual(result, [('y', 45)])
 
     def test_two_axes(self) -> None:
         """Test parsing two axis rotations."""
-        result = _parse_rotation('y45x-25')
+        result = parse_rotation('y45x-25')
         self.assertEqual(result, [('y', 45), ('x', -25)])
 
     def test_three_axes(self) -> None:
         """Test parsing three axis rotations."""
-        result = _parse_rotation('x20y45z10')
+        result = parse_rotation('x20y45z10')
         self.assertEqual(
             result, [('x', 20), ('y', 45), ('z', 10)],
         )
 
     def test_negative_angle(self) -> None:
         """Test parsing negative angle."""
-        result = _parse_rotation('y-30')
+        result = parse_rotation('y-30')
         self.assertEqual(result, [('y', -30)])
 
     def test_zero_angle(self) -> None:
         """Test parsing zero angle."""
-        result = _parse_rotation('x0')
+        result = parse_rotation('x0')
         self.assertEqual(result, [('x', 0)])
 
     def test_large_angle(self) -> None:
         """Test parsing angle above 360."""
-        result = _parse_rotation('y999')
+        result = parse_rotation('y999')
         self.assertEqual(result, [('y', 999)])
 
     def test_invalid_string_raises(self) -> None:
         """Test that invalid rotation strings raise."""
         with self.assertRaises(ValueError):
-            _parse_rotation('invalid')
+            parse_rotation('invalid')
 
     def test_empty_string_raises(self) -> None:
         """Test that empty string raises ValueError."""
         with self.assertRaises(ValueError):
-            _parse_rotation('')
+            parse_rotation('')
 
     def test_partial_match_raises(self) -> None:
         """Test that partially valid string raises."""
         with self.assertRaises(ValueError):
-            _parse_rotation('y45garbage')
+            parse_rotation('y45garbage')
 
 
 class RotatePointTestCase(unittest.TestCase):
@@ -80,7 +81,7 @@ class RotatePointTestCase(unittest.TestCase):
     def test_no_rotation(self) -> None:
         """Test point with empty rotation list."""
         point = (1.0, 0.0, 0.0)
-        result = _rotate_point(point, [])
+        result = rotate_point(point, [])
         self.assertAlmostEqual(result[0], 1.0)
         self.assertAlmostEqual(result[1], 0.0)
         self.assertAlmostEqual(result[2], 0.0)
@@ -88,7 +89,7 @@ class RotatePointTestCase(unittest.TestCase):
     def test_y_rotation_90(self) -> None:
         """Test 90-degree Y rotation (clockwise from above)."""
         point = (1.0, 0.0, 0.0)
-        result = _rotate_point(point, [('y', 90)])
+        result = rotate_point(point, [('y', 90)])
         self.assertAlmostEqual(result[0], 0.0, places=5)
         self.assertAlmostEqual(result[1], 0.0, places=5)
         self.assertAlmostEqual(result[2], 1.0, places=5)
@@ -96,7 +97,7 @@ class RotatePointTestCase(unittest.TestCase):
     def test_x_rotation_90(self) -> None:
         """Test 90-degree X rotation (clockwise from right)."""
         point = (0.0, 1.0, 0.0)
-        result = _rotate_point(point, [('x', 90)])
+        result = rotate_point(point, [('x', 90)])
         self.assertAlmostEqual(result[0], 0.0, places=5)
         self.assertAlmostEqual(result[1], 0.0, places=5)
         self.assertAlmostEqual(result[2], -1.0, places=5)
@@ -104,7 +105,7 @@ class RotatePointTestCase(unittest.TestCase):
     def test_z_rotation_90(self) -> None:
         """Test 90-degree Z rotation (clockwise from front)."""
         point = (1.0, 0.0, 0.0)
-        result = _rotate_point(point, [('z', 90)])
+        result = rotate_point(point, [('z', 90)])
         self.assertAlmostEqual(result[0], 0.0, places=5)
         self.assertAlmostEqual(result[1], -1.0, places=5)
         self.assertAlmostEqual(result[2], 0.0, places=5)
@@ -112,7 +113,7 @@ class RotatePointTestCase(unittest.TestCase):
     def test_combined_rotation(self) -> None:
         """Test combined rotation is applied in sequence."""
         point = (1.0, 0.0, 0.0)
-        result = _rotate_point(
+        result = rotate_point(
             point, [('y', 90), ('x', 90)],
         )
         self.assertAlmostEqual(result[0], 0.0, places=5)
@@ -123,9 +124,9 @@ class RotatePointTestCase(unittest.TestCase):
 class ProjectTestCase(unittest.TestCase):
     """Tests for orthographic projection."""
 
-    def test_project_drops_z(self) -> None:
+    def testproject_drops_z(self) -> None:
         """Test that projection returns only x and y."""
-        result = _project((1.0, 2.0, 3.0))
+        result = project((1.0, 2.0, 3.0))
         self.assertEqual(len(result), 2)
         self.assertAlmostEqual(result[0], 1.0)
         self.assertAlmostEqual(result[1], 2.0)
@@ -137,13 +138,13 @@ class VisibleFacesTestCase(unittest.TestCase):
     def test_default_rotation_shows_three_faces(self) -> None:
         """Default rotation y45x-25 shows exactly 3 faces."""
         rotations = [('y', 45), ('x', -25)]
-        faces = _compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations)
         self.assertEqual(len(faces), 3)
 
     def test_no_rotation_shows_one_face(self) -> None:
         """With no rotation, viewer sees only F face."""
         rotations = [('y', 0)]
-        faces = _compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations)
         face_names = [f[0] for f in faces]
         self.assertIn('F', face_names)
         self.assertEqual(len(faces), 1)
@@ -151,7 +152,7 @@ class VisibleFacesTestCase(unittest.TestCase):
     def test_face_data_structure(self) -> None:
         """Each face has name, 4 corners, and index."""
         rotations = [('y', -45), ('x', 34)]
-        faces = _compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations)
         for face_name, corners_2d, face_index in faces:
             self.assertIsInstance(face_name, str)
             self.assertEqual(len(corners_2d), 4)
@@ -160,13 +161,13 @@ class VisibleFacesTestCase(unittest.TestCase):
     def test_faces_sorted_back_to_front(self) -> None:
         """Visible faces are sorted back-to-front."""
         rotations = [('y', -45), ('x', 34)]
-        faces = _compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations)
         self.assertTrue(len(faces) >= 1)
 
     def test_exact_90_no_degenerate_faces(self) -> None:
         """Exact 90-degree rotation doesn't produce edge-on faces."""
         rotations = [('y', 90)]
-        faces = _compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations)
         face_names = [f[0] for f in faces]
         # At y90, only the R face should be visible (not F or B)
         self.assertIn('R', face_names)
@@ -180,7 +181,7 @@ class BuildSvgTestCase(unittest.TestCase):
     def test_returns_valid_svg(self) -> None:
         """Test that output is a valid SVG string."""
         rotations = [('y', -45), ('x', 34)]
-        svg = _build_svg(SOLVED_STATE, 200, rotations)
+        svg = build_svg(SOLVED_STATE, 200, rotations)
         self.assertTrue(svg.startswith('<svg'))
         self.assertTrue(svg.endswith('</svg>'))
         self.assertIn(
@@ -189,28 +190,28 @@ class BuildSvgTestCase(unittest.TestCase):
 
     def test_contains_viewbox(self) -> None:
         """Test that SVG has correct viewBox."""
-        svg = _build_svg(
+        svg = build_svg(
             SOLVED_STATE, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('viewBox="0 0 200 200"', svg)
 
     def test_custom_size(self) -> None:
         """Test custom size is reflected in viewBox."""
-        svg = _build_svg(
+        svg = build_svg(
             SOLVED_STATE, 400, [('y', -45), ('x', 34)],
         )
         self.assertIn('viewBox="0 0 400 400"', svg)
 
     def test_contains_polygon_elements(self) -> None:
         """Test that SVG contains polygon elements."""
-        svg = _build_svg(
+        svg = build_svg(
             SOLVED_STATE, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('<polygon', svg)
 
     def test_contains_gradient_defs(self) -> None:
         """Test that SVG contains gradient definitions."""
-        svg = _build_svg(
+        svg = build_svg(
             SOLVED_STATE, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('<defs>', svg)
@@ -220,14 +221,14 @@ class BuildSvgTestCase(unittest.TestCase):
         """Test scrambled state produces valid SVG."""
         cube = VCube()
         cube.rotate("R U R' U'")
-        svg = _build_svg(
+        svg = build_svg(
             cube.state, 200, [('y', -45), ('x', 34)],
         )
         self.assertTrue(svg.startswith('<svg'))
 
     def test_contains_per_face_groups(self) -> None:
         """Test that SVG has per-face groups."""
-        svg = _build_svg(
+        svg = build_svg(
             SOLVED_STATE, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('class="face-', svg)
@@ -240,7 +241,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
         """After R move, U-face gradients should include F colors."""
         cube = VCube()
         cube.rotate('R')
-        svg = _build_svg(
+        svg = build_svg(
             cube.state, 200, [('y', 45), ('x', -25)],
         )
         # R move brings F-face facelets onto the U face.
@@ -255,7 +256,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
 
     def test_solved_cube_u_face_all_white(self) -> None:
         """Solved cube U-face gradients should all be white-derived."""
-        svg = _build_svg(
+        svg = build_svg(
             SOLVED_STATE, 200, [('y', 45), ('x', -25)],
         )
         for row in range(3):
@@ -336,9 +337,9 @@ class RenderCubeValidationTestCase(unittest.TestCase):
     def test_invalid_size_raises(self) -> None:
         """Test that size <= 0 raises ValueError."""
         cube = VCube()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidCubeSizeError):
             render_cube(cube, size=0)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidCubeSizeError):
             render_cube(cube, size=-1)
 
     def test_invalid_rotation_raises(self) -> None:
