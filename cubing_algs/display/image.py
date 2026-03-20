@@ -7,6 +7,8 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from cubing_algs.exceptions import InvalidCubeSizeError
+
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm
     from cubing_algs.vcube import VCube
@@ -574,13 +576,13 @@ def render_cube(
         SVG string if path is None, otherwise None.
 
     Raises:
-        ValueError: If size <= 0, rotation is invalid,
-            or file extension is unsupported.
+        InvalidCubeSizeError: If size <= 0
+        ValueError: If file extension is unsupported.
 
     """
     if size <= 0:
         msg = f'size must be positive, got {size}'
-        raise ValueError(msg)
+        raise InvalidCubeSizeError(msg)
 
     rotations = _parse_rotation(rotation)
     state, n = _get_state(source, cube_size)
