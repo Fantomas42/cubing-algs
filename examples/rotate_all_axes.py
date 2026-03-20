@@ -61,9 +61,25 @@ html_parts.append("""\
            border-radius: 4px; }
   button:hover { background: #444; }
   input[type=range] { width: 300px; }
+  #loading { position: fixed; inset: 0; background: #1a1a1a;
+             display: flex; flex-direction: column; align-items: center;
+             justify-content: center; z-index: 100; }
+  #loading .spinner { width: 48px; height: 48px;
+             border: 4px solid #444; border-top-color: #eee;
+             border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { margin-top: 16px; font-size: 18px; color: #aaa; }
+  #content { visibility: hidden; display: flex; flex-direction: column;
+             align-items: center; width: 100%; }
+  #content.ready { visibility: visible; }
 </style>
 </head>
 <body>
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Loading cube frames&hellip;</p>
+</div>
+<div id="content">
 <h1>Cube Rotation &mdash; All Axes</h1>
 <div class="controls">
   <button id="play-btn">Pause</button>
@@ -97,6 +113,7 @@ for axis_id, label, rotation_fmt in axes:
 
 html_parts.append("""\
 </div>
+</div>
 <script>
 const groups = document.querySelectorAll('.axis-group');
 let current = 0;
@@ -122,6 +139,8 @@ function startInterval() {
   interval = setInterval(step, ms);
 }
 
+document.getElementById('loading').remove();
+document.getElementById('content').classList.add('ready');
 startInterval();
 
 document.getElementById('play-btn').addEventListener('click', () => {
