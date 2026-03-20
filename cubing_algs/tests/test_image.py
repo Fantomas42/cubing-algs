@@ -277,8 +277,8 @@ class RenderCubeFromVCubeTestCase(unittest.TestCase):
         cube = VCube()
         result = render_cube(cube)
         self.assertIsInstance(result, str)
-        self.assertIsNotNone(result)
-        self.assertTrue(result.startswith('<svg'))  # type: ignore[union-attr]
+        assert result is not None  # noqa: S101
+        self.assertTrue(result.startswith('<svg'))
 
     def test_scrambled_cube(self) -> None:
         """Test rendering a scrambled cube."""
@@ -286,21 +286,22 @@ class RenderCubeFromVCubeTestCase(unittest.TestCase):
         cube.rotate("R U R' U'")
         result = render_cube(cube)
         self.assertIsNotNone(result)
-        self.assertTrue(result.startswith('<svg'))  # type: ignore[union-attr]
+        assert result is not None  # noqa: S101
+        self.assertTrue(result.startswith('<svg'))
 
     def test_custom_size(self) -> None:
         """Test rendering with custom size."""
         cube = VCube()
         result = render_cube(cube, size=400)
-        self.assertIsNotNone(result)
+        assert result is not None  # noqa: S101
         self.assertIn('viewBox="0 0 400 400"', result)
 
     def test_custom_rotation(self) -> None:
         """Test rendering with custom rotation."""
         cube = VCube()
         result = render_cube(cube, rotation='y-30')
-        self.assertIsNotNone(result)
-        self.assertTrue(result.startswith('<svg'))  # type: ignore[union-attr]
+        assert result is not None  # noqa: S101
+        self.assertTrue(result.startswith('<svg'))
 
 
 class RenderCubeFromAlgorithmTestCase(unittest.TestCase):
@@ -310,8 +311,8 @@ class RenderCubeFromAlgorithmTestCase(unittest.TestCase):
         """Test rendering from an Algorithm."""
         algo = Algorithm.parse_moves("R U R' U'")
         result = render_cube(algo)
-        self.assertIsNotNone(result)
-        self.assertTrue(result.startswith('<svg'))  # type: ignore[union-attr]
+        assert result is not None  # noqa: S101
+        self.assertTrue(result.startswith('<svg'))
 
     def test_algorithm_matches_vcube(self) -> None:
         """Test Algorithm rendering matches VCube."""

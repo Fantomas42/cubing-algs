@@ -13,11 +13,48 @@ if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm
     from cubing_algs.vcube import VCube
 
+Point3D = tuple[float, float, float]
+Point2D = tuple[float, float]
+FaceData = tuple[str, list[Point2D], int]
+
 ROTATION_PATTERN = re.compile(r'^([xyz]-?[0-9]+)+$')
 ROTATION_PARTS = re.compile(r'([xyz])(-?[0-9]+)')
 
-Point3D = tuple[float, float, float]
-Point2D = tuple[float, float]
+# Color mapping: facelet letter -> base hex color
+FACE_COLORS: dict[str, str] = {
+    'U': '#ffffff',
+    'R': '#ff0000',
+    'F': '#00d800',
+    'D': '#ffff00',
+    'L': '#ff8c00',
+    'B': '#0000ff',
+}
+
+# Gap between stickers as a fraction of face size (divided by 3 per cell)
+STICKER_GAP = 0.08
+VISIBILITY_EPSILON = 1e-9
+
+# Vertices of unit cube at (+/-1, +/-1, +/-1)
+CUBE_VERTICES: list[Point3D] = [
+    (-1, -1, -1),
+    (1, -1, -1),
+    (1, 1, -1),
+    (-1, 1, -1),
+    (-1, -1, 1),
+    (1, -1, 1),
+    (1, 1, 1),
+    (-1, 1, 1),
+]
+
+# Face definitions: (name, normal, vertex_indices, face_state_index)
+FACE_DEFS: list[tuple[str, Point3D, list[int], int]] = [
+    ('U', (0, 1, 0), [3, 2, 6, 7], 0),
+    ('D', (0, -1, 0), [4, 5, 1, 0], 3),
+    ('R', (1, 0, 0), [6, 2, 1, 5], 1),
+    ('L', (-1, 0, 0), [3, 7, 4, 0], 4),
+    ('F', (0, 0, 1), [7, 6, 5, 4], 2),
+    ('B', (0, 0, -1), [2, 3, 0, 1], 5),
+]
 
 
 def parse_rotation(rotation: str) -> list[tuple[str, int]]:
@@ -102,31 +139,6 @@ def project(point: Point3D) -> Point2D:
     return point[:2]
 
 
-# Vertices of unit cube at (+/-1, +/-1, +/-1)
-CUBE_VERTICES: list[Point3D] = [
-    (-1, -1, -1),
-    (1, -1, -1),
-    (1, 1, -1),
-    (-1, 1, -1),
-    (-1, -1, 1),
-    (1, -1, 1),
-    (1, 1, 1),
-    (-1, 1, 1),
-]
-
-# Face definitions: (name, normal, vertex_indices, face_state_index)
-FACE_DEFS: list[tuple[str, Point3D, list[int], int]] = [
-    ('U', (0, 1, 0), [3, 2, 6, 7], 0),
-    ('D', (0, -1, 0), [4, 5, 1, 0], 3),
-    ('R', (1, 0, 0), [6, 2, 1, 5], 1),
-    ('L', (-1, 0, 0), [3, 7, 4, 0], 4),
-    ('F', (0, 0, 1), [7, 6, 5, 4], 2),
-    ('B', (0, 0, -1), [2, 3, 0, 1], 5),
-]
-
-FaceData = tuple[str, list[Point2D], int]
-
-
 def compute_visible_faces(
     rotations: list[tuple[str, int]],
 ) -> list[FaceData]:
@@ -164,21 +176,6 @@ def compute_visible_faces(
         (name, corners, idx)
         for name, corners, idx, _ in visible
     ]
-
-
-# Color mapping: facelet letter -> base hex color
-FACE_COLORS: dict[str, str] = {
-    'U': '#ffffff',
-    'R': '#ff0000',
-    'F': '#00d800',
-    'D': '#ffff00',
-    'L': '#ff8c00',
-    'B': '#0000ff',
-}
-
-# Gap between stickers as a fraction of face size (divided by 3 per cell)
-STICKER_GAP = 0.08
-VISIBILITY_EPSILON = 1e-9
 
 
 def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
@@ -584,10 +581,11 @@ def render_cube(
         msg = f'Cube size must be positive, got {size}'
         raise InvalidCubeSizeError(msg)
 
-    if rotation == 'plan':
-        rotations = [('x', -90)]
-    else:
-        rotations = parse_rotation(rotation)
+    rotations = (
+        [('x', -90)]
+        if rotation == 'plan'
+        else parse_rotation(rotation)
+    )
     state, n = get_state(source, cube_size)
     svg = build_svg(state, size, rotations, n)
 
