@@ -549,7 +549,7 @@ def render_cube(
     size: int = 200,
     cube_size: int | None = None,
     rotation: str = 'y45x-25',
-) -> str | None:
+) -> str:
     """
     Render a 3D isometric cube image.
 
