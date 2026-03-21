@@ -13,6 +13,8 @@ FaceData = tuple[str, list[Point2D], int]
 ROTATION_PATTERN = re.compile(r'^([xyz]-?[0-9]+)+$')
 ROTATION_PARTS = re.compile(r'([xyz])(-?[0-9]+)')
 
+CUBE_COLOR = '#111111'
+
 # Color mapping: facelet letter -> base hex color
 FACE_COLORS: dict[str, str] = {
     'U': '#ffffff',
@@ -66,8 +68,8 @@ def parse_rotation(rotation: str) -> list[tuple[str, int]]:
     """
     if not ROTATION_PATTERN.match(rotation):
         msg = (
-            f'Invalid rotation string: {rotation!r}. '
-            f'Expected format like "y45x-25".'
+            f'Invalid rotation string: { rotation!r}. '
+            'Expected format like "y45x-25".'
         )
         raise ValueError(msg)
 
@@ -445,10 +447,9 @@ def build_svg(
         ]
 
         body_polygon = (
-            f'  <polygon'
+            '  <polygon'
             f' points="{points_to_svg(svg_corners)}"'
-            f' fill="#111111" stroke="#111111"'
-            f' stroke-width="0.5"/>'
+            f' fill="{CUBE_COLOR}" />'
         )
 
         face_start = face_state_idx * face_size
@@ -461,7 +462,7 @@ def build_svg(
         defs_parts.extend(face_defs)
 
         face_groups.append(
-            f'<g class="face-{face_name}">\n'
+            f'<g class="face-{ face_name }">\n'
             + body_polygon + '\n'
             + '\n'.join(face_stickers)
             + '\n</g>',
@@ -486,7 +487,7 @@ def assemble_svg(
     """
     lines = [
         (
-            f'<svg xmlns="http://www.w3.org/2000/svg"'
+            '<svg xmlns="http://www.w3.org/2000/svg"'
             f' viewBox="0 0 {size} {size}"'
             f' width="{size}" height="{size}">'
         ),
@@ -536,7 +537,7 @@ def get_state(
         return cube.state, n
 
     msg = (
-        f'source must be VCube or Algorithm, '
+        'source must be VCube or Algorithm, '
         f'got {type(source).__name__}'
     )
     raise TypeError(msg)
