@@ -326,7 +326,7 @@ def build_sticker_polygon(
     t1_row = (row + 1) / cube_size
 
     # Gap is per-cell: divide by n since the face is an nxn grid
-    gap = STICKER_GAP / 3
+    gap = STICKER_GAP / cube_size
     t0_col += gap
     t1_col -= gap
     t0_row += gap
