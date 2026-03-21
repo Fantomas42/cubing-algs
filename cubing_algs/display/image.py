@@ -430,7 +430,7 @@ def build_svg(
     visible = compute_visible_faces(rotations)
 
     margin = size * 0.10
-    max_extent = math.sqrt(3)
+    max_extent = math.sqrt(2)
     scale = (size - 2 * margin) / (2 * max_extent)
     cx, cy = size / 2, size / 2
 
