@@ -1,17 +1,10 @@
 """Cube image rendering in SVG and PNG formats."""
-from __future__ import annotations
-
 import math
 import operator
 import re
-from pathlib import Path
-from typing import TYPE_CHECKING
 
-from cubing_algs.exceptions import InvalidCubeSizeError
-
-if TYPE_CHECKING:
-    from cubing_algs.algorithm import Algorithm
-    from cubing_algs.vcube import VCube
+from cubing_algs.algorithm import Algorithm
+from cubing_algs.vcube import VCube
 
 Point3D = tuple[float, float, float]
 Point2D = tuple[float, float]
@@ -553,9 +546,8 @@ def render_cube(
     source: VCube | Algorithm,
     *,
     size: int = 200,
-    rotation: str = 'y45x-25',
-    path: str | Path | None = None,
     cube_size: int | None = None,
+    rotation: str = 'y45x-25',
 ) -> str | None:
     """
     Render a 3D isometric cube image.
@@ -564,22 +556,19 @@ def render_cube(
         source: VCube or Algorithm to render.
         size: Image dimension in pixels.
         rotation: Axis-angle rotation string.
-        path: If provided, write to file (SVG or PNG).
-            Returns None. If None, return SVG string.
         cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
             etc.). Inferred from source if None.
 
     Returns:
-        SVG string if path is None, otherwise None.
+        SVG string of the cube.
 
     Raises:
-        InvalidCubeSizeError: If size <= 0
-        ValueError: If file extension is unsupported.
+        ValueError: if size is not positive.
 
     """
-    if size <= 0:
-        msg = f'Cube size must be positive, got {size}'
-        raise InvalidCubeSizeError(msg)
+    if size < 1:
+        msg = f'size must be positive, got {size}'
+        raise ValueError(msg)
 
     rotations = (
         [('x', -90)]
@@ -587,56 +576,5 @@ def render_cube(
         else parse_rotation(rotation)
     )
     state, n = get_state(source, cube_size)
-    svg = build_svg(state, size, rotations, n)
 
-    if path is None:
-        return svg
-
-    path = Path(path)
-    suffix = path.suffix.lower()
-
-    if suffix == '.svg':
-        path.write_text(svg, encoding='utf-8')
-    elif suffix == '.png':
-        to_png(svg, path, size)
-    else:
-        msg = (
-            f'Unsupported file extension: {suffix!r}. '
-            f'Use .svg or .png.'
-        )
-        raise ValueError(msg)
-
-    return None
-
-
-def to_png(
-    svg_str: str, path: Path, size: int,
-) -> None:
-    """
-    Convert SVG to PNG using cairosvg.
-
-    Args:
-        svg_str: SVG content as string.
-        path: Output PNG file path.
-        size: Output image dimension.
-
-    Raises:
-        ImportError: If cairosvg is not installed.
-
-    """
-    try:
-        import cairosvg  # type: ignore[import-not-found]  # noqa: PLC0415
-    except ImportError as e:
-        msg = (
-            'PNG export requires cairosvg. '
-            'Install it with: '
-            'pip install cubing-algs[image]'
-        )
-        raise ImportError(msg) from e
-
-    cairosvg.svg2png(
-        bytestring=svg_str.encode('utf-8'),
-        write_to=str(path),
-        output_width=size,
-        output_height=size,
-    )
+    return build_svg(state, size, rotations, n)

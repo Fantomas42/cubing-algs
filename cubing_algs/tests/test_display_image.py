@@ -1,10 +1,5 @@
 """Tests for cube image rendering."""
-import sys
-import tempfile
 import unittest
-from pathlib import Path
-from unittest.mock import MagicMock
-from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.display.image import assemble_svg
@@ -14,18 +9,8 @@ from cubing_algs.display.image import parse_rotation
 from cubing_algs.display.image import project
 from cubing_algs.display.image import render_cube
 from cubing_algs.display.image import rotate_point
-from cubing_algs.display.image import to_png
-from cubing_algs.exceptions import InvalidCubeSizeError
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
-
-SOLVED_STATE = (
-    'UUUUUUUUU'
-    'RRRRRRRRR'
-    'FFFFFFFFF'
-    'DDDDDDDDD'
-    'LLLLLLLLL'
-    'BBBBBBBBB'
-)
 
 
 class ParseRotationTestCase(unittest.TestCase):
@@ -185,7 +170,7 @@ class BuildSvgTestCase(unittest.TestCase):
     def test_returns_valid_svg(self) -> None:
         """Test that output is a valid SVG string."""
         rotations = [('y', -45), ('x', 34)]
-        svg = build_svg(SOLVED_STATE, 200, rotations)
+        svg = build_svg(SOLVED_FACELETS_3x3x3, 200, rotations)
         self.assertTrue(svg.startswith('<svg'))
         self.assertTrue(svg.endswith('</svg>'))
         self.assertIn(
@@ -195,28 +180,28 @@ class BuildSvgTestCase(unittest.TestCase):
     def test_contains_viewbox(self) -> None:
         """Test that SVG has correct viewBox."""
         svg = build_svg(
-            SOLVED_STATE, 200, [('y', -45), ('x', 34)],
+            SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('viewBox="0 0 200 200"', svg)
 
     def test_custom_size(self) -> None:
         """Test custom size is reflected in viewBox."""
         svg = build_svg(
-            SOLVED_STATE, 400, [('y', -45), ('x', 34)],
+            SOLVED_FACELETS_3x3x3, 400, [('y', -45), ('x', 34)],
         )
         self.assertIn('viewBox="0 0 400 400"', svg)
 
     def test_contains_polygon_elements(self) -> None:
         """Test that SVG contains polygon elements."""
         svg = build_svg(
-            SOLVED_STATE, 200, [('y', -45), ('x', 34)],
+            SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('<polygon', svg)
 
     def test_contains_gradient_defs(self) -> None:
         """Test that SVG contains gradient definitions."""
         svg = build_svg(
-            SOLVED_STATE, 200, [('y', -45), ('x', 34)],
+            SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('<defs>', svg)
         self.assertIn('linearGradient', svg)
@@ -233,7 +218,7 @@ class BuildSvgTestCase(unittest.TestCase):
     def test_contains_per_face_groups(self) -> None:
         """Test that SVG has per-face groups."""
         svg = build_svg(
-            SOLVED_STATE, 200, [('y', -45), ('x', 34)],
+            SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('class="face-', svg)
 
@@ -261,7 +246,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
     def test_solved_cube_u_face_all_white(self) -> None:
         """Solved cube U-face gradients should all be white-derived."""
         svg = build_svg(
-            SOLVED_STATE, 200, [('y', 45), ('x', -25)],
+            SOLVED_FACELETS_3x3x3, 200, [('y', 45), ('x', -25)],
         )
         for row in range(3):
             for col in range(3):
@@ -342,9 +327,9 @@ class RenderCubeValidationTestCase(unittest.TestCase):
     def test_invalid_size_raises(self) -> None:
         """Test that size <= 0 raises ValueError."""
         cube = VCube()
-        with self.assertRaises(InvalidCubeSizeError):
+        with self.assertRaises(ValueError):
             render_cube(cube, size=0)
-        with self.assertRaises(InvalidCubeSizeError):
+        with self.assertRaises(ValueError):
             render_cube(cube, size=-1)
 
     def test_invalid_rotation_raises(self) -> None:
@@ -357,82 +342,6 @@ class RenderCubeValidationTestCase(unittest.TestCase):
         """Test invalid source type raises TypeError."""
         with self.assertRaises(TypeError):
             render_cube('not a cube')  # type: ignore[arg-type]
-
-
-class RenderCubeFileOutputTestCase(unittest.TestCase):
-    """Tests for file output in render_cube."""
-
-    def test_write_svg_file(self) -> None:
-        """Test writing SVG to a file."""
-        cube = VCube()
-        with tempfile.NamedTemporaryFile(
-            suffix='.svg', delete=False,
-        ) as f:
-            tmp_path = Path(f.name)
-
-        try:
-            result = render_cube(cube, path=tmp_path)
-            self.assertIsNone(result)
-            self.assertTrue(tmp_path.exists())
-            content = tmp_path.read_text(encoding='utf-8')
-            self.assertTrue(content.startswith('<svg'))
-        finally:
-            tmp_path.unlink()
-
-    def test_write_svg_with_path_object(self) -> None:
-        """Test writing SVG with Path object."""
-        cube = VCube()
-        with tempfile.NamedTemporaryFile(
-            suffix='.svg', delete=False,
-        ) as f:
-            tmp_path = Path(f.name)
-
-        try:
-            render_cube(cube, path=tmp_path)
-            self.assertTrue(tmp_path.exists())
-        finally:
-            tmp_path.unlink()
-
-    def test_unsupported_extension_raises(self) -> None:
-        """Test unsupported extension raises ValueError."""
-        cube = VCube()
-        with self.assertRaises(ValueError):
-            render_cube(cube, path='output.jpg')
-
-    def test_png_without_cairosvg_raises(self) -> None:
-        """Test PNG without cairosvg raises ImportError."""
-        cube = VCube()
-        original = sys.modules.get('cairosvg')
-        sys.modules['cairosvg'] = None  # type: ignore[assignment]
-        try:
-            with self.assertRaises(ImportError):
-                with tempfile.NamedTemporaryFile(
-                    suffix='.png', delete=False,
-                ) as f:
-                    tmp_path = f.name
-                render_cube(cube, path=tmp_path)
-        finally:
-            if original is not None:
-                sys.modules['cairosvg'] = original
-            else:
-                sys.modules.pop('cairosvg', None)
-
-    def test_png_with_cairosvg(self) -> None:
-        """Test PNG export calls cairosvg.svg2png."""
-        mock_cairosvg = MagicMock()
-        with (
-            patch.dict(sys.modules, {'cairosvg': mock_cairosvg}),
-            tempfile.TemporaryDirectory() as tmpdir,
-        ):
-            png_path = Path(tmpdir) / 'test.png'
-            to_png('<svg></svg>', png_path, 256)
-        self.assertEqual(mock_cairosvg.svg2png.call_count, 1)
-        mock_cairosvg.svg2png.assert_called_once_with(
-            bytestring=b'<svg></svg>',
-            write_to=str(png_path),
-            output_width=256,
-            output_height=256,
-        )
 
 
 class AssembleSvgTestCase(unittest.TestCase):
