@@ -141,6 +141,7 @@ def compute_visible_faces(
 
     Args:
         rotations: List of (axis, degrees) rotation pairs.
+        distance: Camera distance for perspective projection.
 
     Returns:
         List of (face_name, corner_2d_points, face_state_index)
@@ -180,7 +181,7 @@ def hex_to_rgb(hex_color: str) -> tuple[int, int, int, float]:
 
     Returns:
         Tuple of (red, green, blue, opacity) where RGB
-        values are 0–255 and opacity is 0.0–1.0.
+        values are 0-255 and opacity is 0.0-1.0.
 
     """
     h = hex_color.lstrip('#')
@@ -392,7 +393,7 @@ def resolve_face_colors(palette_name: str) -> dict[str, str]:
     }
 
 
-def build_face_elements(
+def build_face_elements(  # noqa: PLR0913, PLR0917
     face_name: str,
     svg_corners: list[Point2D],
     facelets: str,
@@ -443,7 +444,7 @@ def build_face_elements(
     return defs, stickers
 
 
-def build_svg(
+def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
     state: str,
     size: int,
     rotations: list[tuple[str, int]],
@@ -595,7 +596,7 @@ def get_state(
     raise TypeError(msg)
 
 
-def render_cube(
+def render_cube(  # noqa: PLR0913
     source: VCube | Algorithm,
     *,
     size: int = 200,

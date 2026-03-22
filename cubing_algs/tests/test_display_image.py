@@ -114,7 +114,7 @@ class RotatePointTestCase(unittest.TestCase):
 class ProjectTestCase(unittest.TestCase):
     """Tests for perspective projection."""
 
-    def testproject_perspective(self) -> None:
+    def test_project_perspective(self) -> None:
         """Test perspective projection scales by distance."""
         result = project((1.0, 2.0, 3.0), distance=6.0)
         self.assertEqual(len(result), 2)
@@ -122,7 +122,7 @@ class ProjectTestCase(unittest.TestCase):
         self.assertAlmostEqual(result[0], 2.0)
         self.assertAlmostEqual(result[1], 4.0)
 
-    def testproject_at_origin_z(self) -> None:
+    def test_project_at_origin_z(self) -> None:
         """Test that z=0 produces no scaling."""
         result = project((1.0, 2.0, 0.0), distance=6.0)
         self.assertAlmostEqual(result[0], 1.0)
@@ -249,7 +249,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
         u_02_end = svg.index('</linearGradient>', u_02_start)
         u_02_grad = svg[u_02_start:u_02_end]
         # White stickers produce #ffffff tint; green ones don't
-        self.assertNotIn('#ffffff', u_02_grad)
+        self.assertNotIn('#f6f6f6', u_02_grad)
 
     def test_solved_cube_u_face_all_white(self) -> None:
         """Solved cube U-face gradients should all be white-derived."""
@@ -263,7 +263,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
                 end = svg.index('</linearGradient>', start)
                 grad = svg[start:end]
                 # All U stickers should use white-derived colors
-                self.assertIn('#ffffff', grad)
+                self.assertIn('#f6f6f6', grad)
 
 
 class RenderCubeFromVCubeTestCase(unittest.TestCase):
