@@ -33,7 +33,7 @@ if args.algorithm:
 
 axis_groups = [
     [
-        ('yx-35', 'Y Axis + X-35', 'y{angle}x-35'),
+        ('yx-34', 'Y Axis + X-34', 'y{angle}x-34'),
     ],
     [
         ('x', 'X Axis', 'x{angle}'),
