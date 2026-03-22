@@ -5,6 +5,7 @@ import re
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display.palettes import hex_to_rgb
 from cubing_algs.display.vcube import DEFAULT_PALETTE
 from cubing_algs.vcube import VCube
 
@@ -173,9 +174,9 @@ def compute_visible_faces(
     ]
 
 
-def hex_to_rgb(hex_color: str) -> tuple[int, int, int, float]:
+def hex_to_rgba(hex_color: str) -> tuple[int, int, int, float]:
     """
-    Convert hex color to RGB tuple with opacity.
+    Convert hex color to RGBA tuple.
 
     Accepts ``#rrggbb`` or ``#rrggbbaa`` format.
 
@@ -185,11 +186,9 @@ def hex_to_rgb(hex_color: str) -> tuple[int, int, int, float]:
 
     """
     h = hex_color.lstrip('#')
-    r = int(h[0:2], 16)
-    g = int(h[2:4], 16)
-    b = int(h[4:6], 16)
-    opacity = int(h[6:8], 16) / 255.0 if len(h) == 8 else 1.0
-    return r, g, b, opacity
+    alpha = int(h[6:8], 16) / 255.0 if len(h) == 8 else 1.0
+    r, g, b = hex_to_rgb(hex_color[:7] if len(h) == 8 else hex_color)
+    return r, g, b, alpha
 
 
 def rgb_to_hex(r: int, g: int, b: int) -> str:
@@ -220,7 +219,7 @@ def adjust_color(
         Adjusted hex color string.
 
     """
-    r, g, b, _ = hex_to_rgb(hex_color)
+    r, g, b = hex_to_rgb(hex_color)
     return rgb_to_hex(
         min(255, max(0, int(r + (toward - r) * factor))),
         min(255, max(0, int(g + (toward - g) * factor))),
@@ -492,7 +491,7 @@ def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
             to_svg_coords(c) for c in corners_2d
         ]
 
-        cr, cg, cb, body_opacity = hex_to_rgb(cube_color)
+        cr, cg, cb, body_opacity = hex_to_rgba(cube_color)
         body_rgb = rgb_to_hex(cr, cg, cb)
         opacity_attr = (
             f' fill-opacity="{body_opacity:.2f}"'
