@@ -5,6 +5,7 @@ from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
 from cubing_algs.display.vcube import VCubeDisplay
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidFaceIndexError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.exceptions import InvalidOrientationError
@@ -49,9 +50,16 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             check: Whether to check cube integrity on initialization.
             history: Optional move history to restore.
 
+        Raises:
+            InvalidCubeSizeError: If size <= 0
+
         """
         self.size = size
         self.face_size = size * size
+
+        if size <= 0:
+            msg = f'Cube size must be positive, got {size}'
+            raise InvalidCubeSizeError(msg)
 
         if initial:
             self._state = initial
