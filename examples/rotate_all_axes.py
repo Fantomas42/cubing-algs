@@ -61,6 +61,9 @@ html_parts.append("""\
            border-radius: 4px; }
   button:hover { background: #444; }
   input[type=range] { width: 300px; }
+  input[type=number] { width: 60px; background: #333; color: #eee;
+                       border: 1px solid #555; border-radius: 4px;
+                       padding: 4px 8px; font-size: 14px; }
   #loading { position: fixed; inset: 0; background: #1a1a1a;
              display: flex; flex-direction: column; align-items: center;
              justify-content: center; z-index: 100; }
@@ -80,11 +83,19 @@ html_parts.append("""\
   <p>Loading cube frames&hellip;</p>
 </div>
 <div id="content">
-<h1>Cube Rotation &mdash; All Axes</h1>
+<h1>Cube Rotation - All Axes</h1>
 <div class="controls">
-  <button id="play-btn">Pause</button>
+  <label>Angle</label>
+  <input type="range" id="angle-slider" min="0" max="359" value="0">
+  <input type="number" id="angle-input" min="0" max="359" value="0">
+</div>
+<div class="controls">
+  <label>Speed</label>
   <input type="range" id="speed" min="1" max="100" value="50">
   <span id="speed-val">50 ms</span>
+</div>
+<div class="controls">
+  <button id="play-btn">⏸︎ Pause</button>
 </div>
 <div class="cubes">
 """)
@@ -120,17 +131,29 @@ let current = 0;
 let playing = true;
 let interval;
 
-function step() {
+const angleSlider = document.getElementById('angle-slider');
+const angleInput = document.getElementById('angle-input');
+
+function goTo(angle) {
   groups.forEach(g => {
     const frames = g.querySelectorAll('.frame');
     frames[current].classList.remove('active');
+    frames[angle].classList.add('active');
+    g.querySelector('[data-angle-display]').textContent = angle + '°';
   });
-  current = (current + 1) % 360;
-  groups.forEach(g => {
-    const frames = g.querySelectorAll('.frame');
-    frames[current].classList.add('active');
-    g.querySelector('[data-angle-display]').textContent = current + '°';
-  });
+  current = angle;
+  angleSlider.value = angle;
+  angleInput.value = angle;
+}
+
+function step() {
+  goTo((current + 1) % 360);
+}
+
+function pause() {
+  playing = false;
+  clearInterval(interval);
+  document.getElementById('play-btn').textContent = 'Play';
 }
 
 function startInterval() {
@@ -145,7 +168,7 @@ startInterval();
 
 document.getElementById('play-btn').addEventListener('click', () => {
   playing = !playing;
-  document.getElementById('play-btn').textContent = playing ? 'Pause' : 'Play';
+  document.getElementById('play-btn').textContent = playing ? '⏸︎ Pause' : '⏵︎ Play';
   if (playing) startInterval(); else clearInterval(interval);
 });
 
@@ -153,6 +176,19 @@ const speedSlider = document.getElementById('speed');
 speedSlider.addEventListener('input', () => {
   document.getElementById('speed-val').textContent = speedSlider.value + ' ms';
   if (playing) startInterval();
+});
+
+angleSlider.addEventListener('input', () => {
+  pause();
+  goTo(parseInt(angleSlider.value));
+});
+
+angleInput.addEventListener('input', () => {
+  const val = parseInt(angleInput.value);
+  if (val >= 0 && val <= 359) {
+    pause();
+    goTo(val);
+  }
 });
 </script>
 </body>
