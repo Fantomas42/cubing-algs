@@ -67,6 +67,10 @@ html_parts.append("""
            font-variant-numeric: tabular-nums; }
   .frame { display: none; }
   .frame.active { display: block; }
+  .frame svg { display: block; border-radius: 12px;
+               background: linear-gradient(135deg, #3b2667, #1a1a2e 50%, #1f4068);
+               box-shadow: 0 4px 20px rgba(0,0,0,0.5),
+                           inset 0 1px 0 rgba(255,255,255,0.08); }
   .controls { margin: 20px 0; display: flex; gap: 16px;
               align-items: center; }
   button { padding: 6px 16px; cursor: pointer; font-size: 14px;
@@ -176,7 +180,7 @@ function step() {
 function pause() {
   playing = false;
   clearInterval(interval);
-  document.getElementById('play-btn').textContent = 'Play';
+  document.getElementById('play-btn').textContent = '⏵︎ Play';
 }
 
 function startInterval() {
