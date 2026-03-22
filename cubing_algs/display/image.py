@@ -4,6 +4,8 @@ import operator
 import re
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display.vcube import DEFAULT_PALETTE
 from cubing_algs.vcube import VCube
 
 Point3D = tuple[float, float, float]
@@ -15,20 +17,10 @@ ROTATION_PARTS = re.compile(r'([xyz])(-?[0-9]+)')
 
 CUBE_COLOR = '#111111'
 
-# Color mapping: facelet letter -> base hex color
-FACE_COLORS: dict[str, str] = {
-    'U': '#ffffff',
-    'R': '#ff0000',
-    'F': '#00d800',
-    'D': '#ffff00',
-    'L': '#ff8c00',
-    'B': '#0000ff',
-}
-
 # Gap between stickers as a fraction of face size (divided by 3 per cell)
 STICKER_GAP = 0.08
 VISIBILITY_EPSILON = 1e-9
-CAMERA_DISTANCE = 6.0
+CAMERA_DISTANCE = 10.0
 
 # Vertices of unit cube at (+/-1, +/-1, +/-1)
 CUBE_VERTICES: list[Point3D] = [
@@ -372,12 +364,41 @@ def build_sticker_polygon(
     )
 
 
+def resolve_face_colors(palette_name: str) -> dict[str, str]:
+    """
+    Build a face-letter to hex-color mapping from a palette.
+
+    Args:
+        palette_name: Name of a palette defined in
+            :mod:`cubing_algs.display.palettes`.
+
+    Returns:
+        Dictionary mapping face letters (U/R/F/D/L/B)
+        to hex color strings.
+
+    """
+    from cubing_algs.display.palettes import PALETTES  # noqa: PLC0415
+
+    config = PALETTES.get(palette_name, PALETTES['default'])
+    faces = config['faces']
+
+    return {
+        face: (
+            entry['background']
+            if isinstance(entry, dict)
+            else entry
+        )
+        for face, entry in zip(FACE_ORDER, faces, strict=True)
+    }
+
+
 def build_face_elements(
     face_name: str,
     svg_corners: list[Point2D],
     facelets: str,
     size: int,
     cube_size: int,
+    face_colors: dict[str, str],
 ) -> tuple[list[str], list[str]]:
     """
     Build gradient defs and sticker polygons for one face.
@@ -406,7 +427,7 @@ def build_face_elements(
         for col in range(cube_size):
             idx = row * cube_size + col
             color_key = facelets[idx]
-            base_color = FACE_COLORS.get(
+            base_color = face_colors.get(
                 color_key, '#888888',
             )
             grad_id = f'g-{face_name}-{row}-{col}'
@@ -429,6 +450,7 @@ def build_svg(
     cube_size: int = 3,
     distance: float = CAMERA_DISTANCE,
     cube_color: str = CUBE_COLOR,
+    palette_name: str = DEFAULT_PALETTE,
 ) -> str:
     """
     Build an SVG string for the cube state.
@@ -441,11 +463,13 @@ def build_svg(
         distance: Camera distance for perspective projection.
         cube_color: Hex color for cube body between stickers.
             Supports alpha channel (``#rrggbbaa``).
+        palette_name: Color palette name for sticker colors.
 
     Returns:
         Complete SVG document as a string.
 
     """
+    face_colors = resolve_face_colors(palette_name)
     visible = compute_visible_faces(rotations, distance)
 
     margin = size * 0.002
@@ -485,7 +509,7 @@ def build_svg(
 
         face_defs, face_stickers = build_face_elements(
             face_name, svg_corners, facelets, size,
-            cube_size,
+            cube_size, face_colors,
         )
         defs_parts.extend(face_defs)
 
@@ -579,6 +603,7 @@ def render_cube(
     rotation: str = 'y45x-35',
     distance: float = CAMERA_DISTANCE,
     cube_color: str = CUBE_COLOR,
+    palette_name: str = DEFAULT_PALETTE,
 ) -> str:
     """
     Render a 3D perspective cube image.
@@ -595,6 +620,7 @@ def render_cube(
         cube_color: Hex color for cube body between stickers.
             Supports alpha channel (``#rrggbbaa``), e.g.
             ``#11111180`` for semi-transparent black.
+        palette_name: Color palette name for sticker colors.
 
     Returns:
         SVG string of the cube.
@@ -610,4 +636,7 @@ def render_cube(
     rotations = parse_rotation(rotation)
     state, n = get_state(source, cube_size)
 
-    return build_svg(state, size, rotations, n, distance, cube_color)
+    return build_svg(
+        state, size, rotations, n, distance,
+        cube_color, palette_name,
+    )
