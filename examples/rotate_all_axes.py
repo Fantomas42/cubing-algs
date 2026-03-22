@@ -34,6 +34,9 @@ axes = [
     ('x', 'X Axis', 'x{angle}'),
     ('y', 'Y Axis', 'y{angle}'),
     ('z', 'Z Axis', 'z{angle}'),
+    ('xy', 'X + Y', 'x{angle}y{angle}'),
+    ('xz', 'X + Z', 'x{angle}z{angle}'),
+    ('yz', 'Y + Z', 'y{angle}z{angle}'),
     ('xyz', 'X + Y + Z', 'x{angle}y{angle}z{angle}'),
 ]
 
@@ -114,7 +117,13 @@ html_parts.append("""
 <div class="cubes">
 """)
 
+prev_axis_len = 0
 for axis_id, label, rotation_fmt in axes:
+    axis_len = len(axis_id)
+    if axis_len > prev_axis_len:
+        if prev_axis_len > 0:
+            html_parts.append('</div>\n<div class="cubes">\n')
+        prev_axis_len = axis_len
     print(f'Generating {label}...')
     html_parts.append(
         f'<div class="axis-group" data-axis="{axis_id}">\n'
