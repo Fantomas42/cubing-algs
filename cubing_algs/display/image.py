@@ -50,7 +50,7 @@ def parse_rotation(rotation: str) -> list[tuple[str, int]]:
     Parse a rotation string into axis-angle pairs.
 
     Args:
-        rotation: Rotation string like "y45x-35".
+        rotation: Rotation string like "y45x-34".
 
     Returns:
         List of (axis, degrees) tuples.
@@ -62,7 +62,7 @@ def parse_rotation(rotation: str) -> list[tuple[str, int]]:
     if not ROTATION_PATTERN.match(rotation):
         msg = (
             f'Invalid rotation string: { rotation!r}. '
-            'Expected format like "y45x-35".'
+            'Expected format like "y45x-34".'
         )
         raise ValueError(msg)
 
@@ -600,7 +600,7 @@ def render_cube(
     *,
     size: int = 200,
     cube_size: int | None = None,
-    rotation: str = 'y45x-35',
+    rotation: str = 'y45x-34',
     distance: float = CAMERA_DISTANCE,
     cube_color: str = CUBE_COLOR,
     palette_name: str = DEFAULT_PALETTE,
