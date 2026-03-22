@@ -26,7 +26,9 @@ cube = VCube(size=args.cube_size)
 if args.algorithm:
     cube.rotate(parse_moves(args.algorithm, trust_input=False))
 
-print(f'Algorithm: {args.algorithm}, Cube size: {args.cube_size}')
+print(f'Cube size: {args.cube_size}')
+if args.algorithm:
+    print(f'Algorithm: {args.algorithm}')
 
 axes = [
     ('x', 'X Axis', 'x{angle}'),
@@ -35,13 +37,21 @@ axes = [
     ('xyz', 'X + Y + Z', 'x{angle}y{angle}z{angle}'),
 ]
 
+cube_info = f'{args.cube_size}x{args.cube_size}x{args.cube_size}'
+if args.algorithm:
+    cube_info_title = f'{cube_info} - {args.algorithm}'
+    cube_info_html = f'{cube_info} - <code>{args.algorithm}</code>'
+else:
+    cube_info_title = cube_info
+    cube_info_html = cube_info
+
 html_parts: list[str] = []
-html_parts.append("""\
+html_parts.append("""
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>Cube Rotations - All Axes</title>
+<title>Cube Rotations - CUBE_INFO_PLACEHOLDER</title>
 <style>
   body { background: #1a1a1a; color: #eee; font-family: sans-serif;
          display: flex; flex-direction: column; align-items: center;
@@ -75,6 +85,9 @@ html_parts.append("""\
   #content { visibility: hidden; display: flex; flex-direction: column;
              align-items: center; width: 100%; }
   #content.ready { visibility: visible; }
+  .info { font-size: 16px; color: #aaa; margin: 0 0 8px; }
+  .info code { color: #ddd; background: #333; padding: 2px 6px;
+               border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -84,6 +97,7 @@ html_parts.append("""\
 </div>
 <div id="content">
 <h1>Cube Rotation - All Axes</h1>
+<p class="info">CUBE_INFO_HTML_PLACEHOLDER</p>
 <div class="controls">
   <label>Angle</label>
   <input type="range" id="angle-slider" min="0" max="359" value="0">
@@ -195,6 +209,14 @@ angleInput.addEventListener('input', () => {
 </html>
 """)
 
-out = Path(__file__).parent.parent / 'rotate_all_axes.html'
-out.write_text(''.join(html_parts))
+filename = f'rotate_all_axes_{args.cube_size}x{args.cube_size}x{args.cube_size}'
+if args.algorithm:
+    safe_alg = args.algorithm.replace(' ', '_').replace("'", '-')
+    filename += f'_{safe_alg}'
+filename += '.html'
+out = Path(__file__).parent.parent / filename
+html = ''.join(html_parts)
+html = html.replace('CUBE_INFO_PLACEHOLDER', cube_info_title)
+html = html.replace('CUBE_INFO_HTML_PLACEHOLDER', cube_info_html)
+out.write_text(html)
 print(f'Saved {out}')
