@@ -62,7 +62,7 @@ def parse_rotation(rotation: str) -> list[tuple[str, int]]:
     """
     if not ROTATION_PATTERN.match(rotation):
         msg = (
-            f'Invalid rotation string: { rotation!r}. '
+            f'Invalid rotation string: {rotation!r}. '
             'Expected format like "y45x-34".'
         )
         raise ValueError(msg)
@@ -417,6 +417,8 @@ def build_face_elements(  # noqa: PLR0913, PLR0917
         svg_corners[0], svg_corners[3], 0.5,
     )
 
+    # Gradient runs diagonally across the face: from the
+    # midpoint of the top-left corner to its mirror at (size-x, size-y).
     gx1 = (left_mid[0] + top_mid[0]) / 2
     gy1 = (left_mid[1] + top_mid[1]) / 2
     gx2 = size - gx1
@@ -486,18 +488,19 @@ def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
     face_groups: list[str] = []
     face_size = cube_size * cube_size
 
+    cr, cg, cb, body_opacity = hex_to_rgba(cube_color)
+    body_rgb = rgb_to_hex(cr, cg, cb)
+    opacity_attr = (
+        f' fill-opacity="{body_opacity:.2f}"'
+        if body_opacity < 1.0
+        else ''
+    )
+
     for face_name, corners_2d, face_state_idx in visible:
         svg_corners = [
             to_svg_coords(c) for c in corners_2d
         ]
 
-        cr, cg, cb, body_opacity = hex_to_rgba(cube_color)
-        body_rgb = rgb_to_hex(cr, cg, cb)
-        opacity_attr = (
-            f' fill-opacity="{body_opacity:.2f}"'
-            if body_opacity < 1.0
-            else ''
-        )
         body_polygon = (
             '  <polygon'
             f' points="{points_to_svg(svg_corners)}"'
@@ -574,16 +577,13 @@ def get_state(
         TypeError: If source is not VCube or Algorithm.
 
     """
-    from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
-    from cubing_algs.vcube import VCube as Cube  # noqa: PLC0415
-
-    if isinstance(source, Cube):
+    if isinstance(source, VCube):
         n = cube_size if cube_size is not None else source.size
         return source.state, n
 
-    if isinstance(source, Algo):
+    if isinstance(source, Algorithm):
         n = cube_size if cube_size is not None else 3
-        cube = Cube(size=n)
+        cube = VCube(size=n)
         if source:
             cube.rotate(source)
         return cube.state, n
@@ -626,9 +626,18 @@ def render_cube(  # noqa: PLR0913
         SVG string of the cube.
 
     Raises:
-        ValueError: if size is not positive.
+        ValueError: if size is not positive or distance is
+            too small.
 
     """
+    min_distance = math.sqrt(3)
+    if distance <= min_distance:
+        msg = (
+            f'distance must be greater than sqrt(3) '
+            f'(~{min_distance:.3f}), got {distance}'
+        )
+        raise ValueError(msg)
+
     if size < 1:
         msg = f'size must be positive, got {size}'
         raise ValueError(msg)

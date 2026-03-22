@@ -1,15 +1,24 @@
 """Tests for cube image rendering."""
+import math
 import unittest
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.display.image import CAMERA_DISTANCE
+from cubing_algs.display.image import adjust_color
 from cubing_algs.display.image import assemble_svg
 from cubing_algs.display.image import build_svg
 from cubing_algs.display.image import compute_visible_faces
+from cubing_algs.display.image import hex_to_rgba
+from cubing_algs.display.image import lerp_2d
 from cubing_algs.display.image import parse_rotation
+from cubing_algs.display.image import points_to_svg
 from cubing_algs.display.image import project
 from cubing_algs.display.image import render_cube
+from cubing_algs.display.image import resolve_face_colors
+from cubing_algs.display.image import rgb_to_hex
 from cubing_algs.display.image import rotate_point
+from cubing_algs.display.image import shade_color
+from cubing_algs.display.image import tint_color
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
 
@@ -240,6 +249,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
         cube.rotate('R')
         svg = build_svg(
             cube.state, 200, [('y', 45), ('x', -25)],
+            palette_name='default',
         )
         # R move brings F-face facelets onto the U face.
         # U-face gradient ids for affected stickers should use
@@ -255,6 +265,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
         """Solved cube U-face gradients should all be white-derived."""
         svg = build_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', 45), ('x', -25)],
+            palette_name='default',
         )
         for row in range(3):
             for col in range(3):
@@ -386,3 +397,191 @@ class RotatePointCombinedTestCase(unittest.TestCase):
         point = (1.0, 2.0, 3.0)
         result = rotate_point(point, [('w', 90)])
         self.assertEqual(result, point)
+
+
+class HexToRgbaTestCase(unittest.TestCase):
+    """Tests for hex_to_rgba conversion."""
+
+    def test_six_digit_hex(self) -> None:
+        """Test #rrggbb returns full opacity."""
+        r, g, b, a = hex_to_rgba('#ff0000')
+        self.assertEqual((r, g, b), (255, 0, 0))
+        self.assertAlmostEqual(a, 1.0)
+
+    def test_eight_digit_hex(self) -> None:
+        """Test #rrggbbaa returns correct alpha."""
+        r, g, b, a = hex_to_rgba('#11111180')
+        self.assertEqual((r, g, b), (17, 17, 17))
+        self.assertAlmostEqual(a, 128 / 255.0, places=3)
+
+    def test_fully_transparent(self) -> None:
+        """Test #rrggbb00 returns zero alpha."""
+        _, _, _, a = hex_to_rgba('#ff000000')
+        self.assertAlmostEqual(a, 0.0)
+
+    def test_fully_opaque_eight_digit(self) -> None:
+        """Test #rrggbbff returns full opacity."""
+        _, _, _, a = hex_to_rgba('#ff0000ff')
+        self.assertAlmostEqual(a, 1.0)
+
+
+class RgbToHexTestCase(unittest.TestCase):
+    """Tests for rgb_to_hex conversion."""
+
+    def test_basic_colors(self) -> None:
+        """Test basic RGB to hex conversion."""
+        self.assertEqual(rgb_to_hex(255, 0, 0), '#ff0000')
+        self.assertEqual(rgb_to_hex(0, 255, 0), '#00ff00')
+        self.assertEqual(rgb_to_hex(0, 0, 255), '#0000ff')
+
+    def test_black_and_white(self) -> None:
+        """Test black and white conversion."""
+        self.assertEqual(rgb_to_hex(0, 0, 0), '#000000')
+        self.assertEqual(rgb_to_hex(255, 255, 255), '#ffffff')
+
+
+class AdjustColorTestCase(unittest.TestCase):
+    """Tests for color adjustment functions."""
+
+    def test_tint_lightens(self) -> None:
+        """Test tint moves color toward white."""
+        result = tint_color('#000000', 0.5)
+        # 0 + (255-0)*0.5 = 127 per channel
+        self.assertEqual(result, rgb_to_hex(127, 127, 127))
+
+    def test_shade_darkens(self) -> None:
+        """Test shade moves color toward black."""
+        result = shade_color('#ffffff', 0.5)
+        # 255 + (0-255)*0.5 = 127 per channel
+        self.assertEqual(result, rgb_to_hex(127, 127, 127))
+
+    def test_zero_factor_no_change(self) -> None:
+        """Test factor=0 produces no change."""
+        self.assertEqual(
+            adjust_color('#ff0000', 0.0, toward=255),
+            '#ff0000',
+        )
+
+    def test_full_factor_reaches_target(self) -> None:
+        """Test factor=1 fully reaches target."""
+        self.assertEqual(
+            adjust_color('#000000', 1.0, toward=255),
+            '#ffffff',
+        )
+
+    def test_tint_no_change_on_white(self) -> None:
+        """Test tinting white stays white."""
+        self.assertEqual(tint_color('#ffffff', 0.5), '#ffffff')
+
+    def test_shade_no_change_on_black(self) -> None:
+        """Test shading black stays black."""
+        self.assertEqual(shade_color('#000000', 0.5), '#000000')
+
+
+class Lerp2dTestCase(unittest.TestCase):
+    """Tests for 2D linear interpolation."""
+
+    def test_t_zero_returns_start(self) -> None:
+        """Test t=0 returns the start point."""
+        result = lerp_2d((0.0, 0.0), (10.0, 20.0), 0.0)
+        self.assertAlmostEqual(result[0], 0.0)
+        self.assertAlmostEqual(result[1], 0.0)
+
+    def test_t_one_returns_end(self) -> None:
+        """Test t=1 returns the end point."""
+        result = lerp_2d((0.0, 0.0), (10.0, 20.0), 1.0)
+        self.assertAlmostEqual(result[0], 10.0)
+        self.assertAlmostEqual(result[1], 20.0)
+
+    def test_midpoint(self) -> None:
+        """Test t=0.5 returns the midpoint."""
+        result = lerp_2d((2.0, 4.0), (10.0, 20.0), 0.5)
+        self.assertAlmostEqual(result[0], 6.0)
+        self.assertAlmostEqual(result[1], 12.0)
+
+
+class PointsToSvgTestCase(unittest.TestCase):
+    """Tests for SVG points formatting."""
+
+    def test_basic_points(self) -> None:
+        """Test formatting a list of 2D points."""
+        result = points_to_svg([(1.0, 2.0), (3.0, 4.0)])
+        self.assertEqual(result, '1.00,2.00 3.00,4.00')
+
+    def test_empty_list(self) -> None:
+        """Test empty list returns empty string."""
+        self.assertEqual(points_to_svg([]), '')
+
+
+class ResolveFaceColorsTestCase(unittest.TestCase):
+    """Tests for palette resolution."""
+
+    def test_default_palette_has_all_faces(self) -> None:
+        """Test default palette returns all 6 face colors."""
+        colors = resolve_face_colors('default')
+        self.assertEqual(len(colors), 6)
+        for face in 'URFDLB':
+            self.assertIn(face, colors)
+
+    def test_unknown_palette_falls_back_to_default(self) -> None:
+        """Test unknown palette name falls back to default."""
+        colors_default = resolve_face_colors('default')
+        colors_unknown = resolve_face_colors('nonexistent_palette')
+        self.assertEqual(colors_default, colors_unknown)
+
+
+class RenderCubeDistanceValidationTestCase(unittest.TestCase):
+    """Tests for distance parameter validation."""
+
+    def test_distance_too_small_raises(self) -> None:
+        """Test distance <= sqrt(3) raises ValueError."""
+        cube = VCube()
+        with self.assertRaises(ValueError):
+            render_cube(cube, distance=1.0)
+
+    def test_distance_at_boundary_raises(self) -> None:
+        """Test distance exactly at sqrt(3) raises ValueError."""
+        cube = VCube()
+        with self.assertRaises(ValueError):
+            render_cube(cube, distance=math.sqrt(3))
+
+    def test_distance_just_above_boundary_ok(self) -> None:
+        """Test distance just above sqrt(3) succeeds."""
+        cube = VCube()
+        result = render_cube(cube, distance=math.sqrt(3) + 0.1)
+        self.assertTrue(result.startswith('<svg'))
+
+
+class RenderCubeCustomParametersTestCase(unittest.TestCase):
+    """Tests for render_cube with custom parameters."""
+
+    def test_2x2_cube(self) -> None:
+        """Test rendering a 2x2 cube."""
+        cube = VCube(size=2)
+        result = render_cube(cube, cube_size=2)
+        self.assertTrue(result.startswith('<svg'))
+        self.assertIn('<polygon', result)
+
+    def test_4x4_cube(self) -> None:
+        """Test rendering a 4x4 cube."""
+        cube = VCube(size=4)
+        result = render_cube(cube, cube_size=4)
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_custom_cube_color_with_alpha(self) -> None:
+        """Test rendering with semi-transparent cube body."""
+        cube = VCube()
+        result = render_cube(cube, cube_color='#11111180')
+        self.assertIn('fill-opacity=', result)
+
+    def test_opaque_cube_color_no_opacity_attr(self) -> None:
+        """Test opaque cube color omits fill-opacity."""
+        cube = VCube()
+        result = render_cube(cube, cube_color='#222222')
+        self.assertNotIn('fill-opacity=', result)
+
+    def test_custom_distance(self) -> None:
+        """Test rendering with custom distance."""
+        cube = VCube()
+        result = render_cube(cube, distance=20.0)
+        self.assertTrue(result.startswith('<svg'))
