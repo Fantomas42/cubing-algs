@@ -99,14 +99,24 @@ html_parts.append("""
                                            #1a1a2e 50%, #1f4068);
                box-shadow: 0 4px 20px rgba(0,0,0,0.5),
                            inset 0 1px 0 rgba(255,255,255,0.08); }
-  .controls { margin: 20px 0; display: flex; gap: 16px;
-              align-items: center; }
+  .control-panel { position: fixed; top: 16px; right: 16px; z-index: 50;
+                   background: rgba(30, 30, 30, 0.92);
+                   backdrop-filter: blur(12px);
+                   border: 1px solid #444; border-radius: 10px;
+                   padding: 16px 20px; display: flex; flex-direction: column;
+                   gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  .controls { display: flex; gap: 12px; align-items: center; }
+  .controls label { min-width: 42px; font-size: 13px; color: #aaa; }
   button { padding: 6px 16px; cursor: pointer; font-size: 14px;
            background: #333; color: #eee; border: 1px solid #555;
            border-radius: 4px; }
   button:hover { background: #444; }
-  input[type=range] { width: 300px; }
-  input[type=number] { width: 60px; background: #333; color: #eee;
+  #play-btn { width: 100%; background: #6a4c9c; border-color: #7d5fbf; }
+  #play-btn:hover { background: #7d5fbf; }
+  #play-btn.playing { background: #9c4c6a; border-color: #bf5f7d; }
+  #play-btn.playing:hover { background: #bf5f7d; }
+  input[type=range] { width: 160px; }
+  input[type=number] { width: 54px; background: #333; color: #eee;
                        border: 1px solid #555; border-radius: 4px;
                        padding: 4px 8px; font-size: 14px; }
   #loading { position: fixed; inset: 0; background: #1a1a1a;
@@ -158,17 +168,17 @@ html_parts.append("""
 <div id="content">
 <h1>Cube Rotation - All Axes</h1>
 <p class="info">CUBE_INFO_HTML_PLACEHOLDER</p>
-<div class="controls">
-  <label>Angle</label>
-  <input type="range" id="angle-slider" min="0" max="359" value="45">
-  <input type="number" id="angle-input" min="0" max="359" value="45">
-</div>
-<div class="controls">
-  <label>Speed</label>
-  <input type="range" id="speed" min="1" max="100" value="50">
-  <span id="speed-val">50 ms</span>
-</div>
-<div class="controls">
+<div class="control-panel">
+  <div class="controls">
+    <label>Angle</label>
+    <input type="range" id="angle-slider" min="0" max="359" value="45">
+    <input type="number" id="angle-input" min="0" max="359" value="45">
+  </div>
+  <div class="controls">
+    <label>Speed</label>
+    <input type="range" id="speed" min="1" max="100" value="50">
+    <span id="speed-val">50 ms</span>
+  </div>
   <button id="play-btn">⏵︎ Play</button>
 </div>
 <div class="cubes">
@@ -235,7 +245,9 @@ function step() {
 function pause() {
   playing = false;
   clearInterval(interval);
-  document.getElementById('play-btn').textContent = '⏵︎ Play';
+  const btn = document.getElementById('play-btn');
+  btn.textContent = '⏵︎ Play';
+  btn.classList.remove('playing');
 }
 
 function startInterval() {
@@ -249,9 +261,9 @@ document.getElementById('content').classList.add('ready');
 
 document.getElementById('play-btn').addEventListener('click', () => {
   playing = !playing;
-  document.getElementById('play-btn').textContent = (
-    playing ? '⏸︎ Pause' : '⏵︎ Play'
-  );
+  const btn = document.getElementById('play-btn');
+  btn.textContent = playing ? '⏸︎ Pause' : '⏵︎ Play';
+  btn.classList.toggle('playing', playing);
   if (playing) startInterval(); else clearInterval(interval);
 });
 
