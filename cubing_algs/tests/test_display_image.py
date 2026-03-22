@@ -4,7 +4,6 @@ import unittest
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.display.image import CAMERA_DISTANCE
-from cubing_algs.display.image import adjust_color
 from cubing_algs.display.image import assemble_svg
 from cubing_algs.display.image import build_svg
 from cubing_algs.display.image import compute_visible_faces
@@ -15,10 +14,7 @@ from cubing_algs.display.image import points_to_svg
 from cubing_algs.display.image import project
 from cubing_algs.display.image import render_cube
 from cubing_algs.display.image import resolve_face_colors
-from cubing_algs.display.image import rgb_to_hex
 from cubing_algs.display.image import rotate_point
-from cubing_algs.display.image import shade_color
-from cubing_algs.display.image import tint_color
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
 
@@ -215,13 +211,13 @@ class BuildSvgTestCase(unittest.TestCase):
         )
         self.assertIn('<polygon', svg)
 
-    def test_contains_gradient_defs(self) -> None:
-        """Test that SVG contains gradient definitions."""
+    def test_no_gradient_defs(self) -> None:
+        """Test that SVG does not contain gradient definitions."""
         svg = build_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
-        self.assertIn('<defs>', svg)
-        self.assertIn('linearGradient', svg)
+        self.assertNotIn('<defs>', svg)
+        self.assertNotIn('linearGradient', svg)
 
     def test_scrambled_state_renders(self) -> None:
         """Test scrambled state produces valid SVG."""
@@ -243,38 +239,26 @@ class BuildSvgTestCase(unittest.TestCase):
 class StickerColorCorrectnessTestCase(unittest.TestCase):
     """Tests that sticker colors match the facelet state."""
 
-    def test_r_move_changes_u_face_gradients(self) -> None:
-        """After R move, U-face gradients should include F colors."""
+    def test_r_move_changes_u_face_colors(self) -> None:
+        """After R move, U-face should include F-face colors."""
         cube = VCube()
         cube.rotate('R')
         svg = build_svg(
             cube.state, 200, [('y', 45), ('x', -25)],
             palette_name='default',
         )
-        # R move brings F-face facelets onto the U face.
-        # U-face gradient ids for affected stickers should use
-        # F-color derived values (tinted green), not white.
-        # Gradient g-U-0-2 should be green-derived, not white.
-        u_02_start = svg.index('id="g-U-0-2"')
-        u_02_end = svg.index('</linearGradient>', u_02_start)
-        u_02_grad = svg[u_02_start:u_02_end]
-        # White stickers produce #ffffff tint; green ones don't
-        self.assertNotIn('#f6f6f6', u_02_grad)
+        # R move brings F-face (green) facelets onto the U face.
+        # The SVG should contain green fill colors, not just white.
+        self.assertIn('fill="#00D700"', svg)
 
     def test_solved_cube_u_face_all_white(self) -> None:
-        """Solved cube U-face gradients should all be white-derived."""
+        """Solved cube U-face stickers should all be white."""
         svg = build_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', 45), ('x', -25)],
             palette_name='default',
         )
-        for row in range(3):
-            for col in range(3):
-                grad_id = f'id="g-U-{row}-{col}"'
-                start = svg.index(grad_id)
-                end = svg.index('</linearGradient>', start)
-                grad = svg[start:end]
-                # All U stickers should use white-derived colors
-                self.assertIn('#f6f6f6', grad)
+        # U face should use white fill color
+        self.assertIn('fill="#F5F5F5"', svg)
 
 
 class RenderCubeFromVCubeTestCase(unittest.TestCase):
@@ -366,19 +350,17 @@ class RenderCubeValidationTestCase(unittest.TestCase):
 class AssembleSvgTestCase(unittest.TestCase):
     """Tests for SVG assembly."""
 
-    def test_empty_defs(self) -> None:
-        """Test assemble_svg with no defs_parts."""
-        result = assemble_svg(100, [], ['<g>content</g>'])
-        self.assertNotIn('<defs>', result)
+    def test_basic_assembly(self) -> None:
+        """Test assemble_svg produces valid SVG."""
+        result = assemble_svg(100, ['<g>content</g>'])
+        self.assertTrue(result.startswith('<svg'))
+        self.assertTrue(result.endswith('</svg>'))
         self.assertIn('<g>content</g>', result)
 
-    def test_with_defs(self) -> None:
-        """Test assemble_svg with defs_parts."""
-        result = assemble_svg(
-            100, ['<clipPath id="c"/>'], ['<g>content</g>'],
-        )
-        self.assertIn('<defs>', result)
-        self.assertIn('<clipPath id="c"/>', result)
+    def test_empty_face_groups(self) -> None:
+        """Test assemble_svg with no face groups."""
+        result = assemble_svg(100, [])
+        self.assertIn('viewBox="0 0 100 100"', result)
 
 
 class RotatePointCombinedTestCase(unittest.TestCase):
@@ -423,59 +405,6 @@ class HexToRgbaTestCase(unittest.TestCase):
         """Test #rrggbbff returns full opacity."""
         _, _, _, a = hex_to_rgba('#ff0000ff')
         self.assertAlmostEqual(a, 1.0)
-
-
-class RgbToHexTestCase(unittest.TestCase):
-    """Tests for rgb_to_hex conversion."""
-
-    def test_basic_colors(self) -> None:
-        """Test basic RGB to hex conversion."""
-        self.assertEqual(rgb_to_hex(255, 0, 0), '#ff0000')
-        self.assertEqual(rgb_to_hex(0, 255, 0), '#00ff00')
-        self.assertEqual(rgb_to_hex(0, 0, 255), '#0000ff')
-
-    def test_black_and_white(self) -> None:
-        """Test black and white conversion."""
-        self.assertEqual(rgb_to_hex(0, 0, 0), '#000000')
-        self.assertEqual(rgb_to_hex(255, 255, 255), '#ffffff')
-
-
-class AdjustColorTestCase(unittest.TestCase):
-    """Tests for color adjustment functions."""
-
-    def test_tint_lightens(self) -> None:
-        """Test tint moves color toward white."""
-        result = tint_color('#000000', 0.5)
-        # 0 + (255-0)*0.5 = 127 per channel
-        self.assertEqual(result, rgb_to_hex(127, 127, 127))
-
-    def test_shade_darkens(self) -> None:
-        """Test shade moves color toward black."""
-        result = shade_color('#ffffff', 0.5)
-        # 255 + (0-255)*0.5 = 127 per channel
-        self.assertEqual(result, rgb_to_hex(127, 127, 127))
-
-    def test_zero_factor_no_change(self) -> None:
-        """Test factor=0 produces no change."""
-        self.assertEqual(
-            adjust_color('#ff0000', 0.0, toward=255),
-            '#ff0000',
-        )
-
-    def test_full_factor_reaches_target(self) -> None:
-        """Test factor=1 fully reaches target."""
-        self.assertEqual(
-            adjust_color('#000000', 1.0, toward=255),
-            '#ffffff',
-        )
-
-    def test_tint_no_change_on_white(self) -> None:
-        """Test tinting white stays white."""
-        self.assertEqual(tint_color('#ffffff', 0.5), '#ffffff')
-
-    def test_shade_no_change_on_black(self) -> None:
-        """Test shading black stays black."""
-        self.assertEqual(shade_color('#000000', 0.5), '#000000')
 
 
 class Lerp2dTestCase(unittest.TestCase):

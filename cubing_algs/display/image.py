@@ -191,64 +191,6 @@ def hex_to_rgba(hex_color: str) -> tuple[int, int, int, float]:
     return r, g, b, alpha
 
 
-def rgb_to_hex(r: int, g: int, b: int) -> str:
-    """
-    Convert RGB tuple to hex color.
-
-    Returns:
-        Hex color string like "#ff0000".
-
-    """
-    return f'#{r:02x}{g:02x}{b:02x}'
-
-
-def adjust_color(
-    hex_color: str,
-    factor: float,
-    toward: int,
-) -> str:
-    """
-    Adjust a color toward a target value (0=darken, 255=lighten).
-
-    Args:
-        hex_color: Base hex color string.
-        factor: Blend factor between 0.0 (no change) and 1.0 (full target).
-        toward: Target value per channel (0 to darken, 255 to lighten).
-
-    Returns:
-        Adjusted hex color string.
-
-    """
-    r, g, b = hex_to_rgb(hex_color)
-    return rgb_to_hex(
-        min(255, max(0, int(r + (toward - r) * factor))),
-        min(255, max(0, int(g + (toward - g) * factor))),
-        min(255, max(0, int(b + (toward - b) * factor))),
-    )
-
-
-def tint_color(hex_color: str, factor: float) -> str:
-    """
-    Lighten a color by mixing with white.
-
-    Returns:
-        Lightened hex color string.
-
-    """
-    return adjust_color(hex_color, factor, toward=255)
-
-
-def shade_color(hex_color: str, factor: float) -> str:
-    """
-    Darken a color by reducing brightness.
-
-    Returns:
-        Darkened hex color string.
-
-    """
-    return adjust_color(hex_color, factor, toward=0)
-
-
 def lerp_2d(
     p0: Point2D, p1: Point2D, t: float,
 ) -> Point2D:
@@ -278,45 +220,11 @@ def points_to_svg(points: list[Point2D]) -> str:
     )
 
 
-GradientCoords = tuple[float, float, float, float]
-
-
-def build_sticker_gradient(
-    grad_id: str,
-    base_color: str,
-    coords: GradientCoords,
-) -> str:
-    """
-    Build an SVG linearGradient element for a sticker.
-
-    Returns:
-        SVG linearGradient element string.
-
-    """
-    light_color = tint_color(base_color, 0.15)
-    dark_color = shade_color(base_color, 0.20)
-    gx1, gy1, gx2, gy2 = coords
-
-    return (
-        f'  <linearGradient id="{grad_id}"'
-        f' x1="{gx1:.1f}"'
-        f' y1="{gy1:.1f}"'
-        f' x2="{gx2:.1f}"'
-        f' y2="{gy2:.1f}"'
-        f' gradientUnits="userSpaceOnUse">'
-        f'<stop offset="0%"'
-        f' stop-color="{light_color}"/>'
-        f'<stop offset="100%"'
-        f' stop-color="{dark_color}"/>'
-        f'</linearGradient>'
-    )
-
-
 def build_sticker_polygon(
     svg_corners: list[Point2D],
     row: int,
     col: int,
-    grad_id: str,
+    fill: str,
     cube_size: int,
 ) -> str:
     """
@@ -360,7 +268,7 @@ def build_sticker_polygon(
     return (
         f'  <polygon'
         f' points="{pts}"'
-        f' fill="url(#{grad_id})"/>'
+        f' fill="{fill}"/>'
     )
 
 
@@ -392,38 +300,20 @@ def resolve_face_colors(palette_name: str) -> dict[str, str]:
     }
 
 
-def build_face_elements(  # noqa: PLR0913, PLR0917
-    face_name: str,
+def build_face_stickers(
     svg_corners: list[Point2D],
     facelets: str,
-    size: int,
     cube_size: int,
     face_colors: dict[str, str],
-) -> tuple[list[str], list[str]]:
+) -> list[str]:
     """
-    Build gradient defs and sticker polygons for one face.
+    Build sticker polygon elements for one face.
 
     Returns:
-        Tuple of (gradient_defs, sticker_elements).
+        List of SVG polygon element strings.
 
     """
-    defs: list[str] = []
     stickers: list[str] = []
-
-    top_mid = lerp_2d(
-        svg_corners[0], svg_corners[1], 0.5,
-    )
-    left_mid = lerp_2d(
-        svg_corners[0], svg_corners[3], 0.5,
-    )
-
-    # Gradient runs diagonally across the face: from the
-    # midpoint of the top-left corner to its mirror at (size-x, size-y).
-    gx1 = (left_mid[0] + top_mid[0]) / 2
-    gy1 = (left_mid[1] + top_mid[1]) / 2
-    gx2 = size - gx1
-    gy2 = size - gy1
-    coords: GradientCoords = (gx1, gy1, gx2, gy2)
 
     for row in range(cube_size):
         for col in range(cube_size):
@@ -432,17 +322,12 @@ def build_face_elements(  # noqa: PLR0913, PLR0917
             base_color = face_colors.get(
                 color_key, '#888888',
             )
-            grad_id = f'g-{face_name}-{row}-{col}'
-
-            defs.append(build_sticker_gradient(
-                grad_id, base_color, coords,
-            ))
             stickers.append(build_sticker_polygon(
-                svg_corners, row, col, grad_id,
+                svg_corners, row, col, base_color,
                 cube_size,
             ))
 
-    return defs, stickers
+    return stickers
 
 
 def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
@@ -484,12 +369,11 @@ def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
     def to_svg_coords(p: Point2D) -> Point2D:
         return (cx + p[0] * scale, cy - p[1] * scale)
 
-    defs_parts: list[str] = []
     face_groups: list[str] = []
     face_size = cube_size * cube_size
 
     cr, cg, cb, body_opacity = hex_to_rgba(cube_color)
-    body_rgb = rgb_to_hex(cr, cg, cb)
+    body_rgb = f'#{cr:02x}{cg:02x}{cb:02x}'
     opacity_attr = (
         f' fill-opacity="{body_opacity:.2f}"'
         if body_opacity < 1.0
@@ -510,11 +394,10 @@ def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
         face_start = face_state_idx * face_size
         facelets = state[face_start:face_start + face_size]
 
-        face_defs, face_stickers = build_face_elements(
-            face_name, svg_corners, facelets, size,
+        face_stickers = build_face_stickers(
+            svg_corners, facelets,
             cube_size, face_colors,
         )
-        defs_parts.extend(face_defs)
 
         face_groups.append(
             f'<g class="face-{ face_name }">\n'
@@ -523,14 +406,11 @@ def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
             + '\n</g>',
         )
 
-    return assemble_svg(
-        size, defs_parts, face_groups,
-    )
+    return assemble_svg(size, face_groups)
 
 
 def assemble_svg(
     size: int,
-    defs_parts: list[str],
     face_groups: list[str],
 ) -> str:
     """
@@ -547,11 +427,6 @@ def assemble_svg(
             f' width="{size}" height="{size}">'
         ),
     ]
-
-    if defs_parts:
-        lines.append('<defs>')
-        lines.extend(defs_parts)
-        lines.append('</defs>')
 
     lines.extend(face_groups)
     lines.append('</svg>')
