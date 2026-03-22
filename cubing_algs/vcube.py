@@ -18,7 +18,6 @@ from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
 from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solver import facelets_to_facelets_algorithm
-from cubing_algs.visual_cube import visual_cube_cube
 
 
 class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
@@ -436,11 +435,6 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             algorithm += orientation
 
         return algorithm
-
-    @property
-    def visual_cube_url(self) -> str:
-        """Get a VisualCube URL for this cube state."""
-        return visual_cube_cube(self)
 
     def __str__(self) -> str:
         """
