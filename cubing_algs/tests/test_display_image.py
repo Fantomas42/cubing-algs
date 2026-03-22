@@ -2,6 +2,7 @@
 import unittest
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.display.image import CAMERA_DISTANCE
 from cubing_algs.display.image import assemble_svg
 from cubing_algs.display.image import build_svg
 from cubing_algs.display.image import compute_visible_faces
@@ -111,12 +112,19 @@ class RotatePointTestCase(unittest.TestCase):
 
 
 class ProjectTestCase(unittest.TestCase):
-    """Tests for orthographic projection."""
+    """Tests for perspective projection."""
 
-    def testproject_drops_z(self) -> None:
-        """Test that projection returns only x and y."""
-        result = project((1.0, 2.0, 3.0))
+    def testproject_perspective(self) -> None:
+        """Test perspective projection scales by distance."""
+        result = project((1.0, 2.0, 3.0), distance=6.0)
         self.assertEqual(len(result), 2)
+        # scale = 6 / (6 - 3) = 2.0
+        self.assertAlmostEqual(result[0], 2.0)
+        self.assertAlmostEqual(result[1], 4.0)
+
+    def testproject_at_origin_z(self) -> None:
+        """Test that z=0 produces no scaling."""
+        result = project((1.0, 2.0, 0.0), distance=6.0)
         self.assertAlmostEqual(result[0], 1.0)
         self.assertAlmostEqual(result[1], 2.0)
 
@@ -127,13 +135,13 @@ class VisibleFacesTestCase(unittest.TestCase):
     def test_default_rotation_shows_three_faces(self) -> None:
         """Default rotation y45x-25 shows exactly 3 faces."""
         rotations = [('y', 45), ('x', -25)]
-        faces = compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations, CAMERA_DISTANCE)
         self.assertEqual(len(faces), 3)
 
     def test_no_rotation_shows_one_face(self) -> None:
         """With no rotation, viewer sees only F face."""
         rotations = [('y', 0)]
-        faces = compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations, CAMERA_DISTANCE)
         face_names = [f[0] for f in faces]
         self.assertIn('F', face_names)
         self.assertEqual(len(faces), 1)
@@ -141,7 +149,7 @@ class VisibleFacesTestCase(unittest.TestCase):
     def test_face_data_structure(self) -> None:
         """Each face has name, 4 corners, and index."""
         rotations = [('y', -45), ('x', 34)]
-        faces = compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations, CAMERA_DISTANCE)
         for face_name, corners_2d, face_index in faces:
             self.assertIsInstance(face_name, str)
             self.assertEqual(len(corners_2d), 4)
@@ -150,13 +158,13 @@ class VisibleFacesTestCase(unittest.TestCase):
     def test_faces_sorted_back_to_front(self) -> None:
         """Visible faces are sorted back-to-front."""
         rotations = [('y', -45), ('x', 34)]
-        faces = compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations, CAMERA_DISTANCE)
         self.assertTrue(len(faces) >= 1)
 
     def test_exact_90_no_degenerate_faces(self) -> None:
         """Exact 90-degree rotation doesn't produce edge-on faces."""
         rotations = [('y', 90)]
-        faces = compute_visible_faces(rotations)
+        faces = compute_visible_faces(rotations, CAMERA_DISTANCE)
         face_names = [f[0] for f in faces]
         # At y90, only the R face should be visible (not F or B)
         self.assertIn('R', face_names)

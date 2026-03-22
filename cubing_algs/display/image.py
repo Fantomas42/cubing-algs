@@ -28,6 +28,7 @@ FACE_COLORS: dict[str, str] = {
 # Gap between stickers as a fraction of face size (divided by 3 per cell)
 STICKER_GAP = 0.08
 VISIBILITY_EPSILON = 1e-9
+CAMERA_DISTANCE = 6.0
 
 # Vertices of unit cube at (+/-1, +/-1, +/-1)
 CUBE_VERTICES: list[Point3D] = [
@@ -57,7 +58,7 @@ def parse_rotation(rotation: str) -> list[tuple[str, int]]:
     Parse a rotation string into axis-angle pairs.
 
     Args:
-        rotation: Rotation string like "y45x-25".
+        rotation: Rotation string like "y45x-35".
 
     Returns:
         List of (axis, degrees) tuples.
@@ -69,7 +70,7 @@ def parse_rotation(rotation: str) -> list[tuple[str, int]]:
     if not ROTATION_PATTERN.match(rotation):
         msg = (
             f'Invalid rotation string: { rotation!r}. '
-            'Expected format like "y45x-25".'
+            'Expected format like "y45x-35".'
         )
         raise ValueError(msg)
 
@@ -120,22 +121,28 @@ def rotate_point(
     return (x, y, z)
 
 
-def project(point: Point3D) -> Point2D:
+def project(point: Point3D, distance: float) -> Point2D:
     """
-    Orthographic projection: drop z coordinate.
+    Perspective projection onto the xy plane.
+
+    The camera sits at z = distance, looking toward the origin.
+    Points closer to the camera appear larger.
 
     Args:
         point: The (x, y, z) point to project.
+        distance: Camera distance from origin along z-axis.
 
     Returns:
         The (x, y) projected point.
 
     """
-    return point[:2]
+    scale = distance / (distance - point[2])
+    return (point[0] * scale, point[1] * scale)
 
 
 def compute_visible_faces(
     rotations: list[tuple[str, int]],
+    distance: float,
 ) -> list[FaceData]:
     """
     Compute which faces are visible and their projected corners.
@@ -159,7 +166,7 @@ def compute_visible_faces(
 
         if rn[2] > VISIBILITY_EPSILON:
             corners_3d = [rotated[i] for i in indices]
-            corners_2d = [project(c) for c in corners_3d]
+            corners_2d = [project(c, distance) for c in corners_3d]
             avg_z = sum(c[2] for c in corners_3d) / 4
             visible.append(
                 (name, corners_2d, state_idx, avg_z),
@@ -413,6 +420,7 @@ def build_svg(
     size: int,
     rotations: list[tuple[str, int]],
     cube_size: int = 3,
+    distance: float = CAMERA_DISTANCE,
 ) -> str:
     """
     Build an SVG string for the cube state.
@@ -422,15 +430,18 @@ def build_svg(
         size: Image dimension in pixels.
         rotations: List of (axis, degrees) rotation pairs.
         cube_size: Cube dimension (2 for 2x2, 3 for 3x3, etc.).
+        distance: Camera distance for perspective projection.
 
     Returns:
         Complete SVG document as a string.
 
     """
-    visible = compute_visible_faces(rotations)
+    visible = compute_visible_faces(rotations, distance)
 
     margin = size * 0.10
-    max_extent = math.sqrt(2)
+    max_extent = math.sqrt(
+        3 * distance ** 2 / (distance ** 2 - 3),
+    )
     scale = (size - 2 * margin) / (2 * max_extent)
     cx, cy = size / 2, size / 2
 
@@ -548,10 +559,11 @@ def render_cube(
     *,
     size: int = 200,
     cube_size: int | None = None,
-    rotation: str = 'y45x-25',
+    rotation: str = 'y45x-35',
+    distance: float = CAMERA_DISTANCE,
 ) -> str:
     """
-    Render a 3D isometric cube image.
+    Render a 3D perspective cube image.
 
     Args:
         source: VCube or Algorithm to render.
@@ -559,6 +571,9 @@ def render_cube(
         rotation: Axis-angle rotation string.
         cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
             etc.). Inferred from source if None.
+        distance: Camera distance for perspective projection.
+            Larger values produce a flatter image closer to
+            orthographic; smaller values exaggerate depth.
 
     Returns:
         SVG string of the cube.
@@ -574,4 +589,4 @@ def render_cube(
     rotations = parse_rotation(rotation)
     state, n = get_state(source, cube_size)
 
-    return build_svg(state, size, rotations, n)
+    return build_svg(state, size, rotations, n, distance)
