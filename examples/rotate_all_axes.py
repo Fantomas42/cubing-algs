@@ -83,9 +83,16 @@ html_parts.append("""
 <meta charset="utf-8">
 <title>Cube Rotations - CUBE_INFO_PLACEHOLDER</title>
 <style>
-  body { background: #1a1a1a; color: #eee; font-family: sans-serif;
+  body { background: #0a0a12; color: #eee; font-family: sans-serif;
          display: flex; flex-direction: column; align-items: center;
-         margin: 20px; }
+         margin: 0; padding: 20px; min-height: 100vh;
+         overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; z-index: -1;
+         background:
+           radial-gradient(ellipse 80% 60% at 20% 10%, rgba(88,28,135,0.25), transparent),
+           radial-gradient(ellipse 60% 50% at 80% 20%, rgba(15,82,186,0.2), transparent),
+           radial-gradient(ellipse 70% 40% at 50% 90%, rgba(6,95,70,0.15), transparent),
+           radial-gradient(ellipse 40% 30% at 10% 70%, rgba(157,23,77,0.12), transparent); }
   .cubes { display: flex; gap: 40px; flex-wrap: wrap;
            justify-content: center; }
   .axis-group { text-align: center; }
@@ -119,7 +126,7 @@ html_parts.append("""
   input[type=number] { width: 54px; background: #333; color: #eee;
                        border: 1px solid #555; border-radius: 4px;
                        padding: 4px 8px; font-size: 14px; }
-  #loading { position: fixed; inset: 0; background: #1a1a1a;
+  #loading { position: fixed; inset: 0; background: #0a0a12;
              display: flex; flex-direction: column; align-items: center;
              justify-content: center; z-index: 100; }
   #loading .spinner { width: 48px; height: 48px;
