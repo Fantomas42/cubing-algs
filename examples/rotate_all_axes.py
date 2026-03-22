@@ -1,6 +1,7 @@
 """Generate an HTML file showing the cube rotating on X, Y, and Z axes."""
 # ruff: noqa: T201
 import argparse
+import time
 from pathlib import Path
 
 from cubing_algs.display.image import render_cube
@@ -65,6 +66,15 @@ else:
     cube_info_title = cube_info
     cube_info_html = cube_info
 
+total_axes = sum(len(group) for group in axis_groups)
+total_frames = total_axes * 360
+total_start = time.perf_counter()
+max_label_len = max(
+    len(label)
+    for group in axis_groups
+    for _, label, _ in group
+)
+
 html_parts: list[str] = []
 html_parts.append("""
 <!DOCTYPE html>
@@ -107,6 +117,12 @@ html_parts.append("""
              border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   #loading p { margin-top: 16px; font-size: 18px; color: #aaa; }
+  #loading .details { font-size: 14px; color: #666; margin-top: 8px; }
+  #loading .progress-bar { width: 240px; height: 6px; background: #333;
+             border-radius: 3px; margin-top: 16px; overflow: hidden; }
+  #loading .progress-fill { height: 100%; width: 0%; background: #eee;
+             border-radius: 3px; }
+  #loading .progress-text { font-size: 13px; color: #666; margin-top: 6px; }
   #content { visibility: hidden; display: flex; flex-direction: column;
              align-items: center; width: 100%; }
   #content.ready { visibility: visible; }
@@ -119,7 +135,26 @@ html_parts.append("""
 <div id="loading">
   <div class="spinner"></div>
   <p>Loading cube frames&hellip;</p>
+  <p class="details">LOADING_DETAILS_PLACEHOLDER</p>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill">
+  </div></div>
+  <p class="progress-text" id="progress-text">
+    0 / TOTAL_AXES_PLACEHOLDER axes</p>
 </div>
+<script>
+  const _totalAxes = TOTAL_AXES_PLACEHOLDER;
+  (function poll() {
+    const done = document.querySelectorAll('.axis-group').length;
+    const pct = Math.round(done / _totalAxes * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    const all = document.querySelectorAll('.axis-group h2');
+    const name = all.length ? all[all.length - 1].textContent : '';
+    document.getElementById('progress-text').textContent = (
+      done + ' / ' + _totalAxes + ' axes' + (name ? ' — ' + name : '')
+    );
+    if (done < _totalAxes) requestAnimationFrame(poll);
+  })();
+</script>
 <div id="content">
 <h1>Cube Rotation - All Axes</h1>
 <p class="info">CUBE_INFO_HTML_PLACEHOLDER</p>
@@ -143,7 +178,7 @@ for group_idx, group in enumerate(axis_groups):
     if group_idx > 0:
         html_parts.append('</div>\n<div class="cubes">\n')
     for axis_id, label, rotation_fmt in group:
-        print(f'Generating {label}...')
+        axis_start = time.perf_counter()
         html_parts.append(
             f'<div class="axis-group" data-axis="{axis_id}">\n'
             f'  <h2>{label}</h2>\n',
@@ -161,6 +196,13 @@ for group_idx, group in enumerate(axis_groups):
                 f'  <div class="frame{active}" data-angle="{angle}">'
                 f'{svg}</div>\n',
             )
+        axis_elapsed = time.perf_counter() - axis_start
+        ms_per_frame = axis_elapsed / 360 * 1000
+        print(
+            f'  {label:<{max_label_len}}'
+            f'  {axis_elapsed:5.2f}s'
+            f'  ({ms_per_frame:.2f}ms/frame)',
+        )
         html_parts.append('</div>\n')
 
 html_parts.append("""\
@@ -245,5 +287,18 @@ out = Path(__file__).parent.parent / filename
 html = ''.join(html_parts)
 html = html.replace('CUBE_INFO_PLACEHOLDER', cube_info_title)
 html = html.replace('CUBE_INFO_HTML_PLACEHOLDER', cube_info_html)
+loading_details = (
+    f'{cube_info} - {total_axes} axes'
+    f' &times; 360 frames = {total_frames:,} frames'
+)
+html = html.replace('LOADING_DETAILS_PLACEHOLDER', loading_details)
+html = html.replace('TOTAL_AXES_PLACEHOLDER', str(total_axes))
 out.write_text(html)
+total_elapsed = time.perf_counter() - total_start
+total_ms = total_elapsed / total_frames * 1000
+print(
+    f'Total: {total_elapsed:.2f}s'
+    f' for {total_frames:,} frames'
+    f' ({total_ms:.2f}ms/frame)',
+)
 print(f'Saved {out}')
