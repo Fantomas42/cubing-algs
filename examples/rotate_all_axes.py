@@ -30,14 +30,31 @@ print(f'Cube size: {args.cube_size}')
 if args.algorithm:
     print(f'Algorithm: {args.algorithm}')
 
-axes = [
-    ('x', 'X Axis', 'x{angle}'),
-    ('y', 'Y Axis', 'y{angle}'),
-    ('z', 'Z Axis', 'z{angle}'),
-    ('xy', 'X + Y', 'x{angle}y{angle}'),
-    ('xz', 'X + Z', 'x{angle}z{angle}'),
-    ('yz', 'Y + Z', 'y{angle}z{angle}'),
-    ('xyz', 'X + Y + Z', 'x{angle}y{angle}z{angle}'),
+axis_groups = [
+    [
+        ('yx-35', 'Y Axis + X-35', 'y{angle}x-35'),
+    ],
+    [
+        ('x', 'X Axis', 'x{angle}'),
+        ('y', 'Y Axis', 'y{angle}'),
+        ('z', 'Z Axis', 'z{angle}'),
+    ],
+    [
+        ('xy', 'X + Y', 'x{angle}y{angle}'),
+        ('xz', 'X + Z', 'x{angle}z{angle}'),
+        ('yx', 'Y + X', 'y{angle}x{angle}'),
+        ('yz', 'Y + Z', 'y{angle}z{angle}'),
+        ('zx', 'Z + X', 'z{angle}x{angle}'),
+        ('zy', 'Z + Y', 'z{angle}y{angle}'),
+    ],
+    [
+        ('xyz', 'X + Y + Z', 'x{angle}y{angle}z{angle}'),
+        ('xzy', 'X + Z + Y', 'x{angle}z{angle}y{angle}'),
+        ('yxz', 'Y + X + Z', 'y{angle}x{angle}z{angle}'),
+        ('yzx', 'Y + Z + X', 'y{angle}z{angle}x{angle}'),
+        ('zxy', 'Z + X + Y', 'z{angle}x{angle}y{angle}'),
+        ('zyx', 'Z + Y + X', 'z{angle}y{angle}x{angle}'),
+    ],
 ]
 
 cube_info = f'{args.cube_size}x{args.cube_size}x{args.cube_size}'
@@ -121,33 +138,30 @@ html_parts.append("""
 <div class="cubes">
 """)
 
-prev_axis_len = 0
-for axis_id, label, rotation_fmt in axes:
-    axis_len = len(axis_id)
-    if axis_len > prev_axis_len:
-        if prev_axis_len > 0:
-            html_parts.append('</div>\n<div class="cubes">\n')
-        prev_axis_len = axis_len
-    print(f'Generating {label}...')
-    html_parts.append(
-        f'<div class="axis-group" data-axis="{axis_id}">\n'
-        f'  <h2>{label}</h2>\n'
-        f'  <div class="angle" data-angle-display>0°</div>\n',
-    )
-    for angle in range(360):
-        rotation = rotation_fmt.format(angle=angle)
-        svg = render_cube(cube, size=200, rotation=rotation)
-        # Prefix gradient IDs to avoid collisions between frames
-        prefix = f'{axis_id}{angle}-'
-        assert svg is not None  # noqa: S101
-        svg = svg.replace('id="g-', f'id="{prefix}g-')
-        svg = svg.replace('url(#g-', f'url(#{prefix}g-')
-        active = ' active' if angle == 0 else ''
+for group_idx, group in enumerate(axis_groups):
+    if group_idx > 0:
+        html_parts.append('</div>\n<div class="cubes">\n')
+    for axis_id, label, rotation_fmt in group:
+        print(f'Generating {label}...')
         html_parts.append(
-            f'  <div class="frame{active}" data-angle="{angle}">'
-            f'{svg}</div>\n',
+            f'<div class="axis-group" data-axis="{axis_id}">\n'
+            f'  <h2>{label}</h2>\n'
+            f'  <div class="angle" data-angle-display>0°</div>\n',
         )
-    html_parts.append('</div>\n')
+        for angle in range(360):
+            rotation = rotation_fmt.format(angle=angle)
+            svg = render_cube(cube, size=200, rotation=rotation)
+            # Prefix gradient IDs to avoid collisions between frames
+            prefix = f'{axis_id}{angle}-'
+            assert svg is not None  # noqa: S101
+            svg = svg.replace('id="g-', f'id="{prefix}g-')
+            svg = svg.replace('url(#g-', f'url(#{prefix}g-')
+            active = ' active' if angle == 0 else ''
+            html_parts.append(
+                f'  <div class="frame{active}" data-angle="{angle}">'
+                f'{svg}</div>\n',
+            )
+        html_parts.append('</div>\n')
 
 html_parts.append("""\
 </div>
