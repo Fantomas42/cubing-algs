@@ -180,16 +180,23 @@ def compute_visible_faces(
     ]
 
 
-def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
+def hex_to_rgb(hex_color: str) -> tuple[int, int, int, float]:
     """
-    Convert hex color to RGB tuple.
+    Convert hex color to RGB tuple with opacity.
+
+    Accepts ``#rrggbb`` or ``#rrggbbaa`` format.
 
     Returns:
-        Tuple of (red, green, blue) values 0-255.
+        Tuple of (red, green, blue, opacity) where RGB
+        values are 0–255 and opacity is 0.0–1.0.
 
     """
     h = hex_color.lstrip('#')
-    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    r = int(h[0:2], 16)
+    g = int(h[2:4], 16)
+    b = int(h[4:6], 16)
+    opacity = int(h[6:8], 16) / 255.0 if len(h) == 8 else 1.0
+    return r, g, b, opacity
 
 
 def rgb_to_hex(r: int, g: int, b: int) -> str:
@@ -220,7 +227,7 @@ def adjust_color(
         Adjusted hex color string.
 
     """
-    r, g, b = hex_to_rgb(hex_color)
+    r, g, b, _ = hex_to_rgb(hex_color)
     return rgb_to_hex(
         min(255, max(0, int(r + (toward - r) * factor))),
         min(255, max(0, int(g + (toward - g) * factor))),
@@ -421,6 +428,7 @@ def build_svg(
     rotations: list[tuple[str, int]],
     cube_size: int = 3,
     distance: float = CAMERA_DISTANCE,
+    cube_color: str = CUBE_COLOR,
 ) -> str:
     """
     Build an SVG string for the cube state.
@@ -431,6 +439,8 @@ def build_svg(
         rotations: List of (axis, degrees) rotation pairs.
         cube_size: Cube dimension (2 for 2x2, 3 for 3x3, etc.).
         distance: Camera distance for perspective projection.
+        cube_color: Hex color for cube body between stickers.
+            Supports alpha channel (``#rrggbbaa``).
 
     Returns:
         Complete SVG document as a string.
@@ -457,10 +467,17 @@ def build_svg(
             to_svg_coords(c) for c in corners_2d
         ]
 
+        cr, cg, cb, body_opacity = hex_to_rgb(cube_color)
+        body_rgb = rgb_to_hex(cr, cg, cb)
+        opacity_attr = (
+            f' fill-opacity="{body_opacity:.2f}"'
+            if body_opacity < 1.0
+            else ''
+        )
         body_polygon = (
             '  <polygon'
             f' points="{points_to_svg(svg_corners)}"'
-            f' fill="{CUBE_COLOR}" />'
+            f' fill="{body_rgb}"{opacity_attr} />'
         )
 
         face_start = face_state_idx * face_size
@@ -561,6 +578,7 @@ def render_cube(
     cube_size: int | None = None,
     rotation: str = 'y45x-35',
     distance: float = CAMERA_DISTANCE,
+    cube_color: str = CUBE_COLOR,
 ) -> str:
     """
     Render a 3D perspective cube image.
@@ -574,6 +592,9 @@ def render_cube(
         distance: Camera distance for perspective projection.
             Larger values produce a flatter image closer to
             orthographic; smaller values exaggerate depth.
+        cube_color: Hex color for cube body between stickers.
+            Supports alpha channel (``#rrggbbaa``), e.g.
+            ``#11111180`` for semi-transparent black.
 
     Returns:
         SVG string of the cube.
@@ -589,4 +610,4 @@ def render_cube(
     rotations = parse_rotation(rotation)
     state, n = get_state(source, cube_size)
 
-    return build_svg(state, size, rotations, n, distance)
+    return build_svg(state, size, rotations, n, distance, cube_color)
