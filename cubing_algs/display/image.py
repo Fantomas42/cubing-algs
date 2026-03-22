@@ -4,6 +4,7 @@ import operator
 import re
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.palettes import hex_to_rgb
 from cubing_algs.display.vcube import DEFAULT_PALETTE
@@ -22,6 +23,21 @@ CUBE_COLOR = '#111111'
 STICKER_GAP = 0.08
 VISIBILITY_EPSILON = 1e-9
 CAMERA_DISTANCE = 10.0
+
+# Adjacent face layout positions relative to the U face in top view
+TOP_VIEW_LAYOUT: dict[str, str] = {
+    'B': 'top',
+    'L': 'left',
+    'R': 'right',
+    'F': 'bottom',
+}
+
+# Strip projection depth in cell units
+STRIP_DEPTH = 0.4
+
+# Inward taper per side as fraction of U face edge length
+STRIP_TAPER = 0.05
+
 
 # Vertices of unit cube at (+/-1, +/-1, +/-1)
 CUBE_VERTICES: list[Point3D] = [
@@ -220,18 +236,20 @@ def points_to_svg(points: list[Point2D]) -> str:
     )
 
 
-def build_sticker_polygon(
+def build_sticker_polygon_points(
     svg_corners: list[Point2D],
     row: int,
     col: int,
-    fill: str,
     cube_size: int,
-) -> str:
+) -> list[Point2D]:
     """
-    Build an SVG polygon element for a single sticker.
+    Compute corner points for a single sticker within a face quad.
+
+    Uses bilinear interpolation with gap insets to position
+    the sticker within the face grid.
 
     Returns:
-        SVG polygon element string.
+        Four corner points [TL, TR, BR, BL] of the sticker.
 
     """
     t0_col = col / cube_size
@@ -259,12 +277,32 @@ def build_sticker_polygon(
         svg_corners[3], svg_corners[2], t1_col,
     )
 
-    s_tl = lerp_2d(top_edge_0, bot_edge_0, t0_row)
-    s_tr = lerp_2d(top_edge_1, bot_edge_1, t0_row)
-    s_br = lerp_2d(top_edge_1, bot_edge_1, t1_row)
-    s_bl = lerp_2d(top_edge_0, bot_edge_0, t1_row)
+    return [
+        lerp_2d(top_edge_0, bot_edge_0, t0_row),
+        lerp_2d(top_edge_1, bot_edge_1, t0_row),
+        lerp_2d(top_edge_1, bot_edge_1, t1_row),
+        lerp_2d(top_edge_0, bot_edge_0, t1_row),
+    ]
 
-    pts = points_to_svg([s_tl, s_tr, s_br, s_bl])
+
+def build_sticker_polygon(
+    svg_corners: list[Point2D],
+    row: int,
+    col: int,
+    fill: str,
+    cube_size: int,
+) -> str:
+    """
+    Build an SVG polygon element for a single sticker.
+
+    Returns:
+        SVG polygon element string.
+
+    """
+    corners = build_sticker_polygon_points(
+        svg_corners, row, col, cube_size,
+    )
+    pts = points_to_svg(corners)
     return (
         f'  <polygon'
         f' points="{pts}"'
@@ -330,7 +368,7 @@ def build_face_stickers(
     return stickers
 
 
-def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
+def build_cube_svg(  # noqa: PLR0913, PLR0914, PLR0917
     state: str,
     size: int,
     rotations: list[tuple[str, int]],
@@ -409,6 +447,254 @@ def build_svg(  # noqa: PLR0913, PLR0914, PLR0917
     return assemble_svg(size, face_groups)
 
 
+def build_polygon(
+    corners: list[Point2D], fill: str,
+    extra_attrs: str = '',
+) -> str:
+    """
+    Build an SVG polygon element from corner points.
+
+    Returns:
+        SVG polygon element string.
+
+    """
+    pts = points_to_svg(corners)
+    return (
+        f'  <polygon'
+        f' points="{pts}"'
+        f' fill="{fill}"{extra_attrs}/>'
+    )
+
+
+def strip_corners(  # noqa: PLR0913, PLR0917
+    layout: str,
+    u_left: float, u_top: float,
+    u_size: float, depth: float, taper: float,
+) -> list[Point2D]:
+    """
+    Compute trapezoid corners for an adjacent strip.
+
+    Corners are ordered top-left, top-right, bottom-right,
+    bottom-left for consistent bilinear interpolation.
+
+    Returns:
+        Four corner points of the strip trapezoid.
+
+    """
+    u_right = u_left + u_size
+    u_bottom = u_top + u_size
+
+    if layout == 'top':
+        return [
+            (u_left + taper, u_top - depth),
+            (u_right - taper, u_top - depth),
+            (u_right, u_top),
+            (u_left, u_top),
+        ]
+    if layout == 'bottom':
+        return [
+            (u_left, u_bottom),
+            (u_right, u_bottom),
+            (u_right - taper, u_bottom + depth),
+            (u_left + taper, u_bottom + depth),
+        ]
+    if layout == 'left':
+        return [
+            (u_left - depth, u_top + taper),
+            (u_left, u_top),
+            (u_left, u_bottom),
+            (u_left - depth, u_bottom - taper),
+        ]
+    # right
+    return [
+        (u_right, u_top),
+        (u_right + depth, u_top + taper),
+        (u_right + depth, u_bottom - taper),
+        (u_right, u_bottom),
+    ]
+
+
+def subdivide_quad(
+    corners: list[Point2D],
+    idx: int, count: int,
+    *,
+    horizontal: bool,
+    gap_frac: float,
+) -> list[Point2D]:
+    """
+    Subdivide a quadrilateral into one cell of a 1xN or Nx1 grid.
+
+    Uses bilinear interpolation with gap insets, matching the
+    approach used by :func:`build_sticker_polygon`.
+
+    Returns:
+        Four corner points of the subdivided sticker.
+
+    """
+    if horizontal:
+        t0 = idx / count + gap_frac / count
+        t1 = (idx + 1) / count - gap_frac / count
+        top0 = lerp_2d(corners[0], corners[1], t0)
+        top1 = lerp_2d(corners[0], corners[1], t1)
+        bot0 = lerp_2d(corners[3], corners[2], t0)
+        bot1 = lerp_2d(corners[3], corners[2], t1)
+        return [
+            lerp_2d(top0, bot0, gap_frac),
+            lerp_2d(top1, bot1, gap_frac),
+            lerp_2d(top1, bot1, 1 - gap_frac),
+            lerp_2d(top0, bot0, 1 - gap_frac),
+        ]
+
+    t0 = idx / count + gap_frac / count
+    t1 = (idx + 1) / count - gap_frac / count
+    left0 = lerp_2d(corners[0], corners[3], t0)
+    left1 = lerp_2d(corners[0], corners[3], t1)
+    right0 = lerp_2d(corners[1], corners[2], t0)
+    right1 = lerp_2d(corners[1], corners[2], t1)
+    return [
+        lerp_2d(left0, right0, gap_frac),
+        lerp_2d(left0, right0, 1 - gap_frac),
+        lerp_2d(left1, right1, 1 - gap_frac),
+        lerp_2d(left1, right1, gap_frac),
+    ]
+
+
+def build_strip_group(  # noqa: PLR0913, PLR0917
+    face_name: str,
+    top_row: str,
+    layout: str,
+    n: int,
+    corners: list[Point2D],
+    body_rgb: str,
+    opacity_attr: str,
+    face_colors: dict[str, str],
+) -> str:
+    """
+    Build SVG group for one projected adjacent strip.
+
+    Returns:
+        SVG group element string.
+
+    """
+    is_horizontal = layout in {'top', 'bottom'}
+
+    if layout in {'top', 'right'}:
+        indices = list(range(n - 1, -1, -1))
+    else:
+        indices = list(range(n))
+
+    body = build_polygon(corners, body_rgb, opacity_attr)
+
+    stickers = [
+        build_polygon(
+            subdivide_quad(
+                corners, pos, n,
+                horizontal=is_horizontal,
+                gap_frac=STICKER_GAP,
+            ),
+            face_colors.get(top_row[idx], '#888888'),
+        )
+        for pos, idx in enumerate(indices)
+    ]
+
+    return (
+        f'<g class="face-{face_name}">\n'
+        + body + '\n'
+        + '\n'.join(stickers)
+        + '\n</g>'
+    )
+
+
+def build_top_view_svg(  # noqa: PLR0914
+    state: str,
+    size: int,
+    cube_size: int = 3,
+    cube_color: str = CUBE_COLOR,
+    palette_name: str = DEFAULT_PALETTE,
+) -> str:
+    """
+    Build a flat 2D top-face SVG showing U face and adjacent strips.
+
+    Renders the U face as a central square with projected
+    trapezoid strips from the F, R, B, L faces flush against
+    the U face edges.
+
+    Args:
+        state: Facelet string (6 * cube_size² characters).
+        size: Image dimension in pixels.
+        cube_size: Cube dimension (2 for 2x2, 3 for 3x3, etc.).
+        cube_color: Hex color for cube body between stickers.
+        palette_name: Color palette name for sticker colors.
+
+    Returns:
+        Complete SVG document as a string.
+
+    """
+    face_colors = resolve_face_colors(palette_name)
+    n = cube_size
+    face_size = n * n
+
+    margin = size * 0.05
+    total_cells = n + 2 * STRIP_DEPTH
+    cell = (size - 2 * margin) / total_cells
+
+    cr, cg, cb, body_opacity = hex_to_rgba(cube_color)
+    body_rgb = f'#{cr:02x}{cg:02x}{cb:02x}'
+    opacity_attr = (
+        f' fill-opacity="{body_opacity:.2f}"'
+        if body_opacity < 1.0
+        else ''
+    )
+
+    u_origin = margin + STRIP_DEPTH * cell
+    u_size = n * cell
+    depth = STRIP_DEPTH * cell
+    taper = STRIP_TAPER * u_size
+
+    # U face
+    u_corners: list[Point2D] = [
+        (u_origin, u_origin),
+        (u_origin + u_size, u_origin),
+        (u_origin + u_size, u_origin + u_size),
+        (u_origin, u_origin + u_size),
+    ]
+    body = build_polygon(u_corners, body_rgb, opacity_attr)
+
+    stickers: list[str] = []
+    for row in range(n):
+        for col in range(n):
+            sticker_corners = build_sticker_polygon_points(
+                u_corners, row, col, n,
+            )
+            color_key = state[row * n + col]
+            fill = face_colors.get(color_key, '#888888')
+            stickers.append(build_polygon(
+                sticker_corners, fill,
+            ))
+
+    face_groups: list[str] = [
+        '<g class="face-U">\n'
+        + body + '\n'
+        + '\n'.join(stickers)
+        + '\n</g>',
+    ]
+
+    # Adjacent strips as projected trapezoids
+    for face_name, layout in TOP_VIEW_LAYOUT.items():
+        face_start = FACE_INDEXES[face_name] * face_size
+        top_row = state[face_start:face_start + n]
+        corners = strip_corners(
+            layout, u_origin, u_origin, u_size,
+            depth, taper,
+        )
+        face_groups.append(build_strip_group(
+            face_name, top_row, layout, n, corners,
+            body_rgb, opacity_attr, face_colors,
+        ))
+
+    return assemble_svg(size, face_groups)
+
+
 def assemble_svg(
     size: int,
     face_groups: list[str],
@@ -475,23 +761,26 @@ def render_cube(  # noqa: PLR0913
     *,
     size: int = 200,
     cube_size: int | None = None,
+    view: str = '3d',
     rotation: str = 'y45x-34',
     distance: float = CAMERA_DISTANCE,
     cube_color: str = CUBE_COLOR,
     palette_name: str = DEFAULT_PALETTE,
 ) -> str:
     """
-    Render a 3D perspective cube image.
+    Render a cube image.
 
     Args:
         source: VCube or Algorithm to render.
         size: Image dimension in pixels.
-        rotation: Axis-angle rotation string.
         cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
             etc.). Inferred from source if None.
-        distance: Camera distance for perspective projection.
-            Larger values produce a flatter image closer to
-            orthographic; smaller values exaggerate depth.
+        view: Rendering mode. ``'3d'`` for perspective view,
+            ``'top'`` for flat top-face with adjacent strips.
+        rotation: Axis-angle rotation string (3d view only).
+        distance: Camera distance for perspective projection
+            (3d view only). Larger values produce a flatter
+            image; smaller values exaggerate depth.
         cube_color: Hex color for cube body between stickers.
             Supports alpha channel (``#rrggbbaa``), e.g.
             ``#11111180`` for semi-transparent black.
@@ -501,26 +790,35 @@ def render_cube(  # noqa: PLR0913
         SVG string of the cube.
 
     Raises:
-        ValueError: if size is not positive or distance is
-            too small.
+        ValueError: if size is not positive, distance is
+            too small, or view is invalid.
 
     """
-    min_distance = math.sqrt(3)
-    if distance <= min_distance:
-        msg = (
-            f'distance must be greater than sqrt(3) '
-            f'(~{min_distance:.3f}), got {distance}'
-        )
-        raise ValueError(msg)
-
     if size < 1:
         msg = f'size must be positive, got {size}'
         raise ValueError(msg)
 
-    rotations = parse_rotation(rotation)
     state, n = get_state(source, cube_size)
 
-    return build_svg(
-        state, size, rotations, n, distance,
-        cube_color, palette_name,
-    )
+    if view == 'top':
+        return build_top_view_svg(
+            state, size, n, cube_color, palette_name,
+        )
+
+    if view == '3d':
+        min_distance = math.sqrt(3)
+        if distance <= min_distance:
+            msg = (
+                f'distance must be greater than sqrt(3) '
+                f'(~{min_distance:.3f}), got {distance}'
+            )
+            raise ValueError(msg)
+
+        rotations = parse_rotation(rotation)
+        return build_cube_svg(
+            state, size, rotations, n, distance,
+            cube_color, palette_name,
+        )
+
+    msg = f"view must be '3d' or 'top', got {view!r}"
+    raise ValueError(msg)

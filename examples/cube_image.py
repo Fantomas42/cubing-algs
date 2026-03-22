@@ -36,6 +36,12 @@ parser.add_argument(
     help='Cube size: 2 for 2x2, 3 for 3x3, etc. (default: 3)',
 )
 parser.add_argument(
+    '-v', '--view',
+    choices=['3d', 'top'],
+    default='3d',
+    help='Rendering mode: 3d perspective or top face plan view (default: 3d)',
+)
+parser.add_argument(
     '-o', '--output',
     help='Output file path (default: cube.svg in current directory)',
 )
@@ -50,6 +56,7 @@ svg = render_cube(
     size=args.size,
     rotation=args.rotation,
     cube_size=args.cube_size,
+    view=args.view,
 )
 
 out = Path(args.output) if args.output else Path('cube.svg')

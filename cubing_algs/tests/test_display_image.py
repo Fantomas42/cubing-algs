@@ -5,7 +5,8 @@ import unittest
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.display.image import CAMERA_DISTANCE
 from cubing_algs.display.image import assemble_svg
-from cubing_algs.display.image import build_svg
+from cubing_algs.display.image import build_cube_svg
+from cubing_algs.display.image import build_top_view_svg
 from cubing_algs.display.image import compute_visible_faces
 from cubing_algs.display.image import hex_to_rgba
 from cubing_algs.display.image import lerp_2d
@@ -183,7 +184,7 @@ class BuildSvgTestCase(unittest.TestCase):
     def test_returns_valid_svg(self) -> None:
         """Test that output is a valid SVG string."""
         rotations = [('y', -45), ('x', 34)]
-        svg = build_svg(SOLVED_FACELETS_3x3x3, 200, rotations)
+        svg = build_cube_svg(SOLVED_FACELETS_3x3x3, 200, rotations)
         self.assertTrue(svg.startswith('<svg'))
         self.assertTrue(svg.endswith('</svg>'))
         self.assertIn(
@@ -192,28 +193,28 @@ class BuildSvgTestCase(unittest.TestCase):
 
     def test_contains_viewbox(self) -> None:
         """Test that SVG has correct viewBox."""
-        svg = build_svg(
+        svg = build_cube_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('viewBox="0 0 200 200"', svg)
 
     def test_custom_size(self) -> None:
         """Test custom size is reflected in viewBox."""
-        svg = build_svg(
+        svg = build_cube_svg(
             SOLVED_FACELETS_3x3x3, 400, [('y', -45), ('x', 34)],
         )
         self.assertIn('viewBox="0 0 400 400"', svg)
 
     def test_contains_polygon_elements(self) -> None:
         """Test that SVG contains polygon elements."""
-        svg = build_svg(
+        svg = build_cube_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('<polygon', svg)
 
     def test_no_gradient_defs(self) -> None:
         """Test that SVG does not contain gradient definitions."""
-        svg = build_svg(
+        svg = build_cube_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertNotIn('<defs>', svg)
@@ -223,14 +224,14 @@ class BuildSvgTestCase(unittest.TestCase):
         """Test scrambled state produces valid SVG."""
         cube = VCube()
         cube.rotate("R U R' U'")
-        svg = build_svg(
+        svg = build_cube_svg(
             cube.state, 200, [('y', -45), ('x', 34)],
         )
         self.assertTrue(svg.startswith('<svg'))
 
     def test_contains_per_face_groups(self) -> None:
         """Test that SVG has per-face groups."""
-        svg = build_svg(
+        svg = build_cube_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', -45), ('x', 34)],
         )
         self.assertIn('class="face-', svg)
@@ -243,7 +244,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
         """After R move, U-face should include F-face colors."""
         cube = VCube()
         cube.rotate('R')
-        svg = build_svg(
+        svg = build_cube_svg(
             cube.state, 200, [('y', 45), ('x', -25)],
             palette_name='default',
         )
@@ -253,7 +254,7 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
 
     def test_solved_cube_u_face_all_white(self) -> None:
         """Solved cube U-face stickers should all be white."""
-        svg = build_svg(
+        svg = build_cube_svg(
             SOLVED_FACELETS_3x3x3, 200, [('y', 45), ('x', -25)],
             palette_name='default',
         )
@@ -513,4 +514,104 @@ class RenderCubeCustomParametersTestCase(unittest.TestCase):
         """Test rendering with custom distance."""
         cube = VCube()
         result = render_cube(cube, distance=20.0)
+        self.assertTrue(result.startswith('<svg'))
+
+
+class BuildTopViewSvgTestCase(unittest.TestCase):
+    """Tests for flat top-face SVG rendering."""
+
+    def test_returns_valid_svg(self) -> None:
+        """Test that output is a valid SVG wrapper."""
+        result = build_top_view_svg(SOLVED_FACELETS_3x3x3, 200)
+        self.assertTrue(result.startswith('<svg'))
+        self.assertTrue(result.endswith('</svg>'))
+        self.assertIn('xmlns=', result)
+
+    def test_contains_u_face_group(self) -> None:
+        """Test that U face group is present."""
+        result = build_top_view_svg(SOLVED_FACELETS_3x3x3, 200)
+        self.assertIn('class="face-U"', result)
+
+    def test_contains_adjacent_face_groups(self) -> None:
+        """Test that all adjacent face groups are present."""
+        result = build_top_view_svg(SOLVED_FACELETS_3x3x3, 200)
+        for face in ('F', 'R', 'B', 'L'):
+            with self.subTest(face=face):
+                self.assertIn(f'class="face-{face}"', result)
+
+    def test_sticker_count_3x3(self) -> None:
+        """Test correct number of polygon elements for 3x3."""
+        result = build_top_view_svg(SOLVED_FACELETS_3x3x3, 200)
+        # 9 U stickers + 4 * 3 adjacent = 21 sticker polygons
+        # Plus 5 body polygons = 26 total
+        polygon_count = result.count('<polygon')
+        self.assertEqual(polygon_count, 26)
+
+    def test_2x2_cube(self) -> None:
+        """Test rendering a 2x2 cube."""
+        state = 'U' * 4 + 'R' * 4 + 'F' * 4 + 'D' * 4 + 'L' * 4 + 'B' * 4
+        result = build_top_view_svg(state, 200, cube_size=2)
+        self.assertTrue(result.startswith('<svg'))
+        # 4 U stickers + 4 * 2 adjacent = 12 + 5 body = 17
+        self.assertEqual(result.count('<polygon'), 17)
+
+    def test_4x4_cube(self) -> None:
+        """Test rendering a 4x4 cube."""
+        state = 'U' * 16 + 'R' * 16 + 'F' * 16 + 'D' * 16 + 'L' * 16 + 'B' * 16
+        result = build_top_view_svg(state, 200, cube_size=4)
+        self.assertTrue(result.startswith('<svg'))
+        # 16 U stickers + 4 * 4 adjacent = 32 + 5 body = 37
+        self.assertEqual(result.count('<polygon'), 37)
+
+    def test_cube_color_with_alpha(self) -> None:
+        """Test top view with semi-transparent cube body."""
+        result = build_top_view_svg(
+            SOLVED_FACELETS_3x3x3, 200,
+            cube_color='#11111180',
+        )
+        self.assertIn('fill-opacity=', result)
+
+
+class RenderCubeTopViewTestCase(unittest.TestCase):
+    """Tests for render_cube with view='top'."""
+
+    def test_view_top_returns_valid_svg(self) -> None:
+        """Test that top view returns valid SVG."""
+        cube = VCube()
+        result = render_cube(cube, view='top')
+        self.assertTrue(result.startswith('<svg'))
+        self.assertIn('class="face-U"', result)
+
+    def test_view_3d_is_default(self) -> None:
+        """Test that default view is 3d."""
+        cube = VCube()
+        default = render_cube(cube)
+        explicit = render_cube(cube, view='3d')
+        self.assertEqual(default, explicit)
+
+    def test_invalid_view_raises(self) -> None:
+        """Test that invalid view name raises ValueError."""
+        cube = VCube()
+        with self.assertRaises(ValueError, msg='view must be'):
+            render_cube(cube, view='invalid')
+
+    def test_view_top_ignores_rotation(self) -> None:
+        """Test that rotation param doesn't error in top view."""
+        cube = VCube()
+        result = render_cube(
+            cube, view='top', rotation='x90y45',
+        )
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_algorithm_with_top_view(self) -> None:
+        """Test top view with Algorithm source."""
+        algo = Algorithm.parse_moves('R')
+        result = render_cube(algo, view='top')
+        self.assertTrue(result.startswith('<svg'))
+        self.assertIn('class="face-U"', result)
+
+    def test_top_view_2x2(self) -> None:
+        """Test top view with 2x2 cube."""
+        cube = VCube(size=2)
+        result = render_cube(cube, view='top')
         self.assertTrue(result.startswith('<svg'))
