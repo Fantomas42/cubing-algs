@@ -87,12 +87,17 @@ html_parts.append("""
          display: flex; flex-direction: column; align-items: center;
          margin: 0; padding: 20px; min-height: 100vh;
          overflow-x: hidden; }
-  body::before { content: ''; position: fixed; inset: 0; z-index: -1;
+  body::before { content: ''; position: fixed; inset: 0;
+         z-index: -1;
          background:
-           radial-gradient(ellipse 80% 60% at 20% 10%, rgba(88,28,135,0.25), transparent),
-           radial-gradient(ellipse 60% 50% at 80% 20%, rgba(15,82,186,0.2), transparent),
-           radial-gradient(ellipse 70% 40% at 50% 90%, rgba(6,95,70,0.15), transparent),
-           radial-gradient(ellipse 40% 30% at 10% 70%, rgba(157,23,77,0.12), transparent); }
+           radial-gradient(ellipse 80% 60% at 20% 10%,
+             rgba(88,28,135,0.25), transparent),
+           radial-gradient(ellipse 60% 50% at 80% 20%,
+             rgba(15,82,186,0.2), transparent),
+           radial-gradient(ellipse 70% 40% at 50% 90%,
+             rgba(6,95,70,0.15), transparent),
+           radial-gradient(ellipse 40% 30% at 10% 70%,
+             rgba(157,23,77,0.12), transparent); }
   .cubes { display: flex; gap: 40px; flex-wrap: wrap;
            justify-content: center; }
   .axis-group { text-align: center; }
