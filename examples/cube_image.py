@@ -21,7 +21,7 @@ parser.add_argument(
 parser.add_argument(
     '-r', '--rotation',
     default='y45x-35',
-    help='Camera rotation string (default: y45x-35)',
+    help='Camera rotation string (default: y45x-34)',
 )
 parser.add_argument(
     '-s', '--size',
