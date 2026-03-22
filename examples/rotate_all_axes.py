@@ -85,7 +85,8 @@ html_parts.append("""
   .frame { display: none; }
   .frame.active { display: block; }
   .frame svg { display: block; border-radius: 12px;
-               background: linear-gradient(135deg, #3b2667, #1a1a2e 50%, #1f4068);
+               background: linear-gradient(135deg, #3b2667,
+                                           #1a1a2e 50%, #1f4068);
                box-shadow: 0 4px 20px rgba(0,0,0,0.5),
                            inset 0 1px 0 rgba(255,255,255,0.08); }
   .controls { margin: 20px 0; display: flex; gap: 16px;
@@ -124,8 +125,8 @@ html_parts.append("""
 <p class="info">CUBE_INFO_HTML_PLACEHOLDER</p>
 <div class="controls">
   <label>Angle</label>
-  <input type="range" id="angle-slider" min="0" max="359" value="0">
-  <input type="number" id="angle-input" min="0" max="359" value="0">
+  <input type="range" id="angle-slider" min="0" max="359" value="45">
+  <input type="number" id="angle-input" min="0" max="359" value="45">
 </div>
 <div class="controls">
   <label>Speed</label>
@@ -133,7 +134,7 @@ html_parts.append("""
   <span id="speed-val">50 ms</span>
 </div>
 <div class="controls">
-  <button id="play-btn">⏸︎ Pause</button>
+  <button id="play-btn">⏵︎ Play</button>
 </div>
 <div class="cubes">
 """)
@@ -145,8 +146,7 @@ for group_idx, group in enumerate(axis_groups):
         print(f'Generating {label}...')
         html_parts.append(
             f'<div class="axis-group" data-axis="{axis_id}">\n'
-            f'  <h2>{label}</h2>\n'
-            f'  <div class="angle" data-angle-display>0°</div>\n',
+            f'  <h2>{label}</h2>\n',
         )
         for angle in range(360):
             rotation = rotation_fmt.format(angle=angle)
@@ -156,7 +156,7 @@ for group_idx, group in enumerate(axis_groups):
             assert svg is not None  # noqa: S101
             svg = svg.replace('id="g-', f'id="{prefix}g-')
             svg = svg.replace('url(#g-', f'url(#{prefix}g-')
-            active = ' active' if angle == 0 else ''
+            active = ' active' if angle == 45 else ''
             html_parts.append(
                 f'  <div class="frame{active}" data-angle="{angle}">'
                 f'{svg}</div>\n',
@@ -168,8 +168,8 @@ html_parts.append("""\
 </div>
 <script>
 const groups = document.querySelectorAll('.axis-group');
-let current = 0;
-let playing = true;
+let current = 45;
+let playing = false;
 let interval;
 
 const angleSlider = document.getElementById('angle-slider');
@@ -180,7 +180,6 @@ function goTo(angle) {
     const frames = g.querySelectorAll('.frame');
     frames[current].classList.remove('active');
     frames[angle].classList.add('active');
-    g.querySelector('[data-angle-display]').textContent = angle + '°';
   });
   current = angle;
   angleSlider.value = angle;
@@ -205,11 +204,12 @@ function startInterval() {
 
 document.getElementById('loading').remove();
 document.getElementById('content').classList.add('ready');
-startInterval();
 
 document.getElementById('play-btn').addEventListener('click', () => {
   playing = !playing;
-  document.getElementById('play-btn').textContent = playing ? '⏸︎ Pause' : '⏵︎ Play';
+  document.getElementById('play-btn').textContent = (
+    playing ? '⏸︎ Pause' : '⏵︎ Play'
+  );
   if (playing) startInterval(); else clearInterval(interval);
 });
 
