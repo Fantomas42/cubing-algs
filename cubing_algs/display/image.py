@@ -739,7 +739,7 @@ def get_state(
 
     """
     if isinstance(source, VCube):
-        n = cube_size if cube_size is not None else source.size
+        n = source.size
         return source.state, n
 
     if isinstance(source, Algorithm):
