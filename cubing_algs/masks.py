@@ -1,11 +1,12 @@
 """Binary masks for identifying and manipulating cube regions and pieces."""
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import Mask
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 
 
-def union_masks(*masks: str) -> str:
+def union_masks(*masks: Mask) -> Mask:
     """
     Perform the union (logical OR) of multiple binary masks.
 
@@ -17,11 +18,18 @@ def union_masks(*masks: str) -> str:
     Returns:
         The union of all masks as a binary string.
 
+    Raises:
+        ValueError: If masks have different lengths.
+
     """
     if not masks:
         return ''
 
     length = len(masks[0])
+    if not all(len(m) == length for m in masks):
+        msg = 'All masks must have the same length'
+        raise ValueError(msg)
+
     result = 0
 
     for mask in masks:
@@ -30,7 +38,7 @@ def union_masks(*masks: str) -> str:
     return format(result, f'0{ length }b')
 
 
-def intersection_masks(*masks: str) -> str:
+def intersection_masks(*masks: Mask) -> Mask:
     """
     Perform the intersection (logical AND) of multiple binary masks.
 
@@ -42,11 +50,18 @@ def intersection_masks(*masks: str) -> str:
     Returns:
         The intersection of all masks as a binary string.
 
+    Raises:
+        ValueError: If masks have different lengths.
+
     """
     if not masks:
         return ''
 
     length = len(masks[0])
+    if not all(len(m) == length for m in masks):
+        msg = 'All masks must have the same length'
+        raise ValueError(msg)
+
     result = int(masks[0], 2)
 
     for mask in masks[1:]:
@@ -55,7 +70,7 @@ def intersection_masks(*masks: str) -> str:
     return format(result, f'0{ length }b')
 
 
-def negate_mask(mask: str) -> str:
+def negate_mask(mask: Mask) -> Mask:
     """
     Invert a binary mask (logical NOT).
 
@@ -80,11 +95,11 @@ def negate_mask(mask: str) -> str:
     return format(negated, f'0{ length }b')
 
 
-_MASK_CACHE: dict[str, tuple[bool, ...]] = {}
+_MASK_CACHE: dict[Mask, tuple[bool, ...]] = {}
 _CACHE_SIZE_LIMIT = 1000  # Prevent unbounded memory growth
 
 
-def facelets_masked(facelets: CubeFacelets, mask: str) -> CubeFacelets:
+def facelets_masked(facelets: CubeFacelets, mask: Mask) -> CubeFacelets:
     """
     Apply a binary mask to a facelets string.
 
@@ -126,7 +141,7 @@ def facelets_masked(facelets: CubeFacelets, mask: str) -> CubeFacelets:
     )
 
 
-def state_masked(state: CubeFacelets, mask: str) -> CubeFacelets:
+def state_masked(state: CubeFacelets, mask: Mask) -> CubeFacelets:
     """
     Apply a binary mask to a cube state.
 
@@ -151,7 +166,7 @@ def state_masked(state: CubeFacelets, mask: str) -> CubeFacelets:
     )
 
 
-FULL_MASK = '1' * 54
+FULL_MASK: Mask = '1' * 54
 
 CENTERS_MASK = (
     '000010000'

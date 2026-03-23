@@ -36,6 +36,11 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
         """Test union empty."""
         self.assertEqual(union_masks(), '')
 
+    def test_union_length_mismatch(self) -> None:
+        """Test union raises ValueError on different length masks."""
+        with self.assertRaises(ValueError):
+            union_masks('1010', '101')
+
     def test_intersection(self) -> None:
         """Test intersection."""
         self.assertEqual(intersection_masks('1010', '1100'), '1000')
@@ -54,6 +59,11 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
     def test_intersection_empty(self) -> None:
         """Test intersection empty."""
         self.assertEqual(intersection_masks(), '')
+
+    def test_intersection_length_mismatch(self) -> None:
+        """Test intersection raises ValueError on different length masks."""
+        with self.assertRaises(ValueError):
+            intersection_masks('1010', '10100')
 
     def test_negate(self) -> None:
         """Test negate."""
@@ -129,7 +139,7 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
         mask = '0' * 54
         result = state_masked(INITIAL_STATE, mask)
 
-        self.assertTrue(result.replace('0', '-'), mask)
+        self.assertEqual(result, '-' * 54)
 
     def test_state_masked_partial(self) -> None:
         """Test state masked partial."""

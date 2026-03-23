@@ -4,6 +4,7 @@ import operator
 import re
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import Mask
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.palettes import hex_to_rgb
@@ -762,7 +763,7 @@ def render_cube(  # noqa: PLR0913
     size: int = 200,
     cube_size: int | None = None,
     view: str = '3d',
-    mask: str = '',  # noqa: ARG001
+    mask: Mask = '',  # noqa: ARG001
     rotation: str = 'y45x-34',
     distance: float = CAMERA_DISTANCE,
     cube_color: str = CUBE_COLOR,

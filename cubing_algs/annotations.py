@@ -28,6 +28,9 @@ type Orientation = list[int]
 # Cube facelets
 type CubeFacelets = str
 
+# Binary mask (54-character string of '0' and '1')
+type Mask = str
+
 # Cube cubies tuple (cp, co, ep, eo) - without spatial orientation
 type CubeCubies = tuple[
     Permutation, Orientation,

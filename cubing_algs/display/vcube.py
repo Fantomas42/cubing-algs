@@ -3,6 +3,7 @@ import os
 import re
 from typing import TYPE_CHECKING
 
+from cubing_algs.annotations import Mask
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import F2L_ADJACENT_FACES
 from cubing_algs.constants import F2L_FACE_ORIENTATIONS
@@ -96,7 +97,7 @@ class VCubeDisplay:
         elif self.facelet_type in {'condensed', 'emoji'}:
             self.facelet_size = 1
 
-    def compute_mask(self, cube: 'VCube', mask: str) -> str:
+    def compute_mask(self, cube: 'VCube', mask: Mask) -> Mask:
         """
         Convert mask string to facelets format for display filtering.
 
@@ -173,7 +174,7 @@ class VCubeDisplay:
         ]
 
     def display(self, mode: str = '', orientation: str = '',  # noqa: C901
-                mask: str = '') -> str:
+                mask: Mask = '') -> str:
         """
         Generate formatted visual representation of the cube state.
 

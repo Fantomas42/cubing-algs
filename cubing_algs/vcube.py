@@ -1,5 +1,6 @@
 """Virtual cube implementation for simulating moves and tracking state."""
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import Mask
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
@@ -305,7 +306,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return cube
 
     def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
-                mask: str = '', palette: str = '',
+                mask: Mask = '', palette: str = '',
                 effect: str = '', facelet: str = '',
                 style: str = '') -> str:
         """
@@ -329,7 +330,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         )
 
     def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
-             mask: str = '', palette: str = '',
+             mask: Mask = '', palette: str = '',
              effect: str = '', facelet: str = '',
              style: str = '') -> None:
         """Print a visual representation of the cube."""
@@ -343,7 +344,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         )
 
     def image(self, *, size: int = 200,  # noqa: PLR0913
-              view: str = '3d', mask: str = '',
+              view: str = '3d', mask: Mask = '',
               rotation: str = 'y45x-34',
               distance: float = 10.0,
               cube_color: str = '#111111',
