@@ -13,6 +13,7 @@ from cubing_algs.cycles import compute_cycles
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
 from cubing_algs.memory import MemoryData
@@ -20,11 +21,12 @@ from cubing_algs.memory import compute_memory
 from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
+from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 from cubing_algs.structure import StructureData
 from cubing_algs.structure import compute_structure
 
 if TYPE_CHECKING:
-    from cubing_algs.vcube import VCube  # pragma: no cover
+    from cubing_algs.vcube import VCube
 
 
 class Algorithm(UserList[Move]):  # noqa: PLR0904
@@ -396,26 +398,50 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             for m in self
         )
 
-    def show(self, mode: str = '') -> 'VCube':
+    def show(self, size: int = 3, mode: str = '',
+             *, impact_mask: bool = True) -> 'VCube':
         """
-        Visualize the algorithm's effect on a 3x3x3 cube.
+        Visualize the algorithm's effect on a cube.
 
         Creates a VCube, applies this algorithm to it, and displays the result
         with a mask showing which facelets are affected by the algorithm.
 
         Args:
+            size: Size of the cube.
             mode: Display mode for the cube visualization.
+            impact_mask: Show affected facelets with a mask.
 
         Returns:
             A VCube object with the algorithm applied.
 
         """
-        impacts = self.impacts
-        cube = impacts.cube
+        from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        cube = VCube(size=size)
+        cube.rotate(untime_moves(self))
+
+        cube = cube.oriented_copy('UF')
+
+        mask = ''
+        if impact_mask and size == 3:
+            state_unique_moved = cubies_to_facelets(
+                *cube.to_cubies,
+                UNIQUE_FACELETS_3x3x3,
+            )
+
+            mask = ''.join(
+                '0' if f1 == f2 else '1'
+                for f1, f2 in zip(
+                        UNIQUE_FACELETS_3x3x3,
+                        state_unique_moved,
+                        strict=True,
+                )
+            )
 
         cube.show(
             mode=mode,
-            mask=impacts.facelets_transformation_mask,
+            mask=mask,
         )
 
         return cube

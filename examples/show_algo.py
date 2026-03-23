@@ -31,7 +31,6 @@ show_algorithm(
 show_algorithm(
     'Sexy Move z2',
     "z2 R U R' U' z2",
-    orientation='DF',
 )
 show_algorithm(
     'PLL T-Perm',
@@ -42,4 +41,9 @@ show_algorithm(
     'OLL 21 H',
     "z2 F R U R' U' R U R' U' R U R' U' F' z2",
     mode='oll',
+)
+show_algorithm(
+    'Big cube',
+    'M2 S2 E2',
+    size=5,
 )

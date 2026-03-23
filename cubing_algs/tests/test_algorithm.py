@@ -7,6 +7,7 @@ from unittest.mock import patch
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.impacts import ImpactData
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.invert import invert_moves
@@ -808,6 +809,15 @@ class AlgorithmShowTestCase(unittest.TestCase):
 
         self.assertIsInstance(result, VCube)
 
+    def test_show_method_without_impact_mask(self) -> None:
+        """Test show method with impact_mask disabled."""
+        algo = Algorithm.parse_moves("R U R'")
+
+        with redirect_stdout(StringIO()):
+            result = algo.show(impact_mask=False)
+
+        self.assertIsInstance(result, VCube)
+
     def test_show_method_empty_algorithm(self) -> None:
         """Test show method with empty algorithm."""
         algo = Algorithm()
@@ -816,6 +826,17 @@ class AlgorithmShowTestCase(unittest.TestCase):
             result = algo.show()
 
         self.assertIsInstance(result, VCube)
+
+
+class AlgorithmImpactsTestCase(unittest.TestCase):
+    """Test cases for the Algorithm.impacts property."""
+
+    def test_impacts_property_returns_impact_data(self) -> None:
+        """Test impacts property returns ImpactData."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        impacts = algo.impacts
+
+        self.assertIsInstance(impacts, ImpactData)
 
 
 class AlgorithmErgonomicsTestCase(unittest.TestCase):
