@@ -445,3 +445,39 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         )
 
         return cube
+
+    def image(self, *, size: int = 200,  # noqa: PLR0913
+              cube_size: int | None = None,
+              view: str = '3d', mask: str = '',
+              rotation: str = 'y45x-34',
+              distance: float = 10.0,
+              cube_color: str = '#111111',
+              palette_name: str = 'default') -> str:
+        """
+        Render the algorithm's effect on a cube as an SVG image.
+
+        Args:
+            size: Image dimension in pixels.
+            cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
+                etc.). Defaults to 3 if not specified.
+            view: Rendering mode. ``'3d'`` for perspective view,
+                ``'top'`` for flat top-face with adjacent strips.
+            mask: Mask to apply on the cube.
+            rotation: Axis-angle rotation string (3d view only).
+            distance: Camera distance for perspective projection
+                (3d view only).
+            cube_color: Hex color for cube body between stickers.
+            palette_name: Color palette name for sticker colors.
+
+        Returns:
+            SVG string of the cube.
+
+        """
+        from cubing_algs.display.image import render_cube  # noqa: PLC0415
+
+        return render_cube(
+            self, size=size, cube_size=cube_size,
+            view=view, mask=mask, rotation=rotation,
+            distance=distance, cube_color=cube_color,
+            palette_name=palette_name,
+        )

@@ -1988,3 +1988,75 @@ class VCubeToAlgorithmTestCase(unittest.TestCase):
         for move in algorithm:
             self.assertTrue(move.is_valid)
             self.assertIn(move.modifier, ['', "'", '2'])
+
+
+class VCubeImageTestCase(unittest.TestCase):
+    """Tests for VCube.image() method."""
+
+    def test_returns_svg(self) -> None:
+        """Test that image() returns an SVG string."""
+        cube = VCube()
+        result = cube.image()
+        self.assertIsInstance(result, str)
+        self.assertTrue(result.startswith('<svg'))
+        self.assertTrue(result.endswith('</svg>'))
+
+    def test_matches_render_cube(self) -> None:
+        """Test that image() matches render_cube() output."""
+        from cubing_algs.display.image import render_cube  # noqa: PLC0415
+
+        cube = VCube()
+        cube.rotate("R U R' U'")
+        self.assertEqual(cube.image(), render_cube(cube))
+
+    def test_3d_view(self) -> None:
+        """Test 3d view rendering."""
+        cube = VCube()
+        result = cube.image(view='3d')
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_top_view(self) -> None:
+        """Test top view rendering."""
+        cube = VCube()
+        result = cube.image(view='top')
+        self.assertTrue(result.startswith('<svg'))
+        self.assertIn('class="face-U"', result)
+
+    def test_custom_size(self) -> None:
+        """Test custom image size."""
+        cube = VCube()
+        result = cube.image(size=400)
+        self.assertIn('width="400"', result)
+        self.assertIn('height="400"', result)
+
+    def test_custom_rotation(self) -> None:
+        """Test custom rotation produces different SVG."""
+        cube = VCube()
+        default = cube.image()
+        rotated = cube.image(rotation='y90')
+        self.assertNotEqual(default, rotated)
+
+    def test_custom_cube_color(self) -> None:
+        """Test custom cube color."""
+        cube = VCube()
+        result = cube.image(cube_color='#ff0000')
+        self.assertIn('#ff0000', result)
+
+    def test_transparent_cube_color(self) -> None:
+        """Test transparent cube color with alpha."""
+        cube = VCube()
+        result = cube.image(cube_color='#11111180')
+        self.assertIn('fill-opacity', result)
+
+    def test_2x2_cube(self) -> None:
+        """Test rendering a 2x2 cube."""
+        cube = VCube(size=2)
+        result = cube.image()
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_scrambled_cube(self) -> None:
+        """Test rendering a scrambled cube."""
+        cube = VCube()
+        cube.rotate("R U R' U' F' D2 L B")
+        result = cube.image()
+        self.assertTrue(result.startswith('<svg'))

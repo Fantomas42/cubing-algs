@@ -865,3 +865,81 @@ class AlgorithmErgonomicsTestCase(unittest.TestCase):
         ergo = algo.ergonomics
 
         self.assertIsInstance(ergo, ErgonomicsData)
+
+
+class AlgorithmImageTestCase(unittest.TestCase):
+    """Tests for Algorithm.image() method."""
+
+    def test_returns_svg(self) -> None:
+        """Test that image() returns an SVG string."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.image()
+        self.assertIsInstance(result, str)
+        self.assertTrue(result.startswith('<svg'))
+        self.assertTrue(result.endswith('</svg>'))
+
+    def test_matches_render_cube(self) -> None:
+        """Test that image() matches render_cube() output."""
+        from cubing_algs.display.image import render_cube  # noqa: PLC0415
+
+        algo = Algorithm.parse_moves("R U R' U'")
+        self.assertEqual(algo.image(), render_cube(algo))
+
+    def test_matches_vcube_image(self) -> None:
+        """Test that Algorithm.image() matches VCube.image()."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        cube = VCube()
+        cube.rotate(algo)
+        self.assertEqual(algo.image(), cube.image())
+
+    def test_empty_algorithm(self) -> None:
+        """Test rendering an empty algorithm."""
+        algo = Algorithm()
+        result = algo.image()
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_3d_view(self) -> None:
+        """Test 3d view rendering."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(view='3d')
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_top_view(self) -> None:
+        """Test top view rendering."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(view='top')
+        self.assertTrue(result.startswith('<svg'))
+        self.assertIn('class="face-U"', result)
+
+    def test_custom_size(self) -> None:
+        """Test custom image size."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(size=300)
+        self.assertIn('width="300"', result)
+        self.assertIn('height="300"', result)
+
+    def test_cube_size_parameter(self) -> None:
+        """Test explicit cube_size parameter."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(cube_size=2)
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_custom_rotation(self) -> None:
+        """Test custom rotation produces different SVG."""
+        algo = Algorithm.parse_moves('R')
+        default = algo.image()
+        rotated = algo.image(rotation='y90')
+        self.assertNotEqual(default, rotated)
+
+    def test_custom_cube_color(self) -> None:
+        """Test custom cube color."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(cube_color='#ff0000')
+        self.assertIn('#ff0000', result)
+
+    def test_custom_distance(self) -> None:
+        """Test custom camera distance."""
+        algo = Algorithm.parse_moves('R')
+        default = algo.image()
+        closer = algo.image(distance=5.0)
+        self.assertNotEqual(default, closer)
