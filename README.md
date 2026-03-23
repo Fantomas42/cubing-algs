@@ -583,6 +583,83 @@ The default orientation is **'UF'**, following the **WCA (World Cube Association
 
 This standard orientation is used consistently across the library for cube initialization, display, and algorithm application.
 
+## Image Rendering
+
+Generate SVG images of cube states using the `render_cube` function or the `.image()` method available on both `VCube` and `Algorithm` objects:
+
+```python
+from cubing_algs import VCube
+from cubing_algs.parsing import parse_moves
+from cubing_algs.display.image import render_cube
+
+# Render a cube state as SVG
+cube = VCube()
+cube.rotate("R U R' U'")
+svg = cube.image()  # Returns SVG string
+
+# Render an algorithm's effect directly
+algo = parse_moves("R U R' U' R' F R2 U' R' U' R U R' F'")
+svg = algo.image()  # Applies to solved cube and renders
+
+# Using render_cube directly
+svg = render_cube(cube, size=300)
+```
+
+### Views
+
+Two rendering modes are available:
+
+```python
+# 3D perspective view (default)
+svg_3d = cube.image(view='3d')
+
+# Flat top-face view with adjacent strips from F, R, B, L faces
+svg_top = cube.image(view='top')
+```
+
+### Customization
+
+```python
+# Custom image size (pixels)
+svg = cube.image(size=400)
+
+# Custom rotation angle for 3D view (axis-angle format)
+svg = cube.image(rotation='y45x-34')   # Default angle
+svg = cube.image(rotation='y-30')      # Different angle
+svg = cube.image(rotation='y90x-20')   # Multiple rotations
+
+# Camera distance (larger = flatter, smaller = more depth)
+svg = cube.image(distance=20.0)
+
+# Custom cube body color (supports alpha: #rrggbbaa)
+svg = cube.image(cube_color='#222222')
+svg = cube.image(cube_color='#11111180')  # Semi-transparent
+
+# Color palettes
+svg = cube.image(palette_name='default')
+svg = cube.image(palette_name='colorblind')
+svg = cube.image(palette_name='neon')
+
+# Algorithm with explicit cube size
+algo = parse_moves("R U R'")
+svg = algo.image(cube_size=2)  # Render on a 2x2x2
+```
+
+**Available palettes:** `default`, `rgb`, `vibrant`, `neon`, `metal`, `pastel`, `retro`, `minecraft`, `colorblind`, `dracula`, `alucard`, `solarized-dark`, `solarized-light`, `halloween`, `galaxy`, `vampire`, `ghoul`, `goblin`, `void`, `cyberpunk`, `synthwave`, `matrix`, `sunset`, `ocean`, `forest`, `fire`, `ice`, `white`, `black`, `red`, `green`, `blue`
+
+### Saving to File
+
+```python
+# Save as SVG
+with open('cube.svg', 'w') as f:
+    f.write(cube.image(size=400))
+
+# Embed in HTML
+html = f'<html><body>{cube.image()}</body></html>'
+with open('cube.html', 'w') as f:
+    f.write(html)
+```
+
 ## Move Object
 
 The `Move` class represents a single move:
