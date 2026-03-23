@@ -762,6 +762,7 @@ def render_cube(  # noqa: PLR0913
     size: int = 200,
     cube_size: int | None = None,
     view: str = '3d',
+    mask: str = '',  # noqa: ARG001
     rotation: str = 'y45x-34',
     distance: float = CAMERA_DISTANCE,
     cube_color: str = CUBE_COLOR,
@@ -777,6 +778,7 @@ def render_cube(  # noqa: PLR0913
             etc.). Inferred from source if None.
         view: Rendering mode. ``'3d'`` for perspective view,
             ``'top'`` for flat top-face with adjacent strips.
+        mask: Mask to apply on the cube.
         rotation: Axis-angle rotation string (3d view only).
         distance: Camera distance for perspective projection
             (3d view only). Larger values produce a flatter
