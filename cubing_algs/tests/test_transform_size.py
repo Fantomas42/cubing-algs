@@ -166,6 +166,12 @@ class TransformCompressTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_compress_empty_algorithm(self) -> None:
+        """Test compress an empty algorithm returns empty."""
+        provide = parse_moves('')
+        result = compress_moves(provide)
+        self.assertEqual(result, provide)
+
     def test_compress_moves_max(self) -> None:
         """Test compress moves max."""
         provide = parse_moves(
@@ -230,6 +236,18 @@ class TransformExpandTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_expand_empty_algorithm(self) -> None:
+        """Test expand an empty algorithm returns empty."""
+        provide = parse_moves('')
+        result = expand_moves(provide)
+        self.assertEqual(result, provide)
+
+    def test_expand_no_double_moves(self) -> None:
+        """Test expand with no double moves returns same algorithm."""
+        provide = parse_moves("R U' F")
+        result = expand_moves(provide)
+        self.assertEqual(result, provide)
 
     def test_expand_timed_moves_paused(self) -> None:
         """Test expand timed moves paused."""

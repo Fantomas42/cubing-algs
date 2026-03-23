@@ -25,8 +25,14 @@ def compress_moves(
         A compressed Algorithm with redundancies removed.
 
     """
+    if not old_moves:
+        return old_moves
+
     moves = old_moves.copy()
 
+    # Order matters: remove cancellations (do-undo) first, then reduce
+    # repeated triples, merge adjacent same-face moves into doubles, and
+    # finally simplify any resulting triples.
     for _ in range(max_iterations):
         start_length = len(moves)
 
