@@ -530,13 +530,13 @@ static void build_coord_to_facelets_map(int size, CoordFacelets coord_facelets[M
  * Main rotate_move function.
  */
 static PyObject* rotate_move(PyObject* self, PyObject* args, PyObject* kwargs) {
-    const char* state;
+    PyObject* state_obj;
     const char* move;
     int size = 3;  // Default size
 
     static char* kwlist[] = {"state", "move", "size", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ss|i", kwlist, &state, &move, &size)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Us|i", kwlist, &state_obj, &move, &size)) {
         return NULL;
     }
 
@@ -546,12 +546,20 @@ static PyObject* rotate_move(PyObject* self, PyObject* args, PyObject* kwargs) {
         return NULL;
     }
 
-    int state_len = strlen(state);
+    Py_ssize_t state_len = PyUnicode_GET_LENGTH(state_obj);
     int expected_len = 6 * size * size;
     if (state_len != expected_len) {
-        PyErr_Format(PyExc_ValueError, "State length %d doesn't match expected %d for size %d",
+        PyErr_Format(PyExc_ValueError, "State length %zd doesn't match expected %d for size %d",
                      state_len, expected_len, size);
         return NULL;
+    }
+
+    // Read state code points into array
+    Py_UCS4 state_chars[MAX_STATE_SIZE];
+    Py_UCS4 max_char = 0;
+    for (int i = 0; i < expected_len; i++) {
+        state_chars[i] = PyUnicode_READ_CHAR(state_obj, i);
+        if (state_chars[i] > max_char) max_char = state_chars[i];
     }
 
     // Parse move
@@ -719,29 +727,32 @@ static PyObject* rotate_move(PyObject* self, PyObject* args, PyObject* kwargs) {
         memcpy(permutation, composed, total_facelets * sizeof(int));
     }
 
-    // Apply permutation to state - optimized with restrict pointers
-    char new_state[MAX_STATE_SIZE];
-    const char* RESTRICT state_read = state;
-    char* RESTRICT new_state_write = new_state;
+    // Apply permutation to state
+    Py_UCS4 new_state[MAX_STATE_SIZE];
     const int* RESTRICT perm_read = permutation;
 
     for (int i = 0; i < total_facelets; i++) {
-        new_state_write[perm_read[i]] = state_read[i];
+        new_state[perm_read[i]] = state_chars[i];
     }
-    new_state_write[total_facelets] = '\0';
 
-    return PyUnicode_FromString(new_state);
+    // Build result Unicode string
+    PyObject* result = PyUnicode_New(total_facelets, max_char);
+    if (!result) return NULL;
+    for (int i = 0; i < total_facelets; i++) {
+        PyUnicode_WriteChar(result, i, new_state[i]);
+    }
+    return result;
 }
 
 // Batch function for rotating multiple moves at once
 static PyObject* rotate_moves(PyObject* self, PyObject* args, PyObject* kwargs) {
-    const char* state;
+    PyObject* state_obj;
     const char* moves;
     int size = 3;  // Default size
 
     static char* kwlist[] = {"state", "moves", "size", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ss|i", kwlist, &state, &moves, &size)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Us|i", kwlist, &state_obj, &moves, &size)) {
         return NULL;
     }
 
@@ -751,11 +762,21 @@ static PyObject* rotate_moves(PyObject* self, PyObject* args, PyObject* kwargs) 
         return NULL;
     }
 
-    // Copy state for modification
-    char current_state[MAX_STATE_SIZE];
+    // Read state code points into array
     const int expected_len = 6 * size * size;
-    memcpy(current_state, state, expected_len);
-    current_state[expected_len] = '\0';
+    Py_ssize_t state_len = PyUnicode_GET_LENGTH(state_obj);
+    if (state_len != expected_len) {
+        PyErr_Format(PyExc_ValueError, "State length %zd doesn't match expected %d for size %d",
+                     state_len, expected_len, size);
+        return NULL;
+    }
+
+    Py_UCS4 current_state[MAX_STATE_SIZE];
+    Py_UCS4 max_char = 0;
+    for (int i = 0; i < expected_len; i++) {
+        current_state[i] = PyUnicode_READ_CHAR(state_obj, i);
+        if (current_state[i] > max_char) max_char = current_state[i];
+    }
 
     // Working buffer for moves string (we'll modify it)
     size_t moves_len = strlen(moves);
@@ -889,19 +910,25 @@ static PyObject* rotate_moves(PyObject* self, PyObject* args, PyObject* kwargs) 
         }
 
         // Apply permutation to state
-        char new_state[MAX_STATE_SIZE];
+        Py_UCS4 new_state[MAX_STATE_SIZE];
         for (int i = 0; i < total_facelets; i++) {
             new_state[permutation[i]] = current_state[i];
         }
-        new_state[total_facelets] = '\0';
 
-        memcpy(current_state, new_state, expected_len + 1);
+        memcpy(current_state, new_state, expected_len * sizeof(Py_UCS4));
 
         token = strtok(NULL, " ");
     }
 
     free(moves_copy);
-    return PyUnicode_FromString(current_state);
+
+    // Build result Unicode string
+    PyObject* result = PyUnicode_New(expected_len, max_char);
+    if (!result) return NULL;
+    for (int i = 0; i < expected_len; i++) {
+        PyUnicode_WriteChar(result, i, current_state[i]);
+    }
+    return result;
 }
 
 // Method definitions
