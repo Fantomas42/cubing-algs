@@ -20,16 +20,21 @@ class StyleConfig(TypedDict, total=False):
 
     corner: str
     edge: str
-    center: str
-    fixed_center: str
     midge: str
     wing: str
+    center: str
+    fixed_center: str
+    t_center: str
+    x_center: str
+    oblique_center: str
 
 
 PIECE_TYPES: tuple[FaceletPieceType, ...] = (
-    'corner', 'edge',
+    'corner',
+    'edge', 'midge', 'wing',
     'center', 'fixed_center',
-    'midge', 'wing',
+    't_center', 'x_center',
+    'oblique_center',
 )
 
 STYLES: dict[str, StyleConfig] = {
@@ -178,14 +183,23 @@ def get_piece_types(
     if on_row_border and on_col_border:
         return ['corner']
 
+    middle = cube_size // 2
+
     if on_row_border or on_col_border:
-        if cube_size > 3:
-            if row == cube_size // 2 or col == cube_size // 2:
-                return ['midge', 'edge']
-            return ['wing', 'edge']
-        return ['edge']
+        if cube_size % 2 == 1 and middle in {row, col}:
+            return ['midge', 'edge']
+        return ['wing', 'edge']
 
-    if cube_size % 2 == 1 and row == cube_size // 2 and col == cube_size // 2:
-        return ['fixed_center', 'center']
+    if cube_size % 2 == 1:
+        if row == middle and col == middle:
+            return ['fixed_center', 'center']
+        if middle in {row, col}:
+            return ['t_center', 'center']
 
-    return ['center']
+    min_row_offset = min([row, cube_size - 1 - row])
+    min_col_offset = min([col, cube_size - 1 - col])
+
+    if min_row_offset == min_col_offset:
+        return ['x_center', 'center']
+
+    return ['oblique_center', 'center']
