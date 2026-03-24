@@ -156,7 +156,7 @@ def register_style(
     STYLES[name] = config
 
 
-def get_piece_types(
+def get_piece_types(  # noqa: PLR0911
         facelet_index: int, cube_size: int,
 ) -> list[FaceletPieceType]:
     """
@@ -184,20 +184,21 @@ def get_piece_types(
         return ['corner']
 
     middle = cube_size // 2
+    is_odd = cube_size % 2 == 1
 
     if on_row_border or on_col_border:
-        if cube_size % 2 == 1 and middle in {row, col}:
+        if is_odd and (row == middle or col == middle):  # noqa: PLR1714
             return ['midge', 'edge']
         return ['wing', 'edge']
 
-    if cube_size % 2 == 1:
+    if is_odd:
         if row == middle and col == middle:
             return ['fixed_center', 'center']
-        if middle in {row, col}:
+        if row == middle or col == middle:  # noqa: PLR1714
             return ['t_center', 'center']
 
-    min_row_offset = min([row, cube_size - 1 - row])
-    min_col_offset = min([col, cube_size - 1 - col])
+    min_row_offset = min(row, cube_size - 1 - row)
+    min_col_offset = min(col, cube_size - 1 - col)
 
     if min_row_offset == min_col_offset:
         return ['x_center', 'center']
