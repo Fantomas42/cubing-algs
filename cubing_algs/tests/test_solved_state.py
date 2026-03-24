@@ -628,11 +628,11 @@ class GetUniqueFaceletsTestCase(unittest.TestCase):  # noqa: PLR0904
             )
 
     def test_character_range_starts_at_chr_33(self) -> None:
-        """Test characters span from chr(33) to chr(33 + length - 1)."""
-        for size in [1, 2, 3, 4]:
+        """Test characters start at chr(33) and are all printable."""
+        for size in [1, 2, 3, 4, 5]:
             result = get_unique_facelets(size)
-            expected_chars = ''.join(chr(33 + i) for i in range(len(result)))
-            self.assertEqual(result, expected_chars)
+            self.assertEqual(result[0], chr(33))
+            self.assertTrue(all(c.isprintable() for c in result))
 
     def test_all_characters_are_unique_size_2(self) -> None:
         """Test all characters in the result are unique for size 2."""
@@ -650,8 +650,8 @@ class GetUniqueFaceletsTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(result), len(set(result)))
 
     def test_all_characters_are_unique_for_all_sizes(self) -> None:
-        """Test all characters are unique for sizes 1 through 9."""
-        for size in range(1, 10):
+        """Test all characters are unique for small size to big size."""
+        for size in [0, 1, 3, 5, 9, 30, 50]:
             result = get_unique_facelets(size)
             self.assertEqual(
                 len(result),

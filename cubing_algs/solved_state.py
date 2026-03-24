@@ -7,6 +7,32 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_SO
 
+PRINTABLE_CACHE = ''
+
+
+def build_printable_chars(count: int) -> str:
+    """
+    Build a string of `count` unique
+    printable characters starting from chr(33).
+
+    Args:
+        count: number of unique characters
+
+    Returns:
+        A string containing only printable characters.
+
+    """
+    chars: list[str] = []
+    code_point = 33
+
+    while len(chars) < count:
+        char = chr(code_point)
+        if char.isprintable():
+            chars.append(char)
+        code_point += 1
+
+    return ''.join(chars)
+
 
 def get_unique_facelets(size: int = 3) -> CubeFacelets:
     """
@@ -28,7 +54,13 @@ def get_unique_facelets(size: int = 3) -> CubeFacelets:
         ""!"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUV"
 
     """
-    return ''.join(chr(33 + i) for i in range(size * size * len(FACE_ORDER)))
+    global PRINTABLE_CACHE  # noqa: PLW0603
+    total = size * size * len(FACE_ORDER)
+
+    if len(PRINTABLE_CACHE) < total:
+        PRINTABLE_CACHE = build_printable_chars(total)
+
+    return PRINTABLE_CACHE[:total]
 
 
 def get_solved_facelets(size: int = 3) -> CubeFacelets:
