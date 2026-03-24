@@ -4,6 +4,7 @@ import unittest
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.extensions.rotate_dynamic import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 5x5x5 state: 150 facelets (6 faces * 25 facelets each)
@@ -713,3 +714,21 @@ class Test5x5x5SiGNNotation(unittest.TestCase):
         result_3r = rotate_move(SOLVED_5X5X5, '3r', size=5)
         result_3rw = rotate_move(SOLVED_5X5X5, '3Rw', size=5)
         self.assertEqual(result_3r, result_3rw, '3r should equal 3Rw')
+
+
+class Test5x5x5VCubeCustomFacelets(unittest.TestCase):
+    """Test VCube implementation for 5x5x5 with custom facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = get_unique_facelets(5)
+        self.cube = VCube(initial=self.state, size=5)
+
+    def test_rotate(self) -> None:
+        """Test get face center indexes."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
