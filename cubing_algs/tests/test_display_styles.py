@@ -271,10 +271,23 @@ class TestGetPieceType(unittest.TestCase):
 
     def test_5x5_edges(self) -> None:
         """Test edge detection on 5x5."""
-        edge_positions = [1, 2, 3, 5, 9, 10, 14, 15, 19, 21, 22, 23]
-        for pos in edge_positions:
+        edge_positions = [
+            1, 2, 3,
+            5, 9,
+            10, 14,
+            15, 19,
+            21, 22, 23,
+        ]
+        edge_pieces = [
+            'wing', 'midge', 'wing',
+            'wing', 'wing',
+            'midge', 'midge',
+            'wing', 'wing',
+            'wing', 'midge', 'wing',
+        ]
+        for pos, name in zip(edge_positions, edge_pieces, strict=True):
             with self.subTest(pos=pos):
-                self.assertEqual(get_piece_type(pos, 5), 'edge')
+                self.assertEqual(get_piece_type(pos, 5), name)
 
     def test_5x5_fixed_center(self) -> None:
         """Test fixed center detection on 5x5."""

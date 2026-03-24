@@ -27,6 +27,7 @@ class StyleConfig(TypedDict, total=False):
 PIECE_TYPES: tuple[FaceletPieceType, ...] = (
     'corner', 'edge',
     'center', 'fixed_center',
+    'midge', 'wing',
 )
 
 STYLES: dict[str, StyleConfig] = {
@@ -36,17 +37,22 @@ STYLES: dict[str, StyleConfig] = {
     'detailed': {
         'corner': 'dim',
         'fixed_center': 'bold',
+        'wing': 'dim',
     },
     'bold': {
         'corner': 'bold',
         'edge': 'bold',
         'center': 'bold',
         'fixed_center': 'bold',
+        'midge': 'bold',
+        'wing': 'bold',
     },
     'fixed_center': {
         'corner': 'hidden',
         'edge': 'hidden',
         'center': 'hidden',
+        'midge': 'hidden',
+        'wing': 'hidden',
     },
     'uniform': {},
 }
@@ -166,6 +172,10 @@ def get_piece_type(facelet_index: int, cube_size: int) -> FaceletPieceType:
         return 'corner'
 
     if on_row_border or on_col_border:
+        if cube_size > 3:
+            if row == cube_size // 2 or col == cube_size // 2:
+                return 'midge'
+            return 'wing'
         return 'edge'
 
     if cube_size % 2 == 1 and row == cube_size // 2 and col == cube_size // 2:
