@@ -12,7 +12,7 @@ from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.effects import load_effect
 from cubing_algs.display.palettes import load_palette
-from cubing_algs.display.styles import get_piece_type
+from cubing_algs.display.styles import get_piece_types
 from cubing_algs.display.styles import load_style
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
@@ -815,11 +815,11 @@ class VCubeDisplay:
             Tuple of (style_start, style_end) ANSI sequences.
 
         """
-        style_ansi = self.style[
-            get_piece_type(facelet_index, self.cube_size)
-        ]
+        piece_types = get_piece_types(facelet_index, self.cube_size)
 
-        if not style_ansi:
-            return '', ''
+        for piece_type in piece_types:
+            style_ansi = self.style[piece_type]
+            if style_ansi:
+                return style_ansi, f'\x1b[0m{ face_color }'
 
-        return style_ansi, f'\x1b[0m{ face_color }'
+        return '', ''

@@ -22,6 +22,8 @@ class StyleConfig(TypedDict, total=False):
     edge: str
     center: str
     fixed_center: str
+    midge: str
+    wing: str
 
 
 PIECE_TYPES: tuple[FaceletPieceType, ...] = (
@@ -149,16 +151,21 @@ def register_style(
     STYLES[name] = config
 
 
-def get_piece_type(facelet_index: int, cube_size: int) -> FaceletPieceType:
+def get_piece_types(
+        facelet_index: int, cube_size: int,
+) -> list[FaceletPieceType]:
     """
-    Determine the piece type for a facelet based on its position.
+    Determine the piece types for a facelet based on its position.
+
+    Returns a list ordered from most specific to least specific,
+    e.g. ['midge', 'edge'] or ['fixed_center', 'center'].
 
     Args:
         facelet_index: Global facelet index (0-based).
         cube_size: Size of the cube (e.g. 3 for 3x3).
 
     Returns:
-        The piece type: 'corner', 'edge', 'center', or 'fixed_center'.
+        List of piece types from most specific to family.
 
     """
     face_size = cube_size * cube_size
@@ -169,17 +176,16 @@ def get_piece_type(facelet_index: int, cube_size: int) -> FaceletPieceType:
     on_col_border = col == 0 or col == cube_size - 1
 
     if on_row_border and on_col_border:
-        return 'corner'
+        return ['corner']
 
     if on_row_border or on_col_border:
         if cube_size > 3:
             if row == cube_size // 2 or col == cube_size // 2:
-                return 'midge'
-            return 'wing'
-        return 'edge'
+                return ['midge', 'edge']
+            return ['wing', 'edge']
+        return ['edge']
 
     if cube_size % 2 == 1 and row == cube_size // 2 and col == cube_size // 2:
-        # For odd-sized cube only
-        return 'fixed_center'
+        return ['fixed_center', 'center']
 
-    return 'center'
+    return ['center']
