@@ -43,7 +43,12 @@ show_algorithm(
     mode='oll',
 )
 show_algorithm(
-    'Big cube',
+    '4x4x4 Cube',
+    "R U 2R' 2U'",
+    size=4,
+)
+show_algorithm(
+    '5x5x5 cube',
     'M2 S2 E2',
     size=5,
 )
