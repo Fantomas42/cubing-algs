@@ -59,6 +59,8 @@ EMOJIS = {
     'B': '🟦',
     'L': '🟧',
     'R': '🟥',
+    'masked': '⬛',
+    'hidden': '❓',
 }
 
 
@@ -271,6 +273,10 @@ class VCubeDisplay:
 
         """
         if self.facelet_type == 'emoji':
+            if mask == '0':
+                return EMOJIS['masked']
+            if facelet not in FACE_ORDER:
+                return EMOJIS['hidden']
             return EMOJIS[facelet]
 
         if not USE_COLORS or self.facelet_type == 'no-color':

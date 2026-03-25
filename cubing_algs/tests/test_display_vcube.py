@@ -1372,6 +1372,22 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         self.assertIn('⬜', result)  # Block character without trailing space
         self.assertNotIn(' U ', result)  # Should not contain letter
 
+    def test_display_facelet_emoji_masked(self) -> None:
+        """Test display_facelet with emoji facelet_type and masked facelet."""
+        printer = VCubeDisplay(self.cube, facelet_type='emoji')
+
+        result = printer.display_facelet('U', mask='0')
+
+        self.assertEqual(result, '⬛')
+
+    def test_display_facelet_emoji_hidden(self) -> None:
+        """Test display_facelet with emoji facelet_type and unknown facelet."""
+        printer = VCubeDisplay(self.cube, facelet_type='emoji')
+
+        result = printer.display_facelet('X')
+
+        self.assertEqual(result, '❓')
+
     @patch.dict(os.environ, {'TERM': 'other'})
     @patch('cubing_algs.display.vcube.USE_COLORS', False)  # noqa: FBT003
     def test_display_facelet_types_without_colors(self) -> None:
