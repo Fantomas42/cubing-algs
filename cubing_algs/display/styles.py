@@ -40,26 +40,28 @@ PIECE_TYPES: tuple[FaceletPieceType, ...] = (
 STYLES: dict[str, StyleConfig] = {
     'default': {
         'fixed_center': 'bold',
-    },
-    'detailed': {
-        'corner': 'dim',
-        'fixed_center': 'bold',
-        'wing': 'dim',
+        'x_center': 'bold',
     },
     'bold': {
+        'center': 'bold',
         'corner': 'bold',
         'edge': 'bold',
-        'center': 'bold',
-        'fixed_center': 'bold',
-        'midge': 'bold',
-        'wing': 'bold',
     },
-    'fixed_center': {
+    'centers': {
         'corner': 'hidden',
         'edge': 'hidden',
-        'center': 'hidden',
-        'midge': 'hidden',
-        'wing': 'hidden',
+        'fixed_center': 'blink',
+        't_center': 'bold',
+        'x_center': 'bold+underline',
+    },
+    'detailed': {
+        'corner': 'italic',
+        'midge': 'underline+italic',
+        'wing': 'underline',
+        'fixed_center': 'hidden',
+        't_center': 'bold',
+        'x_center': 'bold+underline',
+        'oblique_center': 'bold+italic',
     },
     'uniform': {},
 }

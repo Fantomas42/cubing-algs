@@ -129,8 +129,9 @@ class TestLoadStyle(unittest.TestCase):
     def test_load_detailed_style(self) -> None:
         """Test loading the detailed style preset."""
         style = load_style('detailed')
-        self.assertEqual(style['corner'], '\x1b[2m')
-        self.assertEqual(style['fixed_center'], '\x1b[1m')
+        self.assertEqual(style['corner'], '\x1b[3m')
+        self.assertEqual(style['edge'], '')
+        self.assertEqual(style['oblique_center'], '\x1b[1m\x1b[3m')
 
     def test_load_uniform_style(self) -> None:
         """Test loading the uniform style preset (no styling)."""
@@ -141,7 +142,7 @@ class TestLoadStyle(unittest.TestCase):
     def test_load_bold_style(self) -> None:
         """Test loading the bold style preset."""
         style = load_style('bold')
-        for piece_type in ('corner', 'edge', 'center', 'fixed_center'):
+        for piece_type in ('corner', 'edge', 'center'):
             self.assertEqual(style[piece_type], '\x1b[1m')
 
     def test_fallback_to_default(self) -> None:

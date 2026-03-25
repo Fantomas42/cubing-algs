@@ -46,9 +46,11 @@ type CubeCubiesOriented = tuple[
 
 # Facelet piece type
 type FaceletPieceType = Literal[
-    'corner', 'edge', 'center',
-    'midge', 'wing',
-    'fixed_center',
+    'corner',
+    'edge', 'midge', 'wing',
+    'center', 'fixed_center',
+    't_center', 'x_center',
+    'oblique_center',
 ]
 
 # Regex pattern type
