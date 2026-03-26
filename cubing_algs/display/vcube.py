@@ -256,7 +256,7 @@ class VCubeDisplay:
 
         return ' ' * (self.facelet_size * count)
 
-    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901
+    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901, PLR0911, PLR0912
                         facelet_index: int | None = None,
                         *, adjacent: bool = False) -> str:
         """
