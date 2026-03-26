@@ -10,16 +10,89 @@ def translate_moves(
         orientation_moves: Algorithm,
 ) -> Callable[[Algorithm], Algorithm]:
     """
-    Translate moves from a list of rotation moves.
+    Return a transform that rewrites an algorithm for a given cube orientation.
+
+    Given a sequence of rotations describing how the cube is held,
+    returns a function that translates any algorithm so it produces the
+    same effect on the reoriented cube.
+
+    This is a higher-order function: call it once with the orientation,
+    then apply the returned function to one or more algorithms.
+
+    Orientations use the two-letter notation from ``ORIENTATIONS``
+    (top-face + front-face). Standard is UF (white top, green front,
+    no rotation). Each orientation maps to a rotation sequence::
+
+        UF  (standard)       →  (none)
+        DF  (yellow, green)  →  z2
+        RF  (red, green)     →  z'
+        FU  (green, yellow)  →  x
+        ...
+
+    The problem this solves:
+
+    A Bluetooth cube has no gyroscope — it only has mechanical sensors
+    on each face. Those sensors always report moves in the cube's
+    absolute frame (UF), no matter how the user holds the cube.
+
+    When the user picks an orientation before solving (e.g. DF), there
+    is a mismatch between what the user does and what the cube records::
+
+        User holds the cube in DF (z2 = yellow top, green front).
+        The user executes what they see as  R U R' U' :
+
+        ┌─────────────────┬──────────────────────────────────┐
+        │ What user sees  │ What the cube records (UF frame) │
+        ├─────────────────┼──────────────────────────────────┤
+        │ R  (right face) │ L  (it's physically the L face)  │
+        │ U  (top face)   │ D  (it's physically the D face)  │
+        │ R'              │ L'                               │
+        │ U'              │ D'                               │
+        └─────────────────┴──────────────────────────────────┘
+
+    This function bridges that gap:
+
+        translate_moves(z2):  L D L' D'  →  R U R' U'
+                              (recorded)    (what user meant)
+
+    Same principle with other orientations::
+
+        Orientation   User does   Cube records   After translate
+        ────────────────────────────────────────────────────────
+        DF  (z2)      R U R' U'   L D L' D'      R U R' U'
+        RF  (z')      R U R' U'   D R D' R'      R U R' U'
+        FU  (x)       R U R' U'   R F R' F'      R U R' U'
+        FR  (x y)     R U R' U'   U F U' F'      R U R' U'
+        FL  (x y')    R U R' U'   D F D' F'      R U R' U'
+        LU  (z y)     R U R' U'   B L B' L'      R U R' U'
+
+    Also works for translating scrambles. A scramble generator produces
+    moves in the standard UF frame. If the user holds the cube in DF,
+    they need each move rewritten so they can apply it from their POV::
+
+        UF scramble:  R  U  F' D2 L  B' R2 U'
+        DF scramble:  L  D  F' U2 R  B' L2 D'
+
+        translate_moves(z2):  R U F' D2 L B' R2 U'
+                            → L D F' U2 R B' L2 D'
+
+    Both scrambles produce the exact same cube state — the user just
+    reads different face names because they are holding the cube
+    upside down.
+
+    Contrast with ``translate_pov_moves``, which handles rotations
+    discovered inline during the algorithm (gyroscope events).
+    ``translate_moves`` handles a known, fixed orientation applied to
+    the whole algorithm at once.
 
     Args:
-        orientation_moves: Sequence of rotation moves defining the orientation.
+        orientation_moves: Rotation moves (x, y, z) defining the orientation.
 
     Returns:
-        Function that translates algorithms based on the orientation.
+        Function that translates algorithms into the given orientation.
 
     Raises:
-        InvalidMoveError: If orientations_moves contain non rotation moves.
+        InvalidMoveError: If orientation_moves contain non-rotation moves.
 
     """
     for orientation_move in orientation_moves:
