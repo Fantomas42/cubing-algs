@@ -176,3 +176,39 @@ class TransformTranslatePOVTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_translate_pov_consecutive_rotations(self) -> None:
+        """Test translate pov with multiple consecutive rotations."""
+        provide = parse_moves('R x y U')
+        expect = parse_moves('R x y R')
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(result, expect)
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_translate_pov_interspersed_rotations(self) -> None:
+        """Test translate pov with rotations interspersed among moves."""
+        provide = parse_moves('R x U y F')
+        expect = parse_moves('R x B y U')
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(result, expect)
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_translate_pov_trailing_rotation(self) -> None:
+        """Test translate pov with trailing rotation."""
+        provide = parse_moves('R U y')
+        expect = parse_moves('R U y')
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(result, expect)
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
