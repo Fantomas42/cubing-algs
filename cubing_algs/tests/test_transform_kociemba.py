@@ -540,3 +540,44 @@ class TransformKociembaTestCase(unittest.TestCase):  # noqa: PLR0904
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_timed_moves_stripped(self) -> None:
+        """Test timed moves are stripped and produce equivalent state."""
+        provide = parse_moves('R@100 U@200')
+        result = kociemba_moves(provide)
+
+        cube1 = VCube()
+        cube1.rotate(parse_moves('R U'))
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), 'R U')
+
+        for m in result:
+            self.assertFalse(m.is_timed)
+
+    def test_pause_moves_stripped(self) -> None:
+        """Test pause moves are removed before solving."""
+        provide = parse_moves('R . U')
+        result = kociemba_moves(provide)
+
+        cube1 = VCube()
+        cube1.rotate(parse_moves('R U'))
+
+        cube2 = VCube()
+        cube2.rotate(result)
+
+        self.assertEqual(cube1.state, cube2.state)
+        self.assertEqual(str(result), 'R U')
+
+        for m in result:
+            self.assertFalse(m.is_pause)
+
+    def test_only_pauses(self) -> None:
+        """Test algorithm with only pauses returns empty."""
+        provide = parse_moves('. .')
+        result = kociemba_moves(provide)
+
+        self.assertEqual(str(result), '')
