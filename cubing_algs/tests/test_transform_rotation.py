@@ -1078,3 +1078,464 @@ class TransformCompressEndingRotationsTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+
+class CompressEndingRotationsSingleConjugateTestCase(unittest.TestCase):
+    """
+    Tests for single-rotation conjugate patterns: a b a' -> c.
+
+    These are 3-move patterns where two single quarter-turn rotations
+    on different axes form a conjugate (a b a'). The result should be
+    a single quarter-turn on the third axis.
+
+    Currently NOT optimized — compress_ending_rotations only handles
+    double-middle conjugates (a b2 a' -> c2).
+    """
+
+    def test_x_y_conjugate(self) -> None:
+        """Test x-axis / y-axis conjugates producing z or z'."""
+        cases = [
+            ("R U x y x'", 'R U z'),
+            ("R U x y' x'", "R U z'"),
+            ("R U x' y x", "R U z'"),
+            ("R U x' y' x", 'R U z'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_y_z_conjugate(self) -> None:
+        """Test y-axis / z-axis conjugates producing x or x'."""
+        cases = [
+            ("R U y z y'", 'R U x'),
+            ("R U y z' y'", "R U x'"),
+            ("R U y' z y", "R U x'"),
+            ("R U y' z' y", 'R U x'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_z_x_conjugate(self) -> None:
+        """Test z-axis / x-axis conjugates producing y or y'."""
+        cases = [
+            ("R U z x z'", 'R U y'),
+            ("R U z x' z'", "R U y'"),
+            ("R U z' x z", "R U y'"),
+            ("R U z' x' z", 'R U y'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_single_conjugate_all_rotations(self) -> None:
+        """Test that a single conjugate with no face moves compresses."""
+        cases = [
+            ("x y x'", 'z'),
+            ("y z y'", 'x'),
+            ("z x z'", 'y'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+
+class CompressEndingRotationsSandwichTestCase(unittest.TestCase):
+    """
+    Tests for same-move sandwich patterns: a b a -> result.
+
+    Two sub-patterns exist:
+    - Single wraps double: a b2 a -> b2 (single moves cancel out)
+    - Double wraps single: a2 b a2 -> b' (inverts the inner move)
+
+    Currently NOT optimized — the conjugate optimizer requires the
+    first and third moves to be inverses (a ... a'), not identical.
+    """
+
+    def test_single_wraps_double(self) -> None:
+        """Test a b2 a -> b2: single quarter-turns around a double cancel."""
+        cases = [
+            ('R U x y2 x', 'R U y2'),
+            ('R U x z2 x', 'R U z2'),
+            ("R U x' y2 x'", 'R U y2'),
+            ("R U x' z2 x'", 'R U z2'),
+            ('R U y x2 y', 'R U x2'),
+            ('R U y z2 y', 'R U z2'),
+            ("R U y' x2 y'", 'R U x2'),
+            ('R U z x2 z', 'R U x2'),
+            ('R U z y2 z', 'R U y2'),
+            ("R U z' x2 z'", 'R U x2'),
+            ("R U z' y2 z'", 'R U y2'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_double_wraps_single(self) -> None:
+        """Test a2 b a2 -> b': double rotations invert the inner move."""
+        cases = [
+            ('R U x2 y x2', "R U y'"),
+            ("R U x2 y' x2", 'R U y'),
+            ('R U x2 z x2', "R U z'"),
+            ("R U x2 z' x2", 'R U z'),
+            ('R U y2 x y2', "R U x'"),
+            ("R U y2 x' y2", 'R U x'),
+            ('R U y2 z y2', "R U z'"),
+            ("R U y2 z' y2", 'R U z'),
+            ('R U z2 x z2', "R U x'"),
+            ("R U z2 x' z2", 'R U x'),
+            ('R U z2 y z2', "R U y'"),
+            ("R U z2 y' z2", 'R U y'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+
+class CompressEndingRotationsCyclicTripleTestCase(unittest.TestCase):
+    """
+    Tests for three-different-axes patterns that reduce to 1 move.
+
+    When three rotations each on a different axis satisfy certain sign
+    constraints, the whole triple reduces to the middle move.
+
+    Cyclic order (x,y,z), (y,z,x), (z,x,y): odd number of primes.
+    Anti-cyclic order (z,y,x), (x,z,y), (y,x,z): even number of primes.
+    Mixed double outer pairs: a2 b c2 -> b.
+
+    Currently NOT optimized.
+    """
+
+    def test_cyclic_order_single(self) -> None:
+        """Test cyclic-order triples with all single quarter-turns."""
+        cases = [
+            # (x, y, z) family — odd primes
+            ("R U x y z'", 'R U y'),
+            ("R U x y' z", "R U y'"),
+            ("R U x' y z", 'R U y'),
+            ("R U x' y' z'", "R U y'"),
+            # (y, z, x) family — odd primes
+            ("R U y z x'", 'R U z'),
+            ("R U y z' x", "R U z'"),
+            ("R U y' z x", 'R U z'),
+            ("R U y' z' x'", "R U z'"),
+            # (z, x, y) family — odd primes
+            ("R U z x y'", 'R U x'),
+            ("R U z x' y", "R U x'"),
+            ("R U z' x y", 'R U x'),
+            ("R U z' x' y'", "R U x'"),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_anti_cyclic_order_single(self) -> None:
+        """Test anti-cyclic-order triples with all single quarter-turns."""
+        cases = [
+            # (z, y, x) family — even primes
+            ('R U z y x', 'R U y'),
+            ("R U z y' x'", "R U y'"),
+            ("R U z' y x'", 'R U y'),
+            ("R U z' y' x", "R U y'"),
+            # (x, z, y) family — even primes
+            ('R U x z y', 'R U z'),
+            ("R U x z' y'", "R U z'"),
+            ("R U x' z y'", 'R U z'),
+            ("R U x' z' y", "R U z'"),
+            # (y, x, z) family — even primes
+            ('R U y x z', 'R U x'),
+            ("R U y x' z'", "R U x'"),
+            ("R U y' x z'", 'R U x'),
+            ("R U y' x' z", "R U x'"),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_mixed_double_outer_pairs(self) -> None:
+        """Test triples with double outer moves: a2 b c2 -> b."""
+        cases = [
+            ('R U x2 y z2', 'R U y'),
+            ("R U x2 y' z2", "R U y'"),
+            ('R U x2 z y2', 'R U z'),
+            ("R U x2 z' y2", "R U z'"),
+            ('R U y2 x z2', 'R U x'),
+            ("R U y2 x' z2", "R U x'"),
+            ('R U y2 z x2', 'R U z'),
+            ("R U y2 z' x2", "R U z'"),
+            ('R U z2 x y2', 'R U x'),
+            ("R U z2 x' y2", "R U x'"),
+            ('R U z2 y x2', 'R U y'),
+            ("R U z2 y' x2", "R U y'"),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+
+class CompressEndingRotationsLongerSequenceTestCase(unittest.TestCase):
+    """
+    Tests for 4+ move rotation sequences.
+
+    These sequences require multiple optimization passes or a
+    group-multiplication approach to compress fully. Many of them
+    are currently NOT reduced at all.
+    """
+
+    def test_four_move_to_identity(self) -> None:
+        """Test 4-move rotation sequences that cancel to nothing."""
+        cases = [
+            # Conjugate then its result's inverse
+            "R U x y x' z'",
+            "R U y z y' x'",
+            "R U z x z' y'",
+            # Do-undo pairs on different axes
+            "R U x x' y y'",
+            "R U y2 y2 z z'",
+        ]
+        for provided in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves('R U'))
+
+    def test_four_move_to_single(self) -> None:
+        """Test 4-move rotation sequences that reduce to 1 move."""
+        cases = [
+            # Conjugate + extra move
+            ("R U x y x' z", 'R U z2'),
+            ("R U y z y' x", 'R U x2'),
+            ("R U z x z' y", 'R U y2'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_four_move_to_double(self) -> None:
+        """Test 4-move sequences that reduce to 2 moves."""
+        cases = [
+            ('R U x y x y', "R U x' z'"),
+            ("R U x y z x'", 'R U x z'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_five_move_sequences(self) -> None:
+        """Test 5-move rotation sequences."""
+        cases = [
+            ("R U x y z' x2 y", 'R U x2'),
+            ("R U x y x' z y'", 'R U y z2'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_six_move_group_identity(self) -> None:
+        """
+        Test (xy)^3 = identity — a fundamental S4 relation.
+
+        The cube rotation group is isomorphic to S4. One of its
+        defining relations is (yx)^3 = identity, meaning six
+        alternating y x moves cancel completely.
+        """
+        cases = [
+            'R U x y x y x y',
+            'R U y x y x y x',
+            "R U x y' x y' x y'",
+        ]
+        for provided in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves('R U'))
+
+    def test_six_move_to_single(self) -> None:
+        """Test 6-move rotation sequences that reduce to 1 move."""
+        cases = [
+            ("R U x' y z y' x z'", "R U x' z'"),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+
+class CompressEndingRotationsMaxTwoMovesTestCase(unittest.TestCase):
+    """
+    Tests asserting rotation output never exceeds 2 moves.
+
+    The rotation group has 24 elements. Every element can be expressed
+    in at most 2 quarter/half-turn rotations. Therefore, any rotation
+    sequence should compress to at most 2 moves.
+
+    These tests verify the invariant: the trailing rotation part of
+    compress_ending_rotations output has length <= 2.
+    """
+
+    @staticmethod
+    def _rotation_count(alg: Algorithm) -> int:
+        """Count trailing rotation moves in an algorithm."""  # noqa: DOC201
+        _, rotations = split_moves_ending_rotations(alg)
+        return len(rotations)
+
+    def test_three_move_max_two(self) -> None:
+        """All 3-move rotation endings should compress to at most 2."""
+        single = ['x', "x'", 'y', "y'", 'z', "z'", 'x2', 'y2', 'z2']
+        for m1 in single:
+            for m2 in single:
+                if m1[0] == m2[0]:
+                    continue
+                for m3 in single:
+                    if m2[0] == m3[0]:
+                        continue
+                    provided = f'R U {m1} {m2} {m3}'
+                    with self.subTest(provided=provided):
+                        result = compress_ending_rotations(
+                            parse_moves(provided),
+                        )
+                        count = self._rotation_count(result)
+                        self.assertLessEqual(
+                            count, 2,
+                            f'{provided} -> {result} has {count} '
+                            f'trailing rotations (max 2)',
+                        )
+
+    def test_four_move_max_two(self) -> None:
+        """Sampled 4-move rotation endings should compress to at most 2."""
+        cases = [
+            'R U x y x y',
+            "R U x y x' z",
+            "R U y z y' x",
+            "R U x y z x'",
+            "R U x' y' z' x",
+            "R U z y x z'",
+            'R U x2 y x2 z',
+            "R U y z2 x y'",
+        ]
+        for provided in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                count = self._rotation_count(result)
+                self.assertLessEqual(
+                    count, 2,
+                    f'{provided} -> {result} has {count} '
+                    f'trailing rotations (max 2)',
+                )
+
+    def test_long_sequence_max_two(self) -> None:
+        """Long rotation sequences should still compress to at most 2."""
+        cases = [
+            "R U x y z x' y' z'",
+            'R U x y x y x y',
+            'R U x y z x y z',
+            'R U x2 y2 z2 x2 y2 z2',
+            "R U x y' z x' y z'",
+            'R U y x y x y x y x',
+        ]
+        for provided in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                count = self._rotation_count(result)
+                self.assertLessEqual(
+                    count, 2,
+                    f'{provided} -> {result} has {count} '
+                    f'trailing rotations (max 2)',
+                )
+
+
+class CompressEndingRotationsEdgeCaseTestCase(unittest.TestCase):
+    """Tests for edge cases in ending rotation compression."""
+
+    def test_empty_algorithm(self) -> None:
+        """Test empty algorithm stays empty."""
+        result = compress_ending_rotations(Algorithm())
+        self.assertEqual(result, Algorithm())
+
+    def test_no_rotations(self) -> None:
+        """Test algorithm with no rotations is unchanged."""
+        provide = parse_moves("R U F' D2 L B'")
+        result = compress_ending_rotations(provide)
+        self.assertEqual(result, provide)
+
+    def test_single_rotation(self) -> None:
+        """Test single trailing rotation is unchanged."""
+        for rot in ['x', "x'", 'y', "y'", 'z', "z'", 'x2', 'y2', 'z2']:
+            with self.subTest(rot=rot):
+                provide = parse_moves(f'R U {rot}')
+                result = compress_ending_rotations(provide)
+                self.assertEqual(result, provide)
+
+    def test_two_rotations_same_axis(self) -> None:
+        """Test two rotations on the same axis compress normally."""
+        cases = [
+            ('R U x x', 'R U x2'),
+            ("R U x x'", 'R U'),
+            ('R U x x2', "R U x'"),
+            ("R U x' x'", 'R U x2'),
+            ('R U y y', 'R U y2'),
+            ('R U z2 z2', 'R U'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_rotation_only_algorithm(self) -> None:
+        """Test algorithm consisting entirely of rotations."""
+        cases = [
+            ("x y x'", 'z'),
+            ('x2 y2', 'z2'),
+            ("x y z'", 'y'),
+            ('x2 y2 z2', ''),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
+
+    def test_long_face_moves_short_trailing_rotation(self) -> None:
+        """Test that long face-move algorithms are preserved."""
+        long_alg = "R U R' U' R' F R2 U' R' U' R U R' F'"
+        for rot in ["x y x'", 'z y x', 'x2 y z2']:
+            with self.subTest(rot=rot):
+                provide = parse_moves(f'{long_alg} {rot}')
+                result = compress_ending_rotations(provide)
+                # Face moves must be preserved exactly
+                moves_part, _ = split_moves_ending_rotations(result)
+                self.assertEqual(
+                    moves_part,
+                    parse_moves(long_alg),
+                )
+
+    def test_mid_algorithm_rotations_not_touched(self) -> None:
+        """
+        Test that rotations in the middle of an algorithm are kept.
+
+        compress_ending_rotations only operates on trailing rotations.
+        Rotations followed by face moves must not be altered.
+        """
+        provide = parse_moves("x y R U z x' F")
+        result = compress_ending_rotations(provide)
+        self.assertEqual(result, provide)
+
+    def test_pauses_in_trailing_rotations(self) -> None:
+        """Test that pauses among trailing rotations are handled."""
+        cases = [
+            ("R U x . y x'", 'R U z'),
+            ("R U x . y2 . x'", 'R U z2'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                result = compress_ending_rotations(parse_moves(provided))
+                self.assertEqual(result, parse_moves(expected))
