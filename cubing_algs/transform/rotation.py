@@ -150,9 +150,9 @@ def optimize_double_rotations(
         one = moves[i].untimed
         two = moves[i + 1].untimed
         if (
-            one != two
-            and one.is_double
-            and two.is_double
+            one in CANCEL_TRIPLET
+            and two in CANCEL_TRIPLET
+            and one != two
         ):
             missing_rotation = (CANCEL_TRIPLET - {one, two}).pop()
             moves[i:i + 2] = [Move(missing_rotation)]
@@ -195,13 +195,18 @@ def optimize_conjugate_rotations(
         one = moves[i].untimed
         two = moves[i + 1].untimed
         three = moves[i + 2].untimed
-        if (
-                two.is_double
-                and one.base_move == three.base_move
-                and not one.is_double
-                and not three.is_double
-                and one.modifier != three.modifier
-        ):
+        all_rotations = (
+            one.is_rotation_move
+            and two.is_rotation_move
+            and three.is_rotation_move
+        )
+        is_conjugate = (
+            one.base_move == three.base_move
+            and not one.is_double
+            and not three.is_double
+            and one.modifier != three.modifier
+        )
+        if all_rotations and two.is_double and is_conjugate:
             missing_rotation = (CANCEL_TRIPLET - {one.doubled, two}).pop()
             moves[i:i + 3] = [Move(missing_rotation)]
             changed = True

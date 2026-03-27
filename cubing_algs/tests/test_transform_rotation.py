@@ -493,6 +493,39 @@ class TransformOptimizeDoubleRotationsTestCase(unittest.TestCase):
             provide,
         )
 
+    def test_optimize_double_rotations_ignores_face_moves(self) -> None:
+        """Test that non-rotation double moves are left unchanged."""
+        cases = [
+            ('R2 U2', 'R2 U2'),
+            ('R2 F2', 'R2 F2'),
+            ('U2 D2', 'U2 D2'),
+            ('R2 U2 F2', 'R2 U2 F2'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                provide = parse_moves(provided)
+                expect = parse_moves(expected)
+
+                result = optimize_double_rotations(provide)
+
+                self.assertEqual(result, expect)
+
+    def test_optimize_double_rotations_ignores_mixed_moves(self) -> None:
+        """Test that mixed rotation and face double moves are left unchanged."""
+        cases = [
+            ('x2 R2', 'x2 R2'),
+            ('R2 y2', 'R2 y2'),
+            ('z2 U2', 'z2 U2'),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                provide = parse_moves(provided)
+                expect = parse_moves(expected)
+
+                result = optimize_double_rotations(provide)
+
+                self.assertEqual(result, expect)
+
 
 class TransformOptimizeConjugateRotationsTestCase(unittest.TestCase):
     """Tests for optimizing conjugate rotation patterns."""
@@ -637,6 +670,38 @@ class TransformOptimizeConjugateRotationsTestCase(unittest.TestCase):
             result,
             provide,
         )
+
+    def test_optimize_conjugate_rotations_ignores_face_moves(self) -> None:
+        """Test that non-rotation conjugate patterns are left unchanged."""
+        cases = [
+            ("R U2 R'", "R U2 R'"),
+            ("F D2 F'", "F D2 F'"),
+            ("L R2 L'", "L R2 L'"),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                provide = parse_moves(provided)
+                expect = parse_moves(expected)
+
+                result = optimize_conjugate_rotations(provide)
+
+                self.assertEqual(result, expect)
+
+    def test_optimize_conjugate_rotations_ignores_mixed_moves(self) -> None:
+        """Test mixed rotation and face conjugates are unchanged."""
+        cases = [
+            ("R y2 R'", "R y2 R'"),
+            ("U x2 U'", "U x2 U'"),
+            ("x R2 x'", "x R2 x'"),
+        ]
+        for provided, expected in cases:
+            with self.subTest(provided=provided):
+                provide = parse_moves(provided)
+                expect = parse_moves(expected)
+
+                result = optimize_conjugate_rotations(provide)
+
+                self.assertEqual(result, expect)
 
 
 class TransformCompressRotationsTestCase(unittest.TestCase):
