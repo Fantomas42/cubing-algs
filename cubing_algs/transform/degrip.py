@@ -32,10 +32,11 @@ DEGRIP_Z: dict[str, Callable[[Algorithm], Algorithm]] = {
 }
 
 
-DEGRIP_FULL = {}
-DEGRIP_FULL.update(DEGRIP_X)
-DEGRIP_FULL.update(DEGRIP_Y)
-DEGRIP_FULL.update(DEGRIP_Z)
+DEGRIP_FULL: dict[str, Callable[[Algorithm], Algorithm]] = {
+    **DEGRIP_X,
+    **DEGRIP_Y,
+    **DEGRIP_Z,
+}
 
 
 def has_grip(
@@ -81,28 +82,73 @@ def degrip(
         config: dict[str, Callable[[Algorithm], Algorithm]],
 ) -> Algorithm:
     """
-    Remove grip moves from an algorithm
-    by applying appropriate transformations.
+    Remove grip moves from an algorithm by absorbing rotations into face moves.
+
+    A "grip" is a cube rotation (x, y, z) that appears before non-rotation
+    moves. Instead of rotating the whole cube and then turning faces, the
+    same effect can be achieved by renaming the subsequent face moves to
+    match the new orientation — eliminating the rotation entirely.
+
+    The algorithm scans left-to-right for the first rotation listed in
+    ``config``. When found, it applies the inverse offset to every move
+    that follows, effectively absorbing the rotation. The rotation itself
+    is pushed to the end of the algorithm (where it becomes a trailing
+    rotation that can later be stripped by ``remove_ending_rotations``).
+
+    If the result still contains grips, the process repeats until none
+    remain.
+
+    Example::
+
+        Input:   x  R  U  R' U'
+                 ^  ^^^^^^^^^^^
+                 grip  face moves (absolute frame)
+
+        Step 1:  apply x' offset to  R U R' U'  →  R F R' F'
+        Result:  R  F  R' F'  x
+                 ^^^^^^^^^^^^  ^
+                 degripped      trailing rotation
+
+    The trailing x is kept so the algorithm still produces the same cube
+    state. Use ``remove_ending_rotations`` to strip it when the final
+    orientation does not matter (e.g. displaying a short algorithm).
+
+    Multiple grips are handled iteratively::
+
+        Input:   x  R  U  x  F  D    (two grips)
+        Pass 1:  R  F  x  D  B  x    (first x absorbed into R U x F D)
+        Pass 2:  R  F  B  U  x  x    (second x absorbed into D B x)
+
+    Contrast with ``translate_moves``, which applies a known, fixed
+    orientation to the whole algorithm at once, and
+    ``translate_pov_moves``, which translates moves after inline
+    rotations to the user's point of view without removing them.
+    ``degrip`` removes rotations by absorbing them into face moves.
 
     Args:
         old_moves: The algorithm to process.
-        config: Dictionary mapping rotation moves to offset functions.
+        config: Dictionary mapping rotation move strings to their
+            inverse offset functions (e.g. ``DEGRIP_X``, ``DEGRIP_FULL``).
 
     Returns:
-        Algorithm with grip moves removed.
+        Algorithm with grip rotations absorbed into face moves.
+        Trailing rotations are preserved to maintain cube-state equivalence.
 
     """
-    _gripped, prefix, suffix, gripper = has_grip(old_moves, config)
+    result = old_moves
 
-    if suffix:
+    while True:
+        _gripped, prefix, suffix, gripper = has_grip(result, config)
+
+        if not suffix:
+            return result
+
         degripped = Algorithm([*config[gripper](suffix), Move(gripper)])
 
-        if has_grip(degripped, config)[0]:
-            return degrip(prefix + degripped, config)
+        if not has_grip(degripped, config)[0]:
+            return Algorithm(prefix + degripped)
 
-        return Algorithm(prefix + degripped)
-
-    return old_moves
+        result = prefix + degripped
 
 
 def degrip_x_moves(old_moves: Algorithm) -> Algorithm:
