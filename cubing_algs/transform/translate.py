@@ -6,15 +6,14 @@ from cubing_algs.constants import OFFSET_TABLE
 from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
-from cubing_algs.transform.degrip import DEGRIP_FULL
 
 # Parsed offset tables: base_move -> (new_base, direction_flipped)
 ParsedTable = dict[str, tuple[str, bool]]
 
 ROTATION_TO_OFFSET_KEYS: dict[str, tuple[str, ...]] = {
-    'x': ("x'",), 'y': ("y'",), 'z': ("z'",),
-    "x'": ('x',), "y'": ('y',), "z'": ('z',),
-    'x2': ('x', 'x'), 'y2': ('y', 'y'), 'z2': ('z', 'z'),
+    'x': ("x'",), "x'": ('x',), 'x2': ('x', 'x'),
+    'y': ("y'",), "y'": ('y',), 'y2': ('y', 'y'),
+    'z': ("z'",), "z'": ('z',), 'z2': ('z', 'z'),
 }
 
 PARSED_OFFSET_TABLES: dict[str, ParsedTable] = {
@@ -168,15 +167,21 @@ def translate_moves(
             msg = f'{ orientation_move } is not a rotation move'
             raise InvalidMoveError(msg)
 
+    composed: ParsedTable = {}
+    for orientation_move in orientation_moves:
+        for key in ROTATION_TO_OFFSET_KEYS[str(orientation_move.untimed)]:
+            composed = compose_offset_tables(
+                composed, PARSED_OFFSET_TABLES[key],
+            )
+
     def _translate_moves(old_moves: Algorithm) -> Algorithm:
-        if not orientation_moves or not old_moves:
+        if not composed or not old_moves:
             return old_moves
 
-        new_moves = old_moves.copy()
-        for orientation_move in orientation_moves:
-            new_moves = DEGRIP_FULL[str(orientation_move.inverted)](new_moves)
-
-        return new_moves
+        return Algorithm(
+            rotate_move(move, composed)
+            for move in old_moves
+        )
 
     return _translate_moves
 

@@ -1,11 +1,151 @@
 """Tests for algorithm translation transformation functions."""
 import unittest
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.offset import offset_x2_moves
+from cubing_algs.transform.translate import PARSED_OFFSET_TABLES
+from cubing_algs.transform.translate import compose_offset_tables
+from cubing_algs.transform.translate import rotate_move
 from cubing_algs.transform.translate import translate_moves
 from cubing_algs.transform.translate import translate_pov_moves
+
+
+class ComposeOffsetTablesTestCase(unittest.TestCase):
+    """Tests for compose_offset_tables."""
+
+    def test_compose_with_empty(self) -> None:
+        """Composing with an empty table returns the other table."""
+        table = PARSED_OFFSET_TABLES["x'"]
+
+        self.assertEqual(compose_offset_tables({}, table), table)
+        self.assertEqual(compose_offset_tables(table, {}), table)
+
+    def test_compose_identity(self) -> None:
+        """Composing two empty tables returns empty."""
+        self.assertEqual(compose_offset_tables({}, {}), {})
+
+    def test_compose_chained_equals_double(self) -> None:
+        """Composing x with x equals x2 (applied twice)."""
+        x_table = PARSED_OFFSET_TABLES['x']
+        composed = compose_offset_tables(x_table, x_table)
+
+        alg = parse_moves('R U F D L B M S E')
+        expected = offset_x2_moves(alg)
+
+        result = Algorithm([rotate_move(m, composed) for m in alg])
+
+        self.assertEqual(result, expected)
+
+    def test_compose_preserves_flip(self) -> None:
+        """Direction flips compose via XOR."""
+        t1: dict[str, tuple[str, bool]] = {'S': ('E', True)}
+        t2: dict[str, tuple[str, bool]] = {'E': ('S', True)}
+
+        composed = compose_offset_tables(t1, t2)
+
+        self.assertEqual(composed['S'], ('S', False))
+
+    def test_compose_disjoint_tables(self) -> None:
+        """Disjoint tables merge all entries."""
+        t1: dict[str, tuple[str, bool]] = {'U': ('D', False)}
+        t2: dict[str, tuple[str, bool]] = {'R': ('L', False)}
+
+        composed = compose_offset_tables(t1, t2)
+
+        self.assertEqual(composed['U'], ('D', False))
+        self.assertEqual(composed['R'], ('L', False))
+
+
+class RotateMoveTestCase(unittest.TestCase):
+    """Tests for rotate_move."""
+
+    def test_unmapped_move_unchanged(self) -> None:
+        """Move not in table passes through unchanged."""
+        move = Move('R')
+        table: dict[str, tuple[str, bool]] = {'U': ('D', False)}
+
+        self.assertEqual(rotate_move(move, table), move)
+
+    def test_clockwise_no_flip(self) -> None:
+        """Clockwise move remapped without flip stays clockwise."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', False)}
+
+        result = rotate_move(Move('R'), table)
+
+        self.assertEqual(str(result), 'F')
+
+    def test_clockwise_with_flip(self) -> None:
+        """Clockwise move remapped with flip becomes counter-clockwise."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', True)}
+
+        result = rotate_move(Move('R'), table)
+
+        self.assertEqual(str(result), "F'")
+
+    def test_counter_clockwise_with_flip(self) -> None:
+        """Counter-clockwise move with flip becomes clockwise."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', True)}
+
+        result = rotate_move(Move("R'"), table)
+
+        self.assertEqual(str(result), 'F')
+
+    def test_counter_clockwise_no_flip(self) -> None:
+        """Counter-clockwise move without flip stays counter-clockwise."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', False)}
+
+        result = rotate_move(Move("R'"), table)
+
+        self.assertEqual(str(result), "F'")
+
+    def test_double_move_ignores_flip(self) -> None:
+        """Double move is unaffected by flip."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', True)}
+
+        result = rotate_move(Move('R2'), table)
+
+        self.assertEqual(str(result), 'F2')
+
+    def test_wide_move(self) -> None:
+        """Wide move notation is preserved."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', False)}
+
+        result = rotate_move(Move('Rw'), table)
+
+        self.assertEqual(str(result), 'Fw')
+
+    def test_timed_move(self) -> None:
+        """Timing is preserved on remapped move."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', False)}
+
+        result = rotate_move(Move('R@100'), table)
+
+        self.assertEqual(str(result), 'F@100')
+
+    def test_sign_move(self) -> None:
+        """SiGN notation is preserved on remapped move."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', False)}
+
+        result = rotate_move(Move('r'), table)
+
+        self.assertEqual(str(result), 'f')
+
+    def test_empty_table(self) -> None:
+        """Empty table returns move unchanged."""
+        result = rotate_move(Move('R'), {})
+
+        self.assertEqual(str(result), 'R')
+
+    def test_pause_move(self) -> None:
+        """Pause move passes through unchanged."""
+        table: dict[str, tuple[str, bool]] = {'R': ('F', False)}
+
+        result = rotate_move(Move('.'), table)
+
+        self.assertEqual(str(result), '.')
 
 
 class TransformTranslateTestCase(unittest.TestCase):
@@ -128,6 +268,24 @@ class TransformTranslateTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_translate_empty_algorithm(self) -> None:
+        """Translating an empty algorithm returns it unchanged."""
+        orientation = parse_moves('z2')
+
+        result = translate_moves(orientation)(Algorithm())
+
+        self.assertEqual(result, Algorithm())
+
+    def test_translate_reusable_closure(self) -> None:
+        """Closure from translate_moves can be reused on multiple algs."""
+        translate = translate_moves(parse_moves('z2'))
+
+        result1 = translate(parse_moves("L D L' D'"))
+        result2 = translate(parse_moves("R U R' U'"))
+
+        self.assertEqual(result1, parse_moves("R U R' U'"))
+        self.assertEqual(result2, parse_moves("L D L' D'"))
+
 
 class TransformTranslatePOVTestCase(unittest.TestCase):
     """Tests for POV-based algorithm translation."""
@@ -212,3 +370,34 @@ class TransformTranslatePOVTestCase(unittest.TestCase):
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
+
+    def test_translate_pov_no_rotations(self) -> None:
+        """Algorithm without rotations is returned unchanged."""
+        provide = parse_moves("R U R' U'")
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(result, provide)
+
+    def test_translate_pov_only_rotations(self) -> None:
+        """Algorithm of only rotations is returned unchanged."""
+        provide = parse_moves('x y z')
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(result, provide)
+
+    def test_translate_pov_empty(self) -> None:
+        """Empty algorithm is returned unchanged."""
+        result = translate_pov_moves(Algorithm())
+
+        self.assertEqual(result, Algorithm())
+
+    def test_translate_pov_double_rotation(self) -> None:
+        """Double rotation (x2) is handled correctly."""
+        provide = parse_moves("x2 B U B' U'")
+        expect = parse_moves("x2 F D F' D'")
+
+        result = translate_pov_moves(provide)
+
+        self.assertEqual(result, expect)
