@@ -70,8 +70,7 @@ def has_grip(
 
         i += 1
 
-    config_keys = set(config.keys())
-    if suffix and any(str(m.untimed) not in config_keys for m in suffix):
+    if suffix and any(str(m.untimed) not in config for m in suffix):
         return True, prefix, suffix, gripper_move
 
     return False, Algorithm(), Algorithm(), ''

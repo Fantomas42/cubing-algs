@@ -87,7 +87,6 @@ def rotate(old_moves: Algorithm, rotation: str) -> Algorithm:
     rotation_table: dict[str, str] = OFFSET_TABLE[rotation]
 
     for move in old_moves:
-        layer = move.layer
         time = move.time
         base_move = move.base_move
         wide = WIDE_CHAR if move.is_wide_move else ''
@@ -96,7 +95,7 @@ def rotate(old_moves: Algorithm, rotation: str) -> Algorithm:
 
         if base_move in rotation_table:
             new_move = Move(
-                layer + rotation_table[base_move] + wide + time,
+                move.layer + rotation_table[base_move] + wide + time,
             )
             if move.is_counter_clockwise:
                 new_move = new_move.inverted
