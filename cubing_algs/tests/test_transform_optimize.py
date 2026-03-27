@@ -524,3 +524,29 @@ class TransformOptimizeTestCase(unittest.TestCase):
             optimize_triple_moves(provide),
             expect,
         )
+
+    def test_optimize_triple_moves_consecutive_pauses(self) -> None:
+        """Consecutive pauses must not be combined by optimize_triple_moves."""
+        provide = parse_moves('. . R')
+        expect = parse_moves('. . R')
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('R . . R2')
+        expect = parse_moves('R . . R2')
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )
+
+        provide = parse_moves('. .')
+        expect = parse_moves('. .')
+
+        self.assertEqual(
+            optimize_triple_moves(provide),
+            expect,
+        )

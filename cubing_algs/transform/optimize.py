@@ -71,12 +71,8 @@ def optimize_do_undo_moves_inplace(
 
     while i < len(moves) - 1:
         if (
-            (not moves[i].is_pause
-             and moves[i].inverted.untimed == moves[i + 1].untimed) or (
-                 moves[i].untimed == moves[i + 1].untimed
-                 and moves[i].is_double
-                 and not moves[i].is_pause
-             )
+            not moves[i].is_pause
+            and moves[i].inverted.untimed == moves[i + 1].untimed
         ):
             moves[i:i + 2] = []
             changed = True
@@ -158,7 +154,8 @@ def optimize_triple_moves_inplace(
 
     while i < len(moves) - 1:
         if (
-                moves[i].base_move == moves[i + 1].base_move
+                not moves[i].is_pause
+                and moves[i].base_move == moves[i + 1].base_move
                 and moves[i].layer == moves[i + 1].layer
         ):
             if moves[i].is_double and not moves[i + 1].is_double:
