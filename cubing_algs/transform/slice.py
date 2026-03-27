@@ -192,7 +192,7 @@ def reslice(
 
     if changed:
         return reslice(
-            Algorithm(moves), config,
+            moves, config,
             max_depth - 1,
             threshold,
             pattern_lengths,

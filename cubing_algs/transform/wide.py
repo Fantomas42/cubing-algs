@@ -92,7 +92,7 @@ def rewide(
 
     if changed:
         return rewide(
-            Algorithm(moves), config,
+            moves, config,
             max_depth - 1,
             threshold,
         )
