@@ -6,9 +6,6 @@ from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.rotation import compress_ending_rotations
 from cubing_algs.transform.rotation import compress_rotations
-from cubing_algs.transform.rotation import optimize_conjugate_rotations
-from cubing_algs.transform.rotation import optimize_double_rotations
-from cubing_algs.transform.rotation import optimize_triple_rotations
 from cubing_algs.transform.rotation import remove_ending_rotations
 from cubing_algs.transform.rotation import remove_rotations
 from cubing_algs.transform.rotation import remove_starting_rotations
@@ -274,436 +271,6 @@ class SplitMovesEndingRotationsTestCase(unittest.TestCase):
         )
 
 
-class TransformOptimizeTripleRotationsTestCase(unittest.TestCase):
-    """Tests for optimizing triple rotation sequences."""
-
-    def test_optimize_triple_rotations(self) -> None:
-        """Test optimize triple rotations."""
-        provide = parse_moves('x2 y2 z2')
-        expect = Algorithm()
-
-        result = optimize_triple_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        provide = parse_moves('y2 x2 z2')
-
-        result = optimize_triple_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        provide = parse_moves('z2 x2 y2')
-
-        result = optimize_triple_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-    def test_optimize_triple_rotations_timed(self) -> None:
-        """Test optimize triple rotations timed."""
-        provide = parse_moves('x2@0 y2@50 z2@100')
-        expect = Algorithm()
-
-        result = optimize_triple_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-    def test_optimize_triple_rotations_start(self) -> None:
-        """Test optimize triple rotations start."""
-        provide = parse_moves('x2 x2 y2 z2')
-        expect = parse_moves('x2')
-
-        result = optimize_triple_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_triple_rotations_end(self) -> None:
-        """Test optimize triple rotations end."""
-        provide = parse_moves('x2 y2 z2 x2')
-        expect = parse_moves('x2')
-
-        result = optimize_triple_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_triple_rotations_max(self) -> None:
-        """Test optimize triple rotations max."""
-        provide = parse_moves('x2 y2 z2')
-
-        result = optimize_triple_rotations(provide, 0)
-
-        self.assertEqual(
-            result,
-            provide,
-        )
-
-
-class TransformOptimizeDoubleRotationsTestCase(unittest.TestCase):
-    """Tests for optimizing double rotation sequences."""
-
-    def test_optimize_double_rotations(self) -> None:
-        """Test optimize double rotations."""
-        provide = parse_moves('x2 y2')
-        expect = parse_moves('z2')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-        provide = parse_moves('z2 x2')
-        expect = parse_moves('y2')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-        provide = parse_moves('z2 y2')
-        expect = parse_moves('x2')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_double_rotations_timed(self) -> None:
-        """Test optimize double rotations timed."""
-        provide = parse_moves('x2@50 y2@100')
-        expect = parse_moves('z2')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_double_rotations_start(self) -> None:
-        """Test optimize double rotations start."""
-        provide = parse_moves('x x2 y2')
-        expect = parse_moves('x z2')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_double_rotations_end(self) -> None:
-        """Test optimize double rotations end."""
-        provide = parse_moves('x2 y2 x')
-        expect = parse_moves('z2 x')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_double_rotations_multiple(self) -> None:
-        """Test optimize double rotations multiple."""
-        provide = parse_moves('x2 y2 x2')
-        expect = parse_moves('y2')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_double_rotations_chained(self) -> None:
-        """
-        Test that a newly produced rotation is further
-        combined with adjacent double rotations.
-        """
-        # x2 y2 z2 y2: first pair x2,y2 → z2,
-        # then z2,z2 skipped (same), z2,y2 → x2
-        # but the resulting z2,x2 pair must be further combined into y2
-        provide = parse_moves('x2 y2 z2 y2')
-        expect = parse_moves('y2')
-
-        result = optimize_double_rotations(provide)
-
-        self.assertEqual(result, expect)
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_double_rotations_max(self) -> None:
-        """Test optimize double rotations max."""
-        provide = parse_moves('x2 y2')
-
-        result = optimize_double_rotations(provide, 0)
-
-        self.assertEqual(
-            result,
-            provide,
-        )
-
-    def test_optimize_double_rotations_ignores_face_moves(self) -> None:
-        """Test that non-rotation double moves are left unchanged."""
-        cases = [
-            ('R2 U2', 'R2 U2'),
-            ('R2 F2', 'R2 F2'),
-            ('U2 D2', 'U2 D2'),
-            ('R2 U2 F2', 'R2 U2 F2'),
-        ]
-        for provided, expected in cases:
-            with self.subTest(provided=provided):
-                provide = parse_moves(provided)
-                expect = parse_moves(expected)
-
-                result = optimize_double_rotations(provide)
-
-                self.assertEqual(result, expect)
-
-    def test_optimize_double_rotations_ignores_mixed_moves(self) -> None:
-        """Test that mixed rotation and face double moves are left unchanged."""
-        cases = [
-            ('x2 R2', 'x2 R2'),
-            ('R2 y2', 'R2 y2'),
-            ('z2 U2', 'z2 U2'),
-        ]
-        for provided, expected in cases:
-            with self.subTest(provided=provided):
-                provide = parse_moves(provided)
-                expect = parse_moves(expected)
-
-                result = optimize_double_rotations(provide)
-
-                self.assertEqual(result, expect)
-
-
-class TransformOptimizeConjugateRotationsTestCase(unittest.TestCase):
-    """Tests for optimizing conjugate rotation patterns."""
-
-    def test_optimize_conjugate_rotations(self) -> None:
-        """Test optimize conjugate rotations."""
-        provide = parse_moves("y x2 y'")
-        expect = parse_moves('z2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-        provide = parse_moves("y' x2 y")
-        expect = parse_moves('z2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-        provide = parse_moves("z x2 z'")
-        expect = parse_moves('y2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-        provide = parse_moves("z' y2 z")
-        expect = parse_moves('x2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_conjugate_rotations_timed(self) -> None:
-        """Test optimize conjugate rotations timed."""
-        provide = parse_moves("y@0 x2@50 y'@100")
-        expect = parse_moves('z2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_conjugate_rotations_start(self) -> None:
-        """Test optimize conjugate rotations start."""
-        provide = parse_moves("x x y2 x'")
-        expect = parse_moves('x z2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_conjugate_rotations_end(self) -> None:
-        """Test optimize conjugate rotations end."""
-        provide = parse_moves("x y2 x' x")
-        expect = parse_moves('z2 x')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_conjugate_rotations_multiple(self) -> None:
-        """Test optimize conjugate rotations multiple."""
-        provide = parse_moves("x' z2 x y x2 y'")
-        expect = parse_moves('y2 z2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(
-            result,
-            expect,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_conjugate_rotations_chained_double(self) -> None:
-        """
-        Test that two conjugate patterns whose results
-        form a double-rotation pair are fully combined.
-        """
-        # y x2 y' → z2, then y z2 y' → x2 —
-        # the resulting z2 x2 must be further combined into y2
-        provide = parse_moves("y x2 y' y z2 y'")
-        expect = parse_moves('z2 x2')
-
-        result = optimize_conjugate_rotations(provide)
-
-        self.assertEqual(result, expect)
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_optimize_conjugate_rotations_max(self) -> None:
-        """Test optimize conjugate rotations max."""
-        provide = parse_moves("y x2 y'")
-
-        result = optimize_conjugate_rotations(provide, 0)
-
-        self.assertEqual(
-            result,
-            provide,
-        )
-
-    def test_optimize_conjugate_rotations_ignores_face_moves(self) -> None:
-        """Test that non-rotation conjugate patterns are left unchanged."""
-        cases = [
-            ("R U2 R'", "R U2 R'"),
-            ("F D2 F'", "F D2 F'"),
-            ("L R2 L'", "L R2 L'"),
-        ]
-        for provided, expected in cases:
-            with self.subTest(provided=provided):
-                provide = parse_moves(provided)
-                expect = parse_moves(expected)
-
-                result = optimize_conjugate_rotations(provide)
-
-                self.assertEqual(result, expect)
-
-    def test_optimize_conjugate_rotations_ignores_mixed_moves(self) -> None:
-        """Test mixed rotation and face conjugates are unchanged."""
-        cases = [
-            ("R y2 R'", "R y2 R'"),
-            ("U x2 U'", "U x2 U'"),
-            ("x R2 x'", "x R2 x'"),
-        ]
-        for provided, expected in cases:
-            with self.subTest(provided=provided):
-                provide = parse_moves(provided)
-                expect = parse_moves(expected)
-
-                result = optimize_conjugate_rotations(provide)
-
-                self.assertEqual(result, expect)
-
-
 class TransformCompressRotationsTestCase(unittest.TestCase):
     """Tests for compressing rotation sequences."""
 
@@ -742,20 +309,6 @@ class TransformCompressRotationsTestCase(unittest.TestCase):
         provide = parse_moves('x')
 
         result = compress_rotations(provide)
-
-        self.assertEqual(
-            result,
-            provide,
-        )
-
-        for m in result:
-            self.assertTrue(isinstance(m, Move))
-
-    def test_compress_rotations_max(self) -> None:
-        """Test compress rotations max."""
-        provide = parse_moves("x' z2 x y x2 y'")
-
-        result = compress_rotations(provide, 0)
 
         self.assertEqual(
             result,
@@ -1054,7 +607,7 @@ class TransformCompressEndingRotationsTestCase(unittest.TestCase):
             self.assertTrue(isinstance(m, Move))
 
         provide = parse_moves("y'@0 y@3630 y'@5970")
-        expect = parse_moves("y'@5970")
+        expect = parse_moves("y'")
 
         result = compress_ending_rotations(provide)
 
@@ -1087,9 +640,6 @@ class CompressEndingRotationsSingleConjugateTestCase(unittest.TestCase):
     These are 3-move patterns where two single quarter-turn rotations
     on different axes form a conjugate (a b a'). The result should be
     a single quarter-turn on the third axis.
-
-    Currently NOT optimized — compress_ending_rotations only handles
-    double-middle conjugates (a b2 a' -> c2).
     """
 
     def test_x_y_conjugate(self) -> None:
@@ -1151,9 +701,6 @@ class CompressEndingRotationsSandwichTestCase(unittest.TestCase):
     Two sub-patterns exist:
     - Single wraps double: a b2 a -> b2 (single moves cancel out)
     - Double wraps single: a2 b a2 -> b' (inverts the inner move)
-
-    Currently NOT optimized — the conjugate optimizer requires the
-    first and third moves to be inverses (a ... a'), not identical.
     """
 
     def test_single_wraps_double(self) -> None:
@@ -1208,8 +755,6 @@ class CompressEndingRotationsCyclicTripleTestCase(unittest.TestCase):
     Cyclic order (x,y,z), (y,z,x), (z,x,y): odd number of primes.
     Anti-cyclic order (z,y,x), (x,z,y), (y,x,z): even number of primes.
     Mixed double outer pairs: a2 b c2 -> b.
-
-    Currently NOT optimized.
     """
 
     def test_cyclic_order_single(self) -> None:
@@ -1286,9 +831,7 @@ class CompressEndingRotationsLongerSequenceTestCase(unittest.TestCase):
     """
     Tests for 4+ move rotation sequences.
 
-    These sequences require multiple optimization passes or a
-    group-multiplication approach to compress fully. Many of them
-    are currently NOT reduced at all.
+    These sequences require group-multiplication to compress fully.
     """
 
     def test_four_move_to_identity(self) -> None:
@@ -1323,8 +866,8 @@ class CompressEndingRotationsLongerSequenceTestCase(unittest.TestCase):
     def test_four_move_to_double(self) -> None:
         """Test 4-move sequences that reduce to 2 moves."""
         cases = [
-            ('R U x y x y', "R U x' z'"),
-            ("R U x y z x'", 'R U x z'),
+            ('R U x y x y', "R U y' x'"),
+            ("R U x y z x'", "R U y' x"),
         ]
         for provided, expected in cases:
             with self.subTest(provided=provided):
@@ -1335,7 +878,7 @@ class CompressEndingRotationsLongerSequenceTestCase(unittest.TestCase):
         """Test 5-move rotation sequences."""
         cases = [
             ("R U x y z' x2 y", 'R U x2'),
-            ("R U x y x' z y'", 'R U y z2'),
+            ("R U x y x' z y'", 'R U x2 y'),
         ]
         for provided, expected in cases:
             with self.subTest(provided=provided):
@@ -1363,7 +906,7 @@ class CompressEndingRotationsLongerSequenceTestCase(unittest.TestCase):
     def test_six_move_to_single(self) -> None:
         """Test 6-move rotation sequences that reduce to 1 move."""
         cases = [
-            ("R U x' y z y' x z'", "R U x' z'"),
+            ("R U x' y z y' x z'", 'R U y x'),
         ]
         for provided, expected in cases:
             with self.subTest(provided=provided):
@@ -1384,7 +927,7 @@ class CompressEndingRotationsMaxTwoMovesTestCase(unittest.TestCase):
     """
 
     @staticmethod
-    def _rotation_count(alg: Algorithm) -> int:
+    def rotation_count(alg: Algorithm) -> int:
         """Count trailing rotation moves in an algorithm."""  # noqa: DOC201
         _, rotations = split_moves_ending_rotations(alg)
         return len(rotations)
@@ -1404,7 +947,7 @@ class CompressEndingRotationsMaxTwoMovesTestCase(unittest.TestCase):
                         result = compress_ending_rotations(
                             parse_moves(provided),
                         )
-                        count = self._rotation_count(result)
+                        count = self.rotation_count(result)
                         self.assertLessEqual(
                             count, 2,
                             f'{provided} -> {result} has {count} '
@@ -1426,7 +969,7 @@ class CompressEndingRotationsMaxTwoMovesTestCase(unittest.TestCase):
         for provided in cases:
             with self.subTest(provided=provided):
                 result = compress_ending_rotations(parse_moves(provided))
-                count = self._rotation_count(result)
+                count = self.rotation_count(result)
                 self.assertLessEqual(
                     count, 2,
                     f'{provided} -> {result} has {count} '
@@ -1446,7 +989,7 @@ class CompressEndingRotationsMaxTwoMovesTestCase(unittest.TestCase):
         for provided in cases:
             with self.subTest(provided=provided):
                 result = compress_ending_rotations(parse_moves(provided))
-                count = self._rotation_count(result)
+                count = self.rotation_count(result)
                 self.assertLessEqual(
                     count, 2,
                     f'{provided} -> {result} has {count} '

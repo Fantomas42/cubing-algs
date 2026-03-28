@@ -1,13 +1,14 @@
 """Rotation move removal and manipulation transformations."""
-from cubing_algs.algorithm import Algorithm
-from cubing_algs.constants import MAX_ITERATIONS
-from cubing_algs.move import Move
-from cubing_algs.transform.optimize import optimize_do_undo_moves
-from cubing_algs.transform.optimize import optimize_double_moves
-from cubing_algs.transform.optimize import optimize_repeat_three_moves
-from cubing_algs.transform.optimize import optimize_triple_moves
+from functools import cache
+from typing import TYPE_CHECKING
 
-CANCEL_TRIPLET: set[str | Move] = {'x2', 'y2', 'z2'}
+from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import ORIENTATIONS
+from cubing_algs.parsing import parse_moves
+from cubing_algs.vcube import VCube
+
+if TYPE_CHECKING:
+    from cubing_algs.move import Move
 
 
 def remove_rotations(old_moves: Algorithm) -> Algorithm:
@@ -84,141 +85,6 @@ def remove_ending_rotations(old_moves: Algorithm) -> Algorithm:
     return Algorithm(reversed(moves))
 
 
-def optimize_triple_rotations(
-        old_moves: Algorithm,
-        max_depth: int = MAX_ITERATIONS,
-) -> Algorithm:
-    """
-    x2, y2, z2 --> <nothing>
-    x2, z2, y2 --> <nothing>
-    z2, x2, y2 --> <nothing>.
-
-    Args:
-        old_moves: Algorithm to optimize.
-        max_depth: Maximum recursion depth for optimization.
-
-    Returns:
-        Optimized algorithm with triple rotation sets removed.
-
-    """
-    if max_depth <= 0:
-        return old_moves
-
-    i = 0
-    changed = False
-    moves = old_moves.copy()
-
-    while i < len(moves) - 2:
-        triplet = {moves[i].untimed, moves[i + 1].untimed, moves[i + 2].untimed}
-        if triplet == CANCEL_TRIPLET:
-            moves[i:i + 3] = []
-            changed = True
-        else:
-            i += 1
-
-    if changed:
-        return optimize_triple_rotations(moves, max_depth - 1)
-
-    return moves
-
-
-def optimize_double_rotations(
-        old_moves: Algorithm,
-        max_depth: int = MAX_ITERATIONS,
-) -> Algorithm:
-    """
-    x2, y2 --> z2
-    x2, z2 --> y2
-    y2, z2 --> x2.
-
-    Args:
-        old_moves: Algorithm to optimize.
-        max_depth: Maximum recursion depth for optimization.
-
-    Returns:
-        Optimized algorithm with double rotation pairs combined.
-
-    """
-    if max_depth <= 0:
-        return old_moves
-
-    i = 0
-    changed = False
-    moves = old_moves.copy()
-
-    while i < len(moves) - 1:
-        one = moves[i].untimed
-        two = moves[i + 1].untimed
-        if (
-            one in CANCEL_TRIPLET
-            and two in CANCEL_TRIPLET
-            and one != two
-        ):
-            missing_rotation = (CANCEL_TRIPLET - {one, two}).pop()
-            moves[i:i + 2] = [Move(missing_rotation)]
-            changed = True
-        else:
-            i += 1
-
-    if changed:
-        return optimize_double_rotations(moves, max_depth - 1)
-
-    return moves
-
-
-def optimize_conjugate_rotations(
-        old_moves: Algorithm,
-        max_depth: int = MAX_ITERATIONS,
-) -> Algorithm:
-    """
-    x, y2, x' --> z2
-    x', y2, x --> z2
-    x, z2, x' --> y2
-    y, z2, y' --> x2.
-
-    Args:
-        old_moves: Algorithm to optimize.
-        max_depth: Maximum recursion depth for optimization.
-
-    Returns:
-        Optimized algorithm with conjugate rotation patterns simplified.
-
-    """
-    if max_depth <= 0:
-        return old_moves
-
-    i = 0
-    changed = False
-    moves = old_moves.copy()
-
-    while i < len(moves) - 2:
-        one = moves[i].untimed
-        two = moves[i + 1].untimed
-        three = moves[i + 2].untimed
-        all_rotations = (
-            one.is_rotation_move
-            and two.is_rotation_move
-            and three.is_rotation_move
-        )
-        is_conjugate = (
-            one.base_move == three.base_move
-            and not one.is_double
-            and not three.is_double
-            and one.modifier != three.modifier
-        )
-        if all_rotations and two.is_double and is_conjugate:
-            missing_rotation = (CANCEL_TRIPLET - {one.doubled, two}).pop()
-            moves[i:i + 3] = [Move(missing_rotation)]
-            changed = True
-        else:
-            i += 1
-
-    if changed:
-        return optimize_conjugate_rotations(moves, max_depth - 1)
-
-    return moves
-
-
 def split_moves_ending_rotations(
         old_moves: Algorithm,
 ) -> tuple[Algorithm, Algorithm]:
@@ -255,44 +121,60 @@ def split_moves_ending_rotations(
     return Algorithm(moves), Algorithm(rotations)
 
 
-def compress_rotations(
-        old_moves: Algorithm,
-        max_iterations: int = MAX_ITERATIONS,
-) -> Algorithm:
+@cache
+def build_orientation_table() -> dict[str, Algorithm]:
     """
-    Optimize rotation sequences by applying compression techniques.
+    Build a lookup table mapping orientations to optimal move sequences.
 
-    Applies various optimization functions specifically designed
-    for rotation moves to reduce redundancy.
-
-    Args:
-        old_moves: Algorithm to compress.
-        max_iterations: Maximum number of optimization iterations.
+    Uses VCube to compute the shortest rotation sequence for each of
+    the 24 possible cube orientations. The result is cached after the
+    first call.
 
     Returns:
-        Compressed algorithm with optimized rotations.
+        Dictionary mapping orientation strings to optimal Algorithms.
 
     """
-    moves = old_moves.copy()
+    cube = VCube()
+    table: dict[str, Algorithm] = {}
 
-    for _ in range(max_iterations):
-        start_length = len(moves)
+    for orientation in ORIENTATIONS:
+        moves_str = cube.compute_orientation_moves(orientation)
+        table[orientation] = (
+            parse_moves(moves_str) if moves_str else Algorithm()
+        )
 
-        for optimizer in (
-                optimize_do_undo_moves,
-                optimize_repeat_three_moves,
-                optimize_double_moves,
-                optimize_triple_moves,
-                optimize_conjugate_rotations,
-                optimize_double_rotations,
-                optimize_triple_rotations,
-        ):
-            moves = optimizer(moves)
+    return table
 
-        if len(moves) == start_length:
-            break
 
-    return moves
+def compress_rotations(old_moves: Algorithm) -> Algorithm:
+    """
+    Compress a rotation sequence to its optimal form.
+
+    Simulates the rotation sequence on a virtual cube, reads the
+    resulting orientation, and returns the shortest equivalent
+    rotation sequence (at most 2 moves).
+
+    Args:
+        old_moves: Algorithm containing rotation moves to compress.
+
+    Returns:
+        Compressed algorithm with the optimal rotation sequence.
+
+    """
+    if not old_moves:
+        return old_moves
+
+    rotation_moves = Algorithm(
+        m.untimed for m in old_moves if m.is_rotation_move
+    )
+
+    if not rotation_moves:
+        return old_moves
+
+    cube = VCube()
+    cube.rotate(rotation_moves, history=False)
+
+    return build_orientation_table()[cube.orientation]
 
 
 def compress_ending_rotations(old_moves: Algorithm) -> Algorithm:
