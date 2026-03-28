@@ -17,6 +17,7 @@ from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.move import Move
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solver import facelets_to_facelets_algorithm
 
@@ -65,6 +66,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             self._state = initial
             if check and size == 3:
                 self.check_integrity()
+        elif size == 3:
+            self._state = SOLVED_FACELETS_3x3x3
         else:
             self._state = get_solved_facelets(size)
 
