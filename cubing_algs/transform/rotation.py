@@ -1,9 +1,8 @@
 """Rotation move removal and manipulation transformations."""
-from functools import cache
 from typing import TYPE_CHECKING
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.constants import ORIENTATIONS
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
 
@@ -121,31 +120,6 @@ def split_moves_ending_rotations(
     return Algorithm(moves), Algorithm(rotations)
 
 
-@cache
-def build_orientation_table() -> dict[str, Algorithm]:
-    """
-    Build a lookup table mapping orientations to optimal move sequences.
-
-    Uses VCube to compute the shortest rotation sequence for each of
-    the 24 possible cube orientations. The result is cached after the
-    first call.
-
-    Returns:
-        Dictionary mapping orientation strings to optimal Algorithms.
-
-    """
-    cube = VCube()
-    table: dict[str, Algorithm] = {}
-
-    for orientation in ORIENTATIONS:
-        moves_str = cube.compute_orientation_moves(orientation)
-        table[orientation] = (
-            parse_moves(moves_str) if moves_str else Algorithm()
-        )
-
-    return table
-
-
 def compress_rotations(old_moves: Algorithm) -> Algorithm:
     """
     Compress a rotation sequence to its optimal form.
@@ -174,7 +148,8 @@ def compress_rotations(old_moves: Algorithm) -> Algorithm:
     cube = VCube()
     cube.rotate(rotation_moves, history=False)
 
-    return build_orientation_table()[cube.orientation]
+    moves_str = ORIENTATION_FACE_MOVES[cube.orientation]
+    return parse_moves(moves_str) if moves_str else Algorithm()
 
 
 def compress_ending_rotations(old_moves: Algorithm) -> Algorithm:
