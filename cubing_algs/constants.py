@@ -423,31 +423,36 @@ ITERATIONS_BY_CUBE_SIZE = {
     7: (100, 100),
 }
 
+# Orientation move selection priority:
+# 1. Fewest moves (1-move always beats 2-move)
+# 2. Double moves (y2, x2, z2) preferred in first position
+# 3. y-axis preferred over x-axis, x-axis over z-axis
+# 4. Clockwise preferred over counter-clockwise
 OFFSET_ORIENTATION_MAP = {
     '01': 'y',
     '02': '',
     '04': "y'",
     '05': 'y2',
-    '10': "x' z'",
+    '10': "y' x'",
     '12': "z'",
-    '13': "z' y",
-    '15': "z' y2",
-    '20': "x' z2",
+    '13': 'y x',
+    '15': 'y2 z',
+    '20': "y2 x'",
     '21': 'x y',
     '23': 'x',
     '24': "x y'",
-    '31': 'y z2',
+    '31': 'x2 y',
     '32': 'z2',
-    '34': "y' z2",
+    '34': "x2 y'",
     '35': 'x2',
-    '40': 'z y',
+    '40': "y x'",
     '42': 'z',
-    '43': "z y'",
-    '45': 'z y2',
+    '43': "y' x",
+    '45': "y2 z'",
     '50': "x'",
-    '51': "x' y",
-    '53': "x' y2",
-    '54': "x' y'",
+    '51': "y z'",
+    '53': 'y2 x',
+    '54': "y' z",
     '0': '',
     '1': "z'",
     '2': 'x',

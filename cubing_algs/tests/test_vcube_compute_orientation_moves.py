@@ -47,25 +47,25 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
             ('UL', "y'"),
             ('UB', 'y2'),
             ('DF', 'z2'),
-            ('DR', 'y z2'),
-            ('DL', "y' z2"),
+            ('DR', 'x2 y'),
+            ('DL', "x2 y'"),
             ('DB', 'x2'),
-            ('FU', "x' z2"),
+            ('FU', "y2 x'"),
             ('FD', 'x'),
             ('FR', 'x y'),
             ('FL', "x y'"),
             ('BU', "x'"),
-            ('BD', "x' y2"),
-            ('BR', "x' y"),
-            ('BL', "x' y'"),
-            ('RU', "x' z'"),
-            ('RD', "z' y"),
+            ('BD', 'y2 x'),
+            ('BR', "y z'"),
+            ('BL', "y' z"),
+            ('RU', "y' x'"),
+            ('RD', 'y x'),
             ('RF', "z'"),
-            ('RB', "z' y2"),
-            ('LU', 'z y'),
-            ('LD', "z y'"),
+            ('RB', 'y2 z'),
+            ('LU', "y x'"),
+            ('LD', "y' x"),
             ('LF', 'z'),
-            ('LB', 'z y2'),
+            ('LB', "y2 z'"),
         ]
 
         for faces, expected_moves in test_cases:
@@ -340,7 +340,7 @@ class TestVCubeComputeOrientationMoves(unittest.TestCase):
         # Apply slice moves
         self.cube.rotate('M E S')
         orientation_after_slice = self.cube.compute_orientation_moves('UF')
-        self.assertEqual(orientation_after_slice, "y' z2")
+        self.assertEqual(orientation_after_slice, "x2 y'")
 
         # Apply combination of slice and regular moves
         self.cube.rotate("M U2 S E'")

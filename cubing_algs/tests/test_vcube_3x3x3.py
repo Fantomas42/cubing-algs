@@ -456,7 +456,7 @@ class VCubeOrientedCopyTestCase(unittest.TestCase):
 
         self.assertEqual(
             oriented.history,
-            ['R', 'F', 'y', 'z2'],
+            ['R', 'F', 'x2', 'y'],
         )
 
     def test_all_edge_reorientation(self) -> None:

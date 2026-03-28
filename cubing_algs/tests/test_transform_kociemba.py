@@ -254,7 +254,7 @@ class TransformKociembaTestCase(unittest.TestCase):  # noqa: PLR0904
         cube2.rotate(result)
 
         self.assertEqual(cube1.state, cube2.state)
-        self.assertEqual(str(result), 'y z2')
+        self.assertEqual(str(result), 'x2 y')
 
         for m in result:
             self.assertTrue(isinstance(m, Move))
