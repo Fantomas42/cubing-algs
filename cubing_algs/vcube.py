@@ -1,4 +1,6 @@
 """Virtual cube implementation for simulating moves and tracking state."""
+from functools import cached_property
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import Mask
 from cubing_algs.constants import FACE_INDEXES
@@ -78,12 +80,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """Get the current state of the cube as a facelet string."""
         return self._state
 
-    @property
+    @cached_property
     def has_fixed_centers(self) -> bool:
         """Check if the cube has fixed centers."""
         return bool(self.size % 2)
 
-    @property
+    @cached_property
     def center_index(self) -> int:
         """
         Return the center index for a face.
@@ -146,7 +148,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
     @property
     def is_solved(self) -> bool:
         """Check if the cube is in a solved state."""
-        return all(face * self.face_size in self.state for face in FACE_ORDER)
+        return all(face * self.face_size in self._state for face in FACE_ORDER)
 
     def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
         """
@@ -166,11 +168,11 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         """
         if strict:
-            return self.state == other_cube.state
+            return self._state == other_cube._state  # noqa: SLF001
 
         oriented_copy = other_cube.oriented_copy(self.orientation)
 
-        return self.state == oriented_copy.state
+        return self._state == oriented_copy._state  # noqa: SLF001
 
     @property
     def orientation(self) -> str:
@@ -249,7 +251,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             history = list(self.history)
 
         return VCube(
-            self.state,
+            self._state,
             size=self.size,
             check=False,
             history=history,
@@ -408,7 +410,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         center_index = self.center_index
 
         return tuple(
-            self.state[(i * self.face_size) + center_index]
+            self._state[(i * self.face_size) + center_index]
             for i in range(self.face_number)
         )
 
