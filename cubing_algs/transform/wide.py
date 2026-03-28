@@ -1,5 +1,6 @@
 """Wide move expansion and contraction transformations."""
 from collections.abc import Callable
+from collections.abc import Sequence
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
@@ -40,7 +41,7 @@ def unwide_rotation_moves(old_moves: Algorithm) -> Algorithm:
 
 
 def rewide(
-        old_moves: Algorithm,
+        old_moves: Sequence[Move],
         config: dict[str, str],
         max_depth: int = MAX_ITERATIONS,
         threshold: int = 0,
@@ -59,7 +60,7 @@ def rewide(
 
     """
     if max_depth <= 0:
-        return old_moves
+        return Algorithm(old_moves)
 
     i = 0
     moves: list[Move] = []

@@ -1,5 +1,6 @@
 """Slice move expansion and contraction transformations."""
 from collections.abc import Callable
+from collections.abc import Sequence
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
@@ -107,7 +108,7 @@ def is_within_threshold(
 
 
 def try_match_n_moves(
-        old_moves: Algorithm,
+        old_moves: Sequence[Move],
         start_index: int,
         n: int,
         config: dict[str, list[str]],
@@ -141,7 +142,7 @@ def try_match_n_moves(
 
 
 def reslice(
-        old_moves: Algorithm,
+        old_moves: Sequence[Move],
         config: dict[str, list[str]],
         max_depth: int = MAX_ITERATIONS,
         threshold: int = 0,
@@ -165,7 +166,7 @@ def reslice(
 
     """
     if max_depth <= 0:
-        return old_moves
+        return Algorithm(old_moves)
 
     i = 0
     moves: list[Move] = []
