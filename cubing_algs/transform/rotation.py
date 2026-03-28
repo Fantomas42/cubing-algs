@@ -146,7 +146,7 @@ def compress_rotations(old_moves: Algorithm) -> Algorithm:
     )
 
     if not rotation_moves:
-        return old_moves
+        return Algorithm()
 
     cube = VCube()
     cube.rotate(rotation_moves, history=False)

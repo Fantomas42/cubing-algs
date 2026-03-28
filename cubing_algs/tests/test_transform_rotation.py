@@ -348,13 +348,49 @@ class TransformCompressRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertFalse(m.is_timed)
 
+    def test_compress_rotations_discards_non_rotation_moves(self) -> None:
+        """Test compress rotations discards non-rotation moves."""
+        provide = parse_moves('R2 x F2')
+        expect = parse_moves('x')
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, expect)
+
+    def test_compress_rotations_discards_pauses(self) -> None:
+        """Test compress rotations discards pauses."""
+        provide = parse_moves('x . y')
+        expect = parse_moves('x y')
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, expect)
+
+    def test_compress_rotations_discards_trailing_moves(self) -> None:
+        """Test compress rotations discards trailing moves."""
+        provide = parse_moves('R2 F2 x y')
+        expect = parse_moves('x y')
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, expect)
+
+    def test_compress_rotations_discards_leading_moves(self) -> None:
+        """Test compress rotations discards leading moves."""
+        provide = parse_moves('z2 y R2 F2')
+        expect = parse_moves("x2 y'")
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, expect)
+
     def test_compress_rotations_no_rotation_moves(self) -> None:
         """Test compress rotations with no rotation moves."""
         provide = parse_moves("R U R' U'")
 
         result = compress_rotations(provide)
 
-        self.assertEqual(result, provide)
+        self.assertEqual(result, Algorithm())
 
 
 class TransformCompressEndingRotationsTestCase(unittest.TestCase):
