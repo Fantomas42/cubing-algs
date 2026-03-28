@@ -134,6 +134,9 @@ def compress_rotations(old_moves: Algorithm) -> Algorithm:
     Returns:
         Compressed algorithm with the optimal rotation sequence.
 
+    Note:
+        Timing information is discarded from the result.
+
     """
     if not old_moves:
         return old_moves
@@ -165,10 +168,12 @@ def compress_ending_rotations(old_moves: Algorithm) -> Algorithm:
     Returns:
         Algorithm with optimized ending rotations.
 
+    Note:
+        Timing information is discarded from ending rotations.
+
     """
     moves, rotations = split_moves_ending_rotations(old_moves)
 
-    if len(rotations) > 1:
-        rotations = compress_rotations(rotations)
+    rotations = compress_rotations(rotations)
 
     return moves + rotations

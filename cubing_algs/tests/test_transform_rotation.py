@@ -318,6 +318,44 @@ class TransformCompressRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_compress_rotations_empty(self) -> None:
+        """Test compress rotations with empty algorithm."""
+        provide = Algorithm()
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, provide)
+
+    def test_compress_rotations_discards_timing(self) -> None:
+        """Test compress rotations discards timing from timed moves."""
+        provide = parse_moves('x@500 y@300')
+        expect = parse_moves('x y')
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, expect)
+        for m in result:
+            self.assertFalse(m.is_timed)
+
+    def test_compress_rotations_single_timed_rotation(self) -> None:
+        """Test compress rotations with a single timed rotation."""
+        provide = parse_moves('x@500')
+        expect = parse_moves('x')
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, expect)
+        for m in result:
+            self.assertFalse(m.is_timed)
+
+    def test_compress_rotations_no_rotation_moves(self) -> None:
+        """Test compress rotations with no rotation moves."""
+        provide = parse_moves("R U R' U'")
+
+        result = compress_rotations(provide)
+
+        self.assertEqual(result, provide)
+
 
 class TransformCompressEndingRotationsTestCase(unittest.TestCase):
     """Tests for compressing ending rotation sequences."""
@@ -539,6 +577,28 @@ class TransformCompressEndingRotationsTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_compress_ending_rotations_timed_discards_timing(self) -> None:
+        """Test compress ending rotations discards timing from timed moves."""
+        provide = parse_moves('R2 F x@500 y@300')
+        expect = parse_moves('R2 F x y')
+
+        result = compress_ending_rotations(provide)
+
+        self.assertEqual(result, expect)
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_compress_ending_rotations_single_timed_rotation(self) -> None:
+        """Test compress ending rotations with a single timed rotation."""
+        provide = parse_moves('R2 F x@500')
+        expect = parse_moves('R2 F x')
+
+        result = compress_ending_rotations(provide)
+
+        self.assertEqual(result, expect)
+        for m in result:
+            self.assertFalse(m.is_timed)
+
         provide = parse_moves("y y'")
         expect = parse_moves('')
 
@@ -581,7 +641,7 @@ class TransformCompressEndingRotationsTestCase(unittest.TestCase):
     def test_compress_ending_rotations_timed_only(self) -> None:
         """Test compress ending rotations timed only."""
         provide = parse_moves("y'@0")
-        expect = parse_moves("y'@0")
+        expect = parse_moves("y'")
 
         result = compress_ending_rotations(provide)
 
