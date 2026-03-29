@@ -133,19 +133,19 @@ class Test5x5x5VCube(unittest.TestCase):
         """Test the value of center index."""
         self.assertEqual(self.cube.center_index, 12)
 
-    def test_get_face_center_indexes(self) -> None:
+    def test_face_center_colors(self) -> None:
         """Test get face center indexes."""
         self.cube.rotate('F R U')
 
         self.assertEqual(
-            self.cube.get_face_center_indexes(),
+            self.cube.face_center_colors,
             FACE_ORDER,
         )
 
         self.cube.rotate('z2')
 
         self.assertEqual(
-            self.cube.get_face_center_indexes(),
+            self.cube.face_center_colors,
             ('D', 'L', 'F', 'U', 'R', 'B'),
         )
 

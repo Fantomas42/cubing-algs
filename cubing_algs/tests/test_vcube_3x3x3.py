@@ -306,20 +306,20 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
             3,
         )
 
-    def test_get_face_center_indexes(self) -> None:
+    def test_face_center_colors(self) -> None:
         """Test get face center indexes."""
         cube = VCube()
         cube.rotate('F R U')
 
         self.assertEqual(
-            cube.get_face_center_indexes(),
+            cube.face_center_colors,
             FACE_ORDER,
         )
 
         cube.rotate('z2')
 
         self.assertEqual(
-            cube.get_face_center_indexes(),
+            cube.face_center_colors,
             ('D', 'L', 'F', 'U', 'R', 'B'),
         )
 
@@ -514,8 +514,8 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
             initial,
         )
 
-    def test_get_face_center_indexes_not_implemented(self) -> None:
-        """Test that get_face_center_indexes raises NotImplementedError."""
+    def test_face_center_colors_not_implemented(self) -> None:
+        """Test that face_center_colors raises NotImplementedError."""
         class IncompleteVCube(VCubeIntegrityChecker):
             """Incomplete implementation for testing."""
 
@@ -527,7 +527,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
         incomplete_cube = IncompleteVCube()
 
         with self.assertRaises(NotImplementedError):
-            incomplete_cube.get_face_center_indexes()
+            _ = incomplete_cube.face_center_colors
 
     def test_invalid_length_no_check(self) -> None:
         """Test invalid length no check."""

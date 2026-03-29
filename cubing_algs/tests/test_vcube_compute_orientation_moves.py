@@ -390,7 +390,7 @@ class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
         """Set up test fixtures for each test method."""
         self.cube = VCube()
 
-    def test_integration_with_get_face_center_indexes(self) -> None:
+    def test_integration_with_face_center_colors(self) -> None:
         """
         Test that compute_orientation_moves
         correctly uses face center information.
@@ -399,7 +399,7 @@ class TestVCubeComputeOrientationMovesIntegration(unittest.TestCase):
         self.cube.rotate('x y z')
 
         # Get current center positions
-        centers = self.cube.get_face_center_indexes()
+        centers = self.cube.face_center_colors
 
         # Compute orientations - should be consistent
         # with actual center positions

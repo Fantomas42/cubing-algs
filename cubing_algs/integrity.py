@@ -140,7 +140,7 @@ class VCubeIntegrityChecker:
 
     This is a mixin class that expects the following from subclasses:
     - size, face_size, face_number, _state attributes
-    - get_face_center_indexes() method
+    - face_center_colors property
     """
 
     size: int
@@ -149,7 +149,8 @@ class VCubeIntegrityChecker:
 
     _state: str
 
-    def get_face_center_indexes(self) -> tuple[str, ...]:
+    @property
+    def face_center_colors(self) -> tuple[str, ...]:
         """
         Return the center facelet characters for each face.
 
@@ -244,7 +245,7 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If centers are not unique.
 
         """
-        actual_centers = set(self.get_face_center_indexes())
+        actual_centers = set(self.face_center_colors)
 
         if len(actual_centers) != self.face_number:
             msg = 'Face centers must be unique'

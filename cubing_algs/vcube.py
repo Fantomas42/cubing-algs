@@ -106,6 +106,76 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             return 0
         return self.size + 1
 
+    @property
+    def orientation(self) -> str:
+        """
+        Get the cube's orientation as a two-character string.
+
+        Uses the top face center and front face center
+        to determine the current orientation of the cube in space.
+
+        For odd-sized cubes, uses the physical center facelet.
+        For even-sized cubes, uses a representative position to
+        determine orientation.
+
+        It might not work well with an unchecked state.
+
+        Returns:
+            A two-character string representing the orientation
+            (e.g., 'UF' for white top, green front).
+
+        """
+        top_center_index = self.center_index
+        front_center_index = 2 * self.face_size + top_center_index
+
+        return self._state[top_center_index] + self._state[front_center_index]
+
+    @property
+    def face_center_colors(self) -> tuple[str, ...]:
+        """
+        Get the center facelet colors for all faces.
+
+        For odd-sized cubes, returns the physical center facelet colors.
+        For even-sized cubes, returns representative facelet colors at
+        the calculated center position.
+
+        Returns:
+            A tuple of center colors for all six faces in order
+            (U, R, F, D, L, B).
+
+        """
+        center_index = self.center_index
+
+        return tuple(
+            self._state[(i * self.face_size) + center_index]
+            for i in range(self.face_number)
+        )
+
+    @property
+    def is_solved(self) -> bool:
+        """
+        Check if the cube is in a solved state.
+
+        Returns:
+            True if the cube is solved.
+
+        """
+        return all(face * self.face_size in self._state for face in FACE_ORDER)
+
+    @property
+    def to_cubies(self) -> tuple[
+            list[int], list[int], list[int], list[int], list[int],
+    ]:
+        """
+        Convert the cube state to cubie representation.
+
+        Returns:
+            A tuple of (corner_permutation, corner_orientation,
+            edge_permutation, edge_orientation, center_orientation).
+
+        """
+        return facelets_to_cubies(self._state)
+
     @staticmethod
     def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
                     ep: list[int], eo: list[int],
@@ -131,25 +201,6 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             check=not bool(scheme),
         )
 
-    @property
-    def to_cubies(self) -> tuple[
-            list[int], list[int], list[int], list[int], list[int],
-    ]:
-        """
-        Convert the cube state to cubie representation.
-
-        Returns:
-            A tuple of (corner_permutation, corner_orientation,
-            edge_permutation, edge_orientation, center_orientation).
-
-        """
-        return facelets_to_cubies(self._state)
-
-    @property
-    def is_solved(self) -> bool:
-        """Check if the cube is in a solved state."""
-        return all(face * self.face_size in self._state for face in FACE_ORDER)
-
     def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
         """
         Compare two cubes for equality with optional orientation flexibility.
@@ -173,30 +224,6 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         oriented_copy = other_cube.oriented_copy(self.orientation)
 
         return self._state == oriented_copy._state  # noqa: SLF001
-
-    @property
-    def orientation(self) -> str:
-        """
-        Get the cube's orientation as a two-character string.
-
-        Uses the top face center and front face center
-        to determine the current orientation of the cube in space.
-
-        For odd-sized cubes, uses the physical center facelet.
-        For even-sized cubes, uses a representative position to
-        determine orientation.
-
-        It might not work well with an unchecked state.
-
-        Returns:
-            A two-character string representing the orientation
-            (e.g., 'UF' for white top, green front).
-
-        """
-        top_center_index = self.center_index
-        front_center_index = 2 * self.face_size + top_center_index
-
-        return self._state[top_center_index] + self._state[front_center_index]
 
     def rotate(self, moves: Algorithm | Move | str, *,
                history: bool = True) -> str:
@@ -394,26 +421,6 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         index = FACE_INDEXES[face]
         return self._state[index * self.face_size: (index + 1) * self.face_size]
 
-    def get_face_center_indexes(self) -> tuple[str, ...]:
-        """
-        Get the center facelet colors for all faces.
-
-        For odd-sized cubes, returns the physical center facelet colors.
-        For even-sized cubes, returns representative facelet colors at
-        the calculated center position.
-
-        Returns:
-            A tuple of center colors for all six faces in order
-            (U, R, F, D, L, B).
-
-        """
-        center_index = self.center_index
-
-        return tuple(
-            self._state[(i * self.face_size) + center_index]
-            for i in range(self.face_number)
-        )
-
     def get_face_index(self, face: str) -> int:
         """
         Get the index of a face by its center color.
@@ -429,7 +436,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         """
         try:
-            return self.get_face_center_indexes().index(face)
+            return self.face_center_colors.index(face)
         except ValueError as e:
             raise InvalidFaceIndexError(str(e)) from e
 
