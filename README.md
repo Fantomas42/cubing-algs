@@ -556,7 +556,7 @@ print(moves)  # e.g., "x2 y"
 custom_cube = VCube("UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB")
 
 # Work with cubie representation (mathematical)
-cp, co, ep, eo, so = cube.to_cubies  # Convert to cubie format
+cp, co, ep, eo, so = cube.cubies  # Convert to cubie format
 new_cube = VCube.from_cubies(cp, co, ep, eo, so)  # Create from cubies
 
 # Get individual faces
