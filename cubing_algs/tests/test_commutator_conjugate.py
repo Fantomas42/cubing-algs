@@ -1,11 +1,10 @@
 """Tests for commutator and conjugate notation parsing."""
-
 import unittest
 from unittest.mock import patch
 
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
 from cubing_algs.commutator_conjugate import find_innermost_brackets
-from cubing_algs.commutator_conjugate import invert_moves
+from cubing_algs.commutator_conjugate import invert_moves_str
 from cubing_algs.commutator_conjugate import split_on_separator
 from cubing_algs.exceptions import InvalidBracketError
 from cubing_algs.exceptions import InvalidOperatorError
@@ -96,12 +95,12 @@ class TestSplitOnSeparator(unittest.TestCase):
 class TestInvertMoves(unittest.TestCase):
     """Tests for inverting move sequences."""
 
-    def test_invert_moves(self) -> None:
+    def test_invert_moves_str(self) -> None:
         """
-        Should create algorithm, transform with mirror_moves,
+        Should create algorithm, transform with invert_moves,
         and return string.
         """
-        result = invert_moves("R U R' U'")
+        result = invert_moves_str("R U R' U'")
         self.assertEqual(result, "U R U' R'")
         self.assertIsInstance(result, str)
 

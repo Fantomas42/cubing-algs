@@ -6,7 +6,7 @@ from cubing_algs.display.styles import LOADED_STYLES
 from cubing_algs.display.styles import STYLES
 from cubing_algs.display.styles import StyleConfig
 from cubing_algs.display.styles import build_style
-from cubing_algs.display.styles import get_piece_type
+from cubing_algs.display.styles import get_piece_types
 from cubing_algs.display.styles import load_style
 from cubing_algs.display.styles import register_style
 from cubing_algs.display.styles import resolve_style_ansi
@@ -129,8 +129,9 @@ class TestLoadStyle(unittest.TestCase):
     def test_load_detailed_style(self) -> None:
         """Test loading the detailed style preset."""
         style = load_style('detailed')
-        self.assertEqual(style['corner'], '\x1b[2m')
-        self.assertEqual(style['fixed_center'], '\x1b[1m')
+        self.assertEqual(style['corner'], '\x1b[3m')
+        self.assertEqual(style['edge'], '')
+        self.assertEqual(style['oblique_center'], '\x1b[1m\x1b[3m')
 
     def test_load_uniform_style(self) -> None:
         """Test loading the uniform style preset (no styling)."""
@@ -141,7 +142,7 @@ class TestLoadStyle(unittest.TestCase):
     def test_load_bold_style(self) -> None:
         """Test loading the bold style preset."""
         style = load_style('bold')
-        for piece_type in ('corner', 'edge', 'center', 'fixed_center'):
+        for piece_type in ('corner', 'edge', 'center'):
             self.assertEqual(style[piece_type], '\x1b[1m')
 
     def test_fallback_to_default(self) -> None:
@@ -234,8 +235,8 @@ class TestRegisterStyle(unittest.TestCase):
             self.assertEqual(style[piece_type], '')
 
 
-class TestGetPieceType(unittest.TestCase):
-    """Tests for get_piece_type function."""
+class TestGetPieceTypes(unittest.TestCase):
+    """Tests for get_piece_types function."""
 
     def test_3x3_corners(self) -> None:
         """Test corner detection on 3x3 for all faces."""
@@ -244,52 +245,200 @@ class TestGetPieceType(unittest.TestCase):
             for pos in corner_positions:
                 index = face * 9 + pos
                 with self.subTest(face=face, pos=pos):
-                    self.assertEqual(get_piece_type(index, 3), 'corner')
+                    self.assertEqual(
+                        get_piece_types(index, 3),
+                        ['corner'],
+                    )
 
     def test_3x3_edges(self) -> None:
-        """Test edge detection on 3x3 for all faces."""
+        """Test edge detection on 3x3 (all edges are midges)."""
         edge_positions = [1, 3, 5, 7]
         for face in range(6):
             for pos in edge_positions:
                 index = face * 9 + pos
                 with self.subTest(face=face, pos=pos):
-                    self.assertEqual(get_piece_type(index, 3), 'edge')
+                    self.assertEqual(
+                        get_piece_types(index, 3),
+                        ['midge', 'edge'],
+                    )
 
     def test_3x3_fixed_centers(self) -> None:
         """Test fixed center detection on 3x3 for all faces."""
         for face in range(6):
             index = face * 9 + 4
             with self.subTest(face=face):
-                self.assertEqual(get_piece_type(index, 3), 'fixed_center')
+                self.assertEqual(
+                    get_piece_types(index, 3),
+                    ['fixed_center', 'center'],
+                )
+
+    def test_4x4_x_centers(self) -> None:
+        """Test that all 4x4 centers are x_centers (even cube)."""
+        center_positions = [5, 6, 9, 10]
+        for pos in center_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 4),
+                    ['x_center', 'center'],
+                )
 
     def test_5x5_corners(self) -> None:
         """Test corner detection on 5x5."""
         corner_positions = [0, 4, 20, 24]
         for pos in corner_positions:
             with self.subTest(pos=pos):
-                self.assertEqual(get_piece_type(pos, 5), 'corner')
+                self.assertEqual(
+                    get_piece_types(pos, 5),
+                    ['corner'],
+                )
 
     def test_5x5_edges(self) -> None:
         """Test edge detection on 5x5."""
-        edge_positions = [1, 2, 3, 5, 9, 10, 14, 15, 19, 21, 22, 23]
-        for pos in edge_positions:
+        edge_positions = [
+            1, 2, 3,
+            5, 9,
+            10, 14,
+            15, 19,
+            21, 22, 23,
+        ]
+        edge_pieces: list[list[str]] = [
+            ['wing', 'edge'], ['midge', 'edge'], ['wing', 'edge'],
+            ['wing', 'edge'], ['wing', 'edge'],
+            ['midge', 'edge'], ['midge', 'edge'],
+            ['wing', 'edge'], ['wing', 'edge'],
+            ['wing', 'edge'], ['midge', 'edge'], ['wing', 'edge'],
+        ]
+        for pos, expected in zip(edge_positions, edge_pieces, strict=True):
             with self.subTest(pos=pos):
-                self.assertEqual(get_piece_type(pos, 5), 'edge')
+                self.assertEqual(get_piece_types(pos, 5), expected)
 
     def test_5x5_fixed_center(self) -> None:
         """Test fixed center detection on 5x5."""
-        self.assertEqual(get_piece_type(12, 5), 'fixed_center')
+        self.assertEqual(
+            get_piece_types(12, 5),
+            ['fixed_center', 'center'],
+        )
 
-    def test_5x5_moveable_centers(self) -> None:
-        """Test moveable center detection on 5x5."""
-        center_positions = [6, 7, 8, 11, 13, 16, 17, 18]
-        for pos in center_positions:
+    def test_5x5_t_centers(self) -> None:
+        """Test t_center detection on 5x5 (middle row/col, not fixed)."""
+        t_center_positions = [7, 11, 13, 17]
+        for pos in t_center_positions:
             with self.subTest(pos=pos):
-                self.assertEqual(get_piece_type(pos, 5), 'center')
+                self.assertEqual(
+                    get_piece_types(pos, 5),
+                    ['t_center', 'center'],
+                )
 
-    def test_4x4_no_fixed_center(self) -> None:
-        """Test that 4x4 has no fixed center (even cube)."""
-        center_positions = [5, 6, 9, 10]
-        for pos in center_positions:
+    def test_5x5_x_centers(self) -> None:
+        """Test x_center detection on 5x5 (diagonal from fixed center)."""
+        x_center_positions = [6, 8, 16, 18]
+        for pos in x_center_positions:
             with self.subTest(pos=pos):
-                self.assertEqual(get_piece_type(pos, 4), 'center')
+                self.assertEqual(
+                    get_piece_types(pos, 5),
+                    ['x_center', 'center'],
+                )
+
+    def test_6x6_corners(self) -> None:
+        """Test corner detection on 6x6."""
+        corner_positions = [0, 5, 30, 35]
+        for pos in corner_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 6),
+                    ['corner'],
+                )
+
+    def test_6x6_wings(self) -> None:
+        """Test wing detection on 6x6 (border, not corner or midge)."""
+        wing_positions = [
+            1, 2, 3, 4,
+            6, 11,
+            12, 17,
+            18, 23,
+            24, 29,
+            31, 32, 33, 34,
+        ]
+        for pos in wing_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 6),
+                    ['wing', 'edge'],
+                )
+
+    def test_6x6_x_centers(self) -> None:
+        """Test x_center detection on 6x6 (equal row/col offset)."""
+        x_center_positions = [
+            7, 10,
+            14, 15,
+            20, 21,
+            25, 28,
+        ]
+        for pos in x_center_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 6),
+                    ['x_center', 'center'],
+                )
+
+    def test_6x6_oblique_centers(self) -> None:
+        """Test oblique_center detection on 6x6 (unequal row/col offset)."""
+        oblique_positions = [
+            8, 9,
+            13, 16,
+            19, 22,
+            26, 27,
+        ]
+        for pos in oblique_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 6),
+                    ['oblique_center', 'center'],
+                )
+
+    def test_7x7_oblique_centers(self) -> None:
+        """Test oblique_center detection on 7x7."""
+        # 7x7 face layout, row/col 0-indexed, middle=3
+        # pos 9: row=1, col=2 → min_row=1, min_col=2 → oblique
+        # pos 11: row=1, col=4 → min_row=1, min_col=2 → oblique
+        # pos 15: row=2, col=1 → min_row=2, min_col=1 → oblique
+        # pos 33: row=4, col=5 → min_row=2, min_col=1 → oblique
+        oblique_positions = [9, 11, 15, 33]
+        for pos in oblique_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 7),
+                    ['oblique_center', 'center'],
+                )
+
+    def test_7x7_x_centers(self) -> None:
+        """Test x_center detection on 7x7."""
+        # pos 8: row=1, col=1 → min_row=1, min_col=1 → x_center
+        # pos 16: row=2, col=2 → min_row=2, min_col=2 → x_center
+        x_center_positions = [8, 12, 16, 32, 36, 40]
+        for pos in x_center_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 7),
+                    ['x_center', 'center'],
+                )
+
+    def test_7x7_t_centers(self) -> None:
+        """Test t_center detection on 7x7."""
+        # pos 10: row=1, col=3(middle) → t_center
+        # pos 17: row=2, col=3(middle) → t_center
+        # pos 22: row=3(middle), col=1 → t_center
+        t_center_positions = [10, 17, 22, 26, 31, 38]
+        for pos in t_center_positions:
+            with self.subTest(pos=pos):
+                self.assertEqual(
+                    get_piece_types(pos, 7),
+                    ['t_center', 'center'],
+                )
+
+    def test_7x7_fixed_center(self) -> None:
+        """Test fixed center detection on 7x7."""
+        self.assertEqual(
+            get_piece_types(24, 7),
+            ['fixed_center', 'center'],
+        )

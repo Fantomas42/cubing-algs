@@ -79,7 +79,7 @@ _FACE_TO_INDEX = _build_face_lookup_table()
 
 
 class ConversionCache:
-    """Simple cache for facelets conversions with LRU-like behavior."""
+    """Simple cache for facelets conversions with FIFO eviction."""
 
     def __init__(self, max_size: int = 512) -> None:
         """
@@ -175,6 +175,11 @@ class ConversionCache:
     def disable(self) -> None:
         """Disable caching."""
         self._enabled = False
+
+    @property
+    def is_enabled(self) -> bool:
+        """Whether the cache is currently enabled."""
+        return self._enabled
 
 
 # Global cache instance
@@ -389,5 +394,5 @@ def get_cache_info() -> dict[str, int]:
         'facelets_cached': len(_cache.facelets_cache),
         'cubies_cached': len(_cache.cubies_cache),
         'max_size': _cache.max_size,
-        'enabled': _cache._enabled,  # noqa: SLF001
+        'enabled': _cache.is_enabled,
     }

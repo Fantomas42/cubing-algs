@@ -1,12 +1,12 @@
 """Tests for cycle order calculation."""
-
 import unittest
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.cycles import compute_cycles
+from cubing_algs.cycles import permutation_order
 
 
-class ComputeCyclesTestCase(unittest.TestCase):
+class ComputeCyclesTestCase(unittest.TestCase):  # noqa: PLR0904
     """Test cases for the compute_cycles function."""
 
     def test_empty_algorithm(self) -> None:
@@ -149,3 +149,88 @@ class ComputeCyclesTestCase(unittest.TestCase):
         algorithm = Algorithm.parse_moves("R U R' U'")
         result = compute_cycles(algorithm)
         self.assertEqual(result, 6)
+
+    def test_high_order_algorithm(self) -> None:
+        """Test cycles computation for an algorithm with order above 100."""
+        # R U has known order 105, which exceeds the former safety cap of 100
+        algorithm = Algorithm.parse_moves('R U')
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, 105)
+
+    def test_order_1260_face_moves_only(self) -> None:
+        """
+        Test that order 1260 is reachable using only face moves.
+
+        1260 is the maximum order achievable with standard face moves only
+        (no wide or slice moves). Found by exhaustive search over 6-move
+        sequences: R U L' B R L' reaches order 1260.
+        """
+        algorithm = Algorithm.parse_moves("R U L' B R L'")
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, 1260)
+
+    def test_order_1260_face_moves_only_wikipedia(self) -> None:
+        """
+        Test that order 1260 is reachable using only face moves.
+
+        https://en.wikipedia.org/wiki/Rubik's_Cube_group#Group_structure
+        """
+        algorithm = Algorithm.parse_moves("R U2 D' B D'")
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, 1260)
+
+    def test_order_2520_with_wide_and_slice_moves(self) -> None:
+        """
+        Test that order 2520 is reachable using wide and slice moves.
+
+        2520 is the maximum order of any element in the 3x3x3 Rubik's cube
+        group when wide and slice moves are included. Found by exhaustive
+        search over 6-move sequences: Uw S L S Uw Rw reaches order 2520.
+        """
+        algorithm = Algorithm.parse_moves('Uw S L S Uw Rw')
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, 2520)
+
+    def test_order_2520_with_wide_and_slice_moves_merz(self) -> None:
+        """
+        Test that order 2520 is reachable using wide and slice moves.
+
+        https://www.mzrg.com/rubik/orders.shtml
+        """
+        algorithm = Algorithm.parse_moves("R L2 U' F' Dw")
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, 2520)
+
+    def test_big_cubes_algorithm_order(self) -> None:
+        """Test returned value for algorithm dedicated to big cubes."""
+        algorithm = Algorithm.parse_moves("R2 u' l' 2F'")
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, -1)
+
+
+class PermutationOrderTestCase(unittest.TestCase):
+    """Test cases for the permutation_order function."""
+
+    def test_identity(self) -> None:
+        """Test that the identity permutation has order 1."""
+        self.assertEqual(permutation_order([0, 1, 2, 3]), 1)
+
+    def test_single_transposition(self) -> None:
+        """Test a single 2-cycle (swap)."""
+        self.assertEqual(permutation_order([1, 0, 2, 3]), 2)
+
+    def test_single_3_cycle(self) -> None:
+        """Test a single 3-cycle."""
+        self.assertEqual(permutation_order([1, 2, 0, 3]), 3)
+
+    def test_disjoint_cycles_lcm(self) -> None:
+        """Test disjoint 3-cycle and 2-cycle: lcm(3, 2) = 6."""
+        self.assertEqual(permutation_order([1, 2, 0, 4, 3]), 6)
+
+    def test_full_cycle(self) -> None:
+        """Test a single cycle covering all elements."""
+        self.assertEqual(permutation_order([1, 2, 3, 0]), 4)
+
+    def test_empty(self) -> None:
+        """Test empty permutation."""
+        self.assertEqual(permutation_order([]), 1)

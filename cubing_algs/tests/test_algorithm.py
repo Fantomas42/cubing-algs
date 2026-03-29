@@ -2,12 +2,15 @@
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.impacts import ImpactData
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
 from cubing_algs.vcube import VCube
@@ -389,11 +392,27 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.check_contains_moves(algo)
 
-    def test_setitem(self) -> None:
+    def test_setitem_slice_with_move(self) -> None:
+        """Test setitem slice with a Move value replaces the slice correctly."""
+        algo = parse_moves('R2 U F L D')
+        algo[1:3] = Move('R2')
+        self.assertEqual(str(algo), 'R2 R2 L D')
+
+        self.check_contains_moves(algo)
+
+    def test_setitem_int(self) -> None:
         """Test setitem."""
         algo = parse_moves('R2 U')
         algo[1] = Move('B')
         self.assertEqual(str(algo), 'R2 B')
+
+        self.check_contains_moves(algo)
+
+    def test_setitem_int_with_string(self) -> None:
+        """Test setitem with a string stores a Move, not an Algorithm."""
+        algo = parse_moves('R2 U F')
+        algo[1] = 'B'
+        self.assertEqual(str(algo), 'R2 B F')
 
         self.check_contains_moves(algo)
 
@@ -472,7 +491,7 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
         """Test repr."""
         algo = parse_moves('R2 U')
 
-        self.assertEqual(repr(algo), 'Algorithm("R2U")')
+        self.assertEqual(repr(algo), 'Algorithm("R2 U")')
 
     def test_eq(self) -> None:
         """Test eq."""
@@ -543,6 +562,20 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
             ),
             expected,
         )
+
+    def test_transform_to_fixpoint_exhausted(self) -> None:
+        """
+        Test transform to fixpoint when MAX_ITERATIONS is exhausted
+        without convergence.
+        """
+        algo = parse_moves("R U R' U'")
+
+        # invert_moves alternates: original → inverted → original → ...
+        # never converges; after 2 iterations mod_moves is back to the original
+        with patch('cubing_algs.algorithm.MAX_ITERATIONS', 2):
+            result = algo.transform(invert_moves, to_fixpoint=True)
+
+        self.assertEqual(result, algo)
 
     def test_min_cube_size(self) -> None:
         """Test min cube size."""
@@ -772,7 +805,16 @@ class AlgorithmShowTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("R U R'")
 
         with redirect_stdout(StringIO()):
-            result = algo.show(mode='oll', orientation='FU')
+            result = algo.show(mode='oll')
+
+        self.assertIsInstance(result, VCube)
+
+    def test_show_method_without_impact_mask(self) -> None:
+        """Test show method with impact_mask disabled."""
+        algo = Algorithm.parse_moves("R U R'")
+
+        with redirect_stdout(StringIO()):
+            result = algo.show(impact_mask=False)
 
         self.assertIsInstance(result, VCube)
 
@@ -784,6 +826,17 @@ class AlgorithmShowTestCase(unittest.TestCase):
             result = algo.show()
 
         self.assertIsInstance(result, VCube)
+
+
+class AlgorithmImpactsTestCase(unittest.TestCase):
+    """Test cases for the Algorithm.impacts property."""
+
+    def test_impacts_property_returns_impact_data(self) -> None:
+        """Test impacts property returns ImpactData."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        impacts = algo.impacts
+
+        self.assertIsInstance(impacts, ImpactData)
 
 
 class AlgorithmErgonomicsTestCase(unittest.TestCase):
@@ -812,3 +865,81 @@ class AlgorithmErgonomicsTestCase(unittest.TestCase):
         ergo = algo.ergonomics
 
         self.assertIsInstance(ergo, ErgonomicsData)
+
+
+class AlgorithmImageTestCase(unittest.TestCase):
+    """Tests for Algorithm.image() method."""
+
+    def test_returns_svg(self) -> None:
+        """Test that image() returns an SVG string."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.image()
+        self.assertIsInstance(result, str)
+        self.assertTrue(result.startswith('<svg'))
+        self.assertTrue(result.endswith('</svg>'))
+
+    def test_matches_render_cube(self) -> None:
+        """Test that image() matches render_cube() output."""
+        from cubing_algs.display.image import render_cube  # noqa: PLC0415
+
+        algo = Algorithm.parse_moves("R U R' U'")
+        self.assertEqual(algo.image(), render_cube(algo))
+
+    def test_matches_vcube_image(self) -> None:
+        """Test that Algorithm.image() matches VCube.image()."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        cube = VCube()
+        cube.rotate(algo)
+        self.assertEqual(algo.image(), cube.image())
+
+    def test_empty_algorithm(self) -> None:
+        """Test rendering an empty algorithm."""
+        algo = Algorithm()
+        result = algo.image()
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_3d_view(self) -> None:
+        """Test 3d view rendering."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(view='3d')
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_top_view(self) -> None:
+        """Test top view rendering."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(view='top')
+        self.assertTrue(result.startswith('<svg'))
+        self.assertIn('class="face-U"', result)
+
+    def test_custom_size(self) -> None:
+        """Test custom image size."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(size=300)
+        self.assertIn('width="300"', result)
+        self.assertIn('height="300"', result)
+
+    def test_cube_size_parameter(self) -> None:
+        """Test explicit cube_size parameter."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(cube_size=2)
+        self.assertTrue(result.startswith('<svg'))
+
+    def test_custom_rotation(self) -> None:
+        """Test custom rotation produces different SVG."""
+        algo = Algorithm.parse_moves('R')
+        default = algo.image()
+        rotated = algo.image(rotation='y90')
+        self.assertNotEqual(default, rotated)
+
+    def test_custom_cube_color(self) -> None:
+        """Test custom cube color."""
+        algo = Algorithm.parse_moves('R')
+        result = algo.image(cube_color='#ff0000')
+        self.assertIn('#ff0000', result)
+
+    def test_custom_distance(self) -> None:
+        """Test custom camera distance."""
+        algo = Algorithm.parse_moves('R')
+        default = algo.image()
+        closer = algo.image(distance=5.0)
+        self.assertNotEqual(default, closer)

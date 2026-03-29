@@ -1,0 +1,222 @@
+[
+    {
+        "name": "LSE All 6",
+        "code": "01",
+        "description": "All 6 M-slice edges misoriented",
+        "aliases": [
+            "All 6"
+        ],
+        "symmetry": "double",
+        "family": "6 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 9,
+        "optimal_stm": 9,
+        "main": "R U' r' U' M' U r U r'",
+        "algorithms": [
+            "R U' r' U' M' U r U r'",
+            "M' U M U2 M U M' U M U' M'",
+            "M' U' M' U2 M' U' M U' M' U' M'",
+            "M' U M U2 M U M' U M U M'"
+        ]
+    },
+    {
+        "name": "LSE 2 Top 2 Bot",
+        "code": "02",
+        "description": "2 misoriented edges on top and 2 on bottom, opposite sides",
+        "aliases": [
+            "2 Top 2 Bot"
+        ],
+        "symmetry": "double",
+        "family": "4 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 7,
+        "optimal_stm": 7,
+        "main": "M' U2 M' U2 M U M'",
+        "algorithms": [
+            "M' U2 M' U2 M U M'",
+            "M U2 M' U2 M' U' M'",
+            "M U2 M' U2 M' U M'",
+            "M' U2 M U2 M U M'"
+        ]
+    },
+    {
+        "name": "LSE Bottom 2",
+        "code": "03",
+        "description": "2 misoriented edges on the bottom layer",
+        "aliases": [
+            "Bottom 2"
+        ],
+        "symmetry": "double",
+        "family": "2 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 7,
+        "optimal_stm": 7,
+        "main": "M' U' M' U M U' M'",
+        "algorithms": [
+            "M' U' M' U M U' M'",
+            "M2 R U R' U' M' U R U' r'",
+            "M' U' M' U M U M'",
+            "M' U M' U' M U M'"
+        ]
+    },
+    {
+        "name": "LSE Top 2 Front 2",
+        "code": "04",
+        "description": "2 misoriented edges on top and 2 on front, adjacent positions",
+        "aliases": [
+            "Top 2 Front 2"
+        ],
+        "family": "4 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 3,
+        "optimal_stm": 3,
+        "main": "M' U' M'",
+        "algorithms": [
+            "M' U' M'",
+            "y2 M U M'",
+            "M' U M'",
+            "y2 M U' M'"
+        ]
+    },
+    {
+        "name": "LSE 4 Top",
+        "code": "05",
+        "description": "All 4 misoriented edges on the top layer",
+        "aliases": [
+            "4 Top"
+        ],
+        "symmetry": "double",
+        "family": "4 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 7,
+        "optimal_stm": 7,
+        "main": "M' U2 M' U2 M' U' M'",
+        "algorithms": [
+            "M' U2 M' U2 M' U' M'",
+            "M' U2 M U2 M' U M'",
+            "M' U2 M' U2 M' U M'",
+            "M' U2 M U2 M' U' M'"
+        ]
+    },
+    {
+        "name": "LSE 2 Top Opp",
+        "code": "06",
+        "description": "2 misoriented edges on top, on opposite sides",
+        "aliases": [
+            "2 Top Opp"
+        ],
+        "symmetry": "double",
+        "family": "2 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 7,
+        "optimal_stm": 7,
+        "main": "M' U' M U M' U' M'",
+        "algorithms": [
+            "M' U' M U M' U' M'",
+            "R U R' U' M' U R U' r'",
+            "M' U' M U M' U M'",
+            "R U r' U r' U' r2 U' r' U r' U R"
+        ]
+    },
+    {
+        "name": "LSE 2 Top Adj",
+        "code": "07",
+        "description": "2 misoriented edges on top, on adjacent sides",
+        "aliases": [
+            "2 Top Adj"
+        ],
+        "symmetry": "mirror",
+        "family": "2 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 7,
+        "optimal_stm": 7,
+        "main": "M' U M' U2 M' U' M'",
+        "algorithms": [
+            "M' U M' U2 M' U' M'",
+            "U M' U' M U2 M' U' M'",
+            "M' U M' U2 M' U M'",
+            "U M' U' M' U2 M' U' M'"
+        ]
+    },
+    {
+        "name": "LSE 1 Top 1 Bot",
+        "code": "08",
+        "description": "1 misoriented edge on top and 1 on bottom",
+        "aliases": [
+            "1 Top 1 Bot"
+        ],
+        "symmetry": "mirror",
+        "family": "2 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 7,
+        "optimal_stm": 7,
+        "main": "M' U' M' U' M U' M'",
+        "algorithms": [
+            "M' U' M' U' M U' M'",
+            "U M2 U2 M' U' M U2 M' U' M'",
+            "U' M' U M' U2 M U M'",
+            "M U M' U M U M'"
+        ]
+    },
+    {
+        "name": "LSE 2 Top Adj 2 Bot",
+        "code": "09",
+        "description": "2 misoriented edges on top (adjacent) and 2 on bottom",
+        "aliases": [
+            "2 Top Adj 2 Bot"
+        ],
+        "family": "4 Bad",
+        "groups": [
+            "EO",
+            "Roux"
+        ],
+        "status": "OK",
+        "optimal_htm": 5,
+        "optimal_stm": 5,
+        "main": "M2 U' M' U' M'",
+        "algorithms": [
+            "M2 U' M' U' M'",
+            "U M2 U M' U M'",
+            "M' U' M U M U' M'",
+            "U M' U' M' U' M' U' M' U'"
+        ]
+    },
+    {
+        "code": "SKIP",
+        "description": "Skipped case",
+        "name": "LSE Skipped",
+        "status": "OK"
+    }
+]

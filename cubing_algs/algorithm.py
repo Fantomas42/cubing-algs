@@ -13,17 +13,20 @@ from cubing_algs.cycles import compute_cycles
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
+from cubing_algs.memory import MemoryData
+from cubing_algs.memory import compute_memory
 from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
+from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 from cubing_algs.structure import StructureData
 from cubing_algs.structure import compute_structure
-from cubing_algs.visual_cube import visual_cube_algorithm
 
 if TYPE_CHECKING:
-    from cubing_algs.vcube import VCube  # pragma: no cover
+    from cubing_algs.vcube import VCube
 
 
 class Algorithm(UserList[Move]):  # noqa: PLR0904
@@ -42,13 +45,16 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             self.data.extend(initlist)
 
     @staticmethod
-    def parse_moves(items: Iterable[Move | str] | Move | str) -> 'Algorithm':
+    def parse_moves(items: Iterable[Move | str] | Move | str,
+                    *, trust_input: bool = False) -> 'Algorithm':
         """
         Parse a string or list of strings into an Algorithm object.
 
         Args:
             items: A string or iterable of Move objects or strings
                 representing moves.
+            trust_input: If True, trust the input and skip cleaning
+                and validation steps.
 
         Returns:
             An Algorithm object containing the parsed moves.
@@ -56,7 +62,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """
         from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
-        return parse_moves(items, secure=False)
+        return parse_moves(items, trust_input=trust_input)
 
     @staticmethod
     def parse_move(item: Move | str) -> Move:
@@ -150,10 +156,12 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
     def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def] # noqa: ANN001
         """Set a move at a specific index in the algorithm."""
-        if isinstance(item, Move):
+        if isinstance(i, slice):
+            self.data[i] = self.parse_moves(item)
+        elif isinstance(item, Move):
             self.data[i] = item
         else:
-            self.data[i] = self.parse_moves(item)
+            self.data[i] = self.parse_move(item)
 
     def __str__(self) -> str:
         """
@@ -163,7 +171,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A space-separated string of all moves in the algorithm.
 
         """
-        return ' '.join([str(m) for m in self])
+        return ' '.join(str(m) for m in self)
 
     def __repr__(self) -> str:
         """
@@ -174,7 +182,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A Python expression that can recreate this Algorithm object.
 
         """
-        return f'Algorithm("{ "".join([str(m) for m in self]) }")'
+        return f'Algorithm("{ " ".join(str(m) for m in self) }")'
 
     def transform(
             self,
@@ -195,14 +203,15 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A new Algorithm with all transformations applied.
 
         """
-        new_moves = self.copy()
         mod_moves = self.copy()
 
-        max_iterations = 1
-        if to_fixpoint:
-            max_iterations = MAX_ITERATIONS
+        if not to_fixpoint:
+            for process in processes:
+                mod_moves = process(mod_moves)
+            return mod_moves
 
-        for _ in range(max_iterations):
+        new_moves = self.copy()
+        for _ in range(MAX_ITERATIONS):
             for process in processes:
                 mod_moves = process(mod_moves)
 
@@ -216,7 +225,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
     def cycles(self) -> int:
         """
         Get the number of times this algorithm must be applied
-        to return a cube to its solved state.
+        to return a 3x3x3 cube to its solved state.
 
         This property calculates the "order" of the algorithm - how many times
         you need to execute the sequence of moves to bring a solved cube back
@@ -263,7 +272,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
     @property
     def impacts(self) -> ImpactData:
         """
-        Analyze the spatial impact of this algorithm on cube facelets.
+        Analyze the spatial impact of this algorithm on 3x3x3 cube.
 
         Computes comprehensive metrics about how the algorithm affects
         individual facelets on the cube, including movement patterns,
@@ -272,9 +281,9 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         Example:
             >>> alg = Algorithm.parse_moves("R U R' U'")
             >>> impacts = alg.impacts
-            >>> impacts['mobilized_count']
+            >>> impacts.facelets_mobilized_count
             18  # 18 out of 54 facelets are affected
-            >>> impacts['scrambled_percent']
+            >>> impacts.facelets_scrambled_percent
             0.33  # About 33% of the cube is scrambled
 
         """
@@ -337,6 +346,11 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         return compute_structure(self)
 
     @property
+    def memory(self) -> MemoryData:
+        """Analyze the memorisation difficulty of this algorithm."""
+        return compute_memory(self)
+
+    @property
     def min_cube_size(self) -> int:
         """
         Compute the minimum cube size required to execute this algorithm.
@@ -384,12 +398,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             for m in self
         )
 
-    @property
-    def visual_cube_url(self) -> str:
-        """Get a VisualCube URL for this algorithm."""
-        return visual_cube_algorithm(self)
-
-    def show(self, mode: str = '', orientation: str = '') -> 'VCube':
+    def show(self, size: int = 3, mode: str = '',
+             *, impact_mask: bool = True) -> 'VCube':
         """
         Visualize the algorithm's effect on a cube.
 
@@ -397,19 +407,77 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         with a mask showing which facelets are affected by the algorithm.
 
         Args:
+            size: Size of the cube.
             mode: Display mode for the cube visualization.
-            orientation: Orientation of the cube for display.
+            impact_mask: Show affected facelets with a mask.
 
         Returns:
             A VCube object with the algorithm applied.
 
         """
-        cube = self.impacts.cube
+        from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        cube = VCube(size=size)
+        cube.rotate(untime_moves(self))
+
+        cube = cube.oriented_copy('UF')
+
+        mask = ''
+        if impact_mask and size == 3:
+            state_unique_moved = cubies_to_facelets(
+                *cube.cubies,
+                UNIQUE_FACELETS_3x3x3,
+            )
+
+            mask = ''.join(
+                '0' if f1 == f2 else '1'
+                for f1, f2 in zip(
+                        UNIQUE_FACELETS_3x3x3,
+                        state_unique_moved,
+                        strict=True,
+                )
+            )
 
         cube.show(
             mode=mode,
-            orientation=orientation,
-            mask=self.impacts.facelets_transformation_mask,
+            mask=mask,
         )
 
         return cube
+
+    def image(self, *, size: int = 200,  # noqa: PLR0913
+              cube_size: int | None = None,
+              view: str = '3d', mask: str = '',
+              rotation: str = 'y45x-34',
+              distance: float = 10.0,
+              cube_color: str = '#111111',
+              palette_name: str = 'default') -> str:
+        """
+        Render the algorithm's effect on a cube as an SVG image.
+
+        Args:
+            size: Image dimension in pixels.
+            cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
+                etc.). Defaults to 3 if not specified.
+            view: Rendering mode. ``'3d'`` for perspective view,
+                ``'top'`` for flat top-face with adjacent strips.
+            mask: Mask to apply on the cube.
+            rotation: Axis-angle rotation string (3d view only).
+            distance: Camera distance for perspective projection
+                (3d view only).
+            cube_color: Hex color for cube body between stickers.
+            palette_name: Color palette name for sticker colors.
+
+        Returns:
+            SVG string of the cube.
+
+        """
+        from cubing_algs.display.image import render_cube  # noqa: PLC0415
+
+        return render_cube(
+            self, size=size, cube_size=cube_size,
+            view=view, mask=mask, rotation=rotation,
+            distance=distance, cube_color=cube_color,
+            palette_name=palette_name,
+        )

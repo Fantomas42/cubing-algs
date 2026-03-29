@@ -104,15 +104,15 @@ class CaseCollection:
 
 CASES_DIRECTORY: Final[Path] = Path(__file__).parent
 
-METHODS: list[str] = ['CFOP', 'Ortega']
-
 COLLECTIONS: dict[str, CaseCollection] = {}
 
-
-for method in METHODS:
-    method_directory = CASES_DIRECTORY / method
+for method_directory in sorted(CASES_DIRECTORY.iterdir()):
+    if (
+            not method_directory.is_dir()
+            or method_directory.name.startswith(('_', '.'))
+    ):
+        continue
 
     for cases_path in method_directory.glob('*.json'):
-        cc = CaseCollection(method, cases_path)
-
-        COLLECTIONS[f'{ method.upper() }/{ cc.name }'] = cc
+        cc = CaseCollection(method_directory.name, cases_path)
+        COLLECTIONS[f'{ method_directory.name.upper() }/{ cc.name }'] = cc

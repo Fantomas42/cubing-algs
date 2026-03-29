@@ -9,6 +9,7 @@ from statistics import stdev
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.scrambler.nxn import scramble
 from cubing_algs.vcube import VCube
 
@@ -35,6 +36,36 @@ class TestScramble(unittest.TestCase):
         self.assertEqual(
             len(moves), 5,
         )
+
+
+class TestScrambleValidation(unittest.TestCase):
+    """Tests for scramble input validation."""
+
+    def test_cube_size_zero_raises_value_error(self) -> None:
+        """Test that cube_size=0 raises ValueError."""
+        with self.assertRaises(InvalidCubeSizeError):
+            scramble(0)
+
+    def test_cube_size_one_raises_value_error(self) -> None:
+        """Test that cube_size=1 raises ValueError."""
+        with self.assertRaises(InvalidCubeSizeError):
+            scramble(1)
+
+    def test_cube_size_negative_raises_value_error(self) -> None:
+        """Test that negative cube_size raises ValueError."""
+        with self.assertRaises(InvalidCubeSizeError):
+            scramble(-1)
+
+    def test_cube_size_two_is_valid(self) -> None:
+        """Test that cube_size=2 is the minimum valid size."""
+        result = scramble(2, 5)
+        self.assertEqual(len(result), 5)
+
+    def test_iterations_none_uses_automatic(self) -> None:
+        """Test that iterations=None uses automatic length selection."""
+        result = scramble(3)
+        self.assertGreaterEqual(len(result), 25)
+        self.assertLessEqual(len(result), 30)
 
 
 class TestScrambleEffectivenessByLength(unittest.TestCase):
@@ -511,8 +542,8 @@ class TestRNGParameter(unittest.TestCase):
         rng1 = Random(42)  # noqa: S311
         rng2 = Random(42)  # noqa: S311
 
-        result1 = scramble(3, 0, rng=rng1)
-        result2 = scramble(3, 0, rng=rng2)
+        result1 = scramble(3, rng=rng1)
+        result2 = scramble(3, rng=rng2)
 
         self.assertEqual(
             len(result1),

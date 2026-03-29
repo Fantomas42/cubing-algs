@@ -2,11 +2,12 @@
 from random import Random
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.scrambler.moves import build_cube_move_set
 from cubing_algs.scrambler.moves import random_moves
 
 
-def scramble(cube_size: int, iterations: int = 0, *,
+def scramble(cube_size: int, iterations: int | None = None, *,
              inner_layers: bool = False,
              right_handed: bool = True,
              rng: Random | None = None) -> Algorithm:
@@ -17,8 +18,8 @@ def scramble(cube_size: int, iterations: int = 0, *,
     a random sequence to scramble the cube.
 
     Args:
-        cube_size: Size of the cube (e.g., 3 for 3x3x3).
-        iterations: Number of moves in the scramble (0 for automatic).
+        cube_size: Size of the cube (minimum 2).
+        iterations: Number of moves in the scramble (None for automatic).
         inner_layers: Whether to include inner layer moves.
         right_handed: Whether to optimize for right-handed solving.
         rng: Optional random number generator.
@@ -26,7 +27,19 @@ def scramble(cube_size: int, iterations: int = 0, *,
     Returns:
         Algorithm containing the scramble sequence.
 
+    Raises:
+        InvalidCubeSizeError: If cube_size is less than 2.
+
+    Example::
+
+        >>> scramble(3, 5, rng=Random(42))
+        Algorithm("F R D2 F' U")
+
     """
+    if cube_size < 2:
+        msg = f'cube_size must be at least 2, got { cube_size }'
+        raise InvalidCubeSizeError(msg)
+
     move_set = build_cube_move_set(
         cube_size,
         inner_layers=inner_layers,

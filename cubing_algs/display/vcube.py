@@ -3,6 +3,7 @@ import os
 import re
 from typing import TYPE_CHECKING
 
+from cubing_algs.annotations import Mask
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import F2L_ADJACENT_FACES
 from cubing_algs.constants import F2L_FACE_ORIENTATIONS
@@ -11,7 +12,7 @@ from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.effects import load_effect
 from cubing_algs.display.palettes import load_palette
-from cubing_algs.display.styles import get_piece_type
+from cubing_algs.display.styles import get_piece_types
 from cubing_algs.display.styles import load_style
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
@@ -58,6 +59,8 @@ EMOJIS = {
     'B': '🟦',
     'L': '🟧',
     'R': '🟥',
+    'masked': '⬛',
+    'hidden': '❓',
 }
 
 
@@ -96,7 +99,7 @@ class VCubeDisplay:
         elif self.facelet_type in {'condensed', 'emoji'}:
             self.facelet_size = 1
 
-    def compute_mask(self, cube: 'VCube', mask: str) -> str:
+    def compute_mask(self, cube: 'VCube', mask: Mask) -> Mask:
         """
         Convert mask string to facelets format for display filtering.
 
@@ -173,7 +176,7 @@ class VCubeDisplay:
         ]
 
     def display(self, mode: str = '', orientation: str = '',  # noqa: C901
-                mask: str = '') -> str:
+                mask: Mask = '') -> str:
         """
         Generate formatted visual representation of the cube state.
 
@@ -253,7 +256,7 @@ class VCubeDisplay:
 
         return ' ' * (self.facelet_size * count)
 
-    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901
+    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901, PLR0911, PLR0912
                         facelet_index: int | None = None,
                         *, adjacent: bool = False) -> str:
         """
@@ -270,6 +273,10 @@ class VCubeDisplay:
 
         """
         if self.facelet_type == 'emoji':
+            if mask == '0':
+                return EMOJIS['masked']
+            if facelet not in FACE_ORDER:
+                return EMOJIS['hidden']
             return EMOJIS[facelet]
 
         if not USE_COLORS or self.facelet_type == 'no-color':
@@ -791,14 +798,14 @@ class VCubeDisplay:
 
         assert self.effect is not None  # noqa: S101
 
-        new_background_rgb = self.effect(
-            background_rgb, facelet_index,
+        new_background_rgb, new_foreground_rgb = self.effect(
+            background_rgb, foreground_rgb, facelet_index,
             self.cube_size,
         )
 
         return (
             f'\x1b[48;2;{ ";".join(str(c) for c in new_background_rgb) }m'
-            f'\x1b[38;2;{ ";".join(str(c) for c in foreground_rgb) }m'
+            f'\x1b[38;2;{ ";".join(str(c) for c in new_foreground_rgb) }m'
         )
 
     def letter_style_ansi(self, facelet_index: int,
@@ -814,11 +821,11 @@ class VCubeDisplay:
             Tuple of (style_start, style_end) ANSI sequences.
 
         """
-        style_ansi = self.style[
-            get_piece_type(facelet_index, self.cube_size)
-        ]
+        piece_types = get_piece_types(facelet_index, self.cube_size)
 
-        if not style_ansi:
-            return '', ''
+        for piece_type in piece_types:
+            style_ansi = self.style[piece_type]
+            if style_ansi:
+                return style_ansi, f'\x1b[0m{ face_color }'
 
-        return style_ansi, f'\x1b[0m{ face_color }'
+        return '', ''

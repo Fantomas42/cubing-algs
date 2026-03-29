@@ -119,17 +119,18 @@ OFFSET_Z_CW = {
 }
 
 OFFSET_Z_CC = {
-    'D': 'L',
-    'L': 'U',
-    'R': 'D',
     'U': 'R',
+    'D': 'L',
+
+    'R': 'D',
+    'L': 'U',
 
     'M': "E'",
     'E': 'M',
 
     'x': "y'",
     'y': 'x',
-  }
+}
 
 
 OFFSET_TABLE = {
@@ -213,7 +214,7 @@ RESLICE_E_MOVES = {
     # 2-move patterns (sorted form is canonical)
     "D' U": ['E', 'y'],
     "D U'": ["E'", "y'"],
-    'D2 U2': ['E2 y2'],
+    'D2 U2': ['E2', 'y2'],
 
     # 3-move patterns with rotation (sorted form is canonical)
     "D' U y'": ['E'],
@@ -379,7 +380,7 @@ ADJACENT_FACES = {
     'B': ('U', 'D', 'L', 'R'),
 }
 
-FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B']
+FACE_ORDER = ('U', 'R', 'F', 'D', 'L', 'B')
 
 FACE_NUMBER = len(FACE_ORDER)
 
@@ -390,7 +391,7 @@ FACE_INDEXES = {
 
 FACES = ''.join(FACE_ORDER)
 
-F2L_FACES = ['F', 'L', 'R', 'B']
+F2L_FACES = ('F', 'L', 'R', 'B')
 
 F2L_FACE_ORIENTATIONS = {
     'FL': 'F',
@@ -422,31 +423,36 @@ ITERATIONS_BY_CUBE_SIZE = {
     7: (100, 100),
 }
 
-OFFSET_ORIENTATION_MAP = {
+# Orientation move selection priority:
+# 1. Fewest moves (1-move always beats 2-move)
+# 2. Double moves (y2, x2, z2) preferred in first position
+# 3. y-axis preferred over x-axis, x-axis over z-axis
+# 4. Clockwise preferred over counter-clockwise
+OFFSET_ORIENTATION_MAP: dict[str, str] = {
     '01': 'y',
     '02': '',
     '04': "y'",
     '05': 'y2',
-    '10': "x' z'",
+    '10': "y' x'",
     '12': "z'",
-    '13': "z' y",
-    '15': "z' y2",
-    '20': "x' z2",
+    '13': 'y x',
+    '15': 'y2 z',
+    '20': "y2 x'",
     '21': 'x y',
     '23': 'x',
     '24': "x y'",
-    '31': 'y z2',
+    '31': 'x2 y',
     '32': 'z2',
-    '34': "y' z2",
+    '34': "x2 y'",
     '35': 'x2',
-    '40': 'z y',
+    '40': "y x'",
     '42': 'z',
-    '43': "z y'",
-    '45': 'z y2',
+    '43': "y' x",
+    '45': "y2 z'",
     '50': "x'",
-    '51': "x' y",
-    '53': "x' y2",
-    '54': "x' y'",
+    '51': "y z'",
+    '53': 'y2 x',
+    '54': "y' z",
     '0': '',
     '1': "z'",
     '2': 'x',
@@ -455,7 +461,7 @@ OFFSET_ORIENTATION_MAP = {
     '5': "x'",
 }
 
-ORIENTATIONS = [
+ORIENTATIONS: list[str] = [
     'UF', 'UR', 'UL', 'UB',
     'DF', 'DR', 'DL', 'DB',
 
@@ -465,6 +471,41 @@ ORIENTATIONS = [
     'FD', 'FR', 'FU', 'FL',
     'BD', 'BR', 'BU', 'BL',
 ]
+
+# Optimal rotation sequences for each of the 24 cube orientations.
+# Maps orientation (top-face + front-face) to the shortest rotation
+# sequence (at most 2 moves) that achieves it from solved (UF).
+ORIENTATION_FACE_MOVES: dict[str, str] = {
+    'UF': '',
+    'UR': 'y',
+    'UL': "y'",
+    'UB': 'y2',
+
+    'DF': 'z2',
+    'DR': 'x2 y',
+    'DL': "x2 y'",
+    'DB': 'x2',
+
+    'RF': "z'",
+    'RD': 'y x',
+    'RB': 'y2 z',
+    'RU': "y' x'",
+
+    'LF': 'z',
+    'LD': "y' x",
+    'LB': "y2 z'",
+    'LU': "y x'",
+
+    'FD': 'x',
+    'FR': 'x y',
+    'FU': "y2 x'",
+    'FL': "x y'",
+
+    'BD': 'y2 x',
+    'BR': "y z'",
+    'BU': "x'",
+    'BL': "y' z",
+}
 
 FACE_EDGES_INDEX = {1, 3, 5, 7}
 

@@ -9,7 +9,6 @@ from unittest.mock import patch
 from cubing_algs.cases.case import Case
 from cubing_algs.cases.collection import CASES_DIRECTORY
 from cubing_algs.cases.collection import COLLECTIONS
-from cubing_algs.cases.collection import METHODS
 from cubing_algs.cases.collection import CaseCollection
 from cubing_algs.exceptions import InvalidCaseNameError
 
@@ -563,11 +562,6 @@ class TestModuleLevelConstants(unittest.TestCase):
     def test_cases_directory_is_parent_of_file(self) -> None:
         """Test that CASES_DIRECTORY points to correct location."""
         self.assertTrue(str(CASES_DIRECTORY).endswith('cases'))
-
-    def test_methods_list_defined(self) -> None:
-        """Test that METHODS list is defined."""
-        self.assertIsInstance(METHODS, list)
-        self.assertIn('CFOP', METHODS)
 
     def test_collections_dict_defined(self) -> None:
         """Test that COLLECTIONS dict is defined."""

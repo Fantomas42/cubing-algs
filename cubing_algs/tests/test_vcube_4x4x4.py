@@ -2,6 +2,7 @@
 import unittest
 
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.exceptions import NotSupportedCubeSizeError
 from cubing_algs.extensions.rotate_dynamic import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.vcube import VCube
@@ -79,6 +80,11 @@ class Test4x4x4VCube(unittest.TestCase):
         self.assertEqual(
             self.cube.orientation, 'DF',
         )
+
+    def test_cubies(self) -> None:
+        """Test cubies."""
+        with self.assertRaises(NotSupportedCubeSizeError):
+            _ = self.cube.cubies
 
 
 class Test4x4x4ScrambledVCube(unittest.TestCase):

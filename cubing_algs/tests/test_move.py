@@ -1,5 +1,4 @@
 """Tests for the Move class."""
-
 import unittest
 
 from cubing_algs.move import Move

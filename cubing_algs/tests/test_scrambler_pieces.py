@@ -1113,7 +1113,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U corners are solved
         cube = VCube()
         cube.rotate(str(scramble))
-        cp, _, _, _, _ = cube.to_cubies
+        cp, _, _, _, _ = cube.cubies
 
         # U corner indices: URF=0, UFL=1, ULB=2, UBR=3
         u_corners = [0, 1, 2, 3]
@@ -1136,7 +1136,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U edges are solved
         cube = VCube()
         cube.rotate(str(scramble))
-        _, _, ep, _, _ = cube.to_cubies
+        _, _, ep, _, _ = cube.cubies
 
         # U edge indices: UR=0, UF=1, UL=2, UB=3
         u_edges = [0, 1, 2, 3]
@@ -1158,7 +1158,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify all corners are oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _, co, _, _, _ = cube.to_cubies
+        _, co, _, _, _ = cube.cubies
 
         # All corners should have orientation 0
         self.assertEqual(co, SOLVED_CO)
@@ -1178,7 +1178,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify all edges are oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _, _, _, eo, _ = cube.to_cubies
+        _, _, _, eo, _ = cube.cubies
 
         # All edges should have orientation 0
         self.assertEqual(eo, SOLVED_EO)
@@ -1199,7 +1199,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U layer is oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _, co, _, eo, _ = cube.to_cubies
+        _, co, _, eo, _ = cube.cubies
 
         # U corners should be oriented
         u_corners = [0, 1, 2, 3]
@@ -1226,7 +1226,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U corners are not all solved
         cube = VCube()
         cube.rotate(str(scramble))
-        cp, _, _, _, _ = cube.to_cubies
+        cp, _, _, _, _ = cube.cubies
 
         # At least one U corner should not be in solved position
         u_corners = [0, 1, 2, 3]
@@ -1248,7 +1248,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U edges are not all solved
         cube = VCube()
         cube.rotate(str(scramble))
-        _, _, ep, _, _ = cube.to_cubies
+        _, _, ep, _, _ = cube.cubies
 
         # At least one U edge should not be in solved position
         u_edges = [0, 1, 2, 3]
@@ -1270,7 +1270,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U corners are not all oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _, co, _, _, _ = cube.to_cubies
+        _, co, _, _, _ = cube.cubies
 
         # At least one U corner should not be oriented
         u_corners = [0, 1, 2, 3]
@@ -1292,7 +1292,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify U edges are not all oriented
         cube = VCube()
         cube.rotate(str(scramble))
-        _, _, _, eo, _ = cube.to_cubies
+        _, _, _, eo, _ = cube.cubies
 
         # At least one U edge should not be oriented
         u_edges = [0, 1, 2, 3]
@@ -1320,7 +1320,7 @@ class TestScrambleWithPieceConstraints(unittest.TestCase):
         # Apply and verify
         cube = VCube()
         cube.rotate(str(scramble))
-        cp, co, _, eo, _ = cube.to_cubies
+        cp, co, _, eo, _ = cube.cubies
 
         # D corners should be solved
         d_corners = [4, 5, 6, 7]

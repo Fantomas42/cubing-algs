@@ -1,11 +1,10 @@
 """Algorithm compression and expansion transformations for move optimization."""
-
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
-from cubing_algs.transform.optimize import optimize_do_undo_moves
-from cubing_algs.transform.optimize import optimize_double_moves
-from cubing_algs.transform.optimize import optimize_repeat_three_moves
-from cubing_algs.transform.optimize import optimize_triple_moves
+from cubing_algs.transform.optimize import optimize_do_undo_moves_inplace
+from cubing_algs.transform.optimize import optimize_double_moves_inplace
+from cubing_algs.transform.optimize import optimize_repeat_three_moves_inplace
+from cubing_algs.transform.optimize import optimize_triple_moves_inplace
 
 
 def compress_moves(
@@ -26,16 +25,22 @@ def compress_moves(
         A compressed Algorithm with redundancies removed.
 
     """
+    if not old_moves:
+        return old_moves
+
     moves = old_moves.copy()
 
+    # Order matters: remove cancellations (do-undo) first, then reduce
+    # repeated triples, merge adjacent same-face moves into doubles, and
+    # finally simplify any resulting triples.
     for _ in range(max_iterations):
         start_length = len(moves)
 
         for optimizer in (
-            optimize_do_undo_moves,
-            optimize_repeat_three_moves,
-            optimize_double_moves,
-            optimize_triple_moves,
+            optimize_do_undo_moves_inplace,
+            optimize_repeat_three_moves_inplace,
+            optimize_double_moves_inplace,
+            optimize_triple_moves_inplace,
         ):
             moves = optimizer(moves)
 

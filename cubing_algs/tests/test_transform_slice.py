@@ -1,5 +1,4 @@
 """Tests for slice move transformation functions."""
-
 import unittest
 
 from cubing_algs.constants import RESLICE_MOVES
@@ -150,6 +149,21 @@ class TransformSliceTestCase(unittest.TestCase):
         """Test reslice e moves."""
         provide = parse_moves("U' D F")
         expect = parse_moves("E' y' F")
+
+        result = reslice_e_moves(provide)
+
+        self.assertEqual(
+            result,
+            expect,
+        )
+
+        for m in result:
+            self.assertTrue(isinstance(m, Move))
+
+    def test_reslice_e_moves_doubled(self) -> None:
+        """Test reslice e moves."""
+        provide = parse_moves('U2 D2 F')
+        expect = parse_moves('E2 y2 F')
 
         result = reslice_e_moves(provide)
 

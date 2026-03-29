@@ -1,5 +1,4 @@
 """Tests for solver functions."""
-
 import unittest
 
 from cubing_algs.constants import SOLVED_CO
@@ -7,12 +6,10 @@ from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.exceptions import InvalidFaceletsSolveError
-from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.solver import cubies_to_cubies_algorithm
 from cubing_algs.solver import facelets_to_facelets_algorithm
 from cubing_algs.vcube import VCube
-
-INITIAL_STATE = get_solved_facelets(3)
 
 
 class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
@@ -25,7 +22,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         algorithm = facelets_to_facelets_algorithm(
             source.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), "R'")
@@ -37,7 +34,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         algorithm = facelets_to_facelets_algorithm(
             source.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), "U'")
@@ -49,7 +46,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         algorithm = facelets_to_facelets_algorithm(
             source.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), 'R2')
@@ -61,7 +58,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         algorithm = facelets_to_facelets_algorithm(
             source.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), "U R U' R'")
@@ -73,7 +70,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         algorithm = facelets_to_facelets_algorithm(
             source.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), "F R' F' R")
@@ -85,7 +82,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         algorithm = facelets_to_facelets_algorithm(
             source.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), "R U2 R' U' R U' R'")
@@ -97,7 +94,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         algorithm = facelets_to_facelets_algorithm(
             source.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), "R2 U2 R' U2 R2")
@@ -109,8 +106,8 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
         https://github.com/muodov/kociemba/issues/56
         """
         algorithm = facelets_to_facelets_algorithm(
-            INITIAL_STATE,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(str(algorithm), '')
@@ -122,7 +119,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
         with self.assertRaises(InvalidFaceletsSolveError) as context:
             facelets_to_facelets_algorithm(
                 invalid_facelets,
-                INITIAL_STATE,
+                SOLVED_FACELETS_3x3x3,
             )
 
         error_msg = str(context.exception)
@@ -137,7 +134,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
 
         with self.assertRaises(InvalidFaceletsSolveError):
             facelets_to_facelets_algorithm(
-                INITIAL_STATE,
+                SOLVED_FACELETS_3x3x3,
                 invalid_facelets,
             )
 
@@ -148,7 +145,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
         with self.assertRaises(InvalidFaceletsSolveError):
             facelets_to_facelets_algorithm(
                 short_facelets,
-                INITIAL_STATE,
+                SOLVED_FACELETS_3x3x3,
             )
 
     def test_empty_facelets(self) -> None:
@@ -158,7 +155,7 @@ class FaceletsToFaceletsAlgorithmTestCase(unittest.TestCase):
         with self.assertRaises(InvalidFaceletsSolveError):
             facelets_to_facelets_algorithm(
                 empty_facelets,
-                INITIAL_STATE,
+                SOLVED_FACELETS_3x3x3,
             )
 
 
@@ -170,7 +167,7 @@ class CubiesToCubiesAlgorithmTestCase(unittest.TestCase):
         source_cube = VCube()
         source_cube.rotate('R')
 
-        cp, co, ep, eo, _ = source_cube.to_cubies
+        cp, co, ep, eo, _ = source_cube.cubies
         source = (cp, co, ep, eo)
         destination = (list(SOLVED_CP), list(SOLVED_CO),
                        list(SOLVED_EP), list(SOLVED_EO))
@@ -184,7 +181,7 @@ class CubiesToCubiesAlgorithmTestCase(unittest.TestCase):
         source_cube = VCube()
         source_cube.rotate('R2')
 
-        cp, co, ep, eo, _ = source_cube.to_cubies
+        cp, co, ep, eo, _ = source_cube.cubies
         source = (cp, co, ep, eo)
         destination = (list(SOLVED_CP), list(SOLVED_CO),
                        list(SOLVED_EP), list(SOLVED_EO))
@@ -198,7 +195,7 @@ class CubiesToCubiesAlgorithmTestCase(unittest.TestCase):
         source_cube = VCube()
         source_cube.rotate("R U R' U'")
 
-        cp, co, ep, eo, _ = source_cube.to_cubies
+        cp, co, ep, eo, _ = source_cube.cubies
         source = (cp, co, ep, eo)
         destination = (list(SOLVED_CP), list(SOLVED_CO),
                        list(SOLVED_EP), list(SOLVED_EO))
@@ -212,7 +209,7 @@ class CubiesToCubiesAlgorithmTestCase(unittest.TestCase):
         source_cube = VCube()
         source_cube.rotate("R U R' U R U2 R'")
 
-        cp, co, ep, eo, _ = source_cube.to_cubies
+        cp, co, ep, eo, _ = source_cube.cubies
         source = (cp, co, ep, eo)
         destination = (list(SOLVED_CP), list(SOLVED_CO),
                        list(SOLVED_EP), list(SOLVED_EO))

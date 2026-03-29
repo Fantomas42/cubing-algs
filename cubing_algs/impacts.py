@@ -34,10 +34,23 @@ from cubing_algs.face_transforms import transform_opposite_position
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.integrity import compute_parity
 from cubing_algs.integrity import find_permutation_cycles
+from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
     from cubing_algs.vcube import VCube  # pragma: no cover
+
+# Precomputed lookup: facelet index → piece index for O(1) same-piece checks.
+CACHED_FACELET_TO_EDGE_PIECE: dict[int, int] = {
+    facelet: i
+    for i, edge in enumerate(EDGE_FACELET_MAP)
+    for facelet in edge
+}
+CACHED_FACELET_TO_CORNER_PIECE: dict[int, int] = {
+    facelet: i
+    for i, corner in enumerate(CORNER_FACELET_MAP)
+    for facelet in corner
+}
 
 
 class CycleAnalysis(TypedDict):
@@ -188,17 +201,12 @@ def positions_on_same_piece(pos1: int, pos2: int) -> bool:
         True if both positions are on the same physical piece.
 
     """
-    # Check if they're on the same edge piece
-    for edge_map in EDGE_FACELET_MAP:
-        if pos1 in edge_map and pos2 in edge_map:
-            return True
+    e1 = CACHED_FACELET_TO_EDGE_PIECE.get(pos1)
+    if e1 is not None and e1 == CACHED_FACELET_TO_EDGE_PIECE.get(pos2):
+        return True
 
-    # Check if they're on the same corner piece
-    for corner_map in CORNER_FACELET_MAP:
-        if pos1 in corner_map and pos2 in corner_map:
-            return True
-
-    return False
+    c1 = CACHED_FACELET_TO_CORNER_PIECE.get(pos1)
+    return c1 is not None and c1 == CACHED_FACELET_TO_CORNER_PIECE.get(pos2)
 
 
 def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
@@ -881,6 +889,7 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         patterns.append('CROSS_SOLVED')
 
     # F2L specific patterns
+    f2l_edges_solved = False
     if d_corners_solved and d_edges_solved:
         # Check if F2L is complete (D layer + E slice edges)
         f2l_edges_solved = all(
@@ -994,7 +1003,7 @@ def compute_cubie_complexity(
 
 def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     """
-    Compute comprehensive impact metrics for an algorithm.
+    Compute comprehensive impact metrics for an algorithm on a 3x3x3 cube.
 
     Analyzes both facelet-level (visual/spatial) and cubie-level (piece)
     impacts of the algorithm on the cube state.
@@ -1038,28 +1047,28 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     from cubing_algs.transform.timing import untime_moves
     from cubing_algs.vcube import VCube
 
-    cube = VCube()
+    cube = VCube(size=3)
     cube.rotate(untime_moves(algorithm))
     cube = cube.oriented_copy('UF')
 
-    # Create unique state with each facelet having a unique character
-    state_unique = ''.join(
-        [
-            chr(ord('A') + i)
-            for i in range(cube.face_size * cube.face_number)
-        ],
+    state_unique_moved = cubies_to_facelets(
+        *cube.cubies,
+        UNIQUE_FACELETS_3x3x3,
     )
-    state_unique_moved = cubies_to_facelets(*cube.to_cubies, state_unique)
 
     mask = ''.join(
         '0' if f1 == f2 else '1'
-        for f1, f2 in zip(state_unique, state_unique_moved, strict=True)
+        for f1, f2 in zip(
+                UNIQUE_FACELETS_3x3x3,
+                state_unique_moved,
+                strict=True,
+        )
     )
 
     permutations = {}
-    for original_pos in range(len(state_unique)):
+    for original_pos in range(len(UNIQUE_FACELETS_3x3x3)):
         final_pos = state_unique_moved.find(
-            state_unique[original_pos],
+            UNIQUE_FACELETS_3x3x3[original_pos],
         )
 
         if final_pos != original_pos:
@@ -1076,7 +1085,9 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     fixed_count = mask.count('0')
     mobilized_count = mask.count('1')
     # Center facelets should not move
-    scrambled_percent = mobilized_count / (len(state_unique) - cube.face_number)
+    scrambled_percent = mobilized_count / (
+        len(UNIQUE_FACELETS_3x3x3) - cube.face_number
+    )
 
     face_mobility = compute_face_impact(mask, cube)
 
@@ -1085,7 +1096,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     layer_analysis = analyze_layers(permutations, cube)
 
     # Cubie analysis
-    cp, co, ep, eo, _so = cube.to_cubies
+    cp, co, ep, eo, _so = cube.cubies
 
     # Count corners moved and twisted
     corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)

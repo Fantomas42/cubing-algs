@@ -28,7 +28,6 @@ dev = [
     "mypy",
     "pytest",
     "pytest-cov",
-    "pytest-subtests",
     "nbval",
 ]
 notebooks = [
@@ -71,6 +70,9 @@ ignore = [
     "D212",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = ["T201"]
+
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "space"
@@ -94,8 +96,8 @@ disable_error_code = ["import-untyped"]
 exclude = ["poc"]
 python_version = 3.12
 
-[tool.pytest.ini_options]
-addopts = "--cov=cubing_algs"
+[tool.pytest]
+addopts = ["--cov=cubing_algs"]
 
 [tool.coverage.run]
 branch = true

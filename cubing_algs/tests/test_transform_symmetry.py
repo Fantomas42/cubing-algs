@@ -1,5 +1,4 @@
 """Tests for symmetry transformation functions."""
-
 import unittest
 
 from cubing_algs.move import Move
@@ -147,3 +146,21 @@ class TransformSymmetryTestCase(unittest.TestCase):
             symmetry_m_moves(provide),
             expect,
         )
+
+    def test_symmetry_empty_algorithm(self) -> None:
+        """Test symmetry transforms on empty algorithm."""
+        empty = parse_moves('')
+
+        self.assertEqual(symmetry_m_moves(empty), empty)
+        self.assertEqual(symmetry_s_moves(empty), empty)
+        self.assertEqual(symmetry_e_moves(empty), empty)
+        self.assertEqual(symmetry_c_moves(empty), empty)
+
+    def test_symmetry_pauses_only(self) -> None:
+        """Test symmetry transforms on algorithm containing only pauses."""
+        pauses = parse_moves('. . .')
+
+        self.assertEqual(symmetry_m_moves(pauses), pauses)
+        self.assertEqual(symmetry_s_moves(pauses), pauses)
+        self.assertEqual(symmetry_e_moves(pauses), pauses)
+        self.assertEqual(symmetry_c_moves(pauses), pauses)

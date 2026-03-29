@@ -1,5 +1,4 @@
 """Tests for algorithm structure analysis."""
-
 import unittest
 
 from cubing_algs.algorithm import Algorithm
@@ -12,6 +11,7 @@ from cubing_algs.structure import calculate_nesting_depth
 from cubing_algs.structure import classify_commutator
 from cubing_algs.structure import classify_conjugate
 from cubing_algs.structure import compress
+from cubing_algs.structure import compress_recursive
 from cubing_algs.structure import compute_structure
 from cubing_algs.structure import count_all_structures
 from cubing_algs.structure import detect_move_cancellations
@@ -340,6 +340,7 @@ class StructureDataclassTestCase(unittest.TestCase):
             start=0,
             end=3,
             score=10.0,
+            classification='simple',
         )
 
         self.assertEqual(str(struct), '[R: U]')
@@ -355,6 +356,7 @@ class StructureDataclassTestCase(unittest.TestCase):
             start=0,
             end=4,
             score=10.0,
+            classification='A9',
         )
 
         self.assertEqual(str(struct), '[R, U]')
@@ -1167,6 +1169,39 @@ class ScoreStructureTestCase(unittest.TestCase):
         # Shorter setup with longer action should score better
         self.assertGreater(score1, score2)
 
+    def test_score_commutator_higher_than_conjugate(self) -> None:
+        """
+        Test that commutator scores higher than conjugate for same parts.
+
+        Commutator [A, B] = A B A' B' saves |A|+|B| moves from 2|A|+2|B|
+        (50% compression), while conjugate [A: B] = A B A' saves |A| moves
+        from 2|A|+|B| (less than 50%).
+        """
+        setup = Algorithm.parse_moves('R')
+        action = Algorithm.parse_moves('U')
+
+        conj_score = score_structure(setup, action)
+        comm_score = score_structure(setup, action, is_commutator=True)
+
+        self.assertGreater(comm_score, conj_score)
+
+    def test_score_commutator_compression_ratio(self) -> None:
+        """
+        Test that commutator compression ratio is always 50%.
+
+        [A, B] = A B A' B' has 2|A|+2|B| moves, bracket notation uses
+        |A|+|B|, so the compression ratio is always 0.5.
+        """
+        setup = Algorithm.parse_moves('R U')
+        action = Algorithm.parse_moves('F D')
+
+        # Manually compute expected score
+        # compression_ratio = 0.5 (always for commutators)
+        expected = 0.5 * 0.2 * 1.0 * 100
+        score = score_structure(setup, action, is_commutator=True)
+
+        self.assertAlmostEqual(score, expected)
+
 
 class IsInverseAtTestCase(unittest.TestCase):
     """Test inverse checking at position."""
@@ -1399,6 +1434,23 @@ class CalculateNestingDepthTestCase(unittest.TestCase):
         self.assertGreaterEqual(len(cache), 0)
         self.assertGreaterEqual(max_depth, 1)
 
+    def test_calculate_nesting_depth_respects_max_depth(self) -> None:
+        """Test that max depth guard stops recursion."""
+        # F [R, U] F' has nesting depth 2 normally
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+        structures = detect_structures(algo, min_score=0)
+
+        # With max_depth=0, recursion stops immediately
+        depth_capped, nested_capped = calculate_nesting_depth(
+            structures, max_depth=0, current_depth=0,
+        )
+        self.assertEqual(depth_capped, 1)
+        self.assertEqual(nested_capped, 0)
+
+        # With default max_depth, should find deeper nesting
+        depth_full, _ = calculate_nesting_depth(structures)
+        self.assertGreaterEqual(depth_full, depth_capped)
+
 
 class CompressRecursiveTestCase(unittest.TestCase):
     """Test recursive compression with caching."""
@@ -1441,7 +1493,7 @@ class DetectStructuresMaxDepthTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("F R U R' U' F'")
 
         # Should accept max_depth parameter
-        structures = detect_structures(algo, min_score=0, max_depth=5)
+        structures = detect_structures(algo, min_score=0)
 
         # Should still detect structures
         self.assertGreaterEqual(len(structures), 0)
@@ -1538,3 +1590,258 @@ class ClassificationIntegrationTestCase(unittest.TestCase):
                 struct = compute_structure(algo, min_score=0)
 
                 self.assertIn(struct.efficiency_rating, expected_ratings)
+
+
+class NestingDepthGuardTestCase(unittest.TestCase):
+    """Test that classify_conjugate has a recursion depth guard."""
+
+    def test_classify_conjugate_respects_max_depth(self) -> None:
+        """At max depth, classify_conjugate skips nested detection."""
+        setup = Algorithm.parse_moves('F')
+        # Action contains a commutator [R, U] — normally classified 'nested'
+        action = Algorithm.parse_moves("R U R' U'")
+
+        # At depth 0, should detect nested structure
+        normal = classify_conjugate(setup, action, nesting_depth=0)
+        self.assertEqual(normal, 'nested')
+
+        # At max depth, should skip nested detection and fall through
+        capped = classify_conjugate(setup, action, nesting_depth=10)
+        self.assertEqual(capped, 'simple')
+
+    def test_classify_conjugate_depth_propagates(self) -> None:
+        """Depth propagates through detect_structures → detect_conjugate."""
+        # F [R [U, D] R'] F' — nested conjugate containing a commutator
+        algo = Algorithm.parse_moves("F R U D U' D' R' F'")
+        # Should detect structures at default depth without error
+        structures = detect_structures(algo, min_score=0)
+        self.assertGreaterEqual(len(structures), 1)
+
+
+class SharedCacheTestCase(unittest.TestCase):
+    """Test that compute_structure shares cache across compress and counting."""
+
+    def test_compress_accepts_precomputed_structures(self) -> None:
+        """compress() with structures skips redundant detect_structures."""
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+        structures = detect_structures(algo, min_score=0)
+
+        # Passing pre-computed structures should produce same result
+        result_normal = compress(algo, min_score=0)
+        result_precomputed = compress(
+            algo, min_score=0, structures=structures,
+        )
+        self.assertEqual(result_normal, result_precomputed)
+
+    def test_compress_uses_shared_cache(self) -> None:
+        """compress() populates a shared structure_cache."""
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+        structures = detect_structures(algo, min_score=0)
+        cache: dict[str, list[Structure]] = {}
+
+        compress(
+            algo, min_score=0,
+            structures=structures,
+            structure_cache=cache,
+        )
+
+        # Cache should be populated with nested structure lookups
+        self.assertGreater(len(cache), 0)
+
+    def test_compute_structure_shares_cache(self) -> None:
+        """compute_structure result is consistent (shared cache correctness)."""
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+
+        struct = compute_structure(algo, min_score=0)
+
+        # Verify compressed output matches standalone compress
+        standalone = compress(algo, min_score=0)
+        self.assertEqual(struct.compressed, standalone)
+
+        # Verify counts are consistent
+        self.assertEqual(
+            struct.total_structures,
+            struct.conjugate_count + struct.commutator_count,
+        )
+
+
+class PureCommutatorComputeTestCase(unittest.TestCase):
+    """Test pure commutator counting in compute_structure."""
+
+    def test_pure_commutator_counted(self) -> None:
+        """Test that pure commutators (2+2) are counted."""
+        # [R U, F D] = R U F D U' R' D' F'
+        algo = Algorithm.parse_moves("R U F D U' R' D' F'")
+        struct = compute_structure(algo, min_score=0)
+
+        self.assertEqual(struct.pure_commutator_count, 1)
+        self.assertTrue(struct.structures[0].is_pure)
+        self.assertEqual(struct.structures[0].classification, 'pure')
+
+
+class A9CommutatorComputeTestCase(unittest.TestCase):
+    """Test A9 commutator counting in compute_structure."""
+
+    def test_a9_commutator_counted(self) -> None:
+        """Test that A9 commutators are counted."""
+        # [U R, R F D] has cancellation at R/R boundary
+        algo = Algorithm.parse_moves("U R R F D R' U' D' F' R'")
+        struct = compute_structure(algo, min_score=0)
+
+        self.assertEqual(struct.a9_commutator_count, 1)
+        self.assertEqual(struct.structures[0].classification, 'A9')
+
+    def test_cancellation_counted(self) -> None:
+        """Test that structures with cancellations are counted."""
+        algo = Algorithm.parse_moves("U R R F D R' U' D' F' R'")
+        struct = compute_structure(algo, min_score=0)
+
+        self.assertGreaterEqual(struct.structures_with_cancellations, 1)
+
+
+class CompressRecursiveDirectTestCase(unittest.TestCase):
+    """Test compress_recursive called directly without cache."""
+
+    def test_compress_recursive_without_cache(self) -> None:
+        """Test compress_recursive initializes cache when None."""
+        algo = Algorithm.parse_moves("F R U R' U' F'")
+        structures = detect_structures(algo, min_score=0)
+
+        # Call without structure_cache (default None)
+        result = compress_recursive(algo, structures, 0)
+
+        self.assertIn('[', result)
+        self.assertIn(']', result)
+
+
+class SetupSubStructureTestCase(unittest.TestCase):
+    """Test structures whose setup contains sub-structures."""
+
+    def test_compress_recursive_with_setup_structures(self) -> None:
+        """Test recursive compression of setup containing sub-structures."""
+        # R U R' U' F D L U R U' R' has setup="R U R'" containing [R: U]
+        algo = Algorithm.parse_moves("R U R' U' F D L U R U' R'")
+        compressed = compress(algo, min_score=0)
+
+        # Should recursively compress setup
+        self.assertIn('[', compressed)
+
+    def test_count_all_structures_with_setup_nesting(self) -> None:
+        """Test that nested setup structures are counted."""
+        algo = Algorithm.parse_moves("R U R' U' F D L U R U' R'")
+        structures = detect_structures(algo, min_score=0)
+
+        total, conj, comm = count_all_structures(structures)
+
+        # Should find more structures than top-level
+        self.assertGreater(total, len(structures))
+        self.assertEqual(total, conj + comm)
+
+
+class CommutatorEarlyTerminationTestCase(unittest.TestCase):
+    """Test early termination in commutator detection."""
+
+    def test_high_score_commutator_early_termination(self) -> None:
+        """Test that high-scoring commutator triggers early termination."""
+        # [R U, F D L B F D L B F D] scores 50.0 (>= threshold)
+        algo = Algorithm.parse_moves(
+            "R U F D L B F D L B F D U' R' D' F' B' L' D' F' B' L' D' F'",
+        )
+        structures = detect_structures(algo, min_score=0)
+
+        self.assertEqual(len(structures), 1)
+        self.assertEqual(structures[0].type, 'commutator')
+        self.assertGreaterEqual(structures[0].score, 50.0)
+
+
+class MultiSetupConjugateComputeTestCase(unittest.TestCase):
+    """Test multi-setup conjugate in compute_structure."""
+
+    def test_multi_setup_conjugate_falls_through(self) -> None:
+        """Test conjugate with multi-setup classification."""
+        # setup=4, action=8 scores 20.0, higher than shorter setups
+        # [R U F D: L B U F D L B U] = R U F D L B U F D L B U D' F' U' R'
+        algo = Algorithm.parse_moves(
+            "R U F D L B U F D L B U D' F' U' R'",
+        )
+        struct = compute_structure(algo, min_score=0)
+
+        self.assertGreaterEqual(len(struct.structures), 1)
+        has_multi = any(
+            s.classification == 'multi-setup' for s in struct.structures
+        )
+        self.assertTrue(has_multi)
+
+
+class OverlappingStructuresTestCase(unittest.TestCase):
+    """Test compress with overlapping structures."""
+
+    def test_overlapping_structures_filtered(self) -> None:
+        """Test that overlapping structures are filtered in compress."""
+        algo = Algorithm.parse_moves("R U R' U' F D F' D'")
+
+        # Create overlapping structures manually
+        s1 = Structure(
+            type='commutator',
+            setup=Algorithm.parse_moves('R'),
+            action=Algorithm.parse_moves('U'),
+            start=0, end=4, score=10.0,
+            classification='other',
+        )
+        s2 = Structure(
+            type='commutator',
+            setup=Algorithm.parse_moves('U'),
+            action=Algorithm.parse_moves("R'"),
+            start=1, end=5, score=8.0,  # Overlaps with s1
+            classification='other',
+        )
+        s3 = Structure(
+            type='commutator',
+            setup=Algorithm.parse_moves('F'),
+            action=Algorithm.parse_moves('D'),
+            start=4, end=8, score=10.0,
+            classification='other',
+        )
+
+        # Compress with overlapping structures - s2 should be filtered out
+        result = compress(algo, structures=[s1, s2, s3])
+
+        self.assertIn('[', result)
+
+
+class CompressRecursiveCacheHitTestCase(unittest.TestCase):
+    """Test cache hit path in compress_recursive."""
+
+    def test_cache_hit_for_repeated_setup(self) -> None:
+        """Test cache used for repeated setup."""
+        # Two conjugates with the same setup: R X R' + R Y R'
+        algo = Algorithm.parse_moves("R U R' R D R'")
+        structures = detect_structures(algo, min_score=0)
+
+        # Pre-populate cache with setup structures
+        cache: dict[str, list[Structure]] = {}
+        if structures:
+            cache[str(structures[0].setup)] = []
+
+        result = compress(
+            algo, min_score=0, structures=structures,
+            structure_cache=cache,
+        )
+
+        self.assertGreater(len(result), 0)
+
+
+class CommutatorScoreBranchTestCase(unittest.TestCase):
+    """Test the score comparison branch in detect_commutator."""
+
+    def test_commutator_score_comparison(self) -> None:
+        """Test that lower-scoring commutators don't replace higher ones."""
+        # R U R' U' has commutator at a_len=1, b_len=1 (score X)
+        # The detection also tries a_len=1, b_len=2 etc. which may not match
+        # but exercises the inner loop branches
+        algo = Algorithm.parse_moves("R U R' U'")
+        structures = detect_structures(algo, min_score=0)
+
+        # Should find the best commutator
+        self.assertEqual(len(structures), 1)
+        self.assertEqual(structures[0].type, 'commutator')

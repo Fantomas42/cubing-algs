@@ -20,33 +20,48 @@ class StyleConfig(TypedDict, total=False):
 
     corner: str
     edge: str
+    midge: str
+    wing: str
     center: str
     fixed_center: str
+    t_center: str
+    x_center: str
+    oblique_center: str
 
 
-PIECE_TYPES: list[FaceletPieceType] = [
-    'corner', 'edge',
+PIECE_TYPES: tuple[FaceletPieceType, ...] = (
+    'corner',
+    'edge', 'midge', 'wing',
     'center', 'fixed_center',
-]
+    't_center', 'x_center',
+    'oblique_center',
+)
 
 STYLES: dict[str, StyleConfig] = {
     'default': {
         'fixed_center': 'bold',
-    },
-    'detailed': {
-        'corner': 'dim',
-        'fixed_center': 'bold',
+        'x_center': 'bold',
     },
     'bold': {
+        'center': 'bold',
         'corner': 'bold',
         'edge': 'bold',
-        'center': 'bold',
-        'fixed_center': 'bold',
     },
-    'fixed_center': {
+    'centers': {
         'corner': 'hidden',
         'edge': 'hidden',
-        'center': 'hidden',
+        'fixed_center': 'blink',
+        't_center': 'bold',
+        'x_center': 'bold+underline',
+    },
+    'detailed': {
+        'corner': 'italic',
+        'midge': 'underline+italic',
+        'wing': 'underline',
+        'fixed_center': 'hidden',
+        't_center': 'bold',
+        'x_center': 'bold+underline',
+        'oblique_center': 'bold+italic',
     },
     'uniform': {},
 }
@@ -137,22 +152,27 @@ def register_style(
 
     """
     if name in STYLES:
-        msg = f'Style already exists: {name}'
+        msg = f'Style already exists: { name }'
         raise StyleAlreadyExistsError(msg)
 
     STYLES[name] = config
 
 
-def get_piece_type(facelet_index: int, cube_size: int) -> FaceletPieceType:
+def get_piece_types(  # noqa: PLR0911
+        facelet_index: int, cube_size: int,
+) -> list[FaceletPieceType]:
     """
-    Determine the piece type for a facelet based on its position.
+    Determine the piece types for a facelet based on its position.
+
+    Returns a list ordered from most specific to least specific,
+    e.g. ['midge', 'edge'] or ['fixed_center', 'center'].
 
     Args:
         facelet_index: Global facelet index (0-based).
         cube_size: Size of the cube (e.g. 3 for 3x3).
 
     Returns:
-        The piece type: 'corner', 'edge', 'center', or 'fixed_center'.
+        List of piece types from most specific to family.
 
     """
     face_size = cube_size * cube_size
@@ -163,12 +183,26 @@ def get_piece_type(facelet_index: int, cube_size: int) -> FaceletPieceType:
     on_col_border = col == 0 or col == cube_size - 1
 
     if on_row_border and on_col_border:
-        return 'corner'
+        return ['corner']
+
+    middle = cube_size // 2
+    is_odd = cube_size % 2 == 1
 
     if on_row_border or on_col_border:
-        return 'edge'
+        if is_odd and (row == middle or col == middle):  # noqa: PLR1714
+            return ['midge', 'edge']
+        return ['wing', 'edge']
 
-    if cube_size % 2 == 1 and row == cube_size // 2 and col == cube_size // 2:
-        return 'fixed_center'
+    if is_odd:
+        if row == middle and col == middle:
+            return ['fixed_center', 'center']
+        if row == middle or col == middle:  # noqa: PLR1714
+            return ['t_center', 'center']
 
-    return 'center'
+    min_row_offset = min(row, cube_size - 1 - row)
+    min_col_offset = min(col, cube_size - 1 - col)
+
+    if min_row_offset == min_col_offset:
+        return ['x_center', 'center']
+
+    return ['oblique_center', 'center']

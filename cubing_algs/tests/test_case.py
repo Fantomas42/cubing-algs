@@ -439,7 +439,7 @@ class TestCaseOptionalProperties(unittest.TestCase):
         self.assertIn('comment', badmephisto)
         self.assertIn('difficulty', badmephisto)
         self.assertIn('uid', badmephisto)
-        self.assertEqual(badmephisto['algos'], ["R U R' U R U2 R'"])
+        self.assertIsInstance(badmephisto['algos'][0], Algorithm)
         self.assertEqual(badmephisto['comment'], 'Easy algorithm')
         self.assertEqual(badmephisto['difficulty'], 1)
         self.assertEqual(badmephisto['uid'], 'oll27')

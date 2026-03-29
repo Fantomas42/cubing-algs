@@ -9,9 +9,7 @@ from cubing_algs.masks import intersection_masks
 from cubing_algs.masks import negate_mask
 from cubing_algs.masks import state_masked
 from cubing_algs.masks import union_masks
-from cubing_algs.solved_state import get_solved_facelets
-
-INITIAL_STATE = get_solved_facelets(3)
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 
 
 class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
@@ -36,6 +34,11 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
         """Test union empty."""
         self.assertEqual(union_masks(), '')
 
+    def test_union_length_mismatch(self) -> None:
+        """Test union raises ValueError on different length masks."""
+        with self.assertRaises(ValueError):
+            union_masks('1010', '101')
+
     def test_intersection(self) -> None:
         """Test intersection."""
         self.assertEqual(intersection_masks('1010', '1100'), '1000')
@@ -54,6 +57,11 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
     def test_intersection_empty(self) -> None:
         """Test intersection empty."""
         self.assertEqual(intersection_masks(), '')
+
+    def test_intersection_length_mismatch(self) -> None:
+        """Test intersection raises ValueError on different length masks."""
+        with self.assertRaises(ValueError):
+            intersection_masks('1010', '10100')
 
     def test_negate(self) -> None:
         """Test negate."""
@@ -112,7 +120,7 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
 
     def test_facelets_masked_real_cube_pattern(self) -> None:
         """Test facelets masked real cube pattern."""
-        facelets = INITIAL_STATE[:9]
+        facelets = SOLVED_FACELETS_3x3x3[:9]
         mask = '101010101'
         expected = 'U-U-U-U-U'
         self.assertEqual(facelets_masked(facelets, mask), expected)
@@ -120,21 +128,21 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
     def test_state_masked_basic(self) -> None:
         """Test state masked basic."""
         mask = FULL_MASK
-        result = state_masked(INITIAL_STATE, mask)
+        result = state_masked(SOLVED_FACELETS_3x3x3, mask)
 
-        self.assertEqual(result, INITIAL_STATE)
+        self.assertEqual(result, SOLVED_FACELETS_3x3x3)
 
     def test_state_masked_all_zeros(self) -> None:
         """Test state masked all zeros."""
         mask = '0' * 54
-        result = state_masked(INITIAL_STATE, mask)
+        result = state_masked(SOLVED_FACELETS_3x3x3, mask)
 
-        self.assertTrue(result.replace('0', '-'), mask)
+        self.assertEqual(result, '-' * 54)
 
     def test_state_masked_partial(self) -> None:
         """Test state masked partial."""
         mask = '1' * 9 + '0' * 45
-        result = state_masked(INITIAL_STATE, mask)
+        result = state_masked(SOLVED_FACELETS_3x3x3, mask)
 
         self.assertEqual(
             result,
@@ -189,7 +197,7 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(len(_MASK_CACHE), _CACHE_SIZE_LIMIT)
 
         # Now call facelets_masked with a new unique mask to trigger eviction
-        test_facelets = INITIAL_STATE
+        test_facelets = SOLVED_FACELETS_3x3x3
         trigger_mask = '1' + '0' * 53  # Unique mask not in cache
 
         result = facelets_masked(test_facelets, trigger_mask)
@@ -212,7 +220,7 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
         _MASK_CACHE.clear()
 
         # Test with cube-sized strings and common patterns
-        facelets = INITIAL_STATE
+        facelets = SOLVED_FACELETS_3x3x3
         common_masks = [FULL_MASK, '0' * 54, '1' * 27 + '0' * 27]
 
         # First round - populate cache

@@ -69,14 +69,33 @@ References
 - https://www.speedsolving.com/wiki/index.php?title=God%27s_Number
 
 """
-import operator
+from collections import defaultdict
 from typing import TYPE_CHECKING
+from typing import Literal
 from typing import NamedTuple
 
 from cubing_algs.move import Move
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
+
+MetricMode = Literal['htm', 'qtm', 'stm', 'etm', 'rtm', 'qstm']
+MoveField = Literal['rotation', 'outer', 'inner']
+
+
+class ScoringRule(NamedTuple):
+    """
+    A scoring rule defining how a move type is counted in a metric.
+
+    Attributes:
+        base: Base count added for each move regardless of angle.
+        quantum: Multiplied by the move's quantum count
+            (1 for quarter, 2 for half).
+
+    """
+
+    base: int
+    quantum: int
 
 
 class MetricsData(NamedTuple):
@@ -206,14 +225,37 @@ class MetricsData(NamedTuple):
 #   HTM: 2 + (2 * 0) = 2    (slice moves count double)
 #   QTM: 0 + (2 * 2) = 4    (slice quarter = 2, slice half = 4)
 #   STM: 1 + (2 * 0) = 1    (slice moves count as 1)
-MOVE_COUNTS = {
-    'htm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [2, 0]},
-    'qtm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 2]},
-    'stm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [1, 0]},
-    'etm': {'rotation': [1, 0], 'outer': [1, 0], 'inner': [1, 0]},
-    'rtm': {'rotation': [0, 1], 'outer': [0, 0], 'inner': [0, 0]},
-    'qstm': {'rotation': [0, 0], 'outer': [0, 1], 'inner': [0, 1]},
-    'obtm': {'rotation': [0, 0], 'outer': [1, 0], 'inner': [2, 0]},
+MOVE_COUNTS: dict[MetricMode, dict[MoveField, ScoringRule]] = {
+    'htm': {
+        'outer': ScoringRule(1, 0),
+        'inner': ScoringRule(2, 0),
+        'rotation': ScoringRule(0, 0),
+    },
+    'qtm': {
+        'outer': ScoringRule(0, 1),
+        'inner': ScoringRule(0, 2),
+        'rotation': ScoringRule(0, 0),
+    },
+    'stm': {
+        'outer': ScoringRule(1, 0),
+        'inner': ScoringRule(1, 0),
+        'rotation': ScoringRule(0, 0),
+    },
+    'etm': {
+        'outer': ScoringRule(1, 0),
+        'inner': ScoringRule(1, 0),
+        'rotation': ScoringRule(1, 0),
+    },
+    'rtm': {
+        'outer': ScoringRule(0, 0),
+        'inner': ScoringRule(0, 0),
+        'rotation': ScoringRule(0, 1),
+    },
+    'qstm': {
+        'outer': ScoringRule(0, 1),
+        'inner': ScoringRule(0, 1),
+        'rotation': ScoringRule(0, 0),
+    },
 }
 
 
@@ -244,7 +286,7 @@ def amount(move: Move) -> int:
     return 1
 
 
-def move_score(mode: str, field: str,
+def move_score(mode: MetricMode, field: MoveField,
                moves: list[Move]) -> int:
     """
     Calculate the score for a specific group of moves under a given metric.
@@ -254,7 +296,7 @@ def move_score(mode: str, field: str,
     base_count + (quantum_count * quantum_multiplier) for each move.
 
     Args:
-        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm, obtm).
+        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm).
         field: The move field type (rotation, outer, inner).
         moves: List of moves to score.
 
@@ -273,15 +315,15 @@ def move_score(mode: str, field: str,
             Total: 3
 
     """
-    datas = MOVE_COUNTS[mode][field]
+    rule = MOVE_COUNTS[mode][field]
 
     return sum(
-        datas[0] + (amount(move) * datas[1])
+        rule.base + (amount(move) * rule.quantum)
         for move in moves
     )
 
 
-def compute_score(mode: str,
+def compute_score(mode: MetricMode,
                   rotations: list[Move],
                   outer: list[Move],
                   inner: list[Move]) -> int:
@@ -292,7 +334,7 @@ def compute_score(mode: str,
     according to the rules of the specified metric.
 
     Args:
-        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm, obtm).
+        mode: The metric mode (htm, qtm, stm, etm, rtm, qstm).
         rotations: List of rotation moves (x, y, z).
         outer: List of outer face moves (R, U, F, Rw, etc.).
         inner: List of inner slice moves (M, E, S).
@@ -317,58 +359,12 @@ def compute_score(mode: str,
     )
 
 
-def compute_generators(moves: 'Algorithm') -> list[str]:
-    """
-    Identify the most frequently used move faces in an algorithm.
-
-    This function counts how many times each face is turned (ignoring
-    direction and whether it's a single or double turn) and returns them in
-    order of frequency. Rotations and pauses are excluded from this analysis.
-
-    This is useful for understanding which faces an algorithm primarily
-    affects, which can help with method classification (e.g., RU algorithms
-    only use R and U).
-
-    Args:
-        moves: The algorithm to analyze.
-
-    Returns:
-        List of face names sorted by frequency (most frequent first).
-
-    Examples:
-        >>> compute_generators(parse_moves("R U R' U'"))
-        ['R', 'U']
-
-        >>> compute_generators(parse_moves("R U R U R U' R'"))
-        ['R', 'U']  # R appears 4 times, U appears 3 times
-
-        >>> compute_generators(parse_moves("M2 U M2 U2"))
-        ['M', 'U']  # M appears 2 times, U appears 2 times
-
-    """
-    count: dict[str, int] = {}
-    for move in moves:
-        if move.is_rotation_move or move.is_pause:
-            continue
-
-        count.setdefault(move.raw_base_move, 0)
-        count[move.raw_base_move] += 1
-
-    return [
-        k
-        for k, v in sorted(
-                count.items(),
-                key=operator.itemgetter(1),
-                reverse=True,
-        )
-    ]
-
-
 def regroup_moves(
         moves: 'Algorithm',
-) -> tuple[list[Move], list[Move], list[Move], list[Move]]:
+) -> tuple[list[Move], list[Move], list[Move], list[Move], list[str]]:
     """
-    Categorize moves into pause, rotation, outer, and inner move types.
+    Categorize moves into pause, rotation, outer, and inner move types,
+    and compute the generators (most frequently used faces) in a single pass.
 
     This separation is necessary for accurate metric calculations, as different
     move types are counted differently depending on the metric.
@@ -377,25 +373,32 @@ def regroup_moves(
         moves: The algorithm to categorize.
 
     Returns:
-        Tuple of (pauses, rotations, outer_moves, inner_moves) lists.
+        Tuple of (pauses, rotations, outer_moves, inner_moves, generators)
+        where generators is a list of face names sorted by frequency
+        (most frequent first), excluding rotations and pauses.
 
     """
     pauses = []
     rotations = []
     outer_moves = []
     inner_moves = []
+    count: defaultdict[str, int] = defaultdict(int)
 
     for move in moves:
         if move.is_pause:
             pauses.append(move)
         elif move.is_outer_move:
             outer_moves.append(move)
+            count[move.raw_base_move] += 1
         elif move.is_inner_move:
             inner_moves.append(move)
+            count[move.raw_base_move] += 1
         else:
             rotations.append(move)
 
-    return pauses, rotations, outer_moves, inner_moves
+    generators = sorted(count, key=count.__getitem__, reverse=True)
+
+    return pauses, rotations, outer_moves, inner_moves, generators
 
 
 def compute_metrics(moves: 'Algorithm') -> MetricsData:
@@ -468,7 +471,11 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
         of layers as a single move.
 
     """
-    pauses, rotations, outer_moves, inner_moves = regroup_moves(moves)
+    (
+        pauses, rotations,
+        outer_moves, inner_moves,
+        generators,
+    ) = regroup_moves(moves)
 
     return MetricsData(
         pauses=len(pauses),
@@ -481,5 +488,5 @@ def compute_metrics(moves: 'Algorithm') -> MetricsData:
         etm=compute_score('etm', rotations, outer_moves, inner_moves),
         rtm=compute_score('rtm', rotations, outer_moves, inner_moves),
         qstm=compute_score('qstm', rotations, outer_moves, inner_moves),
-        generators=compute_generators(moves),
+        generators=generators,
     )

@@ -16,10 +16,8 @@ from cubing_algs.facelets import enable_cache
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.facelets import get_cache_info
 from cubing_algs.masks import F2L_MASK
-from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
-
-INITIAL_STATE = get_solved_facelets(3)
 
 
 class CubiesToFaceletsTestCase(unittest.TestCase):
@@ -216,7 +214,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation of R move applied to solved cube
         solved_cube = VCube()
         solved_cube.rotate('R')
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state
         result = cubies_to_facelets(
@@ -246,7 +244,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation of F move applied to solved cube
         solved_cube = VCube()
         solved_cube.rotate('F')
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state
         result = cubies_to_facelets(
@@ -276,7 +274,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation of F z2 applied to solved cube
         solved_cube = VCube()
         solved_cube.rotate('F z2')
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state
         result = cubies_to_facelets(
@@ -306,7 +304,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation of moves applied to solved cube
         solved_cube = VCube()
         solved_cube.rotate('F R U2 D2 L2 z2 x y')
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state
         result = cubies_to_facelets(
@@ -329,7 +327,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation of moves applied to solved cube
         solved_cube = VCube()
         solved_cube.rotate('F R U2 D2 L2 z2 y')
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state
         result = cubies_to_facelets(
@@ -353,7 +351,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation after applying moves to solved cube
         solved_cube = VCube()
         solved_cube.rotate(move_sequence)
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state using cubies_to_facelets
         result = cubies_to_facelets(
@@ -377,7 +375,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation after applying moves to solved cube
         solved_cube = VCube()
         solved_cube.rotate(move_sequence)
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state using cubies_to_facelets
         result = cubies_to_facelets(
@@ -403,7 +401,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Get cubie representation after applying algorithm to solved cube
         solved_cube = VCube()
         solved_cube.rotate(algorithm)
-        cp, co, ep, eo, so = solved_cube.to_cubies
+        cp, co, ep, eo, so = solved_cube.cubies
 
         # Apply same transformation to custom state
         result = cubies_to_facelets(
@@ -423,7 +421,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Apply R and then R'
         cube = VCube()
         cube.rotate("R R'")  # Should return to solved
-        cp, co, ep, eo, so = cube.to_cubies
+        cp, co, ep, eo, so = cube.cubies
 
         # Should get back the original custom state
         result = cubies_to_facelets(
@@ -435,7 +433,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Test with sequence that returns to solved
         cube = VCube()
         cube.rotate('R R R R')  # Four R moves return to solved
-        cp, co, ep, eo, so = cube.to_cubies
+        cp, co, ep, eo, so = cube.cubies
 
         result = cubies_to_facelets(
             cp, co, ep, eo, so,
@@ -451,7 +449,7 @@ class CubiesToFaceletsCustomStateTestCase(unittest.TestCase):
         # Apply some moves to get the transformation
         cube = VCube()
         cube.rotate('R U F')
-        cp, co, ep, eo, so = cube.to_cubies
+        cp, co, ep, eo, so = cube.cubies
 
         # Apply this transformation to our custom state
         result = cubies_to_facelets(
@@ -495,7 +493,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         self.assertTrue(info['enabled'])
 
         # Add some items to cache
-        facelets_to_cubies(INITIAL_STATE)
+        facelets_to_cubies(SOLVED_FACELETS_3x3x3)
         cubies_to_facelets(
             SOLVED_CP,
             SOLVED_CO,
@@ -520,7 +518,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         self.assertFalse(info['enabled'])
 
         # Operations should not be cached when disabled
-        facelets_to_cubies(INITIAL_STATE)
+        facelets_to_cubies(SOLVED_FACELETS_3x3x3)
         info = get_cache_info()
         self.assertEqual(info['facelets_cached'], 0)
 
@@ -538,7 +536,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             # Fill cache beyond max size using valid states
             cube = VCube()
 
-            states = [INITIAL_STATE]
+            states = [SOLVED_FACELETS_3x3x3]
 
             # Generate valid states
             moves = ['R', 'U', 'F']
@@ -608,7 +606,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             _CORNER_LOOKUP.clear()
 
             # Now all corner lookups will fail and use fallback
-            result = facelets_to_cubies(INITIAL_STATE)
+            result = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
 
             # Should still work with fallback logic
             self.assertEqual(len(result), 5)
@@ -630,7 +628,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             _EDGE_LOOKUP.clear()
 
             # Now all edge lookups will fail and use fallback
-            result = facelets_to_cubies(INITIAL_STATE)
+            result = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
 
             # Should still work with fallback logic
             self.assertEqual(len(result), 5)
@@ -681,12 +679,12 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         self.assertEqual(info['facelets_cached'], 0)
 
         # First call - cache miss
-        result1 = facelets_to_cubies(INITIAL_STATE)
+        result1 = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
         info = get_cache_info()
         self.assertEqual(info['facelets_cached'], 1)
 
         # Second call - cache hit
-        result2 = facelets_to_cubies(INITIAL_STATE)
+        result2 = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
         self.assertEqual(result1, result2)
 
         info = get_cache_info()
@@ -741,8 +739,8 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         disable_cache()
 
         # Operations should not use cache
-        result1 = facelets_to_cubies(INITIAL_STATE)
-        result2 = facelets_to_cubies(INITIAL_STATE)
+        result1 = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
+        result2 = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
 
         # Results should be identical but cache should remain empty
         self.assertEqual(result1, result2)
@@ -770,7 +768,7 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         """Test corner orientation modulo operation in fallback logic."""
         # Create a state that will trigger the fallback logic
         # and test the ori % 3 operation
-        invalid_state = list(INITIAL_STATE)
+        invalid_state = list(SOLVED_FACELETS_3x3x3)
 
         # Create an invalid corner configuration
         invalid_state[8] = 'U'

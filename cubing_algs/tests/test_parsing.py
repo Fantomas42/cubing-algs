@@ -1,5 +1,4 @@
 """Tests for algorithm parsing functions."""
-
 import unittest
 
 from cubing_algs.exceptions import InvalidBracketError
@@ -159,7 +158,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=False,
+            trust_input=False,
         )
 
     def test_parse_moves_invalid_case_but_corrected(self) -> None:
@@ -167,14 +166,14 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         moves = ['R2', 'X2']
         expect = ['R2', 'x2']
         self.assertEqual(
-            parse_moves(moves, secure=False),
+            parse_moves(moves, trust_input=False),
             expect,
         )
 
         moves = ['R2', 'm2']
         expect = ['R2', 'M2']
         self.assertEqual(
-            parse_moves(moves, secure=False),
+            parse_moves(moves, trust_input=False),
             expect,
         )
 
@@ -213,7 +212,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
             InvalidMoveError,
             parse_moves,
             moves,
-            secure=False,
+            trust_input=False,
         )
 
     def test_parse_moves_conjugate(self) -> None:
@@ -238,7 +237,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidBracketError,
             parse_moves, moves,
-            secure=False,
+            trust_input=False,
         )
 
     def test_parse_moves_conjugate_invalid_moves(self) -> None:
@@ -248,13 +247,13 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=False,
+            trust_input=False,
         )
 
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=True,
+            trust_input=True,
         )
 
     def test_parse_moves_conjugate_nested(self) -> None:
@@ -295,7 +294,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidBracketError,
             parse_moves, moves,
-            secure=False,
+            trust_input=False,
         )
 
     def test_parse_moves_commutator_invalid_moves(self) -> None:
@@ -305,13 +304,13 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=False,
+            trust_input=False,
         )
 
         self.assertRaises(
             InvalidMoveError,
             parse_moves, moves,
-            secure=True,
+            trust_input=True,
         )
 
     def test_parse_moves_commutator_nested(self) -> None:
@@ -336,7 +335,7 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertRaises(
             InvalidOperatorError,
             parse_moves, moves,
-            secure=False,
+            trust_input=False,
         )
 
     def test_parse_moves_complex_1(self) -> None:
@@ -822,21 +821,21 @@ class ParseMovesMultilineIntegrationTestCase(unittest.TestCase):
         expected = ['R', 'U', "R'", "U'"]
         self.assertEqual(list(result), expected)
 
-    def test_parse_moves_multiline_secure_mode(self) -> None:
-        """Test multiline parsing with secure mode enabled."""
+    def test_parse_moves_multiline_trust_input(self) -> None:
+        """Test multiline parsing with trust_input enabled."""
         multiline_moves = """R U R' U' // first part
         D' R D // second part"""
 
-        result = parse_moves(multiline_moves, secure=True)
+        result = parse_moves(multiline_moves, trust_input=True)
         expected = ['R', 'U', "R'", "U'", "D'", 'R', 'D']
         self.assertEqual(list(result), expected)
 
-    def test_parse_moves_multiline_non_secure_mode(self) -> None:
-        """Test multiline parsing with secure mode disabled."""
+    def test_parse_moves_multiline_no_trust_input(self) -> None:
+        """Test multiline parsing with trust_input disabled."""
         multiline_moves = """R U R' U' // first part
         D' R D // second part"""
 
-        result = parse_moves(multiline_moves, secure=False)
+        result = parse_moves(multiline_moves, trust_input=False)
         expected = ['R', 'U', "R'", "U'", "D'", 'R', 'D']
         self.assertEqual(list(result), expected)
 

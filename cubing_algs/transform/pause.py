@@ -1,5 +1,4 @@
 """Pause insertion and removal transformations for timed algorithms."""
-
 from collections.abc import Callable
 
 from cubing_algs.algorithm import Algorithm
@@ -58,11 +57,10 @@ def pause_moves(
 
             if delta > threshold:
                 if multiple:
-                    delta = time - previous_time
-                    occurences = int(delta / threshold)
-                    offset = (delta - (threshold * occurences)) / 2
+                    occurrences = int(delta / threshold)
+                    offset = (delta - (threshold * occurrences)) / 2
 
-                    for i in range(occurences):
+                    for i in range(occurrences):
                         new_time = int(
                             previous_time + offset + (
                                 (i + 1) * threshold

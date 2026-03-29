@@ -1,5 +1,4 @@
 """AUF (Adjust U Face) transformations for optimizing last layer adjustments."""
-
 from collections.abc import Iterable
 from itertools import takewhile
 
@@ -26,7 +25,7 @@ def get_move_score(move: Move) -> int:
         move: The move to score.
 
     Returns:
-        Numeric score (2 for double, -1 for CCW, 1 for CW, 0 otherwise).
+        Numeric score (2 for double, -1 for CCW, 1 for CW, 0 for pause).
 
     """
     if move.is_double:
@@ -85,7 +84,7 @@ def remove_auf_moves(old_moves: Algorithm) -> Algorithm:
 
     score = (
         calculate_auf_score(old_moves) +
-        calculate_auf_score(list(reversed(old_moves)))
+        calculate_auf_score(reversed(old_moves))
     ) % 4
 
     transforms = [trim_moves(AUF_CHAR)]

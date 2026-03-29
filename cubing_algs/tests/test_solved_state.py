@@ -8,8 +8,10 @@ from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_SO
+from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 from cubing_algs.solved_state import get_solved_cubies
 from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import get_unique_facelets
 
 
 class GetInitialStateTestCase(unittest.TestCase):  # noqa: PLR0904
@@ -563,3 +565,156 @@ class GetSolvedCubiesTestCase(unittest.TestCase):  # noqa: PLR0904
         """Test spatial orientation has no duplicate values."""
         _, _, _, _, so = get_solved_cubies()
         self.assertEqual(len(so), len(set(so)))
+
+
+class GetUniqueFaceletsTestCase(unittest.TestCase):  # noqa: PLR0904
+    """Tests for the get_unique_facelets function."""
+
+    def test_default_size_returns_54_characters(self) -> None:
+        """Test default size (3x3x3) returns 54 characters."""
+        result = get_unique_facelets()
+        self.assertEqual(len(result), 54)
+
+    def test_default_size_matches_explicit_size_3(self) -> None:
+        """Test calling with no args matches calling with size=3."""
+        self.assertEqual(get_unique_facelets(), get_unique_facelets(3))
+
+    def test_size_2_returns_24_characters(self) -> None:
+        """Test size 2 (2x2x2) returns 24 characters."""
+        result = get_unique_facelets(2)
+        self.assertEqual(len(result), 24)
+
+    def test_size_4_returns_96_characters(self) -> None:
+        """Test size 4 (4x4x4) returns 96 characters."""
+        result = get_unique_facelets(4)
+        self.assertEqual(len(result), 96)
+
+    def test_length_formula_6_times_size_squared(self) -> None:
+        """Test that length follows formula: 6 * size * size."""
+        for size in range(1, 10):
+            result = get_unique_facelets(size)
+            expected_length = 6 * size * size
+            self.assertEqual(
+                len(result),
+                expected_length,
+                f'Size {size} should have {expected_length} characters',
+            )
+
+    def test_size_2_matches_docstring_example(self) -> None:
+        """Test size 2 matches docstring example for 2x2x2."""
+        expected = '!"#$%&\'()*+,-./012345678'
+        self.assertEqual(get_unique_facelets(2), expected)
+
+    def test_size_3_matches_docstring_example(self) -> None:
+        """Test size 3 matches docstring example for 3x3x3."""
+        expected = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUV'
+        self.assertEqual(get_unique_facelets(3), expected)
+
+    def test_first_character_is_exclamation_mark(self) -> None:
+        """Test that the first character is chr(33) which is '!'."""
+        result = get_unique_facelets(3)
+        self.assertEqual(result[0], '!')
+        self.assertEqual(result[0], chr(33))
+
+    def test_characters_are_consecutive_ascii(self) -> None:
+        """Test each character is exactly one code point above the previous."""
+        result = get_unique_facelets(3)
+        for i in range(len(result) - 1):
+            self.assertEqual(
+                ord(result[i + 1]),
+                ord(result[i]) + 1,
+                f'Character at index {i + 1} should be '
+                f'chr({ord(result[i]) + 1})',
+            )
+
+    def test_character_range_starts_at_chr_33(self) -> None:
+        """Test characters start at chr(33) and are all printable."""
+        for size in [1, 2, 3, 4, 5]:
+            result = get_unique_facelets(size)
+            self.assertEqual(result[0], chr(33))
+            self.assertTrue(all(c.isprintable() for c in result))
+
+    def test_all_characters_are_unique_size_2(self) -> None:
+        """Test all characters in the result are unique for size 2."""
+        result = get_unique_facelets(2)
+        self.assertEqual(len(result), len(set(result)))
+
+    def test_all_characters_are_unique_size_3(self) -> None:
+        """Test all characters in the result are unique for size 3."""
+        result = get_unique_facelets(3)
+        self.assertEqual(len(result), len(set(result)))
+
+    def test_all_characters_are_unique_size_4(self) -> None:
+        """Test all characters in the result are unique for size 4."""
+        result = get_unique_facelets(4)
+        self.assertEqual(len(result), len(set(result)))
+
+    def test_all_characters_are_unique_for_all_sizes(self) -> None:
+        """Test all characters are unique for small size to big size."""
+        for size in [0, 1, 3, 5, 9, 30, 50]:
+            result = get_unique_facelets(size)
+            self.assertEqual(
+                len(result),
+                len(set(result)),
+                f'Size {size} should have all unique characters',
+            )
+
+    def test_return_type_is_string(self) -> None:
+        """Test that returned value is a string."""
+        result = get_unique_facelets(3)
+        self.assertIsInstance(result, str)
+
+    def test_return_type_is_string_for_all_sizes(self) -> None:
+        """Test that returned value is a string for various sizes."""
+        for size in [1, 2, 3, 4, 5]:
+            result = get_unique_facelets(size)
+            self.assertIsInstance(
+                result, str, f'Size {size} should return a str',
+            )
+
+    def test_module_constant_matches_function(self) -> None:
+        """Test UNIQUE_FACELETS_3x3x3 matches get_unique_facelets(3)."""
+        self.assertEqual(UNIQUE_FACELETS_3x3x3, get_unique_facelets(3))
+
+    def test_module_constant_has_54_characters(self) -> None:
+        """Test that UNIQUE_FACELETS_3x3x3 constant has 54 characters."""
+        self.assertEqual(len(UNIQUE_FACELETS_3x3x3), 54)
+
+    def test_module_constant_starts_with_exclamation_mark(self) -> None:
+        """Test that UNIQUE_FACELETS_3x3x3 constant starts with '!'."""
+        self.assertEqual(UNIQUE_FACELETS_3x3x3[0], '!')
+
+    def test_consistent_results_for_same_size(self) -> None:
+        """Test same size always produces identical results."""
+        for size in [2, 3, 4, 5]:
+            result1 = get_unique_facelets(size)
+            result2 = get_unique_facelets(size)
+            self.assertEqual(result1, result2)
+
+    def test_different_sizes_produce_different_results(self) -> None:
+        """Test that different sizes produce different result strings."""
+        sizes = [1, 2, 3, 4, 5]
+        results = [get_unique_facelets(size) for size in sizes]
+        self.assertEqual(len(results), len(set(results)))
+
+    def test_size_1_returns_6_characters(self) -> None:
+        """Test edge case: size 1 (1x1x1) returns 6 characters."""
+        result = get_unique_facelets(1)
+        self.assertEqual(len(result), 6)
+
+    def test_size_1_has_6_unique_characters(self) -> None:
+        """Test edge case: size 1 returns 6 unique chars from '!'."""
+        result = get_unique_facelets(1)
+        self.assertEqual(result, '!"#$%&')
+        self.assertEqual(len(set(result)), 6)
+
+    def test_size_0_returns_empty_string(self) -> None:
+        """Test edge case: size 0 returns empty string (no validation)."""
+        result = get_unique_facelets(0)
+        self.assertEqual(result, '')
+
+    def test_size_negative_1_returns_6_characters(self) -> None:
+        """Test edge case: size -1 returns 6 characters due to (-1)*(-1)*6=6."""
+        result = get_unique_facelets(-1)
+        self.assertEqual(len(result), 6)
+        self.assertEqual(result, '!"#$%&')

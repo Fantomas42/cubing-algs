@@ -18,12 +18,12 @@ Classification System:
 The module follows speedcubing conventions and the Beyer-Hardwick (BH)
 classification system for systematic algorithm analysis.
 """
-
 import typing
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import Literal
 from typing import NamedTuple
 
 if TYPE_CHECKING:
@@ -45,9 +45,7 @@ LONG_ALGO_MIN_SCORE = 5.0  # Min score for long algorithms
 # Classification constants
 PURE_COMMUTATOR_SETUP_LEN = 2  # Setup length for pure commutators
 PURE_COMMUTATOR_ACTION_LEN = 2  # Action length for pure commutators
-PURE_COMMUTATOR_TOTAL_MOVES = 8  # Total moves in pure commutator
 COMMUTATOR_A9_TOTAL_MOVES = 10  # Total moves in A9 commutator (before cancel)
-SIMPLE_CONJUGATE_MAX_SETUP = 2  # Max setup length for "simple" conjugates
 MULTI_SETUP_MIN_LENGTH = 3  # Min setup length for "multi-setup" conjugates
 
 # Efficiency rating constants
@@ -62,13 +60,8 @@ DEFAULT_MAX_NESTING_DEPTH = 10  # Maximum recursion depth for nested structures
 # Very permissive score for classification checks
 CLASSIFICATION_MIN_SCORE = 0.1
 
-# Early termination threshold
-EARLY_TERMINATION_SCORE = 50.0  # Stop searching if structure score exceeds this
-
 # Cache size limits (LRU behavior)
 MAX_INVERSE_CACHE_SIZE = 1000  # Maximum entries in inverse cache
-MAX_STRING_CACHE_SIZE = 1000  # Maximum entries in string cache
-MAX_STRUCTURE_CACHE_SIZE = 500  # Maximum entries in structure cache
 
 
 class BoundedCache[K, V](MutableMapping[K, V]):
@@ -132,17 +125,27 @@ class BoundedCache[K, V](MutableMapping[K, V]):
         return len(self._cache)
 
 
+type StructureType = Literal['conjugate', 'commutator']
+type StructureClassification = Literal[
+    'pure', 'A9',
+    'orthogonal', 'extended',
+    'other', 'simple',
+    'nested', 'multi-setup',
+    '',
+]
+
+
 @dataclass
 class Structure:
     """Represents a detected structure (conjugate or commutator)."""
 
-    type: str  # 'conjugate' or 'commutator'
+    type: StructureType
     setup: 'Algorithm'  # The A part
     action: 'Algorithm'  # The B part
     start: int  # Start index in original algorithm
     end: int  # End index in original algorithm
     score: float  # Quality score (higher is better)
-    classification: str = ''  # Classification type (pure, A9, orthogonal, etc.)
+    classification: StructureClassification
     has_cancellations: bool = False  # Whether moves cancel
     move_count: int = 0  # Total move count
     is_pure: bool = False  # Pure commutator (8 moves)
@@ -259,9 +262,9 @@ def inverse_sequence(algo: 'Algorithm') -> 'Algorithm':
         The inverted algorithm.
 
     """
-    from cubing_algs.transform.mirror import mirror_moves  # noqa: PLC0415
+    from cubing_algs.transform.invert import invert_moves  # noqa: PLC0415
 
-    return algo.transform(mirror_moves)
+    return algo.transform(invert_moves)
 
 
 def detect_move_cancellations(
@@ -296,7 +299,7 @@ def classify_commutator(
     setup: 'Algorithm',
     action: 'Algorithm',
     inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
-) -> str:
+) -> StructureClassification:
     """
     Classify a commutator based on speedcubing taxonomy.
 
@@ -350,7 +353,10 @@ def classify_commutator(
     return 'other'
 
 
-def classify_conjugate(setup: 'Algorithm', action: 'Algorithm') -> str:
+def classify_conjugate(
+        setup: 'Algorithm', action: 'Algorithm',
+        nesting_depth: int = 0,
+) -> StructureClassification:
     """
     Classify a conjugate based on structure and efficiency.
 
@@ -358,38 +364,39 @@ def classify_conjugate(setup: 'Algorithm', action: 'Algorithm') -> str:
     - 'simple': Short setup (1-2 moves) with commutator action
     - 'nested': Action contains a structure
     - 'multi-setup': Long setup (3+ moves)
-    - 'standard': Regular conjugate pattern
 
     Args:
         setup: The setup (A) part of the conjugate.
         action: The action (B) part of the conjugate.
+        nesting_depth: The nesting depth
 
     Returns:
-        Classification string (simple, nested, multi-setup, or standard).
+        Classification string (simple, nested or multi-setup).
 
     """
     setup_len = len(setup)
 
-    # Check if action contains nested structures
-    # Use very low threshold to detect any potential nested structure
-    max_setup = calculate_max_setup_length(len(action))
-    action_structures = detect_structures(
-        action,
-        max_setup_len=max_setup,
-        min_score=CLASSIFICATION_MIN_SCORE,
-    )
-    has_nested = any(s.type == 'commutator' for s in action_structures)
+    # Check if action contains nested structures (skip at max depth to
+    # guard against unbounded recursion: classify_conjugate →
+    # detect_structures → detect_conjugate → classify_conjugate)
+    has_nested = False
+    if nesting_depth < DEFAULT_MAX_NESTING_DEPTH:
+        max_setup = calculate_max_setup_length(len(action))
+        action_structures = detect_structures(
+            action,
+            max_setup_len=max_setup,
+            min_score=CLASSIFICATION_MIN_SCORE,
+            nesting_depth=nesting_depth + 1,
+        )
+        has_nested = any(s.type == 'commutator' for s in action_structures)
 
     if has_nested:
         return 'nested'
 
-    if setup_len <= SIMPLE_CONJUGATE_MAX_SETUP:
-        return 'simple'
-
     if setup_len >= MULTI_SETUP_MIN_LENGTH:
         return 'multi-setup'
 
-    return 'standard'
+    return 'simple'
 
 
 def is_inverse_at(
@@ -424,7 +431,12 @@ def is_inverse_at(
     return algo[start:start + len(inverse)] == inverse
 
 
-def score_structure(setup: 'Algorithm', action: 'Algorithm') -> float:
+def score_structure(
+    setup: 'Algorithm',
+    action: 'Algorithm',
+    *,
+    is_commutator: bool = False,
+) -> float:
     """
     Score a potential structure based on compression ratio and meaningfulness.
 
@@ -436,6 +448,8 @@ def score_structure(setup: 'Algorithm', action: 'Algorithm') -> float:
     Args:
         setup: The setup (A) part of the structure.
         action: The action (B) part of the structure.
+        is_commutator: True for commutator [A, B] = A B A' B',
+            False for conjugate [A: B] = A B A'.
 
     Returns:
         Quality score (higher is better, 0-100+ range).
@@ -445,7 +459,12 @@ def score_structure(setup: 'Algorithm', action: 'Algorithm') -> float:
         return 0.0
 
     # Compression ratio: how much we save by using bracket notation
-    original_length = len(setup) * 2 + len(action)
+    # Conjugate [A: B] = A B A' → original = 2|A| + |B|
+    # Commutator [A, B] = A B A' B' → original = 2|A| + 2|B|
+    if is_commutator:
+        original_length = len(setup) * 2 + len(action) * 2
+    else:
+        original_length = len(setup) * 2 + len(action)
     compressed_length = len(setup) + len(action)
     compression_ratio = (original_length - compressed_length) / original_length
 
@@ -465,6 +484,7 @@ def detect_conjugate(
     start: int,
     max_setup_len: int,
     inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
+    nesting_depth: int = 0,
 ) -> Structure | None:
     """
     Detect a conjugate pattern [A: B] = A B A' starting at the given position.
@@ -474,11 +494,14 @@ def detect_conjugate(
         start: Starting position
         max_setup_len: Maximum setup length
         inverse_cache: Cache for inverse sequences (key: str(algo))
+        nesting_depth: The nesting depth
 
     Returns:
         Best conjugate structure found, or None if no valid structure exists.
 
     """
+    from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
+
     best_structure: Structure | None = None
 
     # Cache algorithm length to avoid repeated calls
@@ -489,32 +512,27 @@ def detect_conjugate(
         if start + setup_len * 2 > algo_len:
             break
 
-        # Early termination: if we have a very high-scoring structure
-        if best_structure and best_structure.score >= EARLY_TERMINATION_SCORE:
-            break
-
-        from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
-
         setup = Algo(algo[start:start + setup_len])
 
         # Look for A' after some action B
         for action_len in range(1, algo_len - start - setup_len * 2 + 1):
             action_end = start + setup_len + action_len
-
-            if action_end + setup_len > algo_len:
-                break
-
             action = Algo(algo[start + setup_len:action_end])
 
             # Check if A' appears after B (uses cached inverse)
             if is_inverse_at(
                 algo, action_end, setup, inverse_cache,
             ):
-                score = score_structure(setup, action)
+                score = score_structure(
+                    setup, action, is_commutator=False,
+                )
 
                 if best_structure is None or score > best_structure.score:
                     # Classify and analyze the conjugate
-                    classification = classify_conjugate(setup, action)
+                    classification = classify_conjugate(
+                        setup, action,
+                        nesting_depth,
+                    )
                     has_cancel = detect_move_cancellations(setup, action)
                     move_count = setup_len * 2 + action_len
 
@@ -530,10 +548,6 @@ def detect_conjugate(
                         move_count=move_count,
                         is_pure=False,
                     )
-
-                    # Early termination: if score is very high, stop searching
-                    if score >= EARLY_TERMINATION_SCORE:
-                        return best_structure
 
     return best_structure
 
@@ -557,6 +571,8 @@ def detect_commutator(
         Best commutator structure found, or None if no valid structure exists.
 
     """
+    from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
+
     best_structure: Structure | None = None
 
     # Cache algorithm length to avoid repeated calls
@@ -566,12 +582,6 @@ def detect_commutator(
     for a_len in range(1, max_part_len + 1):
         if start + a_len * 2 > algo_len:
             break
-
-        # Early termination: if we have a very high-scoring structure
-        if best_structure and best_structure.score >= EARLY_TERMINATION_SCORE:
-            break
-
-        from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
 
         a_part = Algo(algo[start:start + a_len])
 
@@ -593,45 +603,40 @@ def detect_commutator(
                     algo, b_end + a_len, b_part, inverse_cache,
                 )
             ):
-                score = score_structure(a_part, b_part)
+                score = score_structure(
+                    a_part, b_part, is_commutator=True,
+                )
 
-                if best_structure is None or score > best_structure.score:
-                    # Get/compute inverse for cancellation check
-                    a_part_key = str(a_part)
-                    if a_part_key not in inverse_cache:
-                        inverse_cache[a_part_key] = inverse_sequence(a_part)
-                    a_part_inv = inverse_cache[a_part_key]
+                # Get cached inverse (already populated by is_inverse_at)
+                a_part_key = str(a_part)
+                a_part_inv = inverse_cache[a_part_key]
 
-                    # Classify and analyze the commutator
-                    classification = classify_commutator(
-                        a_part, b_part, inverse_cache,
-                    )
-                    has_cancel = (
-                        detect_move_cancellations(a_part, b_part) or
-                        detect_move_cancellations(b_part, a_part_inv)
-                    )
-                    move_count = a_len * 2 + b_len * 2
-                    is_pure_comm = (
-                        a_len == PURE_COMMUTATOR_SETUP_LEN
-                        and b_len == PURE_COMMUTATOR_ACTION_LEN
-                    )
+                # Classify and analyze the commutator
+                classification = classify_commutator(
+                    a_part, b_part, inverse_cache,
+                )
+                has_cancel = (
+                    detect_move_cancellations(a_part, b_part) or
+                    detect_move_cancellations(b_part, a_part_inv)
+                )
+                move_count = a_len * 2 + b_len * 2
+                is_pure_comm = (
+                    a_len == PURE_COMMUTATOR_SETUP_LEN
+                    and b_len == PURE_COMMUTATOR_ACTION_LEN
+                )
 
-                    best_structure = Structure(
-                        type='commutator',
-                        setup=a_part,
-                        action=b_part,
-                        start=start,
-                        end=b_end + a_len + b_len,
-                        score=score,
-                        classification=classification,
-                        has_cancellations=has_cancel,
-                        move_count=move_count,
-                        is_pure=is_pure_comm,
-                    )
-
-                    # Early termination: if score is very high, stop searching
-                    if score >= EARLY_TERMINATION_SCORE:
-                        return best_structure
+                best_structure = Structure(
+                    type='commutator',
+                    setup=a_part,
+                    action=b_part,
+                    start=start,
+                    end=b_end + a_len + b_len,
+                    score=score,
+                    classification=classification,
+                    has_cancellations=has_cancel,
+                    move_count=move_count,
+                    is_pure=is_pure_comm,
+                )
 
     return best_structure
 
@@ -640,7 +645,7 @@ def detect_structures(
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,
-    max_depth: int = DEFAULT_MAX_NESTING_DEPTH,  # noqa: ARG001
+    nesting_depth: int = 0,
 ) -> list[Structure]:
     """
     Detect all meaningful conjugate and commutator structures in an algorithm.
@@ -652,7 +657,7 @@ def detect_structures(
         algo: The algorithm to analyze
         max_setup_len: Maximum setup sequence length (auto-calculated)
         min_score: Minimum structure score (auto-calculated)
-        max_depth: Max recursion depth for nested detection (default: 10)
+        nesting_depth: The nesting depth
 
     Returns:
         List of detected structures, sorted by position
@@ -666,7 +671,6 @@ def detect_structures(
         min_score = calculate_min_score(algo_len)
 
     # Create single shared cache for both commutator and conjugate detection
-    # Now safe because we eliminated the string_cache with id() keys
     inverse_cache: BoundedCache[str, Algorithm] = BoundedCache(
         MAX_INVERSE_CACHE_SIZE,
     )
@@ -683,17 +687,17 @@ def detect_structures(
         # Try to detect conjugate (shares same cache)
         conjugate = detect_conjugate(
             algo, i, max_setup_len, inverse_cache,
+            nesting_depth,
         )
 
-        # Pick the best one
+        # Pick the best one (every commutator A B A' B' contains
+        # conjugate A B A', so conjugate is always found when commutator is)
         best = None
         if commutator and conjugate:
             best = (
                 commutator if commutator.score >= conjugate.score
                 else conjugate
             )
-        elif commutator:
-            best = commutator
         elif conjugate:
             best = conjugate
 
@@ -786,6 +790,8 @@ def compress(
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,
+    structures: list[Structure] | None = None,
+    structure_cache: dict[str, list[Structure]] | None = None,
 ) -> str:
     """
     Compress an algorithm into bracket notation showing its structure.
@@ -801,6 +807,8 @@ def compress(
         algo: The algorithm to compress
         max_setup_len: Maximum setup sequence length (auto-calculated)
         min_score: Minimum structure score (auto-calculated)
+        structures: Pre-computed structures to skip redundant detection
+        structure_cache: Shared cache for nested structure detection
 
     Returns:
         Compressed notation string
@@ -815,11 +823,13 @@ def compress(
         '[F: [R, U]]'
 
     """
-    structures = detect_structures(algo, max_setup_len, min_score)
+    if structures is None:
+        structures = detect_structures(algo, max_setup_len, min_score)
 
     # Early return for single structure (no sorting/filtering needed)
     if len(structures) <= 1:
-        structure_cache: dict[str, list[Structure]] = {}
+        if structure_cache is None:
+            structure_cache = {}
         return compress_recursive(algo, structures, 0, structure_cache)
 
     # Build a non-overlapping set of structures using greedy approach
@@ -834,8 +844,9 @@ def compress(
             non_overlapping.append(struct)
             last_end = struct.end
 
-    # Create cache for nested structure detection (use string keys)
-    structure_cache = {}
+    # Use provided cache or create new one for nested structure detection
+    if structure_cache is None:
+        structure_cache = {}
     return compress_recursive(algo, non_overlapping, 0, structure_cache)
 
 
@@ -879,7 +890,6 @@ def count_all_structures(
         if setup_key not in structure_cache:
             structure_cache[setup_key] = detect_structures(
                 struct.setup,
-                max_depth=max_depth - current_depth - 1,
             )
         setup_structures = structure_cache[setup_key]
 
@@ -887,7 +897,6 @@ def count_all_structures(
         if action_key not in structure_cache:
             structure_cache[action_key] = detect_structures(
                 struct.action,
-                max_depth=max_depth - current_depth - 1,
             )
         action_structures = structure_cache[action_key]
 
@@ -920,6 +929,8 @@ def count_all_structures(
 def calculate_nesting_depth(
     structures: list[Structure],
     structure_cache: dict[str, list[Structure]] | None = None,
+    max_depth: int = DEFAULT_MAX_NESTING_DEPTH,
+    current_depth: int = 0,
 ) -> tuple[int, int]:
     """
     Calculate the maximum nesting depth and count of nested structures.
@@ -927,6 +938,8 @@ def calculate_nesting_depth(
     Args:
         structures: List of structures to analyze
         structure_cache: Cache for detected structures (key: str(algo))
+        max_depth: Maximum recursion depth (default: 10)
+        current_depth: Current recursion depth (used internally)
 
     Returns:
         Tuple of (maximum nesting depth, number of nested structures).
@@ -935,7 +948,11 @@ def calculate_nesting_depth(
     if structure_cache is None:
         structure_cache = {}
 
-    max_depth = 0
+    # Early termination if max depth reached
+    if current_depth >= max_depth:
+        return (1 if structures else 0), 0
+
+    depth = 0
     nested_count = 0
 
     for struct in structures:
@@ -955,18 +972,24 @@ def calculate_nesting_depth(
             nested_count += 1
             # Recursively calculate depth
             setup_depth, _ = (
-                calculate_nesting_depth(setup_structures, structure_cache)
+                calculate_nesting_depth(
+                    setup_structures, structure_cache,
+                    max_depth, current_depth + 1,
+                )
                 if setup_structures else (0, 0)
             )
             action_depth, _ = (
-                calculate_nesting_depth(action_structures, structure_cache)
+                calculate_nesting_depth(
+                    action_structures, structure_cache,
+                    max_depth, current_depth + 1,
+                )
                 if action_structures else (0, 0)
             )
-            max_depth = max(max_depth, 1 + max(setup_depth, action_depth))
+            depth = max(depth, 1 + max(setup_depth, action_depth))
         else:
-            max_depth = max(max_depth, 1)
+            depth = max(depth, 1)
 
-    return max_depth, nested_count
+    return depth, nested_count
 
 
 def calculate_efficiency_rating(
@@ -1064,8 +1087,12 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
     # Create shared cache for all nested structure detection (use string keys)
     structure_cache: dict[str, list[Structure]] = {}
 
-    # Use cached compression
-    compressed_str = compress(algo, max_setup_len, min_score)
+    # Compress using pre-computed structures and shared cache
+    compressed_str = compress(
+        algo, max_setup_len, min_score,
+        structures,
+        structure_cache,
+    )
 
     # Count structure types (including nested structures) with cache
     total_count, conjugate_count, commutator_count = (

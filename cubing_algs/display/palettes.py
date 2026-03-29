@@ -1,5 +1,4 @@
 """Color palette management and conversion utilities for cube visualization."""
-
 from typing import TypedDict
 
 from cubing_algs.constants import FACE_ORDER
@@ -403,6 +402,20 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#2AE464',
         'hidden_ansi': build_ansi_color('#000000', '#00F253'),
     },
+    'void': {
+        'faces': (
+            '#000000',
+            '#000000',
+            '#000000',
+            '#000000',
+            '#000000',
+            '#000000',
+        ),
+        'font': '#C200C2',
+        'masked_background': '#620062',
+        'adjacent_background': '#008282',
+        'hidden_ansi': build_ansi_color('#000000', '#00C2C2'),
+    },
     # Futuristic
     'cyberpunk': {
         'faces': (
@@ -728,7 +741,7 @@ def register_palette(
 
     """
     if name in PALETTES:
-        msg = f'Palette already exists: {name}'
+        msg = f'Palette already exists: { name }'
         raise PaletteAlreadyExistsError(msg)
 
     PALETTES[name] = config

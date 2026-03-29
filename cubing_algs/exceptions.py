@@ -1,20 +1,42 @@
 """Custom exception classes for cube algorithm parsing and manipulation."""
 
 
-class InvalidFaceError(Exception):
+class CubingAlgsError(Exception):
+    """Base exception for all cubing-algs library errors."""
+
+
+class InvalidCubeSizeError(CubingAlgsError):
+    """Exception raised when a cube size is invalid (e.g., less than 2)."""
+
+
+class InvalidFaceError(CubingAlgsError):
     """Exception raised when an invalid face is encountered."""
 
 
-class InvalidCubeStateError(Exception):
-    """Exception raised when an invalid cube is encountered."""
+class InvalidCubeStateError(CubingAlgsError):
+    """
+    Exception raised when an invalid cube state is encountered.
+
+    This covers structural issues such as incorrect facelets string length,
+    invalid characters, wrong color counts, non-unique centers, invalid
+    corner/edge permutations or orientations, and parity mismatches.
+    """
 
 
-class InvalidMoveError(Exception):
+class InvalidMoveError(CubingAlgsError):
     """
     Exception raised when an invalid move notation is encountered.
 
     This can occur when parsing algorithms with incorrect or unsupported
     move notations.
+    """
+
+
+class NotSupportedCubeSizeError(CubingAlgsError):
+    """
+    Exception raised when an operation is not supported for the cube's size.
+
+    This can occur when using code with partial implementation.
     """
 
 
@@ -26,45 +48,54 @@ class InvalidOperatorError(InvalidMoveError):
     """Exception raised when an invalid operator is encountered."""
 
 
-class InvalidCaseNameError(ValueError):
+class InvalidPatternNameError(CubingAlgsError):
+    """Exception raised when requesting a pattern with an invalid name."""
+
+
+class InvalidCaseNameError(CubingAlgsError):
     """Exception raised when requesting a case with an invalid name."""
 
 
-class InvalidCollectionNameError(ValueError):
+class InvalidCollectionNameError(CubingAlgsError):
     """Exception raised when requesting a collection with an invalid name."""
 
 
-class InvalidStepError(ValueError):
+class InvalidStepError(CubingAlgsError):
     """Exception raised when step name is not recognized."""
 
 
-class InvalidSlotSpecError(ValueError):
+class InvalidSlotSpecError(CubingAlgsError):
     """Exception raised when an invalid F2L slot is specified."""
 
 
-class InvalidPieceSpecError(ValueError):
-    """Exception raise when piece specification cannot be parsed."""
+class InvalidPieceSpecError(CubingAlgsError):
+    """Exception raised when a piece specification cannot be parsed."""
 
 
-class InvalidOrientationError(ValueError):
+class InvalidOrientationError(CubingAlgsError):
     """Exception raised when requesting an orientation with an invalid value."""
 
 
-class InvalidFaceIndexError(ValueError):
-    """Exception raised when requesting an unexisting face index by center."""
+class InvalidFaceIndexError(CubingAlgsError):
+    """Exception raised when requesting a non-existent face index by center."""
 
 
-class InvalidFaceletsSolveError(ValueError):
-    """Exception raised when the solver encounter invalid facelet format."""
+class InvalidFaceletsSolveError(CubingAlgsError):
+    """
+    Exception raised when the solver encounters invalid facelet format.
+
+    This occurs when the facelets string cannot be solved, typically due to
+    an impossible or malformed cube state passed to the solver.
+    """
 
 
-class PaletteAlreadyExistsError(ValueError):
+class PaletteAlreadyExistsError(CubingAlgsError):
     """Exception raised when registering a palette that already exists."""
 
 
-class EffectAlreadyExistsError(ValueError):
+class EffectAlreadyExistsError(CubingAlgsError):
     """Exception raised when registering an effect that already exists."""
 
 
-class StyleAlreadyExistsError(ValueError):
+class StyleAlreadyExistsError(CubingAlgsError):
     """Exception raised when registering a style that already exists."""

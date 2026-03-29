@@ -4,9 +4,10 @@ Collection of cool patterns on 3x3x3.
 https://ruwix.com/the-rubiks-cube/rubiks-cube-patterns-algorithms/more-rubiks-patterns/
 """
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.exceptions import InvalidPatternNameError
 from cubing_algs.parsing import parse_moves
 
-PATTERNS = {
+PATTERNS: dict[str, str] = {
     '3T': "B U2 L2 F2 R2 F D2 F2 R2 F' R2 U2",
     '4Crosses': 'F2 B2 R F2 B2 R F2 B2 R F2 B2 R F2 B2 R F2 B2 R',
     '4Plus2Dots': "F U2 D2 R L U' D F B R U2 R2 U2 F2 L2 U2 F2 L2 B2",
@@ -73,10 +74,20 @@ PATTERNS = {
     'UnionJack': "U F B' L2 U2 L2 F' B U2 L2 U",
     'VerticalStripes': "F U F R L2 B D' R D2 L D' B R2 L F U F",
     'Wire': 'R L F B R L F B R L F B R2 B2 L2 R2 B2 L2',
-    'YanYing': "L R F B U' D' L' R'",
     'YinYang': "R L B F R L U' D' F' B' U D",
     'ZZLine': "R L U2 R L' U2 F2 R2 U2 F2 D2 B2 L2 U2 L2",
 }
+
+
+def list_patterns() -> list[str]:
+    """
+    Return the list of available pattern names.
+
+    Returns:
+        List of pattern name strings.
+
+    """
+    return list(PATTERNS.keys())
 
 
 def get_pattern(pattern_name: str) -> Algorithm:
@@ -89,11 +100,16 @@ def get_pattern(pattern_name: str) -> Algorithm:
     Returns:
         Algorithm object representing the pattern moves.
 
+    Raises:
+        InvalidPatternNameError: If the pattern name is not found.
+
     """
-    return parse_moves(PATTERNS.get(pattern_name, ''))
+    if pattern_name not in PATTERNS:
+        raise InvalidPatternNameError(pattern_name)
+    return parse_moves(PATTERNS[pattern_name])
 
 
-ALPHABET = {
+ALPHABET: dict[str, str] = {
     'A': "B2 U2 F2 R2 D L2 R2 U' B2 U2 L U F' U2 F U' L U2",
     'B': "D B2 U2 B2 R2 U R2 U' R2 D' F L2 D2 L2 F' U' R2",
     'C': "D' L2 U' F2 D R2 U' R2 U2 F2 L' F U L2 U' L' F'",
@@ -123,6 +139,17 @@ ALPHABET = {
 }
 
 
+def list_letters() -> list[str]:
+    """
+    Return the list of available letter names.
+
+    Returns:
+        List of letter name strings.
+
+    """
+    return list(ALPHABET.keys())
+
+
 def get_letter(letter_name: str) -> Algorithm:
     """
     Get an algorithm for a cube pattern representing a letter
@@ -134,5 +161,10 @@ def get_letter(letter_name: str) -> Algorithm:
     Returns:
         Algorithm object representing the pattern moves.
 
+    Raises:
+        InvalidPatternNameError: If the letter name is not found.
+
     """
-    return parse_moves(ALPHABET.get(letter_name, ''))
+    if letter_name not in ALPHABET:
+        raise InvalidPatternNameError(letter_name)
+    return parse_moves(ALPHABET[letter_name])

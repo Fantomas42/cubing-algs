@@ -12,7 +12,7 @@ pip install cubing-algs
 
 - **Dual Representation System**: Work with both facelet (visual) and cubie (mathematical) representations
 - **Algorithm Analysis**: Comprehensive metrics, impact analysis, ergonomics, and structure detection
-- **Powerful Transformations**: Mirror, rotate, compress, and compose algorithms with a clean pipeline API
+- **Powerful Transformations**: Invert, rotate, compress, and compose algorithms with a clean pipeline API
 - **Virtual Cube Simulation**: Full 3x3x3 cube state tracking with orientation support
 - **Advanced Notation**: Commutators `[A, B]`, conjugates `[A: B]`, wide moves, slice moves, rotations
 - **Pattern Library**: 70+ classic cube patterns (Superflip, Checkerboard, etc.)
@@ -122,14 +122,14 @@ Apply various transformations to algorithms using the transform pipeline:
 
 ```python
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.size import compress_moves, expand_moves
 from cubing_algs.transform.symmetry import symmetry_m_moves
 
 algo = parse_moves("R U R' U'")
 
-# Mirror an algorithm
-mirrored = algo.transform(mirror_moves)  # L' U' L U
+# Invert an algorithm
+inverse = algo.transform(invert_moves)  # U R U' R'
 
 # Compression (optimize with cancellations)
 compressed = parse_moves("R R U U U").transform(compress_moves)  # R2 U'
@@ -138,7 +138,7 @@ compressed = parse_moves("R R U U U").transform(compress_moves)  # R2 U'
 expanded = parse_moves("R2 U'").transform(expand_moves)  # R R U'
 
 # Chain multiple transformations
-result = algo.transform(mirror_moves, compress_moves, symmetry_m_moves)
+result = algo.transform(invert_moves, compress_moves, symmetry_m_moves)
 
 # Transform until fixed point (apply repeatedly until stable)
 messy = parse_moves("R R F F' R2 U F2")
@@ -148,7 +148,7 @@ clean = messy.transform(compress_moves, to_fixpoint=True)  # U F2
 ### Available Transformations
 
 **Basic transformations:**
-- `mirror_moves` - Mirror across M plane (R ↔ L)
+- `invert_moves` - Invert moves
 - `compress_moves` - Optimize with move cancellations (R R → R2, R R' → ∅)
 - `expand_moves` - Convert double moves to pairs (R2 → R R)
 
@@ -328,67 +328,187 @@ tetris = get_pattern('Tetris')
 
 ## Scramble Generation
 
-Generate scrambles for various cube sizes with advanced customization options:
+The `cubing_algs.scrambler` module provides comprehensive scramble generation:
+- **NxN scrambles** for cubes of any size (2x2x2 to NxNxN)
+- **Step-based scrambles** for speedcubing practice (PLL, OLL, F2L, ZBLL, etc.)
+- **Piece-level constraints** for fine-grained control over cube state
+- **Practice scrambles** for cross, x-cross, and F2L training
+
+### Basic NxN Scrambles
 
 ```python
-from cubing_algs.scrambler import scramble, scramble_easy_cross, build_cube_move_set
+from cubing_algs.scrambler import scramble
 
-# Generate scramble for 3x3x3 cube (default 25 moves)
+# Generate scramble for 3x3x3 cube (default 25-30 moves)
 scramble_3x3 = scramble(3)
 print(scramble_3x3)
 
 # Generate scramble for 4x4x4 cube (includes wide moves)
 scramble_4x4 = scramble(4)
-print(scramble_4x4)  # Example: Rw U 2R D' Fw2 R' Uw F2 ...
+print(scramble_4x4)  # Example: Rw U R D' Fw2 R' Uw F2 ...
 
 # Generate scramble for 6x6x6 cube (includes multi-layer moves)
 scramble_6x6 = scramble(6)
-print(scramble_6x6)  # Example: 3Rw 2F' 4Uw2 3Fw R 2Bw' ...
+print(scramble_6x6)  # Example: 3Rw F' 3Uw2 Fw R Bw' ...
 
 # Generate scramble with specific number of moves
 custom_scramble = scramble(3, iterations=20)
 print(f"Custom 20-move scramble: {custom_scramble}")
 
-# Generate easy cross scramble (only F, R, B, L moves - 10 moves)
-easy_scramble = scramble_easy_cross()
-print(f"Easy cross scramble: {easy_scramble}")  # Example: F R B' L F' R2 B L' F R
+# Include inner layer moves (e.g., 2R, 3R for big cubes)
+inner_scramble = scramble(5, inner_layers=True)
 
-# Build custom move set for specific cube size
-move_set_3x3 = build_cube_move_set(3)
-print(f"3x3 moves: {move_set_3x3[:12]}")  # ['R', "R'", 'R2', 'U', "U'", 'U2', ...]
-
-move_set_4x4 = build_cube_move_set(4)
-print(f"4x4 additional moves: {[m for m in move_set_4x4 if 'w' in m][:9]}")  # ['Rw', "Rw'", 'Rw2', ...]
-
-move_set_6x6 = build_cube_move_set(6)
-multi_layer = [m for m in move_set_6x6 if any(c.isdigit() for c in m)]
-print(f"6x6 multi-layer moves: {multi_layer[:12]}")  # ['2R', "2R'", '2R2', '3R', ...]
+# Left-handed optimized scramble (excludes D, R, B instead of D, L, B)
+lh_scramble = scramble(4, right_handed=False)
 ```
 
-**Scramble Features:**
+### Step-Based Scrambles
+
+Generate scrambles for specific speedcubing steps. The cube state is constructed
+mathematically (not by applying random moves), ensuring a valid partial-solve state:
+
+```python
+from cubing_algs.scrambler import scramble_step
+
+# Last Layer steps
+pll_scramble = scramble_step("PLL")          # Only U layer permuted
+oll_scramble = scramble_step("OLL")          # U layer permuted + oriented
+zbll_scramble = scramble_step("ZBLL")        # Corners oriented, all U pieces permuted
+
+# With random AUF (Adjust U Face)
+pll_with_auf = scramble_step("PLL", include_auf=True)
+
+# F2L variants
+f2l_scramble = scramble_step("F2L")          # First two layers scrambled
+zzf2l_scramble = scramble_step("ZZF2L")      # ZZ method F2L
+
+# Roux method
+cmll_scramble = scramble_step("CMLL")        # Roux CMLL step
+sb_scramble = scramble_step("SB")            # Roux Second Block
+
+# Last Slot variants
+ls_scramble = scramble_step("LS")            # Last Slot
+wv_scramble = scramble_step("WV")            # Winter Variation
+```
+
+**Supported steps:**
+- **Last Layer**: LL, OLL, PLL, CLL, OLLCP, COLL, ZBLL, 2GLL, OCLL, ELL, EPLL, CPLL, ZZLL
+- **F2L variants**: F2L, ZZF2L, ZZRB, PETRUSF2L
+- **Last Slot**: LS, ELS, ZZLS, TSLE, CLS, CPLS, EJLS, EJF2L, TTLL, WV, SV, VLS, VHLS
+- **Roux method**: CMLL, CMLLEO, SB
+- **Petrus method**: PETRUS2X2X3, PETRUSEO
+
+### OCLL Case Scrambles
+
+Generate scrambles for specific OCLL (Orientation of Corners of Last Layer) cases:
+
+```python
+from cubing_algs.scrambler import scramble_ocll_case
+
+sune_scramble = scramble_ocll_case("Sune")
+antisune_scramble = scramble_ocll_case("AntiSune")
+h_scramble = scramble_ocll_case("H")
+pi_scramble = scramble_ocll_case("Pi")
+```
+
+**Valid cases:** T, U, L, H, Pi, Sune, AntiSune, Solved
+
+### Cross and X-Cross Practice
+
+```python
+from cubing_algs.scrambler import scramble_easy_cross, scramble_x_cross
+
+# Easy cross scramble - returns (scramble, solution) tuple
+scramble_alg, solution = scramble_easy_cross()
+print(f"Scramble: {scramble_alg}")
+print(f"Solution: {solution}")
+
+# Adjust difficulty: 'easy' (3 moves), 'normal' (5 moves), 'hard' (7 moves)
+easy_scramble, easy_solution = scramble_easy_cross(difficulty='easy')
+hard_scramble, hard_solution = scramble_easy_cross(difficulty='hard')
+
+# X-cross scramble - cross + one F2L slot preserved
+x_cross_scramble, x_cross_solution = scramble_x_cross(slots=['FR'])
+
+# XX-cross - cross + two F2L slots preserved
+xx_scramble, xx_solution = scramble_x_cross(slots=['FR', 'FL'])
+
+# Valid slots: FR, FL, BR, BL
+```
+
+### F2L Slot Practice
+
+```python
+from cubing_algs.scrambler import scramble_f2l
+
+# Scramble a single F2L slot (cross solved, one slot scrambled)
+f2l_scramble = scramble_f2l(slots=['FR'])
+
+# Scramble multiple F2L slots
+multi_slot = scramble_f2l(slots=['FR', 'BL'])
+```
+
+### Piece-Level Constraints
+
+For maximum control over cube state, specify exactly which pieces should be
+solved, oriented, scrambled, or disoriented:
+
+```python
+from cubing_algs.scrambler import scramble_with_piece_constraints
+
+# PLL-like state: all pieces oriented, only permutation scrambled
+pll_state = scramble_with_piece_constraints(
+    orient_corners_spec="all",
+    orient_edges_spec="all",
+)
+
+# F2L solved, last layer scrambled
+f2l_solved = scramble_with_piece_constraints(
+    solve_corners="D",
+    solve_edges="D E",
+    buffer_corners="U",
+    buffer_edges="U",
+)
+
+# ZBLL-like: last layer corners oriented, permutation scrambled
+zbll_state = scramble_with_piece_constraints(
+    orient_corners_spec="U",
+    orient_edges_spec="U",
+)
+
+# Specific pieces scrambled
+specific = scramble_with_piece_constraints(
+    solve_corners="URF UBR",    # Keep these corners solved
+    derange_edges="UF UR",      # Ensure these edges are NOT solved
+    disorient_corners_spec="U", # U-layer corners must be misoriented
+)
+```
+
+**Piece specification formats:**
+- `"all"` or `""`: All pieces of that type
+- `"U"`, `"D"`, `"R"`, `"L"`, `"F"`, `"B"`: All pieces on that layer
+- `"URF UBR"`: Specific pieces by name (space-separated)
+- `"U DFR"`: Mix of layer and specific pieces
+
+### Scramble Features
+
 - **Cube sizes**: Supports 2x2x2 through 7x7x7+ cubes
 - **Automatic move count**: Based on cube size (configurable ranges)
   - 2x2x2: 9-11 moves
-  - 3x3x3: 20-25 moves
-  - 4x4x4: 40-45 moves
-  - 5x5x5+: 60-70 moves
+  - 3x3x3: 25-30 moves
+  - 4x4x4: 45-50 moves
+  - 5x5x5: 60 moves
+  - 6x6x6: 80 moves
+  - 7x7x7: 100 moves
 - **Smart move validation**: Prevents consecutive moves on same face or opposite faces
 - **Big cube support**:
   - Wide moves (Rw, Uw, etc.) for 4x4x4+
-  - Multi-layer moves (2R, 3Rw, etc.) for 6x6x6+
-- **Easy cross scrambles**: Only F, R, B, L moves for beginners
-- **Customizable iterations**: Override default move counts
-
-**Move Set Generation:**
-The `build_cube_move_set()` function creates appropriate move sets:
-- **3x3x3**: Basic face turns (R, U, F, etc.) with modifiers (', 2)
-- **4x4x4+**: Adds wide moves (Rw, Uw, Fw, etc.)
-- **6x6x6+**: Adds numbered layer moves (2R, 3R, 2Rw, 3Rw, etc.)
-
-**Validation Logic:**
-- No consecutive moves on the same face (R R' is invalid)
-- No consecutive moves on opposite faces (R L is invalid)
-- Ensures natural, realistic scramble sequences
+  - Multi-layer moves (3Rw, etc.) for 6x6x6+
+  - Optional inner layer moves (2R, 3R, etc.)
+- **Handedness**: Right-handed (default) or left-handed move set optimization
+- **Reproducible scrambles**: Pass a `Random` instance for deterministic results
+- **Physical constraints**: Step-based scrambles maintain valid cube states
+  (sum(co) % 3 == 0, sum(eo) % 2 == 0, matching permutation parity)
 
 ## Virtual Cube Simulation
 
@@ -436,7 +556,7 @@ print(moves)  # e.g., "x2 y"
 custom_cube = VCube("UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB")
 
 # Work with cubie representation (mathematical)
-cp, co, ep, eo, so = cube.to_cubies  # Convert to cubie format
+cp, co, ep, eo, so = cube.cubies  # Convert to cubie format
 new_cube = VCube.from_cubies(cp, co, ep, eo, so)  # Create from cubies
 
 # Get individual faces
@@ -462,6 +582,83 @@ The default orientation is **'UF'**, following the **WCA (World Cube Association
 - **B (Back) face**: Blue color (opposite Green)
 
 This standard orientation is used consistently across the library for cube initialization, display, and algorithm application.
+
+## Image Rendering
+
+Generate SVG images of cube states using the `render_cube` function or the `.image()` method available on both `VCube` and `Algorithm` objects:
+
+```python
+from cubing_algs import VCube
+from cubing_algs.parsing import parse_moves
+from cubing_algs.display.image import render_cube
+
+# Render a cube state as SVG
+cube = VCube()
+cube.rotate("R U R' U'")
+svg = cube.image()  # Returns SVG string
+
+# Render an algorithm's effect directly
+algo = parse_moves("R U R' U' R' F R2 U' R' U' R U R' F'")
+svg = algo.image()  # Applies to solved cube and renders
+
+# Using render_cube directly
+svg = render_cube(cube, size=300)
+```
+
+### Views
+
+Two rendering modes are available:
+
+```python
+# 3D perspective view (default)
+svg_3d = cube.image(view='3d')
+
+# Flat top-face view with adjacent strips from F, R, B, L faces
+svg_top = cube.image(view='top')
+```
+
+### Customization
+
+```python
+# Custom image size (pixels)
+svg = cube.image(size=400)
+
+# Custom rotation angle for 3D view (axis-angle format)
+svg = cube.image(rotation='y45x-34')   # Default angle
+svg = cube.image(rotation='y-30')      # Different angle
+svg = cube.image(rotation='y90x-20')   # Multiple rotations
+
+# Camera distance (larger = flatter, smaller = more depth)
+svg = cube.image(distance=20.0)
+
+# Custom cube body color (supports alpha: #rrggbbaa)
+svg = cube.image(cube_color='#222222')
+svg = cube.image(cube_color='#11111180')  # Semi-transparent
+
+# Color palettes
+svg = cube.image(palette_name='default')
+svg = cube.image(palette_name='colorblind')
+svg = cube.image(palette_name='neon')
+
+# Algorithm with explicit cube size
+algo = parse_moves("R U R'")
+svg = algo.image(cube_size=2)  # Render on a 2x2x2
+```
+
+**Available palettes:** `default`, `rgb`, `vibrant`, `neon`, `metal`, `pastel`, `retro`, `minecraft`, `colorblind`, `dracula`, `alucard`, `solarized-dark`, `solarized-light`, `halloween`, `galaxy`, `vampire`, `ghoul`, `goblin`, `void`, `cyberpunk`, `synthwave`, `matrix`, `sunset`, `ocean`, `forest`, `fire`, `ice`, `white`, `black`, `red`, `green`, `blue`
+
+### Saving to File
+
+```python
+# Save as SVG
+with open('cube.svg', 'w') as f:
+    f.write(cube.image(size=400))
+
+# Embed in HTML
+html = f'<html><body>{cube.image()}</body></html>'
+with open('cube.html', 'w') as f:
+    f.write(html)
+```
 
 ## Move Object
 
@@ -516,16 +713,16 @@ The library is optimized for performance:
 
 ## Examples
 
-### Generating a mirror of an OLL algorithm
+### Generating the inverse of an OLL algorithm
 
 ```python
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs import VCube
 
 oll = parse_moves("F U F' R' F R U' R' F' R")  # OLL 14 Anti-Gun
-oll_mirror = oll.transform(mirror_moves)
-print(oll_mirror)  # R' F R U R' F' R F U' F'
+oll_invert = oll.transform(invert_moves)
+print(oll_invert)  # R' F R U R' F' R F U' F'
 
 cube = VCube()
 cube.rotate('z2')
@@ -595,50 +792,43 @@ cube.show()  # Display the superflip pattern
 
 # Generate and apply a scramble
 from cubing_algs.scrambler import scramble
-scramble_algo = scramble(3, 25)
+scramble_algo = scramble(3, iterations=25)
 cube = VCube()
 cube.rotate(scramble_algo)
 print(f"Scrambled with: {scramble_algo}")
 ```
 
-### Advanced scramble generation and testing
+### Step-based scramble practice
 
 ```python
-from cubing_algs.scrambler import scramble, scramble_easy_cross, build_cube_move_set
+from cubing_algs.scrambler import scramble_step, scramble_easy_cross, scramble_f2l
 from cubing_algs import VCube
 
-# Test different scramble types
+# Practice PLL recognition
 cube = VCube()
+pll_scramble = scramble_step("PLL")
+cube.rotate(pll_scramble)
+cube.show(mode='oll')  # Visualize - all pieces oriented, only permutation scrambled
 
-# Standard 3x3x3 scramble
-standard_scramble = scramble(3)
-cube.rotate(standard_scramble)
-print(f"Standard scramble ({standard_scramble.metrics.htm} HTM): {standard_scramble}")
-
-# Easy cross scramble for beginners
+# Practice cross building with solution
+scramble_alg, solution = scramble_easy_cross(difficulty='normal')
 cube = VCube()
-easy_scramble = scramble_easy_cross()
-cube.rotate(easy_scramble)
-print(f"Easy cross scramble: {easy_scramble}")
-cube.show(orientation='DF')  # Visual check of scrambled state with DF orientation
+cube.rotate(scramble_alg)
+print(f"Scramble: {scramble_alg}")
+print(f"Solution: {solution}")
 
-# Big cube scramble with specific length
-big_cube_scramble = scramble(5, iterations=50)
-print(f"5x5x5 scramble (50 moves): {big_cube_scramble}")
-
-# Analyze move distribution
-move_set = build_cube_move_set(4)
-face_moves = [m for m in move_set if not 'w' in m]
-wide_moves = [m for m in move_set if 'w' in m]
-print(f"4x4x4 face moves: {len(face_moves)}")  # 18 moves (6 faces × 3 modifiers)
-print(f"4x4x4 wide moves: {len(wide_moves)}")  # 18 moves (6 faces × 3 modifiers)
+# Practice a specific F2L slot
+f2l_scramble = scramble_f2l(slots=['FR'])
+cube = VCube()
+cube.rotate(f2l_scramble)
+cube.show()  # Cross solved, FR slot scrambled
 ```
 
 ### Advanced algorithm development workflow
 
 ```python
 from cubing_algs.parsing import parse_moves
-from cubing_algs.transform.mirror import mirror_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.symmetry import symmetry_m_moves
 from cubing_algs import VCube
 from cubing_algs.scrambler import scramble
@@ -647,14 +837,14 @@ from cubing_algs.scrambler import scramble
 base_alg = parse_moves("[R U R', D]")  # R U R' D R U' R' D'
 
 # Generate variations
-mirrored = base_alg.transform(mirror_moves)
+inverse = base_alg.transform(invert_moves)
 m_symmetric = base_alg.transform(symmetry_m_moves)
 
 # Analyze algorithms
 print(f"Original: {base_alg} ({base_alg.metrics.htm} HTM)")
 print(f"Comfort: {base_alg.ergonomics.comfort_rating}/10")
 print(f"Affected pieces: {base_alg.impacts.affected_facelet_count}")
-print(f"Mirrored: {mirrored} ({mirrored.metrics.htm} HTM)")
+print(f"Inverse: {inverse} ({inverse.metrics.htm} HTM)")
 
 # Test on virtual cube
 cube = VCube()
@@ -663,7 +853,7 @@ print(f"Is solved after: {cube.is_solved}")
 
 # Test algorithm on scrambled cube
 test_cube = VCube()
-test_scramble = scramble(3, 15)
+test_scramble = scramble(3, iterations=15)
 test_cube.rotate(test_scramble)
 print(f"Applied scramble: {test_scramble}")
 

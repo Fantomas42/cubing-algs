@@ -1,6 +1,6 @@
 """Slice move expansion and contraction transformations."""
-
 from collections.abc import Callable
+from collections.abc import Sequence
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
@@ -12,43 +12,7 @@ from cubing_algs.constants import RESLICE_THRESHOLD
 from cubing_algs.constants import UNSLICE_ROTATION_MOVES
 from cubing_algs.constants import UNSLICE_WIDE_MOVES
 from cubing_algs.move import Move
-
-
-def unslice(old_moves: Algorithm, config: dict[str, list[str]]) -> Algorithm:
-    """
-    Convert slice moves to their component moves using configuration.
-
-    Args:
-        old_moves: Algorithm to process.
-        config: Mapping of slice moves to their component move sequences.
-
-    Returns:
-        Algorithm with slice moves expanded to component moves.
-
-    """
-    moves: list[Move] = []
-
-    move_cache: dict[Move, list[Move]] = {}
-    for move_str, replacements in config.items():
-        move_cache[Move(move_str)] = [Move(m) for m in replacements]
-
-    for move in old_moves:
-        move_untimed = move.untimed
-
-        if move_untimed in config:
-            if move.is_timed:
-                moves.extend(
-                    [
-                        Move(x + move.time)
-                        for x in move_cache[move_untimed]
-                    ],
-                )
-            else:
-                moves.extend(move_cache[move_untimed])
-        else:
-            moves.append(move)
-
-    return Algorithm(moves)
+from cubing_algs.transform.utils import expand_moves
 
 
 def unslice_wide_moves(old_moves: Algorithm) -> Algorithm:
@@ -62,7 +26,7 @@ def unslice_wide_moves(old_moves: Algorithm) -> Algorithm:
         Algorithm with slice moves converted to wide moves.
 
     """
-    return unslice(old_moves, UNSLICE_WIDE_MOVES)
+    return expand_moves(old_moves, UNSLICE_WIDE_MOVES)
 
 
 def unslice_rotation_moves(old_moves: Algorithm) -> Algorithm:
@@ -76,7 +40,7 @@ def unslice_rotation_moves(old_moves: Algorithm) -> Algorithm:
         Algorithm with slice moves converted to face and rotation moves.
 
     """
-    return unslice(old_moves, UNSLICE_ROTATION_MOVES)
+    return expand_moves(old_moves, UNSLICE_ROTATION_MOVES)
 
 
 def try_match_pattern(
@@ -98,13 +62,12 @@ def try_match_pattern(
     if pattern in config:
         return config[pattern]
 
-    # Try normalized match (sorted alphabetically)
+    # Try normalized match (sorted alphabetically).
+    # Config keys must be in sorted order.
     moves = pattern.split()
     normalized = ' '.join(sorted(moves))
-    if normalized in config:
-        return config[normalized]
 
-    return None
+    return config.get(normalized)
 
 
 def is_within_threshold(
@@ -115,6 +78,10 @@ def is_within_threshold(
 
     Returns True if threshold is 0, or if all consecutive moves
     are within the threshold time.
+
+    Notes:
+        Algorithms are either fully timed or fully untimed,
+        mixed timing does not occur.
 
     Args:
         moves_to_check: List of moves to check.
@@ -133,7 +100,7 @@ def is_within_threshold(
         if (
             current.is_timed
             and next_move.is_timed
-            and abs(next_move.timed - current.timed) > threshold
+            and next_move.timed - current.timed > threshold
         ):
             return False
 
@@ -141,7 +108,7 @@ def is_within_threshold(
 
 
 def try_match_n_moves(
-        old_moves: Algorithm,
+        old_moves: Sequence[Move],
         start_index: int,
         n: int,
         config: dict[str, list[str]],
@@ -175,7 +142,7 @@ def try_match_n_moves(
 
 
 def reslice(
-        old_moves: Algorithm,
+        old_moves: Sequence[Move],
         config: dict[str, list[str]],
         max_depth: int = MAX_ITERATIONS,
         threshold: int = 0,
@@ -190,7 +157,7 @@ def reslice(
     Args:
         old_moves: Algorithm to process.
         config: Configuration mapping move patterns to slice moves.
-        max_depth: Maximum recursion depth for optimization.
+        max_depth: Maximum number of reslicing iterations.
         threshold: Maximum time difference for grouping moves.
         pattern_lengths: Tuple of pattern lengths to try matching.
 
@@ -199,7 +166,7 @@ def reslice(
 
     """
     if max_depth <= 0:
-        return old_moves
+        return Algorithm(old_moves)
 
     i = 0
     moves: list[Move] = []
@@ -226,8 +193,10 @@ def reslice(
 
     if changed:
         return reslice(
-            Algorithm(moves), config,
-            max_depth - 1, threshold, pattern_lengths,
+            moves, config,
+            max_depth - 1,
+            threshold,
+            pattern_lengths,
         )
 
     return Algorithm(moves)

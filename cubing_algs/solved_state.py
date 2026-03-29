@@ -7,6 +7,61 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_SO
 
+PRINTABLE_CACHE = ''
+
+
+def build_printable_chars(count: int) -> str:
+    """
+    Build a string of `count` unique
+    printable characters starting from chr(33).
+
+    Args:
+        count: number of unique characters
+
+    Returns:
+        A string containing only printable characters.
+
+    """
+    chars: list[str] = []
+    code_point = 33
+
+    while len(chars) < count:
+        char = chr(code_point)
+        if char.isprintable():
+            chars.append(char)
+        code_point += 1
+
+    return ''.join(chars)
+
+
+def get_unique_facelets(size: int = 3) -> CubeFacelets:
+    """
+    Get the facelets with unique symbol for a cube of given size.
+
+    Args:
+        size: The size of the cube (2, 3, 4, etc.)
+
+    Returns:
+        A string representing the unique facelets.
+        For 2x2x2: 24 characters (6 faces * 4 facelets)
+        For 3x3x3: 54 characters (6 faces * 9 facelets)
+        For NxNxN: 6*N*N characters
+
+    Examples:
+        >>> get_unique_facelets(2)
+        "!"#$%&'()*+,-./012345678"
+        >>> get_unique_facelets(3)
+        ""!"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUV"
+
+    """
+    global PRINTABLE_CACHE  # noqa: PLW0603
+    total = size * size * len(FACE_ORDER)
+
+    if len(PRINTABLE_CACHE) < total:
+        PRINTABLE_CACHE = build_printable_chars(total)
+
+    return PRINTABLE_CACHE[:total]
+
 
 def get_solved_facelets(size: int = 3) -> CubeFacelets:
     """
@@ -57,3 +112,5 @@ def get_solved_cubies(size: int = 3) -> CubeCubiesOriented:
 
 SOLVED_FACELETS_3x3x3 = get_solved_facelets(3)
 SOLVED_CUBIES_3x3x3 = get_solved_cubies(3)
+
+UNIQUE_FACELETS_3x3x3 = get_unique_facelets(3)

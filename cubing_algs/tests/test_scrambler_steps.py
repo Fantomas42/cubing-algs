@@ -165,7 +165,7 @@ class TestScrambleStep(unittest.TestCase):
         cube.rotate(str(scramble))
 
         # Check that only U layer is permuted (no orientation)
-        _cp, co, _ep, eo, _ = cube.to_cubies
+        _cp, co, _ep, eo, _ = cube.cubies
 
         # All orientations should be 0
         self.assertEqual(co, SOLVED_CO)
@@ -267,7 +267,7 @@ class TestScrambleOCLLCase(unittest.TestCase):
         cube.rotate(str(scramble))
 
         # U corners should be oriented
-        _cp, co, _ep, _eo, _ = cube.to_cubies
+        _cp, co, _ep, _eo, _ = cube.cubies
         u_corners = [0, 1, 2, 3]
 
         # All U corners should be oriented
