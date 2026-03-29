@@ -52,7 +52,7 @@ def apply_moves(
     """
     temp_cube = VCube.from_cubies(*cubies, SOLVED_SO)
     temp_cube.rotate(moves)
-    cp, co, ep, eo, _ = temp_cube.to_cubies
+    cp, co, ep, eo, _ = temp_cube.cubies
     return cp, co, ep, eo
 
 

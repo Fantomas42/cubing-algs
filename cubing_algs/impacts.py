@@ -1052,7 +1052,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     cube = cube.oriented_copy('UF')
 
     state_unique_moved = cubies_to_facelets(
-        *cube.to_cubies,
+        *cube.cubies,
         UNIQUE_FACELETS_3x3x3,
     )
 
@@ -1096,7 +1096,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
     layer_analysis = analyze_layers(permutations, cube)
 
     # Cubie analysis
-    cp, co, ep, eo, _so = cube.to_cubies
+    cp, co, ep, eo, _so = cube.cubies
 
     # Count corners moved and twisted
     corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)

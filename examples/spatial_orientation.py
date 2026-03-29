@@ -11,7 +11,7 @@ cube.show()
 
 print(cube)
 
-n_cube = VCube.from_cubies(*cube.to_cubies)
+n_cube = VCube.from_cubies(*cube.cubies)
 n_cube.show()
 
 print(n_cube)

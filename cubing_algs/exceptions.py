@@ -32,6 +32,14 @@ class InvalidMoveError(CubingAlgsError):
     """
 
 
+class NotSupportedCubeSizeError(CubingAlgsError):
+    """
+    Exception raised when an operation is not supported for the cube's size.
+
+    This can occur when using code with partial implementation.
+    """
+
+
 class InvalidBracketError(InvalidMoveError):
     """Exception raised when an invalid bracket formation is encountered."""
 

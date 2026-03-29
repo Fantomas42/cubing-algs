@@ -426,7 +426,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         mask = ''
         if impact_mask and size == 3:
             state_unique_moved = cubies_to_facelets(
-                *cube.to_cubies,
+                *cube.cubies,
                 UNIQUE_FACELETS_3x3x3,
             )
 

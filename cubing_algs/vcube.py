@@ -12,6 +12,7 @@ from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidFaceIndexError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.exceptions import InvalidOrientationError
+from cubing_algs.exceptions import NotSupportedCubeSizeError
 from cubing_algs.extensions import rotate_2x2x2
 from cubing_algs.extensions import rotate_3x3x3
 from cubing_algs.extensions import rotate_dynamic
@@ -163,7 +164,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return all(face * self.face_size in self._state for face in FACE_ORDER)
 
     @property
-    def to_cubies(self) -> tuple[
+    def cubies(self) -> tuple[
             list[int], list[int], list[int], list[int], list[int],
     ]:
         """
@@ -173,8 +174,15 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             A tuple of (corner_permutation, corner_orientation,
             edge_permutation, edge_orientation, center_orientation).
 
+        Raises:
+            NotSupportedCubeSizeError: If cube.size != 3
+
         """
-        return facelets_to_cubies(self._state)
+        if self.size == 3:
+            return facelets_to_cubies(self._state)
+
+        msg = f'cubies are not available on cube with size {self.size}'
+        raise NotSupportedCubeSizeError(msg)
 
     @staticmethod
     def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917

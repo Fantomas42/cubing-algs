@@ -16,11 +16,9 @@ from cubing_algs.integrity import VCubeIntegrityChecker
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
-from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.transform.wide import unwide_rotation_moves
 from cubing_algs.vcube import VCube
-
-INITIAL_STATE = get_solved_facelets(3)
 
 
 class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
@@ -44,7 +42,7 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(
             cube.state,
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         result = cube.rotate('R2 U2')
@@ -172,7 +170,7 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         facelets = 'UUFUUFLLFUUURRRRRRFFRFFDFFDRRBDDBDDBLLDLLDLLDLBBUBBUBB'
 
         self.assertEqual(
-            VCube(facelets).to_cubies,
+            VCube(facelets).cubies,
             (
                 cp, co,
                 ep, eo,
@@ -184,7 +182,7 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         """Test from cubies equality."""
         cube = VCube()
         cube.rotate('F R')
-        n_cube = VCube.from_cubies(*cube.to_cubies)
+        n_cube = VCube.from_cubies(*cube.cubies)
 
         self.assertEqual(
             cube.state,
@@ -195,7 +193,7 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         """Test from cubies oriented equality."""
         cube = VCube()
         cube.rotate('F R x')
-        n_cube = VCube.from_cubies(*cube.to_cubies)
+        n_cube = VCube.from_cubies(*cube.cubies)
 
         self.assertEqual(
             cube.state,
@@ -674,7 +672,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_corner_same_colors(self, *_: Mock) -> None:
         """Test invalid corner same colors."""
-        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list = list(SOLVED_FACELETS_3x3x3)
         # Corner URF: same color on the 2 faces
         invalid_state_list[8] = invalid_state_list[9]
         invalid_state = ''.join(invalid_state_list)
@@ -688,7 +686,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_edge_same_colors(self, *_: Mock) -> None:
         """Test invalid edge same colors."""
-        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list = list(SOLVED_FACELETS_3x3x3)
         # Edge UR: same color on the 2 faces
         invalid_state_list[5] = invalid_state_list[10]
         invalid_state = ''.join(invalid_state_list)
@@ -702,7 +700,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_corner_opposite_colors(self, *_: Mock) -> None:
         """Test invalid corner opposite colors."""
-        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list = list(SOLVED_FACELETS_3x3x3)
         invalid_state_list[8] = 'U'  # Face U
         invalid_state_list[9] = 'D'  # Opposite face D
         invalid_state_list[20] = 'F'  # Third face
@@ -718,7 +716,7 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
     @unittest.mock.patch.object(VCube, 'check_colors')
     def test_invalid_edge_opposite_colors(self, *_: Mock) -> None:
         """Test invalid edge opposite colors."""
-        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list = list(SOLVED_FACELETS_3x3x3)
         invalid_state_list[5] = 'F'
         invalid_state_list[10] = 'B'  # Opposite color
         invalid_state = ''.join(invalid_state_list)
@@ -824,7 +822,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("U'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -843,7 +841,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("R'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -862,7 +860,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("F'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -881,7 +879,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("D'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -900,7 +898,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("L'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -919,7 +917,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("B'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -938,7 +936,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("M'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -957,7 +955,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("S'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -976,7 +974,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("E'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -995,7 +993,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("x'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -1014,7 +1012,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("y'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -1033,7 +1031,7 @@ class VCubeRotateTestCase(unittest.TestCase):
 
         self.assertEqual(
             cube.rotate("z'"),
-            INITIAL_STATE,
+            SOLVED_FACELETS_3x3x3,
         )
 
         self.assertEqual(
@@ -1571,7 +1569,7 @@ class TestVCubeIsEqual(unittest.TestCase):
     def test_is_equal_with_invalid_states(self) -> None:
         """Test is equal with invalid states."""
         # Test with cubes that have invalid states but same pattern
-        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list = list(SOLVED_FACELETS_3x3x3)
         invalid_state_list[4] = 'R'   # Change top center to R
         invalid_state_list[22] = 'D'  # Change front center to D
         invalid_state = ''.join(invalid_state_list)
@@ -1796,7 +1794,7 @@ class TestVCubeOrientation(unittest.TestCase):
         """Test orientation with invalid state."""
         # Test orientation with an unchecked/invalid state
         # Create a state with modified centers
-        invalid_state_list = list(INITIAL_STATE)
+        invalid_state_list = list(SOLVED_FACELETS_3x3x3)
         invalid_state_list[4] = 'R'   # Change top center to R
         invalid_state_list[22] = 'D'  # Change front center to D
         invalid_state = ''.join(invalid_state_list)
