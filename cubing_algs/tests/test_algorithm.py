@@ -1072,6 +1072,26 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
         self.assertEqual(grid, expected)
 
+    def test_show_with_mask_mse_moves(self) -> None:
+        """Test impact mask highlights slice moves only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('M2 S2 E2'),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          u  D  u \n'
+            '          D  u  D \n'
+            '          u  D  u \n'
+            ' l  R  l  f  B  f  r  L  r  b  F  b \n'
+            ' R  l  R  B  f  B  L  r  L  F  b  F \n'
+            ' l  R  l  f  B  f  r  L  r  b  F  b \n'
+            '          d  U  d \n'
+            '          U  d  U \n'
+            '          d  U  d '
+        )
+        self.assertEqual(grid, expected)
+
 
 class AlgorithmImpactsTestCase(unittest.TestCase):
     """Test cases for the Algorithm.impacts property."""
