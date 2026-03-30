@@ -1,4 +1,5 @@
 """Tests for the Algorithm class."""
+import re
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -788,10 +789,92 @@ class AlgorithmCyclesPropertyTestCase(unittest.TestCase):
         self.assertEqual(result, 80)
 
 
-class AlgorithmShowTestCase(unittest.TestCase):
-    """Test cases for the Algorithm.show method."""
+class AlgorithmShowMixin:
+    """Testing tools for Algorithm.show() output verification."""
 
-    def test_show_method_basic(self) -> None:
+    ANSI_RE = re.compile(r'\x1b\[[^m]*m')
+    # Default palette masked background: '#444444' → rgb(68,68,68)
+    MASKED_BG = '\x1b[48;2;68;68;68m'
+
+    @staticmethod
+    def show_output(algo: Algorithm,
+                    mode: str = '', *,
+                    impact_mask: bool = True) -> str:
+        """
+        Run algo.show() and capture stdout.
+
+        Returns:
+            Raw stdout output including ANSI escape codes.
+
+        """
+        buf = StringIO()
+        with redirect_stdout(buf):
+            algo.show(mode=mode, impact_mask=impact_mask)
+        return buf.getvalue()
+
+    def show_stripped(self, algo: Algorithm,
+                      mode: str = '', *,
+                      impact_mask: bool = True) -> str:
+        """
+        Run algo.show() and return output with ANSI codes stripped.
+
+        Returns:
+            Plain text output with face letters and spacing.
+
+        """
+        return self.ANSI_RE.sub(
+            '',
+            self.show_output(
+                algo,
+                mode=mode,
+                impact_mask=impact_mask,
+            ),
+        )
+
+    def show_grid(self, algo: Algorithm,
+                  mode: str = '', *,
+                  impact_mask: bool = True) -> str:
+        """
+        Run algo.show() and return a readable grid.
+
+        Same layout as stripped output, but with case encoding:
+        Uppercase = bright (affected), lowercase = dimmed (masked).
+
+        Returns:
+            Grid string with case-encoded mask information.
+
+        """
+        raw = self.show_output(
+            algo,
+            mode=mode,
+            impact_mask=impact_mask,
+        )
+
+        i = 0
+        result: list[str] = []
+        is_masked = False
+
+        while i < len(raw):
+            if raw[i] == '\x1b':
+                end = raw.index('m', i) + 1
+                seq = raw[i:end]
+                if seq.startswith('\x1b[48;2;'):
+                    is_masked = seq == self.MASKED_BG
+                i = end
+            elif raw[i].isalpha():
+                result.append(raw[i].lower() if is_masked else raw[i].upper())
+                i += 1
+            else:
+                result.append(raw[i])
+                i += 1
+        return ''.join(result).rstrip('\n')
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class AlgorithmShowTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """Test cases for Algorithm.show without mask."""
+
+    def test_show_returns_vcube(self) -> None:
         """Test show method returns VCube instance."""
         algo = Algorithm.parse_moves("R U R'")
 
@@ -800,32 +883,194 @@ class AlgorithmShowTestCase(unittest.TestCase):
 
         self.assertIsInstance(result, VCube)
 
-    def test_show_method_with_parameters(self) -> None:
-        """Test show method with mode and orientation parameters."""
+    def test_show_renders_solved_cube(self) -> None:
+        """Test show renders solved cube for empty algorithm."""
+        output = self.show_stripped(Algorithm())
+
+        expected = (
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_renders_r_move(self) -> None:
+        """Test show renders single R move correctly."""
+        output = self.show_stripped(
+            Algorithm.parse_moves('R'),
+        )
+
+        expected = (
+            '          U  U  F \n'
+            '          U  U  F \n'
+            '          U  U  F \n'
+            ' L  L  L  F  F  D  R  R  R  U  B  B \n'
+            ' L  L  L  F  F  D  R  R  R  U  B  B \n'
+            ' L  L  L  F  F  D  R  R  R  U  B  B \n'
+            '          D  D  B \n'
+            '          D  D  B \n'
+            '          D  D  B \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_renders_r_u_r_prime(self) -> None:
+        """Test show renders R U R' correctly."""
+        output = self.show_stripped(
+            Algorithm.parse_moves("R U R'"),
+        )
+
+        expected = (
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          F  F  L \n'
+            ' F  F  D  R  R  U  B  R  R  B  L  L \n'
+            ' L  L  L  F  F  U  B  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  U  R  R  B  B  B \n'
+            '          D  D  R \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_oll_mode(self) -> None:
+        """Test show renders OLL mode layout."""
+        output = self.show_stripped(
+            Algorithm.parse_moves("R U R'"),
+            mode='oll',
+        )
+
+        expected = (
+            '          B  B  B \n'
+            '       R  D  D  D  L \n'
+            '       R  D  D  D  L \n'
+            '       U  R  D  D  L \n'
+            '          F  F  F \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_oll_mode_single_r(self) -> None:
+        """Test show renders OLL mode for single R move."""
+        output = self.show_stripped(
+            Algorithm.parse_moves('R'),
+            mode='oll',
+        )
+
+        expected = (
+            '          U  B  B \n'
+            '       R  B  D  D  L \n'
+            '       R  B  D  D  L \n'
+            '       R  B  D  D  L \n'
+            '          D  F  F \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_strips_timing(self) -> None:
+        """Test show strips timing from moves before applying."""
+        output_timed = self.show_stripped(
+            Algorithm.parse_moves('R@50 U@75'),
+        )
+        output_plain = self.show_stripped(
+            Algorithm.parse_moves('R U'),
+        )
+
+        self.assertEqual(output_timed, output_plain)
+
+    def test_show_orients_cube_to_uf(self) -> None:
+        """Test show returns cube oriented to UF."""
         algo = Algorithm.parse_moves("R U R'")
-
-        with redirect_stdout(StringIO()):
-            result = algo.show(mode='oll')
-
-        self.assertIsInstance(result, VCube)
-
-    def test_show_method_without_impact_mask(self) -> None:
-        """Test show method with impact_mask disabled."""
-        algo = Algorithm.parse_moves("R U R'")
-
-        with redirect_stdout(StringIO()):
-            result = algo.show(impact_mask=False)
-
-        self.assertIsInstance(result, VCube)
-
-    def test_show_method_empty_algorithm(self) -> None:
-        """Test show method with empty algorithm."""
-        algo = Algorithm()
 
         with redirect_stdout(StringIO()):
             result = algo.show()
 
-        self.assertIsInstance(result, VCube)
+        self.assertEqual(result.orientation, 'UF')
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask.
+
+    Grid notation: Uppercase = bright (affected),
+    lowercase = dimmed (masked).
+    """
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  U  u \n'
+            '          U  u  u \n'
+            '          F  F  L \n'
+            ' F  F  D  R  R  U  B  r  r  b  L  L \n'
+            ' l  l  l  f  f  U  B  r  r  b  b  b \n'
+            ' l  l  l  f  f  F  U  r  r  b  b  b \n'
+            '          d  d  R \n'
+            '          d  d  d \n'
+            '          d  d  d '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_without_mask_all_bright(self) -> None:
+        """Test impact_mask=False renders all facelets bright."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            impact_mask=False,
+        )
+
+        self.assertTrue(
+            all(c.isupper() or not c.isalpha() for c in grid),
+            f'Expected all bright facelets without mask, got:\n{grid}',
+        )
+
+    def test_show_with_mask_empty(self) -> None:
+        """Test empty algorithm dims all facelets."""
+        grid = self.show_grid(
+            Algorithm(),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          u  u  u \n'
+            '          u  u  u \n'
+            '          u  u  u \n'
+            ' l  l  l  f  f  f  r  r  r  b  b  b \n'
+            ' l  l  l  f  f  f  r  r  r  b  b  b \n'
+            ' l  l  l  f  f  f  r  r  r  b  b  b \n'
+            '          d  d  d \n'
+            '          d  d  d \n'
+            '          d  d  d '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          u  u  F \n'
+            '          u  u  F \n'
+            '          u  u  F \n'
+            ' l  l  l  f  f  D  R  R  R  U  b  b \n'
+            ' l  l  l  f  f  D  R  r  R  U  b  b \n'
+            ' l  l  l  f  f  D  R  R  R  U  b  b \n'
+            '          d  d  B \n'
+            '          d  d  B \n'
+            '          d  d  B '
+        )
+        self.assertEqual(grid, expected)
 
 
 class AlgorithmImpactsTestCase(unittest.TestCase):
