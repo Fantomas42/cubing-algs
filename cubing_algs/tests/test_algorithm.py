@@ -846,7 +846,7 @@ class AlgorithmShowMixin:
         Run algo.show() and return a readable grid.
 
         Same layout as stripped output, but with case encoding:
-        Uppercase = bright (affected), lowercase = dimmed (masked).
+        Uppercase = dimmed (masked), lowercase = bright (affected).
 
         Returns:
             Grid string with case-encoded mask information.
@@ -871,7 +871,7 @@ class AlgorithmShowMixin:
                     is_masked = seq == self.MASKED_BG
                 i = end
             elif raw[i].isalpha():
-                result.append(raw[i].lower() if is_masked else raw[i].upper())
+                result.append(raw[i].upper() if is_masked else raw[i].lower())
                 i += 1
             else:
                 result.append(raw[i])
@@ -1005,8 +1005,8 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
     """
     Test cases for Algorithm.show with impact mask.
 
-    Grid notation: Uppercase = bright (affected),
-    lowercase = dimmed (masked).
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
     """
 
     def test_show_with_mask_r_u_r_prime(self) -> None:
@@ -1017,15 +1017,15 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
 
         expected = (
-            '          U  U  u \n'
-            '          U  u  u \n'
-            '          F  F  L \n'
-            ' F  F  D  R  R  U  B  r  r  b  L  L \n'
-            ' l  l  l  f  f  U  B  r  r  b  b  b \n'
-            ' l  l  l  f  f  F  U  r  r  b  b  b \n'
-            '          d  d  R \n'
-            '          d  d  d \n'
-            '          d  d  d '
+            '          u  u  U \n'
+            '          u  U  U \n'
+            '          f  f  l \n'
+            ' f  f  d  r  r  u  b  R  R  B  l  l \n'
+            ' L  L  L  F  F  u  b  R  R  B  B  B \n'
+            ' L  L  L  F  F  f  u  R  R  B  B  B \n'
+            '          D  D  r \n'
+            '          D  D  D \n'
+            '          D  D  D '
         )
         self.assertEqual(grid, expected)
 
@@ -1037,7 +1037,7 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
 
         self.assertTrue(
-            all(c.isupper() or not c.isalpha() for c in grid),
+            all(c.islower() or not c.isalpha() for c in grid),
             f'Expected all bright facelets without mask, got:\n{grid}',
         )
 
@@ -1049,15 +1049,15 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
 
         expected = (
-            '          u  u  u \n'
-            '          u  u  u \n'
-            '          u  u  u \n'
-            ' l  l  l  f  f  f  r  r  r  b  b  b \n'
-            ' l  l  l  f  f  f  r  r  r  b  b  b \n'
-            ' l  l  l  f  f  f  r  r  r  b  b  b \n'
-            '          d  d  d \n'
-            '          d  d  d \n'
-            '          d  d  d '
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          D  D  D '
         )
         self.assertEqual(grid, expected)
 
@@ -1069,15 +1069,15 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
 
         expected = (
-            '          u  u  F \n'
-            '          u  u  F \n'
-            '          u  u  F \n'
-            ' l  l  l  f  f  D  R  R  R  U  b  b \n'
-            ' l  l  l  f  f  D  R  r  R  U  b  b \n'
-            ' l  l  l  f  f  D  R  R  R  U  b  b \n'
-            '          d  d  B \n'
-            '          d  d  B \n'
-            '          d  d  B '
+            '          U  U  f \n'
+            '          U  U  f \n'
+            '          U  U  f \n'
+            ' L  L  L  F  F  d  r  r  r  u  B  B \n'
+            ' L  L  L  F  F  d  r  R  r  u  B  B \n'
+            ' L  L  L  F  F  d  r  r  r  u  B  B \n'
+            '          D  D  b \n'
+            '          D  D  b \n'
+            '          D  D  b '
         )
         self.assertEqual(grid, expected)
 
@@ -1089,15 +1089,15 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
 
         expected = (
-            '          u  D  u \n'
-            '          D  u  D \n'
-            '          u  D  u \n'
-            ' l  R  l  f  B  f  r  L  r  b  F  b \n'
-            ' R  l  R  B  f  B  L  r  L  F  b  F \n'
-            ' l  R  l  f  B  f  r  L  r  b  F  b \n'
+            '          U  d  U \n'
             '          d  U  d \n'
             '          U  d  U \n'
-            '          d  U  d '
+            ' L  r  L  F  b  F  R  l  R  B  f  B \n'
+            ' r  L  r  b  F  b  l  R  l  f  B  f \n'
+            ' L  r  L  F  b  F  R  l  R  B  f  B \n'
+            '          D  u  D \n'
+            '          u  D  u \n'
+            '          D  u  D '
         )
         self.assertEqual(grid, expected)
 
@@ -1107,8 +1107,8 @@ class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
     """
     Test cases for Algorithm.show with impact mask on 2x2x2.
 
-    Grid notation: Uppercase = bright (affected),
-    lowercase = dimmed (masked).
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
     """
 
     def test_show_with_mask_r_move(self) -> None:
@@ -1119,12 +1119,12 @@ class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             impact_mask=True,
         )
         expected = (
-            '       u  F \n'
-            '       u  F \n'
-            ' l  l  f  D  R  R  U  b \n'
-            ' l  l  f  D  R  R  U  b \n'
-            '       d  B \n'
-            '       d  B '
+            '       U  f \n'
+            '       U  f \n'
+            ' L  L  F  d  r  r  u  B \n'
+            ' L  L  F  d  r  r  u  B \n'
+            '       D  b \n'
+            '       D  b '
         )
         self.assertEqual(grid, expected)
 
@@ -1136,12 +1136,12 @@ class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             impact_mask=True,
         )
         expected = (
-            '       U  l \n'
-            '       U  F \n'
-            ' B  L  F  D  R  u  b  R \n'
-            ' b  b  l  L  F  f  u  r \n'
-            '       d  D \n'
-            '       d  r '
+            '       u  L \n'
+            '       u  f \n'
+            ' b  l  f  d  r  U  B  r \n'
+            ' B  B  L  l  f  F  U  R \n'
+            '       D  d \n'
+            '       D  R '
         )
         self.assertEqual(grid, expected)
 
@@ -1150,8 +1150,8 @@ class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
     """
     Test cases for Algorithm.show with impact mask on 4x4x4.
 
-    Grid notation: Uppercase = bright (affected),
-    lowercase = dimmed (masked).
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
     """
 
     def test_show_with_mask_r_move(self) -> None:
@@ -1162,18 +1162,18 @@ class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             impact_mask=True,
         )
         expected = (
-            '             u  u  u  F \n'
-            '             u  u  u  F \n'
-            '             u  u  u  F \n'
-            '             u  u  u  F \n'
-            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
-            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
-            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
-            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
-            '             d  d  d  B \n'
-            '             d  d  d  B \n'
-            '             d  d  d  B \n'
-            '             d  d  d  B '
+            '             U  U  U  f \n'
+            '             U  U  U  f \n'
+            '             U  U  U  f \n'
+            '             U  U  U  f \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            '             D  D  D  b \n'
+            '             D  D  D  b \n'
+            '             D  D  D  b \n'
+            '             D  D  D  b '
         )
         self.assertEqual(grid, expected)
 
@@ -1185,18 +1185,18 @@ class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             impact_mask=True,
         )
         expected = (
-            '             U  U  U  u \n'
-            '             U  U  U  u \n'
-            '             U  U  U  u \n'
-            '             F  F  F  L \n'
-            ' F  F  F  D  R  R  R  U  B  r  r  r  b  L  L  L \n'
-            ' l  l  l  l  f  f  f  U  B  r  r  r  b  b  b  b \n'
-            ' l  l  l  l  f  f  f  U  B  r  r  r  b  b  b  b \n'
-            ' l  l  l  l  f  f  f  F  U  r  r  r  b  b  b  b \n'
-            '             d  d  d  R \n'
-            '             d  d  d  d \n'
-            '             d  d  d  d \n'
-            '             d  d  d  d '
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             f  f  f  l \n'
+            ' f  f  f  d  r  r  r  u  b  R  R  R  B  l  l  l \n'
+            ' L  L  L  L  F  F  F  u  b  R  R  R  B  B  B  B \n'
+            ' L  L  L  L  F  F  F  u  b  R  R  R  B  B  B  B \n'
+            ' L  L  L  L  F  F  F  f  u  R  R  R  B  B  B  B \n'
+            '             D  D  D  r \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D '
         )
         self.assertEqual(grid, expected)
 
@@ -1205,8 +1205,8 @@ class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
     """
     Test cases for Algorithm.show with impact mask on 5x5x5.
 
-    Grid notation: Uppercase = bright (affected),
-    lowercase = dimmed (masked).
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
     """
 
     def test_show_with_mask_r_move(self) -> None:
@@ -1217,21 +1217,21 @@ class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             impact_mask=True,
         )
         expected = (
-            '                u  u  u  u  F \n'
-            '                u  u  u  u  F \n'
-            '                u  u  u  u  F \n'
-            '                u  u  u  u  F \n'
-            '                u  u  u  u  F \n'
-            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
-            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
-            ' l  l  l  l  l  f  f  f  f  D  R  R  r  R  R  U  b  b  b  b \n'
-            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
-            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
-            '                d  d  d  d  B \n'
-            '                d  d  d  d  B \n'
-            '                d  d  d  d  B \n'
-            '                d  d  d  d  B \n'
-            '                d  d  d  d  B '
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  R  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b '
         )
         self.assertEqual(grid, expected)
 
@@ -1243,21 +1243,21 @@ class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             impact_mask=True,
         )
         expected = (
-            '                U  U  U  U  u \n'
-            '                U  U  U  U  u \n'
-            '                U  U  u  U  u \n'
-            '                U  U  U  U  u \n'
-            '                F  F  F  F  L \n'
-            ' F  F  F  F  D  R  R  R  R  U  B  r  r  r  r  b  L  L  L  L \n'
-            ' l  l  l  l  l  f  f  f  f  U  B  r  r  r  r  b  b  b  b  b \n'
-            ' l  l  l  l  l  f  f  f  f  U  B  r  r  r  r  b  b  b  b  b \n'
-            ' l  l  l  l  l  f  f  f  f  U  B  r  r  r  r  b  b  b  b  b \n'
-            ' l  l  l  l  l  f  f  f  f  F  U  r  r  r  r  b  b  b  b  b \n'
-            '                d  d  d  d  R \n'
-            '                d  d  d  d  d \n'
-            '                d  d  d  d  d \n'
-            '                d  d  d  d  d \n'
-            '                d  d  d  d  d '
+            '                u  u  u  u  U \n'
+            '                u  u  u  u  U \n'
+            '                u  u  U  u  U \n'
+            '                u  u  u  u  U \n'
+            '                f  f  f  f  l \n'
+            ' f  f  f  f  d  r  r  r  r  u  b  R  R  R  R  B  l  l  l  l \n'
+            ' L  L  L  L  L  F  F  F  F  u  b  R  R  R  R  B  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  u  b  R  R  R  R  B  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  u  b  R  R  R  R  B  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  f  u  R  R  R  R  B  B  B  B  B \n'
+            '                D  D  D  D  r \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D '
         )
         self.assertEqual(grid, expected)
 
