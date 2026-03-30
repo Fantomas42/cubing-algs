@@ -798,6 +798,7 @@ class AlgorithmShowMixin:
 
     @staticmethod
     def show_output(algo: Algorithm,
+                    size: int = 3,
                     mode: str = '', *,
                     impact_mask: bool = True) -> str:
         """
@@ -809,10 +810,15 @@ class AlgorithmShowMixin:
         """
         buf = StringIO()
         with redirect_stdout(buf):
-            algo.show(mode=mode, impact_mask=impact_mask)
+            algo.show(
+                size=size,
+                mode=mode,
+                impact_mask=impact_mask,
+            )
         return buf.getvalue()
 
     def show_stripped(self, algo: Algorithm,
+                      size: int = 3,
                       mode: str = '', *,
                       impact_mask: bool = True) -> str:
         """
@@ -826,12 +832,14 @@ class AlgorithmShowMixin:
             '',
             self.show_output(
                 algo,
+                size=size,
                 mode=mode,
                 impact_mask=impact_mask,
             ),
         )
 
     def show_grid(self, algo: Algorithm,
+                  size: int = 3,
                   mode: str = '', *,
                   impact_mask: bool = True) -> str:
         """
@@ -846,6 +854,7 @@ class AlgorithmShowMixin:
         """
         raw = self.show_output(
             algo,
+            size=size,
             mode=mode,
             impact_mask=impact_mask,
         )
@@ -1089,6 +1098,166 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             '          d  U  d \n'
             '          U  d  U \n'
             '          d  U  d '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask on 2x2x2.
+
+    Grid notation: Uppercase = bright (affected),
+    lowercase = dimmed (masked).
+    """
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       u  F \n'
+            '       u  F \n'
+            ' l  l  f  D  R  R  U  b \n'
+            ' l  l  f  D  R  R  U  b \n'
+            '       d  B \n'
+            '       d  B '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       U  l \n'
+            '       U  F \n'
+            ' B  L  F  D  R  u  b  R \n'
+            ' b  b  l  L  F  f  u  r \n'
+            '       d  D \n'
+            '       d  r '
+        )
+        self.assertEqual(grid, expected)
+
+
+class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask on 4x4x4.
+
+    Grid notation: Uppercase = bright (affected),
+    lowercase = dimmed (masked).
+    """
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             u  u  u  F \n'
+            '             u  u  u  F \n'
+            '             u  u  u  F \n'
+            '             u  u  u  F \n'
+            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
+            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
+            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
+            ' l  l  l  l  f  f  f  D  R  R  R  R  U  b  b  b \n'
+            '             d  d  d  B \n'
+            '             d  d  d  B \n'
+            '             d  d  d  B \n'
+            '             d  d  d  B '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             U  U  U  u \n'
+            '             U  U  U  u \n'
+            '             U  U  U  u \n'
+            '             F  F  F  L \n'
+            ' F  F  F  D  R  R  R  U  B  r  r  r  b  L  L  L \n'
+            ' l  l  l  l  f  f  f  U  B  r  r  r  b  b  b  b \n'
+            ' l  l  l  l  f  f  f  U  B  r  r  r  b  b  b  b \n'
+            ' l  l  l  l  f  f  f  F  U  r  r  r  b  b  b  b \n'
+            '             d  d  d  R \n'
+            '             d  d  d  d \n'
+            '             d  d  d  d \n'
+            '             d  d  d  d '
+        )
+        self.assertEqual(grid, expected)
+
+
+class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask on 5x5x5.
+
+    Grid notation: Uppercase = bright (affected),
+    lowercase = dimmed (masked).
+    """
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                u  u  u  u  F \n'
+            '                u  u  u  u  F \n'
+            '                u  u  u  u  F \n'
+            '                u  u  u  u  F \n'
+            '                u  u  u  u  F \n'
+            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
+            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
+            ' l  l  l  l  l  f  f  f  f  D  R  R  r  R  R  U  b  b  b  b \n'
+            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
+            ' l  l  l  l  l  f  f  f  f  D  R  R  R  R  R  U  b  b  b  b \n'
+            '                d  d  d  d  B \n'
+            '                d  d  d  d  B \n'
+            '                d  d  d  d  B \n'
+            '                d  d  d  d  B \n'
+            '                d  d  d  d  B '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                U  U  U  U  u \n'
+            '                U  U  U  U  u \n'
+            '                U  U  u  U  u \n'
+            '                U  U  U  U  u \n'
+            '                F  F  F  F  L \n'
+            ' F  F  F  F  D  R  R  R  R  U  B  r  r  r  r  b  L  L  L  L \n'
+            ' l  l  l  l  l  f  f  f  f  U  B  r  r  r  r  b  b  b  b  b \n'
+            ' l  l  l  l  l  f  f  f  f  U  B  r  r  r  r  b  b  b  b  b \n'
+            ' l  l  l  l  l  f  f  f  f  U  B  r  r  r  r  b  b  b  b  b \n'
+            ' l  l  l  l  l  f  f  f  f  F  U  r  r  r  r  b  b  b  b  b \n'
+            '                d  d  d  d  R \n'
+            '                d  d  d  d  d \n'
+            '                d  d  d  d  d \n'
+            '                d  d  d  d  d \n'
+            '                d  d  d  d  d '
         )
         self.assertEqual(grid, expected)
 
