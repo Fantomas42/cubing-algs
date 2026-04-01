@@ -2260,6 +2260,24 @@ class TestComputeImpacts(unittest.TestCase):
             self.assertGreaterEqual(result.facelets_manhattan_distance.max, 0)
             self.assertGreaterEqual(result.facelets_manhattan_distance.sum, 0)
 
+    def test_pause_and_timed_algorithm_impact(self) -> None:
+        """Test impact of a complex algorithm."""
+        algorithm = Algorithm.parse_moves("R@1 .@2 U@3 R'@4 .@5 U'@6")
+        result = compute_impacts(algorithm)
+
+        # This is a common algorithm that should affect multiple faces
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            54,
+        )
+
+        # Should have distance metrics
+        if result.facelets_manhattan_distance.distances:
+            self.assertGreaterEqual(result.facelets_manhattan_distance.mean, 0)
+            self.assertGreaterEqual(result.facelets_manhattan_distance.max, 0)
+            self.assertGreaterEqual(result.facelets_manhattan_distance.sum, 0)
+
     def test_algorithm_with_rotations(self) -> None:
         """Test impact of algorithm with cube rotations."""
         algorithm = Algorithm.parse_moves("x R U R' U' x'")

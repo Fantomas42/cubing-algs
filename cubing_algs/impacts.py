@@ -1,4 +1,3 @@
-# ruff: noqa: PLC0415
 """
 Impact analysis tools for Rubik's cube algorithms.
 
@@ -1044,11 +1043,17 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
             - cubies_suggested_approach: Recommended solving strategy
 
     """
-    from cubing_algs.transform.timing import untime_moves
-    from cubing_algs.vcube import VCube
+    from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+    from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
+    from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+    cleaned_algorithm = algorithm.transform(
+        unpause_moves,
+        untime_moves,
+    )
 
     cube = VCube(size=3)
-    cube.rotate(untime_moves(algorithm))
+    cube.rotate(cleaned_algorithm)
     cube = cube.oriented_copy('UF')
 
     state_unique_moved = cubies_to_facelets(
