@@ -2127,7 +2127,7 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
                 )
 
 
-class TestComputeImpacts(unittest.TestCase):
+class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
     """Test the compute_impacts function."""
 
     def test_empty_algorithm_no_impact(self) -> None:
