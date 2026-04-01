@@ -398,6 +398,16 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             for m in self
         )
 
+    @property
+    def has_pauses(self) -> bool:
+        """Check if algorithm contains pauses."""
+        return any(m.is_pause for m in self)
+
+    @property
+    def has_times(self) -> bool:
+        """Check if algorithm timed moves."""
+        return any(m.is_timed for m in self)
+
     def show(self, size: int = 3, mode: str = '',
              *, impact_mask: bool = True) -> 'VCube':
         """

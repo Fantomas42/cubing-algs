@@ -697,6 +697,26 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertFalse(algo.has_internal_rotations)
 
+    def test_has_pauses(self) -> None:
+        """Test has pauses."""
+        algo = parse_moves("R U . R' U'")
+
+        self.assertTrue(algo.has_pauses)
+
+        algo = parse_moves("R U R' U'")
+
+        self.assertFalse(algo.has_pauses)
+
+    def test_has_times(self) -> None:
+        """Test has timed moves."""
+        algo = parse_moves("R@0.5 U R' U'")
+
+        self.assertTrue(algo.has_times)
+
+        algo = parse_moves("R U R' U'")
+
+        self.assertFalse(algo.has_times)
+
 
 class AlgorithmCyclesPropertyTestCase(unittest.TestCase):
     """Test cases for the Algorithm.cycles property."""
