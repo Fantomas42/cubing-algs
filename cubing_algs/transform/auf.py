@@ -1,19 +1,19 @@
 """AUF (Adjust U Face) transformations for optimizing last layer adjustments."""
+from collections.abc import Callable
 from collections.abc import Iterable
+from functools import partial
 from itertools import takewhile
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import AUF_CHAR
 from cubing_algs.move import Move
-from cubing_algs.transform.offset import offset_y2_moves
-from cubing_algs.transform.offset import offset_y_moves
-from cubing_algs.transform.offset import offset_yprime_moves
+from cubing_algs.transform.offset import offset_moves
 from cubing_algs.transform.trim import trim_moves
 
-OFFSET_MAP = {
-    1: offset_y_moves,
-    2: offset_y2_moves,
-    3: offset_yprime_moves,
+OFFSET_MAP: dict[int, Callable[[Algorithm], Algorithm]] = {
+    1: partial(offset_moves, rotation="y'"),
+    2: partial(offset_moves, rotation='y', count=2),
+    3: partial(offset_moves, rotation='y'),
 }
 
 

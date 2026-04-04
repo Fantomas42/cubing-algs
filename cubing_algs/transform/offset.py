@@ -67,6 +67,71 @@ from cubing_algs.constants import OFFSET_TABLE
 from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.move import Move
 
+# Parsed offset tables: base_move -> (new_base, direction_flipped)
+ParsedTable = dict[str, tuple[str, bool]]
+
+ROTATION_TO_OFFSET_KEYS: dict[str, tuple[str, ...]] = {
+    'x': ("x'",), "x'": ('x',), 'x2': ('x', 'x'),
+    'y': ("y'",), "y'": ('y',), 'y2': ('y', 'y'),
+    'z': ("z'",), "z'": ('z',), 'z2': ('z', 'z'),
+}
+
+PARSED_OFFSET_TABLES: dict[str, ParsedTable] = {
+    key: {
+        k: (v[:-1], True) if v.endswith("'") else (v, False)
+        for k, v in raw.items()
+    }
+    for key, raw in OFFSET_TABLE.items()
+}
+
+
+def compose_offset_tables(t1: ParsedTable, t2: ParsedTable) -> ParsedTable:
+    """
+    Compose two parsed offset tables into one.
+
+    Returns:
+        Composed table that applies t1 then t2 in a single lookup.
+
+    """
+    result: ParsedTable = {}
+    for k, (mapped, flip1) in t1.items():
+        if mapped in t2:
+            final, flip2 = t2[mapped]
+            result[k] = (final, flip1 ^ flip2)
+        else:
+            result[k] = (mapped, flip1)
+    for k, v in t2.items():
+        if k not in result:
+            result[k] = v
+    return result
+
+
+def rotate_move(move: Move, table: ParsedTable) -> Move:
+    """
+    Apply a composed offset table to a single move.
+
+    Returns:
+        Move with base remapped and direction adjusted per the table.
+
+    """
+    base_move = move.base_move
+    if base_move not in table:
+        return move
+
+    new_base, flip = table[base_move]
+    wide = WIDE_CHAR if move.is_wide_move else ''
+    new_move = Move(move.layer + new_base + wide + move.time)
+
+    if move.is_double:
+        new_move = new_move.doubled
+    elif move.is_counter_clockwise ^ flip:
+        new_move = new_move.inverted
+
+    if move.is_sign_move:
+        new_move = new_move.to_sign
+
+    return new_move
+
 
 def rotate(old_moves: Algorithm, rotation: str) -> Algorithm:
     """
@@ -83,31 +148,8 @@ def rotate(old_moves: Algorithm, rotation: str) -> Algorithm:
         Transformed algorithm with rotated moves.
 
     """
-    moves: list[Move] = []
-    rotation_table: dict[str, str] = OFFSET_TABLE[rotation]
-
-    for move in old_moves:
-        time = move.time
-        base_move = move.base_move
-        wide = WIDE_CHAR if move.is_wide_move else ''
-
-        new_move = move
-
-        if base_move in rotation_table:
-            new_move = Move(
-                move.layer + rotation_table[base_move] + wide + time,
-            )
-            if move.is_counter_clockwise:
-                new_move = new_move.inverted
-            elif move.is_double:
-                new_move = new_move.doubled
-
-            if move.is_sign_move:
-                new_move = new_move.to_sign
-
-        moves.append(new_move)
-
-    return Algorithm(moves)
+    table = PARSED_OFFSET_TABLES[rotation]
+    return Algorithm(rotate_move(move, table) for move in old_moves)
 
 
 def offset_moves(
@@ -118,7 +160,8 @@ def offset_moves(
     """
     Apply a rotation transformation multiple times to an algorithm.
 
-    Repeatedly applies the specified rotation to achieve the desired offset.
+    Pre-composes the offset table to apply the rotation in a single
+    pass regardless of count.
 
     Args:
         old_moves: The algorithm to transform.
@@ -129,10 +172,15 @@ def offset_moves(
         Transformed algorithm after repeated rotation.
 
     """
-    result = old_moves
-    for _ in range(count):
-        result = rotate(result, rotation)
-    return result
+    if count == 0 or not old_moves:
+        return old_moves
+
+    base_table = PARSED_OFFSET_TABLES[rotation]
+    composed = base_table
+    for _ in range(count - 1):
+        composed = compose_offset_tables(composed, base_table)
+
+    return Algorithm(rotate_move(move, composed) for move in old_moves)
 
 
 def offset_x_moves(old_moves: Algorithm) -> Algorithm:

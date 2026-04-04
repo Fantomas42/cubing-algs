@@ -1,76 +1,17 @@
 """Algorithm translation transformations based on cube orientation changes."""
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.constants import OFFSET_TABLE
-from cubing_algs.constants import WIDE_CHAR
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.move import Move
+from cubing_algs.transform.offset import PARSED_OFFSET_TABLES
+from cubing_algs.transform.offset import ROTATION_TO_OFFSET_KEYS
+from cubing_algs.transform.offset import ParsedTable
+from cubing_algs.transform.offset import compose_offset_tables
+from cubing_algs.transform.offset import rotate_move
 
-# Parsed offset tables: base_move -> (new_base, direction_flipped)
-ParsedTable = dict[str, tuple[str, bool]]
-
-ROTATION_TO_OFFSET_KEYS: dict[str, tuple[str, ...]] = {
-    'x': ("x'",), "x'": ('x',), 'x2': ('x', 'x'),
-    'y': ("y'",), "y'": ('y',), 'y2': ('y', 'y'),
-    'z': ("z'",), "z'": ('z',), 'z2': ('z', 'z'),
-}
-
-PARSED_OFFSET_TABLES: dict[str, ParsedTable] = {
-    key: {
-        k: (v[:-1], True) if v.endswith("'") else (v, False)
-        for k, v in raw.items()
-    }
-    for key, raw in OFFSET_TABLE.items()
-}
-
-
-def compose_offset_tables(t1: ParsedTable, t2: ParsedTable) -> ParsedTable:
-    """
-    Compose two parsed offset tables into one.
-
-    Returns:
-        Composed table that applies t1 then t2 in a single lookup.
-
-    """
-    result: ParsedTable = {}
-    for k, (mapped, flip1) in t1.items():
-        if mapped in t2:
-            final, flip2 = t2[mapped]
-            result[k] = (final, flip1 ^ flip2)
-        else:
-            result[k] = (mapped, flip1)
-    for k, v in t2.items():
-        if k not in result:
-            result[k] = v
-    return result
-
-
-def rotate_move(move: Move, table: ParsedTable) -> Move:
-    """
-    Apply a composed offset table to a single move.
-
-    Returns:
-        Move with base remapped and direction adjusted per the table.
-
-    """
-    base_move = move.base_move
-    if base_move not in table:
-        return move
-
-    new_base, flip = table[base_move]
-    wide = WIDE_CHAR if move.is_wide_move else ''
-    new_move = Move(move.layer + new_base + wide + move.time)
-
-    if move.is_double:
-        new_move = new_move.doubled
-    elif move.is_counter_clockwise ^ flip:
-        new_move = new_move.inverted
-
-    if move.is_sign_move:
-        new_move = new_move.to_sign
-
-    return new_move
+if TYPE_CHECKING:
+    from cubing_algs.move import Move
 
 
 def translate_moves(

@@ -1,34 +1,27 @@
 """Degrip transformations for converting rotation moves into face moves."""
 from collections.abc import Callable
+from functools import partial
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import Move
-from cubing_algs.transform.offset import offset_x2_moves
-from cubing_algs.transform.offset import offset_x_moves
-from cubing_algs.transform.offset import offset_xprime_moves
-from cubing_algs.transform.offset import offset_y2_moves
-from cubing_algs.transform.offset import offset_y_moves
-from cubing_algs.transform.offset import offset_yprime_moves
-from cubing_algs.transform.offset import offset_z2_moves
-from cubing_algs.transform.offset import offset_z_moves
-from cubing_algs.transform.offset import offset_zprime_moves
+from cubing_algs.transform.offset import offset_moves
 
 DEGRIP_X: dict[str, Callable[[Algorithm], Algorithm]] = {
-    'x': offset_xprime_moves,
-    'x2': offset_x2_moves,
-    "x'": offset_x_moves,
+    'x': partial(offset_moves, rotation='x'),
+    'x2': partial(offset_moves, rotation='x', count=2),
+    "x'": partial(offset_moves, rotation="x'"),
 }
 
 DEGRIP_Y: dict[str, Callable[[Algorithm], Algorithm]] = {
-    'y': offset_yprime_moves,
-    'y2': offset_y2_moves,
-    "y'": offset_y_moves,
+    'y': partial(offset_moves, rotation='y'),
+    'y2': partial(offset_moves, rotation='y', count=2),
+    "y'": partial(offset_moves, rotation="y'"),
 }
 
 DEGRIP_Z: dict[str, Callable[[Algorithm], Algorithm]] = {
-    'z': offset_zprime_moves,
-    'z2': offset_z2_moves,
-    "z'": offset_z_moves,
+    'z': partial(offset_moves, rotation='z'),
+    'z2': partial(offset_moves, rotation='z', count=2),
+    "z'": partial(offset_moves, rotation="z'"),
 }
 
 
