@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from typing import Self
 
 from cubing_algs.constants import MAX_ITERATIONS
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
 from cubing_algs.cycles import compute_cycles
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
@@ -448,11 +449,52 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             )
             cube_mask.rotate(cleaned_algo)
 
+            # Orientation-aware impact mask
+            #
+            # Problem: when an algorithm contains rotations (e.g. y R),
+            # comparing unique_facelets with cube_mask.state would mark
+            # every facelet as moved — the rotation displaces all of
+            # them.  We only want to highlight facelets moved by the
+            # face turns (R), not by the rotations (y).
+            #
+            # Solution: undo the final orientation from cube_mask.state
+            # before comparing.  For "y R" with orientation "UR" (= y):
+            #
+            #   cube_mask.state      =  yR(identity)
+            #   deoriented           =  y'(yR(identity)) = R(identity)
+            #   unique_facelets      =  identity
+            #
+            #   comparison: identity vs R(identity)
+            #       → only R-affected positions get '1'
+            #
+            # The resulting mask is in solved-state coordinates, which
+            # is exactly what compute_mask expects: it will re-apply
+            # the full cube history (y R) to permute the '1' bits into
+            # their correct final display positions.
+            mask_reference = cube_mask.state
+            orientation_moves = ORIENTATION_FACE_MOVES[cube.orientation]
+
+            if orientation_moves:
+                from cubing_algs.parsing import parse_moves  # noqa: PLC0415
+                from cubing_algs.transform.invert import (
+                    invert_moves,  # noqa: PLC0415
+                )
+
+                deoriented = VCube(
+                    initial=cube_mask.state,
+                    size=size,
+                    check=False,
+                )
+                deoriented.rotate(
+                    invert_moves(parse_moves(orientation_moves)),
+                )
+                mask_reference = deoriented.state
+
             moved_facelets_mask = ''.join(
                 '0' if f1 == f2 else '1'
                 for f1, f2 in zip(
                         unique_facelets,
-                        cube_mask.state,
+                        mask_reference,
                         strict=True,
                 )
             )
