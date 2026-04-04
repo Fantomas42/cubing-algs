@@ -1156,12 +1156,12 @@ class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             impact_mask=True,
         )
         expected = (
-            '       u  L \n'
-            '       u  f \n'
-            ' b  l  f  d  r  U  B  r \n'
-            ' B  B  L  l  f  F  U  R \n'
-            '       D  d \n'
-            '       D  R '
+            '       u  U \n'
+            '       f  l \n'
+            ' f  d  r  u  b  R  B  l \n'
+            ' L  L  F  f  u  R  B  B \n'
+            '       D  r \n'
+            '       D  D '
         )
         self.assertEqual(grid, expected)
 

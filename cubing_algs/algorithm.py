@@ -13,7 +13,6 @@ from cubing_algs.cycles import compute_cycles
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
 from cubing_algs.memory import MemoryData
@@ -21,7 +20,7 @@ from cubing_algs.memory import compute_memory
 from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
-from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
+from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.structure import StructureData
 from cubing_algs.structure import compute_structure
 
@@ -425,33 +424,42 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A VCube object with the algorithm applied.
 
         """
+        from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
         from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
         from cubing_algs.vcube import VCube  # noqa: PLC0415
 
+        cleaned_algo = self.transform(
+            unpause_moves,
+            untime_moves,
+        )
+
         cube = VCube(size=size)
-        cube.rotate(untime_moves(self))
+        cube.rotate(cleaned_algo)
 
-        cube = cube.oriented_copy('UF')
+        moved_facelets_mask = ''
 
-        mask = ''
-        if impact_mask and size == 3:
-            state_unique_moved = cubies_to_facelets(
-                *cube.cubies,
-                UNIQUE_FACELETS_3x3x3,
+        if impact_mask:
+            unique_facelets = get_unique_facelets(size)
+
+            cube_mask = VCube(
+                initial=unique_facelets,
+                size=size,
+                check=False,
             )
+            cube_mask.rotate(cleaned_algo)
 
-            mask = ''.join(
+            moved_facelets_mask = ''.join(
                 '0' if f1 == f2 else '1'
                 for f1, f2 in zip(
-                        UNIQUE_FACELETS_3x3x3,
-                        state_unique_moved,
+                        unique_facelets,
+                        cube_mask.state,
                         strict=True,
                 )
             )
 
         cube.show(
             mode=mode,
-            mask=mask,
+            mask=moved_facelets_mask,
         )
 
         return cube

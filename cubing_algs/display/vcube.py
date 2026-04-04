@@ -14,8 +14,6 @@ from cubing_algs.display.effects import load_effect
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.styles import get_piece_types
 from cubing_algs.display.styles import load_style
-from cubing_algs.facelets import cubies_to_facelets
-from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.masks import CROSS_MASK
 from cubing_algs.masks import F2L_CLL_MASK
 from cubing_algs.masks import F2L_ELL_MASK
@@ -114,10 +112,16 @@ class VCubeDisplay:
         if not mask:
             return '1' * (self.face_number * self.face_size)
 
-        return cubies_to_facelets(
-            *facelets_to_cubies(cube.state),
-            mask,
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        cube_mask = VCube(
+            initial=mask,
+            size=cube.size,
+            check=False,
         )
+        cube_mask.rotate(' '.join(cube.history))
+
+        return cube_mask.state
 
     def compute_f2l_front_face(self) -> str:
         """
@@ -229,7 +233,7 @@ class VCubeDisplay:
 
         final_orientation = orientation or default_orientation
         if final_orientation:
-            cube = self.cube.oriented_copy(final_orientation)
+            cube = self.cube.oriented_copy(final_orientation, full=True)
         else:
             cube = self.cube
 
