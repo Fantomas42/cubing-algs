@@ -30,7 +30,10 @@ class VCubeShowMixin:
 
         """
         buf = StringIO()
-        with redirect_stdout(buf):
+        with (
+            patch('cubing_algs.display.vcube.USE_COLORS', new=True),
+            redirect_stdout(buf),
+        ):
             cube.show(
                 mode=mode,
                 orientation=orientation,
