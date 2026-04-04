@@ -473,7 +473,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             An algorithm to apply.
 
+        Raises:
+            NotSupportedCubeSizeError: If cube.size != 3 or other.size != 3
+
         """
+        if self.size != 3 or other.size != 3:
+            msg = f'to_algorithm is not available on cube with size {self.size}'
+            raise NotSupportedCubeSizeError(msg)
+
         self_uf = self.oriented_copy('UF', full=False)
         other_uf = other.oriented_copy('UF', full=False)
 

@@ -86,6 +86,12 @@ class Test4x4x4VCube(unittest.TestCase):
         with self.assertRaises(NotSupportedCubeSizeError):
             _ = self.cube.cubies
 
+    def test_to_algorithm(self) -> None:
+        """Test to_algorithm raises on non-3x3x3 cubes."""
+        other = VCube(size=4)
+        with self.assertRaises(NotSupportedCubeSizeError):
+            self.cube.to_algorithm(other)
+
 
 class Test4x4x4ScrambledVCube(unittest.TestCase):
     """Test VCube implementation for 4x4x4."""
