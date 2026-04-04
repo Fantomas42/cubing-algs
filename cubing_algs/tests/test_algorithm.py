@@ -1121,6 +1121,88 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
         self.assertEqual(grid, expected)
 
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix highlights R-layer only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  U  r \n'
+            '          U  U  r \n'
+            '          U  U  r \n'
+            ' F  F  F  R  R  d  b  b  b  u  L  L \n'
+            ' F  F  F  R  R  d  b  B  b  u  L  L \n'
+            ' F  F  F  R  R  d  b  b  b  u  L  L \n'
+            '          D  D  l \n'
+            '          D  D  l \n'
+            '          D  D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          u  u  U \n'
+            '          u  U  U \n'
+            '          r  r  f \n'
+            ' r  r  d  b  b  u  l  B  B  L  f  f \n'
+            ' F  F  F  R  R  u  l  B  B  L  L  L \n'
+            ' F  F  F  R  R  r  u  B  B  L  L  L \n'
+            '          D  D  b \n'
+            '          D  D  D \n'
+            '          D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_pll_t(self) -> None:
+        """Test impact mask with z2 rotation prefix for PLL T perm."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("z2 R U R' U' R' F R2 U' R' U' R U R' F'"),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          D  D  d \n'
+            '          d  D  d \n'
+            '          D  D  d \n'
+            ' R  l  R  F  F  l  b  r  f  l  B  B \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h(self) -> None:
+        """Test impact mask with z2 rotation prefix for OLL 21 H."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          b  D  b \n'
+            '          D  D  D \n'
+            '          f  D  f \n'
+            ' l  R  l  d  F  d  r  L  r  d  B  d \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U '
+        )
+        self.assertEqual(grid, expected)
+
 
 @patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
 class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
@@ -1161,6 +1243,40 @@ class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             ' f  d  r  u  b  R  B  l \n'
             ' L  L  F  f  u  R  B  B \n'
             '       D  r \n'
+            '       D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix on 2x2x2."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       U  r \n'
+            '       U  r \n'
+            ' F  F  R  d  b  b  u  L \n'
+            ' F  F  R  d  b  b  u  L \n'
+            '       D  l \n'
+            '       D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R' on 2x2x2."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       u  U \n'
+            '       r  f \n'
+            ' r  d  b  u  l  B  L  f \n'
+            ' F  F  R  r  u  B  L  L \n'
+            '       D  b \n'
             '       D  D '
         )
         self.assertEqual(grid, expected)
@@ -1214,6 +1330,52 @@ class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             ' L  L  L  L  F  F  F  u  b  R  R  R  B  B  B  B \n'
             ' L  L  L  L  F  F  F  f  u  R  R  R  B  B  B  B \n'
             '             D  D  D  r \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix on 4x4x4."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             U  U  U  r \n'
+            '             U  U  U  r \n'
+            '             U  U  U  r \n'
+            '             U  U  U  r \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            '             D  D  D  l \n'
+            '             D  D  D  l \n'
+            '             D  D  D  l \n'
+            '             D  D  D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R' on 4x4x4."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             r  r  r  f \n'
+            ' r  r  r  d  b  b  b  u  l  B  B  B  L  f  f  f \n'
+            ' F  F  F  F  R  R  R  u  l  B  B  B  L  L  L  L \n'
+            ' F  F  F  F  R  R  R  u  l  B  B  B  L  L  L  L \n'
+            ' F  F  F  F  R  R  R  r  u  B  B  B  L  L  L  L \n'
+            '             D  D  D  b \n'
             '             D  D  D  D \n'
             '             D  D  D  D \n'
             '             D  D  D  D '
@@ -1274,6 +1436,58 @@ class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             ' L  L  L  L  L  F  F  F  F  u  b  R  R  R  R  B  B  B  B  B \n'
             ' L  L  L  L  L  F  F  F  F  f  u  R  R  R  R  B  B  B  B  B \n'
             '                D  D  D  D  r \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix on 5x5x5."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  B  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R' on 5x5x5."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                u  u  u  u  U \n'
+            '                u  u  u  u  U \n'
+            '                u  u  U  u  U \n'
+            '                u  u  u  u  U \n'
+            '                r  r  r  r  f \n'
+            ' r  r  r  r  d  b  b  b  b  u  l  B  B  B  B  L  f  f  f  f \n'
+            ' F  F  F  F  F  R  R  R  R  u  l  B  B  B  B  L  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  u  l  B  B  B  B  L  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  u  l  B  B  B  B  L  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  r  u  B  B  B  B  L  L  L  L  L \n'
+            '                D  D  D  D  b \n'
             '                D  D  D  D  D \n'
             '                D  D  D  D  D \n'
             '                D  D  D  D  D \n'
