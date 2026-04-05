@@ -268,25 +268,32 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """
         return compute_metrics(self)
 
-    @property
-    def impacts(self) -> ImpactData:
+    def impacts(self, size: int = 3) -> ImpactData:
         """
-        Analyze the spatial impact of this algorithm on 3x3x3 cube.
+        Analyze the spatial impact of this algorithm on a cube.
 
         Computes comprehensive metrics about how the algorithm affects
         individual facelets on the cube, including movement patterns,
         distances, and face-level statistics.
 
+        Cubie-level analysis is only available for 3x3x3 cubes.
+
+        Args:
+            size: Size of the cube (default 3).
+
+        Returns:
+            An ImpactData object containing comprehensive impact metrics.
+
         Example:
             >>> alg = Algorithm.parse_moves("R U R' U'")
-            >>> impacts = alg.impacts
+            >>> impacts = alg.impacts()
             >>> impacts.facelets_mobilized_count
             18  # 18 out of 54 facelets are affected
             >>> impacts.facelets_scrambled_percent
             0.33  # About 33% of the cube is scrambled
 
         """
-        return compute_impacts(self)
+        return compute_impacts(self, size=size)
 
     @property
     def ergonomics(self) -> ErgonomicsData:

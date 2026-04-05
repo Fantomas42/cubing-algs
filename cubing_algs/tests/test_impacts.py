@@ -1,5 +1,6 @@
 """Tests for algorithm impact analysis."""
 import unittest
+from typing import cast
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_NUMBER
@@ -107,18 +108,26 @@ class TestImpactData(unittest.TestCase):
             impact_data.facelets_manhattan_distance,
             DistanceMetrics,
         )
-        self.assertEqual(impact_data.facelets_manhattan_distance.distances, {})
-        self.assertEqual(impact_data.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(impact_data.facelets_manhattan_distance.max, 0)
-        self.assertEqual(impact_data.facelets_manhattan_distance.sum, 0)
+        manhattan = cast(
+            'DistanceMetrics',
+            impact_data.facelets_manhattan_distance,
+        )
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
         self.assertIsInstance(
             impact_data.facelets_qtm_distance,
             DistanceMetrics,
         )
-        self.assertEqual(impact_data.facelets_qtm_distance.distances, {})
-        self.assertEqual(impact_data.facelets_qtm_distance.mean, 0.0)
-        self.assertEqual(impact_data.facelets_qtm_distance.max, 0)
-        self.assertEqual(impact_data.facelets_qtm_distance.sum, 0)
+        qtm = cast(
+            'DistanceMetrics',
+            impact_data.facelets_qtm_distance,
+        )
+        self.assertEqual(qtm.distances, {})
+        self.assertEqual(qtm.mean, 0.0)
+        self.assertEqual(qtm.max, 0)
+        self.assertEqual(qtm.sum, 0)
         self.assertIsInstance(impact_data.facelets_face_mobility, dict)
         self.assertEqual(impact_data.cubies_corners_moved, 0)
         self.assertEqual(impact_data.cubies_corners_twisted, 0)
@@ -207,17 +216,22 @@ class TestImpactData(unittest.TestCase):
             20.0 / 54.0,
         )
         self.assertEqual(impact_data.facelets_permutations[0], 10)
-        self.assertEqual(
-            impact_data.facelets_manhattan_distance.distances[1],
-            3,
+        manhattan = cast(
+            'DistanceMetrics',
+            impact_data.facelets_manhattan_distance,
         )
-        self.assertEqual(impact_data.facelets_manhattan_distance.mean, 2.5)
-        self.assertEqual(impact_data.facelets_manhattan_distance.max, 3)
-        self.assertEqual(impact_data.facelets_manhattan_distance.sum, 5)
-        self.assertEqual(impact_data.facelets_qtm_distance.distances[1], 2)
-        self.assertEqual(impact_data.facelets_qtm_distance.mean, 1.5)
-        self.assertEqual(impact_data.facelets_qtm_distance.max, 2)
-        self.assertEqual(impact_data.facelets_qtm_distance.sum, 3)
+        self.assertEqual(manhattan.distances[1], 3)
+        self.assertEqual(manhattan.mean, 2.5)
+        self.assertEqual(manhattan.max, 3)
+        self.assertEqual(manhattan.sum, 5)
+        qtm = cast(
+            'DistanceMetrics',
+            impact_data.facelets_qtm_distance,
+        )
+        self.assertEqual(qtm.distances[1], 2)
+        self.assertEqual(qtm.mean, 1.5)
+        self.assertEqual(qtm.max, 2)
+        self.assertEqual(qtm.sum, 3)
         self.assertEqual(impact_data.facelets_face_mobility['U'], 1)
         self.assertEqual(impact_data.cubies_corners_moved, 2)
         self.assertEqual(impact_data.cubies_complexity_score, 7)
@@ -2033,14 +2047,22 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
             with self.subTest(rotation=rotation_str):
                 algorithm = Algorithm.parse_moves(rotation_str)
                 result = compute_impacts(algorithm)
+                manhattan = cast(
+                    'DistanceMetrics',
+                    result.facelets_manhattan_distance,
+                )
+                qtm = cast(
+                    'DistanceMetrics',
+                    result.facelets_qtm_distance,
+                )
 
                 self.assertEqual(
-                    result.facelets_manhattan_distance.sum, 0,
+                    manhattan.sum, 0,
                     f"Rotation '{rotation_str}' should have zero "
                     "Manhattan displacement",
                 )
                 self.assertEqual(
-                    result.facelets_qtm_distance.sum, 0,
+                    qtm.sum, 0,
                     f"Rotation '{rotation_str}' should have zero "
                     "QTM displacement",
                 )
@@ -2059,6 +2081,14 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
         # Get baseline distance (no rotation)
         baseline_algo = Algorithm.parse_moves(scramble)
         baseline_result = compute_impacts(baseline_algo)
+        baseline_manhattan = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_manhattan_distance,
+        )
+        baseline_qtm = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_qtm_distance,
+        )
 
         for rotation_str in rotations:
             with self.subTest(rotation=rotation_str):
@@ -2067,17 +2097,25 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
                     f'{ rotation_str } { scramble }',
                 )
                 rotated_result = compute_impacts(rotated_algo)
+                rotated_manhattan = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_manhattan_distance,
+                )
+                rotated_qtm = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_qtm_distance,
+                )
 
                 # Distance metrics should be identical
                 self.assertEqual(
-                    rotated_result.facelets_manhattan_distance.sum,
-                    baseline_result.facelets_manhattan_distance.sum,
+                    rotated_manhattan.sum,
+                    baseline_manhattan.sum,
                     'Manhattan distance should be same with pre-rotation '
                     f"{ rotation_str }'",
                 )
                 self.assertEqual(
-                    rotated_result.facelets_qtm_distance.sum,
-                    baseline_result.facelets_qtm_distance.sum,
+                    rotated_qtm.sum,
+                    baseline_qtm.sum,
                     'QTM distance should be same with pre-rotation '
                     f"'{ rotation_str }'",
                 )
@@ -2097,6 +2135,14 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
         # Get baseline distance (no rotation)
         baseline_algo = Algorithm.parse_moves(scramble)
         baseline_result = compute_impacts(baseline_algo)
+        baseline_manhattan = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_manhattan_distance,
+        )
+        baseline_qtm = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_qtm_distance,
+        )
 
         for rotation_str in rotations:
             with self.subTest(rotation=rotation_str):
@@ -2105,17 +2151,25 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
                     f'{scramble} {rotation_str}',
                 )
                 rotated_result = compute_impacts(rotated_algo)
+                rotated_manhattan = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_manhattan_distance,
+                )
+                rotated_qtm = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_qtm_distance,
+                )
 
                 # Distance metrics should be identical
                 self.assertEqual(
-                    rotated_result.facelets_manhattan_distance.sum,
-                    baseline_result.facelets_manhattan_distance.sum,
+                    rotated_manhattan.sum,
+                    baseline_manhattan.sum,
                     'Manhattan distance should be same with post-rotation '
                     f"'{ rotation_str }'",
                 )
                 self.assertEqual(
-                    rotated_result.facelets_qtm_distance.sum,
-                    baseline_result.facelets_qtm_distance.sum,
+                    rotated_qtm.sum,
+                    baseline_qtm.sum,
                     'QTM distance should be same with post-rotation '
                     f"'{ rotation_str }'",
                 )
@@ -2139,14 +2193,16 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(result.facelets_mobilized_count, 0)
         self.assertEqual(result.facelets_scrambled_percent, 0.0)
         self.assertEqual(result.facelets_permutations, {})
-        self.assertEqual(result.facelets_manhattan_distance.distances, {})
-        self.assertEqual(result.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertEqual(result.facelets_manhattan_distance.sum, 0)
-        self.assertEqual(result.facelets_qtm_distance.distances, {})
-        self.assertEqual(result.facelets_qtm_distance.mean, 0.0)
-        self.assertEqual(result.facelets_qtm_distance.max, 0)
-        self.assertEqual(result.facelets_qtm_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
+        qtm = cast('DistanceMetrics', result.facelets_qtm_distance)
+        self.assertEqual(qtm.distances, {})
+        self.assertEqual(qtm.mean, 0.0)
+        self.assertEqual(qtm.max, 0)
+        self.assertEqual(qtm.sum, 0)
         self.assertEqual(result.facelets_transformation_mask, '0' * 54)
 
         # All faces should have zero mobility
@@ -2175,10 +2231,11 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         self.assertGreater(len(result.facelets_permutations), 0)
 
         # Should have distance metrics
-        if result.facelets_manhattan_distance.distances:
-            self.assertGreater(result.facelets_manhattan_distance.mean, 0)
-            self.assertGreater(result.facelets_manhattan_distance.max, 0)
-            self.assertGreater(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
+            self.assertGreater(manhattan.mean, 0)
+            self.assertGreater(manhattan.max, 0)
+            self.assertGreater(manhattan.sum, 0)
 
     def test_double_move_impact(self) -> None:
         """Test impact of a double move."""
@@ -2208,13 +2265,25 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         algo_rp = Algorithm.parse_moves("R'")
         result_rp = compute_impacts(algo_rp)
 
+        manhattan_r = cast(
+            'DistanceMetrics',
+            result_r.facelets_manhattan_distance,
+        )
+        manhattan_r2 = cast(
+            'DistanceMetrics',
+            result_r2.facelets_manhattan_distance,
+        )
+        manhattan_rp = cast(
+            'DistanceMetrics',
+            result_rp.facelets_manhattan_distance,
+        )
         self.assertGreater(
-            result_r2.facelets_manhattan_distance.sum,
-            result_r.facelets_manhattan_distance.sum,
+            manhattan_r2.sum,
+            manhattan_r.sum,
         )
         self.assertEqual(
-            result_r.facelets_manhattan_distance.sum,
-            result_rp.facelets_manhattan_distance.sum,
+            manhattan_r.sum,
+            manhattan_rp.sum,
         )
 
     def test_inverse_moves_cancel(self) -> None:
@@ -2227,10 +2296,11 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(result.facelets_fixed_count, 54)
         self.assertEqual(result.facelets_scrambled_percent, 0.0)
         self.assertEqual(result.facelets_permutations, {})
-        self.assertEqual(result.facelets_manhattan_distance.distances, {})
-        self.assertEqual(result.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertEqual(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
 
     def test_four_moves_cancel(self) -> None:
         """Test that four identical moves cancel out."""
@@ -2255,10 +2325,11 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         )
 
         # Should have distance metrics
-        if result.facelets_manhattan_distance.distances:
-            self.assertGreaterEqual(result.facelets_manhattan_distance.mean, 0)
-            self.assertGreaterEqual(result.facelets_manhattan_distance.max, 0)
-            self.assertGreaterEqual(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
+            self.assertGreaterEqual(manhattan.mean, 0)
+            self.assertGreaterEqual(manhattan.max, 0)
+            self.assertGreaterEqual(manhattan.sum, 0)
 
     def test_pause_and_timed_algorithm_impact(self) -> None:
         """Test impact of a complex algorithm."""
@@ -2273,10 +2344,11 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         )
 
         # Should have distance metrics
-        if result.facelets_manhattan_distance.distances:
-            self.assertGreaterEqual(result.facelets_manhattan_distance.mean, 0)
-            self.assertGreaterEqual(result.facelets_manhattan_distance.max, 0)
-            self.assertGreaterEqual(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
+            self.assertGreaterEqual(manhattan.mean, 0)
+            self.assertGreaterEqual(manhattan.max, 0)
+            self.assertGreaterEqual(manhattan.sum, 0)
 
     def test_algorithm_with_rotations(self) -> None:
         """Test impact of algorithm with cube rotations."""
@@ -2336,30 +2408,31 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         algorithm = Algorithm.parse_moves('R U')
         result = compute_impacts(algorithm)
 
-        if result.facelets_manhattan_distance.distances:
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
             # Distance mean should match manual calculation
-            values = list(result.facelets_manhattan_distance.distances.values())
+            values = list(manhattan.distances.values())
             calculated_mean = sum(values) / len(values)
             self.assertAlmostEqual(
-                result.facelets_manhattan_distance.mean,
+                manhattan.mean,
                 calculated_mean,
             )
 
             # Distance sum should match
             distance_sum = sum(
-                result.facelets_manhattan_distance.distances.values(),
+                manhattan.distances.values(),
             )
             self.assertEqual(
-                result.facelets_manhattan_distance.sum,
+                manhattan.sum,
                 distance_sum,
             )
 
             # Distance max should match
             distance_max = max(
-                result.facelets_manhattan_distance.distances.values(),
+                manhattan.distances.values(),
             )
             self.assertEqual(
-                result.facelets_manhattan_distance.max,
+                manhattan.max,
                 distance_max,
             )
 
@@ -2460,12 +2533,13 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         algorithm = Algorithm.parse_moves('R U F D L B')
         result = compute_impacts(algorithm)
 
-        for distance in result.facelets_manhattan_distance.distances.values():
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        for distance in manhattan.distances.values():
             self.assertGreaterEqual(distance, 0)
 
-        self.assertGreaterEqual(result.facelets_manhattan_distance.mean, 0)
-        self.assertGreaterEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertGreaterEqual(result.facelets_manhattan_distance.sum, 0)
+        self.assertGreaterEqual(manhattan.mean, 0)
+        self.assertGreaterEqual(manhattan.max, 0)
+        self.assertGreaterEqual(manhattan.sum, 0)
 
     def test_empty_permutations_empty_distances(self) -> None:
         """Test when no moves occur, permutations and distances are empty."""
@@ -2473,10 +2547,11 @@ class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
         result = compute_impacts(algorithm)
 
         self.assertEqual(result.facelets_permutations, {})
-        self.assertEqual(result.facelets_manhattan_distance.distances, {})
-        self.assertEqual(result.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertEqual(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
 
 
 class TestComputeImpactsEdgeCases(unittest.TestCase):
@@ -2534,9 +2609,17 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
             result1.facelets_permutations,
             result2.facelets_permutations,
         )
+        manhattan1 = cast(
+            'DistanceMetrics',
+            result1.facelets_manhattan_distance,
+        )
+        manhattan2 = cast(
+            'DistanceMetrics',
+            result2.facelets_manhattan_distance,
+        )
         self.assertEqual(
-            result1.facelets_manhattan_distance.distances,
-            result2.facelets_manhattan_distance.distances,
+            manhattan1.distances,
+            manhattan2.distances,
         )
         self.assertEqual(
             result1.facelets_face_mobility,
@@ -2551,24 +2634,25 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
         )
         result = compute_impacts(algorithm)
 
-        if result.facelets_manhattan_distance.distances:
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
             # Mean should be precise
             manual_mean = (
-                sum(result.facelets_manhattan_distance.distances.values())
-                / len(result.facelets_manhattan_distance.distances)
+                sum(manhattan.distances.values())
+                / len(manhattan.distances)
             )
             self.assertAlmostEqual(
-                result.facelets_manhattan_distance.mean,
+                manhattan.mean,
                 manual_mean,
                 places=10,
             )
 
             # Sum should be exact
             distance_sum = sum(
-                result.facelets_manhattan_distance.distances.values(),
+                manhattan.distances.values(),
             )
             self.assertEqual(
-                result.facelets_manhattan_distance.sum,
+                manhattan.sum,
                 distance_sum,
             )
 
@@ -3278,10 +3362,11 @@ class TestOrientationInvariance(unittest.TestCase):
                         oriented_algo = algorithm + orientation
 
                     impacts = compute_impacts(oriented_algo)
-                    distance_metrics = (
+                    distance_metrics = cast(
+                        'DistanceMetrics',
                         impacts.facelets_manhattan_distance
                         if metric_type == 'manhattan'
-                        else impacts.facelets_qtm_distance
+                        else impacts.facelets_qtm_distance,
                     )
 
                     results.append(
@@ -3352,10 +3437,11 @@ class TestFaceInvariance(unittest.TestCase):
         for face_move in face_moves:
             algorithm = Algorithm.parse_moves(face_move)
             impacts = compute_impacts(algorithm)
-            distance_metrics = (
+            distance_metrics = cast(
+                'DistanceMetrics',
                 impacts.facelets_manhattan_distance
                 if metric_type == 'manhattan'
-                else impacts.facelets_qtm_distance
+                else impacts.facelets_qtm_distance,
             )
 
             results.append(
@@ -3476,3 +3562,206 @@ class TestPositionsOnAdjacentCorners(unittest.TestCase):
         # URF [8, 9, 20] and DBL [33, 53, 42] don't share an edge
         result = positions_on_adjacent_corners(8, 33, self.cube)
         self.assertFalse(result)
+
+
+class TestComputeImpactsMultiSize(unittest.TestCase):
+    """Test compute_impacts with cube sizes other than 3x3x3."""
+
+    def test_2x2x2_single_move(self) -> None:
+        """Test impact of a single move on 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        total_facelets = 24  # 6 faces * 4 facelets
+        self.assertEqual(
+            len(result.facelets_transformation_mask),
+            total_facelets,
+        )
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            total_facelets,
+        )
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        # 2x2x2 has no fixed centers (even-sized)
+        expected_percent = result.facelets_mobilized_count / total_facelets
+        self.assertAlmostEqual(
+            result.facelets_scrambled_percent,
+            expected_percent,
+        )
+
+    def test_2x2x2_empty_algorithm(self) -> None:
+        """Test empty algorithm on 2x2x2 produces no impact."""
+        algorithm = Algorithm()
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertEqual(result.facelets_fixed_count, 24)
+        self.assertEqual(result.facelets_mobilized_count, 0)
+        self.assertEqual(result.facelets_scrambled_percent, 0.0)
+        self.assertEqual(result.facelets_permutations, {})
+        self.assertEqual(result.facelets_transformation_mask, '0' * 24)
+
+    def test_2x2x2_cubie_fields_are_none(self) -> None:
+        """Test that cubie fields are None for 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertIsNone(result.cubies_corner_permutation)
+        self.assertIsNone(result.cubies_corner_orientation)
+        self.assertIsNone(result.cubies_edge_permutation)
+        self.assertIsNone(result.cubies_edge_orientation)
+        self.assertIsNone(result.cubies_corners_moved)
+        self.assertIsNone(result.cubies_corners_twisted)
+        self.assertIsNone(result.cubies_edges_moved)
+        self.assertIsNone(result.cubies_edges_flipped)
+        self.assertIsNone(result.cubies_corner_cycles)
+        self.assertIsNone(result.cubies_edge_cycles)
+        self.assertIsNone(result.cubies_complexity_score)
+        self.assertIsNone(result.cubies_suggested_approach)
+        self.assertIsNone(result.cubies_patterns)
+
+    def test_2x2x2_distance_fields_are_none(self) -> None:
+        """Test that distance and layer fields are None for 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertIsNone(result.facelets_manhattan_distance)
+        self.assertIsNone(result.facelets_qtm_distance)
+        self.assertIsNone(result.facelets_layer_analysis)
+
+    def test_2x2x2_facelet_metrics_populated(self) -> None:
+        """Test that size-agnostic facelet metrics are populated for 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertIsInstance(result.facelets_face_mobility, dict)
+        self.assertEqual(len(result.facelets_face_mobility), 6)
+        self.assertIsInstance(result.facelets_face_to_face_matrix, dict)
+        self.assertIsInstance(result.facelets_symmetry, dict)
+
+    def test_4x4x4_single_move(self) -> None:
+        """Test impact of a single move on 4x4x4."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=4)
+
+        total_facelets = 96  # 6 faces * 16 facelets
+        self.assertEqual(
+            len(result.facelets_transformation_mask),
+            total_facelets,
+        )
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            total_facelets,
+        )
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        # 4x4x4 has no fixed centers (even-sized)
+        expected_percent = result.facelets_mobilized_count / total_facelets
+        self.assertAlmostEqual(
+            result.facelets_scrambled_percent,
+            expected_percent,
+        )
+        self.assertIsNone(result.cubies_corner_permutation)
+
+    def test_5x5x5_single_move(self) -> None:
+        """Test impact of a single move on 5x5x5."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        total_facelets = 150  # 6 faces * 25 facelets
+        self.assertEqual(
+            len(result.facelets_transformation_mask),
+            total_facelets,
+        )
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            total_facelets,
+        )
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        # 5x5x5 has 6 fixed centers (odd-sized)
+        expected_percent = (
+            result.facelets_mobilized_count / (total_facelets - 6)
+        )
+        self.assertAlmostEqual(
+            result.facelets_scrambled_percent,
+            expected_percent,
+        )
+
+    def test_5x5x5_empty_algorithm(self) -> None:
+        """Test empty algorithm on 5x5x5 produces no impact."""
+        algorithm = Algorithm()
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertEqual(result.facelets_fixed_count, 150)
+        self.assertEqual(result.facelets_mobilized_count, 0)
+        self.assertEqual(result.facelets_scrambled_percent, 0.0)
+        self.assertEqual(result.facelets_transformation_mask, '0' * 150)
+
+    def test_5x5x5_cubie_and_distance_fields_are_none(self) -> None:
+        """Test that cubie and distance fields are None for 5x5x5."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertIsNone(result.cubies_corner_permutation)
+        self.assertIsNone(result.cubies_complexity_score)
+        self.assertIsNone(result.facelets_manhattan_distance)
+        self.assertIsNone(result.facelets_qtm_distance)
+        self.assertIsNone(result.facelets_layer_analysis)
+
+    def test_5x5x5_wide_move(self) -> None:
+        """Test impact of a wide move on 5x5x5."""
+        algorithm = Algorithm.parse_moves('3Rw')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        self.assertGreater(result.facelets_scrambled_percent, 0.0)
+        self.assertLessEqual(result.facelets_scrambled_percent, 1.0)
+
+    def test_5x5x5_scrambled_percent_bounded(self) -> None:
+        """Test that scrambled_percent stays within [0, 1] for 5x5x5."""
+        algorithm = Algorithm.parse_moves('R U F D L B')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertGreaterEqual(result.facelets_scrambled_percent, 0.0)
+        self.assertLessEqual(result.facelets_scrambled_percent, 1.0)
+
+    def test_5x5x5_face_mobility(self) -> None:
+        """Test face mobility analysis on 5x5x5."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertEqual(len(result.facelets_face_mobility), 6)
+        # R move should not affect L face
+        self.assertEqual(result.facelets_face_mobility['L'], 0)
+        # R move should affect R face
+        self.assertGreater(result.facelets_face_mobility['R'], 0)
+
+    def test_3x3x3_cubie_fields_not_none(self) -> None:
+        """Test that cubie fields are populated for 3x3x3."""
+        algorithm = Algorithm.parse_moves("R U R' U'")
+        result = compute_impacts(algorithm, size=3)
+
+        self.assertIsNotNone(result.cubies_corner_permutation)
+        self.assertIsNotNone(result.cubies_corner_orientation)
+        self.assertIsNotNone(result.cubies_edge_permutation)
+        self.assertIsNotNone(result.cubies_edge_orientation)
+        self.assertIsNotNone(result.facelets_manhattan_distance)
+        self.assertIsNotNone(result.facelets_qtm_distance)
+        self.assertIsNotNone(result.facelets_layer_analysis)
+        self.assertIsNotNone(result.cubies_patterns)
+
+    def test_scrambled_percent_identity_algorithm(self) -> None:
+        """Test scrambled_percent is 0 for identity algorithms."""
+        # R4 is identity on any cube
+        algorithm = Algorithm.parse_moves('R R R R')
+        for size in (2, 3, 4, 5):
+            with self.subTest(size=size):
+                result = compute_impacts(algorithm, size=size)
+                self.assertEqual(result.facelets_scrambled_percent, 0.0)
+
+    def test_scrambled_percent_consistency_across_sizes(self) -> None:
+        """Test that R move scrambles a consistent fraction across sizes."""
+        for size in (2, 3, 4, 5):
+            with self.subTest(size=size):
+                algorithm = Algorithm.parse_moves('R')
+                result = compute_impacts(algorithm, size=size)
+                self.assertGreater(result.facelets_scrambled_percent, 0.0)
+                self.assertLessEqual(result.facelets_scrambled_percent, 1.0)

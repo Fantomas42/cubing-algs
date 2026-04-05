@@ -1500,12 +1500,12 @@ class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
 
 
 class AlgorithmImpactsTestCase(unittest.TestCase):
-    """Test cases for the Algorithm.impacts property."""
+    """Test cases for the Algorithm.impacts method."""
 
-    def test_impacts_property_returns_impact_data(self) -> None:
-        """Test impacts property returns ImpactData."""
+    def test_impacts_method_returns_impact_data(self) -> None:
+        """Test impacts method returns ImpactData."""
         algo = Algorithm.parse_moves("R U R' U'")
-        impacts = algo.impacts
+        impacts = algo.impacts()
 
         self.assertIsInstance(impacts, ImpactData)
 
