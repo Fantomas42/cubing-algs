@@ -3,9 +3,6 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import Mask
-from cubing_algs.facelets import cubies_to_facelets
-from cubing_algs.facelets import facelets_to_cubies
-from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm
@@ -98,77 +95,6 @@ def negate_mask(mask: Mask) -> Mask:
     negated = mask_int ^ all_ones
 
     return format(negated, f'0{ length }b')
-
-
-_MASK_CACHE: dict[Mask, tuple[bool, ...]] = {}
-_CACHE_SIZE_LIMIT = 1000  # Prevent unbounded memory growth
-
-
-def facelets_masked(facelets: CubeFacelets, mask: Mask) -> CubeFacelets:
-    """
-    Apply a binary mask to a facelets string.
-
-    Returns a new facelets string where positions with '0' in the mask
-    are replaced with '-', and positions with '1' retain their original value.
-
-    Optimized for high-frequency usage with caching and fast string operations.
-
-    Args:
-        facelets: The facelets string to mask.
-        mask: The binary mask string.
-
-    Returns:
-        The masked facelets string with '-' for masked positions.
-
-    """
-    if mask in _MASK_CACHE:
-        translation = _MASK_CACHE[mask]
-        return ''.join(
-            char if keep else '-'
-            for char, keep in zip(facelets, translation, strict=True)
-        )
-
-    # Build and cache translation for new masks
-    translation = tuple(c == '1' for c in mask)
-
-    # Manage cache size to prevent memory bloat
-    if len(_MASK_CACHE) >= _CACHE_SIZE_LIMIT:
-        # Remove oldest half of cache entries (batch-FIFO eviction)
-        items = list(_MASK_CACHE.items())
-        _MASK_CACHE.clear()
-        _MASK_CACHE.update(items[_CACHE_SIZE_LIMIT // 2:])
-
-    _MASK_CACHE[mask] = translation
-
-    return ''.join(
-        char if keep else '-'
-        for char, keep in zip(facelets, translation, strict=True)
-    )
-
-
-def state_masked(state: CubeFacelets, mask: Mask) -> CubeFacelets:
-    """
-    Apply a binary mask to a cube state.
-
-    Converts the state to cubies, applies the mask
-    to the initial state facelets, then converts back
-    to a facelets representation showing only the masked pieces.
-
-    Args:
-        state: The cube state string to mask.
-        mask: The binary mask string.
-
-    Returns:
-        The masked cube state as a facelets string.
-
-    """
-    return cubies_to_facelets(
-        *facelets_to_cubies(state),
-        facelets_masked(
-            SOLVED_FACELETS_3x3x3,
-            mask,
-        ),
-    )
 
 
 def compute_algorithm_mask(
