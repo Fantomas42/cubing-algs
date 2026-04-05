@@ -109,7 +109,7 @@ class ImpactData(NamedTuple):
     facelets_symmetry: dict[str, bool]
     facelets_qtm_distance: DistanceMetrics | None
     facelets_manhattan_distance: DistanceMetrics | None
-    facelets_layer_analysis: dict[str, int] | None
+    facelets_layer_analysis: dict[str, int]
 
     # Cubie analysis (piece-level impact, 3x3x3 only)
     cubies_corner_permutation: list[int] | None
@@ -709,26 +709,31 @@ def analyze_layers(
         Dictionary with layer counts (centers_moved, outer_layer_moved, etc).
 
     """
-    # Center of each face (position 4 in 3x3 grid)
-    center_indices = {
-        i * cube.face_size + cube.center_index
-        for i in range(FACE_NUMBER)
-    }
-    edge_indices = set()
-    corner_indices = set()
+    size = cube.size
+    corner_indices: set[int] = set()
+    edge_indices: set[int] = set()
+    center_indices: set[int] = set()
+
+    # Corners of a face: 4 positions at (row, col) grid corners
+    face_corner_offsets = {0, size - 1, size * (size - 1), size * size - 1}
+    # Border positions that are not corners are edges
+    face_border_offsets: set[int] = set()
+    for i in range(size):
+        face_border_offsets.update({
+            i,                      # top row
+            size * (size - 1) + i,  # bottom row
+            size * i,               # left column
+            size * i + (size - 1),  # right column
+        })
+    face_edge_offsets = face_border_offsets - face_corner_offsets
+    # Centers: interior positions (not on border)
+    face_center_offsets = set(range(size * size)) - face_border_offsets
 
     for face_idx in range(FACE_NUMBER):
         face_start = face_idx * cube.face_size
-        # Corners: positions 0, 2, 6, 8 in each face
-        corner_indices.update({
-            face_start + 0, face_start + 2,
-            face_start + 6, face_start + 8,
-        })
-        # Edges: positions 1, 3, 5, 7 in each face
-        edge_indices.update({
-            face_start + 1, face_start + 3,
-            face_start + 5, face_start + 7,
-        })
+        corner_indices.update(face_start + o for o in face_corner_offsets)
+        edge_indices.update(face_start + o for o in face_edge_offsets)
+        center_indices.update(face_start + o for o in face_center_offsets)
 
     centers_moved = sum(
         1 for pos in permutations
@@ -1056,10 +1061,11 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     face_to_face_matrix = compute_face_to_face_matrix(permutations, cube)
     symmetry = detect_symmetry(mask, cube)
 
-    # 3x3x3-specific analysis (distances, layers, cubies)
+    layer_analysis = analyze_layers(permutations, cube)
+
+    # 3x3x3-specific analysis (distances, cubies)
     manhattan_distance: DistanceMetrics | None = None
     qtm_distance: DistanceMetrics | None = None
-    layer_analysis: dict[str, int] | None = None
     cp: list[int] | None = None
     co: list[int] | None = None
     ep: list[int] | None = None
@@ -1088,8 +1094,6 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
         qtm_distance = compute_distance_metrics(
             permutations, oriented_cube, compute_qtm_distance,
         )
-        layer_analysis = analyze_layers(permutations, oriented_cube)
-
         cp, co, ep, eo, _so = oriented_cube.cubies
 
         corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)

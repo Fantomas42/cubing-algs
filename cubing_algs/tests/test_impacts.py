@@ -3693,7 +3693,16 @@ class TestComputeImpactsMultiSize(unittest.TestCase):
 
         self.assertIsNone(result.facelets_manhattan_distance)
         self.assertIsNone(result.facelets_qtm_distance)
-        self.assertIsNone(result.facelets_layer_analysis)
+
+    def test_2x2x2_layer_analysis(self) -> None:
+        """Test layer analysis for 2x2x2 has only corners."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertIsNotNone(result.facelets_layer_analysis)
+        self.assertEqual(result.facelets_layer_analysis['corners_moved'], 12)
+        self.assertEqual(result.facelets_layer_analysis['edges_moved'], 0)
+        self.assertEqual(result.facelets_layer_analysis['centers_moved'], 0)
 
     def test_2x2x2_facelet_metrics_populated(self) -> None:
         """Test that size-agnostic facelet metrics are populated for 2x2x2."""
@@ -3771,7 +3780,16 @@ class TestComputeImpactsMultiSize(unittest.TestCase):
         self.assertIsNone(result.cubies_complexity_score)
         self.assertIsNone(result.facelets_manhattan_distance)
         self.assertIsNone(result.facelets_qtm_distance)
-        self.assertIsNone(result.facelets_layer_analysis)
+
+    def test_5x5x5_layer_analysis(self) -> None:
+        """Test layer analysis for 5x5x5 has corners, edges, and centers."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertIsNotNone(result.facelets_layer_analysis)
+        self.assertEqual(result.facelets_layer_analysis['corners_moved'], 12)
+        self.assertEqual(result.facelets_layer_analysis['edges_moved'], 24)
+        self.assertEqual(result.facelets_layer_analysis['centers_moved'], 8)
 
     def test_5x5x5_wide_move(self) -> None:
         """Test impact of a wide move on 5x5x5."""
