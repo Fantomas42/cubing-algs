@@ -771,9 +771,10 @@ class VCubeDisplay:
         result = ''
 
         for row in range(self.cube_size):
-            for face in FACE_ORDER:
-                result += self.display_face_row(faces, faces_mask, face, row)
-                result += ' '
+            result += ' '.join(
+                self.display_face_row(faces, faces_mask, face, row)
+                for face in FACE_ORDER
+            )
             result += '\n'
 
         return result

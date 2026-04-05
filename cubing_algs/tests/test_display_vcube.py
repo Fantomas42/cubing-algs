@@ -896,9 +896,9 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
         # Expected output:
         # 3 rows (for 3x3 cube), each with 6 faces + spaces + newline
         expected_lines = [
-            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B  ',
-            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B  ',
-            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B  ',
+            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B ',
+            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B ',
+            ' U  U  U   R  R  R   F  F  F   D  D  D   L  L  L   B  B  B ',
             '',
         ]
         expected = '\n'.join(expected_lines)
