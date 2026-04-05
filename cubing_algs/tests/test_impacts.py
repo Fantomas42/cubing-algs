@@ -2585,6 +2585,73 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
         self.assertIsInstance(result.facelets_face_mobility, dict)
         self.assertEqual(len(result.facelets_face_mobility), 6)
 
+    def test_trailing_rotation_does_not_affect_cubie_analysis(self) -> None:
+        """Test that trailing rotations are normalized for cubie analysis."""
+        result_r = compute_impacts(Algorithm.parse_moves('R'))
+        result_r_y = compute_impacts(Algorithm.parse_moves('R y'))
+
+        # Cubie analysis should be identical regardless of trailing rotation
+        self.assertEqual(
+            result_r.cubies_corner_permutation,
+            result_r_y.cubies_corner_permutation,
+        )
+        self.assertEqual(
+            result_r.cubies_corner_orientation,
+            result_r_y.cubies_corner_orientation,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_permutation,
+            result_r_y.cubies_edge_permutation,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_orientation,
+            result_r_y.cubies_edge_orientation,
+        )
+        self.assertEqual(
+            result_r.cubies_corners_moved,
+            result_r_y.cubies_corners_moved,
+        )
+        self.assertEqual(
+            result_r.cubies_corners_twisted,
+            result_r_y.cubies_corners_twisted,
+        )
+        self.assertEqual(
+            result_r.cubies_edges_moved,
+            result_r_y.cubies_edges_moved,
+        )
+        self.assertEqual(
+            result_r.cubies_edges_flipped,
+            result_r_y.cubies_edges_flipped,
+        )
+        self.assertEqual(
+            result_r.cubies_corner_cycles,
+            result_r_y.cubies_corner_cycles,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_cycles,
+            result_r_y.cubies_edge_cycles,
+        )
+        self.assertEqual(
+            result_r.cubies_complexity_score,
+            result_r_y.cubies_complexity_score,
+        )
+        self.assertEqual(
+            result_r.cubies_corner_parity,
+            result_r_y.cubies_corner_parity,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_parity,
+            result_r_y.cubies_edge_parity,
+        )
+        self.assertEqual(
+            result_r.cubies_parity_valid,
+            result_r_y.cubies_parity_valid,
+        )
+        self.assertEqual(
+            result_r.cubies_patterns,
+            result_r_y.cubies_patterns,
+        )
+
     def test_identical_algorithms_identical_results(self) -> None:
         """Test that identical algorithms produce identical results."""
         algorithm1 = Algorithm.parse_moves("R U R' U'")
