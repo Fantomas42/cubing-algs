@@ -1100,17 +1100,17 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     patterns: list[str] | None = None
 
     if size == 3:
-        cube = cube.oriented_copy('UF')
+        oriented_cube = cube.oriented_copy('UF')
 
         manhattan_distance = compute_distance_metrics(
-            permutations, cube, compute_manhattan_distance,
+            permutations, oriented_cube, compute_manhattan_distance,
         )
         qtm_distance = compute_distance_metrics(
-            permutations, cube, compute_qtm_distance,
+            permutations, oriented_cube, compute_qtm_distance,
         )
-        layer_analysis = analyze_layers(permutations, cube)
+        layer_analysis = analyze_layers(permutations, oriented_cube)
 
-        cp, co, ep, eo, _so = cube.cubies
+        cp, co, ep, eo, _so = oriented_cube.cubies
 
         corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)
         corners_twisted = sum(1 for orientation in co if orientation != 0)
