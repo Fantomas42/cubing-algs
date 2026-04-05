@@ -20,7 +20,6 @@ from cubing_algs.memory import compute_memory
 from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
-from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.structure import StructureData
 from cubing_algs.structure import compute_structure
 
@@ -431,13 +430,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A VCube object with the algorithm applied.
 
         """
-        from cubing_algs.transform.degrip import (  # noqa: PLC0415
-            degrip_full_moves,
-        )
+        from cubing_algs.masks import compute_algorithm_mask  # noqa: PLC0415
         from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
-        from cubing_algs.transform.rotation import (  # noqa: PLC0415
-            split_moves_ending_rotations,
-        )
         from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
         from cubing_algs.vcube import VCube  # noqa: PLC0415
 
@@ -452,52 +446,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         moved_facelets_mask = ''
 
         if impact_mask:
-            # Orientation-aware impact mask
-            #
-            # Problem: when an algorithm contains rotations (e.g. y R),
-            # comparing unique_facelets with cube_mask.state would mark
-            # every facelet as moved — the rotation displaces all of
-            # them.  We only want to highlight facelets moved by the
-            # face turns (R), not by the rotations (y).
-            #
-            # Solution: strip rotations before applying to the mask
-            # cube.  degrip_full_moves absorbs inline rotations into
-            # face moves (y R → B y), then split_moves_ending_rotations
-            # separates the trailing rotations.  For "y R":
-            #
-            #   degrip:  y R  →  B y
-            #   split:   B y  →  face_moves=B, rotations=y
-            #
-            #   cube_mask.rotate(B)  =  B(identity)
-            #   unique_facelets      =  identity  # noqa: ERA001
-            #
-            #   comparison: identity vs B(identity)
-            #       → only B-affected positions get '1'
-            #
-            # The resulting mask is in solved-state coordinates, which
-            # is exactly what compute_mask expects: it will re-apply
-            # the full cube history (y R) to permute the '1' bits into
-            # their correct final display positions.
-
-            unique_facelets = get_unique_facelets(size)
-            deoriented_algo, _orientation = split_moves_ending_rotations(
-                degrip_full_moves(cleaned_algo),
-            )
-
-            cube_mask = VCube(
-                initial=unique_facelets,
-                size=size,
-                check=False,
-            )
-            cube_mask.rotate(deoriented_algo)
-
-            moved_facelets_mask = ''.join(
-                '0' if f1 == f2 else '1'
-                for f1, f2 in zip(
-                        unique_facelets,
-                        cube_mask.state,
-                        strict=True,
-                )
+            moved_facelets_mask, _ = compute_algorithm_mask(
+                cleaned_algo, size,
             )
 
         cube.show(

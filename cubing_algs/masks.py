@@ -1,9 +1,14 @@
 """Binary masks for identifying and manipulating cube regions and pieces."""
+from typing import TYPE_CHECKING
+
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import Mask
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
+
+if TYPE_CHECKING:
+    from cubing_algs.algorithm import Algorithm
 
 
 def union_masks(*masks: Mask) -> Mask:
@@ -164,6 +169,88 @@ def state_masked(state: CubeFacelets, mask: Mask) -> CubeFacelets:
             mask,
         ),
     )
+
+
+def compute_algorithm_mask(
+        algorithm: 'Algorithm',
+        size: int = 3,
+) -> tuple[Mask, CubeFacelets]:
+    """
+    Compute an orientation-aware binary mask of facelets
+    affected by an algorithm.
+
+    The mask is expressed in solved-state coordinates: each
+    position in the string corresponds to the facelet at that
+    index on a solved cube.  This means the mask defines
+    precisely which physical facelet positions are tracked,
+    regardless of any whole-cube reorientation the algorithm
+    may perform.  Callers that need the mask in display
+    coordinates (after rotations) can re-apply the full
+    algorithm to permute the '1' bits into their final
+    positions.
+
+    Problem: when an algorithm contains rotations (e.g. y R),
+    comparing unique_facelets with cube_mask.state would mark
+    every facelet as moved — the rotation displaces all of
+    them.  We only want to highlight facelets moved by the
+    face turns (R), not by the rotations (y).
+
+    Solution: strip rotations before applying to the mask
+    cube.  degrip_full_moves absorbs inline rotations into
+    face moves (y R → B y), then split_moves_ending_rotations
+    separates the trailing rotations.  For "y R":
+
+      degrip:  y R  →  B y
+      split:   B y  →  face_moves=B, rotations=y
+
+      cube_mask.rotate(B)  =  B(identity)
+      unique_facelets      =  identity
+
+      comparison: identity vs B(identity)
+          → only B-affected positions get '1'
+
+    Args:
+        algorithm: The algorithm to analyze.
+        size: Size of the cube.
+
+    Returns:
+        A tuple of:
+        - A binary mask string ('0'/'1'), one character per
+          facelet in solved-state order.  '1' means the
+          facelet at that position was moved by the algorithm.
+        - The transformed unique facelets state, useful for
+          computing permutations by the caller.
+
+    """
+    from cubing_algs.solved_state import get_unique_facelets  # noqa: PLC0415
+    from cubing_algs.transform.degrip import degrip_full_moves  # noqa: PLC0415
+    from cubing_algs.transform.rotation import (  # noqa: PLC0415
+        split_moves_ending_rotations,
+    )
+    from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+    unique_facelets = get_unique_facelets(size)
+    deoriented_algo, _orientation = split_moves_ending_rotations(
+        degrip_full_moves(algorithm),
+    )
+
+    cube_mask = VCube(
+        initial=unique_facelets,
+        size=size,
+        check=False,
+    )
+    cube_mask.rotate(deoriented_algo)
+
+    mask = ''.join(
+        '0' if f1 == f2 else '1'
+        for f1, f2 in zip(
+                unique_facelets,
+                cube_mask.state,
+                strict=True,
+        )
+    )
+
+    return mask, cube_mask.state
 
 
 FULL_MASK: Mask = '1' * 54

@@ -1015,12 +1015,9 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
         Cubie metrics and distance metrics are None for non-3x3x3.
 
     """
+    from cubing_algs.masks import compute_algorithm_mask  # noqa: PLC0415
     from cubing_algs.solved_state import get_unique_facelets  # noqa: PLC0415
-    from cubing_algs.transform.degrip import degrip_full_moves  # noqa: PLC0415
     from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
-    from cubing_algs.transform.rotation import (  # noqa: PLC0415
-        split_moves_ending_rotations,
-    )
     from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
     from cubing_algs.vcube import VCube  # noqa: PLC0415
 
@@ -1032,31 +1029,14 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     cube = VCube(size=size)
     cube.rotate(cleaned_algorithm)
 
-    # Mask computation using facelet comparison (works for any size)
+    mask, transformed_state = compute_algorithm_mask(
+        cleaned_algorithm, size,
+    )
+
     unique_facelets = get_unique_facelets(size)
-    deoriented_algo, _orientation = split_moves_ending_rotations(
-        degrip_full_moves(cleaned_algorithm),
-    )
-
-    cube_mask = VCube(
-        initial=unique_facelets,
-        size=size,
-        check=False,
-    )
-    cube_mask.rotate(deoriented_algo)
-
-    mask = ''.join(
-        '0' if f1 == f2 else '1'
-        for f1, f2 in zip(
-                unique_facelets,
-                cube_mask.state,
-                strict=True,
-        )
-    )
-
-    permutations = {}
+    permutations: dict[int, int] = {}
     for original_pos in range(len(unique_facelets)):
-        final_pos = cube_mask.state.find(
+        final_pos = transformed_state.find(
             unique_facelets[original_pos],
         )
 
