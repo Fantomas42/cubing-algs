@@ -161,6 +161,10 @@ class Test5x5x5VCube(unittest.TestCase):
             self.cube.orientation, 'DF',
         )
 
+    def test_check_integrity(self) -> None:
+        """Test check_integrity on a 5x5x5 cube."""
+        self.assertTrue(self.cube.check_integrity())
+
 
 class Test5x5x5ScrambledVCube(unittest.TestCase):
     """Test VCube implementation for 4x4x4."""
@@ -722,10 +726,28 @@ class Test5x5x5VCubeCustomFacelets(unittest.TestCase):
     def setUp(self) -> None:
         """Set up required components."""
         self.state = get_unique_facelets(5)
-        self.cube = VCube(initial=self.state, size=5)
+        self.cube = VCube(initial=self.state, size=5, check=False)
 
     def test_rotate(self) -> None:
-        """Test get face center indexes."""
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test5x5x5VCubeCheckCustomState(unittest.TestCase):
+    """Test VCube implementation for 5x5x5 with scrambled facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = EXPECTED_5X5X5_R
+        self.cube = VCube(initial=self.state, size=5, check=True)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
         self.cube.rotate('F R U')
 
         self.assertNotEqual(

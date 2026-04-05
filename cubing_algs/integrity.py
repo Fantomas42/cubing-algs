@@ -158,6 +158,15 @@ class VCubeIntegrityChecker:
         """
         raise NotImplementedError
 
+    @property
+    def has_fixed_centers(self) -> bool:
+        """
+        Check if the cube has fixed centers.
+
+        Must be implemented by subclass.
+        """
+        raise NotImplementedError
+
     def check_integrity(self) -> bool:
         """
         Perform comprehensive integrity checks on the cube state.
@@ -175,7 +184,12 @@ class VCubeIntegrityChecker:
 
         self.check_characters(color_counts)
         self.check_colors(color_counts)
-        self.check_centers()
+
+        if self.has_fixed_centers:
+            self.check_centers()
+
+        if self.size != 3:
+            return True
 
         cp, co, ep, eo, so = facelets_to_cubies(self._state)
 

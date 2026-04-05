@@ -527,6 +527,9 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
         with self.assertRaises(NotImplementedError):
             _ = incomplete_cube.face_center_colors
 
+        with self.assertRaises(NotImplementedError):
+            _ = incomplete_cube.has_fixed_centers
+
     def test_invalid_length_no_check(self) -> None:
         """Test invalid length no check."""
         initial = 'DUUDUUDUULLLRRRRRRFBBFFBFFBDDUDDUDDURRRLLLLLLFFBFBBFB'

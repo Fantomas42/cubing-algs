@@ -5,6 +5,7 @@ from cubing_algs.constants import FACE_ORDER
 from cubing_algs.exceptions import NotSupportedCubeSizeError
 from cubing_algs.extensions.rotate_dynamic import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 4x4x4 state: 96 facelets (6 faces * 16 facelets each)
@@ -85,6 +86,10 @@ class Test4x4x4VCube(unittest.TestCase):
         """Test cubies."""
         with self.assertRaises(NotSupportedCubeSizeError):
             _ = self.cube.cubies
+
+    def test_check_integrity(self) -> None:
+        """Test check_integrity on a 4x4x4 cube."""
+        self.assertTrue(self.cube.check_integrity())
 
     def test_to_algorithm(self) -> None:
         """Test to_algorithm raises on non-3x3x3 cubes."""
@@ -553,3 +558,39 @@ class Test4x4x4SiGNNotation(unittest.TestCase):
         # Apply inverse to return to solved
         cube.rotate("U r U' r'")
         self.assertTrue(cube.is_solved)
+
+
+class Test4x4x4VCubeCustomFacelets(unittest.TestCase):
+    """Test VCube implementation for 4x4x4 with custom facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = get_unique_facelets(4)
+        self.cube = VCube(initial=self.state, size=4, check=False)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test4x4x4VCubeCheckCustomState(unittest.TestCase):
+    """Test VCube implementation for 4x4x4 with scrambled facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = EXPECTED_4X4X4_R
+        self.cube = VCube(initial=self.state, size=4, check=True)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )

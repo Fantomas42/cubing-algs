@@ -67,7 +67,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         if initial:
             self._state = initial
-            if check and size == 3:
+            if check:
                 self.check_integrity()
         elif size == 3:
             self._state = SOLVED_FACELETS_3x3x3

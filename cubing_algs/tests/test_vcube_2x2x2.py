@@ -4,6 +4,7 @@ import unittest
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.extensions.rotate_2x2x2 import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 2x2x2 state: 24 facelets (6 faces * 4 facelets each)
@@ -47,6 +48,10 @@ class Test2x2x2VCube(unittest.TestCase):
         self.assertEqual(
             self.cube.orientation, 'DF',
         )
+
+    def test_check_integrity(self) -> None:
+        """Test check_integrity on a 2x2x2 cube."""
+        self.assertTrue(self.cube.check_integrity())
 
 
 class Test2x2x2BasicMoves(unittest.TestCase):
@@ -296,4 +301,40 @@ class Test2x2x2SliceMoveErrors(unittest.TestCase):
         self.assertIn(
             'M moves are only allowed on odd-sized cubes',
             str(context.exception),
+        )
+
+
+class Test2x2x2VCubeCustomFacelets(unittest.TestCase):
+    """Test VCube implementation for 2x2x2 with custom facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = get_unique_facelets(2)
+        self.cube = VCube(initial=self.state, size=2, check=False)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test2x2x2VCubeCheckCustomState(unittest.TestCase):
+    """Test VCube implementation for 2x2x2 with scrambled facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = EXPECTED_2X2X2_R
+        self.cube = VCube(initial=self.state, size=2, check=True)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
         )
