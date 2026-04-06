@@ -214,7 +214,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         self.cube.rotate("R U R' U'")
         initial_state = self.cube.state
 
-        result = self.printer.display(mode='extended')
+        result = self.printer.display(layout='extended')
         lines = result.split('\n')
 
         self.assertEqual(self.cube.state, initial_state)
@@ -1081,7 +1081,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
 
     def test_display_linear_integration_with_display_method(self) -> None:
         """Test display_linear integration through display() method."""
-        result = self.printer.display(mode='linear')
+        result = self.printer.display(layout='linear')
 
         # Should be same as calling display_linear directly
         faces = self.printer.split_faces(self.cube.state)
@@ -1093,7 +1093,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
     def test_display_linear_integration_with_orientation(self) -> None:
         """Test display_linear with orientation parameter."""
         # Test with different orientation
-        result = self.printer.display(mode='linear', orientation='D')
+        result = self.printer.display(layout='linear', orientation='D')
 
         # Should produce valid output
         lines = result.split('\n')
@@ -1107,7 +1107,7 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
         """Test display_linear with mask parameter."""
         # Test with custom mask
         test_mask = '1' * 27 + '0' * 27  # Half visible, half hidden
-        result = self.printer.display(mode='linear', mask=test_mask)
+        result = self.printer.display(layout='linear', mask=test_mask)
 
         # Should produce valid output
         lines = result.split('\n')

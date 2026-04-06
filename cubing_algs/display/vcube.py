@@ -2,6 +2,7 @@
 import os
 import re
 from typing import TYPE_CHECKING
+from typing import cast
 
 from cubing_algs.annotations import Mask
 from cubing_algs.annotations import RegexPattern
@@ -23,6 +24,8 @@ from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from cubing_algs.vcube import VCube  # pragma: no cover
 
 
@@ -58,6 +61,13 @@ EMOJIS = {
     'R': '🟥',
     'masked': '⬛',
     'hidden': '❓',
+}
+
+LAYOUT_METHODS: dict[str, str] = {
+    'top': 'display_top_face',
+    'extended': 'display_extended_net',
+    'linear': 'display_linear',
+    'cube': 'display_cube',
 }
 
 
@@ -178,59 +188,71 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, mode: str = '', orientation: str = '',  # noqa: C901, PLR0912
-                mask: Mask = '') -> str:
+    def display(self, mode: str = '', layout: str = '',
+                orientation: str = '', mask: Mask = '') -> str:
         """
         Generate formatted visual representation of the cube state.
 
         Args:
-            mode: Display mode (e.g., 'oll', 'pll', 'cross', 'f2l', 'extended').
+            mode: Display mode for layout/orientation/mask
+                  (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout ('cube', 'top', 'linear', 'extended').
+                    Overrides the default layout implied by mode.
             orientation: Cube orientation string for reorienting the view.
-            mask: Custom mask to filter which facelets are displayed.
+                         Overrides the default orientation implied by mode.
+            mask: Mask to filter which facelets are displayed.
+                  Overrides the default masl implied by mode.
 
         Returns:
             Formatted string representation of the cube state.
 
         """
-        mode_mask = ''
-        display_method = self.display_cube
+        default_mask = ''
         default_orientation = ''
+        default_layout = ''
+
         mode = mode.lower()
+        layout = layout.lower()
 
         # Only work for 3x3x3
         if mode == 'oll':
-            mode_mask = OLL_MASK
-            display_method = self.display_top_face
+            default_mask = OLL_MASK
+            default_layout = 'top'
             default_orientation = 'D'
         elif mode == 'pll':
-            mode_mask = PLL_MASK
-            display_method = self.display_top_face
+            default_mask = PLL_MASK
+            default_layout = 'top'
             default_orientation = 'D'
         elif mode == 'll':
-            mode_mask = L3_MASK
-            display_method = self.display_top_face
+            default_mask = L3_MASK
+            default_layout = 'top'
             default_orientation = 'D'
         elif mode == 'cross':
-            mode_mask = CROSS_MASK
+            default_mask = CROSS_MASK
             default_orientation = 'FU'
         elif mode in {'f2l', 'af2l'}:
-            mode_mask = F2L_MASK
+            default_mask = F2L_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'f2l+ll':
-            mode_mask = F2L_LL_MASK
+            default_mask = F2L_LL_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'f2l+cll':
-            mode_mask = F2L_CLL_MASK
+            default_mask = F2L_CLL_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'f2l+ell':
-            mode_mask = F2L_ELL_MASK
+            default_mask = F2L_ELL_MASK
             default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'extended':
-            display_method = self.display_extended_net
-        elif mode == 'linear':
-            display_method = self.display_linear
-        elif mode == 'top':
-            display_method = self.display_top_face
+
+        display_method = cast(
+            'Callable[[list[str], list[str]], str]',
+            getattr(
+                self,
+                LAYOUT_METHODS.get(
+                    layout or default_layout,
+                    'display_cube',
+                ),
+            ),
+        )
 
         final_orientation = orientation or default_orientation
         if final_orientation:
@@ -240,7 +262,10 @@ class VCubeDisplay:
 
         faces = self.split_faces(cube.state)
         masked_faces = self.split_faces(
-            self.compute_mask(cube, mask or mode_mask),
+            self.compute_mask(
+                cube,
+                mask or default_mask,
+            ),
         )
 
         return display_method(faces, masked_faces)

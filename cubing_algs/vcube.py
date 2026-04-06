@@ -419,7 +419,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return cube
 
-    def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
+    def display(self, mode: str = '',  # noqa: PLR0913 PLR0917
+                layout: str = '', orientation: str = '',
                 mask: Mask = '', palette: str = '',
                 effect: str = '', facelet: str = '',
                 style: str = '') -> str:
@@ -427,9 +428,11 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Generate a visual representation of the cube.
 
         Args:
-            mode: Display mode for the visualization.
-            orientation: Desired orientation for display.
-            mask: Mask to apply to the display.
+            mode: Display mode for layout/orientation/mask
+                  (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout ('cube', 'top', 'linear', 'extended').
+            orientation: Cube orientation string for reorienting the view.
+            mask: Mask to filter which facelets are displayed.
             palette: Color palette to use.
             effect: Visual effect to apply.
             facelet: Facelet mode for display.
@@ -440,19 +443,19 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         """
         return VCubeDisplay(self, palette, effect, facelet, style).display(
-            mode, orientation, mask,
+            mode, layout, orientation, mask,
         )
 
-    def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
+    def show(self, mode: str = '',  # noqa: PLR0913 PLR0917
+             layout: str = '', orientation: str = '',
              mask: Mask = '', palette: str = '',
              effect: str = '', facelet: str = '',
              style: str = '') -> None:
         """Print a visual representation of the cube."""
         print(  # noqa: T201
             self.display(
-                mode, orientation, mask,
-                palette, effect, facelet,
-                style,
+                mode, layout, orientation, mask,
+                palette, effect, facelet, style,
             ),
             end='',
         )
