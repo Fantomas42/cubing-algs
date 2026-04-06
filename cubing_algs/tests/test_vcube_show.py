@@ -21,7 +21,8 @@ class VCubeShowMixin:
     def show_output(cube: VCube,
                     mode: str = '',
                     orientation: str = '',
-                    mask: Mask = '') -> str:
+                    mask: Mask = '',
+                    layout: str = '') -> str:
         """
         Run cube.show() and capture stdout.
 
@@ -38,13 +39,15 @@ class VCubeShowMixin:
                 mode=mode,
                 orientation=orientation,
                 mask=mask,
+                layout=layout,
             )
         return buf.getvalue()
 
     def show_stripped(self, cube: VCube,
                       mode: str = '',
                       orientation: str = '',
-                      mask: Mask = '') -> str:
+                      mask: Mask = '',
+                      layout: str = '') -> str:
         """
         Run cube.show() and return output with ANSI codes stripped.
 
@@ -59,13 +62,15 @@ class VCubeShowMixin:
                 mode=mode,
                 orientation=orientation,
                 mask=mask,
+                layout=layout,
             ),
         )
 
     def show_grid(self, cube: VCube,
                   mode: str = '',
                   orientation: str = '',
-                  mask: Mask = '') -> str:
+                  mask: Mask = '',
+                  layout: str = '') -> str:
         """
         Run cube.show() and return a readable grid.
 
@@ -81,6 +86,7 @@ class VCubeShowMixin:
             mode=mode,
             orientation=orientation,
             mask=mask,
+            layout=layout,
         )
 
         i = 0
@@ -125,6 +131,38 @@ class VCubeShowPLLTestCase(VCubeShowMixin, unittest.TestCase):
         )
         self.assertEqual(grid, expected)
 
+    def test_pll_linear_layout(self) -> None:
+        """Test PLL mode with linear layout."""
+        grid = self.show_grid(self.cube, mode='pll', layout='linear')
+
+        expected = (
+            ' d  d  d   R  F  F   F  L  B   u  u  u   B  B  R   L  R  L \n'
+            ' d  d  d   l  l  l   f  f  f   u  u  u   r  r  r   b  b  b \n'
+            ' d  d  d   l  l  l   f  f  f   u  u  u   r  r  r   b  b  b '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_pll_extended_layout(self) -> None:
+        """Test PLL mode with extended net layout."""
+        grid = self.show_grid(self.cube, mode='pll', layout='extended')
+
+        expected = (
+            '                L  R  L \n'
+            '             B  d  d  d  F \n'
+            '             B  d  d  d  F \n'
+            '             R  d  d  d  R \n'
+            '    d  d  d                 d  d  d  d  d  d \n'
+            ' L  B  B  R     F  L  B     R  F  F  L  R  L  B \n'
+            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
+            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
+            '    u  u  u                 u  u  u  u  u  u \n'
+            '             r  u  u  u  l \n'
+            '             r  u  u  u  l \n'
+            '             r  u  u  u  l \n'
+            '                b  b  b '
+        )
+        self.assertEqual(grid, expected)
+
 
 @patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
 class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
@@ -145,6 +183,38 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
             '       r  D  D  D  b \n'
             '       r  b  l  D  l \n'
             '          D  D  f '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_linear_layout(self) -> None:
+        """Test OLL mode with linear layout."""
+        grid = self.show_grid(self.cube, mode='oll', layout='linear')
+
+        expected = (
+            ' l  f  r   l  b  f   D  D  f   u  u  u   D  r  r   D  D  b \n'
+            ' D  D  D   l  l  l   f  f  f   u  u  u   r  r  r   b  b  b \n'
+            ' b  l  D   l  l  l   f  f  f   u  u  u   r  r  r   b  b  b '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_extended_layout(self) -> None:
+        """Test OLL mode with extended net layout."""
+        grid = self.show_grid(self.cube, mode='oll', layout='extended')
+
+        expected = (
+            '                b  D  D \n'
+            '             D  l  f  r  f \n'
+            '             r  D  D  D  b \n'
+            '             r  b  l  D  l \n'
+            '    l  D  b                 D  D  r  r  f  l \n'
+            ' b  D  r  r     D  D  f     l  b  f  D  D  b  D \n'
+            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
+            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
+            '    u  u  u                 u  u  u  u  u  u \n'
+            '             r  u  u  u  l \n'
+            '             r  u  u  u  l \n'
+            '             r  u  u  u  l \n'
+            '                b  b  b '
         )
         self.assertEqual(grid, expected)
 

@@ -817,10 +817,11 @@ class AlgorithmShowMixin:
     MASKED_BG = '\x1b[48;2;68;68;68m'
 
     @staticmethod
-    def show_output(algo: Algorithm,
+    def show_output(algo: Algorithm,  # noqa: PLR0913
                     size: int = 3,
                     mode: str = '',
-                    orientation: str = '', *,
+                    orientation: str = '',
+                    layout: str = '', *,
                     impact_mask: bool = True) -> str:
         """
         Run algo.show() and capture stdout.
@@ -838,14 +839,16 @@ class AlgorithmShowMixin:
                 size=size,
                 mode=mode,
                 orientation=orientation,
+                layout=layout,
                 impact_mask=impact_mask,
             )
         return buf.getvalue()
 
-    def show_stripped(self, algo: Algorithm,
+    def show_stripped(self, algo: Algorithm,  # noqa: PLR0913
                       size: int = 3,
                       mode: str = '',
-                      orientation: str = '', *,
+                      orientation: str = '',
+                      layout: str = '', *,
                       impact_mask: bool = True) -> str:
         """
         Run algo.show() and return output with ANSI codes stripped.
@@ -861,14 +864,16 @@ class AlgorithmShowMixin:
                 size=size,
                 mode=mode,
                 orientation=orientation,
+                layout=layout,
                 impact_mask=impact_mask,
             ),
         )
 
-    def show_grid(self, algo: Algorithm,
+    def show_grid(self, algo: Algorithm,  # noqa: PLR0913
                   size: int = 3,
                   mode: str = '',
-                  orientation: str = '', *,
+                  orientation: str = '',
+                  layout: str = '', *,
                   impact_mask: bool = True) -> str:
         """
         Run algo.show() and return a readable grid.
@@ -885,6 +890,7 @@ class AlgorithmShowMixin:
             size=size,
             mode=mode,
             orientation=orientation,
+            layout=layout,
             impact_mask=impact_mask,
         )
 
@@ -1281,6 +1287,71 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             '          U  U  U \n'
             '          U  U  U \n'
             '          U  U  U '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h_oll_mode(self) -> None:
+        """Test impact mask with z2 OLL 21 H using OLL mode (top layout)."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            mode='oll',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          d  B  d \n'
+            '       l  b  D  b  r \n'
+            '       R  D  D  D  L \n'
+            '       l  f  D  f  r \n'
+            '          d  F  d '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h_oll_linear(self) -> None:
+        """Test impact mask with z2 OLL 21 H using OLL mode, linear layout."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            mode='oll',
+            layout='linear',
+            impact_mask=True,
+        )
+
+        expected = (
+            ' b  D  b   r  L  r   d  F  d   U  U  U   l  R  l   d  B  d \n'
+            ' D  D  D   L  L  L   F  F  F   U  U  U   R  R  R   B  B  B \n'
+            ' f  D  f   L  L  L   F  F  F   U  U  U   R  R  R   B  B  B '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h_oll_extended(self) -> None:
+        """Test impact mask with z2 OLL 21 H using OLL mode, extended layout."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            mode='oll',
+            layout='extended',
+            impact_mask=True,
+        )
+
+        expected = (
+            '                d  B  d \n'
+            '             l  b  D  b  r \n'
+            '             R  D  D  D  L \n'
+            '             l  f  D  f  r \n'
+            '    b  D  f                 f  D  b  b  D  b \n'
+            ' d  l  R  l     d  F  d     r  L  r  d  B  d  l \n'
+            ' B  R  R  R     F  F  F     L  L  L  B  B  B  R \n'
+            ' B  R  R  R     F  F  F     L  L  L  B  B  B  R \n'
+            '    U  U  U                 U  U  U  U  U  U \n'
+            '             R  U  U  U  L \n'
+            '             R  U  U  U  L \n'
+            '             R  U  U  U  L \n'
+            '                B  B  B '
         )
         self.assertEqual(grid, expected)
 
