@@ -12,7 +12,7 @@ from cubing_algs.constants import SOLVED_EP
 from cubing_algs.impacts import DistanceMetrics
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import analyze_cycles
-from cubing_algs.impacts import analyze_layers
+from cubing_algs.impacts import analyze_piece_type_impact
 from cubing_algs.impacts import classify_pattern
 from cubing_algs.impacts import compute_cubie_complexity
 from cubing_algs.impacts import compute_face_impact
@@ -59,7 +59,7 @@ class TestImpactData(unittest.TestCase):
             },
             facelets_face_to_face_matrix={},
             facelets_symmetry={},
-            facelets_layer_analysis={},
+            facelets_piece_type_impact={},
             cubies_corner_permutation=SOLVED_CP,
             cubies_corner_orientation=SOLVED_CO,
             cubies_edge_permutation=SOLVED_EP,
@@ -162,10 +162,10 @@ class TestImpactData(unittest.TestCase):
             facelets_face_mobility=face_mobility,
             facelets_face_to_face_matrix={'U': {'R': 1, 'F': 2}},
             facelets_symmetry={'all_faces_same': False},
-            facelets_layer_analysis={
-                'centers_moved': 1,
-                'edges_moved': 2,
-                'corners_moved': 3,
+            facelets_piece_type_impact={
+                'center': 1,
+                'edge': 2,
+                'corner': 3,
             },
             cubies_corner_permutation=SOLVED_CP,
             cubies_corner_orientation=[0, 1, 0, 0, 0, 0, 0, 0],
@@ -2872,55 +2872,57 @@ class TestDetectSymmetry(unittest.TestCase):
         self.assertFalse(result['full_impact'])
 
 
-class TestAnalyzeLayers(unittest.TestCase):
-    """Test the analyze_layers function."""
+class TestAnalyzePieceTypeImpact(unittest.TestCase):
+    """Test the analyze_piece_type_impact function."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
         self.cube = VCube()
 
     def test_no_permutations(self) -> None:
-        """Test with no permutations."""
-        result = analyze_layers({}, self.cube)
-        self.assertEqual(result['centers_moved'], 0)
-        self.assertEqual(result['edges_moved'], 0)
-        self.assertEqual(result['corners_moved'], 0)
+        """Test with no permutations returns empty dict."""
+        result = analyze_piece_type_impact({}, self.cube)
+        self.assertEqual(result, {})
 
     def test_only_centers_moved(self) -> None:
-        """Test when only center pieces move."""
+        """Test when only center pieces move (fixed_center on 3x3x3)."""
         permutations = {4: 13, 13: 4}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 2)
-        self.assertEqual(result['edges_moved'], 0)
-        self.assertEqual(result['corners_moved'], 0)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['fixed_center'], 2)
+        self.assertEqual(result['center'], 2)
+        self.assertNotIn('midge', result)
+        self.assertNotIn('corner', result)
 
     def test_only_edges_moved(self) -> None:
-        """Test when only edge pieces move."""
+        """Test when only edge pieces move — specific and family counted."""
         permutations = {1: 3, 3: 1, 5: 7, 7: 5}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 0)
-        self.assertEqual(result['edges_moved'], 4)
-        self.assertEqual(result['corners_moved'], 0)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['midge'], 4)
+        self.assertEqual(result['edge'], 4)
+        self.assertNotIn('fixed_center', result)
+        self.assertNotIn('corner', result)
 
     def test_only_corners_moved(self) -> None:
         """Test when only corner pieces move."""
         permutations = {0: 2, 2: 0, 6: 8, 8: 6}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 0)
-        self.assertEqual(result['edges_moved'], 0)
-        self.assertEqual(result['corners_moved'], 4)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['corner'], 4)
+        self.assertNotIn('center', result)
+        self.assertNotIn('edge', result)
 
-    def test_mixed_layer_movement(self) -> None:
-        """Test when different layer types move."""
+    def test_mixed_piece_type_movement(self) -> None:
+        """Test when different piece types move — hierarchy fully expanded."""
         permutations = {
-            0: 1,
-            1: 2,
-            4: 13,
+            0: 1,   # corner
+            1: 2,   # midge (also counts as edge)
+            4: 13,  # fixed_center (also counts as center)
         }
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 1)
-        self.assertEqual(result['edges_moved'], 1)
-        self.assertEqual(result['corners_moved'], 1)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['corner'], 1)
+        self.assertEqual(result['midge'], 1)
+        self.assertEqual(result['edge'], 1)
+        self.assertEqual(result['fixed_center'], 1)
+        self.assertEqual(result['center'], 1)
 
     def test_all_corners_moved(self) -> None:
         """Test all corner positions move."""
@@ -2932,8 +2934,8 @@ class TestAnalyzeLayers(unittest.TestCase):
                 face_start + 6, face_start + 8,
             ])
         permutations = {pos: (pos + 1) % 54 for pos in corner_positions}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['corners_moved'], 24)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['corner'], 24)
 
 
 class TestAnalyzeCycles(unittest.TestCase):
@@ -3694,15 +3696,15 @@ class TestComputeImpactsMultiSize(unittest.TestCase):
         self.assertIsNone(result.facelets_manhattan_distance)
         self.assertIsNone(result.facelets_qtm_distance)
 
-    def test_2x2x2_layer_analysis(self) -> None:
-        """Test layer analysis for 2x2x2 has only corners."""
+    def test_2x2x2_piece_type_impact(self) -> None:
+        """Test piece type impact for 2x2x2 has only corners."""
         algorithm = Algorithm.parse_moves('R')
         result = compute_impacts(algorithm, size=2)
 
-        self.assertIsNotNone(result.facelets_layer_analysis)
-        self.assertEqual(result.facelets_layer_analysis['corners_moved'], 12)
-        self.assertEqual(result.facelets_layer_analysis['edges_moved'], 0)
-        self.assertEqual(result.facelets_layer_analysis['centers_moved'], 0)
+        impact = result.facelets_piece_type_impact
+        self.assertEqual(impact['corner'], 12)
+        self.assertNotIn('midge', impact)
+        self.assertNotIn('fixed_center', impact)
 
     def test_2x2x2_facelet_metrics_populated(self) -> None:
         """Test that size-agnostic facelet metrics are populated for 2x2x2."""
@@ -3781,15 +3783,22 @@ class TestComputeImpactsMultiSize(unittest.TestCase):
         self.assertIsNone(result.facelets_manhattan_distance)
         self.assertIsNone(result.facelets_qtm_distance)
 
-    def test_5x5x5_layer_analysis(self) -> None:
-        """Test layer analysis for 5x5x5 has corners, edges, and centers."""
+    def test_5x5x5_piece_type_impact(self) -> None:
+        """Test piece type impact for 5x5x5 uses granular types."""
         algorithm = Algorithm.parse_moves('R')
         result = compute_impacts(algorithm, size=5)
 
-        self.assertIsNotNone(result.facelets_layer_analysis)
-        self.assertEqual(result.facelets_layer_analysis['corners_moved'], 12)
-        self.assertEqual(result.facelets_layer_analysis['edges_moved'], 24)
-        self.assertEqual(result.facelets_layer_analysis['centers_moved'], 8)
+        impact = result.facelets_piece_type_impact
+        # Specific piece types
+        self.assertEqual(impact['corner'], 12)
+        self.assertEqual(impact['wing'], 16)
+        self.assertEqual(impact['midge'], 8)
+        self.assertEqual(impact['x_center'], 4)
+        self.assertEqual(impact['t_center'], 4)
+        # Family totals (each facelet also counts for its family)
+        self.assertEqual(impact['edge'], 24)   # wing + midge
+        self.assertEqual(impact['center'], 8)  # x_center + t_center
+        self.assertNotIn('fixed_center', impact)
 
     def test_5x5x5_wide_move(self) -> None:
         """Test impact of a wide move on 5x5x5."""
@@ -3830,7 +3839,7 @@ class TestComputeImpactsMultiSize(unittest.TestCase):
         self.assertIsNotNone(result.cubies_edge_orientation)
         self.assertIsNotNone(result.facelets_manhattan_distance)
         self.assertIsNotNone(result.facelets_qtm_distance)
-        self.assertIsNotNone(result.facelets_layer_analysis)
+        self.assertIsNotNone(result.facelets_piece_type_impact)
         self.assertIsNotNone(result.cubies_patterns)
 
     def test_scrambled_percent_identity_algorithm(self) -> None:

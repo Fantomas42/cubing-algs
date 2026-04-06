@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from typing import NamedTuple
 from typing import TypedDict
 
+from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import D_CORNERS
 from cubing_algs.constants import D_EDGES
@@ -109,7 +110,7 @@ class ImpactData(NamedTuple):
     facelets_symmetry: dict[str, bool]
     facelets_qtm_distance: DistanceMetrics | None
     facelets_manhattan_distance: DistanceMetrics | None
-    facelets_layer_analysis: dict[str, int]
+    facelets_piece_type_impact: dict[FaceletPieceType, int]
 
     # Cubie analysis (piece-level impact, 3x3x3 only)
     cubies_corner_permutation: list[int] | None
@@ -692,41 +693,34 @@ def detect_symmetry(mask: str, cube: 'VCube') -> dict[str, bool]:
     }
 
 
-def analyze_layers(
+def analyze_piece_type_impact(
         permutations: dict[int, int],
         cube: 'VCube',
-) -> dict[str, int]:
+) -> dict[FaceletPieceType, int]:
     """
-    Analyze impact by cube layers.
+    Count moved facelets by specific piece type.
 
-    Separates facelets into outer layer (edges/corners) and center pieces.
+    Counts moved facelets for every piece type in the type hierarchy.
+
+    Each facelet contributes to all its types — specific and family.
+    For example, a 3x3x3 edge facelet (type list: ['midge', 'edge']) increments
+    both 'midge' and 'edge', so family totals remain available alongside
+    specific breakdowns.
 
     Args:
         permutations: Dictionary mapping original to final positions.
         cube: The virtual cube for size context.
 
     Returns:
-        Dictionary with layer counts (centers_moved, edges_moved, etc).
+        Dictionary mapping piece type names to counts of moved facelets.
+        Only piece types with at least one moved facelet are included.
 
     """
-    centers_moved = 0
-    edges_moved = 0
-    corners_moved = 0
-
+    counts: dict[FaceletPieceType, int] = {}
     for pos in permutations:
-        family = cube.get_facelet_piece_types(pos)[-1]
-        if family == 'corner':
-            corners_moved += 1
-        elif family == 'edge':
-            edges_moved += 1
-        elif family == 'center':
-            centers_moved += 1
-
-    return {
-        'centers_moved': centers_moved,
-        'edges_moved': edges_moved,
-        'corners_moved': corners_moved,
-    }
+        for piece_type in cube.get_facelet_piece_types(pos):
+            counts[piece_type] = counts.get(piece_type, 0) + 1
+    return counts
 
 
 def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
@@ -1035,7 +1029,7 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     face_to_face_matrix = compute_face_to_face_matrix(permutations, cube)
     symmetry = detect_symmetry(mask, cube)
 
-    layer_analysis = analyze_layers(permutations, cube)
+    piece_type_impact = analyze_piece_type_impact(permutations, cube)
 
     # 3x3x3-specific analysis (distances, cubies)
     manhattan_distance: DistanceMetrics | None = None
@@ -1107,7 +1101,7 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
         facelets_face_mobility=face_mobility,
         facelets_face_to_face_matrix=face_to_face_matrix,
         facelets_symmetry=symmetry,
-        facelets_layer_analysis=layer_analysis,
+        facelets_piece_type_impact=piece_type_impact,
 
         # Cubie analysis
         cubies_corner_permutation=cp,

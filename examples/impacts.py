@@ -30,11 +30,10 @@ def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
     for face, count in impacts.facelets_face_mobility.items():
         print(f'    {face} face:               {count}/9 facelets moved')
 
-    layer = impacts.facelets_layer_analysis
-    print('\n  Layer analysis:')
-    print(f'    Corners moved:         { layer["corners_moved"] }')
-    print(f'    Edges moved:           { layer["edges_moved"] }')
-    print(f'    Centers moved:         { layer["centers_moved"] }')
+    piece_types = impacts.facelets_piece_type_impact
+    print('\n  Piece type impact:')
+    for piece_type, count in sorted(piece_types.items()):
+        print(f'    {piece_type}:{"." * (20 - len(piece_type))} { count }')
 
     # Cubie Analysis (Piece-Level Impact)
     print('\nCUBIE ANALYSIS (Piece-Level Impact)')
