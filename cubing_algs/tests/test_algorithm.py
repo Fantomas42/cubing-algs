@@ -819,7 +819,8 @@ class AlgorithmShowMixin:
     @staticmethod
     def show_output(algo: Algorithm,
                     size: int = 3,
-                    mode: str = '', *,
+                    mode: str = '',
+                    orientation: str = '', *,
                     impact_mask: bool = True) -> str:
         """
         Run algo.show() and capture stdout.
@@ -836,13 +837,15 @@ class AlgorithmShowMixin:
             algo.show(
                 size=size,
                 mode=mode,
+                orientation=orientation,
                 impact_mask=impact_mask,
             )
         return buf.getvalue()
 
     def show_stripped(self, algo: Algorithm,
                       size: int = 3,
-                      mode: str = '', *,
+                      mode: str = '',
+                      orientation: str = '', *,
                       impact_mask: bool = True) -> str:
         """
         Run algo.show() and return output with ANSI codes stripped.
@@ -857,13 +860,15 @@ class AlgorithmShowMixin:
                 algo,
                 size=size,
                 mode=mode,
+                orientation=orientation,
                 impact_mask=impact_mask,
             ),
         )
 
     def show_grid(self, algo: Algorithm,
                   size: int = 3,
-                  mode: str = '', *,
+                  mode: str = '',
+                  orientation: str = '', *,
                   impact_mask: bool = True) -> str:
         """
         Run algo.show() and return a readable grid.
@@ -879,6 +884,7 @@ class AlgorithmShowMixin:
             algo,
             size=size,
             mode=mode,
+            orientation=orientation,
             impact_mask=impact_mask,
         )
 
@@ -1144,6 +1150,54 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
         self.assertEqual(grid, expected)
 
+    def test_show_with_mask_y_r_orientation_df(self) -> None:
+        """
+        Test impact mask with y rotation prefix highlights R-layer only,
+        with custom DF orientation.
+        """
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            orientation='DF',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          l  l  l \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            ' d  R  R  F  F  F  L  L  u  b  b  b \n'
+            ' d  R  R  F  F  F  L  L  u  b  B  b \n'
+            ' d  R  R  F  F  F  L  L  u  b  b  b \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          r  r  r '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_orientation_uf(self) -> None:
+        """
+        Test impact mask with y rotation prefix highlights R-layer only,
+        with custom UF orientation.
+        """
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            orientation='UF',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          r  r  r \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            ' u  L  L  F  F  F  R  R  d  b  b  b \n'
+            ' u  L  L  F  F  F  R  R  d  b  B  b \n'
+            ' u  L  L  F  F  F  R  R  d  b  b  b \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          l  l  l '
+        )
+        self.assertEqual(grid, expected)
+
     def test_show_with_mask_y_r_u_r_prime(self) -> None:
         """Test impact mask with y rotation prefix for R U R'."""
         grid = self.show_grid(
@@ -1161,6 +1215,30 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
             '          D  D  b \n'
             '          D  D  D \n'
             '          D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime_orientation_uf(self) -> None:
+        """
+        Test impact mask with y rotation prefix highlights R-layer only,
+        with custom UF orientation.
+        """
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            orientation='UF',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  U  f \n'
+            '          u  U  r \n'
+            '          u  u  r \n'
+            ' L  f  f  r  r  d  b  b  u  l  B  B \n'
+            ' L  L  L  F  F  F  R  R  u  l  B  B \n'
+            ' L  L  L  F  F  F  R  R  r  u  B  B \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          D  D  b '
         )
         self.assertEqual(grid, expected)
 

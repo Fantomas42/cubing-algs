@@ -178,7 +178,7 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, mode: str = '', orientation: str = '',  # noqa: C901
+    def display(self, mode: str = '', orientation: str = '',  # noqa: C901, PLR0912
                 mask: Mask = '') -> str:
         """
         Generate formatted visual representation of the cube state.

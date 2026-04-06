@@ -413,7 +413,10 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """Check if algorithm timed moves."""
         return any(m.is_timed for m in self)
 
-    def show(self, size: int = 3, mode: str = '',
+    def show(self, size: int = 3,  # noqa: PLR0913, PLR0917
+             mode: str = '', orientation: str = '',
+             palette: str = '', effect: str = '',
+             facelet: str = '', style: str = '',
              *, impact_mask: bool = True) -> 'VCube':
         """
         Visualize the algorithm's effect on a cube.
@@ -424,6 +427,11 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         Args:
             size: Size of the cube.
             mode: Display mode for the cube visualization.
+            orientation: Desired orientation for display.
+            palette: Color palette to use.
+            effect: Visual effect to apply.
+            facelet: Facelet mode for display.
+            style: Letter style preset to apply.
             impact_mask: Show affected facelets with a mask.
 
         Returns:
@@ -452,6 +460,11 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         cube.show(
             mode=mode,
+            orientation=orientation,
+            palette=palette,
+            effect=effect,
+            facelet=facelet,
+            style=style,
             mask=moved_facelets_mask,
         )
 
