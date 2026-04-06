@@ -229,6 +229,8 @@ class VCubeDisplay:
             display_method = self.display_extended_net
         elif mode == 'linear':
             display_method = self.display_linear
+        elif mode == 'top':
+            display_method = self.display_top_face
 
         final_orientation = orientation or default_orientation
         if final_orientation:
