@@ -26,6 +26,7 @@ from cubing_algs.move import Move
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solver import facelets_to_facelets_algorithm
+from cubing_algs.transform.invert import invert_moves
 
 
 class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
@@ -291,7 +292,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return self._state == oriented_copy._state  # noqa: SLF001
 
     def rotate(self, moves: Algorithm | Move | str, *,
-               history: bool = True) -> str:
+               history: bool = True) -> CubeFacelets:
         """
         Apply a sequence of moves to the cube.
 
@@ -326,6 +327,22 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             if history:
                 self.history.extend(moves_str.split(' '))
             return self._state
+
+    def undo(self, move_number: int = 1) -> CubeFacelets:
+        """
+        Undo moves from history.
+
+        Args:
+            move_number: Number of moves to undo. Default is 1.
+
+        Returns:
+            The new state of the cube after undoing the moves.
+
+        """
+        moves = Algorithm(Move(m) for m in self.history[-move_number:])
+        del self.history[-move_number:]
+
+        return self.rotate(invert_moves(moves), history=False)
 
     def copy(self, *, full: bool = False) -> 'VCube':
         """

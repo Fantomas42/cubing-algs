@@ -88,6 +88,71 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertTrue(cube.is_solved)
 
+    def test_undo_single_move(self) -> None:
+        """Test undoing a single move restores previous state."""
+        cube = VCube()
+        state_before = cube.state
+        cube.rotate('R')
+        cube.undo()
+
+        self.assertEqual(cube.state, state_before)
+
+    def test_undo_multiple_moves(self) -> None:
+        """Test undoing multiple moves restores the correct state."""
+        cube = VCube()
+        state_before = cube.state
+        cube.rotate('R U F')
+        cube.undo(3)
+
+        self.assertEqual(cube.state, state_before)
+
+    def test_undo_partial_history(self) -> None:
+        """Test undoing fewer moves than history preserves earlier state."""
+        cube = VCube()
+        cube.rotate('R')
+        state_after_r = cube.state
+        cube.rotate('U F')
+        cube.undo(2)
+
+        self.assertEqual(cube.state, state_after_r)
+
+    def test_undo_updates_history(self) -> None:
+        """Test that undo removes undone moves from history."""
+        cube = VCube()
+        cube.rotate('R U F')
+        cube.undo(2)
+
+        self.assertEqual(cube.history, ['R'])
+
+    def test_undo_does_not_add_to_history(self) -> None:
+        """Test that undo moves are not recorded in history."""
+        cube = VCube()
+        cube.rotate('R')
+        cube.undo()
+
+        self.assertEqual(cube.history, [])
+
+    def test_undo_more_than_history_undoes_all(self) -> None:
+        """
+        Test that undoing more moves than history
+        clamps to available moves.
+        """
+        cube = VCube()
+        cube.rotate('R U')
+        cube.undo(10)
+
+        self.assertEqual(cube.state, SOLVED_FACELETS_3x3x3)
+        self.assertEqual(cube.history, [])
+
+    def test_undo_empty_history_is_noop(self) -> None:
+        """Test that undoing with empty history leaves state unchanged."""
+        cube = VCube()
+        state = cube.state
+        cube.undo(5)
+
+        self.assertEqual(cube.state, state)
+        self.assertEqual(cube.history, [])
+
     def test_rotate_history(self) -> None:
         """Test history tracking with rotate method."""
         cube = VCube()
