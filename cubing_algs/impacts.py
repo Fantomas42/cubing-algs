@@ -706,47 +706,21 @@ def analyze_layers(
         cube: The virtual cube for size context.
 
     Returns:
-        Dictionary with layer counts (centers_moved, outer_layer_moved, etc).
+        Dictionary with layer counts (centers_moved, edges_moved, etc).
 
     """
-    size = cube.size
-    corner_indices: set[int] = set()
-    edge_indices: set[int] = set()
-    center_indices: set[int] = set()
+    centers_moved = 0
+    edges_moved = 0
+    corners_moved = 0
 
-    # Corners of a face: 4 positions at (row, col) grid corners
-    face_corner_offsets = {0, size - 1, size * (size - 1), size * size - 1}
-    # Border positions that are not corners are edges
-    face_border_offsets: set[int] = set()
-    for i in range(size):
-        face_border_offsets.update({
-            i,                      # top row
-            size * (size - 1) + i,  # bottom row
-            size * i,               # left column
-            size * i + (size - 1),  # right column
-        })
-    face_edge_offsets = face_border_offsets - face_corner_offsets
-    # Centers: interior positions (not on border)
-    face_center_offsets = set(range(size * size)) - face_border_offsets
-
-    for face_idx in range(FACE_NUMBER):
-        face_start = face_idx * cube.face_size
-        corner_indices.update(face_start + o for o in face_corner_offsets)
-        edge_indices.update(face_start + o for o in face_edge_offsets)
-        center_indices.update(face_start + o for o in face_center_offsets)
-
-    centers_moved = sum(
-        1 for pos in permutations
-        if pos in center_indices
-    )
-    edges_moved = sum(
-        1 for pos in permutations
-        if pos in edge_indices
-    )
-    corners_moved = sum(
-        1 for pos in permutations
-        if pos in corner_indices
-    )
+    for pos in permutations:
+        family = cube.get_facelet_piece_types(pos)[-1]
+        if family == 'corner':
+            corners_moved += 1
+        elif family == 'edge':
+            edges_moved += 1
+        elif family == 'center':
+            centers_moved += 1
 
     return {
         'centers_moved': centers_moved,

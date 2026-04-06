@@ -2,6 +2,7 @@
 from functools import cached_property
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.annotations import Mask
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
@@ -106,6 +107,62 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         if self.size == 2:
             return 0
         return self.size + 1
+
+    @cached_property
+    def facelet_piece_types(self) -> dict[int, list[FaceletPieceType]]:
+        """
+        Get the piece types for every facelet index on the cube.
+
+        Each value is a list ordered from most specific to least specific,
+        e.g. ['midge', 'edge'] or ['fixed_center', 'center'].
+
+        Returns:
+            Dictionary mapping facelet index to piece type list.
+
+        """
+        size = self.size
+        middle = size // 2
+        is_odd = self.has_fixed_centers
+        result: dict[int, list[FaceletPieceType]] = {}
+
+        for i in range(self.face_size):
+            row, col = divmod(i, size)
+
+            on_row_border = row == 0 or row == size - 1
+            on_col_border = col == 0 or col == size - 1
+
+            if on_row_border and on_col_border:
+                result[i] = ['corner']
+            elif on_row_border or on_col_border:
+                if is_odd and middle in {row, col}:
+                    result[i] = ['midge', 'edge']
+                else:
+                    result[i] = ['wing', 'edge']
+            elif is_odd and row == middle and col == middle:
+                result[i] = ['fixed_center', 'center']
+            elif is_odd and middle in {row, col}:
+                result[i] = ['t_center', 'center']
+            elif min(row, size - 1 - row) == min(col, size - 1 - col):
+                result[i] = ['x_center', 'center']
+            else:
+                result[i] = ['oblique_center', 'center']
+
+        return result
+
+    def get_facelet_piece_types(
+            self, facelet_index: int,
+    ) -> list[FaceletPieceType]:
+        """
+        Get the piece types for a specific facelet index.
+
+        Args:
+            facelet_index: Global facelet index (0-based).
+
+        Returns:
+            List of piece types from most specific to family.
+
+        """
+        return self.facelet_piece_types[facelet_index % self.face_size]
 
     @property
     def orientation(self) -> str:
