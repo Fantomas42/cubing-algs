@@ -7,7 +7,6 @@ from cubing_algs.display.palettes import PALETTES
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.masks import F2L_MASK
-from cubing_algs.masks import facelets_masked
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
 
@@ -32,6 +31,24 @@ def print_colorized(string: str, colors: list[str], line: str = '-') -> None:
     result += '\x1b[0;0m'
 
     print(result)
+
+
+def facelets_masked(state: str, mask: str) -> str:
+    """
+    Mask facelets.
+
+    Returns:
+      A state masked.
+
+    """
+    masked = []
+    for i, m in enumerate(mask):
+        if m == '1':
+            masked.append(state[i])
+        else:
+            masked.append('-')
+
+    return ''.join(masked)
 
 
 def show_cube_palette(palette_name: str) -> None:
@@ -86,54 +103,60 @@ def show_cube_palette(palette_name: str) -> None:
 
     cube_moved.show(
         palette=palette_name,
-        mode='extended',
+        layout='extended',
+    )
+    print()
+    cube_moved.show(
+        palette=palette_name,
+        layout='extended',
+        mask=F2L_MASK,
     )
 
     print_colorized('Linear :', colors)
     cube_static.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
     )
     print()
     cube_moved.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
     )
     print()
     cube_moved.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
         mask=CENTERS_MASK,
     )
     print()
     cube_hidden.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
     )
 
     print_colorized('Compact linear :', colors)
     cube_static.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
         facelet='compact',
     )
     print()
     cube_moved.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
         facelet='compact',
     )
     print()
     cube_moved.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
         mask=CENTERS_MASK,
         facelet='compact',
     )
     print()
     cube_hidden.show(
         palette=palette_name,
-        mode='linear',
+        layout='linear',
         facelet='compact',
     )
     print()

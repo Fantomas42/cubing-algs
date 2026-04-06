@@ -2,8 +2,12 @@
 # ruff: noqa: T201
 import argparse
 from collections import Counter
+from typing import TYPE_CHECKING
 
 from cubing_algs.vcube import VCube
+
+if TYPE_CHECKING:
+    from cubing_algs.annotations import FaceletPieceType
 
 DEFAULT_SIZES = (2, 3, 4, 5, 7)
 
@@ -22,12 +26,13 @@ def show_piece_types(size: int) -> None:
     print(f'{size}x{size}x{size}')
     print('=' * 40)
 
-    counts: Counter[str] = Counter()
-    families: dict[str, list[str]] = {}
+    counts: Counter[FaceletPieceType] = Counter()
+    families: dict[FaceletPieceType, list[FaceletPieceType]] = {}
+
     for types in piece_types.values():
         counts[types[0]] += 1
         if len(types) > 1:
-            family = types[-1]
+            family: FaceletPieceType = types[-1]
             families.setdefault(family, [])
             if types[0] not in families[family]:
                 families[family].append(types[0])
@@ -48,7 +53,7 @@ def show_piece_types(size: int) -> None:
         if piece_type not in members_set:
             print_row(piece_type, count)
 
-    cube.show(mode='linear', style='detailed')
+    cube.show(layout='linear', style='detailed')
     print()
 
 

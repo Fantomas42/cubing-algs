@@ -1,9 +1,31 @@
 """Demonstrate comprehensive algorithm impact analysis."""
 # ruff: noqa: T201
+from typing import TYPE_CHECKING
+
 from cubing_algs.algorithm import Algorithm
 
+if TYPE_CHECKING:
+    from cubing_algs.impacts import CycleAnalysis
 
-def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
+
+def print_cycle_info(
+    label: str,
+    cycles: list[list[int]],
+    analysis: 'CycleAnalysis | None',
+) -> None:
+    """Print cycle details for corners or edges."""
+    print(f'\n  {label} cycles:           { cycles }')
+    if analysis is None or analysis['cycle_count'] == 0:
+        return
+    print(f'    Cycle count:           { analysis["cycle_count"] }')
+    print(f'    Cycle lengths:         { analysis["cycle_lengths"] }')
+    if analysis['two_cycles'] > 0:
+        print(f'    2-cycles (swaps):      { analysis["two_cycles"] }')
+    if analysis['three_cycles'] > 0:
+        print(f'    3-cycles:              { analysis["three_cycles"] }')
+
+
+def show_impact(algorithm: str) -> None:
     """Display comprehensive impact analysis for an algorithm."""
     print(f'{ "=" * 70 }')
     print(f'Algorithm: { algorithm }')
@@ -18,14 +40,18 @@ def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
     print(f'  Fixed facelets:          { impacts.facelets_fixed_count }/54')
     print(f'  Mobilized facelets:      { impacts.facelets_mobilized_count }/54')
     print(f'  Scrambled percent:       { impacts.facelets_scrambled_percent:.1%}')  # noqa: E501
-    print('\n  Manhattan distance metrics:')
-    print(f'    Mean displacement:     { impacts.facelets_manhattan_distance.mean:.2f}')  # noqa: E501
-    print(f'    Max displacement:      { impacts.facelets_manhattan_distance.max }')  # noqa: E501
-    print(f'    Total displacement:    { impacts.facelets_manhattan_distance.sum }')  # noqa: E501
-    print('\n  QTM distance metrics:')
-    print(f'    Mean displacement:     { impacts.facelets_qtm_distance.mean:.2f}')  # noqa: E501
-    print(f'    Max displacement:      { impacts.facelets_qtm_distance.max }')
-    print(f'    Total displacement:    { impacts.facelets_qtm_distance.sum }')
+    manhattan = impacts.facelets_manhattan_distance
+    if manhattan is not None:
+        print('\n  Manhattan distance metrics:')
+        print(f'    Mean displacement:     { manhattan.mean:.2f}')
+        print(f'    Max displacement:      { manhattan.max }')
+        print(f'    Total displacement:    { manhattan.sum }')
+    qtm = impacts.facelets_qtm_distance
+    if qtm is not None:
+        print('\n  QTM distance metrics:')
+        print(f'    Mean displacement:     { qtm.mean:.2f}')
+        print(f'    Max displacement:      { qtm.max }')
+        print(f'    Total displacement:    { qtm.sum }')
     print('\n  Face mobility:')
     for face, count in impacts.facelets_face_mobility.items():
         print(f'    {face} face:               {count}/9 facelets moved')
@@ -58,56 +84,18 @@ def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
     )
 
     if impacts.cubies_corner_cycles:
-        print(
-            f'\n  Corner cycles:           '
-            f'{ impacts.cubies_corner_cycles }',
+        print_cycle_info(
+            'Corner',
+            impacts.cubies_corner_cycles,
+            impacts.cubies_corner_cycle_analysis,
         )
-        cc_analysis = impacts.cubies_corner_cycle_analysis
-        if cc_analysis['cycle_count'] > 0:
-            print(
-                f'    Cycle count:           '
-                f'{ cc_analysis["cycle_count"] }',
-            )
-            print(
-                f'    Cycle lengths:         '
-                f'{ cc_analysis["cycle_lengths"] }',
-            )
-            if cc_analysis['two_cycles'] > 0:
-                print(
-                    f'    2-cycles (swaps):      '
-                    f'{ cc_analysis["two_cycles"] }',
-                )
-            if cc_analysis['three_cycles'] > 0:
-                print(
-                    f'    3-cycles:              '
-                    f'{ cc_analysis["three_cycles"] }',
-                )
 
     if impacts.cubies_edge_cycles:
-        print(
-            f'\n  Edge cycles:             '
-            f'{ impacts.cubies_edge_cycles }',
+        print_cycle_info(
+            'Edge',
+            impacts.cubies_edge_cycles,
+            impacts.cubies_edge_cycle_analysis,
         )
-        ec_analysis = impacts.cubies_edge_cycle_analysis
-        if ec_analysis['cycle_count'] > 0:
-            print(
-                '    Cycle count:           '
-                f'{ ec_analysis["cycle_count"] }',
-            )
-            print(
-                '    Cycle lengths:         '
-                f'{ ec_analysis["cycle_lengths"] }',
-            )
-            if ec_analysis['two_cycles'] > 0:
-                print(
-                    '    2-cycles (swaps):      '
-                    f'{ ec_analysis["two_cycles"] }',
-                )
-            if ec_analysis['three_cycles'] > 0:
-                print(
-                    f'    3-cycles:              '
-                    f'{ ec_analysis["three_cycles"] }',
-                )
 
     print(
         '\n  Complexity score:        '
@@ -118,9 +106,10 @@ def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
         f'{ impacts.cubies_suggested_approach }',
     )
 
-    print('\n  Pattern classification:  ')
-    for pattern in impacts.cubies_patterns:
-        print(f'    { pattern }')
+    if impacts.cubies_patterns:
+        print('\n  Pattern classification:  ')
+        for pattern in impacts.cubies_patterns:
+            print(f'    { pattern }')
 
     # Visual representation
     print('\nCUBE VISUALIZATION')

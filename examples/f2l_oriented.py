@@ -16,7 +16,7 @@ def show_f2l_oriented(orientation: str) -> None:
     c.rotate(f"{ orientation } z2 R U' R' U R' F R F' U".strip())
 
     print(f'{ orientation} ====>')
-    c.show('f2l')
+    c.show(mode='f2l')
 
 
 show_f2l_oriented('')

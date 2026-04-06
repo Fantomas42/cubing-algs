@@ -10,4 +10,4 @@ print('Before:')
 c.show()
 
 print('After:')
-c.show('linear')
+c.show(layout='linear')
