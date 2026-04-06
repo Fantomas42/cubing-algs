@@ -2,6 +2,8 @@
 from functools import cached_property
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import CubeCubiesOriented
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.annotations import Mask
 from cubing_algs.constants import FACE_INDEXES
@@ -78,7 +80,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         self.history: list[str] = history or []
 
     @property
-    def state(self) -> str:
+    def state(self) -> CubeFacelets:
         """Get the current state of the cube as a facelet string."""
         return self._state
 
@@ -221,9 +223,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return all(face * self.face_size in self._state for face in FACE_ORDER)
 
     @property
-    def cubies(self) -> tuple[
-            list[int], list[int], list[int], list[int], list[int],
-    ]:
+    def cubies(self) -> CubeCubiesOriented:
         """
         Convert the cube state to cubie representation.
 
