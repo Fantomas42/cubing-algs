@@ -419,7 +419,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return cube
 
-    def display(self, mode: str = '',  # noqa: PLR0913 PLR0917
+    def display(self, *, mode: str = '',  # noqa: PLR0913
                 layout: str = '', orientation: str = '',
                 mask: Mask = '', palette: str = '',
                 effect: str = '', facelet: str = '',
@@ -443,10 +443,13 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         """
         return VCubeDisplay(self, palette, effect, facelet, style).display(
-            mode, layout, orientation, mask,
+            mode=mode,
+            layout=layout,
+            orientation=orientation,
+            mask=mask,
         )
 
-    def show(self, mode: str = '',  # noqa: PLR0913 PLR0917
+    def show(self, *, mode: str = '',  # noqa: PLR0913
              layout: str = '', orientation: str = '',
              mask: Mask = '', palette: str = '',
              effect: str = '', facelet: str = '',
@@ -454,8 +457,10 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """Print a visual representation of the cube."""
         print(  # noqa: T201
             self.display(
-                mode, layout, orientation, mask,
-                palette, effect, facelet, style,
+                mode=mode, layout=layout,
+                orientation=orientation, mask=mask,
+                palette=palette, effect=effect,
+                facelet=facelet, style=style,
             ),
             end='',
         )
