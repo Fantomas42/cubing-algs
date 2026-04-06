@@ -317,10 +317,10 @@ class VCubeDisplay:
             face_color = self.palette['hidden']
         else:
             face_key = facelet
-            if mask == '0':
-                face_key += '_masked'
-            elif adjacent:
+            if adjacent:
                 face_key += '_adjacent'
+            elif mask == '0':
+                face_key += '_masked'
             face_color = self.palette[face_key]
 
         if self.effect and not adjacent and facelet_index is not None:

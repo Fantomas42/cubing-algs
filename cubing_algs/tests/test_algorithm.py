@@ -1339,19 +1339,19 @@ class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         )
 
         expected = (
-            '                d  B  d \n'
+            '                d  b  d \n'
             '             l  b  D  b  r \n'
-            '             R  D  D  D  L \n'
+            '             r  D  D  D  l \n'
             '             l  f  D  f  r \n'
-            '    b  D  f                 f  D  b  b  D  b \n'
+            '    b  d  f                 f  d  b  b  d  b \n'
             ' d  l  R  l     d  F  d     r  L  r  d  B  d  l \n'
-            ' B  R  R  R     F  F  F     L  L  L  B  B  B  R \n'
-            ' B  R  R  R     F  F  F     L  L  L  B  B  B  R \n'
-            '    U  U  U                 U  U  U  U  U  U \n'
-            '             R  U  U  U  L \n'
-            '             R  U  U  U  L \n'
-            '             R  U  U  U  L \n'
-            '                B  B  B '
+            ' b  R  R  R     F  F  F     L  L  L  B  B  B  r \n'
+            ' b  R  R  R     F  F  F     L  L  L  B  B  B  r \n'
+            '    u  u  u                 u  u  u  u  u  u \n'
+            '             r  U  U  U  l \n'
+            '             r  U  U  U  l \n'
+            '             r  U  U  U  l \n'
+            '                b  b  b '
         )
         self.assertEqual(grid, expected)
 

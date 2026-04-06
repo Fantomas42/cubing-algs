@@ -151,15 +151,15 @@ class VCubeShowPLLTestCase(VCubeShowMixin, unittest.TestCase):
             '             B  d  d  d  F \n'
             '             B  d  d  d  F \n'
             '             R  d  d  d  R \n'
-            '    d  d  d                 d  d  d  d  d  d \n'
+            '    D  D  D                 D  D  D  D  D  D \n'
             ' L  B  B  R     F  L  B     R  F  F  L  R  L  B \n'
-            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
-            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
-            '    u  u  u                 u  u  u  u  u  u \n'
-            '             r  u  u  u  l \n'
-            '             r  u  u  u  l \n'
-            '             r  u  u  u  l \n'
-            '                b  b  b '
+            ' B  r  r  r     f  f  f     l  l  l  b  b  b  R \n'
+            ' B  r  r  r     f  f  f     l  l  l  b  b  b  R \n'
+            '    U  U  U                 U  U  U  U  U  U \n'
+            '             R  u  u  u  L \n'
+            '             R  u  u  u  L \n'
+            '             R  u  u  u  L \n'
+            '                B  B  B '
         )
         self.assertEqual(grid, expected)
 
@@ -202,19 +202,19 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='oll', layout='extended')
 
         expected = (
-            '                b  D  D \n'
-            '             D  l  f  r  f \n'
-            '             r  D  D  D  b \n'
-            '             r  b  l  D  l \n'
-            '    l  D  b                 D  D  r  r  f  l \n'
-            ' b  D  r  r     D  D  f     l  b  f  D  D  b  D \n'
-            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
-            ' b  r  r  r     f  f  f     l  l  l  b  b  b  r \n'
-            '    u  u  u                 u  u  u  u  u  u \n'
-            '             r  u  u  u  l \n'
-            '             r  u  u  u  l \n'
-            '             r  u  u  u  l \n'
-            '                b  b  b '
+            '                B  D  D \n'
+            '             D  l  f  r  F \n'
+            '             R  D  D  D  B \n'
+            '             R  b  l  D  L \n'
+            '    L  D  B                 D  D  R  R  F  L \n'
+            ' B  D  r  r     D  D  f     l  b  f  D  D  b  D \n'
+            ' B  r  r  r     f  f  f     l  l  l  b  b  b  R \n'
+            ' B  r  r  r     f  f  f     l  l  l  b  b  b  R \n'
+            '    U  U  U                 U  U  U  U  U  U \n'
+            '             R  u  u  u  L \n'
+            '             R  u  u  u  L \n'
+            '             R  u  u  u  L \n'
+            '                B  B  B '
         )
         self.assertEqual(grid, expected)
 

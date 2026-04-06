@@ -105,12 +105,6 @@ def show_cube_palette(palette_name: str) -> None:
         palette=palette_name,
         layout='extended',
     )
-    print()
-    cube_moved.show(
-        palette=palette_name,
-        layout='extended',
-        mask=F2L_MASK,
-    )
 
     print_colorized('Linear :', colors)
     cube_static.show(
