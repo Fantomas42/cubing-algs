@@ -10,7 +10,7 @@ def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
     print('=' * 70)
 
     algo = Algorithm.parse_moves(algorithm)
-    impacts = algo.impacts
+    impacts = algo.impacts()
 
     # Facelet Analysis (Visual/Spatial Impact)
     print('\nFACELET ANALYSIS (Visual/Spatial Impact)')
@@ -29,6 +29,12 @@ def show_impact(algorithm: str) -> None:  # noqa: PLR0915, C901
     print('\n  Face mobility:')
     for face, count in impacts.facelets_face_mobility.items():
         print(f'    {face} face:               {count}/9 facelets moved')
+
+    layer = impacts.facelets_layer_analysis
+    print('\n  Layer analysis:')
+    print(f'    Corners moved:         { layer["corners_moved"] }')
+    print(f'    Edges moved:           { layer["edges_moved"] }')
+    print(f'    Centers moved:         { layer["centers_moved"] }')
 
     # Cubie Analysis (Piece-Level Impact)
     print('\nCUBIE ANALYSIS (Piece-Level Impact)')
