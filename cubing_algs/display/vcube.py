@@ -225,9 +225,9 @@ class VCubeDisplay:
             Formatted string representation of the cube state.
 
         """
-        default_mask = ''
-        default_orientation = ''
-        default_layout = ''
+        mode_mask = ''
+        mode_orientation = ''
+        mode_layout = ''
 
         mode = mode.lower()
         layout = layout.lower()
@@ -248,42 +248,42 @@ class VCubeDisplay:
 
         # Only work for 3x3x3
         if mode == 'oll':
-            default_mask = OLL_MASK
-            default_layout = 'top'
+            mode_mask = OLL_MASK
+            mode_layout = 'top'
         elif mode == 'pll':
-            default_mask = PLL_MASK
-            default_layout = 'top'
+            mode_mask = PLL_MASK
+            mode_layout = 'top'
         elif mode == 'll':
-            default_mask = L3_MASK
-            default_layout = 'top'
+            mode_mask = L3_MASK
+            mode_layout = 'top'
         elif mode == 'cross':
-            default_mask = CROSS_BOTTOM_MASK
-            default_orientation = 'FU'
+            mode_mask = CROSS_BOTTOM_MASK
+            mode_orientation = 'FU'
         elif mode in {'f2l', 'af2l'}:
-            default_mask = F2L_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
+            mode_mask = F2L_MASK
+            mode_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'f2l+ll':
-            default_mask = F2L_LL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
+            mode_mask = F2L_LL_MASK
+            mode_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'f2l+cll':
-            default_mask = F2L_CLL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
+            mode_mask = F2L_CLL_MASK
+            mode_orientation = f'D{ self.compute_f2l_front_face() }'
         elif mode == 'f2l+ell':
-            default_mask = F2L_ELL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
+            mode_mask = F2L_ELL_MASK
+            mode_orientation = f'D{ self.compute_f2l_front_face() }'
 
         display_method = cast(
             'Callable[[list[str], list[str]], str]',
             getattr(
                 self,
                 LAYOUT_METHODS.get(
-                    layout or default_layout,
+                    layout or mode_layout,
                     'display_cube',
                 ),
             ),
         )
 
-        final_orientation = orientation or default_orientation
+        final_orientation = orientation or mode_orientation
         if final_orientation:
             cube = self.cube.oriented_copy(final_orientation, full=True)
         else:
@@ -293,7 +293,7 @@ class VCubeDisplay:
         masked_faces = self.split_faces(
             self.compute_mask(
                 cube,
-                mask or rotata(default_mask),
+                mask or rotata(mode_mask),
             ),
         )
 
