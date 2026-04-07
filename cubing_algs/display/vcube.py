@@ -14,7 +14,7 @@ from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.effects import load_effect
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.styles import load_style
-from cubing_algs.masks import CROSS_MASK
+from cubing_algs.masks import CROSS_BOTTOM_MASK
 from cubing_algs.masks import F2L_CLL_MASK
 from cubing_algs.masks import F2L_ELL_MASK
 from cubing_algs.masks import F2L_LL_MASK
@@ -188,7 +188,7 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, *,
+    def display(self, *,  # noqa: C901
                 mode: str = '', layout: str = '',
                 orientation: str = '', mask: Mask = '') -> str:
         """
@@ -232,21 +232,32 @@ class VCubeDisplay:
         mode = mode.lower()
         layout = layout.lower()
 
+        def rotata(mask: Mask) -> Mask:
+            from cubing_algs.vcube import VCube
+
+            cube = VCube(
+                mask,
+                size=self.cube.size,
+                check=False,
+            )
+            cube.rotate(
+                self.cube.compute_orientation_moves('UF'),
+            )
+
+            return cube.state
+
         # Only work for 3x3x3
         if mode == 'oll':
             default_mask = OLL_MASK
             default_layout = 'top'
-            default_orientation = 'D'
         elif mode == 'pll':
             default_mask = PLL_MASK
             default_layout = 'top'
-            default_orientation = 'D'
         elif mode == 'll':
             default_mask = L3_MASK
             default_layout = 'top'
-            default_orientation = 'D'
         elif mode == 'cross':
-            default_mask = CROSS_MASK
+            default_mask = CROSS_BOTTOM_MASK
             default_orientation = 'FU'
         elif mode in {'f2l', 'af2l'}:
             default_mask = F2L_MASK
@@ -282,7 +293,7 @@ class VCubeDisplay:
         masked_faces = self.split_faces(
             self.compute_mask(
                 cube,
-                mask or default_mask,
+                mask or rotata(default_mask),
             ),
         )
 
