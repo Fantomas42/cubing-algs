@@ -15,6 +15,7 @@ from cubing_algs.display.effects import load_effect
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.styles import load_style
 from cubing_algs.masks import CROSS_BOTTOM_MASK
+from cubing_algs.masks import CROSS_TOP_MASK
 from cubing_algs.masks import F2L_CLL_MASK
 from cubing_algs.masks import F2L_ELL_MASK
 from cubing_algs.masks import F2L_LL_MASK
@@ -256,7 +257,10 @@ class VCubeDisplay:
         elif mode == 'll':
             mode_mask = L3_MASK
             mode_layout = 'top'
-        elif mode == 'cross':
+        elif mode == 'cross-top':
+            mode_mask = CROSS_TOP_MASK
+            mode_orientation = 'FD'
+        elif mode in {'cross', 'cross-bottom'}:
             mode_mask = CROSS_BOTTOM_MASK
             mode_orientation = 'FU'
         elif mode in {'f2l', 'af2l'}:
