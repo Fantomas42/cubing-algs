@@ -220,6 +220,138 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
 
 
 @patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class VCubeShowPLLExampleTestCase(VCubeShowMixin, unittest.TestCase):
+    """Test PLL mode matching examples/pll.py for T Perm with y x' prefix."""
+
+    def setUp(self) -> None:
+        """Set up T Perm cube state with y x' prefix."""
+        self.cube = VCube()
+        self.cube.rotate("y x' L2 U' L2 D F2 R2 U R2 D' F2")
+
+    def test_no_mode(self) -> None:
+        """Test plain show() without mode."""
+        grid = self.show_grid(self.cube)
+
+        expected = (
+            '          L  L  L \n'
+            '          L  L  L \n'
+            '          L  L  L \n'
+            ' D  D  F  U  B  D  F  U  U  B  F  B \n'
+            ' F  F  F  U  U  U  B  B  B  D  D  D \n'
+            ' F  F  F  U  U  U  B  B  B  D  D  D \n'
+            '          R  R  R \n'
+            '          R  R  R \n'
+            '          R  R  R '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_pll_mode(self) -> None:
+        """Test PLL mode dims D-face and highlights edges."""
+        grid = self.show_grid(self.cube, mode='pll')
+
+        expected = (
+            '          B  F  B \n'
+            '       D  l  l  l  U \n'
+            '       D  l  l  l  U \n'
+            '       F  l  l  l  F \n'
+            '          U  B  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_pll_orientation_ld(self) -> None:
+        """Test PLL mode with LD orientation."""
+        grid = self.show_grid(self.cube, mode='pll', orientation='LD')
+
+        expected = (
+            '          D  B  U \n'
+            '       F  l  l  l  F \n'
+            '       U  l  l  l  D \n'
+            '       U  l  l  l  D \n'
+            '          B  F  B '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_pll_orientation_dl(self) -> None:
+        """Test PLL mode with DL orientation."""
+        grid = self.show_grid(self.cube, mode='pll', orientation='DL')
+
+        expected = (
+            '          r  r  r \n'
+            '       f  d  d  d  b \n'
+            '       f  d  d  d  b \n'
+            '       D  B  F  B  U \n'
+            '          l  l  l '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class VCubeShowOLLExampleTestCase(VCubeShowMixin, unittest.TestCase):
+    """Test OLL mode matching for case 14 Anti-Gun in different orientations."""
+
+    def setUp(self) -> None:
+        """Set up OLL case 14 Anti-Gun cube state with y x prefix."""
+        self.cube = VCube()
+        self.cube.rotate("y x F U F' R' F R U' R' F' R")
+
+    def test_no_mode(self) -> None:
+        """Test plain show() without mode."""
+        grid = self.show_grid(self.cube)
+
+        expected = (
+            '          B  D  F \n'
+            '          R  R  R \n'
+            '          U  B  R \n'
+            ' R  F  F  R  R  D  B  U  D  R  R  U \n'
+            ' F  F  F  D  D  D  B  B  B  U  U  U \n'
+            ' F  F  F  D  D  D  B  B  B  U  U  U \n'
+            '          L  L  L \n'
+            '          L  L  L \n'
+            '          L  L  L '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_mode(self) -> None:
+        """Test OLL mode highlights U-face colors and dims others."""
+        grid = self.show_grid(self.cube, mode='oll')
+
+        expected = (
+            '          u  R  R \n'
+            '       R  b  d  f  d \n'
+            '       f  R  R  R  u \n'
+            '       f  u  b  R  b \n'
+            '          R  R  d '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_orientation_ru(self) -> None:
+        """Test OLL mode with RU orientation."""
+        grid = self.show_grid(self.cube, mode='oll', orientation='RU')
+
+        expected = (
+            '          d  R  R \n'
+            '       b  R  b  u  f \n'
+            '       u  R  R  R  f \n'
+            '       d  f  d  b  R \n'
+            '          R  R  u '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_orientation_ur(self) -> None:
+        """Test OLL mode with UR orientation."""
+        grid = self.show_grid(self.cube, mode='oll', orientation='UR')
+
+        expected = (
+            '          l  l  l \n'
+            '       f  u  u  u  b \n'
+            '       f  u  u  u  b \n'
+            '       R  u  R  R  d \n'
+            '          b  d  f '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
 class VCubeShowOrientedTestCase(VCubeShowMixin, unittest.TestCase):
     """Test orientation + CENTERS_MASK after R U R' U'."""
 

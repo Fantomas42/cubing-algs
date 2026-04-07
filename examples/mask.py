@@ -2,7 +2,7 @@
 # ruff: noqa: T201
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.masks import CORNERS_MASK
-from cubing_algs.masks import CROSS_MASK
+from cubing_algs.masks import CROSS_BOTTOM_MASK
 from cubing_algs.masks import EDGES_MASK
 from cubing_algs.masks import F2L_BL_MASK
 from cubing_algs.masks import F2L_BR_MASK
@@ -40,7 +40,7 @@ examples = (
     ['EDGES', EDGES_MASK],
     ['OLL', OLL_MASK],
     ['PLL', PLL_MASK],
-    ['Cross', CROSS_MASK],
+    ['Cross', CROSS_BOTTOM_MASK],
     ['F2L', F2L_MASK],
     ['F2L FR', F2L_FR_MASK],
     ['F2L FL', F2L_FL_MASK],
