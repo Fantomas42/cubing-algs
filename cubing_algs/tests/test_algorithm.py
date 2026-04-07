@@ -1434,6 +1434,7 @@ class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         self.assertEqual(grid, expected)
 
 
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
 class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
     """
     Test cases for Algorithm.show with impact mask on 4x4x4.
@@ -1535,6 +1536,7 @@ class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
         self.assertEqual(grid, expected)
 
 
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
 class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
     """
     Test cases for Algorithm.show with impact mask on 5x5x5.

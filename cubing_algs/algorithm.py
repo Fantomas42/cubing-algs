@@ -10,6 +10,7 @@ from typing import Self
 
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
+from cubing_algs.display.vcube import DEFAULT_PALETTE
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidMoveError
@@ -479,7 +480,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
               rotation: str = 'y45x-34',
               distance: float = 10.0,
               cube_color: str = '#111111',
-              palette_name: str = 'default') -> str:
+              palette_name: str = DEFAULT_PALETTE) -> str:
         """
         Render the algorithm's effect on a cube as an SVG image.
 

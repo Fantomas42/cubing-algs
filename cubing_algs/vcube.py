@@ -10,6 +10,7 @@ from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
+from cubing_algs.display.vcube import DEFAULT_PALETTE
 from cubing_algs.display.vcube import VCubeDisplay
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidFaceIndexError
@@ -470,7 +471,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
               rotation: str = 'y45x-34',
               distance: float = 10.0,
               cube_color: str = '#111111',
-              palette_name: str = 'default') -> str:
+              palette_name: str = DEFAULT_PALETTE) -> str:
         """
         Render the cube as an SVG image.
 
