@@ -126,7 +126,7 @@ class VCubeDisplay:
 
         cube_mask = VCube(
             initial=mask,
-            size=cube.size,
+            size=self.cube_size,
             check=False,
         )
         cube_mask.rotate(' '.join(cube.history))
@@ -238,7 +238,7 @@ class VCubeDisplay:
 
             cube = VCube(
                 mask,
-                size=self.cube.size,
+                size=self.cube_size,
                 check=False,
             )
             cube.rotate(
@@ -297,7 +297,11 @@ class VCubeDisplay:
         masked_faces = self.split_faces(
             self.compute_mask(
                 cube,
-                mask or rotata(mode_mask),
+                mask or (
+                    rotata(mode_mask)
+                    if self.cube_size == 3
+                    else ''
+                ),
             ),
         )
 

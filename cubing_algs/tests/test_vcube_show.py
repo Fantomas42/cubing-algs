@@ -705,3 +705,43 @@ class VCubeShowF2LOrientedTestCase(VCubeShowMixin, unittest.TestCase):
             '          U  U  U '
         )
         self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class VCubeShowNon3x3ModeTestCase(VCubeShowMixin, unittest.TestCase):
+    """Test that show() with mode args does not raise for non-3x3x3 cubes."""
+
+    def setUp(self) -> None:
+        """Set up a 4x4x4 cube."""
+        self.cube = VCube(size=4)
+
+    def test_oll_mode_no_error(self) -> None:
+        """Test OLL mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='oll')
+        self.assertIsInstance(output, str)
+
+    def test_pll_mode_no_error(self) -> None:
+        """Test PLL mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='pll')
+        self.assertIsInstance(output, str)
+
+    def test_ll_mode_no_error(self) -> None:
+        """Test LL mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='ll')
+        self.assertIsInstance(output, str)
+
+    def test_cross_mode_no_error(self) -> None:
+        """Test cross mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='cross')
+        self.assertIsInstance(output, str)
+
+    def test_mode_changes_layout_without_masking(self) -> None:
+        """
+        Test that mode sets the layout but applies no masking on a 4x4x4.
+
+        OLL mode implies layout='top'. The output must match an explicit
+        layout='top' call (same layout, no mask difference).
+        """
+        output_mode = self.show_stripped(self.cube, mode='oll')
+        output_top = self.show_stripped(self.cube, layout='top')
+        self.assertEqual(output_mode, output_top)
