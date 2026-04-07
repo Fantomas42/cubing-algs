@@ -64,6 +64,14 @@ class CycleAnalysis(TypedDict):
     four_plus_cycles: int
 
 
+class ParitySignature(TypedDict):
+    """Parity classification of an algorithm's corner and edge permutations."""
+
+    signature: str
+    is_valid: bool
+    implications: list[str]
+
+
 class DistanceMetrics(NamedTuple):
     """Container for distance calculation results."""
 
@@ -128,6 +136,7 @@ class ImpactData(NamedTuple):
     cubies_corner_parity: int | None
     cubies_edge_parity: int | None
     cubies_parity_valid: bool | None
+    cubies_parity_signature: ParitySignature | None
     cubies_corner_cycle_analysis: CycleAnalysis | None
     cubies_edge_cycle_analysis: CycleAnalysis | None
     cubies_patterns: list[str] | None
@@ -760,6 +769,98 @@ def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
     }
 
 
+PARITY_LABELS: dict[int, str] = {0: 'even', 1: 'odd'}
+
+
+def classify_parity_signature(
+        corner_parity: int,
+        edge_parity: int,
+) -> ParitySignature:
+    """
+    Classify the parity signature of an algorithm's permutation.
+
+    Parity is a mathematical property of permutations: even permutations
+    can be decomposed into an even number of transpositions (swaps), odd
+    permutations into an odd number. On a valid 3x3x3 cube, corner and
+    edge parities must always match.
+
+    Args:
+        corner_parity: Parity of the corner permutation (0=even, 1=odd).
+        edge_parity: Parity of the edge permutation (0=even, 1=odd).
+
+    Returns:
+        ParitySignature with parity values, a signature string, validity
+        flag, and human-readable implications.
+
+    """
+    signature = f'{PARITY_LABELS[corner_parity]}-{PARITY_LABELS[edge_parity]}'
+    is_valid = corner_parity == edge_parity
+
+    implications: list[str] = []
+
+    if not is_valid:
+        corner_label = PARITY_LABELS[corner_parity]
+        edge_label = PARITY_LABELS[edge_parity]
+        implications.extend([
+            (
+                f'Corners have {corner_label} permutation parity,'
+                f' edges have {edge_label} — they must always match'
+            ),
+            (
+                'Every quarter turn flips both corner and edge parity'
+                ' simultaneously, so they can never diverge on a real cube'
+            ),
+            (
+                'Physically impossible on a standard 3x3x3: only achievable'
+                ' by disassembling the cube or swapping stickers'
+            ),
+        ])
+    elif corner_parity == 0:
+        implications.extend([
+            (
+                'Even permutation: corners and edges each undergo'
+                ' an even number of 2-cycles (swaps)'
+            ),
+            (
+                "Can be built entirely from commutators [A, B] = A B A' B'"
+                " and conjugates [A: B] = A B A' — no bare swaps needed"
+            ),
+            (
+                'Decomposes into 3-cycles, which is why pure commutator algs'
+                ' always move exactly 3 pieces per piece type'
+            ),
+            (
+                'A single quarter turn (R, U, ...) is odd, so this algorithm'
+                ' uses an even count of quarter turns net of half turns'
+            ),
+        ])
+    else:
+        implications.extend([
+            (
+                'Odd permutation: corners and edges each undergo'
+                ' an odd number of 2-cycles (swaps)'
+            ),
+            (
+                'A single quarter turn (R, U, ...) is itself an odd'
+                ' permutation, so one unmatched quarter turn drives this'
+            ),
+            (
+                'Cannot be built from commutators alone — at minimum one'
+                ' bare swap or unpaired quarter turn is required'
+            ),
+            (
+                'Typical of algorithms like T-perm or J-perm that swap'
+                ' one pair of corners and one pair of edges simultaneously'
+            ),
+        ])
+
+    return {
+        'signature': signature,
+        'is_valid': is_valid,
+        'implications': implications,
+    }
+
+
 def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         cp: list[int], co: list[int],
         ep: list[int], eo: list[int],
@@ -1049,6 +1150,7 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     corner_parity: int | None = None
     edge_parity: int | None = None
     parity_valid: bool | None = None
+    parity_signature: ParitySignature | None = None
     corner_cycle_analysis: CycleAnalysis | None = None
     edge_cycle_analysis: CycleAnalysis | None = None
     patterns: list[str] | None = None
@@ -1082,6 +1184,7 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
         corner_parity = compute_parity(cp)
         edge_parity = compute_parity(ep)
         parity_valid = corner_parity == edge_parity
+        parity_signature = classify_parity_signature(corner_parity, edge_parity)
         corner_cycle_analysis = analyze_cycles(corner_cycles)
         edge_cycle_analysis = analyze_cycles(edge_cycles)
         patterns = classify_pattern(cp, co, ep, eo)
@@ -1119,6 +1222,7 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
         cubies_corner_parity=corner_parity,
         cubies_edge_parity=edge_parity,
         cubies_parity_valid=parity_valid,
+        cubies_parity_signature=parity_signature,
         cubies_corner_cycle_analysis=corner_cycle_analysis,
         cubies_edge_cycle_analysis=edge_cycle_analysis,
         cubies_patterns=patterns,

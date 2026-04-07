@@ -11,8 +11,10 @@ from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.impacts import DistanceMetrics
 from cubing_algs.impacts import ImpactData
+from cubing_algs.impacts import ParitySignature
 from cubing_algs.impacts import analyze_cycles
 from cubing_algs.impacts import analyze_piece_type_impact
+from cubing_algs.impacts import classify_parity_signature
 from cubing_algs.impacts import classify_pattern
 from cubing_algs.impacts import compute_cubie_complexity
 from cubing_algs.impacts import compute_face_impact
@@ -24,6 +26,7 @@ from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
 from cubing_algs.impacts import parse_facelet_position
 from cubing_algs.impacts import positions_on_adjacent_corners
+from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
 
 
@@ -96,6 +99,7 @@ class TestImpactData(unittest.TestCase):
                 'four_plus_cycles': 0,
             },
             cubies_patterns=['SOLVED'],
+            cubies_parity_signature=classify_parity_signature(0, 0),
         )
 
         self.assertIsInstance(impact_data.cube, VCube)
@@ -205,6 +209,7 @@ class TestImpactData(unittest.TestCase):
                 'four_plus_cycles': 0,
             },
             cubies_patterns=['EDGES_ORIENTED', 'CORNERS_PERMUTED'],
+            cubies_parity_signature=classify_parity_signature(0, 0),
         )
 
         # Test all fields are accessible
@@ -3312,6 +3317,88 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         eo = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('UNCLASSIFIED', patterns)
+
+
+class TestClassifyParitySignature(unittest.TestCase):
+    """Test the classify_parity_signature function."""
+
+    def test_identity(self) -> None:
+        """Identity permutation should be even-even and valid."""
+        result = classify_parity_signature(0, 0)
+        self.assertEqual(result['signature'], 'even-even')
+        self.assertTrue(result['is_valid'])
+
+    def test_identity_implications(self) -> None:
+        """Even-even (identity) permutation should mention commutators."""
+        result = classify_parity_signature(0, 0)
+        self.assertTrue(
+            any('commutator' in s for s in result['implications']),
+        )
+
+    def test_three_cycles_even_even(self) -> None:
+        """3-cycles are even permutations."""
+        result = classify_parity_signature(0, 0)
+        self.assertEqual(result['signature'], 'even-even')
+        self.assertTrue(result['is_valid'])
+
+    def test_even_even_commutator_implication(self) -> None:
+        """Even-even algorithms should mention commutators."""
+        result = classify_parity_signature(0, 0)
+        self.assertTrue(
+            any('commutator' in s for s in result['implications']),
+        )
+
+    def test_single_swaps_odd_odd(self) -> None:
+        """Single 2-cycles are odd permutations."""
+        result = classify_parity_signature(1, 1)
+        self.assertEqual(result['signature'], 'odd-odd')
+        self.assertTrue(result['is_valid'])
+
+    def test_odd_odd_quarter_turn_implication(self) -> None:
+        """Odd-odd algorithms should mention quarter turns."""
+        result = classify_parity_signature(1, 1)
+        self.assertTrue(
+            any('quarter turn' in s for s in result['implications']),
+        )
+
+    def test_even_odd_invalid(self) -> None:
+        """Mismatched parities should be invalid."""
+        result = classify_parity_signature(0, 1)
+        self.assertEqual(result['signature'], 'even-odd')
+        self.assertFalse(result['is_valid'])
+
+    def test_odd_even_invalid(self) -> None:
+        """Mismatched parities should be invalid."""
+        result = classify_parity_signature(1, 0)
+        self.assertEqual(result['signature'], 'odd-even')
+        self.assertFalse(result['is_valid'])
+
+    def test_invalid_parity_implication(self) -> None:
+        """Invalid parity should mention impossibility."""
+        result = classify_parity_signature(0, 1)
+        self.assertTrue(
+            any('impossible' in s for s in result['implications']),
+        )
+
+    def test_return_type_keys(self) -> None:
+        """Result should have all expected TypedDict keys."""
+        result = classify_parity_signature(0, 0)
+        self.assertIn('signature', result)
+        self.assertIn('is_valid', result)
+        self.assertIn('implications', result)
+        self.assertIsInstance(result['implications'], list)
+
+    def test_compute_impacts_populates_parity_signature(self) -> None:
+        """compute_impacts should populate cubies_parity_signature."""
+        algo = parse_moves("R U R' U'")
+        impact = compute_impacts(algo)
+        self.assertIsNotNone(impact.cubies_parity_signature)
+        sig = cast('ParitySignature', impact.cubies_parity_signature)
+        self.assertIn(
+            sig['signature'],
+            ('even-even', 'odd-odd', 'even-odd', 'odd-even'),
+        )
+        self.assertTrue(sig['is_valid'])
 
 
 class TestComputeCubieComplexity(unittest.TestCase):
