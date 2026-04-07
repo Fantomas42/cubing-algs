@@ -221,6 +221,21 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         # Extended net should have more lines
         self.assertGreater(len(lines), 10)
 
+    def test_display_top_face_big_cube(self) -> None:
+        """Test top face layout works for cube sizes other than 3x3."""
+        for size in [2, 4, 5]:
+            with self.subTest(size=size):
+                cube = VCube(size=size)
+                printer = VCubeDisplay(cube)
+                face_size = size * size
+                faces = printer.split_faces(cube.state)
+                faces_mask = printer.split_faces('1' * face_size * 6)
+
+                result = printer.display_top_face(faces, faces_mask)
+
+                lines = result.splitlines()
+                self.assertEqual(len(lines), size + 2)
+
     def test_display_structure(self) -> None:
         """Test display structure."""
         result = self.printer.display()
@@ -883,6 +898,23 @@ class TestVCubeDisplayExtendedNet(unittest.TestCase):  # noqa: PLR0904
             # Each face should appear at least 9 times
             # (some faces appear more in extended net)
             self.assertGreaterEqual(face_counts[face], 9)
+
+    @patch.dict(os.environ, {'TERM': 'other'})
+    @patch('cubing_algs.display.vcube.USE_COLORS', False)  # noqa: FBT003
+    def test_display_extended_net_big_cube(self) -> None:
+        """Test extended net display works for cube sizes other than 3x3."""
+        for size in [2, 4, 5]:
+            with self.subTest(size=size):
+                cube = VCube(size=size)
+                printer = VCubeDisplay(cube)
+                face_size = size * size
+                faces = printer.split_faces(cube.state)
+                faces_mask = printer.split_faces('1' * face_size * 6)
+
+                result = printer.display_extended_net(faces, faces_mask)
+
+                lines = result.splitlines()
+                self.assertEqual(len(lines), 3 * size + 4)
 
     @patch.dict(os.environ, {'TERM': 'other'})
     @patch('cubing_algs.display.vcube.USE_COLORS', False)  # noqa: FBT003

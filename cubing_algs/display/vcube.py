@@ -635,8 +635,9 @@ class VCubeDisplay:
         )
 
         # Middle
-        l_indexes = [0, 1, 2]
-        r_indexes = [2, 1, 0]
+        top_row = list(range(self.cube_size))
+        l_indexes = top_row
+        r_indexes = top_row[::-1]
         for row in range(self.cube_size):
             result += self.display_row_with_sides(
                 faces, faces_mask, 'U',
@@ -674,6 +675,11 @@ class VCubeDisplay:
 
         """
         b_face_idx = FACE_INDEXES['B']
+        n = self.cube_size
+        top_row = list(range(n))
+        left_col = [i * n for i in range(n)]
+        right_col = [i * n + (n - 1) for i in range(n)]
+        bottom_row = list(range(n * (n - 1), n * n))
 
         # Top section with U face
         result = self.display_top_down_adjacent_facelets(
@@ -687,8 +693,8 @@ class VCubeDisplay:
             adjacent=True,
         )
 
-        top_l_indexes = [0, 1, 2]
-        top_r_indexes = [2, 1, 0]
+        top_l_indexes = top_row
+        top_r_indexes = top_row[::-1]
         for row in range(self.cube_size):
             result += self.display_row_with_sides(
                 faces, faces_mask, 'U',
@@ -701,20 +707,20 @@ class VCubeDisplay:
         result += self.display_spaces(1)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'U', [0, 3, 6],
+            'U', left_col,
             adjacent=True,
         )
         result += self.display_spaces(self.cube_size + 2)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'U', [8, 5, 2, 2, 1, 0],
+            'U', right_col[::-1] + top_row[::-1],
             adjacent=True,
         )
         result += '\n'
 
         # Central section with L F R B faces
-        mid_b_indexes = [2, 5, 8]
-        mid_l_indexes = [0, 3, 6]
+        mid_b_indexes = right_col
+        mid_l_indexes = left_col
 
         for row in range(self.cube_size):
             result += self.display_facelet_by_face(
@@ -749,20 +755,20 @@ class VCubeDisplay:
         result += self.display_spaces(1)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'D', [6, 3, 0],
+            'D', left_col[::-1],
             adjacent=True,
         )
         result += self.display_spaces(self.cube_size + 2)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'D', [2, 5, 8, 8, 7, 6],
+            'D', right_col + bottom_row[::-1],
             adjacent=True,
         )
         result += '\n'
 
         # Bottom section with D face
-        bottom_l_indexes = [8, 7, 6]
-        bottom_r_indexes = [6, 7, 8]
+        bottom_l_indexes = bottom_row[::-1]
+        bottom_r_indexes = bottom_row
         for row in range(self.cube_size):
             result += self.display_row_with_sides(
                 faces, faces_mask, 'D',
