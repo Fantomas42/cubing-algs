@@ -194,15 +194,32 @@ class VCubeDisplay:
         """
         Generate formatted visual representation of the cube state.
 
+        ``mode`` is a convenient shorthand that presets ``mask``,
+        ``orientation``, and ``layout`` for common solving stages.
+        Any explicit argument overrides what ``mode`` would have implied.
+
         Args:
-            mode: Display mode for layout/orientation/mask
-                  (e.g., 'oll', 'pll', 'cross', 'f2l').
-            layout: Display layout ('cube', 'top', 'linear', 'extended').
-                    Overrides the default layout implied by mode.
-            orientation: Cube orientation string for reorienting the view.
-                         Overrides the default orientation implied by mode.
-            mask: Mask to filter which facelets are displayed.
-                  Overrides the default masl implied by mode.
+            mode: Solving-stage preset (3x3x3 only).
+                Sets mask, orientation, and layout together.
+                Supported values: ``'oll'``, ``'pll'``, ``'ll'``,
+                ``'cross'``, ``'f2l'``, ``'af2l'``, ``'f2l+ll'``,
+                ``'f2l+cll'``, ``'f2l+ell'``.
+            layout: Face arrangement for the output.
+                One of ``'cube'`` (cross net, default),
+                ``'top'`` (U face with one row of each adjacent face),
+                ``'extended'`` (full unfolded net), or
+                ``'linear'`` (every face printed side by side row by row).
+            orientation: Two-character string that rotates the cube to change
+                the viewer's point of view before rendering (e.g. ``'UF'``
+                keeps U on top and F in front, ``'DF'`` puts D on top).
+            mask: 54-character binary string in facelet-state format (same
+                layout as ``VCube.state``). ``'1'`` facelets are shown
+                normally; ``'0'`` facelets are greyed out. When provided
+                directly, the mask is used as-is and only rotated through
+                the cube's move history. When implied by ``mode``, the
+                predefined mask is written in user-POV coordinates and first
+                converted to internal cube coordinates (e.g. U-D after a z2)
+                before being tracked through the history.
 
         Returns:
             Formatted string representation of the cube state.

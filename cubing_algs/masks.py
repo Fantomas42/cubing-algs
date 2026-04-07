@@ -181,15 +181,31 @@ def compute_algorithm_mask(
 
 FULL_MASK: Mask = '1' * 54
 
-# A mask is a 54-character binary string, one bit per facelet in solved-state
-# order (same layout as VCube.state). '1' highlights a facelet; '0' hides it.
+# Masks are mainly used to highlight or hide facelets when displaying a cube
+# state, making it easy to focus on a specific solving feature (OLL, PLL,
+# F2L, cross, etc.).
 #
-# Masks are defined relative to the solved cube, not to any specific color.
-# When displaying, the mask is rotated alongside the cube's move history so
-# highlighted positions follow the physical layer — not the color on it.
+# A mask is a 54-character binary string in facelet-state format (same layout
+# as VCube.state). '1' highlights a facelet; '0' hides it.
 #
-# Example: OLL_MASK marks the top layer. Whether yellow, white, or any other
-# color ends up on top, the same nine facelets are always highlighted.
+# Masks are written from the user's point of view: setting U facelets to '1'
+# means "highlight what I see on top". This is more intuitive than working in
+# solved-cube coordinates and makes masks color-neutral — they describe
+# positions, not which color occupies them, so the same mask works regardless
+# of the cube's color scheme or orientation.
+#
+# Internally, when a mask is used via a display mode, it is first converted
+# from user-POV to cube coordinates before being tracked through the move
+# history. For example, if the user holds the cube with yellow on top (a z2
+# from the solved state), a mask with U='1' is transformed to D='1' in
+# internal coordinates, then rotated through the algorithm moves so the
+# highlighted facelets follow the right stickers.
+#
+# Example: PLL_MASK highlights the top row of all four side faces — the
+# stickers the user sees at the top of F, B, L, R. A PLL algorithm permutes
+# those pieces without rotations. Because the user holds the cube z2, the mask
+# is converted to track the D-adjacent rows internally, correctly following
+# each sticker as it is permuted by the algorithm.
 
 CENTERS_MASK = (
     '000010000'
