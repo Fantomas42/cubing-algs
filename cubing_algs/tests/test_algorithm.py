@@ -984,33 +984,33 @@ class AlgorithmShowTestCase(AlgorithmShowMixin, unittest.TestCase):
 
     def test_show_oll_mode(self) -> None:
         """Test show renders OLL mode layout."""
-        output = self.show_stripped(
+        output = self.show_grid(
             Algorithm.parse_moves("R U R'"),
             mode='oll',
         )
 
         expected = (
-            '          B  B  B \n'
-            '       R  D  D  D  L \n'
-            '       R  D  D  D  L \n'
-            '       U  R  D  D  L \n'
-            '          F  F  F \n'
+            '          l  l  B \n'
+            '       f  u  u  U  R \n'
+            '       f  u  U  U  R \n'
+            '       d  f  f  l  b \n'
+            '          r  r  u '
         )
         self.assertEqual(output, expected)
 
     def test_show_oll_mode_single_r(self) -> None:
         """Test show renders OLL mode for single R move."""
-        output = self.show_stripped(
+        output = self.show_grid(
             Algorithm.parse_moves('R'),
             mode='oll',
         )
 
         expected = (
-            '          U  B  B \n'
-            '       R  B  D  D  L \n'
-            '       R  B  D  D  L \n'
-            '       R  B  D  D  L \n'
-            '          D  F  F \n'
+            '          B  B  u \n'
+            '       L  U  U  f  r \n'
+            '       L  U  U  f  r \n'
+            '       L  U  U  f  r \n'
+            '          F  F  d '
         )
         self.assertEqual(output, expected)
 

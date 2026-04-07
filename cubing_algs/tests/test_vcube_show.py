@@ -116,7 +116,7 @@ class VCubeShowPLLTestCase(VCubeShowMixin, unittest.TestCase):
     def setUp(self) -> None:
         """Set up T Perm cube state."""
         self.cube = VCube()
-        self.cube.rotate("z2 L2 U' L2 D F2 R2 U R2 D' F2 z2")
+        self.cube.rotate("z2 L2 U' L2 D F2 R2 U R2 D' F2")
 
     def test_pll_mode_grid(self) -> None:
         """Test PLL mode mask dims D-face and highlights edges."""
@@ -171,7 +171,7 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
     def setUp(self) -> None:
         """Set up OLL case 14 Anti-Gun cube state."""
         self.cube = VCube()
-        self.cube.rotate("z2 F U F' R' F R U' R' F' R z2")
+        self.cube.rotate("z2 F U F' R' F R U' R' F' R")
 
     def test_oll_mode_grid(self) -> None:
         """Test OLL mode mask highlights U-face colors and dims D-face."""

@@ -13,7 +13,6 @@ from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.integrity import VCubeIntegrityChecker
-from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
@@ -214,13 +213,22 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         so = SOLVED_SO
         facelets = '111111011111011011011010010010001001110110000111111100'
 
+        f2l_mask = (
+            '111111111'
+            '111111000'
+            '111111000'
+            '000000000'
+            '111111000'
+            '111111000'
+        )
+
         cube = VCube.from_cubies(
             cp, co, ep, eo, so,
-            F2L_MASK,
+            f2l_mask,
         )
         self.assertEqual(cube.state, facelets)
 
-        cube = VCube(F2L_MASK, check=False)
+        cube = VCube(f2l_mask, check=False)
         cube.rotate('F R')
 
         self.assertEqual(cube.state, facelets)
