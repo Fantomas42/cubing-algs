@@ -105,6 +105,10 @@ def show_cube_palette(palette_name: str) -> None:
         palette=palette_name,
         layout='extended',
     )
+    cube_hidden.show(
+        palette=palette_name,
+        layout='extended',
+    )
 
     print_colorized('Linear :', colors)
     cube_static.show(

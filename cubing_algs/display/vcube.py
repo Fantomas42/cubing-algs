@@ -314,7 +314,9 @@ class VCubeDisplay:
             return f' { facelet } '
 
         if facelet not in FACE_ORDER:
-            face_color = self.palette['hidden']
+            face_color = self.palette[
+                'hidden_adjacent' if adjacent else 'hidden'
+            ]
         else:
             face_key = facelet
             if adjacent:
