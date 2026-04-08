@@ -6,24 +6,12 @@ from typing import cast
 
 from cubing_algs.annotations import Mask
 from cubing_algs.annotations import RegexPattern
-from cubing_algs.constants import F2L_ADJACENT_FACES
-from cubing_algs.constants import F2L_FACE_ORIENTATIONS
-from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.display.effects import load_effect
+from cubing_algs.display.mode import ModeDisplay
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.styles import load_style
-from cubing_algs.masks import CROSS_BOTTOM_MASK
-from cubing_algs.masks import CROSS_TOP_MASK
-from cubing_algs.masks import F2L_CLL_MASK
-from cubing_algs.masks import F2L_ELL_MASK
-from cubing_algs.masks import F2L_LL_MASK
-from cubing_algs.masks import F2L_MASK
-from cubing_algs.masks import L3_MASK
-from cubing_algs.masks import OLL_MASK
-from cubing_algs.masks import PLL_MASK
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -73,7 +61,7 @@ LAYOUT_METHODS: dict[str, str] = {
 }
 
 
-class VCubeDisplay:
+class VCubeDisplay(ModeDisplay):
     """
     Handle visual representation and display formatting for virtual cubes.
 
@@ -91,7 +79,7 @@ class VCubeDisplay:
         """Initialize display handler with cube instance and visual settings."""
         self.cube = cube
         self.cube_size: int = cube.size
-        self.face_size: int = self.cube_size * self.cube_size
+        self.face_size: int = cube.face_size
         self.face_number: int = cube.face_number
 
         self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
@@ -133,119 +121,6 @@ class VCubeDisplay:
         cube_mask.rotate(' '.join(cube.history))
 
         return cube_mask.state
-
-    def compute_f2l_front_face(self) -> str:
-        """
-        Determine the optimal front face orientation for F2L display mode.
-
-        Returns:
-            Single character representing the optimal front face for F2L.
-
-        """
-        impacted_faces = ''
-        saved_facelets = ''
-        cube_d_top = self.cube.oriented_copy('D')
-
-        for face in F2L_FACES:
-            exclusion_pattern = face * 6
-            facelets = cube_d_top.get_face_by_center(face)[
-                self.cube_size:self.face_size
-            ]
-
-            if exclusion_pattern != facelets:
-                impacted_faces += face
-                saved_facelets = facelets
-
-        if impacted_faces and len(impacted_faces) != 2:
-            last_face = impacted_faces[-1]
-            index = (
-                0
-                if saved_facelets[0] != last_face
-                or saved_facelets[3] != last_face
-                else 1
-            )
-            impacted_faces = (
-                last_face
-                + F2L_ADJACENT_FACES[last_face][index]
-            )
-
-        return F2L_FACE_ORIENTATIONS.get(
-            ''.join(sorted(impacted_faces)),
-            '',
-        )
-
-    def resolve_mode(self, mode: str) -> tuple[Mask, str, str]:
-        """
-        Resolve display mode into mask, layout, and orientation settings.
-
-        Args:
-            mode: Solving-stage preset name (e.g. ``'oll'``, ``'f2l'``).
-
-        Returns:
-            Tuple of (mask, layout, orientation) for the given mode.
-
-        """
-        def f2l_orientation() -> str:
-            return f'D{ self.compute_f2l_front_face() }'
-
-        def cross_top_orientation() -> str:
-            # Put top cross in front
-            cube_orientation = self.cube.orientation
-
-            return (
-                f'{ OPPOSITE_FACES[cube_orientation[1]] }'
-                f'{ cube_orientation[0] }'
-            )
-
-        def cross_bottom_orientation() -> str:
-            # Put bottom cross in front
-            cube_orientation = self.cube.orientation
-
-            return (
-                f'{ cube_orientation[1] }'
-                f'{ OPPOSITE_FACES[cube_orientation[0]] }'
-            )
-
-        def rotata(mask: Mask) -> Mask:
-            from cubing_algs.vcube import VCube
-
-            cube = VCube(
-                mask,
-                size=self.cube_size,
-                check=False,
-            )
-            cube.rotate(
-                self.cube.compute_orientation_moves('UF'),
-            )
-
-            return cube.state
-
-        configs: dict[str, tuple[Mask, str, str]] = {
-            'oll':          (OLL_MASK,          'top', None),
-            'pll':          (PLL_MASK,          'top', None),
-            'll':           (L3_MASK,           'top', None),
-            'cross-top':    (CROSS_TOP_MASK,    '',    cross_top_orientation),
-            'cross-bottom': (CROSS_BOTTOM_MASK, '',    cross_bottom_orientation),
-            'cross':        (CROSS_BOTTOM_MASK, '',    cross_bottom_orientation),
-            'f2l':          (F2L_MASK,          '',    f2l_orientation),
-            'af2l':         (F2L_MASK,          '',    f2l_orientation),
-            'f2l+ll':       (F2L_LL_MASK,       '',    f2l_orientation),
-            'f2l+cll':      (F2L_CLL_MASK,      '',    f2l_orientation),
-            'f2l+ell':      (F2L_ELL_MASK,      '',    f2l_orientation),
-        }
-
-        if mode not in configs:
-            return '', '', ''
-
-        mask, layout, orientation_cb = configs[mode]
-
-        orientation = ''
-        if orientation_cb:
-            orientation = orientation_cb()
-
-        mask = rotata(mask) if self.cube_size == 3 else ''
-
-        return mask, layout, orientation
 
     def split_faces(self, state: str) -> list[str]:
         """

@@ -391,22 +391,6 @@ FACE_INDEXES = {
 
 FACES = ''.join(FACE_ORDER)
 
-F2L_FACES = ('F', 'L', 'R', 'B')
-
-F2L_FACE_ORIENTATIONS = {
-    'FL': 'F',
-    'FR': 'R',
-    'BL': 'L',
-    'BR': 'B',
-}
-
-F2L_ADJACENT_FACES = {
-    'R': ('B', 'F'),
-    'L': ('F', 'B'),
-    'B': ('L', 'R'),
-    'F': ('R', 'L'),
-}
-
 F2L_EDGE_CORNERS = {  # Edge: Corner
     'FL': 'DLF',
     'FR': 'DFR',
