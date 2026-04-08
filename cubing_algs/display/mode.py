@@ -1,4 +1,6 @@
 """Mode handling for visual display."""
+from typing import TYPE_CHECKING
+
 from cubing_algs.annotations import Mask
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
@@ -11,6 +13,9 @@ from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
+
+if TYPE_CHECKING:
+    from cubing_algs.vcube import VCube
 
 F2L_FACE_ORIENTATIONS = {
     'FL': 'F',
@@ -44,10 +49,14 @@ MODE_CONFIGS: dict[str, tuple[Mask, str, str]] = {
 class ModeDisplay:
     """Mixin handling mode computing tools."""
 
+    cube: 'VCube'
+    face_size: int
+    cube_size: int
+
     def cross_top_orientation(self) -> str:
         """
-        Determine the face orientation of the cube
-        to the the cross facing by doing a x' rotation.
+        Determine the face orientation to bring the top cross
+        to the front face (facing the user), equivalent to an x' rotation.
 
         Returns:
             Two characters representing the face orientation.
@@ -62,8 +71,8 @@ class ModeDisplay:
 
     def cross_bottom_orientation(self) -> str:
         """
-        Determine the face orientation of the cube
-        to the the cross facing by doing a x rotation.
+        Determine the face orientation to bring the bottom cross
+        to the front face (facing the user), equivalent to an x rotation.
 
         Returns:
             Two characters representing the face orientation.
@@ -81,10 +90,10 @@ class ModeDisplay:
         Determine the optimal front face orientation for F2L display mode
         keeping the initial top face orientation.
 
-        Align F2L into FR slot for consistant results.
+        Align F2L into FR slot for consistent results.
 
         Returns:
-            Two haracters representing the face orientation.
+            Two characters representing the face orientation.
 
         """
         impacted_faces = ''
@@ -125,10 +134,14 @@ class ModeDisplay:
 
     def compensate_mask(self, mask: Mask) -> Mask:
         """
-        Compensate the mask to preserve user orientation.
+        Rotate the mask to match the cube's current orientation,
+        so it aligns with the cube's view rather than the user orientation.
+
+        Args:
+            mask: The mask to rotate.
 
         Returns:
-            The mask rotated.
+            The mask rotated to the cube's current orientation.
 
         """
         from cubing_algs.vcube import VCube  # noqa: PLC0415
@@ -152,7 +165,8 @@ class ModeDisplay:
             mode: Solving-stage preset name (e.g. ``'oll'``, ``'f2l'``).
 
         Returns:
-            Tuple of (mask, layout, orientation) for the given mode.
+            Tuple of (mask, layout, orientation) for the given mode,
+            or a tuple of empty strings if the mode is unknown.
 
         """
         if mode not in MODE_CONFIGS:

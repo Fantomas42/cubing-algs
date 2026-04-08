@@ -13,8 +13,6 @@ from cubing_algs.vcube import VCube
 class VCubeShowMixin:
     """Testing tools for VCube.show() output verification."""
 
-    maxDiff = None
-
     ANSI_RE = re.compile(r'\x1b\[[^m]*m')
     # Default palette masked background: '#444444' → rgb(68,68,68)
     MASKED_BG = '\x1b[48;2;68;68;68m'
