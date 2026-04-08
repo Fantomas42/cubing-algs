@@ -11,6 +11,7 @@ from cubing_algs.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.display.effects import load_effect
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.styles import load_style
@@ -184,14 +185,26 @@ class VCubeDisplay:
             Tuple of (mask, layout, orientation) for the given mode.
 
         """
-        def f2l_orientation():
+        def f2l_orientation() -> str:
             return f'D{ self.compute_f2l_front_face() }'
 
-        def cross_top_orientation():
-            return 'FD'
+        def cross_top_orientation() -> str:
+            # Put top cross in front
+            cube_orientation = self.cube.orientation
 
-        def cross_bottom_orientation():
-            return 'FU'
+            return (
+                f'{ OPPOSITE_FACES[cube_orientation[1]] }'
+                f'{ cube_orientation[0] }'
+            )
+
+        def cross_bottom_orientation() -> str:
+            # Put bottom cross in front
+            cube_orientation = self.cube.orientation
+
+            return (
+                f'{ cube_orientation[1] }'
+                f'{ OPPOSITE_FACES[cube_orientation[0]] }'
+            )
 
         def rotata(mask: Mask) -> Mask:
             from cubing_algs.vcube import VCube

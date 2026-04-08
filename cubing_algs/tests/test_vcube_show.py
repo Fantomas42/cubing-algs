@@ -13,6 +13,8 @@ from cubing_algs.vcube import VCube
 class VCubeShowMixin:
     """Testing tools for VCube.show() output verification."""
 
+    maxDiff = None
+
     ANSI_RE = re.compile(r'\x1b\[[^m]*m')
     # Default palette masked background: '#444444' → rgb(68,68,68)
     MASKED_BG = '\x1b[48;2;68;68;68m'
@@ -444,22 +446,39 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
     def setUp(self) -> None:
         """Set up scrambled cube for cross visualization."""
         self.cube = VCube()
-        self.cube.rotate('B L F L F R F L B R')
+        self.cube.rotate('z2 B L F L F R F L B R')
 
     def test_cross_mode_grid(self) -> None:
         """Test cross mode mask highlights cross-relevant facelets."""
         grid = self.show_grid(self.cube, mode='cross')
 
         expected = (
-            '          b  d  r \n'
-            '          b  F  d \n'
             '          u  f  d \n'
-            ' l  d  r  b  r  f  l  l  u  f  r  d \n'
-            ' l  R  U  B  U  f  l  L  U  F  d  b \n'
-            ' b  L  f  l  R  l  b  r  r  d  d  r \n'
-            '          u  U  u \n'
-            '          U  B  b \n'
-            '          d  f  f '
+            '          U  F  B \n'
+            '          l  U  b \n'
+            ' r  R  d  f  L  u  r  U  l  b  l  f \n'
+            ' r  R  d  f  U  b  r  L  d  b  d  f \n'
+            ' b  l  l  u  U  l  b  r  f  r  l  r \n'
+            '          f  F  u \n'
+            '          b  B  d \n'
+            '          d  d  d '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_cross_top_mode_grid(self) -> None:
+        """Test cross mode mask highlights cross-relevant facelets."""
+        grid = self.show_grid(self.cube, mode='cross-top')
+
+        expected = (
+            '          f  f  u \n'
+            '          b  B  D \n'
+            '          d  D  d \n'
+            ' l  l  b  r  L  r  f  R  b  l  u  u \n'
+            ' D  R  r  f  D  B  D  L  r  b  u  F \n'
+            ' d  r  r  f  l  b  l  u  r  u  l  f \n'
+            '          u  f  d \n'
+            '          u  F  b \n'
+            '          l  u  b '
         )
         self.assertEqual(grid, expected)
 
