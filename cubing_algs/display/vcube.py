@@ -173,6 +173,67 @@ class VCubeDisplay:
             '',
         )
 
+    def resolve_mode(self, mode: str) -> tuple[Mask, str, str]:
+        """
+        Resolve display mode into mask, layout, and orientation settings.
+
+        Args:
+            mode: Solving-stage preset name (e.g. ``'oll'``, ``'f2l'``).
+
+        Returns:
+            Tuple of (mask, layout, orientation) for the given mode.
+
+        """
+        def f2l_orientation():
+            return f'D{ self.compute_f2l_front_face() }'
+
+        def cross_top_orientation():
+            return 'FD'
+
+        def cross_bottom_orientation():
+            return 'FU'
+
+        def rotata(mask: Mask) -> Mask:
+            from cubing_algs.vcube import VCube
+
+            cube = VCube(
+                mask,
+                size=self.cube_size,
+                check=False,
+            )
+            cube.rotate(
+                self.cube.compute_orientation_moves('UF'),
+            )
+
+            return cube.state
+
+        configs: dict[str, tuple[Mask, str, str]] = {
+            'oll':          (OLL_MASK,          'top', None),
+            'pll':          (PLL_MASK,          'top', None),
+            'll':           (L3_MASK,           'top', None),
+            'cross-top':    (CROSS_TOP_MASK,    '',    cross_top_orientation),
+            'cross-bottom': (CROSS_BOTTOM_MASK, '',    cross_bottom_orientation),
+            'cross':        (CROSS_BOTTOM_MASK, '',    cross_bottom_orientation),
+            'f2l':          (F2L_MASK,          '',    f2l_orientation),
+            'af2l':         (F2L_MASK,          '',    f2l_orientation),
+            'f2l+ll':       (F2L_LL_MASK,       '',    f2l_orientation),
+            'f2l+cll':      (F2L_CLL_MASK,      '',    f2l_orientation),
+            'f2l+ell':      (F2L_ELL_MASK,      '',    f2l_orientation),
+        }
+
+        if mode not in configs:
+            return '', '', ''
+
+        mask, layout, orientation_cb = configs[mode]
+
+        orientation = ''
+        if orientation_cb:
+            orientation = orientation_cb()
+
+        mask = rotata(mask) if self.cube_size == 3 else ''
+
+        return mask, layout, orientation
+
     def split_faces(self, state: str) -> list[str]:
         """
         Split cube state string into individual face strings.
@@ -189,7 +250,7 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, *,  # noqa: C901
+    def display(self, *,
                 mode: str = '', layout: str = '',
                 orientation: str = '', mask: Mask = '') -> str:
         """
@@ -226,62 +287,16 @@ class VCubeDisplay:
             Formatted string representation of the cube state.
 
         """
-        mode_mask = ''
-        mode_orientation = ''
-        mode_layout = ''
-
-        mode = mode.lower()
-        layout = layout.lower()
-
-        def rotata(mask: Mask) -> Mask:
-            from cubing_algs.vcube import VCube
-
-            cube = VCube(
-                mask,
-                size=self.cube_size,
-                check=False,
-            )
-            cube.rotate(
-                self.cube.compute_orientation_moves('UF'),
-            )
-
-            return cube.state
-
-        # Only work for 3x3x3
-        if mode == 'oll':
-            mode_mask = OLL_MASK
-            mode_layout = 'top'
-        elif mode == 'pll':
-            mode_mask = PLL_MASK
-            mode_layout = 'top'
-        elif mode == 'll':
-            mode_mask = L3_MASK
-            mode_layout = 'top'
-        elif mode == 'cross-top':
-            mode_mask = CROSS_TOP_MASK
-            mode_orientation = 'FD'
-        elif mode in {'cross', 'cross-bottom'}:
-            mode_mask = CROSS_BOTTOM_MASK
-            mode_orientation = 'FU'
-        elif mode in {'f2l', 'af2l'}:
-            mode_mask = F2L_MASK
-            mode_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+ll':
-            mode_mask = F2L_LL_MASK
-            mode_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+cll':
-            mode_mask = F2L_CLL_MASK
-            mode_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+ell':
-            mode_mask = F2L_ELL_MASK
-            mode_orientation = f'D{ self.compute_f2l_front_face() }'
+        mode_mask, mode_layout, mode_orientation = self.resolve_mode(
+            mode.lower(),
+        )
 
         display_method = cast(
             'Callable[[list[str], list[str]], str]',
             getattr(
                 self,
                 LAYOUT_METHODS.get(
-                    layout or mode_layout,
+                    layout.lower() or mode_layout,
                     'display_cube',
                 ),
             ),
@@ -296,12 +311,7 @@ class VCubeDisplay:
         faces = self.split_faces(cube.state)
         masked_faces = self.split_faces(
             self.compute_mask(
-                cube,
-                mask or (
-                    rotata(mode_mask)
-                    if self.cube_size == 3
-                    else ''
-                ),
+                cube, mask or mode_mask,
             ),
         )
 
