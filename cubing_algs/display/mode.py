@@ -132,16 +132,25 @@ class ModeDisplay:
 
         return f'{ top }{ new_front }'
 
-    def compensate_mask(self, mask: Mask) -> Mask:
+    def realign_mask(self, mask: Mask) -> Mask:
         """
-        Rotate the mask to match the cube's current orientation,
-        so it aligns with the cube's view rather than the user orientation.
+        Convert a mask from user-POV coordinates to cube-internal coordinates.
+
+        Masks are authored from the user's point of view (e.g. '1' at U
+        positions means "the top face as I see it"). But internally the
+        cube may be oriented differently — if the user holds D on top
+        (a z2 from solved), the physical top is the D face, not U.
+
+        This method applies the inverse of the cube's orientation to the
+        mask so that its '1' bits land on the correct internal face
+        positions. The realigned mask can then be replayed through the
+        algorithm's move history by ``compute_mask``.
 
         Args:
-            mask: The mask to rotate.
+            mask: The mask to realign, in user-POV coordinates.
 
         Returns:
-            The mask rotated to the cube's current orientation.
+            The mask expressed in cube-internal coordinates.
 
         """
         from cubing_algs.vcube import VCube  # noqa: PLC0415
@@ -178,6 +187,6 @@ class ModeDisplay:
         if orientation_cb:
             orientation = getattr(self, orientation_cb)()
 
-        mask = self.compensate_mask(mask) if self.cube_size == 3 else ''
+        mask = self.realign_mask(mask) if self.cube_size == 3 else ''
 
         return mask, layout, orientation
