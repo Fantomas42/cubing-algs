@@ -100,8 +100,9 @@ class ModeDisplay:
         saved_facelets = ''
 
         top = self.cube.orientation[0]
+        excluded_faces = (top, OPPOSITE_FACES[top])
 
-        for face in set(FACE_ORDER) - {top, OPPOSITE_FACES[top]}:
+        for face in (f for f in FACE_ORDER if f not in excluded_faces):
             exclusion_pattern = face * (self.face_size - self.cube_size)
             facelets = self.cube.get_face_by_center(face)[
                 self.cube_size:self.face_size
