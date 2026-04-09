@@ -16,12 +16,12 @@ c.show(mode='af2l')
 print('Special case #1')
 
 c = VCube()
-c.rotate("z2 L2 B L B' L B U B' z2")
+c.rotate("z2 L2 B L B' L B U B'")
 c.show(mode='af2l')
 
 
 print('Special case #2')
 
 c = VCube()
-c.rotate("z2 R' U2 R U' R' F R F' z2")
+c.rotate("z2 R' U2 R U' R' F R F'")
 c.show(mode='af2l')
