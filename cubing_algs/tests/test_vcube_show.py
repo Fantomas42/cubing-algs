@@ -488,7 +488,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_mode_grid(self) -> None:
         """Test F2L mode after y' z2 R U R' U' z2 y2."""
         cube = VCube()
-        cube.rotate("y' z2 R U R' U' z2 y2")
+        cube.rotate("y' z2 R U R' U'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -507,7 +507,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_1(self) -> None:
         """Test F2L mode after z2 F' L F L' z2."""
         cube = VCube()
-        cube.rotate("z2 F' L F L' z2")
+        cube.rotate("z2 F' L F L'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -526,7 +526,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_2(self) -> None:
         """Test F2L mode after z2 L U' L' U' L U L' U' L U2 L' z2."""
         cube = VCube()
-        cube.rotate("z2 L U' L' U' L U L' U' L U2 L' z2")
+        cube.rotate("z2 L U' L' U' L U L' U' L U2 L'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -545,7 +545,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_3(self) -> None:
         """Test F2L mode after z2 R' D' R U R' D R U' z2."""
         cube = VCube()
-        cube.rotate("z2 R' D' R U R' D R U' z2")
+        cube.rotate("z2 R' D' R U R' D R U'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -564,7 +564,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_4(self) -> None:
         """Test F2L mode after z2 R U' R' U R U' R' U R U' R' z2."""
         cube = VCube()
-        cube.rotate("z2 R U' R' U R U' R' U R U' R' z2")
+        cube.rotate("z2 R U' R' U R U' R' U R U' R'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -607,7 +607,7 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_af2l_special_case_1(self) -> None:
         """Test AF2L mode after z2 L2 B L B' L B U B' z2."""
         cube = VCube()
-        cube.rotate("z2 L2 B L B' L B U B' z2")
+        cube.rotate("z2 L2 B L B' L B U B'")
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
@@ -626,7 +626,7 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_af2l_special_case_2(self) -> None:
         """Test AF2L mode after z2 R' U2 R U' R' F R F' z2."""
         cube = VCube()
-        cube.rotate("z2 R' U2 R U' R' F R F' z2")
+        cube.rotate("z2 R' U2 R U' R' F R F'")
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
