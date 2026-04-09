@@ -342,33 +342,33 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
             54 * '1',
         )
 
-    def test_compute_f2l_front_face(self) -> None:
+    def test_compute_f2l_orientation(self) -> None:
         """Test compute f2l front face."""
         cube = VCube()
-        cube.rotate("z2 R U R' U' z2")
+        cube.rotate("z2 R U R' U'")
 
         printer = VCubeDisplay(cube)
 
         self.assertEqual(
-            printer.compute_f2l_front_face(),
-            'F',
+            printer.f2l_orientation(),
+            'DF',
         )
 
         cube = VCube()
-        cube.rotate("y2 z2 R U R' U' z2")
+        cube.rotate("y2 z2 R U R' U'")
 
         printer = VCubeDisplay(cube)
 
         self.assertEqual(
-            printer.compute_f2l_front_face(),
-            'B',
+            printer.f2l_orientation(),
+            'DB',
         )
 
-    def test_compute_f2l_front_face_edge_cases(self) -> None:
+    def test_compute_f2l_orientation_edge_cases(self) -> None:
         """Test compute_f2l_front_face with various edge cases."""
-        # Should return empty string for solved cube
-        result = self.printer.compute_f2l_front_face()
-        self.assertEqual(result, '')
+        # Should return simple U for solved cube
+        result = self.printer.f2l_orientation()
+        self.assertEqual(result, 'U')
 
     def test_display_top_down_adjacent_facelets_no_break_line(self) -> None:
         """
@@ -497,7 +497,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         # Create a state where only one face is impacted
         self.cube.rotate('R')
 
-        result = self.printer.compute_f2l_front_face()
+        result = self.printer.f2l_orientation()
         # Should handle single face case
         self.assertIsInstance(result, str)
 
