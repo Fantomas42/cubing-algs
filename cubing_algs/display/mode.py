@@ -2,6 +2,7 @@
 from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import Mask
+from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.masks import CROSS_BOTTOM_MASK
@@ -102,7 +103,7 @@ class ModeDisplay:
         top = self.cube.orientation[0]
         excluded_faces = (top, OPPOSITE_FACES[top])
 
-        for face in (f for f in FACE_ORDER if f not in excluded_faces):
+        for face in ADJACENT_FACES[top]:
             exclusion_pattern = face * (self.face_size - self.cube_size)
             facelets = self.cube.get_face_by_center(face)[
                 self.cube_size:self.face_size
