@@ -414,8 +414,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """Check if algorithm timed moves."""
         return any(m.is_timed for m in self)
 
-    def show(self, size: int = 3, *,   # noqa: PLR0913
-             mode: str = '', layout: str = '', orientation: str = '',
+    def show(self, size: int = 3, *, mode: str = '',  # noqa: PLR0913
+             layout: str = '', orientation: str = '',
              palette: str = '', effect: str = '',
              facelet: str = '', style: str = '',
              impact_mask: bool = True) -> 'VCube':
