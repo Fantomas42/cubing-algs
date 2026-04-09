@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import Mask
 from cubing_algs.constants import ADJACENT_FACES
-from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.masks import CROSS_BOTTOM_MASK
 from cubing_algs.masks import CROSS_TOP_MASK
@@ -54,37 +53,67 @@ class ModeDisplay:
     face_size: int
     cube_size: int
 
+    def compute_best_front_face(self, color: str, front: str) -> str:
+        """
+        Determine the best front face with most matching color facelets.
+
+        Gives priority to the default front face on ties.
+
+        Returns:
+            The character representing the face.
+
+        """
+        face = ''
+        max_score = -1
+
+        faces = list(ADJACENT_FACES[color])
+        faces.remove(front)
+        faces.insert(0, front)
+
+        for f in faces:
+            facelets = self.cube.get_face_by_center(f)
+            count_facelets = facelets.count(color)
+
+            if count_facelets > max_score:
+                face = f
+                max_score = count_facelets
+
+        return face
+
     def cross_top_orientation(self) -> str:
         """
-        Determine the face orientation to bring the top cross
-        to the front face (facing the user), equivalent to an x' rotation.
+        Determine the front face with the most cross top color facelets.
 
         Returns:
             Two characters representing the face orientation.
 
         """
-        cube_orientation = self.cube.orientation
+        top = self.cube.orientation[0]
+        front = self.cube.orientation[1]
 
-        return (
-            f'{ OPPOSITE_FACES[cube_orientation[1]] }'
-            f'{ cube_orientation[0] }'
+        new_front = self.compute_best_front_face(
+            top, front,
         )
+
+        return f'{ top }{ new_front }'
 
     def cross_bottom_orientation(self) -> str:
         """
-        Determine the face orientation to bring the bottom cross
-        to the front face (facing the user), equivalent to an x rotation.
+        Determine the front face with the most cross bottom color facelets.
 
         Returns:
             Two characters representing the face orientation.
 
         """
-        cube_orientation = self.cube.orientation
+        top = self.cube.orientation[0]
+        bottom = OPPOSITE_FACES[top]
+        front = self.cube.orientation[1]
 
-        return (
-            f'{ cube_orientation[1] }'
-            f'{ OPPOSITE_FACES[cube_orientation[0]] }'
+        new_front = self.compute_best_front_face(
+            bottom, front,
         )
+
+        return f'{ top }{ new_front }'
 
     def f2l_orientation(self) -> str:
         """
@@ -101,7 +130,6 @@ class ModeDisplay:
         saved_facelets = ''
 
         top = self.cube.orientation[0]
-        excluded_faces = (top, OPPOSITE_FACES[top])
 
         for face in ADJACENT_FACES[top]:
             exclusion_pattern = face * (self.face_size - self.cube_size)

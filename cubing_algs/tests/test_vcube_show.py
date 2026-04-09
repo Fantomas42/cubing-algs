@@ -451,15 +451,15 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='cross')
 
         expected = (
-            '          u  f  d \n'
-            '          U  F  B \n'
-            '          l  U  b \n'
-            ' r  R  d  f  L  u  r  U  l  b  l  f \n'
-            ' r  R  d  f  U  b  r  L  d  b  d  f \n'
-            ' b  l  l  u  U  l  b  r  f  r  l  r \n'
-            '          f  F  u \n'
-            '          b  B  d \n'
-            '          d  d  d '
+            '          r  l  r \n'
+            '          f  d  b \n'
+            '          f  l  b \n'
+            ' b  r  r  u  f  d  l  d  f  d  d  d \n'
+            ' l  R  R  U  F  B  U  L  r  d  B  b \n'
+            ' l  d  d  l  U  b  r  r  b  u  F  f \n'
+            '          f  L  u \n'
+            '          f  U  b \n'
+            '          u  U  l '
         )
         self.assertEqual(grid, expected)
 
@@ -468,15 +468,15 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='cross-top')
 
         expected = (
-            '          f  f  u \n'
-            '          b  B  D \n'
-            '          d  D  d \n'
-            ' l  l  b  r  L  r  f  R  b  l  u  u \n'
-            ' D  R  r  f  D  B  D  L  r  b  u  F \n'
-            ' d  r  r  f  l  b  l  u  r  u  l  f \n'
-            '          u  f  d \n'
-            '          u  F  b \n'
-            '          l  u  b '
+            '          b  l  f \n'
+            '          B  D  f \n'
+            '          r  L  r \n'
+            ' l  D  f  d  D  d  b  r  r  u  f  d \n'
+            ' u  L  R  D  B  b  l  R  r  u  F  b \n'
+            ' r  r  b  u  f  f  l  D  d  l  u  b \n'
+            '          l  u  u \n'
+            '          b  u  F \n'
+            '          u  l  f '
         )
         self.assertEqual(grid, expected)
 
