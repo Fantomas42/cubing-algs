@@ -116,7 +116,7 @@ class VCubeShowPLLTestCase(VCubeShowMixin, unittest.TestCase):
     def setUp(self) -> None:
         """Set up T Perm cube state."""
         self.cube = VCube()
-        self.cube.rotate("z2 L2 U' L2 D F2 R2 U R2 D' F2 z2")
+        self.cube.rotate("z2 L2 U' L2 D F2 R2 U R2 D' F2")
 
     def test_pll_mode_grid(self) -> None:
         """Test PLL mode mask dims D-face and highlights edges."""
@@ -171,7 +171,7 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
     def setUp(self) -> None:
         """Set up OLL case 14 Anti-Gun cube state."""
         self.cube = VCube()
-        self.cube.rotate("z2 F U F' R' F R U' R' F' R z2")
+        self.cube.rotate("z2 F U F' R' F R U' R' F' R")
 
     def test_oll_mode_grid(self) -> None:
         """Test OLL mode mask highlights U-face colors and dims D-face."""
@@ -215,6 +215,138 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
             '             R  u  u  u  L \n'
             '             R  u  u  u  L \n'
             '                B  B  B '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class VCubeShowPLLExampleTestCase(VCubeShowMixin, unittest.TestCase):
+    """Test PLL mode matching examples/pll.py for T Perm with y x' prefix."""
+
+    def setUp(self) -> None:
+        """Set up T Perm cube state with y x' prefix."""
+        self.cube = VCube()
+        self.cube.rotate("y x' L2 U' L2 D F2 R2 U R2 D' F2")
+
+    def test_no_mode(self) -> None:
+        """Test plain show() without mode."""
+        grid = self.show_grid(self.cube)
+
+        expected = (
+            '          L  L  L \n'
+            '          L  L  L \n'
+            '          L  L  L \n'
+            ' D  D  F  U  B  D  F  U  U  B  F  B \n'
+            ' F  F  F  U  U  U  B  B  B  D  D  D \n'
+            ' F  F  F  U  U  U  B  B  B  D  D  D \n'
+            '          R  R  R \n'
+            '          R  R  R \n'
+            '          R  R  R '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_pll_mode(self) -> None:
+        """Test PLL mode dims D-face and highlights edges."""
+        grid = self.show_grid(self.cube, mode='pll')
+
+        expected = (
+            '          B  F  B \n'
+            '       D  l  l  l  U \n'
+            '       D  l  l  l  U \n'
+            '       F  l  l  l  F \n'
+            '          U  B  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_pll_orientation_ld(self) -> None:
+        """Test PLL mode with LD orientation."""
+        grid = self.show_grid(self.cube, mode='pll', orientation='LD')
+
+        expected = (
+            '          D  B  U \n'
+            '       F  l  l  l  F \n'
+            '       U  l  l  l  D \n'
+            '       U  l  l  l  D \n'
+            '          B  F  B '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_pll_orientation_dl(self) -> None:
+        """Test PLL mode with DL orientation."""
+        grid = self.show_grid(self.cube, mode='pll', orientation='DL')
+
+        expected = (
+            '          r  r  r \n'
+            '       f  d  d  d  b \n'
+            '       f  d  d  d  b \n'
+            '       D  B  F  B  U \n'
+            '          l  l  l '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class VCubeShowOLLExampleTestCase(VCubeShowMixin, unittest.TestCase):
+    """Test OLL mode matching for case 14 Anti-Gun in different orientations."""
+
+    def setUp(self) -> None:
+        """Set up OLL case 14 Anti-Gun cube state with y x prefix."""
+        self.cube = VCube()
+        self.cube.rotate("y x F U F' R' F R U' R' F' R")
+
+    def test_no_mode(self) -> None:
+        """Test plain show() without mode."""
+        grid = self.show_grid(self.cube)
+
+        expected = (
+            '          B  D  F \n'
+            '          R  R  R \n'
+            '          U  B  R \n'
+            ' R  F  F  R  R  D  B  U  D  R  R  U \n'
+            ' F  F  F  D  D  D  B  B  B  U  U  U \n'
+            ' F  F  F  D  D  D  B  B  B  U  U  U \n'
+            '          L  L  L \n'
+            '          L  L  L \n'
+            '          L  L  L '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_mode(self) -> None:
+        """Test OLL mode highlights U-face colors and dims others."""
+        grid = self.show_grid(self.cube, mode='oll')
+
+        expected = (
+            '          u  R  R \n'
+            '       R  b  d  f  d \n'
+            '       f  R  R  R  u \n'
+            '       f  u  b  R  b \n'
+            '          R  R  d '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_orientation_ru(self) -> None:
+        """Test OLL mode with RU orientation."""
+        grid = self.show_grid(self.cube, mode='oll', orientation='RU')
+
+        expected = (
+            '          d  R  R \n'
+            '       b  R  b  u  f \n'
+            '       u  R  R  R  f \n'
+            '       d  f  d  b  R \n'
+            '          R  R  u '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_oll_orientation_ur(self) -> None:
+        """Test OLL mode with UR orientation."""
+        grid = self.show_grid(self.cube, mode='oll', orientation='UR')
+
+        expected = (
+            '          l  l  l \n'
+            '       f  u  u  u  b \n'
+            '       f  u  u  u  b \n'
+            '       R  u  R  R  d \n'
+            '          b  d  f '
         )
         self.assertEqual(grid, expected)
 
@@ -312,22 +444,39 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
     def setUp(self) -> None:
         """Set up scrambled cube for cross visualization."""
         self.cube = VCube()
-        self.cube.rotate('B L F L F R F L B R')
+        self.cube.rotate('z2 B L F L F R F L B R')
 
     def test_cross_mode_grid(self) -> None:
         """Test cross mode mask highlights cross-relevant facelets."""
         grid = self.show_grid(self.cube, mode='cross')
 
         expected = (
-            '          b  d  r \n'
-            '          b  F  d \n'
-            '          u  f  d \n'
-            ' l  d  r  b  r  f  l  l  u  f  r  d \n'
-            ' l  R  U  B  U  f  l  L  U  F  d  b \n'
-            ' b  L  f  l  R  l  b  r  r  d  d  r \n'
-            '          u  U  u \n'
-            '          U  B  b \n'
-            '          d  f  f '
+            '          r  l  r \n'
+            '          f  d  b \n'
+            '          f  l  b \n'
+            ' b  r  r  u  f  d  l  d  f  d  d  d \n'
+            ' l  R  R  U  F  B  U  L  r  d  B  b \n'
+            ' l  d  d  l  U  b  r  r  b  u  F  f \n'
+            '          f  L  u \n'
+            '          f  U  b \n'
+            '          u  U  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_cross_top_mode_grid(self) -> None:
+        """Test cross mode mask highlights cross-relevant facelets."""
+        grid = self.show_grid(self.cube, mode='cross-top')
+
+        expected = (
+            '          b  l  f \n'
+            '          B  D  f \n'
+            '          r  L  r \n'
+            ' l  D  f  d  D  d  b  r  r  u  f  d \n'
+            ' u  L  R  D  B  b  l  R  r  u  F  b \n'
+            ' r  r  b  u  f  f  l  D  d  l  u  b \n'
+            '          l  u  u \n'
+            '          b  u  F \n'
+            '          u  l  f '
         )
         self.assertEqual(grid, expected)
 
@@ -339,7 +488,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_mode_grid(self) -> None:
         """Test F2L mode after y' z2 R U R' U' z2 y2."""
         cube = VCube()
-        cube.rotate("y' z2 R U R' U' z2 y2")
+        cube.rotate("y' z2 R U R' U'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -358,7 +507,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_1(self) -> None:
         """Test F2L mode after z2 F' L F L' z2."""
         cube = VCube()
-        cube.rotate("z2 F' L F L' z2")
+        cube.rotate("z2 F' L F L'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -377,7 +526,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_2(self) -> None:
         """Test F2L mode after z2 L U' L' U' L U L' U' L U2 L' z2."""
         cube = VCube()
-        cube.rotate("z2 L U' L' U' L U L' U' L U2 L' z2")
+        cube.rotate("z2 L U' L' U' L U L' U' L U2 L'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -396,7 +545,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_3(self) -> None:
         """Test F2L mode after z2 R' D' R U R' D R U' z2."""
         cube = VCube()
-        cube.rotate("z2 R' D' R U R' D R U' z2")
+        cube.rotate("z2 R' D' R U R' D R U'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -415,7 +564,7 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_f2l_special_case_4(self) -> None:
         """Test F2L mode after z2 R U' R' U R U' R' U R U' R' z2."""
         cube = VCube()
-        cube.rotate("z2 R U' R' U R U' R' U R U' R' z2")
+        cube.rotate("z2 R U' R' U R U' R' U R U' R'")
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
@@ -458,7 +607,7 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_af2l_special_case_1(self) -> None:
         """Test AF2L mode after z2 L2 B L B' L B U B' z2."""
         cube = VCube()
-        cube.rotate("z2 L2 B L B' L B U B' z2")
+        cube.rotate("z2 L2 B L B' L B U B'")
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
@@ -477,7 +626,7 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
     def test_af2l_special_case_2(self) -> None:
         """Test AF2L mode after z2 R' U2 R U' R' F R F' z2."""
         cube = VCube()
-        cube.rotate("z2 R' U2 R U' R' F R F' z2")
+        cube.rotate("z2 R' U2 R U' R' F R F'")
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
@@ -573,3 +722,43 @@ class VCubeShowF2LOrientedTestCase(VCubeShowMixin, unittest.TestCase):
             '          U  U  U '
         )
         self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class VCubeShowNon3x3ModeTestCase(VCubeShowMixin, unittest.TestCase):
+    """Test that show() with mode args does not raise for non-3x3x3 cubes."""
+
+    def setUp(self) -> None:
+        """Set up a 4x4x4 cube."""
+        self.cube = VCube(size=4)
+
+    def test_oll_mode_no_error(self) -> None:
+        """Test OLL mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='oll')
+        self.assertIsInstance(output, str)
+
+    def test_pll_mode_no_error(self) -> None:
+        """Test PLL mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='pll')
+        self.assertIsInstance(output, str)
+
+    def test_ll_mode_no_error(self) -> None:
+        """Test LL mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='ll')
+        self.assertIsInstance(output, str)
+
+    def test_cross_mode_no_error(self) -> None:
+        """Test cross mode on a 4x4x4 cube does not raise."""
+        output = self.show_stripped(self.cube, mode='cross')
+        self.assertIsInstance(output, str)
+
+    def test_mode_changes_layout_without_masking(self) -> None:
+        """
+        Test that mode sets the layout but applies no masking on a 4x4x4.
+
+        OLL mode implies layout='top'. The output must match an explicit
+        layout='top' call (same layout, no mask difference).
+        """
+        output_mode = self.show_stripped(self.cube, mode='oll')
+        output_top = self.show_stripped(self.cube, layout='top')
+        self.assertEqual(output_mode, output_top)

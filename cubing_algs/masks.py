@@ -181,6 +181,32 @@ def compute_algorithm_mask(
 
 FULL_MASK: Mask = '1' * 54
 
+# Masks are mainly used to highlight or hide facelets when displaying a cube
+# state, making it easy to focus on a specific solving feature (OLL, PLL,
+# F2L, cross, etc.).
+#
+# A mask is a 54-character binary string in facelet-state format (same layout
+# as VCube.state). '1' highlights a facelet; '0' hides it.
+#
+# Masks are written from the user's point of view: setting U facelets to '1'
+# means "highlight what I see on top". This is more intuitive than working in
+# solved-cube coordinates and makes masks color-neutral — they describe
+# positions, not which color occupies them, so the same mask works regardless
+# of the cube's color scheme or orientation.
+#
+# Internally, when a mask is used via a display mode, it is first converted
+# from user-POV to cube coordinates before being tracked through the move
+# history. For example, if the user holds the cube with yellow on top (a z2
+# from the solved state), a mask with U='1' is transformed to D='1' in
+# internal coordinates, then rotated through the algorithm moves so the
+# highlighted facelets follow the right stickers.
+#
+# Example: PLL_MASK highlights the top row of all four side faces — the
+# stickers the user sees at the top of F, B, L, R. A PLL algorithm permutes
+# those pieces without rotations. Because the user holds the cube z2, the mask
+# is converted to track the D-adjacent rows internally, correctly following
+# each sticker as it is permuted by the algorithm.
+
 CENTERS_MASK = (
     '000010000'
     '000010000'
@@ -208,7 +234,16 @@ EDGES_MASK = (
     '010101010'
 )
 
-CROSS_MASK = (
+CROSS_BOTTOM_MASK = (
+    '000000000'
+    '000010010'
+    '000010010'
+    '010111010'
+    '000010010'
+    '000010010'
+)
+
+CROSS_TOP_MASK = (
     '010111010'
     '010010000'
     '010010000'
@@ -218,12 +253,12 @@ CROSS_MASK = (
 )
 
 L1_MASK = (
-    '111111111'
-    '111000000'
-    '111000000'
     '000000000'
-    '111000000'
-    '111000000'
+    '000000111'
+    '000000111'
+    '111111111'
+    '000000111'
+    '000000111'
 )
 
 L2_MASK = (
@@ -236,100 +271,100 @@ L2_MASK = (
 )
 
 L3_MASK = (
-    '000000000'
-    '000000111'
-    '000000111'
     '111111111'
-    '000000111'
-    '000000111'
+    '111000000'
+    '111000000'
+    '000000000'
+    '111000000'
+    '111000000'
 )
 
 F2L_MASK = (
-    '111111111'
-    '111111000'
-    '111111000'
     '000000000'
-    '111111000'
-    '111111000'
+    '000111111'
+    '000111111'
+    '111111111'
+    '000111111'
+    '000111111'
 )
 
 F2L_FR_MASK = (
-    '000000001'
-    '100100000'
-    '001001000'
     '000000000'
+    '000100100'
+    '000001001'
+    '001000000'
     '000000000'
     '000000000'
 )
 
 F2L_FL_MASK = (
-    '000000100'
     '000000000'
-    '100100000'
     '000000000'
-    '001001000'
+    '000100100'
+    '100000000'
+    '000001001'
     '000000000'
 )
 
 F2L_BR_MASK = (
-    '001000000'
-    '001001000'
     '000000000'
+    '000001001'
     '000000000'
+    '000000001'
     '000000000'
-    '100100000'
+    '000100100'
 )
 
 F2L_BL_MASK = (
-    '100000000'
     '000000000'
     '000000000'
     '000000000'
-    '100100000'
-    '001001000'
+    '000000100'
+    '000100100'
+    '000001001'
 )
 
 F2L_LL_MASK = (
     '111111111'
-    '111111000'
-    '111111000'
+    '000111111'
+    '000111111'
     '111111111'
-    '111111000'
-    '111111000'
+    '000111111'
+    '000111111'
 )
 
 F2L_CLL_MASK = (
-    '111111111'
-    '111111000'
-    '111111000'
     '101010101'
-    '111111000'
-    '111111000'
+    '000111111'
+    '000111111'
+    '111111111'
+    '000111111'
+    '000111111'
 )
 
 F2L_ELL_MASK = (
-    '111111111'
-    '111111000'
-    '111111000'
     '010111010'
-    '111111000'
-    '111111000'
+    '000111111'
+    '000111111'
+    '111111111'
+    '000111111'
+    '000111111'
 )
 
 OLL_MASK = (
-    '000000000'
-    '000000000'
-    '000000000'
     '111111111'
+    '000000000'
+    '000000000'
+    '000000000'
     '000000000'
     '000000000'
 )
 
 PLL_MASK = (
     '000000000'
-    '000000111'
-    '000000111'
+    '111000000'
+    '111000000'
     '000000000'
-    '000000111'
-    '000000111'
+    '111000000'
+    '111000000'
 )

@@ -6,22 +6,12 @@ from typing import cast
 
 from cubing_algs.annotations import Mask
 from cubing_algs.annotations import RegexPattern
-from cubing_algs.constants import F2L_ADJACENT_FACES
-from cubing_algs.constants import F2L_FACE_ORIENTATIONS
-from cubing_algs.constants import F2L_FACES
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.effects import load_effect
+from cubing_algs.display.mode import ModeDisplay
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.styles import load_style
-from cubing_algs.masks import CROSS_MASK
-from cubing_algs.masks import F2L_CLL_MASK
-from cubing_algs.masks import F2L_ELL_MASK
-from cubing_algs.masks import F2L_LL_MASK
-from cubing_algs.masks import F2L_MASK
-from cubing_algs.masks import L3_MASK
-from cubing_algs.masks import OLL_MASK
-from cubing_algs.masks import PLL_MASK
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -71,7 +61,7 @@ LAYOUT_METHODS: dict[str, str] = {
 }
 
 
-class VCubeDisplay:
+class VCubeDisplay(ModeDisplay):
     """
     Handle visual representation and display formatting for virtual cubes.
 
@@ -89,7 +79,7 @@ class VCubeDisplay:
         """Initialize display handler with cube instance and visual settings."""
         self.cube = cube
         self.cube_size: int = cube.size
-        self.face_size: int = self.cube_size * self.cube_size
+        self.face_size: int = cube.face_size
         self.face_number: int = cube.face_number
 
         self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
@@ -125,52 +115,12 @@ class VCubeDisplay:
 
         cube_mask = VCube(
             initial=mask,
-            size=cube.size,
+            size=self.cube_size,
             check=False,
         )
         cube_mask.rotate(' '.join(cube.history))
 
         return cube_mask.state
-
-    def compute_f2l_front_face(self) -> str:
-        """
-        Determine the optimal front face orientation for F2L display mode.
-
-        Returns:
-            Single character representing the optimal front face for F2L.
-
-        """
-        impacted_faces = ''
-        saved_facelets = ''
-        cube_d_top = self.cube.oriented_copy('D')
-
-        for face in F2L_FACES:
-            exclusion_pattern = face * 6
-            facelets = cube_d_top.get_face_by_center(face)[
-                self.cube_size:self.face_size
-            ]
-
-            if exclusion_pattern != facelets:
-                impacted_faces += face
-                saved_facelets = facelets
-
-        if impacted_faces and len(impacted_faces) != 2:
-            last_face = impacted_faces[-1]
-            index = (
-                0
-                if saved_facelets[0] != last_face
-                or saved_facelets[3] != last_face
-                else 1
-            )
-            impacted_faces = (
-                last_face
-                + F2L_ADJACENT_FACES[last_face][index]
-            )
-
-        return F2L_FACE_ORIENTATIONS.get(
-            ''.join(sorted(impacted_faces)),
-            '',
-        )
 
     def split_faces(self, state: str) -> list[str]:
         """
@@ -194,68 +144,53 @@ class VCubeDisplay:
         """
         Generate formatted visual representation of the cube state.
 
+        ``mode`` is a convenient shorthand that presets ``mask``,
+        ``orientation``, and ``layout`` for common solving stages.
+        Any explicit argument overrides what ``mode`` would have implied.
+
         Args:
-            mode: Display mode for layout/orientation/mask
-                  (e.g., 'oll', 'pll', 'cross', 'f2l').
-            layout: Display layout ('cube', 'top', 'linear', 'extended').
-                    Overrides the default layout implied by mode.
-            orientation: Cube orientation string for reorienting the view.
-                         Overrides the default orientation implied by mode.
-            mask: Mask to filter which facelets are displayed.
-                  Overrides the default masl implied by mode.
+            mode: Solving-stage preset (3x3x3 only).
+                Sets mask, orientation, and layout together.
+                Supported values: ``'oll'``, ``'pll'``, ``'ll'``,
+                ``'cross'``, ``'f2l'``, ``'af2l'``, ``'f2l+ll'``,
+                ``'f2l+cll'``, ``'f2l+ell'``.
+            layout: Face arrangement for the output.
+                One of ``'cube'`` (cross net, default),
+                ``'top'`` (U face with one row of each adjacent face),
+                ``'extended'`` (full unfolded net), or
+                ``'linear'`` (every face printed side by side row by row).
+            orientation: Two-character string that rotates the cube to change
+                the viewer's point of view before rendering (e.g. ``'UF'``
+                keeps U on top and F in front, ``'DF'`` puts D on top).
+            mask: 54-character binary string in facelet-state format (same
+                layout as ``VCube.state``). ``'1'`` facelets are shown
+                normally; ``'0'`` facelets are greyed out. When provided
+                directly, the mask is used as-is and only rotated through
+                the cube's move history. When implied by ``mode``, the
+                predefined mask is written in user-POV coordinates and first
+                converted to internal cube coordinates (e.g. U-D after a z2)
+                before being tracked through the history.
 
         Returns:
             Formatted string representation of the cube state.
 
         """
-        default_mask = ''
-        default_orientation = ''
-        default_layout = ''
-
-        mode = mode.lower()
-        layout = layout.lower()
-
-        # Only work for 3x3x3
-        if mode == 'oll':
-            default_mask = OLL_MASK
-            default_layout = 'top'
-            default_orientation = 'D'
-        elif mode == 'pll':
-            default_mask = PLL_MASK
-            default_layout = 'top'
-            default_orientation = 'D'
-        elif mode == 'll':
-            default_mask = L3_MASK
-            default_layout = 'top'
-            default_orientation = 'D'
-        elif mode == 'cross':
-            default_mask = CROSS_MASK
-            default_orientation = 'FU'
-        elif mode in {'f2l', 'af2l'}:
-            default_mask = F2L_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+ll':
-            default_mask = F2L_LL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+cll':
-            default_mask = F2L_CLL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+ell':
-            default_mask = F2L_ELL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
+        mode_mask, mode_layout, mode_orientation = self.resolve_mode(
+            mode.lower(),
+        )
 
         display_method = cast(
             'Callable[[list[str], list[str]], str]',
             getattr(
                 self,
                 LAYOUT_METHODS.get(
-                    layout or default_layout,
+                    layout.lower() or mode_layout,
                     'display_cube',
                 ),
             ),
         )
 
-        final_orientation = orientation or default_orientation
+        final_orientation = orientation or mode_orientation
         if final_orientation:
             cube = self.cube.oriented_copy(final_orientation, full=True)
         else:
@@ -264,8 +199,7 @@ class VCubeDisplay:
         faces = self.split_faces(cube.state)
         masked_faces = self.split_faces(
             self.compute_mask(
-                cube,
-                mask or default_mask,
+                cube, mask or mode_mask,
             ),
         )
 
