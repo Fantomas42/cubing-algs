@@ -85,7 +85,7 @@ class ModeDisplay:
         Determine the front face with the most cross top color facelets.
 
         Returns:
-            Two characters representing the face orientation.
+            Characters representing the new face orientation.
 
         """
         top = self.cube.orientation[0]
@@ -95,6 +95,9 @@ class ModeDisplay:
             top, front,
         )
 
+        if front == new_front:
+            return ''
+
         return f'{ top }{ new_front }'
 
     def cross_bottom_orientation(self) -> str:
@@ -102,7 +105,7 @@ class ModeDisplay:
         Determine the front face with the most cross bottom color facelets.
 
         Returns:
-            Two characters representing the face orientation.
+            Characters representing the new face orientation.
 
         """
         top = self.cube.orientation[0]
@@ -112,6 +115,9 @@ class ModeDisplay:
         new_front = self.compute_best_front_face(
             bottom, front,
         )
+
+        if front == new_front:
+            return ''
 
         return f'{ top }{ new_front }'
 
@@ -123,7 +129,7 @@ class ModeDisplay:
         Align F2L into FR slot for consistent results.
 
         Returns:
-            Two characters representing the face orientation.
+            Characters representing the new face orientation.
 
         """
         impacted_faces = ''
@@ -159,6 +165,9 @@ class ModeDisplay:
             ''.join(sorted(impacted_faces)),
             '',
         )
+
+        if not new_front:
+            return ''
 
         return f'{ top }{ new_front }'
 

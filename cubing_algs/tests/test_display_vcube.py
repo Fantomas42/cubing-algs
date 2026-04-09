@@ -366,9 +366,8 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
     def test_compute_f2l_orientation_edge_cases(self) -> None:
         """Test compute_f2l_front_face with various edge cases."""
-        # Should return simple U for solved cube
         result = self.printer.f2l_orientation()
-        self.assertEqual(result, 'U')
+        self.assertEqual(result, '')
 
     def test_display_top_down_adjacent_facelets_no_break_line(self) -> None:
         """

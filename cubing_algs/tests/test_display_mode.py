@@ -62,14 +62,14 @@ class CrossTopOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
     """Tests for ModeDisplay.cross_top_orientation()."""
 
     def test_solved_cube(self) -> None:
-        """Solved cube returns default orientation 'UF'."""
+        """Solved cube does not return new orientation."""
         display = self.make_display()
-        self.assertEqual(display.cross_top_orientation(), 'UF')
+        self.assertEqual(display.cross_top_orientation(), '')
 
     def test_y_rotation_shifts_front(self) -> None:
-        """After y rotation the new front (R) wins the zero-score tie."""
+        """After y rotation on solved cube does not return new orientation."""
         display = self.make_display('y')
-        self.assertEqual(display.cross_top_orientation(), 'UR')
+        self.assertEqual(display.cross_top_orientation(), '')
 
     def test_f_move_selects_right_face(self) -> None:
         """After F move R has 3 U-colored facelets and wins."""
@@ -90,23 +90,24 @@ class CrossTopOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         """
         After L move F gains 3 U-colored facelets
         and wins as the highest scorer.
+        But already in UF so no rotations.
         """
         display = self.make_display('L')
-        self.assertEqual(display.cross_top_orientation(), 'UF')
+        self.assertEqual(display.cross_top_orientation(), '')
 
 
 class CrossBottomOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
     """Tests for ModeDisplay.cross_bottom_orientation()."""
 
     def test_solved_cube(self) -> None:
-        """Solved cube returns default orientation 'UF'."""
+        """Solved cube does not return new orientation."""
         display = self.make_display()
-        self.assertEqual(display.cross_bottom_orientation(), 'UF')
+        self.assertEqual(display.cross_bottom_orientation(), '')
 
     def test_y_rotation_shifts_front(self) -> None:
-        """After y rotation the new front (R) wins the zero-score tie."""
+        """After y rotation on solved cube does not return new orientation."""
         display = self.make_display('y')
-        self.assertEqual(display.cross_bottom_orientation(), 'UR')
+        self.assertEqual(display.cross_bottom_orientation(), '')
 
     def test_f_move_selects_left_face(self) -> None:
         """After F move L has 3 D-colored facelets and wins."""
@@ -122,9 +123,10 @@ class CrossBottomOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         """
         After R move F gains 3 D-colored facelets
         and wins as the highest scorer.
+        But already in UF so no rotations.
         """
         display = self.make_display('R')
-        self.assertEqual(display.cross_bottom_orientation(), 'UF')
+        self.assertEqual(display.cross_bottom_orientation(), '')
 
     def test_l_move_selects_back_face(self) -> None:
         """After L move B has 3 D-colored facelets and wins."""
@@ -153,14 +155,14 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
     # ------------------------------------------------------------------
 
     def test_solved_cube_returns_top_only(self) -> None:
-        """Solved cube has no impacted faces; only top is returned."""
+        """Solved cube has no impacted faces; no orientation."""
         display = self.make_display()
-        self.assertEqual(display.f2l_orientation(), 'U')
+        self.assertEqual(display.f2l_orientation(), '')
 
     def test_u_layer_only_moves_leave_f2l_intact(self) -> None:
-        """U-layer moves don't touch F2L rows; only top is returned."""
+        """U-layer moves don't touch F2L rows; no orientation."""
         display = self.make_display('z2 U2')
-        self.assertEqual(display.f2l_orientation(), 'D')
+        self.assertEqual(display.f2l_orientation(), '')
 
     # ------------------------------------------------------------------
     # 2 impacted faces — opposite-face pairs (no valid slot)
@@ -171,7 +173,7 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         # z2 R moves U-colored facelets onto B and D-colored onto F:
         # (F,B) is not an F2L corner slot so F2L_FACE_ORIENTATIONS returns ''.
         display = self.make_display('z2 R')
-        self.assertEqual(display.f2l_orientation(), 'D')
+        self.assertEqual(display.f2l_orientation(), '')
 
     # ------------------------------------------------------------------
     # 2 impacted faces — valid F2L corner slots
@@ -344,7 +346,7 @@ class ResolveModeTestCase(ModeDisplayMixin, unittest.TestCase):
         display = self.make_display()
         _, layout, orientation = display.resolve_mode('f2l')
         self.assertEqual(layout, '')
-        self.assertEqual(orientation, 'U')  # solved: no front appended
+        self.assertEqual(orientation, '')  # solved
 
     def test_cross_and_cross_bottom_are_aliases(self) -> None:
         """'cross' and 'cross-bottom' produce identical results."""
