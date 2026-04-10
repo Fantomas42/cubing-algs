@@ -4,8 +4,8 @@ from functools import cached_property
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import FaceletPieceType
-from cubing_algs.annotations import Mask
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
@@ -422,7 +422,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     def display(self, *, mode: str = '',  # noqa: PLR0913
                 layout: str = '', orientation: str = '',
-                mask: Mask = '', palette: str = '',
+                mask: CubeMask = '', palette: str = '',
                 effect: str = '', facelet: str = '',
                 style: str = '') -> str:
         """
@@ -452,7 +452,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     def show(self, *, mode: str = '',  # noqa: PLR0913
              layout: str = '', orientation: str = '',
-             mask: Mask = '', palette: str = '',
+             mask: CubeMask = '', palette: str = '',
              effect: str = '', facelet: str = '',
              style: str = '') -> None:
         """Print a visual representation of the cube."""

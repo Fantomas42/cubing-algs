@@ -1,12 +1,14 @@
 """Demonstrate emoji facelet display mode for cube visualization."""
 # ruff: noqa: T201
+from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import CubeMask
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
 
 
-def facelets_masked(state: str, mask: str) -> str:
+def facelets_masked(state: CubeFacelets, mask: CubeMask) -> CubeMask:
     """
     Mask facelets.
 

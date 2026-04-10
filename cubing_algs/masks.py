@@ -2,13 +2,13 @@
 from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeFacelets
-from cubing_algs.annotations import Mask
+from cubing_algs.annotations import CubeMask
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm
 
 
-def union_masks(*masks: Mask) -> Mask:
+def union_masks(*masks: CubeMask) -> CubeMask:
     """
     Perform the union (logical OR) of multiple binary masks.
 
@@ -40,7 +40,7 @@ def union_masks(*masks: Mask) -> Mask:
     return format(result, f'0{ length }b')
 
 
-def intersection_masks(*masks: Mask) -> Mask:
+def intersection_masks(*masks: CubeMask) -> CubeMask:
     """
     Perform the intersection (logical AND) of multiple binary masks.
 
@@ -72,7 +72,7 @@ def intersection_masks(*masks: Mask) -> Mask:
     return format(result, f'0{ length }b')
 
 
-def negate_mask(mask: Mask) -> Mask:
+def negate_mask(mask: CubeMask) -> CubeMask:
     """
     Invert a binary mask (logical NOT).
 
@@ -100,7 +100,7 @@ def negate_mask(mask: Mask) -> Mask:
 def compute_algorithm_mask(
         algorithm: 'Algorithm',
         size: int = 3,
-) -> tuple[Mask, CubeFacelets]:
+) -> tuple[CubeMask, CubeFacelets]:
     """
     Compute an orientation-aware binary mask of facelets
     affected by an algorithm.
@@ -179,7 +179,7 @@ def compute_algorithm_mask(
     return mask, cube_mask.state
 
 
-FULL_MASK: Mask = '1' * 54
+FULL_MASK: CubeMask = '1' * 54
 
 # Masks are mainly used to highlight or hide facelets when displaying a cube
 # state, making it easy to focus on a specific solving feature (OLL, PLL,

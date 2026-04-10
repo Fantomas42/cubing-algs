@@ -1,7 +1,7 @@
 """Mode handling for visual display."""
 from typing import TYPE_CHECKING
 
-from cubing_algs.annotations import Mask
+from cubing_algs.annotations import CubeMask
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.masks import CROSS_BOTTOM_MASK
@@ -31,7 +31,7 @@ F2L_ADJACENT_FACES = {
     'F': ('R', 'L'),
 }
 
-MODE_CONFIGS: dict[str, tuple[Mask, str, str]] = {
+MODE_CONFIGS: dict[str, tuple[CubeMask, str, str]] = {
     'oll':          (OLL_MASK,          'top', ''),                          # noqa: E241
     'pll':          (PLL_MASK,          'top', ''),                          # noqa: E241
     'll':           (L3_MASK,           'top', ''),                          # noqa: E241
@@ -171,7 +171,7 @@ class ModeDisplay:
 
         return f'{ top }{ new_front }'
 
-    def realign_mask(self, mask: Mask) -> Mask:
+    def realign_mask(self, mask: CubeMask) -> CubeMask:
         """
         Convert a mask from user-POV coordinates to cube-internal coordinates.
 
@@ -205,7 +205,7 @@ class ModeDisplay:
 
         return cube.state
 
-    def resolve_mode(self, mode: str) -> tuple[Mask, str, str]:
+    def resolve_mode(self, mode: str) -> tuple[CubeMask, str, str]:
         """
         Resolve display mode into mask, layout, and orientation settings.
 

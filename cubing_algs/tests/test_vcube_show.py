@@ -5,7 +5,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from unittest.mock import patch
 
-from cubing_algs.annotations import Mask
+from cubing_algs.annotations import CubeMask
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.vcube import VCube
 
@@ -21,7 +21,7 @@ class VCubeShowMixin:
     def show_output(cube: VCube,
                     mode: str = '',
                     orientation: str = '',
-                    mask: Mask = '',
+                    mask: CubeMask = '',
                     layout: str = '') -> str:
         """
         Run cube.show() and capture stdout.
@@ -46,7 +46,7 @@ class VCubeShowMixin:
     def show_stripped(self, cube: VCube,
                       mode: str = '',
                       orientation: str = '',
-                      mask: Mask = '',
+                      mask: CubeMask = '',
                       layout: str = '') -> str:
         """
         Run cube.show() and return output with ANSI codes stripped.
@@ -69,7 +69,7 @@ class VCubeShowMixin:
     def show_grid(self, cube: VCube,
                   mode: str = '',
                   orientation: str = '',
-                  mask: Mask = '',
+                  mask: CubeMask = '',
                   layout: str = '') -> str:
         """
         Run cube.show() and return a readable grid.

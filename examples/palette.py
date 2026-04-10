@@ -2,6 +2,8 @@
 # ruff: noqa: T201
 import argparse
 
+from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import CubeMask
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.palettes import PALETTES
 from cubing_algs.display.palettes import load_palette
@@ -33,7 +35,7 @@ def print_colorized(string: str, colors: list[str], line: str = '-') -> None:
     print(result)
 
 
-def facelets_masked(state: str, mask: str) -> str:
+def facelets_masked(state: CubeFacelets, mask: CubeMask) -> CubeMask:
     """
     Mask facelets.
 
