@@ -3,7 +3,10 @@ import os
 from typing import TYPE_CHECKING
 from typing import cast
 
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import FaceFacelets
+from cubing_algs.annotations import FaceMask
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.constants import ANSI_TO_RGB
@@ -100,7 +103,9 @@ class VCubeDisplay(ModeDisplay):
 
         return cube_mask.state
 
-    def split_faces(self, state: str) -> list[str]:
+    def split_faces(
+            self, state: CubeFacelets | CubeMask,
+    ) -> list[FaceFacelets | FaceMask]:
         """
         Split cube state string into individual face strings.
 
@@ -158,7 +163,7 @@ class VCubeDisplay(ModeDisplay):
         )
 
         display_method = cast(
-            'Callable[[list[str], list[str]], str]',
+            'Callable[[list[FaceFacelets], list[FaceMask]], str]',
             getattr(
                 self,
                 LAYOUT_METHODS.get(
@@ -277,7 +282,8 @@ class VCubeDisplay(ModeDisplay):
             f'{ self.palette["reset"] }'
         )
 
-    def display_face_row(self, faces: list[str], faces_mask: list[str],
+    def display_face_row(self, faces: list[FaceFacelets],
+                         faces_mask: list[FaceMask],
                          face_key: str, row: int) -> str:
         """
         Display a complete row of a face.
@@ -305,7 +311,8 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_facelet_by_face(self, faces: list[str], faces_mask: list[str],
+    def display_facelet_by_face(self, faces: list[FaceFacelets],
+                                faces_mask: list[FaceMask],
                                 face_key: str, index: int, *,
                                 adjacent: bool = True) -> str:
         """
@@ -331,7 +338,8 @@ class VCubeDisplay(ModeDisplay):
             adjacent=adjacent,
         )
 
-    def display_face_indexes(self, faces: list[str], faces_mask: list[str],
+    def display_face_indexes(self, faces: list[FaceFacelets],
+                             faces_mask: list[FaceMask],
                              face_key: str, indexes: list[int], *,
                              adjacent: bool = True) -> str:
         """
@@ -357,7 +365,8 @@ class VCubeDisplay(ModeDisplay):
             for idx in indexes
         )
 
-    def display_row_with_sides(self, faces: list[str], faces_mask: list[str],  # noqa: PLR0913 PLR0917
+    def display_row_with_sides(self, faces: list[FaceFacelets],  # noqa: PLR0913 PLR0917
+                               faces_mask: list[FaceMask],
                                center_face: str,
                                left_indexes: list[int],
                                right_indexes: list[int],
@@ -478,7 +487,8 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_cube(self, faces: list[str], faces_mask: list[str]) -> str:
+    def display_cube(self, faces: list[FaceFacelets],
+                     faces_mask: list[FaceMask]) -> str:
         """
         Display cube in standard unfolded net layout.
 
@@ -518,8 +528,8 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_top_face(self, faces: list[str],
-                         faces_mask: list[str]) -> str:
+    def display_top_face(self, faces: list[FaceFacelets],
+                         faces_mask: list[FaceMask]) -> str:
         """
         Display only the top face with surrounding adjacent facelets.
 
@@ -573,8 +583,8 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_extended_net(self, faces: list[str],
-                             faces_mask: list[str]) -> str:
+    def display_extended_net(self, faces: list[FaceFacelets],
+                             faces_mask: list[FaceMask]) -> str:
         """
         Display cube as an extended net layout.
 
@@ -702,8 +712,8 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_linear(self, faces: list[str],
-                       faces_mask: list[str]) -> str:
+    def display_linear(self, faces: list[FaceFacelets],
+                       faces_mask: list[FaceMask]) -> str:
         """
         Display facelets in a linear arrangement.
 
