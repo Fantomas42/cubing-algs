@@ -1,13 +1,17 @@
 """Visual representation and display formatting for virtual cube states."""
 import os
-import re
 from typing import TYPE_CHECKING
 from typing import cast
 
 from cubing_algs.annotations import CubeMask
-from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display.constants import ANSI_TO_RGB
+from cubing_algs.display.constants import DEFAULT_EFFECT
+from cubing_algs.display.constants import DEFAULT_PALETTE
+from cubing_algs.display.constants import DEFAULT_STYLE
+from cubing_algs.display.constants import EMOJIS
+from cubing_algs.display.constants import LAYOUT_METHODS
 from cubing_algs.display.effects import load_effect
 from cubing_algs.display.mode import ModeDisplay
 from cubing_algs.display.palettes import load_palette
@@ -33,32 +37,6 @@ def color_support() -> bool:
 
 
 USE_COLORS = color_support()
-
-DEFAULT_EFFECT = os.getenv('CUBING_ALGS_EFFECT', '')
-DEFAULT_PALETTE = os.getenv('CUBING_ALGS_PALETTE', 'default')
-DEFAULT_STYLE = os.getenv('CUBING_ALGS_STYLE', 'default')
-
-ANSI_TO_RGB: RegexPattern = re.compile(
-    r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
-)
-
-EMOJIS = {
-    'U': '⬜',
-    'D': '🟨',
-    'F': '🟩',
-    'B': '🟦',
-    'L': '🟧',
-    'R': '🟥',
-    'masked': '⬛',
-    'hidden': '❓',
-}
-
-LAYOUT_METHODS: dict[str, str] = {
-    'top': 'display_top_face',
-    'extended': 'display_extended_net',
-    'linear': 'display_linear',
-    'cube': 'display_cube',
-}
 
 
 class VCubeDisplay(ModeDisplay):
