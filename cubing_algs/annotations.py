@@ -30,6 +30,7 @@ type CubeFacelets = str
 type FaceFacelets = str
 
 # Binary mask (string of '0' and '1')
+type POVMask = str
 type CubeMask = str
 type FaceMask = str
 

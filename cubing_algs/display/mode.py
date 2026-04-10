@@ -2,8 +2,11 @@
 from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import POVMask
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.display.constants import F2L_ADJACENT_FACES
+from cubing_algs.display.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.masks import CROSS_BOTTOM_MASK
 from cubing_algs.masks import CROSS_TOP_MASK
 from cubing_algs.masks import F2L_CLL_MASK
@@ -16,20 +19,6 @@ from cubing_algs.masks import PLL_MASK
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube
-
-F2L_FACE_ORIENTATIONS = {
-    'FL': 'F',
-    'FR': 'R',
-    'BL': 'L',
-    'BR': 'B',
-}
-
-F2L_ADJACENT_FACES = {
-    'R': ('B', 'F'),
-    'L': ('F', 'B'),
-    'B': ('L', 'R'),
-    'F': ('R', 'L'),
-}
 
 MODE_CONFIGS: dict[str, tuple[CubeMask, str, str]] = {
     'oll':          (OLL_MASK,          'top', ''),                          # noqa: E241
@@ -171,7 +160,7 @@ class ModeDisplay:
 
         return f'{ top }{ new_front }'
 
-    def realign_mask(self, mask: CubeMask) -> CubeMask:
+    def realign_mask(self, mask: POVMask) -> CubeMask:
         """
         Convert a mask from user-POV coordinates to cube-internal coordinates.
 

@@ -32,3 +32,17 @@ LAYOUT_METHODS: dict[str, str] = {
 }
 
 MIN_DISTANCE = math.sqrt(3)
+
+F2L_FACE_ORIENTATIONS = {
+    'FL': 'F',
+    'FR': 'R',
+    'BL': 'L',
+    'BR': 'B',
+}
+
+F2L_ADJACENT_FACES = {
+    'R': ('B', 'F'),
+    'L': ('F', 'B'),
+    'B': ('L', 'R'),
+    'F': ('R', 'L'),
+}

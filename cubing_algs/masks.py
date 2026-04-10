@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import POVMask
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm
@@ -207,7 +208,7 @@ FULL_MASK: CubeMask = '1' * 54
 # is converted to track the D-adjacent rows internally, correctly following
 # each sticker as it is permuted by the algorithm.
 
-CENTERS_MASK = (
+CENTERS_MASK: POVMask = (
     '000010000'
     '000010000'
     '000010000'
@@ -216,7 +217,7 @@ CENTERS_MASK = (
     '000010000'
 )
 
-CORNERS_MASK = (
+CORNERS_MASK: POVMask = (
     '101000101'
     '101000101'
     '101000101'
@@ -225,7 +226,7 @@ CORNERS_MASK = (
     '101000101'
 )
 
-EDGES_MASK = (
+EDGES_MASK: POVMask = (
     '010101010'
     '010101010'
     '010101010'
@@ -234,7 +235,7 @@ EDGES_MASK = (
     '010101010'
 )
 
-CROSS_BOTTOM_MASK = (
+CROSS_BOTTOM_MASK: POVMask = (
     '000000000'
     '000010010'
     '000010010'
@@ -243,7 +244,7 @@ CROSS_BOTTOM_MASK = (
     '000010010'
 )
 
-CROSS_TOP_MASK = (
+CROSS_TOP_MASK: POVMask = (
     '010111010'
     '010010000'
     '010010000'
@@ -252,7 +253,7 @@ CROSS_TOP_MASK = (
     '010010000'
 )
 
-L1_MASK = (
+L1_MASK: POVMask = (
     '000000000'
     '000000111'
     '000000111'
@@ -261,7 +262,7 @@ L1_MASK = (
     '000000111'
 )
 
-L2_MASK = (
+L2_MASK: POVMask = (
     '000000000'
     '000111000'
     '000111000'
@@ -270,7 +271,7 @@ L2_MASK = (
     '000111000'
 )
 
-L3_MASK = (
+L3_MASK: POVMask = (
     '111111111'
     '111000000'
     '111000000'
@@ -279,7 +280,7 @@ L3_MASK = (
     '111000000'
 )
 
-F2L_MASK = (
+F2L_MASK: POVMask = (
     '000000000'
     '000111111'
     '000111111'
@@ -288,7 +289,7 @@ F2L_MASK = (
     '000111111'
 )
 
-F2L_FR_MASK = (
+F2L_FR_MASK: POVMask = (
     '000000000'
     '000100100'
     '000001001'
@@ -297,7 +298,7 @@ F2L_FR_MASK = (
     '000000000'
 )
 
-F2L_FL_MASK = (
+F2L_FL_MASK: POVMask = (
     '000000000'
     '000000000'
     '000100100'
@@ -306,7 +307,7 @@ F2L_FL_MASK = (
     '000000000'
 )
 
-F2L_BR_MASK = (
+F2L_BR_MASK: POVMask = (
     '000000000'
     '000001001'
     '000000000'
@@ -315,7 +316,7 @@ F2L_BR_MASK = (
     '000100100'
 )
 
-F2L_BL_MASK = (
+F2L_BL_MASK: POVMask = (
     '000000000'
     '000000000'
     '000000000'
@@ -324,7 +325,7 @@ F2L_BL_MASK = (
     '000001001'
 )
 
-F2L_LL_MASK = (
+F2L_LL_MASK: POVMask = (
     '111111111'
     '000111111'
     '000111111'
@@ -333,7 +334,7 @@ F2L_LL_MASK = (
     '000111111'
 )
 
-F2L_CLL_MASK = (
+F2L_CLL_MASK: POVMask = (
     '101010101'
     '000111111'
     '000111111'
@@ -342,7 +343,7 @@ F2L_CLL_MASK = (
     '000111111'
 )
 
-F2L_ELL_MASK = (
+F2L_ELL_MASK: POVMask = (
     '010111010'
     '000111111'
     '000111111'
@@ -351,7 +352,7 @@ F2L_ELL_MASK = (
     '000111111'
 )
 
-OLL_MASK = (
+OLL_MASK: POVMask = (
     '111111111'
     '000000000'
     '000000000'
@@ -360,7 +361,7 @@ OLL_MASK = (
     '000000000'
 )
 
-PLL_MASK = (
+PLL_MASK: POVMask = (
     '000000000'
     '111000000'
     '111000000'
