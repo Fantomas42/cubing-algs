@@ -2593,7 +2593,8 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
     def test_single_face_moves_have_symmetric_cubie_orientation_counts(
             self,
     ) -> None:
-        """Test that all single face moves report the same orientation counts.
+        """
+        Test that all single face moves report the same orientation counts.
 
         corners_twisted and edges_flipped count only pieces in their home
         position but mis-oriented. Any single face move cycles pieces out of
@@ -3149,18 +3150,24 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         self.assertIn('ALL_ORIENTED', patterns)
 
     def test_corners_oriented_only(self) -> None:
-        """Test only corners oriented."""
+        """
+        Test only corners oriented,
+        edges are flipped at their home position.
+        """
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = SOLVED_CO
-        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('CORNERS_ORIENTED', patterns)
         self.assertNotIn('ALL_ORIENTED', patterns)
 
     def test_edges_oriented_only(self) -> None:
-        """Test only edges oriented."""
-        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        """
+        Test only edges oriented,
+        corners are twisted at their home position.
+        """
+        cp = SOLVED_CP
         co = [1, 0, 0, 0, 0, 0, 0, 0]
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
@@ -3201,14 +3208,14 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         """Test OLL with corners oriented."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = SOLVED_CO
-        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('OLL_CORNERS_DONE', patterns)
 
     def test_oll_edges_done(self) -> None:
         """Test OLL with edges oriented."""
-        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        cp = SOLVED_CP
         co = [1, 0, 0, 0, 0, 0, 0, 0]
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
@@ -3414,6 +3421,25 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         eo = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('UNCLASSIFIED', patterns)
+
+    def test_symmetry_variations_give_same_patterns(self) -> None:
+        """
+        Symmetry variations of an algorithm must yield identical patterns.
+
+        Sune and AntiSune are mirror variations of the same OLL case.
+        They move different pieces but produce the same structural pattern,
+        so classify_pattern should return the same set for both.
+        """
+        sune = Algorithm.parse_moves("R U R' U R U2 R'")
+        anti_sune = Algorithm.parse_moves("R U2 R' U' R U' R'")
+
+        sune_impacts = compute_impacts(sune)
+        anti_sune_impacts = compute_impacts(anti_sune)
+
+        self.assertEqual(
+            sune_impacts.cubies_patterns,
+            anti_sune_impacts.cubies_patterns,
+        )
 
 
 class TestClassifyParitySignature(unittest.TestCase):

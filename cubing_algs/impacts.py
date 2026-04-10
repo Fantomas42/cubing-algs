@@ -888,9 +888,15 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         patterns.append('SOLVED')
         return patterns  # If solved, no other patterns apply
 
-    # Orientation patterns
-    all_corners_oriented = all(orientation == 0 for orientation in co)
-    all_edges_oriented = all(orientation == 0 for orientation in eo)
+    # Orientation patterns — only consider pieces at their home position
+    all_corners_oriented = all(
+        cp[i] != i or orientation == 0
+        for i, orientation in enumerate(co)
+    )
+    all_edges_oriented = all(
+        ep[i] != i or orientation == 0
+        for i, orientation in enumerate(eo)
+    )
 
     if all_corners_oriented and all_edges_oriented:
         patterns.append('ALL_ORIENTED')
