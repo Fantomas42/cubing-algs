@@ -1048,9 +1048,9 @@ def compute_cubie_complexity(
 
     Args:
         corners_moved: Number of corners out of place.
-        corners_twisted: Number of corners incorrectly oriented.
+        corners_twisted: Number of corners in their home position but twisted.
         edges_moved: Number of edges out of place.
-        edges_flipped: Number of edges incorrectly oriented.
+        edges_flipped: Number of edges in their home position but flipped.
 
     Returns:
         Tuple of (complexity_score, suggested_approach).
@@ -1178,9 +1178,15 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
         cp, co, ep, eo, _so = cubie_cube.cubies
 
         corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)
-        corners_twisted = sum(1 for orientation in co if orientation != 0)
+        corners_twisted = sum(
+            1 for i, (pos, orientation) in enumerate(zip(cp, co, strict=True))
+            if pos == i and orientation != 0
+        )
         edges_moved = sum(1 for i, pos in enumerate(ep) if pos != i)
-        edges_flipped = sum(1 for orientation in eo if orientation != 0)
+        edges_flipped = sum(
+            1 for i, (pos, orientation) in enumerate(zip(ep, eo, strict=True))
+            if pos == i and orientation != 0
+        )
 
         corner_cycles = find_permutation_cycles(cp)
         edge_cycles = find_permutation_cycles(ep)

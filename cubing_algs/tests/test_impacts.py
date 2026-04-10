@@ -2590,6 +2590,30 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
         self.assertIsInstance(result.facelets_face_mobility, dict)
         self.assertEqual(len(result.facelets_face_mobility), 6)
 
+    def test_single_face_moves_have_symmetric_cubie_orientation_counts(
+            self,
+    ) -> None:
+        """Test that all single face moves report the same orientation counts.
+
+        corners_twisted and edges_flipped count only pieces in their home
+        position but mis-oriented. Any single face move cycles pieces out of
+        place — it never leaves a piece at home but mis-oriented — so both
+        counts are 0 for every face move regardless of which face is turned.
+        """
+        for move in ('R', "R'", 'R2', 'U', 'F', 'B', 'L', 'D'):
+            with self.subTest(move=move):
+                result = compute_impacts(Algorithm.parse_moves(move))
+                self.assertEqual(
+                    result.cubies_corners_twisted,
+                    0,
+                    msg=f'{move} should have 0 corners twisted in place',
+                )
+                self.assertEqual(
+                    result.cubies_edges_flipped,
+                    0,
+                    msg=f'{move} should have 0 edges flipped in place',
+                )
+
     def test_trailing_rotation_does_not_affect_cubie_analysis(self) -> None:
         """Test that trailing rotations are normalized for cubie analysis."""
         result_r = compute_impacts(Algorithm.parse_moves('R'))
