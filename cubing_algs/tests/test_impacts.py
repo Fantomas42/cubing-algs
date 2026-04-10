@@ -2657,6 +2657,79 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
             result_r_y.cubies_patterns,
         )
 
+    def test_leading_rotation_is_absorbed_into_face_moves(self) -> None:
+        """
+        Test that a leading rotation is degripped
+        into its face equivalent.
+
+        y R is physically equivalent to B (y rotates the cube so R face
+        becomes B in the original orientation)
+
+        """
+        result_b = compute_impacts(Algorithm.parse_moves('B'))
+        result_y_r = compute_impacts(Algorithm.parse_moves('y R'))
+
+        self.assertEqual(
+            result_b.cubies_corner_permutation,
+            result_y_r.cubies_corner_permutation,
+        )
+        self.assertEqual(
+            result_b.cubies_corner_orientation,
+            result_y_r.cubies_corner_orientation,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_permutation,
+            result_y_r.cubies_edge_permutation,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_orientation,
+            result_y_r.cubies_edge_orientation,
+        )
+        self.assertEqual(
+            result_b.cubies_corners_moved,
+            result_y_r.cubies_corners_moved,
+        )
+        self.assertEqual(
+            result_b.cubies_corners_twisted,
+            result_y_r.cubies_corners_twisted,
+        )
+        self.assertEqual(
+            result_b.cubies_edges_moved,
+            result_y_r.cubies_edges_moved,
+        )
+        self.assertEqual(
+            result_b.cubies_edges_flipped,
+            result_y_r.cubies_edges_flipped,
+        )
+        self.assertEqual(
+            result_b.cubies_corner_cycles,
+            result_y_r.cubies_corner_cycles,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_cycles,
+            result_y_r.cubies_edge_cycles,
+        )
+        self.assertEqual(
+            result_b.cubies_complexity_score,
+            result_y_r.cubies_complexity_score,
+        )
+        self.assertEqual(
+            result_b.cubies_corner_parity,
+            result_y_r.cubies_corner_parity,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_parity,
+            result_y_r.cubies_edge_parity,
+        )
+        self.assertEqual(
+            result_b.cubies_parity_valid,
+            result_y_r.cubies_parity_valid,
+        )
+        self.assertEqual(
+            result_b.cubies_patterns,
+            result_y_r.cubies_patterns,
+        )
+
     def test_identical_algorithms_identical_results(self) -> None:
         """Test that identical algorithms produce identical results."""
         algorithm1 = Algorithm.parse_moves("R U R' U'")

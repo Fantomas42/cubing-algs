@@ -1091,7 +1091,11 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     """
     from cubing_algs.masks import compute_algorithm_mask  # noqa: PLC0415
     from cubing_algs.solved_state import get_unique_facelets  # noqa: PLC0415
+    from cubing_algs.transform.degrip import degrip_full_moves  # noqa: PLC0415
     from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+    from cubing_algs.transform.rotation import (  # noqa: PLC0415
+        remove_ending_rotations,
+    )
     from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
     from cubing_algs.vcube import VCube  # noqa: PLC0415
 
@@ -1156,15 +1160,22 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     patterns: list[str] | None = None
 
     if size == 3:
-        oriented_cube = cube.oriented_copy('UF')
+        cubie_cube = VCube(size=size)
+        # Keep cube in absolute frame
+        cubie_cube.rotate(
+            cleaned_algorithm.transform(
+                degrip_full_moves,
+                remove_ending_rotations,
+            ),
+        )
 
         manhattan_distance = compute_distance_metrics(
-            permutations, oriented_cube, compute_manhattan_distance,
+            permutations, cubie_cube, compute_manhattan_distance,
         )
         qtm_distance = compute_distance_metrics(
-            permutations, oriented_cube, compute_qtm_distance,
+            permutations, cubie_cube, compute_qtm_distance,
         )
-        cp, co, ep, eo, _so = oriented_cube.cubies
+        cp, co, ep, eo, _so = cubie_cube.cubies
 
         corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)
         corners_twisted = sum(1 for orientation in co if orientation != 0)
