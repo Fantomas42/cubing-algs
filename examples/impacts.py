@@ -1,5 +1,6 @@
 """Demonstrate comprehensive algorithm impact analysis."""
 # ruff: noqa: T201
+import sys
 from typing import TYPE_CHECKING
 
 from cubing_algs.algorithm import Algorithm
@@ -117,9 +118,13 @@ def show_impact(algorithm: str) -> None:
     algo.show()
 
 
-# Examples demonstrating different types of algorithms
-show_impact('R')
-show_impact("R'")
-show_impact("R U R' U'")
-show_impact("R U R' U R U2 R'")  # Sune
-show_impact("R U R' F' R U R' U' R' F R2 U' R'")  # T-Perm
+if sys.argv[1:]:
+    for arg in sys.argv[1:]:
+        show_impact(arg)
+else:
+    # Default examples demonstrating different types of algorithms
+    show_impact('R')
+    show_impact("R'")
+    show_impact("R U R' U'")
+    show_impact("R U R' U R U2 R'")  # Sune
+    show_impact("R U R' F' R U R' U' R' F R2 U' R'")  # T-Perm
