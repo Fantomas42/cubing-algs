@@ -10,6 +10,8 @@ import re
 
 from cubing_algs.annotations import RegexPattern
 
+DEFAULT_CUBE_SIZE = 3
+
 MAX_ITERATIONS = 50
 
 RESLICE_THRESHOLD = 50

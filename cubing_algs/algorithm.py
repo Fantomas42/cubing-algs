@@ -8,9 +8,10 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING
 from typing import Self
 
+from cubing_algs.annotations import CubeMask
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
-from cubing_algs.display.vcube import DEFAULT_PALETTE
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidMoveError
@@ -44,8 +45,11 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             self.data.extend(initlist)
 
     @staticmethod
-    def parse_moves(items: Iterable[Move | str] | Move | str,
-                    *, trust_input: bool = False) -> 'Algorithm':
+    def parse_moves(
+            items: Iterable[Move | str] | Move | str,
+            *,
+            trust_input: bool = False,
+    ) -> 'Algorithm':
         """
         Parse a string or list of strings into an Algorithm object.
 
@@ -220,6 +224,33 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         return mod_moves
 
+    def impacts(self, size: int = DEFAULT_CUBE_SIZE) -> ImpactData:
+        """
+        Analyze the spatial impact of this algorithm on a cube.
+
+        Computes comprehensive metrics about how the algorithm affects
+        individual facelets on the cube, including movement patterns,
+        distances, and face-level statistics.
+
+        Cubie-level analysis is only available for 3x3x3 cubes.
+
+        Args:
+            size: Size of the cube (default 3).
+
+        Returns:
+            An ImpactData object containing comprehensive impact metrics.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("R U R' U'")
+            >>> impacts = alg.impacts()
+            >>> impacts.facelets_mobilized_count
+            18  # 18 out of 54 facelets are affected
+            >>> impacts.facelets_scrambled_percent
+            0.33  # About 33% of the cube is scrambled
+
+        """
+        return compute_impacts(self, size=size)
+
     @property
     def cycles(self) -> int:
         """
@@ -267,33 +298,6 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         """
         return compute_metrics(self)
-
-    def impacts(self, size: int = 3) -> ImpactData:
-        """
-        Analyze the spatial impact of this algorithm on a cube.
-
-        Computes comprehensive metrics about how the algorithm affects
-        individual facelets on the cube, including movement patterns,
-        distances, and face-level statistics.
-
-        Cubie-level analysis is only available for 3x3x3 cubes.
-
-        Args:
-            size: Size of the cube (default 3).
-
-        Returns:
-            An ImpactData object containing comprehensive impact metrics.
-
-        Example:
-            >>> alg = Algorithm.parse_moves("R U R' U'")
-            >>> impacts = alg.impacts()
-            >>> impacts.facelets_mobilized_count
-            18  # 18 out of 54 facelets are affected
-            >>> impacts.facelets_scrambled_percent
-            0.33  # About 33% of the cube is scrambled
-
-        """
-        return compute_impacts(self, size=size)
 
     @property
     def ergonomics(self) -> ErgonomicsData:
@@ -414,31 +418,28 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """Check if algorithm timed moves."""
         return any(m.is_timed for m in self)
 
-    def show(self, size: int = 3, *, mode: str = '',  # noqa: PLR0913
-             layout: str = '', orientation: str = '',
-             palette: str = '', effect: str = '',
-             facelet: str = '', style: str = '',
-             impact_mask: bool = True) -> 'VCube':
+    def get_cube_and_impact_mask(
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            impact_mask: bool = True,
+    ) -> tuple['VCube', CubeMask]:
         """
-        Visualize the algorithm's effect on a cube.
+        Apply this algorithm to a fresh cube and return it with an impact mask.
 
-        Creates a VCube, applies this algorithm to it, and displays the result
-        with a mask showing which facelets are affected by the algorithm.
+        Strips pauses and timed moves, applies the cleaned algorithm to a new
+        VCube, and optionally computes a mask string identifying which facelets
+        were moved by the algorithm.
 
         Args:
-            size: Size of the cube.
-            mode: Display mode for layout/orientation/mask
-                  (e.g., 'oll', 'pll', 'cross', 'f2l').
-            layout: Display layout ('cube', 'top', 'linear', 'extended').
-            orientation: Cube orientation string for reorienting the view.
-            palette: Color palette to use.
-            effect: Visual effect to apply.
-            facelet: Facelet mode for display.
-            style: Letter style preset to apply.
-            impact_mask: Show affected facelets with a mask.
+            size: Size of the cube (default 3).
+            impact_mask: If True, compute and return a mask string marking
+                moved facelets. If False, the mask is an empty string.
 
         Returns:
-            A VCube object with the algorithm applied.
+            A tuple of (cube, mask) where cube is the VCube after the algorithm
+            is applied, and mask is the CubeMask string of impacted facelets
+            by the algorithm or '' when impact_mask is False.
 
         """
         from cubing_algs.masks import compute_algorithm_mask  # noqa: PLC0415
@@ -461,6 +462,48 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
                 cleaned_algo, size,
             )
 
+        return cube, moved_facelets_mask
+
+    def show(  # noqa: PLR0913
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: str = '',
+            palette: str = '',
+            effect: str = '',
+            facelet: str = '',
+            style: str = '',
+            impact_mask: bool = True,
+    ) -> 'VCube':
+        """
+        Visualize the algorithm's effect on a cube.
+
+        Creates a VCube, applies this algorithm to it, and displays the result
+        with a mask showing which facelets are affected by the algorithm.
+
+        Args:
+            size: Size of the cube.
+            mode: Display mode for layout/orientation/mask
+                  (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout ('cube', 'top', 'linear', 'extended').
+            orientation: Cube orientation string for reorienting the view.
+            palette: Color palette to use.
+            effect: Visual effect to apply.
+            facelet: Facelet mode for display.
+            style: Letter style preset to apply.
+            impact_mask: Show affected facelets with a mask.
+
+        Returns:
+            A VCube object with the algorithm applied.
+
+        """
+        cube, moved_facelets_mask = self.get_cube_and_impact_mask(
+            size=size,
+            impact_mask=impact_mask,
+        )
+
         cube.show(
             mode=mode,
             layout=layout,
@@ -474,38 +517,59 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         return cube
 
-    def image(self, *, size: int = 200,  # noqa: PLR0913
-              cube_size: int | None = None,
-              view: str = '3d', mask: str = '',
-              rotation: str = 'y45x-34',
-              distance: float = 10.0,
-              cube_color: str = '#111111',
-              palette_name: str = DEFAULT_PALETTE) -> str:
+    def image(  # noqa: PLR0913
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: str = '',
+            palette: str = '',
+            cube_color: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0,
+            impact_mask: bool = True,
+    ) -> str:
         """
-        Render the algorithm's effect on a cube as an SVG image.
+        Generate image of the algorithm's effect on a cube.
+
+        Creates a VCube, applies this algorithm to it, and displays the result
+        with a mask showing which facelets are affected by the algorithm.
 
         Args:
-            size: Image dimension in pixels.
-            cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
-                etc.). Defaults to 3 if not specified.
-            view: Rendering mode. ``'3d'`` for perspective view,
-                ``'top'`` for flat top-face with adjacent strips.
-            mask: Mask to apply on the cube.
-            rotation: Axis-angle rotation string (3d view only).
-            distance: Camera distance for perspective projection
-                (3d view only).
-            cube_color: Hex color for cube body between stickers.
-            palette_name: Color palette name for sticker colors.
+            size: Size of the cube (default 3).
+            mode: Display preset that sets layout, orientation, and mask
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout; 'top' renders a flat 2D top-view,
+                    otherwise a 3D perspective view is used.
+            orientation: Cube orientation string for reorienting the view
+                         before rendering.
+            palette: Color palette name for sticker colors.
+            cube_color: Hex color for the cube body shown between stickers.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string for the 3D view, composed of
+                      axis-angle pairs (e.g., 'y45x-30').
+            distance: Camera distance from the cube center for the 3D view.
+            impact_mask: If True, highlight facelets moved by the algorithm.
 
         Returns:
             SVG string of the cube.
 
         """
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
+        cube, moved_facelets_mask = self.get_cube_and_impact_mask(
+            size=size,
+            impact_mask=impact_mask,
+        )
 
-        return render_cube(
-            self, size=size, cube_size=cube_size,
-            view=view, mask=mask, rotation=rotation,
-            distance=distance, cube_color=cube_color,
-            palette_name=palette_name,
+        return cube.image(
+            mode=mode,
+            layout=layout,
+            orientation=orientation,
+            mask=moved_facelets_mask,
+            palette=palette,
+            cube_color=cube_color,
+            image_size=image_size,
+            rotation=rotation,
+            distance=distance,
         )
