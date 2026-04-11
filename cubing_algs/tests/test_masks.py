@@ -82,7 +82,7 @@ class TestComputeAlgorithmMask(unittest.TestCase):
     def test_identity_algorithm(self) -> None:
         """Empty algorithm should produce all-zeros mask."""
         algo = Algorithm.parse_moves('')
-        mask, state = compute_algorithm_mask(algo)
+        mask, state = compute_algorithm_mask(algo, 3)
 
         self.assertEqual(mask, '0' * 54)
         self.assertEqual(state, get_unique_facelets(3))
@@ -90,7 +90,7 @@ class TestComputeAlgorithmMask(unittest.TestCase):
     def test_single_move(self) -> None:
         """R move affects exactly 20 facelets."""
         algo = Algorithm.parse_moves('R')
-        mask, _ = compute_algorithm_mask(algo)
+        mask, _ = compute_algorithm_mask(algo, 3)
 
         self.assertEqual(len(mask), 54)
         self.assertEqual(mask.count('1'), 20)
@@ -99,15 +99,15 @@ class TestComputeAlgorithmMask(unittest.TestCase):
         """An algorithm and its inverse affect the same facelets."""
         algo = Algorithm.parse_moves("R U R' U'")
         algo_inv = Algorithm.parse_moves("U R U' R'")
-        mask, _ = compute_algorithm_mask(algo)
-        mask_inv, _ = compute_algorithm_mask(algo_inv)
+        mask, _ = compute_algorithm_mask(algo, 3)
+        mask_inv, _ = compute_algorithm_mask(algo_inv, 3)
 
         self.assertEqual(mask, mask_inv)
 
     def test_rotation_only(self) -> None:
         """Pure rotation should produce all-zeros mask."""
         algo = Algorithm.parse_moves('y')
-        mask, _ = compute_algorithm_mask(algo)
+        mask, _ = compute_algorithm_mask(algo, 3)
 
         self.assertEqual(mask, '0' * 54)
 
@@ -116,8 +116,8 @@ class TestComputeAlgorithmMask(unittest.TestCase):
         algo_bare = Algorithm.parse_moves('B')
         algo_rotated = Algorithm.parse_moves('y R')
 
-        mask_bare, _ = compute_algorithm_mask(algo_bare)
-        mask_rotated, _ = compute_algorithm_mask(algo_rotated)
+        mask_bare, _ = compute_algorithm_mask(algo_bare, 3)
+        mask_rotated, _ = compute_algorithm_mask(algo_rotated, 3)
 
         # y R is equivalent to B in solved-state coordinates
         self.assertEqual(mask_bare, mask_rotated)
@@ -135,14 +135,14 @@ class TestComputeAlgorithmMask(unittest.TestCase):
     def test_solved_algorithm_cycle(self) -> None:
         """Applying R4 returns to solved, mask should be all zeros."""
         algo = Algorithm.parse_moves('R R R R')
-        mask, _ = compute_algorithm_mask(algo)
+        mask, _ = compute_algorithm_mask(algo, 3)
 
         self.assertEqual(mask, '0' * 54)
 
     def test_transformed_state_enables_permutation(self) -> None:
         """Transformed state can be used to compute permutations."""
         algo = Algorithm.parse_moves('R')
-        mask, transformed_state = compute_algorithm_mask(algo)
+        mask, transformed_state = compute_algorithm_mask(algo, 3)
         unique_facelets = get_unique_facelets(3)
 
         permutations: dict[int, int] = {}
@@ -185,7 +185,7 @@ class TestComputeAlgorithmMask(unittest.TestCase):
     def test_sexy_move(self) -> None:
         """Sexy move (R U R' U') affects a known number of facelets."""
         algo = Algorithm.parse_moves("R U R' U'")
-        mask, _ = compute_algorithm_mask(algo)
+        mask, _ = compute_algorithm_mask(algo, 3)
 
         mobilized = mask.count('1')
         self.assertEqual(mobilized, 18)

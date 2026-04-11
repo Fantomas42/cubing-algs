@@ -1723,13 +1723,13 @@ class AlgorithmImageTestCase(unittest.TestCase):
     def test_3d_view(self) -> None:
         """Test 3d view rendering."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(view='3d')
+        result = algo.image(layout='3d')
         self.assertTrue(result.startswith('<svg'))
 
     def test_top_view(self) -> None:
         """Test top view rendering."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(view='top')
+        result = algo.image(layout='top')
         self.assertTrue(result.startswith('<svg'))
         self.assertIn('class="face-U"', result)
 

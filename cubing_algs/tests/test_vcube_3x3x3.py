@@ -2086,13 +2086,13 @@ class VCubeImageTestCase(unittest.TestCase):
     def test_3d_view(self) -> None:
         """Test 3d view rendering."""
         cube = VCube()
-        result = cube.image(view='3d')
+        result = cube.image(layout='3d')
         self.assertTrue(result.startswith('<svg'))
 
     def test_top_view(self) -> None:
         """Test top view rendering."""
         cube = VCube()
-        result = cube.image(view='top')
+        result = cube.image(layout='top')
         self.assertTrue(result.startswith('<svg'))
         self.assertIn('class="face-U"', result)
 
