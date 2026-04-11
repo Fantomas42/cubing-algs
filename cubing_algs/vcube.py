@@ -532,7 +532,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
                     otherwise a 3D perspective view is used.
             orientation: Cube orientation string for reorienting the view
                          before rendering.
-            mask: Mask to show/mask facelets.
+            mask: Mask to filter which facelets are displayed.
             palette: Color palette name for sticker colors.
             cube_color: Hex color for the cube body shown between stickers.
             image_size: Output image dimension in pixels (width and height).

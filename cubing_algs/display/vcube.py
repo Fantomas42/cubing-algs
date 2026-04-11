@@ -52,11 +52,14 @@ class VCubeDisplay(ModeDisplay):
 
     facelet_size = 3
 
-    def __init__(self, cube: 'VCube',
-                 palette_name: str = '',
-                 effect_name: str = '',
-                 facelet_type: str = '',
-                 style_name: str = '') -> None:
+    def __init__(
+            self,
+            cube: 'VCube',
+            palette_name: str = '',
+            effect_name: str = '',
+            facelet_type: str = '',
+            style_name: str = '',
+    ) -> None:
         """Initialize display handler with cube instance and visual settings."""
         self.cube = cube
         self.cube_size: int = cube.size
@@ -104,7 +107,8 @@ class VCubeDisplay(ModeDisplay):
         return cube_mask.state
 
     def split_faces(
-            self, state: CubeFacelets | CubeMask,
+            self,
+            state: CubeFacelets | CubeMask,
     ) -> list[FaceFacelets | FaceMask]:
         """
         Split cube state string into individual face strings.
@@ -121,9 +125,14 @@ class VCubeDisplay(ModeDisplay):
             for i in range(self.face_number)
         ]
 
-    def display(self, *,
-                mode: str = '', layout: str = '',
-                orientation: str = '', mask: CubeMask = '') -> str:
+    def display(
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: str = '',
+            mask: CubeMask = '',
+    ) -> str:
         """
         Generate formatted visual representation of the cube state.
 
@@ -145,14 +154,7 @@ class VCubeDisplay(ModeDisplay):
             orientation: Two-character string that rotates the cube to change
                 the viewer's point of view before rendering (e.g. ``'UF'``
                 keeps U on top and F in front, ``'DF'`` puts D on top).
-            mask: 54-character binary string in facelet-state format (same
-                layout as ``VCube.state``). ``'1'`` facelets are shown
-                normally; ``'0'`` facelets are greyed out. When provided
-                directly, the mask is used as-is and only rotated through
-                the cube's move history. When implied by ``mode``, the
-                predefined mask is written in user-POV coordinates and first
-                converted to internal cube coordinates (e.g. U-D after a z2)
-                before being tracked through the history.
+            mask: Mask to filter which facelets are displayed.
 
         Returns:
             Formatted string representation of the cube state.
@@ -204,9 +206,14 @@ class VCubeDisplay(ModeDisplay):
 
         return ' ' * (self.facelet_size * count)
 
-    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901, PLR0911, PLR0912
-                        facelet_index: int | None = None,
-                        *, adjacent: bool = False) -> str:
+    def display_facelet(  # noqa: C901, PLR0911, PLR0912
+            self,
+            facelet: str,
+            mask: str = '',
+            facelet_index: int | None = None,
+            *,
+            adjacent: bool = False,
+    ) -> str:
         """
         Format a single facelet with colors and effects for display.
 
@@ -282,9 +289,13 @@ class VCubeDisplay(ModeDisplay):
             f'{ self.palette["reset"] }'
         )
 
-    def display_face_row(self, faces: list[FaceFacelets],
-                         faces_mask: list[FaceMask],
-                         face_key: str, row: int) -> str:
+    def display_face_row(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            face_key: str,
+            row: int,
+    ) -> str:
         """
         Display a complete row of a face.
 
@@ -311,10 +322,15 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_facelet_by_face(self, faces: list[FaceFacelets],
-                                faces_mask: list[FaceMask],
-                                face_key: str, index: int, *,
-                                adjacent: bool = True) -> str:
+    def display_facelet_by_face(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            face_key: str,
+            index: int,
+            *,
+            adjacent: bool = True,
+    ) -> str:
         """
         Display a specific facelet from a face using face key and index.
 
@@ -338,10 +354,15 @@ class VCubeDisplay(ModeDisplay):
             adjacent=adjacent,
         )
 
-    def display_face_indexes(self, faces: list[FaceFacelets],
-                             faces_mask: list[FaceMask],
-                             face_key: str, indexes: list[int], *,
-                             adjacent: bool = True) -> str:
+    def display_face_indexes(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            face_key: str,
+            indexes: list[int],
+            *,
+            adjacent: bool = True,
+    ) -> str:
         """
         Display multiple facelets from a face using specified indexes.
 
@@ -365,14 +386,18 @@ class VCubeDisplay(ModeDisplay):
             for idx in indexes
         )
 
-    def display_row_with_sides(self, faces: list[FaceFacelets],  # noqa: PLR0913 PLR0917
-                               faces_mask: list[FaceMask],
-                               center_face: str,
-                               left_indexes: list[int],
-                               right_indexes: list[int],
-                               row: int,
-                               leading_spaces: int = 0, *,
-                               adjacent: bool = True) -> str:
+    def display_row_with_sides(  # noqa: PLR0913 PLR0917
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            center_face: str,
+            left_indexes: list[int],
+            right_indexes: list[int],
+            row: int,
+            leading_spaces: int = 0,
+            *,
+            adjacent: bool = True,
+    ) -> str:
         """
         Display a row with center face and adjacent side facelets.
 
@@ -411,8 +436,12 @@ class VCubeDisplay(ModeDisplay):
 
         return row_result
 
-    def display_top_down_face(self, face: str, face_mask: str,
-                              face_index: int) -> str:
+    def display_top_down_face(
+            self,
+            face: FaceFacelets,
+            face_mask: FaceMask,
+            face_index: int,
+    ) -> str:
         """
         Display a complete face in top-down view with proper spacing.
 
@@ -440,13 +469,18 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_top_down_adjacent_facelets(self, face: str, face_mask: str,  # noqa: PLR0913
-                                           face_index: int, *,
-                                           top: bool = False,
-                                           end: bool = False,
-                                           spaces: int = 0,
-                                           adjacent: bool = True,
-                                           break_line: bool = True) -> str:
+    def display_top_down_adjacent_facelets(  # noqa: PLR0913
+            self,
+            face: FaceFacelets,
+            face_mask: FaceMask,
+            face_index: int,
+            *,
+            top: bool = False,
+            end: bool = False,
+            spaces: int = 0,
+            adjacent: bool = True,
+            break_line: bool = True,
+    ) -> str:
         """
         Display adjacent facelets in a linear arrangement.
 
@@ -487,8 +521,11 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_cube(self, faces: list[FaceFacelets],
-                     faces_mask: list[FaceMask]) -> str:
+    def display_cube(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display cube in standard unfolded net layout.
 
@@ -528,8 +565,11 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_top_face(self, faces: list[FaceFacelets],
-                         faces_mask: list[FaceMask]) -> str:
+    def display_top_face(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display only the top face with surrounding adjacent facelets.
 
@@ -583,8 +623,11 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_extended_net(self, faces: list[FaceFacelets],
-                             faces_mask: list[FaceMask]) -> str:
+    def display_extended_net(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display cube as an extended net layout.
 
@@ -712,8 +755,11 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def display_linear(self, faces: list[FaceFacelets],
-                       faces_mask: list[FaceMask]) -> str:
+    def display_linear(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display facelets in a linear arrangement.
 
@@ -736,8 +782,11 @@ class VCubeDisplay(ModeDisplay):
 
         return result
 
-    def position_based_effect(self, facelet_colors: str,
-                              facelet_index: int) -> str:
+    def position_based_effect(
+            self,
+            facelet_colors: str,
+            facelet_index: int,
+    ) -> str:
         """
         Apply position-based visual effects to facelet colors.
 
@@ -770,8 +819,11 @@ class VCubeDisplay(ModeDisplay):
             f'\x1b[38;2;{ ";".join(str(c) for c in new_foreground_rgb) }m'
         )
 
-    def letter_style_ansi(self, facelet_index: int,
-                          face_color: str) -> tuple[str, str]:
+    def letter_style_ansi(
+            self,
+            facelet_index: int,
+            face_color: str,
+    ) -> tuple[str, str]:
         """
         Resolve ANSI letter style codes for a facelet position.
 
