@@ -1,6 +1,7 @@
 """Generate solved state for different cube size."""
 from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import EDGE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import SOLVED_CO
@@ -34,7 +35,7 @@ def build_printable_chars(count: int) -> str:
     return ''.join(chars)
 
 
-def get_unique_facelets(size: int = 3) -> CubeFacelets:
+def get_unique_facelets(size: int = DEFAULT_CUBE_SIZE) -> CubeFacelets:
     """
     Get the facelets with unique symbol for a cube of given size.
 
@@ -63,7 +64,7 @@ def get_unique_facelets(size: int = 3) -> CubeFacelets:
     return PRINTABLE_CACHE[:total]
 
 
-def get_solved_facelets(size: int = 3) -> CubeFacelets:
+def get_solved_facelets(size: int = DEFAULT_CUBE_SIZE) -> CubeFacelets:
     """
     Get the facelets in solved state for a cube of given size.
 
@@ -88,7 +89,7 @@ def get_solved_facelets(size: int = 3) -> CubeFacelets:
     return ''.join(face * facelets_per_face for face in FACE_ORDER)
 
 
-def get_solved_cubies(size: int = 3) -> CubeCubiesOriented:
+def get_solved_cubies(size: int = DEFAULT_CUBE_SIZE) -> CubeCubiesOriented:
     """
     Get the cubies in solved state for a cube of given size.
 

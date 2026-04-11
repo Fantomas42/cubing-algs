@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import POVMask
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm
@@ -100,7 +101,7 @@ def negate_mask(mask: CubeMask) -> CubeMask:
 
 def compute_algorithm_mask(
         algorithm: 'Algorithm',
-        size: int,
+        size: int = DEFAULT_CUBE_SIZE,
 ) -> tuple[CubeMask, CubeFacelets]:
     """
     Compute an orientation-aware binary mask of facelets

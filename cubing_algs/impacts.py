@@ -14,6 +14,7 @@ from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import D_CORNERS
 from cubing_algs.constants import D_EDGES
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import E_EDGES
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_EDGES_INDEX
@@ -1079,7 +1080,7 @@ def compute_cubie_complexity(
 
 
 def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
-                    size: int = 3) -> ImpactData:
+                    size: int = DEFAULT_CUBE_SIZE) -> ImpactData:
     """
     Compute comprehensive impact metrics for an algorithm.
 
