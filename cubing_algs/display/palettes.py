@@ -57,6 +57,34 @@ def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     return (r, g, b)
 
 
+def hex_to_rgba(hex_color: str) -> tuple[int, int, int, float]:
+    """
+    Convert hex color to RGBA tuple.
+
+    Accepts ``#rrggbb`` or ``#rrggbbaa`` format.
+
+    Returns:
+        Tuple of (red, green, blue, opacity) where RGB
+        values are 0-255 and opacity is 0.0-1.0.
+
+    """
+    h = hex_color.lstrip('#')
+
+    alpha = (
+        int(h[6:8], 16) / 255.0
+        if len(h) == 8
+        else 1.0
+    )
+
+    r, g, b = hex_to_rgb(
+        hex_color[:7]
+        if len(h) == 8
+        else hex_color,
+    )
+
+    return (r, g, b, alpha)
+
+
 def hex_to_ansi(domain: str, hex_color: str) -> str:
     """
     Convert hexadecimal color value to ANSI escape code.
