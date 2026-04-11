@@ -1740,10 +1740,10 @@ class AlgorithmImageTestCase(unittest.TestCase):
         self.assertIn('width="300"', result)
         self.assertIn('height="300"', result)
 
-    def test_cube_size_parameter(self) -> None:
-        """Test explicit cube_size parameter."""
+    def test_size_parameter(self) -> None:
+        """Test explicit cube size parameter."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(cube_size=2)
+        result = algo.image(size=2)
         self.assertTrue(result.startswith('<svg'))
 
     def test_custom_rotation(self) -> None:

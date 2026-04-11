@@ -2099,7 +2099,7 @@ class VCubeImageTestCase(unittest.TestCase):
     def test_custom_size(self) -> None:
         """Test custom image size."""
         cube = VCube()
-        result = cube.image(size=400)
+        result = cube.image(image_size=400)
         self.assertIn('width="400"', result)
         self.assertIn('height="400"', result)
 
