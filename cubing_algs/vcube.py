@@ -6,11 +6,12 @@ from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import FaceletPieceType
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
-from cubing_algs.display.vcube import DEFAULT_PALETTE
+from cubing_algs.display.image import ImageDisplay
 from cubing_algs.display.vcube import VCubeDisplay
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidFaceIndexError
@@ -45,10 +46,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     face_number: int = FACE_NUMBER
 
-    def __init__(self, initial: str | None = None, *,
-                 size: int = 3,
-                 check: bool = True,
-                 history: list[str] | None = None) -> None:
+    def __init__(
+            self,
+            initial: str | None = None,
+            *,
+            size: int = DEFAULT_CUBE_SIZE,
+            check: bool = True,
+            history: list[str] | None = None,
+    ) -> None:
         """
         Initialize a virtual cube with optional initial state and history.
 
@@ -154,7 +159,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return result
 
     def get_facelet_piece_types(
-            self, facelet_index: int,
+            self,
+            facelet_index: int,
     ) -> list[FaceletPieceType]:
         """
         Get the piece types for a specific facelet index.
@@ -244,10 +250,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         raise NotSupportedCubeSizeError(msg)
 
     @staticmethod
-    def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
-                    ep: list[int], eo: list[int],
-                    so: list[int],
-                    scheme: str | None = None) -> 'VCube':
+    def from_cubies(  # noqa: PLR0913 PLR0917
+            cp: list[int],
+            co: list[int],
+            ep: list[int],
+            eo: list[int],
+            so: list[int],
+            scheme: str | None = None,
+    ) -> 'VCube':
         """
         Create a VCube from cubie representation.
 
@@ -268,7 +278,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             check=not bool(scheme),
         )
 
-    def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
+    def is_equal(
+            self,
+            other_cube: 'VCube',
+            *,
+            strict: bool = True,
+    ) -> bool:
         """
         Compare two cubes for equality with optional orientation flexibility.
 
@@ -292,8 +307,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return self._state == oriented_copy._state  # noqa: SLF001
 
-    def rotate(self, moves: Algorithm | Move | str, *,
-               history: bool = True) -> CubeFacelets:
+    def rotate(
+            self,
+            moves: Algorithm | Move | str,
+            *,
+            history: bool = True,
+    ) -> CubeFacelets:
         """
         Apply a sequence of moves to the cube.
 
@@ -420,11 +439,18 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return cube
 
-    def display(self, *, mode: str = '',  # noqa: PLR0913
-                layout: str = '', orientation: str = '',
-                mask: CubeMask = '', palette: str = '',
-                effect: str = '', facelet: str = '',
-                style: str = '') -> str:
+    def display(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: str = '',
+            mask: CubeMask = '',
+            palette: str = '',
+            effect: str = '',
+            facelet: str = '',
+            style: str = '',
+    ) -> str:
         """
         Generate a visual representation of the cube.
 
@@ -443,59 +469,93 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             A string containing the visual representation of the cube.
 
         """
-        return VCubeDisplay(self, palette, effect, facelet, style).display(
+        return VCubeDisplay(
+            self,
+            palette,
+            effect,
+            facelet,
+            style,
+        ).display(
             mode=mode,
             layout=layout,
             orientation=orientation,
             mask=mask,
         )
 
-    def show(self, *, mode: str = '',  # noqa: PLR0913
-             layout: str = '', orientation: str = '',
-             mask: CubeMask = '', palette: str = '',
-             effect: str = '', facelet: str = '',
-             style: str = '') -> None:
+    def show(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: str = '',
+            mask: CubeMask = '',
+            palette: str = '',
+            effect: str = '',
+            facelet: str = '',
+            style: str = '',
+    ) -> None:
         """Print a visual representation of the cube."""
         print(  # noqa: T201
             self.display(
-                mode=mode, layout=layout,
-                orientation=orientation, mask=mask,
-                palette=palette, effect=effect,
-                facelet=facelet, style=style,
+                mode=mode,
+                layout=layout,
+                orientation=orientation,
+                mask=mask,
+                palette=palette,
+                effect=effect,
+                facelet=facelet,
+                style=style,
             ),
             end='',
         )
 
-    def image(self, *, size: int = 200,  # noqa: PLR0913
-              view: str = '3d', mask: Mask = '',
-              rotation: str = 'y45x-34',
-              distance: float = 10.0,
-              cube_color: str = '#111111',
-              palette_name: str = DEFAULT_PALETTE) -> str:
+    def image(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: str = '',
+            mask: CubeMask = '',
+            palette: str = '',
+            cube_color: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0.0,
+    ) -> str:
         """
         Render the cube as an SVG image.
 
         Args:
-            size: Image dimension in pixels.
-            view: Rendering mode. ``'3d'`` for perspective view,
-                ``'top'`` for flat top-face with adjacent strips.
-            mask: Mask to apply on the cube.
-            rotation: Axis-angle rotation string (3d view only).
-            distance: Camera distance for perspective projection
-                (3d view only).
-            cube_color: Hex color for cube body between stickers.
-            palette_name: Color palette name for sticker colors.
+            mode: Display preset that sets layout, orientation, and mask
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout; 'top' renders a flat 2D top-view,
+                    otherwise a 3D perspective view is used.
+            orientation: Cube orientation string for reorienting the view
+                         before rendering.
+            mask: Mask to show/mask facelets.
+            palette: Color palette name for sticker colors.
+            cube_color: Hex color for the cube body shown between stickers.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string for the 3D view, composed of
+                      axis-angle pairs (e.g., 'y45x-30').
+            distance: Camera distance from the cube center for the 3D view.
 
         Returns:
             SVG string of the cube.
 
         """
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
-
-        return render_cube(
-            self, size=size, view=view, mask=mask,
-            rotation=rotation, distance=distance,
-            cube_color=cube_color, palette_name=palette_name,
+        return ImageDisplay(
+            self,
+            palette,
+            cube_color,
+        ).render(
+            mode=mode,
+            layout=layout,
+            orientation=orientation,
+            mask=mask,
+            image_size=image_size,
+            rotation=rotation,
+            distance=distance,
         )
 
     def get_face(self, face: str) -> str:
