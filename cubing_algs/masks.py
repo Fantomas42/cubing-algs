@@ -100,7 +100,7 @@ def negate_mask(mask: CubeMask) -> CubeMask:
 
 def compute_algorithm_mask(
         algorithm: 'Algorithm',
-        size: int = 3,
+        size: int,
 ) -> tuple[CubeMask, CubeFacelets]:
     """
     Compute an orientation-aware binary mask of facelets
