@@ -1700,19 +1700,15 @@ class AlgorithmImageTestCase(unittest.TestCase):
         self.assertTrue(result.startswith('<svg'))
         self.assertTrue(result.endswith('</svg>'))
 
-    def test_matches_render_cube(self) -> None:
-        """Test that image() matches render_cube() output."""
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
-
-        algo = Algorithm.parse_moves("R U R' U'")
-        self.assertEqual(algo.image(), render_cube(algo))
-
     def test_matches_vcube_image(self) -> None:
         """Test that Algorithm.image() matches VCube.image()."""
         algo = Algorithm.parse_moves("R U R' U'")
         cube = VCube()
         cube.rotate(algo)
-        self.assertEqual(algo.image(), cube.image())
+        self.assertEqual(
+            algo.image(impact_mask=False),
+            cube.image(),
+        )
 
     def test_empty_algorithm(self) -> None:
         """Test rendering an empty algorithm."""
@@ -1736,7 +1732,7 @@ class AlgorithmImageTestCase(unittest.TestCase):
     def test_custom_size(self) -> None:
         """Test custom image size."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(size=300)
+        result = algo.image(image_size=300)
         self.assertIn('width="300"', result)
         self.assertIn('height="300"', result)
 

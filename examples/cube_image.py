@@ -7,7 +7,6 @@ Supports configurable rotation and algorithm.
 import argparse
 from pathlib import Path
 
-from cubing_algs.display.image import render_cube
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
 
@@ -24,7 +23,7 @@ parser.add_argument(
     help='Camera rotation string (default: y45x-34)',
 )
 parser.add_argument(
-    '-s', '--size',
+    '-s', '--image-size',
     type=int,
     default=200,
     help='Image size in pixels (default: 200)',
@@ -36,9 +35,9 @@ parser.add_argument(
     help='Cube size: 2 for 2x2, 3 for 3x3, etc. (default: 3)',
 )
 parser.add_argument(
-    '-v', '--view',
-    choices=['3d', 'top'],
-    default='3d',
+    '-l', '--layout',
+    choices=['', 'top'],
+    default='',
     help='Rendering mode: 3d perspective or top face plan view (default: 3d)',
 )
 parser.add_argument(
@@ -51,12 +50,10 @@ cube = VCube(size=args.cube_size)
 if args.algorithm:
     cube.rotate(parse_moves(args.algorithm, trust_input=False))
 
-svg = render_cube(
-    cube,
-    size=args.size,
+svg = cube.image(
+    image_size=args.image_size,
     rotation=args.rotation,
-    cube_size=args.cube_size,
-    view=args.view,
+    layout=args.layout,
 )
 
 out = Path(args.output) if args.output else Path('cube.svg')

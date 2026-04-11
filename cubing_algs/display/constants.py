@@ -49,10 +49,15 @@ MIN_DISTANCE = math.sqrt(3)
 
 CUBE_COLOR = '#111111'
 
+IMAGE_SIZE = 200
+
+DISTANCE = 10.0
+
+ROTATION = 'y45x-34'
+
 # Gap between stickers as a fraction of face size (divided by 3 per cell)
 STICKER_GAP = 0.08
 VISIBILITY_EPSILON = 1e-9
-CAMERA_DISTANCE = 10.0
 
 # Strip projection depth in cell units
 STRIP_DEPTH = 0.4

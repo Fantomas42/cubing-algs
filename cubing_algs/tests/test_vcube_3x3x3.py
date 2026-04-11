@@ -2075,14 +2075,6 @@ class VCubeImageTestCase(unittest.TestCase):
         self.assertTrue(result.startswith('<svg'))
         self.assertTrue(result.endswith('</svg>'))
 
-    def test_matches_render_cube(self) -> None:
-        """Test that image() matches render_cube() output."""
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
-
-        cube = VCube()
-        cube.rotate("R U R' U'")
-        self.assertEqual(cube.image(), render_cube(cube))
-
     def test_3d_view(self) -> None:
         """Test 3d view rendering."""
         cube = VCube()

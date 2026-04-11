@@ -115,7 +115,7 @@ class VCubeDisplay(ModeDisplay):
         Any explicit argument overrides what ``mode`` would have implied.
 
         Args:
-            mode: Solving-stage preset (3x3x3 only).
+            mode: Solving-stage preset.
                 Sets mask, orientation, and layout together.
                 Supported values: ``'oll'``, ``'pll'``, ``'ll'``,
                 ``'cross'``, ``'f2l'``, ``'af2l'``, ``'f2l+ll'``,
