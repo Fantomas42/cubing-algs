@@ -31,8 +31,6 @@ LAYOUT_METHODS: dict[str, str] = {
     'cube': 'display_cube',
 }
 
-MIN_DISTANCE = math.sqrt(3)
-
 F2L_FACE_ORIENTATIONS = {
     'FL': 'F',
     'FR': 'R',
@@ -46,3 +44,18 @@ F2L_ADJACENT_FACES = {
     'B': ('L', 'R'),
     'F': ('R', 'L'),
 }
+
+MIN_DISTANCE = math.sqrt(3)
+
+CUBE_COLOR = '#111111'
+
+# Gap between stickers as a fraction of face size (divided by 3 per cell)
+STICKER_GAP = 0.08
+VISIBILITY_EPSILON = 1e-9
+CAMERA_DISTANCE = 10.0
+
+# Strip projection depth in cell units
+STRIP_DEPTH = 0.4
+
+# Inward taper per side as fraction of U face edge length
+STRIP_TAPER = 0.05
