@@ -160,6 +160,32 @@ class ModeDisplay:
 
         return f'{ top }{ new_front }'
 
+    def compute_mask(self, cube: 'VCube', mask: CubeMask) -> CubeMask:
+        """
+        Convert mask string to facelets format for display filtering.
+
+        Args:
+            cube: The virtual cube instance to process.
+            mask: Mask string in cubies format or empty string.
+
+        Returns:
+            Facelets format mask string where '1' indicates visible facelets.
+
+        """
+        if not mask:
+            return '1' * len(cube.state)
+
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        cube_mask = VCube(
+            initial=mask,
+            size=self.cube_size,
+            check=False,
+        )
+        cube_mask.rotate(' '.join(cube.history))
+
+        return cube_mask.state
+
     def realign_mask(self, mask: POVMask) -> CubeMask:
         """
         Convert a mask from user-POV coordinates to cube-internal coordinates.

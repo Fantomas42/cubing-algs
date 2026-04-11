@@ -80,32 +80,6 @@ class VCubeDisplay(ModeDisplay):
         elif self.facelet_type in {'condensed', 'emoji'}:
             self.facelet_size = 1
 
-    def compute_mask(self, cube: 'VCube', mask: CubeMask) -> CubeMask:
-        """
-        Convert mask string to facelets format for display filtering.
-
-        Args:
-            cube: The virtual cube instance to process.
-            mask: Mask string in cubies format or empty string.
-
-        Returns:
-            Facelets format mask string where '1' indicates visible facelets.
-
-        """
-        if not mask:
-            return '1' * (self.face_number * self.face_size)
-
-        from cubing_algs.vcube import VCube  # noqa: PLC0415
-
-        cube_mask = VCube(
-            initial=mask,
-            size=self.cube_size,
-            check=False,
-        )
-        cube_mask.rotate(' '.join(cube.history))
-
-        return cube_mask.state
-
     def split_faces(
             self,
             state: CubeFacelets | CubeMask,
