@@ -90,6 +90,12 @@ class HexToRgbaTestCase(unittest.TestCase):
         _, _, _, a = hex_to_rgba('#ff0000ff')
         self.assertAlmostEqual(a, 1.0)
 
+    def test_without_diese(self) -> None:
+        """Test rrggbbaa returns correct opacity."""
+        r, g, b, a = hex_to_rgba('11111180')
+        self.assertEqual((r, g, b), (17, 17, 17))
+        self.assertAlmostEqual(a, 128 / 255.0, places=3)
+
 
 class TestBuildAnsiPalette(unittest.TestCase):
     """Test ANSI palette building."""

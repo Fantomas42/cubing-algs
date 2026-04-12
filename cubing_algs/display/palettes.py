@@ -77,7 +77,7 @@ def hex_to_rgba(hex_color: str) -> tuple[int, int, int, float]:
     )
 
     r, g, b = hex_to_rgb(
-        hex_color[:7]
+        h[:6]
         if len(h) == 8
         else hex_color,
     )
