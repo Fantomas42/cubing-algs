@@ -13,6 +13,7 @@ from cubing_algs.masks import F2L_CLL_MASK
 from cubing_algs.masks import F2L_ELL_MASK
 from cubing_algs.masks import F2L_LL_MASK
 from cubing_algs.masks import F2L_MASK
+from cubing_algs.masks import FULL_MASK
 from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
@@ -32,6 +33,7 @@ MODE_CONFIGS: dict[str, tuple[CubeMask, str, str]] = {
     'f2l+ll':       (F2L_LL_MASK,       '',    'f2l_orientation'),           # noqa: E241
     'f2l+cll':      (F2L_CLL_MASK,      '',    'f2l_orientation'),           # noqa: E241
     'f2l+ell':      (F2L_ELL_MASK,      '',    'f2l_orientation'),           # noqa: E241
+    'full':         (FULL_MASK,         '',    ''),                          # noqa: E241
 }
 
 
