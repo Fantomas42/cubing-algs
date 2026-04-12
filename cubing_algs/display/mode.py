@@ -160,6 +160,52 @@ class ModeDisplay:
 
         return f'{ top }{ new_front }'
 
+    @staticmethod
+    def scale_mask(mask: CubeMask, target_size: int) -> CubeMask:
+        """
+        Scale a 3x3 CubeMask to a different cube size.
+
+        Each of the 9 positions per 3x3 face acts as a template for
+        a region in the target NxN face:
+
+        - 4 corners map 1:1 to the 4 target corners
+        - 4 edges expand to all border non-corner facelets on that side
+        - 1 center expands to all interior facelets
+
+        Args:
+            mask: A 54-character binary mask for a 3x3 cube.
+            target_size: The target cube size (e.g. 2, 4, 5).
+
+        Returns:
+            A binary mask string of length ``6 * target_size ** 2``.
+
+        """
+        n = target_size
+        result: list[str] = []
+
+        for face in range(6):
+            template = mask[face * 9:(face + 1) * 9]
+
+            for row in range(n):
+                for col in range(n):
+                    if row == 0:
+                        r = 0
+                    elif row == n - 1:
+                        r = 2
+                    else:
+                        r = 1
+
+                    if col == 0:
+                        c = 0
+                    elif col == n - 1:
+                        c = 2
+                    else:
+                        c = 1
+
+                    result.append(template[r * 3 + c])
+
+        return ''.join(result)
+
     def compute_mask(self, cube: 'VCube', mask: CubeMask) -> CubeMask:
         """
         Convert mask string to facelets format for display filtering.
@@ -241,6 +287,9 @@ class ModeDisplay:
         if orientation_cb:
             orientation = getattr(self, orientation_cb)()
 
-        mask = self.realign_mask(mask) if self.cube_size == 3 else ''
+        if self.cube_size != 3:
+            mask = self.scale_mask(mask, self.cube_size)
+
+        mask = self.realign_mask(mask)
 
         return mask, layout, orientation

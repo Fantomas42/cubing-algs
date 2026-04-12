@@ -297,6 +297,272 @@ class RealignMaskTestCase(ModeDisplayMixin, unittest.TestCase):
         self.assertEqual(display.realign_mask(all_zeros), all_zeros)
 
 
+class ScaleMaskTestCase(ModeDisplayMixin, unittest.TestCase):
+    """Tests for ModeDisplay.scale_mask()."""
+
+    # ------------------------------------------------------------------
+    # Identity: 3 → 3
+    # ------------------------------------------------------------------
+
+    def test_identity_all_ones(self) -> None:
+        """Scaling a full mask from 3 to 3 returns it unchanged."""
+        display = self.make_display()
+        mask = '1' * 54
+        self.assertEqual(display.scale_mask(mask, 3), mask)
+
+    def test_identity_all_zeros(self) -> None:
+        """Scaling an empty mask from 3 to 3 returns it unchanged."""
+        display = self.make_display()
+        mask = '0' * 54
+        self.assertEqual(display.scale_mask(mask, 3), mask)
+
+    def test_identity_oll_mask(self) -> None:
+        """Scaling OLL_MASK from 3 to 3 returns it unchanged."""
+        display = self.make_display()
+        self.assertEqual(display.scale_mask(OLL_MASK, 3), OLL_MASK)
+
+    # ------------------------------------------------------------------
+    # Downscale: 3 → 2 (only corners survive, edges and centers dropped)
+    # ------------------------------------------------------------------
+
+    def test_downscale_all_ones(self) -> None:
+        """All-ones mask scaled to 2x2 gives all-ones (6x4=24)."""
+        display = self.make_display()
+        mask = '1' * 54
+        self.assertEqual(display.scale_mask(mask, 2), '1' * 24)
+
+    def test_downscale_all_zeros(self) -> None:
+        """All-zeros mask scaled to 2x2 gives all-zeros (6x4=24)."""
+        display = self.make_display()
+        mask = '0' * 54
+        self.assertEqual(display.scale_mask(mask, 2), '0' * 24)
+
+    def test_downscale_oll_mask(self) -> None:
+        """OLL_MASK scaled to 2x2: U-face corners survive, rest zeros."""
+        display = self.make_display()
+        # OLL_MASK: U='111111111', rest all zeros
+        # 2x2 U face: 4 corners from positions 0,2,6,8 → all '1'
+        # 2x2 other faces: corners from positions 0,2,6,8 → all '0'
+        expected = '1111' + '0000' * 5
+        self.assertEqual(display.scale_mask(OLL_MASK, 2), expected)
+
+    def test_downscale_corners_only(self) -> None:
+        """A mask with only corners set keeps them after downscale."""
+        display = self.make_display()
+        # Build a mask where each face has only corners set: 101 000 101
+        face_corners = '101000101'
+        mask = face_corners * 6
+        self.assertEqual(display.scale_mask(mask, 2), '1111' * 6)
+
+    def test_downscale_edges_only_disappear(self) -> None:
+        """A mask with only edges set loses everything at size 2."""
+        display = self.make_display()
+        # Each face has only edges set: 010 101 010
+        face_edges = '010101010'
+        mask = face_edges * 6
+        self.assertEqual(display.scale_mask(mask, 2), '0000' * 6)
+
+    def test_downscale_center_only_disappear(self) -> None:
+        """A mask with only centers set loses everything at size 2."""
+        display = self.make_display()
+        face_center = '000010000'
+        mask = face_center * 6
+        self.assertEqual(display.scale_mask(mask, 2), '0000' * 6)
+
+    # ------------------------------------------------------------------
+    # Upscale: 3 → 4
+    # ------------------------------------------------------------------
+
+    def test_upscale_4_all_ones(self) -> None:
+        """All-ones mask scaled to 4x4 gives all-ones (6x16=96)."""
+        display = self.make_display()
+        mask = '1' * 54
+        self.assertEqual(display.scale_mask(mask, 4), '1' * 96)
+
+    def test_upscale_4_all_zeros(self) -> None:
+        """All-zeros mask scaled to 4x4 gives all-zeros (6x16=96)."""
+        display = self.make_display()
+        mask = '0' * 54
+        self.assertEqual(display.scale_mask(mask, 4), '0' * 96)
+
+    def test_upscale_4_corners_only(self) -> None:
+        """Corners-only mask scaled to 4x4 has corners set."""
+        display = self.make_display()
+        face_corners = '101000101'
+        mask = face_corners * 6
+        # 4x4 face: corners at (0,0),(0,3),(3,0),(3,3)
+        # Row 0: 1 0 0 1
+        # Row 1: 0 0 0 0
+        # Row 2: 0 0 0 0
+        # Row 3: 1 0 0 1
+        face_4 = (
+            '1001'
+            '0000'
+            '0000'
+            '1001'
+        )
+        self.assertEqual(display.scale_mask(mask, 4), face_4 * 6)
+
+    def test_upscale_4_edges_only(self) -> None:
+        """Edges-only mask scaled to 4x4 has border non-corner positions set."""
+        display = self.make_display()
+        face_edges = '010101010'
+        mask = face_edges * 6
+        # 4x4 face: edges are border non-corner positions
+        # Row 0: 0 1 1 0  (top edge positions)
+        # Row 1: 1 0 0 1  (left and right edges)
+        # Row 2: 1 0 0 1  (left and right edges)
+        # Row 3: 0 1 1 0  (bottom edge positions)
+        face_4 = (
+            '0110'
+            '1001'
+            '1001'
+            '0110'
+        )
+        self.assertEqual(display.scale_mask(mask, 4), face_4 * 6)
+
+    def test_upscale_4_center_only(self) -> None:
+        """Center-only mask scaled to 4x4 has interior positions set."""
+        display = self.make_display()
+        face_center = '000010000'
+        mask = face_center * 6
+        # 4x4 face: interior is (1..2, 1..2)
+        # Row 0: 0 0 0 0
+        # Row 1: 0 1 1 0
+        # Row 2: 0 1 1 0
+        # Row 3: 0 0 0 0
+        face_4 = (
+            '0000'
+            '0110'
+            '0110'
+            '0000'
+        )
+        self.assertEqual(display.scale_mask(mask, 4), face_4 * 6)
+
+    # ------------------------------------------------------------------
+    # Upscale: 3 → 5
+    # ------------------------------------------------------------------
+
+    def test_upscale_5_all_ones(self) -> None:
+        """All-ones mask scaled to 5x5 gives all-ones (6x25=150)."""
+        display = self.make_display()
+        mask = '1' * 54
+        self.assertEqual(display.scale_mask(mask, 5), '1' * 150)
+
+    def test_upscale_5_corners_only(self) -> None:
+        """Corners-only mask scaled to 5x5 has 4 corner positions per face."""
+        display = self.make_display()
+        face_corners = '101000101'
+        mask = face_corners * 6
+        # 5x5 face:
+        # Row 0: 1 0 0 0 1
+        # Row 1: 0 0 0 0 0
+        # Row 2: 0 0 0 0 0
+        # Row 3: 0 0 0 0 0
+        # Row 4: 1 0 0 0 1
+        face_5 = (
+            '10001'
+            '00000'
+            '00000'
+            '00000'
+            '10001'
+        )
+        self.assertEqual(display.scale_mask(mask, 5), face_5 * 6)
+
+    def test_upscale_5_edges_only(self) -> None:
+        """Edges-only mask scaled to 5x5 has border non-corner positions set."""
+        display = self.make_display()
+        face_edges = '010101010'
+        mask = face_edges * 6
+        # 5x5 face:
+        # Row 0: 0 1 1 1 0  (top edge: 3 positions)
+        # Row 1: 1 0 0 0 1  (left and right edges)
+        # Row 2: 1 0 0 0 1
+        # Row 3: 1 0 0 0 1
+        # Row 4: 0 1 1 1 0  (bottom edge: 3 positions)
+        face_5 = (
+            '01110'
+            '10001'
+            '10001'
+            '10001'
+            '01110'
+        )
+        self.assertEqual(display.scale_mask(mask, 5), face_5 * 6)
+
+    def test_upscale_5_center_only(self) -> None:
+        """Center-only mask scaled to 5x5 has all interior positions set."""
+        display = self.make_display()
+        face_center = '000010000'
+        mask = face_center * 6
+        # 5x5 face: interior is (1..3, 1..3) = 3x3 = 9 positions
+        # Row 0: 0 0 0 0 0
+        # Row 1: 0 1 1 1 0
+        # Row 2: 0 1 1 1 0
+        # Row 3: 0 1 1 1 0
+        # Row 4: 0 0 0 0 0
+        face_5 = (
+            '00000'
+            '01110'
+            '01110'
+            '01110'
+            '00000'
+        )
+        self.assertEqual(display.scale_mask(mask, 5), face_5 * 6)
+
+    # ------------------------------------------------------------------
+    # Mixed masks: per-face different corner/edge/center values
+    # ------------------------------------------------------------------
+
+    def test_upscale_4_pll_mask(self) -> None:
+        """PLL_MASK scaled to 4x4 preserves per-face structure."""
+        display = self.make_display()
+        # PLL_MASK: U='000000000' R='111000000' F='111000000'
+        #           D='000000000' L='111000000' B='111000000'
+        # U face all zeros → 4x4 all zeros
+        u_4 = '0' * 16
+        # R face '111000000': corners(0,2,6,8)=1,1,0,0
+        #   edges(1,3,5,7)=1,0,0,0  center(4)=0
+        # 4x4:
+        # Row 0: 1 1 1 1  (TL=1, T-edge=1, TR=1)
+        # Row 1: 0 0 0 0  (L-edge=0, center=0, R-edge=0)
+        # Row 2: 0 0 0 0
+        # Row 3: 0 0 0 0  (BL=0, B-edge=0, BR=0)
+        r_4 = (
+            '1111'
+            '0000'
+            '0000'
+            '0000'
+        )
+        f_4 = r_4  # same pattern
+        d_4 = '0' * 16
+        l_4 = r_4
+        b_4 = r_4
+        expected = u_4 + r_4 + f_4 + d_4 + l_4 + b_4
+        self.assertEqual(display.scale_mask(PLL_MASK, 4), expected)
+
+    def test_upscale_mixed_face(self) -> None:
+        """A face with different corner values scales correctly."""
+        display = self.make_display()
+        # Custom mask: first face has TL=1, TR=0, BL=0, BR=1
+        # edges all 0, center 0
+        # 3x3: 100 000 001
+        face_3 = '100000001'
+        mask = face_3 + '0' * 45  # only first face has data
+        # 4x4:
+        # Row 0: 1 0 0 0  (TL=1, T-edge=0, TR=0)
+        # Row 1: 0 0 0 0  (L-edge=0, center=0, R-edge=0)
+        # Row 2: 0 0 0 0
+        # Row 3: 0 0 0 1  (BL=0, B-edge=0, BR=1)
+        face_4 = (
+            '1000'
+            '0000'
+            '0000'
+            '0001'
+        )
+        expected = face_4 + '0' * 80
+        self.assertEqual(display.scale_mask(mask, 4), expected)
+
+
 class ResolveModeTestCase(ModeDisplayMixin, unittest.TestCase):
     """Tests for ModeDisplay.resolve_mode()."""
 
