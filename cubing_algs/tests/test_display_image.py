@@ -430,3 +430,10 @@ class BuildTopViewSvgTestCase(unittest.TestCase):
             cube_color='#11111180',
         ).render(layout='top')
         self.assertIn('fill-opacity=', result)
+
+    def test_2x2_cube_with_oll_mode(self) -> None:
+        """Test rendering a 2x2 cube with oll mode after algorithm."""
+        cube = VCube(size=2)
+        cube.rotate("F2 U' R U' R' U F2 U R U R'")
+        result = ImageDisplay(cube).render(mode='oll')
+        self.assertTrue(result.startswith('<svg'))

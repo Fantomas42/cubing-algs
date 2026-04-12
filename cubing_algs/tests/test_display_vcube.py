@@ -1481,3 +1481,14 @@ class TestColorSupport(unittest.TestCase):
         """Test color_support returns False when environment is empty."""
         result = color_support()
         self.assertFalse(result)
+
+
+class TestVCubeDisplayOllMode2x2Issue(unittest.TestCase):
+    """Tests for display with oll mode on 2x2 cube."""
+
+    def test_display_2x2_with_oll_mode(self) -> None:
+        """Test display on a 2x2 cube with oll mode after algorithm."""
+        cube = VCube(size=2)
+        cube.rotate("F2 U' R U' R' U F2 U R U R'")
+        result = cube.display(mode='oll')
+        self.assertIsInstance(result, str)
