@@ -371,6 +371,13 @@ class RenderCubeCustomParametersTestCase(unittest.TestCase):
         result = ImageDisplay(VCube()).render(distance=20.0)
         self.assertTrue(result.startswith('<svg'))
 
+    def test_orientation_reorients_cube(self) -> None:
+        """Test that passing orientation reorients the cube before render."""
+        cube = VCube()
+        cube.rotate("R U R' U'")
+        result = ImageDisplay(cube).render(orientation='DF')
+        self.assertTrue(result.startswith('<svg'))
+
 
 class BuildTopViewSvgTestCase(unittest.TestCase):
     """Tests for flat top-face SVG rendering."""
