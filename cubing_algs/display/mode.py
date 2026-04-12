@@ -7,6 +7,7 @@ from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.display.constants import F2L_ADJACENT_FACES
 from cubing_algs.display.constants import F2L_FACE_ORIENTATIONS
+from cubing_algs.masks import CMLL_MASK
 from cubing_algs.masks import CROSS_BOTTOM_MASK
 from cubing_algs.masks import CROSS_TOP_MASK
 from cubing_algs.masks import F2L_CLL_MASK
@@ -15,6 +16,7 @@ from cubing_algs.masks import F2L_LL_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import FULL_MASK
 from cubing_algs.masks import L3_MASK
+from cubing_algs.masks import LSE_MASK
 from cubing_algs.masks import OLL_MASK
 from cubing_algs.masks import PLL_MASK
 
@@ -33,6 +35,8 @@ MODE_CONFIGS: dict[str, tuple[CubeMask, str, str]] = {
     'f2l+ll':       (F2L_LL_MASK,       '',    'f2l_orientation'),           # noqa: E241
     'f2l+cll':      (F2L_CLL_MASK,      '',    'f2l_orientation'),           # noqa: E241
     'f2l+ell':      (F2L_ELL_MASK,      '',    'f2l_orientation'),           # noqa: E241
+    'cmll':         (CMLL_MASK,         'top', ''),                          # noqa: E241
+    'lse':          (LSE_MASK,          '',    ''),                          # noqa: E241
     'full':         (FULL_MASK,         '',    ''),                          # noqa: E241
 }
 

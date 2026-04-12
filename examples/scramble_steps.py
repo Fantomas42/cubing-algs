@@ -123,8 +123,8 @@ STEP_INFO: dict[str, tuple[str, str]] = {
     'VLS': ("Valk Last Slot (after R U' R')", 'f2l'),
     'VHLS': ('Valk-Harris Last Slot', 'f2l'),
     # Roux method
-    'CMLL': ('Corners of Last Layer (Roux)', 'oll'),
-    'CMLLEO': ('CMLL + Edge Orientation (Roux)', 'oll'),
+    'CMLL': ('Corners of Last Layer (Roux)', 'cmll'),
+    'CMLLEO': ('CMLL + Edge Orientation (Roux)', 'lse'),
     'SB': ('Second Block (Roux R+U+DF+DB)', 'f2l'),
     # Petrus method
     'PETRUS2X2X3': ('Petrus 2x2x3 block (U+R+F scrambled)', 'f2l'),
