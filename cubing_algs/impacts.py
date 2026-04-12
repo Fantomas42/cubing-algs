@@ -8,7 +8,6 @@ and statistical analysis of the algorithm's effect on the cube.
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 from typing import NamedTuple
-from typing import TypedDict
 
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import CORNER_FACELET_MAP
@@ -52,7 +51,7 @@ CACHED_FACELET_TO_CORNER_PIECE: dict[int, int] = {
 }
 
 
-class CycleAnalysis(TypedDict):
+class CycleAnalysis(NamedTuple):
     """Analysis of permutation cycle structure."""
 
     cycle_count: int
@@ -65,7 +64,7 @@ class CycleAnalysis(TypedDict):
     four_plus_cycles: int
 
 
-class ParitySignature(TypedDict):
+class ParitySignature(NamedTuple):
     """Parity classification of an algorithm's corner and edge permutations."""
 
     signature: str
@@ -232,24 +231,18 @@ def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
         True if positions are on adjacent corners.
 
     """
-    corner1 = None
-    corner2 = None
+    idx1 = CACHED_FACELET_TO_CORNER_PIECE.get(pos1)
+    idx2 = CACHED_FACELET_TO_CORNER_PIECE.get(pos2)
 
-    for corner in CORNER_FACELET_MAP:
-        if pos1 in corner:
-            corner1 = corner
-        if pos2 in corner:
-            corner2 = corner
-
-    if corner1 is None or corner2 is None:
+    if idx1 is None or idx2 is None:
         return False
 
-    if corner1 == corner2:  # Same corner
+    if idx1 == idx2:  # Same corner
         return False
 
     # Get the faces for each corner
-    faces1 = {p // cube.face_size for p in corner1}
-    faces2 = {p // cube.face_size for p in corner2}
+    faces1 = {p // cube.face_size for p in CORNER_FACELET_MAP[idx1]}
+    faces2 = {p // cube.face_size for p in CORNER_FACELET_MAP[idx2]}
 
     # Adjacent corners share exactly 2 faces (an edge)
     return len(faces1 & faces2) == 2
@@ -745,29 +738,29 @@ def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
 
     """
     if not cycles:
-        return {
-            'cycle_count': 0,
-            'cycle_lengths': [],
-            'min_cycle_length': 0,
-            'max_cycle_length': 0,
-            'total_pieces_in_cycles': 0,
-            'two_cycles': 0,
-            'three_cycles': 0,
-            'four_plus_cycles': 0,
-        }
+        return CycleAnalysis(
+            cycle_count=0,
+            cycle_lengths=[],
+            min_cycle_length=0,
+            max_cycle_length=0,
+            total_pieces_in_cycles=0,
+            two_cycles=0,
+            three_cycles=0,
+            four_plus_cycles=0,
+        )
 
     cycle_lengths = [len(c) for c in cycles]
 
-    return {
-        'cycle_count': len(cycles),
-        'cycle_lengths': cycle_lengths,
-        'min_cycle_length': min(cycle_lengths),
-        'max_cycle_length': max(cycle_lengths),
-        'total_pieces_in_cycles': sum(cycle_lengths),
-        'two_cycles': sum(1 for length in cycle_lengths if length == 2),
-        'three_cycles': sum(1 for length in cycle_lengths if length == 3),
-        'four_plus_cycles': sum(1 for length in cycle_lengths if length >= 4),
-    }
+    return CycleAnalysis(
+        cycle_count=len(cycles),
+        cycle_lengths=cycle_lengths,
+        min_cycle_length=min(cycle_lengths),
+        max_cycle_length=max(cycle_lengths),
+        total_pieces_in_cycles=sum(cycle_lengths),
+        two_cycles=sum(1 for length in cycle_lengths if length == 2),
+        three_cycles=sum(1 for length in cycle_lengths if length == 3),
+        four_plus_cycles=sum(1 for length in cycle_lengths if length >= 4),
+    )
 
 
 PARITY_LABELS: dict[int, str] = {0: 'even', 1: 'odd'}
@@ -855,11 +848,11 @@ def classify_parity_signature(
             ),
         ])
 
-    return {
-        'signature': signature,
-        'is_valid': is_valid,
-        'implications': implications,
-    }
+    return ParitySignature(
+        signature=signature,
+        is_valid=is_valid,
+        implications=implications,
+    )
 
 
 def classify_pattern(  # noqa: C901, PLR0912, PLR0915
@@ -951,10 +944,9 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         patterns.append('FIRST_LAYER_CORNERS_SOLVED')
 
     # Check if first layer edges are solved
-    d_edges = D_EDGES
     d_edges_solved = all(
         ep[i] == i and eo[i] == 0
-        for i in d_edges
+        for i in D_EDGES
     )
     if d_edges_solved:
         patterns.append('FIRST_LAYER_EDGES_SOLVED')

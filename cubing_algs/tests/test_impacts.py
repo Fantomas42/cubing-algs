@@ -9,6 +9,7 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
+from cubing_algs.impacts import CycleAnalysis
 from cubing_algs.impacts import DistanceMetrics
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import ParitySignature
@@ -78,26 +79,26 @@ class TestImpactData(unittest.TestCase):
             cubies_corner_parity=0,
             cubies_edge_parity=0,
             cubies_parity_valid=True,
-            cubies_corner_cycle_analysis={
-                'cycle_count': 0,
-                'cycle_lengths': [],
-                'min_cycle_length': 0,
-                'max_cycle_length': 0,
-                'total_pieces_in_cycles': 0,
-                'two_cycles': 0,
-                'three_cycles': 0,
-                'four_plus_cycles': 0,
-            },
-            cubies_edge_cycle_analysis={
-                'cycle_count': 0,
-                'cycle_lengths': [],
-                'min_cycle_length': 0,
-                'max_cycle_length': 0,
-                'total_pieces_in_cycles': 0,
-                'two_cycles': 0,
-                'three_cycles': 0,
-                'four_plus_cycles': 0,
-            },
+            cubies_corner_cycle_analysis=CycleAnalysis(
+                cycle_count=0,
+                cycle_lengths=[],
+                min_cycle_length=0,
+                max_cycle_length=0,
+                total_pieces_in_cycles=0,
+                two_cycles=0,
+                three_cycles=0,
+                four_plus_cycles=0,
+            ),
+            cubies_edge_cycle_analysis=CycleAnalysis(
+                cycle_count=0,
+                cycle_lengths=[],
+                min_cycle_length=0,
+                max_cycle_length=0,
+                total_pieces_in_cycles=0,
+                two_cycles=0,
+                three_cycles=0,
+                four_plus_cycles=0,
+            ),
             cubies_patterns=['SOLVED'],
             cubies_parity_signature=classify_parity_signature(0, 0),
         )
@@ -188,26 +189,26 @@ class TestImpactData(unittest.TestCase):
             cubies_corner_parity=0,
             cubies_edge_parity=0,
             cubies_parity_valid=True,
-            cubies_corner_cycle_analysis={
-                'cycle_count': 1,
-                'cycle_lengths': [2],
-                'min_cycle_length': 2,
-                'max_cycle_length': 2,
-                'total_pieces_in_cycles': 2,
-                'two_cycles': 1,
-                'three_cycles': 0,
-                'four_plus_cycles': 0,
-            },
-            cubies_edge_cycle_analysis={
-                'cycle_count': 1,
-                'cycle_lengths': [3],
-                'min_cycle_length': 3,
-                'max_cycle_length': 3,
-                'total_pieces_in_cycles': 3,
-                'two_cycles': 0,
-                'three_cycles': 1,
-                'four_plus_cycles': 0,
-            },
+            cubies_corner_cycle_analysis=CycleAnalysis(
+                cycle_count=1,
+                cycle_lengths=[2],
+                min_cycle_length=2,
+                max_cycle_length=2,
+                total_pieces_in_cycles=2,
+                two_cycles=1,
+                three_cycles=0,
+                four_plus_cycles=0,
+            ),
+            cubies_edge_cycle_analysis=CycleAnalysis(
+                cycle_count=1,
+                cycle_lengths=[3],
+                min_cycle_length=3,
+                max_cycle_length=3,
+                total_pieces_in_cycles=3,
+                two_cycles=0,
+                three_cycles=1,
+                four_plus_cycles=0,
+            ),
             cubies_patterns=['EDGES_ORIENTED', 'CORNERS_PERMUTED'],
             cubies_parity_signature=classify_parity_signature(0, 0),
         )
@@ -3047,84 +3048,96 @@ class TestAnalyzeCycles(unittest.TestCase):
     def test_empty_cycles(self) -> None:
         """Test with no cycles."""
         result = analyze_cycles([])
-        self.assertEqual(result['cycle_count'], 0)
-        self.assertEqual(result['cycle_lengths'], [])
-        self.assertEqual(result['min_cycle_length'], 0)
-        self.assertEqual(result['max_cycle_length'], 0)
-        self.assertEqual(result['total_pieces_in_cycles'], 0)
-        self.assertEqual(result['two_cycles'], 0)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 0)
+        self.assertEqual(result.cycle_lengths, [])
+        self.assertEqual(result.min_cycle_length, 0)
+        self.assertEqual(result.max_cycle_length, 0)
+        self.assertEqual(result.total_pieces_in_cycles, 0)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_single_two_cycle(self) -> None:
         """Test single 2-cycle analysis."""
         cycles = [[0, 1]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['cycle_lengths'], [2])
-        self.assertEqual(result['min_cycle_length'], 2)
-        self.assertEqual(result['max_cycle_length'], 2)
-        self.assertEqual(result['total_pieces_in_cycles'], 2)
-        self.assertEqual(result['two_cycles'], 1)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [2])
+        self.assertEqual(result.min_cycle_length, 2)
+        self.assertEqual(result.max_cycle_length, 2)
+        self.assertEqual(result.total_pieces_in_cycles, 2)
+        self.assertEqual(result.two_cycles, 1)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_single_three_cycle(self) -> None:
         """Test single 3-cycle analysis."""
         cycles = [[0, 1, 2]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['cycle_lengths'], [3])
-        self.assertEqual(result['min_cycle_length'], 3)
-        self.assertEqual(result['max_cycle_length'], 3)
-        self.assertEqual(result['total_pieces_in_cycles'], 3)
-        self.assertEqual(result['two_cycles'], 0)
-        self.assertEqual(result['three_cycles'], 1)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [3])
+        self.assertEqual(result.min_cycle_length, 3)
+        self.assertEqual(result.max_cycle_length, 3)
+        self.assertEqual(result.total_pieces_in_cycles, 3)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 1)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_single_four_plus_cycle(self) -> None:
         """Test 4+ cycle analysis."""
         cycles = [[0, 1, 2, 3]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['cycle_lengths'], [4])
-        self.assertEqual(result['min_cycle_length'], 4)
-        self.assertEqual(result['max_cycle_length'], 4)
-        self.assertEqual(result['total_pieces_in_cycles'], 4)
-        self.assertEqual(result['two_cycles'], 0)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 1)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [4])
+        self.assertEqual(result.min_cycle_length, 4)
+        self.assertEqual(result.max_cycle_length, 4)
+        self.assertEqual(result.total_pieces_in_cycles, 4)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 1)
 
     def test_multiple_mixed_cycles(self) -> None:
         """Test multiple cycles of different lengths."""
         cycles = [[0, 1], [2, 3, 4], [5, 6, 7, 8, 9]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 3)
-        self.assertEqual(result['cycle_lengths'], [2, 3, 5])
-        self.assertEqual(result['min_cycle_length'], 2)
-        self.assertEqual(result['max_cycle_length'], 5)
-        self.assertEqual(result['total_pieces_in_cycles'], 10)
-        self.assertEqual(result['two_cycles'], 1)
-        self.assertEqual(result['three_cycles'], 1)
-        self.assertEqual(result['four_plus_cycles'], 1)
+        self.assertEqual(result.cycle_count, 3)
+        self.assertEqual(result.cycle_lengths, [2, 3, 5])
+        self.assertEqual(result.min_cycle_length, 2)
+        self.assertEqual(result.max_cycle_length, 5)
+        self.assertEqual(result.total_pieces_in_cycles, 10)
+        self.assertEqual(result.two_cycles, 1)
+        self.assertEqual(result.three_cycles, 1)
+        self.assertEqual(result.four_plus_cycles, 1)
 
     def test_multiple_two_cycles(self) -> None:
         """Test multiple 2-cycles."""
         cycles = [[0, 1], [2, 3], [4, 5]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 3)
-        self.assertEqual(result['two_cycles'], 3)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 3)
+        self.assertEqual(result.two_cycles, 3)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_long_cycle(self) -> None:
         """Test long cycle."""
         cycles = [SOLVED_CP]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['min_cycle_length'], 8)
-        self.assertEqual(result['max_cycle_length'], 8)
-        self.assertEqual(result['four_plus_cycles'], 1)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.min_cycle_length, 8)
+        self.assertEqual(result.max_cycle_length, 8)
+        self.assertEqual(result.four_plus_cycles, 1)
+
+    def test_cycle_analysis_supports_attribute_access(self) -> None:
+        """CycleAnalysis fields must be accessible via dot notation."""
+        result = analyze_cycles([[0, 1, 2]])
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [3])
+        self.assertEqual(result.min_cycle_length, 3)
+        self.assertEqual(result.max_cycle_length, 3)
+        self.assertEqual(result.total_pieces_in_cycles, 3)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 1)
+        self.assertEqual(result.four_plus_cycles, 0)
 
 
 class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
@@ -3448,68 +3461,74 @@ class TestClassifyParitySignature(unittest.TestCase):
     def test_identity(self) -> None:
         """Identity permutation should be even-even and valid."""
         result = classify_parity_signature(0, 0)
-        self.assertEqual(result['signature'], 'even-even')
-        self.assertTrue(result['is_valid'])
+        self.assertEqual(result.signature, 'even-even')
+        self.assertTrue(result.is_valid)
 
     def test_identity_implications(self) -> None:
         """Even-even (identity) permutation should mention commutators."""
         result = classify_parity_signature(0, 0)
         self.assertTrue(
-            any('commutator' in s for s in result['implications']),
+            any('commutator' in s for s in result.implications),
         )
 
     def test_three_cycles_even_even(self) -> None:
         """3-cycles are even permutations."""
         result = classify_parity_signature(0, 0)
-        self.assertEqual(result['signature'], 'even-even')
-        self.assertTrue(result['is_valid'])
+        self.assertEqual(result.signature, 'even-even')
+        self.assertTrue(result.is_valid)
 
     def test_even_even_commutator_implication(self) -> None:
         """Even-even algorithms should mention commutators."""
         result = classify_parity_signature(0, 0)
         self.assertTrue(
-            any('commutator' in s for s in result['implications']),
+            any('commutator' in s for s in result.implications),
         )
 
     def test_single_swaps_odd_odd(self) -> None:
         """Single 2-cycles are odd permutations."""
         result = classify_parity_signature(1, 1)
-        self.assertEqual(result['signature'], 'odd-odd')
-        self.assertTrue(result['is_valid'])
+        self.assertEqual(result.signature, 'odd-odd')
+        self.assertTrue(result.is_valid)
 
     def test_odd_odd_quarter_turn_implication(self) -> None:
         """Odd-odd algorithms should mention quarter turns."""
         result = classify_parity_signature(1, 1)
         self.assertTrue(
-            any('quarter turn' in s for s in result['implications']),
+            any('quarter turn' in s for s in result.implications),
         )
 
     def test_even_odd_invalid(self) -> None:
         """Mismatched parities should be invalid."""
         result = classify_parity_signature(0, 1)
-        self.assertEqual(result['signature'], 'even-odd')
-        self.assertFalse(result['is_valid'])
+        self.assertEqual(result.signature, 'even-odd')
+        self.assertFalse(result.is_valid)
 
     def test_odd_even_invalid(self) -> None:
         """Mismatched parities should be invalid."""
         result = classify_parity_signature(1, 0)
-        self.assertEqual(result['signature'], 'odd-even')
-        self.assertFalse(result['is_valid'])
+        self.assertEqual(result.signature, 'odd-even')
+        self.assertFalse(result.is_valid)
 
     def test_invalid_parity_implication(self) -> None:
         """Invalid parity should mention impossibility."""
         result = classify_parity_signature(0, 1)
         self.assertTrue(
-            any('impossible' in s for s in result['implications']),
+            any('impossible' in s for s in result.implications),
         )
 
-    def test_return_type_keys(self) -> None:
-        """Result should have all expected TypedDict keys."""
+    def test_return_type_fields(self) -> None:
+        """Result should have all expected NamedTuple fields."""
         result = classify_parity_signature(0, 0)
-        self.assertIn('signature', result)
-        self.assertIn('is_valid', result)
-        self.assertIn('implications', result)
-        self.assertIsInstance(result['implications'], list)
+        self.assertIsInstance(result.signature, str)
+        self.assertIsInstance(result.is_valid, bool)
+        self.assertIsInstance(result.implications, list)
+
+    def test_parity_signature_supports_attribute_access(self) -> None:
+        """ParitySignature fields must be accessible via dot notation."""
+        result = classify_parity_signature(0, 0)
+        self.assertEqual(result.signature, 'even-even')
+        self.assertTrue(result.is_valid)
+        self.assertIsInstance(result.implications, list)
 
     def test_compute_impacts_populates_parity_signature(self) -> None:
         """compute_impacts should populate cubies_parity_signature."""
@@ -3518,10 +3537,10 @@ class TestClassifyParitySignature(unittest.TestCase):
         self.assertIsNotNone(impact.cubies_parity_signature)
         sig = cast('ParitySignature', impact.cubies_parity_signature)
         self.assertIn(
-            sig['signature'],
+            sig.signature,
             ('even-even', 'odd-odd', 'even-odd', 'odd-even'),
         )
-        self.assertTrue(sig['is_valid'])
+        self.assertTrue(sig.is_valid)
 
 
 class TestComputeCubieComplexity(unittest.TestCase):
