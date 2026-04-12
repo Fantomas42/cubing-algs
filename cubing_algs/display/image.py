@@ -681,6 +681,7 @@ class ImageDisplay(ModeDisplay):
 
         Corners are ordered top-left, top-right, bottom-right,
         bottom-left for consistent bilinear interpolation.
+        A small overlap into the U face eliminates anti-aliasing seams.
 
         Returns:
             Four corner points of the strip trapezoid.
@@ -688,34 +689,36 @@ class ImageDisplay(ModeDisplay):
         """
         u_right = u_left + u_size
         u_bottom = u_top + u_size
+        # Overlap to prevent anti-aliasing gaps between strips and U face
+        overlap = 0.5
 
         if layout == 'top':
             return [
                 (u_left + taper, u_top - depth),
                 (u_right - taper, u_top - depth),
-                (u_right, u_top),
-                (u_left, u_top),
+                (u_right, u_top + overlap),
+                (u_left, u_top + overlap),
             ]
         if layout == 'bottom':
             return [
-                (u_left, u_bottom),
-                (u_right, u_bottom),
+                (u_left, u_bottom - overlap),
+                (u_right, u_bottom - overlap),
                 (u_right - taper, u_bottom + depth),
                 (u_left + taper, u_bottom + depth),
             ]
         if layout == 'left':
             return [
                 (u_left - depth, u_top + taper),
-                (u_left, u_top),
-                (u_left, u_bottom),
+                (u_left + overlap, u_top),
+                (u_left + overlap, u_bottom),
                 (u_left - depth, u_bottom - taper),
             ]
         # right
         return [
-            (u_right, u_top),
+            (u_right - overlap, u_top),
             (u_right + depth, u_top + taper),
             (u_right + depth, u_bottom - taper),
-            (u_right, u_bottom),
+            (u_right - overlap, u_bottom),
         ]
 
     @staticmethod
