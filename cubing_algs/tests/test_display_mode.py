@@ -628,13 +628,13 @@ class ResolveModeTestCase(ModeDisplayMixin, unittest.TestCase):
         mask_z2, _, _ = self.make_display('z2').resolve_mode('oll')
         self.assertNotEqual(mask_uf, mask_z2)
 
-    def test_non_3x3_returns_empty_mask(self) -> None:
-        """On a non-3x3 cube every mode returns an empty mask."""
+    def test_non_3x3_returns_mask(self) -> None:
+        """On a non-3x3 cube every mode returns a mask."""
         display = VCubeDisplay(VCube(size=4))
         for mode in ('oll', 'pll', 'll', 'cross', 'f2l'):
             with self.subTest(mode=mode):
                 mask, _, _ = display.resolve_mode(mode)
-                self.assertEqual(mask, '')
+                self.assertNotEqual(mask, '')
 
     def test_non_3x3_preserves_layout(self) -> None:
         """On a non-3x3 cube the layout from the mode config is returned."""
