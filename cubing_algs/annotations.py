@@ -2,8 +2,22 @@
 import re
 from typing import Literal
 
+# Facelet and Mask
+type Facelet = Literal['U', 'R', 'F', 'D', 'L', 'B']
+type Mask = Literal['0', '1']
+
 # Piece type for corners and edges
 type PieceType = Literal['corner', 'edge']
+
+# Facelet piece type
+type FaceletPieceType = Literal[
+    'corner',
+    'edge', 'midge', 'wing',
+    'center', 'fixed_center',
+    't_center', 'x_center',
+    'oblique_center',
+]
+
 
 # Corner types (8 corners, orientations 0-2)
 type CornerIndex = Literal[0, 1, 2, 3, 4, 5, 6, 7]
@@ -26,13 +40,16 @@ type Permutation = list[int]
 type Orientation = list[int]
 
 # Cube facelets
-type CubeFacelets = str
-type FaceFacelets = str
+type CubeFacelets = str[Facelet]
+type FaceFacelets = str[Facelet]
+
+# Cube orientation (1 or 2 characters)
+type CubeOrientation = str[Facelet]
 
 # Binary mask (string of '0' and '1')
-type POVMask = str
-type CubeMask = str
-type FaceMask = str
+type POVMask = str[Mask]
+type CubeMask = str[Mask]
+type FaceMask = str[Mask]
 
 # Cube cubies tuple (cp, co, ep, eo) - without spatial orientation
 type CubeCubies = tuple[
@@ -45,15 +62,6 @@ type CubeCubiesOriented = tuple[
     Permutation, Orientation,
     Permutation, Orientation,
     Orientation,
-]
-
-# Facelet piece type
-type FaceletPieceType = Literal[
-    'corner',
-    'edge', 'midge', 'wing',
-    'center', 'fixed_center',
-    't_center', 'x_center',
-    'oblique_center',
 ]
 
 # Regex pattern type

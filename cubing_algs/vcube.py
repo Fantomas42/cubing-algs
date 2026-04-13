@@ -5,6 +5,8 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import CubeOrientation
+from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import FACE_INDEXES
@@ -256,7 +258,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             ep: list[int],
             eo: list[int],
             so: list[int],
-            scheme: str | None = None,
+            scheme: CubeFacelets | None = None,
     ) -> 'VCube':
         """
         Create a VCube from cubie representation.
@@ -386,7 +388,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             history=history,
         )
 
-    def compute_orientation_moves(self, faces: str) -> str:
+    def compute_orientation_moves(self, faces: CubeOrientation) -> str:
         """
         Calculate the moves needed to orient the cube to specific faces.
 
@@ -413,7 +415,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         except KeyError as e:
             raise InvalidOrientationError(str(e)) from e
 
-    def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
+    def oriented_copy(
+            self,
+            faces: CubeOrientation,
+            *,
+            full: bool = False,
+    ) -> 'VCube':
         """
         Create a copy of the cube oriented to specific faces.
 
@@ -444,7 +451,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             *,
             mode: str = '',
             layout: str = '',
-            orientation: str = '',
+            orientation: CubeOrientation = '',
             mask: CubeMask = '',
             palette: str = '',
             effect: str = '',
@@ -487,7 +494,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             *,
             mode: str = '',
             layout: str = '',
-            orientation: str = '',
+            orientation: CubeOrientation = '',
             mask: CubeMask = '',
             palette: str = '',
             effect: str = '',
@@ -514,7 +521,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             *,
             mode: str = '',
             layout: str = '',
-            orientation: str = '',
+            orientation: CubeOrientation = '',
             mask: CubeMask = '',
             palette: str = '',
             cube_color: str = '',
