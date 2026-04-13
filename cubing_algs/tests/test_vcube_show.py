@@ -6,6 +6,7 @@ from io import StringIO
 from unittest.mock import patch
 
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import RegexPattern
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.vcube import VCube
 
@@ -13,7 +14,7 @@ from cubing_algs.vcube import VCube
 class VCubeShowMixin:
     """Testing tools for VCube.show() output verification."""
 
-    ANSI_RE = re.compile(r'\x1b\[[^m]*m')
+    ANSI_RE: RegexPattern = re.compile(r'\x1b\[[^m]*m')
     # Default palette masked background: '#444444' → rgb(68,68,68)
     MASKED_BG = '\x1b[48;2;68;68;68m'
 

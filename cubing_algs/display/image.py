@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.constants import CUBE_COLOR
@@ -30,8 +31,8 @@ Point3D = tuple[float, float, float]
 Point2D = tuple[float, float]
 FaceData = tuple[str, list[Point2D], int]
 
-ROTATION_PATTERN = re.compile(r'^([xyz]-?[0-9]+)+$')
-ROTATION_PARTS = re.compile(r'([xyz])(-?[0-9]+)')
+ROTATION_PATTERN: RegexPattern = re.compile(r'^([xyz]-?[0-9]+)+$')
+ROTATION_PARTS: RegexPattern = re.compile(r'([xyz])(-?[0-9]+)')
 
 # Adjacent face layout positions relative to the U face in top view
 TOP_VIEW_LAYOUT: dict[str, str] = {
