@@ -6,7 +6,6 @@ from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
-from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import FACE_INDEXES
@@ -177,7 +176,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return self.facelet_piece_types[facelet_index % self.face_size]
 
     @property
-    def orientation(self) -> str:
+    def orientation(self) -> CubeOrientation:
         """
         Get the cube's orientation as a two-character string.
 

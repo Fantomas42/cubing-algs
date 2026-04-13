@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -122,7 +123,7 @@ class ImageDisplay(ModeDisplay):
             *,
             mode: str = '',
             layout: str = '',
-            orientation: str = '',
+            orientation: CubeOrientation = '',
             mask: CubeMask = '',
             image_size: int = 0,
             rotation: str = '',

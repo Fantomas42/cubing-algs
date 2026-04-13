@@ -2,6 +2,7 @@
 from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import POVMask
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
@@ -75,7 +76,7 @@ class ModeDisplay:
 
         return face
 
-    def cross_top_orientation(self) -> str:
+    def cross_top_orientation(self) -> CubeOrientation:
         """
         Determine the front face with the most cross top color facelets.
 
@@ -95,7 +96,7 @@ class ModeDisplay:
 
         return f'{ top }{ new_front }'
 
-    def cross_bottom_orientation(self) -> str:
+    def cross_bottom_orientation(self) -> CubeOrientation:
         """
         Determine the front face with the most cross bottom color facelets.
 
@@ -116,7 +117,7 @@ class ModeDisplay:
 
         return f'{ top }{ new_front }'
 
-    def f2l_orientation(self) -> str:
+    def f2l_orientation(self) -> CubeOrientation:
         """
         Determine the optimal front face orientation for F2L display mode
         keeping the initial top face orientation.

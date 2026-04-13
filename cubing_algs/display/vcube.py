@@ -5,6 +5,7 @@ from typing import cast
 
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import FaceFacelets
 from cubing_algs.annotations import FaceMask
 from cubing_algs.constants import FACE_INDEXES
@@ -104,7 +105,7 @@ class VCubeDisplay(ModeDisplay):
             *,
             mode: str = '',
             layout: str = '',
-            orientation: str = '',
+            orientation: CubeOrientation = '',
             mask: CubeMask = '',
     ) -> str:
         """

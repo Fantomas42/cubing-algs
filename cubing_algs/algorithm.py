@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from typing import Self
 
 from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import CubeOrientation
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
@@ -470,7 +471,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             *,
             mode: str = '',
             layout: str = '',
-            orientation: str = '',
+            orientation: CubeOrientation = '',
             palette: str = '',
             effect: str = '',
             facelet: str = '',
@@ -523,7 +524,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             *,
             mode: str = '',
             layout: str = '',
-            orientation: str = '',
+            orientation: CubeOrientation = '',
             palette: str = '',
             cube_color: str = '',
             image_size: int = 0,
