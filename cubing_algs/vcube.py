@@ -6,6 +6,7 @@ from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
+from cubing_algs.annotations import FaceFacelets
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import FACE_INDEXES
@@ -564,7 +565,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             distance=distance,
         )
 
-    def get_face(self, face: str) -> str:
+    def get_face(self, face: str) -> FaceFacelets:
         """
         Get the facelets of a specific face by face letter.
 
@@ -597,7 +598,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         except ValueError as e:
             raise InvalidFaceIndexError(str(e)) from e
 
-    def get_face_by_center(self, face: str) -> str:
+    def get_face_by_center(self, face: str) -> FaceFacelets:
         """
         Get the facelets of a face by its center color.
 

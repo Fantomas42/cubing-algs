@@ -1,5 +1,6 @@
 """Tests for face transformation computations."""
 import unittest
+from typing import TYPE_CHECKING
 
 from cubing_algs.face_transforms import ADJACENT_FACE_TRANSFORMATIONS
 from cubing_algs.face_transforms import identity
@@ -8,6 +9,9 @@ from cubing_algs.face_transforms import offset_right
 from cubing_algs.face_transforms import offset_up
 from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.face_transforms import transform_opposite_position
+
+if TYPE_CHECKING:
+    from cubing_algs.annotations import Facelet
 
 
 class TestOffsetRight(unittest.TestCase):
@@ -333,7 +337,7 @@ class TestAdjacentFaceTransformations(unittest.TestCase):
 
     def test_opposite_faces_not_adjacent(self) -> None:
         """Test that opposite faces are not listed as adjacent."""
-        opposite_pairs = [
+        opposite_pairs: list[tuple[Facelet, Facelet]] = [
             ('U', 'D'),
             ('R', 'L'),
             ('F', 'B'),
@@ -578,7 +582,7 @@ class TestTransformAdjacentPosition(unittest.TestCase):
 
     def test_transform_adjacent_position_center_invariant(self) -> None:
         """Test center position (4) stays at 4 for all transformations."""
-        all_faces = ['U', 'R', 'F', 'D', 'L', 'B']
+        all_faces: list[Facelet] = ['U', 'R', 'F', 'D', 'L', 'B']
 
         for orig_face in all_faces:
             for dest_face in ADJACENT_FACE_TRANSFORMATIONS[orig_face]:

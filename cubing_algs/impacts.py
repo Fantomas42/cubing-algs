@@ -8,7 +8,9 @@ and statistical analysis of the algorithm's effect on the cube.
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 from typing import NamedTuple
+from typing import cast
 
+from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import D_CORNERS
@@ -85,7 +87,7 @@ class FaceletPosition(NamedTuple):
     """Parsed facelet position information."""
 
     face_index: int
-    face_name: str
+    face_name: Facelet
     face_position: int
     row: int
     col: int
@@ -113,8 +115,8 @@ class ImpactData(NamedTuple):
     facelets_mobilized_count: int
     facelets_scrambled_percent: float
     facelets_permutations: dict[int, int]
-    facelets_face_mobility: dict[str, int]
-    facelets_face_to_face_matrix: dict[str, dict[str, int]]
+    facelets_face_mobility: dict[Facelet, int]
+    facelets_face_to_face_matrix: dict[Facelet, dict[Facelet, int]]
     facelets_symmetry: dict[str, bool]
     facelets_qtm_distance: DistanceMetrics | None
     facelets_manhattan_distance: DistanceMetrics | None
@@ -142,7 +144,7 @@ class ImpactData(NamedTuple):
     cubies_patterns: list[str] | None
 
 
-def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
+def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[Facelet, int]:
     """
     Calculate face impact from impact mask.
 
@@ -154,13 +156,13 @@ def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
         Dictionary mapping face names to counts of affected facelets.
 
     """
-    face_impact = {}
+    face_impact: dict[Facelet, int] = {}
 
     for i, face_name in enumerate(FACE_ORDER):
         start_idx = i * cube.face_size
         end_idx = start_idx + cube.face_size
         face_mask = impact_mask[start_idx:end_idx]
-        face_impact[face_name] = face_mask.count('1')
+        face_impact[cast('Facelet', face_name)] = face_mask.count('1')
 
     return face_impact
 
@@ -178,7 +180,7 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
 
     """
     face_index = position // cube.face_size
-    face_name = FACE_ORDER[face_index]
+    face_name = cast('Facelet', FACE_ORDER[face_index])
     position_in_face = position % cube.face_size
     row = position_in_face // cube.size
     col = position_in_face % cube.size
@@ -625,7 +627,7 @@ def compute_distance_metrics(
 def compute_face_to_face_matrix(
         permutations: dict[int, int],
         cube: 'VCube',
-) -> dict[str, dict[str, int]]:
+) -> dict[Facelet, dict[Facelet, int]]:
     """
     Compute face-to-face movement matrix.
 
@@ -639,14 +641,15 @@ def compute_face_to_face_matrix(
         Nested dictionary: matrix[orig_face][dest_face] = count.
 
     """
-    matrix: dict[str, dict[str, int]] = {
-        face: dict.fromkeys(FACE_ORDER, 0)
+    matrix: dict[Facelet, dict[Facelet, int]] = {
+        cast('Facelet', face):
+        cast('dict[Facelet, int]', dict.fromkeys(FACE_ORDER, 0))
         for face in FACE_ORDER
     }
 
     for orig_pos, final_pos in permutations.items():
-        orig_face = FACE_ORDER[orig_pos // cube.face_size]
-        final_face = FACE_ORDER[final_pos // cube.face_size]
+        orig_face = cast('Facelet', FACE_ORDER[orig_pos // cube.face_size])
+        final_face = cast('Facelet', FACE_ORDER[final_pos // cube.face_size])
         matrix[orig_face][final_face] += 1
 
     return matrix

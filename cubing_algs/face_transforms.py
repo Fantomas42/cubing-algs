@@ -8,6 +8,8 @@ one face to another.
 """
 from collections.abc import Callable
 
+from cubing_algs.annotations import Facelet
+
 
 def offset_right(position: int) -> int:
     """
@@ -170,7 +172,10 @@ def offset_vertical_mirror(position: int) -> int:
 
 # Mapping of how positions transform when moving between adjacent faces
 # For each origin face, maps destination faces to the appropriate transformation
-ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
+ADJACENT_FACE_TRANSFORMATIONS: dict[
+    Facelet,
+    dict[Facelet, Callable[[int], int]],
+] = {
     'U': {
         'R': offset_right,
         'L': offset_left,
@@ -211,7 +216,7 @@ ADJACENT_FACE_TRANSFORMATIONS: dict[str, dict[str, Callable[[int], int]]] = {
 
 # Mapping of how positions transform when moving between opposite faces
 # For each origin face, maps destination faces to the appropriate transformation
-OPPOSITE_FACE_TRANSFORMATIONS: dict[str, Callable[[int], int]] = {
+OPPOSITE_FACE_TRANSFORMATIONS: dict[Facelet, Callable[[int], int]] = {
     'U': offset_horizontal_mirror,
     'R': offset_vertical_mirror,
     'F': offset_vertical_mirror,
@@ -222,8 +227,8 @@ OPPOSITE_FACE_TRANSFORMATIONS: dict[str, Callable[[int], int]] = {
 
 
 def transform_adjacent_position(
-        original_face_name: str,
-        destination_face_name: str,
+        original_face_name: Facelet,
+        destination_face_name: Facelet,
         destination_face_position: int) -> int:
     """
     Transform adjacent destination face position to original face position.
@@ -246,7 +251,7 @@ def transform_adjacent_position(
     )
 
 
-def transform_opposite_position(face_name: str, face_position: int) -> int:
+def transform_opposite_position(face_name: Facelet, face_position: int) -> int:
     """
     Transform opposite destination face position to original face position.
 

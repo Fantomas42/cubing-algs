@@ -1,5 +1,6 @@
 """Tests for algorithm impact analysis."""
 import unittest
+from typing import TYPE_CHECKING
 from typing import cast
 
 from cubing_algs.algorithm import Algorithm
@@ -29,6 +30,9 @@ from cubing_algs.impacts import parse_facelet_position
 from cubing_algs.impacts import positions_on_adjacent_corners
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
+
+if TYPE_CHECKING:
+    from cubing_algs.annotations import Facelet
 
 
 class TestImpactData(unittest.TestCase):
@@ -142,7 +146,10 @@ class TestImpactData(unittest.TestCase):
     def test_impact_data_field_access(self) -> None:
         """Test individual field access on ImpactData."""
         cube = VCube()
-        face_mobility = {'U': 1, 'R': 2, 'F': 3, 'D': 4, 'L': 5, 'B': 6}
+        face_mobility: dict[Facelet, int] = {
+            'U': 1, 'R': 2, 'F': 3,
+            'D': 4, 'L': 5, 'B': 6,
+        }
 
         impact_data = ImpactData(
             cube=cube,
@@ -2870,14 +2877,17 @@ class TestComputeFaceToFaceMatrix(unittest.TestCase):
         for face in FACE_ORDER:
             self.assertIn(face, matrix)
             for target_face in FACE_ORDER:
-                self.assertEqual(matrix[face][target_face], 0)
+                self.assertEqual(
+                    matrix[cast('Facelet', face)][cast('Facelet', target_face)],
+                    0,
+                )
 
     def test_same_face_permutation(self) -> None:
         """Test permutation within same face."""
         permutations = {0: 1, 1: 2, 2: 0}
         matrix = compute_face_to_face_matrix(permutations, self.cube)
         self.assertEqual(matrix['U']['U'], 3)
-        for face in ['R', 'F', 'D', 'L', 'B']:
+        for face in cast('list[Facelet]', ['R', 'F', 'D', 'L', 'B']):
             self.assertEqual(matrix['U'][face], 0)
 
     def test_cross_face_permutation(self) -> None:
@@ -2907,9 +2917,9 @@ class TestComputeFaceToFaceMatrix(unittest.TestCase):
         self.assertEqual(len(matrix), 6)
         for face in FACE_ORDER:
             self.assertIn(face, matrix)
-            self.assertEqual(len(matrix[face]), 6)
+            self.assertEqual(len(matrix[cast('Facelet', face)]), 6)
             for target_face in FACE_ORDER:
-                self.assertIn(target_face, matrix[face])
+                self.assertIn(target_face, matrix[cast('Facelet', face)])
 
 
 class TestDetectSymmetry(unittest.TestCase):
