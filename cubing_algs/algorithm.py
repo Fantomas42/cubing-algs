@@ -15,6 +15,7 @@ from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
@@ -225,6 +226,21 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         return mod_moves
 
+    def validate_cube_size(self, size: int) -> None:
+        """
+        Ensure the given cube size can accommodate this algorithm.
+
+        Raises:
+            InvalidCubeSizeError: If cube size is less than minimal cube size.
+
+        """
+        if size < self.min_cube_size:
+            msg = (
+                'Cube size is too small for this algorithm '
+                f'({ size } < { self.min_cube_size })'
+            )
+            raise InvalidCubeSizeError(msg)
+
     def impacts(self, size: int = DEFAULT_CUBE_SIZE) -> ImpactData:
         """
         Analyze the spatial impact of this algorithm on a cube.
@@ -250,6 +266,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             0.33  # About 33% of the cube is scrambled
 
         """
+        self.validate_cube_size(size)
+
         return compute_impacts(self, size=size)
 
     @property
@@ -447,6 +465,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
         from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
         from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        self.validate_cube_size(size)
 
         cleaned_algo = self.transform(
             unpause_moves,

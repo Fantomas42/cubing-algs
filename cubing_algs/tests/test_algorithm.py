@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
 from cubing_algs.move import Move
@@ -1659,6 +1660,35 @@ class AlgorithmImpactsTestCase(unittest.TestCase):
         impacts = algo.impacts()
 
         self.assertIsInstance(impacts, ImpactData)
+
+    def test_impacts_raises_on_too_small_cube_size(self) -> None:
+        """Test impacts raises InvalidCubeSizeError for undersized cube."""
+        algo = Algorithm.parse_moves('3Rw')
+
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.impacts(size=3)
+
+    def test_get_cube_and_impact_mask_raises_on_too_small_cube_size(
+            self,
+    ) -> None:
+        """Test get_cube_and_impact_mask raises for undersized cube."""
+        algo = Algorithm.parse_moves('3Rw')
+
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.get_cube_and_impact_mask(size=3)
+
+    def test_validate_cube_size_accepts_valid_size(self) -> None:
+        """Test validate_cube_size does not raise for valid size."""
+        algo = Algorithm.parse_moves("R U R' U'")
+
+        self.assertIsNone(algo.validate_cube_size(3))
+
+    def test_validate_cube_size_raises_on_too_small(self) -> None:
+        """Test validate_cube_size raises for undersized cube."""
+        algo = Algorithm.parse_moves('3Rw')
+
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.validate_cube_size(3)
 
 
 class AlgorithmErgonomicsTestCase(unittest.TestCase):
