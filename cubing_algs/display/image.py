@@ -218,13 +218,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         scale = (image_size - 2 * margin) / (2 * max_extent)
         cx, cy = image_size / 2, image_size / 2
 
-        cr, cg, cb, body_opacity = hex_to_rgba(self.cube_color)
-        body_rgb = f'#{cr:02x}{cg:02x}{cb:02x}'
-        opacity_attr = (
-            f' fill-opacity="{body_opacity:.2f}"'
-            if body_opacity < 1.0
-            else ''
-        )
+        cr, cg, cb, ca = hex_to_rgba(self.cube_color)
+        body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
 
         # First pass: project all face corners into SVG space
         face_data: list[tuple[str, list[Point2D], int]] = []
@@ -245,7 +240,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             (
                 '<g class="cube-body">\n'
                 f'  <polygon points="{self.points_to_svg(hull)}"'
-                f' fill="{body_rgb}"{opacity_attr} />\n'
+                f' fill="{body_fill}" />\n'
                 '</g>'
             ),
         ]
@@ -291,13 +286,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         total_cells = self.cube_size + 2 * STRIP_DEPTH
         cell = (image_size - 2 * margin) / total_cells
 
-        cr, cg, cb, body_opacity = hex_to_rgba(self.cube_color)
-        body_rgb = f'#{cr:02x}{cg:02x}{cb:02x}'
-        opacity_attr = (
-            f' fill-opacity="{body_opacity:.2f}"'
-            if body_opacity < 1.0
-            else ''
-        )
+        cr, cg, cb, ca = hex_to_rgba(self.cube_color)
+        body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
 
         u_origin = margin + STRIP_DEPTH * cell
         u_size = self.cube_size * cell
@@ -311,7 +301,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             (u_origin + u_size, u_origin + u_size),
             (u_origin, u_origin + u_size),
         ]
-        body = self.build_polygon(u_corners, body_rgb, opacity_attr)
+        body = self.build_polygon(u_corners, body_fill)
 
         stickers: list[str] = []
         for row in range(self.cube_size):
@@ -323,11 +313,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                 )
                 index = row * self.cube_size + col
 
-                color_key = state[index]
-                if mask[index] == '0':
-                    color_key = 'masked'
-
-                fill = self.palette[color_key]
+                fill = self.get_sticker_fill(state[index], mask[index])
                 stickers.append(
                     self.build_polygon(
                         sticker_corners,
@@ -359,8 +345,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                     mask_row,
                     layout,
                     corners,
-                    body_rgb,
-                    opacity_attr,
+                    body_fill,
                 ),
             )
 
@@ -370,7 +355,6 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             self,
             corners: list[Point2D],
             fill: str,
-            extra_attrs: str = '',
     ) -> str:
         """
         Build an SVG polygon element from corner points.
@@ -382,8 +366,29 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         return (
             f'  <polygon'
             f' points="{self.points_to_svg(corners)}"'
-            f' fill="{ fill }"{ extra_attrs }/>'
+            f' fill="{ fill }"/>'
         )
+
+    def get_sticker_fill(self, color_key: str, mask_char: str) -> str:
+        """
+        Resolve the SVG fill color for a facelet given its mask value.
+
+        Args:
+            color_key: Face letter identifying the facelet color in the palette.
+            mask_char: Mask character; '0' uses masked color, '2' applies
+                       50% transparency, '1' uses the normal color.
+
+        Returns:
+            SVG fill color string.
+
+        """
+        if mask_char == '0':
+            return self.palette['masked']
+        fill = self.palette[color_key]
+        if mask_char == '2':
+            r, g, b, _ = hex_to_rgba(fill)
+            return f'rgba({r},{g},{b},0.25)'
+        return fill
 
     def build_face_stickers(
             self,
@@ -404,11 +409,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             for col in range(self.cube_size):
                 idx = row * self.cube_size + col
 
-                color_key = facelets[idx]
-                if mask[idx] == '0':
-                    color_key = 'masked'
-
-                fill = self.palette[color_key]
+                fill = self.get_sticker_fill(facelets[idx], mask[idx])
 
                 stickers.append(
                     self.build_sticker_polygon(
@@ -501,8 +502,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             mask_row: str,
             layout: str,
             corners: list[Point2D],
-            body_rgb: str,
-            opacity_attr: str,
+            body_fill: str,
     ) -> str:
         """
         Build SVG group for one projected adjacent strip.
@@ -518,11 +518,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         else:
             indices = list(range(self.cube_size))
 
-        body = self.build_polygon(
-            corners,
-            body_rgb,
-            opacity_attr,
-        )
+        body = self.build_polygon(corners, body_fill)
 
         stickers = [
             self.build_polygon(
@@ -533,11 +529,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                     horizontal=is_horizontal,
                     gap_frac=STICKER_GAP,
                 ),
-                self.palette[
-                    'masked'
-                    if mask_row[idx] == '0'
-                    else top_row[idx]
-                ],
+                self.get_sticker_fill(top_row[idx], mask_row[idx]),
             )
             for pos, idx in enumerate(indices)
         ]
