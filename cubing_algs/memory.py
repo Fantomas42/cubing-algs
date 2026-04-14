@@ -7,12 +7,10 @@ repetition, face diversity, flow, and move familiarity.
 
 Higher scores indicate algorithms that are harder to memorize.
 """
-from __future__ import annotations
-
 import math
 from collections import Counter
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import NamedTuple
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -69,8 +67,7 @@ RATING_THRESHOLDS: list[tuple[float, str]] = [
 ]
 
 
-@dataclass(frozen=True)
-class MemoryData:
+class MemoryData(NamedTuple):
     """Container for memory difficulty computation results."""
 
     # Composite
@@ -243,7 +240,7 @@ def compute_repetition_score(repeated_patterns: int, stm: int) -> float:
     return max(0.0, 100.0 - reduction)
 
 
-def get_move_face(move: Move) -> str | None:
+def get_move_face(move: 'Move') -> str | None:
     """
     Extract the face letter from a move.
 
@@ -261,7 +258,7 @@ def get_move_face(move: Move) -> str | None:
     return move.base_move
 
 
-def compute_face_diversity_score(moves: list[Move]) -> float:
+def compute_face_diversity_score(moves: 'list[Move]') -> float:
     """
     Compute face diversity sub-score.
 
@@ -331,7 +328,7 @@ def compute_flow_memory_score(
     return min(100.0, ratio * 200.0)
 
 
-def compute_move_familiarity_score(moves: list[Move]) -> float:
+def compute_move_familiarity_score(moves: 'list[Move]') -> float:
     """
     Compute move familiarity sub-score.
 
@@ -383,7 +380,7 @@ def get_memory_rating(score: float) -> str:
     return 'Trivial'
 
 
-def compute_memory(algorithm: Algorithm) -> MemoryData:  # noqa: PLR0914
+def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
     """
     Compute comprehensive memory difficulty metrics for an algorithm.
 
