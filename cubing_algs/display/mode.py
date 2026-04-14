@@ -267,9 +267,14 @@ class ModeDisplay:
             size=self.cube_size,
             check=False,
         )
-        cube.rotate(
-            self.cube.compute_orientation_moves('UF'),
-        )
+
+        # Detect if internal orientation is broken
+        if len(set(self.cube.face_center_colors)) == self.cube.face_number:
+            moves = self.cube.compute_orientation_moves('UF')
+        else:
+            moves = ' '.join(self.cube.history)
+
+        cube.rotate(moves)
 
         return cube.state
 
