@@ -1682,7 +1682,10 @@ class AlgorithmImpactsTestCase(unittest.TestCase):
         """Test validate_cube_size does not raise for valid size."""
         algo = Algorithm.parse_moves("R U R' U'")
 
-        self.assertIsNone(algo.validate_cube_size(3))
+        try:
+            algo.validate_cube_size(3)
+        except InvalidCubeSizeError:
+            self.fail('validate_cube_size raised unexpectedly')
 
     def test_validate_cube_size_raises_on_too_small(self) -> None:
         """Test validate_cube_size raises for undersized cube."""
