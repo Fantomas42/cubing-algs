@@ -64,19 +64,6 @@ class TestTriggerPattern(unittest.TestCase):
         self.assertEqual(pattern.moves, 'R U R')
         self.assertEqual(pattern.category, 'basic')
 
-    def test_whitespace_normalization(self) -> None:
-        """Test that moves and variations are whitespace-normalized."""
-        pattern = TriggerPattern(
-            name='Test',
-            moves="R  U   R'  U'",
-            category='basic',
-            ergonomic_bonus=0.1,
-            speed_multiplier=1.2,
-            variations=["L  U  L'   U'"],
-        )
-        self.assertEqual(pattern.moves, "R U R' U'")
-        self.assertEqual(pattern.variations, ["L U L' U'"])
-
     def test_trigger_patterns_count(self) -> None:
         """Test that all 13 trigger patterns are defined."""
         self.assertEqual(len(TRIGGER_PATTERNS), 13)

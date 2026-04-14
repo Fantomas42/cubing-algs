@@ -6,7 +6,6 @@ of algorithms, including hand balance, fingertrick difficulty,
 regrip requirements, trigger pattern detection, and overall
 execution comfort.
 """
-from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 from typing import NamedTuple
@@ -27,8 +26,7 @@ class HandDominance(Enum):
     AMBIDEXTROUS = 'ambidextrous'
 
 
-@dataclass
-class TriggerPattern:
+class TriggerPattern(NamedTuple):
     """
     Represents a common speedcubing trigger or pattern.
 
@@ -42,11 +40,6 @@ class TriggerPattern:
     ergonomic_bonus: float
     speed_multiplier: float
     variations: list[str]
-
-    def __post_init__(self) -> None:
-        """Normalize the moves string and variations."""
-        self.moves = ' '.join(self.moves.split())
-        self.variations = [' '.join(var.split()) for var in self.variations]
 
 
 class TriggerMatch(NamedTuple):
