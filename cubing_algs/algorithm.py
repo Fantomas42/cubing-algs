@@ -5,8 +5,6 @@ sequences of cube moves.
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
-from dataclasses import asdict
-from dataclasses import is_dataclass
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Self
@@ -626,8 +624,6 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
                 return [flatten(v) for v in obj]
             if isinstance(obj, dict):
                 return {k: flatten(v) for k, v in obj.items()}
-            if is_dataclass(obj) and not isinstance(obj, type):
-                return {k: flatten(v) for k, v in asdict(obj).items()}
             return obj
 
         return {
