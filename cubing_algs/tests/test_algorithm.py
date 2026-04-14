@@ -1,4 +1,5 @@
 """Tests for the Algorithm class."""
+import json
 import re
 import unittest
 from contextlib import redirect_stdout
@@ -1791,3 +1792,61 @@ class AlgorithmImageTestCase(unittest.TestCase):
         default = algo.image()
         closer = algo.image(distance=5.0)
         self.assertNotEqual(default, closer)
+
+
+class AlgorithmToDictTestCase(unittest.TestCase):
+    """Tests for the Algorithm.to_dict method."""
+
+    def test_expected_keys(self) -> None:
+        """to_dict returns every documented top-level key."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.to_dict()
+        self.assertEqual(
+            set(result),
+            {
+                'moves', 'cycles', 'min_cube_size',
+                'is_standard', 'is_sign',
+                'has_rotations', 'has_internal_rotations',
+                'has_pauses', 'has_times',
+                'metrics', 'ergonomics', 'structure',
+                'memory', 'impacts',
+            },
+        )
+
+    def test_moves_is_string(self) -> None:
+        """Moves entry is the stringified algorithm."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        self.assertEqual(algo.to_dict()['moves'], "R U R' U'")
+
+    def test_nested_are_plain_dicts(self) -> None:
+        """Data containers are flattened to plain dicts."""
+        algo = Algorithm.parse_moves("R U R' U' F R U R' U' F'")
+        result = algo.to_dict()
+        for key in ('metrics', 'ergonomics', 'structure', 'memory', 'impacts'):
+            self.assertIsInstance(result[key], dict)
+
+    def test_json_serializable(self) -> None:
+        """The full dict is JSON-serializable."""
+        algo = Algorithm.parse_moves("R U R' U' F R U R' U' F'")
+        payload = json.dumps(algo.to_dict())
+        self.assertGreater(len(payload), 0)
+
+    def test_impacts_cube_is_facelets_string(self) -> None:
+        """VCube inside impacts is flattened to its facelets state string."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.to_dict()
+        cube = result['impacts']['cube']
+        self.assertIsInstance(cube, str)
+        self.assertEqual(len(cube), 54)
+
+    def test_size_parameter_validates(self) -> None:
+        """to_dict propagates cube-size validation from impacts."""
+        algo = Algorithm.parse_moves('3Rw')
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.to_dict(size=2)
+
+    def test_size_parameter_accepted(self) -> None:
+        """to_dict accepts a custom cube size."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.to_dict(size=4)
+        self.assertEqual(len(result['impacts']['cube']), 6 * 4 * 4)

@@ -5,7 +5,10 @@ sequences of cube moves.
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
+from dataclasses import asdict
+from dataclasses import is_dataclass
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Self
 
 from cubing_algs.annotations import CubeMask
@@ -594,3 +597,52 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             rotation=rotation,
             distance=distance,
         )
+
+    def to_dict(self, size: int = DEFAULT_CUBE_SIZE) -> dict[str, Any]:
+        """
+        Export algorithm data as a plain, JSON-serializable dict.
+
+        Aggregates the move string, every analysis property, and the
+        impacts computed for the given cube size. Nested data containers
+        (NamedTuple / dataclass) are recursively flattened to plain dicts.
+
+        Args:
+            size: Cube size used for impacts computation.
+
+        Returns:
+            A dict aggregating the algorithm moves and all its computed
+            properties and analyses.
+
+        """
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        def flatten(obj: object) -> object:
+            if isinstance(obj, VCube | Algorithm | Move):
+                return obj.state if isinstance(obj, VCube) else str(obj)
+            if isinstance(obj, tuple) and hasattr(obj, '_asdict'):
+                named: dict[str, object] = obj._asdict()
+                return {k: flatten(v) for k, v in named.items()}
+            if isinstance(obj, list | tuple):
+                return [flatten(v) for v in obj]
+            if isinstance(obj, dict):
+                return {k: flatten(v) for k, v in obj.items()}
+            if is_dataclass(obj) and not isinstance(obj, type):
+                return {k: flatten(v) for k, v in asdict(obj).items()}
+            return obj
+
+        return {
+            'moves': str(self),
+            'cycles': self.cycles,
+            'min_cube_size': self.min_cube_size,
+            'is_standard': self.is_standard,
+            'is_sign': self.is_sign,
+            'has_rotations': self.has_rotations,
+            'has_internal_rotations': self.has_internal_rotations,
+            'has_pauses': self.has_pauses,
+            'has_times': self.has_times,
+            'metrics': flatten(self.metrics),
+            'ergonomics': flatten(self.ergonomics),
+            'structure': flatten(self.structure),
+            'memory': flatten(self.memory),
+            'impacts': flatten(self.impacts(size)),
+        }
