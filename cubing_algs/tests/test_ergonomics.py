@@ -48,7 +48,7 @@ class TestHandDominance(unittest.TestCase):
 
 
 class TestTriggerPattern(unittest.TestCase):
-    """Test the TriggerPattern dataclass."""
+    """Test the TriggerPattern NamedTuple."""
 
     def test_creation(self) -> None:
         """Test basic creation."""
@@ -70,7 +70,7 @@ class TestTriggerPattern(unittest.TestCase):
 
 
 class TestTriggerMatch(unittest.TestCase):
-    """Test the TriggerMatch dataclass."""
+    """Test the TriggerMatch NamedTuple."""
 
     def test_creation(self) -> None:
         """Test basic creation."""
@@ -1223,18 +1223,16 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.flow_breaks, 0)
 
-    def test_ergonomics_data_is_frozen_dataclass(self) -> None:
-        """Test that ErgonomicsData is a frozen dataclass."""
+    def test_ergonomics_data_is_immutable_named_tuple(self) -> None:
+        """Test that ErgonomicsData is an immutable NamedTuple."""
         alg = Algorithm.parse_moves('R U')
         result = compute_ergonomics(alg)
 
-        # Test dataclass properties
         self.assertIsInstance(result, ErgonomicsData)
         self.assertTrue(hasattr(result, 'total_moves'))
         self.assertTrue(hasattr(result, 'comfort_score'))
         self.assertTrue(hasattr(result, 'ergonomic_rating'))
 
-        # Test immutability (frozen dataclass characteristic)
         with self.assertRaises(AttributeError):
             result.total_moves = 999  # type: ignore[misc]
 

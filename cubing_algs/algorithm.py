@@ -602,7 +602,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         Aggregates the move string, every analysis property, and the
         impacts computed for the given cube size. Nested data containers
-        (NamedTuple / dataclass) are recursively flattened to plain dicts.
+        (NamedTuple) are recursively flattened to plain dicts.
 
         Args:
             size: Cube size used for impacts computation.
