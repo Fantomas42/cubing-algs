@@ -21,7 +21,6 @@ classification system for systematic algorithm analysis.
 import typing
 from collections import OrderedDict
 from collections.abc import MutableMapping
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import Literal
 from typing import NamedTuple
@@ -135,8 +134,7 @@ type StructureClassification = Literal[
 ]
 
 
-@dataclass
-class Structure:
+class Structure(NamedTuple):
     """Represents a detected structure (conjugate or commutator)."""
 
     type: StructureType
