@@ -359,7 +359,7 @@ class RenderCubeCustomParametersTestCase(unittest.TestCase):
     def test_custom_cube_color_with_alpha(self) -> None:
         """Test rendering with semi-transparent cube body."""
         result = ImageDisplay(VCube(), cube_color='#11111180').render()
-        self.assertIn('fill-opacity=', result)
+        self.assertIn('rgba(17,17,17,0.50)', result)
 
     def test_opaque_cube_color_no_opacity_attr(self) -> None:
         """Test opaque cube color omits fill-opacity."""
@@ -429,7 +429,7 @@ class BuildTopViewSvgTestCase(unittest.TestCase):
             VCube(),
             cube_color='#11111180',
         ).render(layout='top')
-        self.assertIn('fill-opacity=', result)
+        self.assertIn('rgba(17,17,17,0.50)', result)
 
     def test_2x2_cube_with_oll_mode(self) -> None:
         """Test rendering a 2x2 cube with oll mode after algorithm."""

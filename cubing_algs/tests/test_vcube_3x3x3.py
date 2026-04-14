@@ -2106,13 +2106,13 @@ class VCubeImageTestCase(unittest.TestCase):
         """Test custom cube color."""
         cube = VCube()
         result = cube.image(cube_color='#ff0000')
-        self.assertIn('#ff0000', result)
+        self.assertIn('rgba(255,0,0,1.00)', result)
 
     def test_transparent_cube_color(self) -> None:
         """Test transparent cube color with alpha."""
         cube = VCube()
         result = cube.image(cube_color='#11111180')
-        self.assertIn('fill-opacity', result)
+        self.assertIn('rgba(17,17,17,0.50)', result)
 
     def test_2x2_cube(self) -> None:
         """Test rendering a 2x2 cube."""

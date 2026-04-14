@@ -1753,7 +1753,7 @@ class AlgorithmImageTestCase(unittest.TestCase):
         """Test custom cube color."""
         algo = Algorithm.parse_moves('R')
         result = algo.image(cube_color='#ff0000')
-        self.assertIn('#ff0000', result)
+        self.assertIn('rgba(255,0,0,1.00)', result)
 
     def test_custom_distance(self) -> None:
         """Test custom camera distance."""
