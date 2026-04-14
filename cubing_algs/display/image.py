@@ -306,7 +306,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         stickers: list[str] = []
         for row in range(self.cube_size):
             for col in range(self.cube_size):
-                sticker_corners = self.build_sticker_polygon_points(
+                sticker_corners = self.build_top_sticker_points(
                     u_corners,
                     row,
                     col,
@@ -495,6 +495,51 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             self.lerp_2d(top_edge_0, bot_edge_0, t1_row),
         ]
 
+    def build_top_sticker_points(
+            self,
+            svg_corners: list[Point2D],
+            row: int,
+            col: int,
+    ) -> list[Point2D]:
+        """
+        Compute sticker corner points for the top-view U face.
+
+        Uses reduced inner gaps so that inner and outer margins
+        look visually balanced in the flat 2D layout.
+
+        Returns:
+            Four corner points [TL, TR, BR, BL] of the sticker.
+
+        """
+        n = self.cube_size
+        gap = STICKER_GAP / n
+        inner_gap = gap * 2 / 3
+
+        t0_col = col / n + (gap if col == 0 else inner_gap)
+        t1_col = (col + 1) / n - (gap if col == n - 1 else inner_gap)
+        t0_row = row / n + (gap if row == 0 else inner_gap)
+        t1_row = (row + 1) / n - (gap if row == n - 1 else inner_gap)
+
+        top_edge_0 = self.lerp_2d(
+            svg_corners[0], svg_corners[1], t0_col,
+        )
+        top_edge_1 = self.lerp_2d(
+            svg_corners[0], svg_corners[1], t1_col,
+        )
+        bot_edge_0 = self.lerp_2d(
+            svg_corners[3], svg_corners[2], t0_col,
+        )
+        bot_edge_1 = self.lerp_2d(
+            svg_corners[3], svg_corners[2], t1_col,
+        )
+
+        return [
+            self.lerp_2d(top_edge_0, bot_edge_0, t0_row),
+            self.lerp_2d(top_edge_1, bot_edge_1, t0_row),
+            self.lerp_2d(top_edge_1, bot_edge_1, t1_row),
+            self.lerp_2d(top_edge_0, bot_edge_0, t1_row),
+        ]
+
     def build_strip_group(  # noqa: PLR0913, PLR0917
             self,
             face_name: str,
@@ -558,8 +603,10 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
         """
         if horizontal:
-            t0 = idx / count + gap_frac / count
-            t1 = (idx + 1) / count - gap_frac / count
+            gap = gap_frac / count
+            inner_gap = gap * 2 / 3
+            t0 = idx / count + (gap if idx == 0 else inner_gap)
+            t1 = (idx + 1) / count - (gap if idx == count - 1 else inner_gap)
             top0 = self.lerp_2d(corners[0], corners[1], t0)
             top1 = self.lerp_2d(corners[0], corners[1], t1)
             bot0 = self.lerp_2d(corners[3], corners[2], t0)
@@ -572,8 +619,10 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                 self.lerp_2d(top0, bot0, 1 - gap_frac),
             ]
 
-        t0 = idx / count + gap_frac / count
-        t1 = (idx + 1) / count - gap_frac / count
+        gap = gap_frac / count
+        inner_gap = gap * 2 / 3
+        t0 = idx / count + (gap if idx == 0 else inner_gap)
+        t1 = (idx + 1) / count - (gap if idx == count - 1 else inner_gap)
         left0 = self.lerp_2d(corners[0], corners[3], t0)
         left1 = self.lerp_2d(corners[0], corners[3], t1)
         right0 = self.lerp_2d(corners[1], corners[2], t0)
