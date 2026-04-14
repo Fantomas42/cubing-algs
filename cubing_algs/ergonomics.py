@@ -6,18 +6,17 @@ of algorithms, including hand balance, fingertrick difficulty,
 regrip requirements, trigger pattern detection, and overall
 execution comfort.
 """
-from __future__ import annotations
-
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
+from typing import NamedTuple
 
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.move import Move
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
-    from cubing_algs.move import Move  # pragma: no cover
 
 
 class HandDominance(Enum):
@@ -50,18 +49,16 @@ class TriggerPattern:
         self.variations = [' '.join(var.split()) for var in self.variations]
 
 
-@dataclass
-class TriggerMatch:
+class TriggerMatch(NamedTuple):
     """Represents a detected trigger pattern in an algorithm."""
 
-    pattern: TriggerPattern
+    pattern: 'TriggerPattern'
     start_index: int
     end_index: int
     matched_moves: str
 
 
-@dataclass(frozen=True)
-class ErgonomicsData:
+class ErgonomicsData(NamedTuple):
     """Container for ergonomics computation results."""
 
     total_moves: int
@@ -449,7 +446,7 @@ def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
     return TRANSITION_PENALTIES['adjacent']
 
 
-def calculate_flow_score(algorithm: Algorithm) -> float:
+def calculate_flow_score(algorithm: 'Algorithm') -> float:
     """
     Calculate the overall flow score of an algorithm.
 
@@ -485,7 +482,7 @@ def calculate_flow_score(algorithm: Algorithm) -> float:
     return max(0.0, 1.0 - (avg_penalty / max_possible_penalty))
 
 
-def normalize_algorithm_string(algorithm: Algorithm) -> str:
+def normalize_algorithm_string(algorithm: 'Algorithm') -> str:
     """
     Convert algorithm to normalized string for pattern matching.
 
@@ -499,7 +496,7 @@ def normalize_algorithm_string(algorithm: Algorithm) -> str:
 
 
 def find_trigger_patterns(
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> list[TriggerMatch]:
     """
@@ -605,7 +602,7 @@ def calculate_trigger_bonus(
 
 
 def estimate_tps_potential(
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> float:
     """
@@ -653,7 +650,7 @@ def estimate_tps_potential(
 
 
 def calculate_ergonomic_score(
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> float:
     """
@@ -698,7 +695,7 @@ def calculate_ergonomic_score(
 
 
 def classify_algorithm_difficulty(
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> str:
     """
@@ -728,7 +725,7 @@ def classify_algorithm_difficulty(
     return 'Expert'
 
 
-def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
+def suggest_ergonomic_improvements(algorithm: 'Algorithm') -> list[str]:
     """
     Suggest specific improvements to make the algorithm more ergonomic.
 
@@ -782,12 +779,12 @@ def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
     return suggestions
 
 
-def compute_hand_balance(moves: Algorithm) -> tuple[int, int, int, float]:
+def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
     """
     Calculate hand balance metrics for the algorithm.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
 
     Returns:
         Tuple of (right_count, left_count, both_count, balance_ratio).
@@ -823,13 +820,13 @@ def compute_hand_balance(moves: Algorithm) -> tuple[int, int, int, float]:
 
 
 def compute_finger_distribution(
-    moves: Algorithm,
+    moves: 'Algorithm',
 ) -> tuple[int, int, int, int]:
     """
     Calculate finger usage distribution for the algorithm.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
 
     Returns:
         Tuple of (thumb_count, index_count, middle_count, ring_count).
@@ -859,7 +856,7 @@ def compute_finger_distribution(
     return thumb_count, index_count, middle_count, ring_count
 
 
-def compute_regrip_count(moves: Algorithm) -> int:
+def compute_regrip_count(moves: 'Algorithm') -> int:
     """
     Estimate the number of regrips required for the algorithm.
 
@@ -867,7 +864,7 @@ def compute_regrip_count(moves: Algorithm) -> int:
     transitions with penalty >= opposite-face penalty.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
 
     Returns:
         Number of estimated regrips required.
@@ -895,14 +892,14 @@ def compute_regrip_count(moves: Algorithm) -> int:
     return regrip_count
 
 
-def compute_flow_breaks(moves: Algorithm) -> int:
+def compute_flow_breaks(moves: 'Algorithm') -> int:
     """
     Count awkward transitions that break the flow of execution.
 
     Uses transition penalty system to detect difficult transitions.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
 
     Returns:
         Number of awkward transitions detected.
@@ -929,7 +926,7 @@ def compute_flow_breaks(moves: Algorithm) -> int:
 
 
 def compute_fingertrick_difficulty(
-    moves: Algorithm,
+    moves: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> float:
     """
@@ -939,7 +936,7 @@ def compute_fingertrick_difficulty(
     execution (inverted from weight scale).
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
         hand_dominance: The hand dominance preference.
 
     Returns:
@@ -968,7 +965,7 @@ def compute_fingertrick_difficulty(
 
 
 def compute_estimated_execution_time(
-    moves: Algorithm,
+    moves: 'Algorithm',
     regrip_count: int,
 ) -> float:
     """
@@ -977,7 +974,7 @@ def compute_estimated_execution_time(
     Based on average move times and regrip penalties.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
         regrip_count: Number of regrips in the algorithm.
 
     Returns:
@@ -1063,7 +1060,7 @@ def get_ergonomic_rating(comfort_score: float) -> str:
 
 
 def compute_ergonomics(  # noqa: PLR0914
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> ErgonomicsData:
     """
