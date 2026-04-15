@@ -2,9 +2,10 @@
 import re
 from typing import Literal
 
-# Facelet and Mask
+# Facelet, Mask and DisplayCode
 type Facelet = Literal['U', 'R', 'F', 'D', 'L', 'B']
 type Mask = Literal['0', '1']
+type DisplayCode = Literal['0', '1', '2', '3']
 
 # Piece type for corners and edges
 type PieceType = Literal['corner', 'edge']
@@ -50,6 +51,9 @@ type CubeOrientation = str[Facelet]
 type POVMask = str[Mask]
 type CubeMask = str[Mask]
 type FaceMask = str[Mask]
+
+# Display mask
+type POVDisplayMask = str[DisplayCode]
 
 # Cube cubies tuple (cp, co, ep, eo) - without spatial orientation
 type CubeCubies = tuple[
