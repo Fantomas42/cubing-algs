@@ -221,41 +221,26 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         cr, cg, cb, ca = hex_to_rgba(self.cube_color)
         body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
 
-        # First pass: project all face corners into SVG space
-        face_data: list[tuple[str, list[Point2D], int]] = []
-        hull_points: list[Point2D] = []
+        # Draw each visible face back-to-front: the face body polygon
+        # first, then its stickers on top. Per-face body polygons cover
+        # exactly the projected face area, so near edge-on faces do not
+        # leave gaps that would show through a larger silhouette fill.
+        face_groups: list[str] = []
         for face_name, corners_2d, face_state_idx in visible:
             svg_corners = [
                 self.point_to_svg_coords(c, cx, cy, scale)
                 for c in corners_2d
             ]
-            face_data.append((face_name, svg_corners, face_state_idx))
-            hull_points.extend(svg_corners)
-
-        # One background polygon covering the cube silhouette fills
-        # anti-aliasing seams between adjacent face body polygons
-        # without affecting the outer cube boundary.
-        hull = self.convex_hull(hull_points)
-        face_groups: list[str] = [
-            (
-                '<g class="cube-body">\n'
-                f'  <polygon points="{self.points_to_svg(hull)}"'
-                f' fill="{body_fill}" />\n'
-                '</g>'
-            ),
-        ]
-
-        # Second pass: draw stickers back-to-front
-        for face_name, svg_corners, face_state_idx in face_data:
             face_start = face_state_idx * self.face_size
             face_stickers = self.build_face_stickers(
                 svg_corners,
                 state[face_start:face_start + self.face_size],
                 mask[face_start:face_start + self.face_size],
             )
+            body = self.build_polygon(svg_corners, body_fill)
             face_groups.append(
                 f'<g class="face-{ face_name }">\n'
-                f'{ "\n".join(face_stickers) }\n</g>',
+                f'{ body }\n{ "\n".join(face_stickers) }\n</g>',
             )
 
         return self.assemble_svg(image_size, face_groups)
@@ -859,46 +844,6 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             (m.group(1), int(m.group(2)))
             for m in ROTATION_PARTS.finditer(rotation)
         ]
-
-    @staticmethod
-    def convex_hull(points: list[Point2D]) -> list[Point2D]:
-        """
-        Compute the convex hull of a set of 2D points using gift wrapping.
-
-        Returns:
-            Ordered list of hull vertices (clockwise in SVG coordinates).
-
-        """
-        # Deduplicate while preserving order; duplicate points would
-        # break the index-based termination check below, since the
-        # algorithm could wrap onto a point with the same coordinates
-        # as the starting point but a different index.
-        points = list(set(points))
-        n = len(points)
-        if n <= 2:
-            return list(points)
-
-        start = min(range(n), key=lambda i: (points[i][0], points[i][1]))
-        hull: list[Point2D] = []
-        current = start
-
-        while True:
-            hull.append(points[current])
-            next_idx = (current + 1) % n
-
-            for i in range(n):
-                px, py = points[current]
-                nx, ny = points[next_idx]
-                ix, iy = points[i]
-                cross = (nx - px) * (iy - py) - (ny - py) * (ix - px)
-                if cross < 0:
-                    next_idx = i
-
-            current = next_idx
-            if current == start:
-                break
-
-        return hull
 
     @staticmethod
     def assemble_svg(

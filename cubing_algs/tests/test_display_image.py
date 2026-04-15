@@ -290,53 +290,6 @@ class Lerp2dTestCase(unittest.TestCase):
         self.assertAlmostEqual(result[1], 12.0)
 
 
-class ConvexHullTestCase(unittest.TestCase):
-    """Tests for convex hull computation."""
-
-    def test_square(self) -> None:
-        """Test hull of a simple square."""
-        pts = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
-        result = ImageDisplay.convex_hull(pts)
-        self.assertEqual(len(result), 4)
-        self.assertEqual(set(result), set(pts))
-
-    def test_duplicate_leftmost_points(self) -> None:
-        """Duplicated leftmost points must not cause an infinite loop."""
-        # Reproduces the hang from rotation 'y318x-34' where three
-        # visible faces share a corner, putting the same point at
-        # multiple indices including the gift-wrapping start index.
-        pts = [
-            (15.83, 48.12),
-            (94.93, 97.31),
-            (95.54, 197.65),
-            (24.69, 142.00),
-            (15.83, 48.12),
-            (103.95, 13.61),
-            (185.28, 52.44),
-            (94.93, 97.31),
-            (94.93, 97.31),
-            (185.28, 52.44),
-            (176.19, 146.96),
-            (95.54, 197.65),
-        ]
-        result = ImageDisplay.convex_hull(pts)
-        expected_hull = {
-            (15.83, 48.12),
-            (103.95, 13.61),
-            (185.28, 52.44),
-            (176.19, 146.96),
-            (95.54, 197.65),
-            (24.69, 142.00),
-        }
-        self.assertEqual(set(result), expected_hull)
-
-    def test_render_three_visible_faces_terminates(self) -> None:
-        """Rendering from a view with three visible faces terminates."""
-        # rotation 'y318x-34' previously hung in convex_hull.
-        svg = VCube().image(rotation='y318x-34')
-        self.assertIn('<svg', svg)
-
-
 class PointsToSvgTestCase(unittest.TestCase):
     """Tests for SVG points formatting."""
 
