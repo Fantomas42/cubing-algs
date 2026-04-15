@@ -181,6 +181,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#7F7F7F',
         'hidden_ansi': build_ansi_color('#000', '#fff'),
         'hidden_adjacent_ansi': build_ansi_color('#7F7F7F', '#fff'),
+        'cube_color': '#000000',
     },
     'vibrant': {
         'faces': (
@@ -212,6 +213,7 @@ PALETTES: dict[str, PaletteConfig] = {
             '#64A0C8',
         ),
         'adjacent_background': '#3F3F3F',
+        'cube_color': '#303030',
     },
     'pastel': {
         'faces': (
@@ -223,6 +225,7 @@ PALETTES: dict[str, PaletteConfig] = {
             '#ADD8E6',
         ),
         'adjacent_background': '#666694',
+        'cube_color': '#303030',
     },
     'retro': {
         'faces': (
@@ -234,6 +237,7 @@ PALETTES: dict[str, PaletteConfig] = {
             '#87CEFA',
         ),
         'adjacent_background': '#5555A4',
+        'cube_color': '#302010',
     },
     'minecraft': {
         'faces': (
@@ -258,6 +262,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#000016',
         'hidden_ansi': build_ansi_color('#363636', '#DDDDDD'),
         'hidden_adjacent_ansi': build_ansi_color('#000016', '#DDDDDD'),
+        'cube_color': '#000000',
     },
     'colorblind': {
         'faces': (
@@ -371,6 +376,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'font': '#191919',
         'masked_background': '#282828',
         'hidden_ansi': build_ansi_color('#191919', '#FFA500'),
+        'cube_color': '#000000',
     },
     'galaxy': {
         'faces': (
@@ -395,6 +401,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'font': '#FFFFFF',
         'masked_background': '#282846',
         'hidden_ansi': build_ansi_color('#141428', '#FFE1AA'),
+        'cube_color': '#200050',
     },
     # Dark / Goth
     'vampire': {
@@ -411,6 +418,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#AE6060',
         'hidden_ansi': build_ansi_color('#000000', '#AE0000'),
         'hidden_adjacent_ansi': build_ansi_color('#AE6060', '#AE0000'),
+        'cube_color': '#AA0000',
     },
     'ghoul': {
         'faces': (
@@ -426,6 +434,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#8BD8F3',
         'hidden_ansi': build_ansi_color('#000000', '#26C4EC'),
         'hidden_adjacent_ansi': build_ansi_color('#8BD8F3', '#26C4EC'),
+        'cube_color': '#0000AA',
     },
     'goblin': {
         'faces': (
@@ -441,6 +450,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#2AE464',
         'hidden_ansi': build_ansi_color('#000000', '#00F253'),
         'hidden_adjacent_ansi': build_ansi_color('#2AE464', '#00F253'),
+        'cube_color': '#00AA00',
     },
     'void': {
         'faces': (
@@ -456,6 +466,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#008282',
         'hidden_ansi': build_ansi_color('#000000', '#00C2C2'),
         'hidden_adjacent_ansi': build_ansi_color('#008282', '#00C2C2'),
+        'cube_color': '#030303',
     },
     # Futuristic
     'cyberpunk': {
@@ -480,6 +491,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'font': '#00FFFF',
         'masked_background': '#2D2D2D',
         'hidden_ansi': build_ansi_color('#711C91', '#00FFFF'),
+        'cube_color': '#000000',
     },
     'synthwave': {
         'faces': (
@@ -499,6 +511,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'font': '#FFFFFF',
         'masked_background': '#3C3C64',
         'hidden_ansi': build_ansi_color('#282850', '#FF1493'),
+        'cube_color': '#000000',
     },
     'matrix': {
         'faces': (
@@ -541,6 +554,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#003200',
         'hidden_ansi': build_ansi_color('#003400', '#00FF00'),
         'hidden_adjacent_ansi': build_ansi_color('#003200', '#00FF00'),
+        'cube_color': '#000A00',
     },
     # Nature
     'sunset': {
@@ -583,6 +597,7 @@ PALETTES: dict[str, PaletteConfig] = {
             },
         ),
         'adjacent_background': '#003200',
+        'cube_color': '#3D2412',
     },
     'fire': {
         'faces': (
@@ -621,6 +636,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#000000',
         'hidden_ansi': build_ansi_color('#FFFFFF', '#404040'),
         'hidden_adjacent_ansi': build_ansi_color('#000000', '#404040'),
+        'cube_color': '#000000',
     },
     'black': {
         'faces': (
@@ -636,6 +652,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#C8C8C8',
         'hidden_ansi': build_ansi_color('#000000', '#C0C0C0'),
         'hidden_adjacent_ansi': build_ansi_color('#C8C8C8', '#C0C0C0'),
+        'cube_color': '#FFFFFF',
     },
     'red': {
         'faces': (
@@ -651,6 +668,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#F8C8C8',
         'hidden_ansi': build_ansi_color('#000000', '#BB0000'),
         'hidden_adjacent_ansi': build_ansi_color('#F8C8C8', '#BB0000'),
+        'cube_color': '#000000',
     },
     'green': {
         'faces': (
@@ -666,6 +684,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#C8F8C8',
         'hidden_ansi': build_ansi_color('#000000', '#00BB00'),
         'hidden_adjacent_ansi': build_ansi_color('#C8F8C8', '#00BB00'),
+        'cube_color': '#000000',
     },
     'blue': {
         'faces': (
@@ -681,6 +700,7 @@ PALETTES: dict[str, PaletteConfig] = {
         'adjacent_background': '#C8C8F8',
         'hidden_ansi': build_ansi_color('#000000', '#0000BB'),
         'hidden_adjacent_ansi': build_ansi_color('#C8C8F8', '#0000BB'),
+        'cube_color': '#000000',
     },
 }
 
