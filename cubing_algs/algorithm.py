@@ -547,7 +547,6 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             layout: str = '',
             orientation: CubeOrientation = '',
             palette: str = '',
-            cube_color: str = '',
             image_size: int = 0,
             rotation: str = '',
             distance: float = 0,
@@ -568,7 +567,6 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             orientation: Cube orientation string for reorienting the view
                          before rendering.
             palette: Color palette name for sticker colors.
-            cube_color: Hex color for the cube body shown between stickers.
             image_size: Output image dimension in pixels (width and height).
             rotation: Camera rotation string for the 3D view, composed of
                       axis-angle pairs (e.g., 'y45x-30').
@@ -590,7 +588,6 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             orientation=orientation,
             mask=moved_facelets_mask,
             palette=palette,
-            cube_color=cube_color,
             image_size=image_size,
             rotation=rotation,
             distance=distance,

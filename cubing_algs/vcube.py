@@ -524,7 +524,6 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             orientation: CubeOrientation = '',
             mask: CubeMask = '',
             palette: str = '',
-            cube_color: str = '',
             image_size: int = 0,
             rotation: str = '',
             distance: float = 0.0,
@@ -541,7 +540,6 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
                          before rendering.
             mask: Mask to filter which facelets are displayed.
             palette: Color palette name for sticker colors.
-            cube_color: Hex color for the cube body shown between stickers.
             image_size: Output image dimension in pixels (width and height).
             rotation: Camera rotation string for the 3D view, composed of
                       axis-angle pairs (e.g., 'y45x-30').
@@ -554,7 +552,6 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return ImageDisplay(
             self,
             palette,
-            cube_color,
         ).render(
             mode=mode,
             layout=layout,

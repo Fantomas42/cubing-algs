@@ -1,5 +1,6 @@
 """Tests for cube image rendering."""
 import unittest
+from unittest.mock import patch
 
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.image import ImageDisplay
@@ -313,10 +314,11 @@ class ResolveFaceColorsTestCase(unittest.TestCase):
             palette_name='default',
         ).load_palette()
 
-        self.assertEqual(len(colors), 7)
+        self.assertEqual(len(colors), 8)
         for face in 'URFDLB':
             self.assertIn(face, colors)
         self.assertIn('masked', colors)
+        self.assertIn('cube_color', colors)
 
     def test_unknown_palette_falls_back_to_default(self) -> None:
         """Test unknown palette name falls back to default."""
@@ -358,12 +360,20 @@ class RenderCubeCustomParametersTestCase(unittest.TestCase):
 
     def test_custom_cube_color_with_alpha(self) -> None:
         """Test rendering with semi-transparent cube body."""
-        result = ImageDisplay(VCube(), cube_color='#11111180').render()
+        with patch(
+            'cubing_algs.display.image.DEFAULT_CUBE_COLOR',
+            '#11111180',
+        ):
+            result = ImageDisplay(VCube()).render()
         self.assertIn('rgba(17,17,17,0.50)', result)
 
     def test_opaque_cube_color_no_opacity_attr(self) -> None:
         """Test opaque cube color omits fill-opacity."""
-        result = ImageDisplay(VCube(), cube_color='#222222').render()
+        with patch(
+            'cubing_algs.display.image.DEFAULT_CUBE_COLOR',
+            '#222222',
+        ):
+            result = ImageDisplay(VCube()).render()
         self.assertNotIn('fill-opacity=', result)
 
     def test_custom_distance(self) -> None:
@@ -422,14 +432,6 @@ class BuildTopViewSvgTestCase(unittest.TestCase):
         self.assertTrue(result.startswith('<svg'))
         # 16 U stickers + 4 * 4 adjacent = 32 + 5 body = 37
         self.assertEqual(result.count('<polygon'), 37)
-
-    def test_cube_color_with_alpha(self) -> None:
-        """Test top view with semi-transparent cube body."""
-        result = ImageDisplay(
-            VCube(),
-            cube_color='#11111180',
-        ).render(layout='top')
-        self.assertIn('rgba(17,17,17,0.50)', result)
 
     def test_2x2_cube_with_oll_mode(self) -> None:
         """Test rendering a 2x2 cube with oll mode after algorithm."""

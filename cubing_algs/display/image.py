@@ -10,7 +10,6 @@ from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
-from cubing_algs.display.constants import CUBE_COLOR
 from cubing_algs.display.constants import DEFAULT_PALETTE
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.constants import IMAGE_SIZE
@@ -21,6 +20,7 @@ from cubing_algs.display.constants import STRIP_DEPTH
 from cubing_algs.display.constants import STRIP_TAPER
 from cubing_algs.display.constants import VISIBILITY_EPSILON
 from cubing_algs.display.mode import ModeDisplay
+from cubing_algs.display.palettes import DEFAULT_CUBE_COLOR
 from cubing_algs.display.palettes import DEFAULT_MASKED_BACKGROUND
 from cubing_algs.display.palettes import PALETTES
 from cubing_algs.display.palettes import hex_to_rgba
@@ -78,7 +78,6 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             self,
             cube: 'VCube',
             palette_name: str = '',
-            cube_color: str = '',
     ) -> None:
         """Initialize display handler with cube instance and color settings."""
         self.cube = cube
@@ -86,7 +85,6 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         self.face_size: int = cube.face_size
         self.face_number: int = cube.face_number
 
-        self.cube_color = cube_color or CUBE_COLOR
         self.palette_name = (palette_name or DEFAULT_PALETTE).lower()
 
         self.palette = self.load_palette()
@@ -114,6 +112,10 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         palette['masked'] = config.get(
             'masked_background',
             DEFAULT_MASKED_BACKGROUND,
+        )
+        palette['cube_color'] = config.get(
+            'cube_color',
+            DEFAULT_CUBE_COLOR,
         )
 
         return palette
@@ -218,7 +220,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         scale = (image_size - 2 * margin) / (2 * max_extent)
         cx, cy = image_size / 2, image_size / 2
 
-        cr, cg, cb, ca = hex_to_rgba(self.cube_color)
+        cr, cg, cb, ca = hex_to_rgba(self.palette['cube_color'])
         body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
 
         # Draw each visible face back-to-front: the face body polygon
@@ -271,7 +273,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         total_cells = self.cube_size + 2 * STRIP_DEPTH
         cell = (image_size - 2 * margin) / total_cells
 
-        cr, cg, cb, ca = hex_to_rgba(self.cube_color)
+        cr, cg, cb, ca = hex_to_rgba(self.palette['cube_color'])
         body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
 
         u_origin = margin + STRIP_DEPTH * cell

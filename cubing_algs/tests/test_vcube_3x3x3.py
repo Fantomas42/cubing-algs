@@ -2102,18 +2102,6 @@ class VCubeImageTestCase(unittest.TestCase):
         rotated = cube.image(rotation='y90')
         self.assertNotEqual(default, rotated)
 
-    def test_custom_cube_color(self) -> None:
-        """Test custom cube color."""
-        cube = VCube()
-        result = cube.image(cube_color='#ff0000')
-        self.assertIn('rgba(255,0,0,1.00)', result)
-
-    def test_transparent_cube_color(self) -> None:
-        """Test transparent cube color with alpha."""
-        cube = VCube()
-        result = cube.image(cube_color='#11111180')
-        self.assertIn('rgba(17,17,17,0.50)', result)
-
     def test_2x2_cube(self) -> None:
         """Test rendering a 2x2 cube."""
         cube = VCube(size=2)

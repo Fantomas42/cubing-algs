@@ -17,6 +17,7 @@ class PaletteConfig(TypedDict, total=False):
 
     faces: tuple[str | dict[str, str], ...]
     font: str
+    cube_color: str
     masked_background: str
     adjacent_background: str
     hidden_ansi: str
@@ -685,6 +686,8 @@ PALETTES: dict[str, PaletteConfig] = {
 
 DEFAULT_FONT = '#080808'
 
+DEFAULT_CUBE_COLOR = '#111111'
+
 DEFAULT_MASKED_BACKGROUND = '#444444'
 
 DEFAULT_ADJACENT_BACKGROUND = '#00004E'
@@ -697,6 +700,7 @@ DEFAULT_HIDDEN_ANSI = build_ansi_color('#303030', DEFAULT_HIDDEN_FOREGROUND)
 def build_ansi_palette(  # noqa: PLR0913, PLR0917
         faces: tuple[str | dict[str, str], ...],
         font: str = DEFAULT_FONT,
+        cube_color: str = DEFAULT_CUBE_COLOR,  # noqa: ARG001
         masked_background: str = DEFAULT_MASKED_BACKGROUND,
         adjacent_background: str = DEFAULT_ADJACENT_BACKGROUND,
         hidden_ansi: str = DEFAULT_HIDDEN_ANSI,
@@ -714,6 +718,7 @@ def build_ansi_palette(  # noqa: PLR0913, PLR0917
     Args:
         faces: Tuple of 6 face colors (U/R/F/D/L/B order).
         font: Default font color hex string.
+        cube_color: Cube color.
         masked_background: Background color for masked facelets.
         adjacent_background: Background color for adjacent faces.
         hidden_ansi: ANSI sequence for hidden facelets.

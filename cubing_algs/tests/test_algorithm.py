@@ -1783,12 +1783,6 @@ class AlgorithmImageTestCase(unittest.TestCase):
         rotated = algo.image(rotation='y90')
         self.assertNotEqual(default, rotated)
 
-    def test_custom_cube_color(self) -> None:
-        """Test custom cube color."""
-        algo = Algorithm.parse_moves('R')
-        result = algo.image(cube_color='#ff0000')
-        self.assertIn('rgba(255,0,0,1.00)', result)
-
     def test_custom_distance(self) -> None:
         """Test custom camera distance."""
         algo = Algorithm.parse_moves('R')
