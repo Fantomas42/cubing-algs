@@ -1,13 +1,16 @@
 """Mode handling for visual display."""
 from typing import TYPE_CHECKING
 
-from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeOrientation
-from cubing_algs.annotations import POVMask
+from cubing_algs.annotations import POVDisplayMask
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.display.constants import F2L_ADJACENT_FACES
 from cubing_algs.display.constants import F2L_FACE_ORIENTATIONS
+from cubing_algs.display.masks import L3_MASK
+from cubing_algs.display.masks import OLL_MASK
+from cubing_algs.display.masks import PLL_MASK
 from cubing_algs.masks import CMLL_MASK
 from cubing_algs.masks import CROSS_BOTTOM_MASK
 from cubing_algs.masks import CROSS_TOP_MASK
@@ -17,15 +20,12 @@ from cubing_algs.masks import F2L_ELL_MASK
 from cubing_algs.masks import F2L_LL_MASK
 from cubing_algs.masks import F2L_MASK
 from cubing_algs.masks import FULL_MASK
-from cubing_algs.masks import L3_MASK
 from cubing_algs.masks import LSE_MASK
-from cubing_algs.masks import OLL_MASK
-from cubing_algs.masks import PLL_MASK
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube
 
-MODE_CONFIGS: dict[str, tuple[CubeMask, str, str]] = {
+MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'oll':          (OLL_MASK,          'top', ''),                          # noqa: E241
     'pll':          (PLL_MASK,          'top', ''),                          # noqa: E241
     'll':           (L3_MASK,           'top', ''),                          # noqa: E241
@@ -170,9 +170,12 @@ class ModeDisplay:
         return f'{ top }{ new_front }'
 
     @staticmethod
-    def scale_mask(mask: CubeMask, target_size: int) -> CubeMask:
+    def scale_mask(
+            mask: POVDisplayMask,
+            target_size: int,
+    ) -> POVDisplayMask:
         """
-        Scale a 3x3 CubeMask to a different cube size.
+        Scale a 3x3 mask to a different cube size.
 
         Each of the 9 positions per 3x3 face acts as a template for
         a region in the target NxN face:
@@ -186,7 +189,7 @@ class ModeDisplay:
             target_size: The target cube size (e.g. 2, 4, 5).
 
         Returns:
-            A binary mask string of length ``6 * target_size ** 2``.
+            A display mask string of length ``6 * target_size ** 2``.
 
         """
         n = target_size
@@ -215,33 +218,7 @@ class ModeDisplay:
 
         return ''.join(result)
 
-    def compute_mask(self, cube: 'VCube', mask: CubeMask) -> CubeMask:
-        """
-        Convert mask string to facelets format for display filtering.
-
-        Args:
-            cube: The virtual cube instance to process.
-            mask: Mask string in cubies format or empty string.
-
-        Returns:
-            Facelets format mask string where '1' indicates visible facelets.
-
-        """
-        if not mask:
-            return '1' * len(cube.state)
-
-        from cubing_algs.vcube import VCube  # noqa: PLC0415
-
-        cube_mask = VCube(
-            initial=mask,
-            size=self.cube_size,
-            check=False,
-        )
-        cube_mask.rotate(' '.join(cube.history))
-
-        return cube_mask.state
-
-    def realign_mask(self, mask: POVMask) -> CubeMask:
+    def realign_mask(self, mask: POVDisplayMask) -> CubeDisplayMask:
         """
         Convert a mask from user-POV coordinates to cube-internal coordinates.
 
@@ -253,7 +230,7 @@ class ModeDisplay:
         This method applies the inverse of the cube's orientation to the
         mask so that its '1' bits land on the correct internal face
         positions. The realigned mask can then be replayed through the
-        algorithm's move history by ``compute_mask``.
+        algorithm's move history by ``map_mask``.
 
         Args:
             mask: The mask to realign, in user-POV coordinates.
@@ -280,7 +257,37 @@ class ModeDisplay:
 
         return cube.state
 
-    def resolve_mode(self, mode: str) -> tuple[CubeMask, str, str]:
+    def map_mask(
+            self,
+            cube: 'VCube',
+            mask: CubeDisplayMask,
+    ) -> CubeDisplayMask:
+        """
+        Map raw display mask to facelets position for display filtering.
+
+        Args:
+            cube: The virtual cube instance to process.
+            mask: Mask string in cubies format or empty string.
+
+        Returns:
+            Mask string mapped to final facelets positions.
+
+        """
+        if not mask:
+            return '1' * len(cube.state)
+
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        cube_mask = VCube(
+            initial=mask,
+            size=self.cube_size,
+            check=False,
+        )
+        cube_mask.rotate(' '.join(cube.history))
+
+        return cube_mask.state
+
+    def resolve_mode(self, mode: str) -> tuple[CubeDisplayMask, str, str]:
         """
         Resolve display mode into mask, layout, and orientation settings.
 

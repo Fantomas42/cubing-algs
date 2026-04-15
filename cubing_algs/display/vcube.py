@@ -158,7 +158,7 @@ class VCubeDisplay(ModeDisplay):
 
         faces = self.split_faces(cube.state)
         masked_faces = self.split_faces(
-            self.compute_mask(
+            self.map_mask(
                 cube, mask or mode_mask,
             ),
         )

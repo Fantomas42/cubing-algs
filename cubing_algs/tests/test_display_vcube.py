@@ -290,8 +290,8 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         for face in result:
             self.assertEqual(len(face), 9)
 
-    def test_compute_mask(self) -> None:
-        """Test compute mask."""
+    def test_map_mask(self) -> None:
+        """Test map mask."""
         base_mask = (
             '000000000'
             '111111111'
@@ -302,15 +302,15 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         )
 
         self.assertEqual(
-            self.printer.compute_mask(
+            self.printer.map_mask(
                 self.cube,
                 base_mask,
             ),
             base_mask,
         )
 
-    def test_compute_mask_moves(self) -> None:
-        """Test compute mask moves."""
+    def test_map_mask_moves(self) -> None:
+        """Test map mask moves."""
         self.cube.rotate('R U F')
 
         base_mask = (
@@ -323,7 +323,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         )
 
         self.assertEqual(
-            self.printer.compute_mask(
+            self.printer.map_mask(
                 self.cube,
                 base_mask,
             ),
@@ -335,10 +335,10 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
             '111011011',
         )
 
-    def test_compute_no_mask(self) -> None:
-        """Test compute no mask."""
+    def test_map_no_mask(self) -> None:
+        """Test map no mask."""
         self.assertEqual(
-            self.printer.compute_mask(self.cube, ''),
+            self.printer.map_mask(self.cube, ''),
             54 * '1',
         )
 

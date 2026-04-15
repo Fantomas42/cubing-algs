@@ -54,6 +54,7 @@ type FaceMask = str[Mask]
 
 # Display mask
 type POVDisplayMask = str[DisplayCode]
+type CubeDisplayMask = str[DisplayCode]
 
 # Cube cubies tuple (cp, co, ep, eo) - without spatial orientation
 type CubeCubies = tuple[

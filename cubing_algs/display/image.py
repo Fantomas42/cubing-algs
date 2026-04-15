@@ -166,7 +166,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         else:
             cube = self.cube
 
-        moved_mask = self.compute_mask(
+        mapped_mask = self.map_mask(
             cube,
             mask or mode_mask,
         )
@@ -175,13 +175,13 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             return self.render_top(
                 image_size or IMAGE_SIZE,
                 cube.state,
-                moved_mask,
+                mapped_mask,
             )
 
         return self.render_cube(
             image_size or IMAGE_SIZE,
             cube.state,
-            moved_mask,
+            mapped_mask,
             rotation or ROTATION,
             distance or DISTANCE,
         )
