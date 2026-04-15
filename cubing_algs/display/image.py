@@ -869,6 +869,11 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             Ordered list of hull vertices (clockwise in SVG coordinates).
 
         """
+        # Deduplicate while preserving order; duplicate points would
+        # break the index-based termination check below, since the
+        # algorithm could wrap onto a point with the same coordinates
+        # as the starting point but a different index.
+        points = list(set(points))
         n = len(points)
         if n <= 2:
             return list(points)
