@@ -23,6 +23,7 @@ from cubing_algs.display.mode import ModeDisplay
 from cubing_algs.display.palettes import DEFAULT_CUBE_COLOR
 from cubing_algs.display.palettes import DEFAULT_MASKED_BACKGROUND
 from cubing_algs.display.palettes import PALETTES
+from cubing_algs.display.palettes import hex_to_rgb
 from cubing_algs.display.palettes import hex_to_rgba
 
 if TYPE_CHECKING:
@@ -369,12 +370,18 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             SVG fill color string.
 
         """
-        if mask_char == '0':
-            return self.palette['masked']
-        fill = self.palette[color_key]
         if mask_char == '2':
-            r, g, b, _ = hex_to_rgba(fill)
+            return self.palette['masked']
+
+        if mask_char == '3':
+            return 'rgb(0,0,0,0.0)'
+
+        fill = self.palette[color_key]
+
+        if mask_char == '0':
+            r, g, b = hex_to_rgb(fill)
             return f'rgba({r},{g},{b},0.25)'
+
         return fill
 
     def build_face_stickers(
