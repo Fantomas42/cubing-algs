@@ -181,9 +181,9 @@ def compute_algorithm_mask(
     return mask, cube_mask.state
 
 
-FULL_MASK: CubeMask = '1' * 54
+FULL_MASK: POVMask = '1' * 54
 
-EMPTY_MASK: CubeMask = '0' * 54
+EMPTY_MASK: POVMask = '0' * 54
 
 # Masks are mainly used to highlight or hide facelets when displaying a cube
 # state, making it easy to focus on a specific solving feature (OLL, PLL,
