@@ -22,6 +22,7 @@ class PaletteConfig(TypedDict, total=False):
     adjacent_background: str
     hidden_ansi: str
     hidden_adjacent_ansi: str
+    arrow: str
 
 
 def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
@@ -714,6 +715,8 @@ DEFAULT_ADJACENT_BACKGROUND = '#00004E'
 
 DEFAULT_HIDDEN_FOREGROUND = '#DADADA'
 
+DEFAULT_ARROW_COLOR = '#000000'
+
 DEFAULT_HIDDEN_ANSI = build_ansi_color('#303030', DEFAULT_HIDDEN_FOREGROUND)
 
 
@@ -852,8 +855,24 @@ def load_palette(palette_name: str) -> dict[str, str]:
     if palette_name in LOADED_PALETTES:
         return LOADED_PALETTES[palette_name]
 
+    config = PALETTES[palette_name]
     palette = build_ansi_palette(
-        **PALETTES[palette_name],
+        faces=config['faces'],
+        font=config.get('font', DEFAULT_FONT),
+        cube_color=config.get(
+            'cube_color',
+            DEFAULT_CUBE_COLOR,
+        ),
+        masked_background=config.get(
+            'masked_background',
+            DEFAULT_MASKED_BACKGROUND,
+        ),
+        adjacent_background=config.get(
+            'adjacent_background',
+            DEFAULT_ADJACENT_BACKGROUND,
+        ),
+        hidden_ansi=config.get('hidden_ansi', DEFAULT_HIDDEN_ANSI),
+        hidden_adjacent_ansi=config.get('hidden_adjacent_ansi', ''),
     )
 
     LOADED_PALETTES[palette_name] = palette

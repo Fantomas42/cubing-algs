@@ -3,14 +3,15 @@ import math
 import operator
 import re
 from typing import TYPE_CHECKING
+from typing import cast
 
 from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import FaceFacelets
-from cubing_algs.annotations import FaceMask
 from cubing_algs.annotations import Facelet
+from cubing_algs.annotations import FaceMask
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -24,6 +25,7 @@ from cubing_algs.display.constants import STRIP_DEPTH
 from cubing_algs.display.constants import STRIP_TAPER
 from cubing_algs.display.constants import VISIBILITY_EPSILON
 from cubing_algs.display.mode import ModeDisplay
+from cubing_algs.display.palettes import DEFAULT_ARROW_COLOR
 from cubing_algs.display.palettes import DEFAULT_CUBE_COLOR
 from cubing_algs.display.palettes import DEFAULT_MASKED_BACKGROUND
 from cubing_algs.display.palettes import PALETTES
@@ -39,6 +41,7 @@ FaceData = tuple[Facelet, list[Point2D], int]
 
 ROTATION_PATTERN: RegexPattern = re.compile(r'^([xyz]-?[0-9]+)+$')
 ROTATION_PARTS: RegexPattern = re.compile(r'([xyz])(-?[0-9]+)')
+ARROW_PATTERN: RegexPattern = re.compile(r'^([URFDLB])(\d+)([URFDLB])(\d+)$')
 
 # Adjacent face layout positions relative to the U face in top view
 TOP_VIEW_LAYOUT: dict[Facelet, str] = {
@@ -122,6 +125,10 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             'cube_color',
             DEFAULT_CUBE_COLOR,
         )
+        palette['arrow'] = config.get(
+            'arrow',
+            DEFAULT_ARROW_COLOR,
+        )
 
         return palette
 
@@ -135,6 +142,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             image_size: int = 0,
             rotation: str = '',
             distance: float = 0.0,
+            arrows: str = '',
     ) -> str:
         """
         Generate a SVG visual representation of the cube state.
@@ -155,6 +163,10 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             rotation: Camera rotation string for the 3D view, composed of
                       axis-angle pairs (e.g., 'y45x-30').
             distance: Camera distance from the cube center for the 3D view.
+            arrows: Comma-separated arrow definitions of the form
+                    ``<face><index><face><index>`` (e.g., 'U0U2,R6R2').
+                    Arrows must stay on a single face; invalid entries
+                    raise ``ValueError``.
 
         Returns:
             SVG string of the cube.
@@ -175,11 +187,14 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             mask or mode_mask,
         )
 
+        parsed_arrows = self.parse_arrows(arrows)
+
         if (layout or mode_layout) == 'top':
             return self.render_top(
                 image_size or IMAGE_SIZE,
                 cube.state,
                 mapped_mask,
+                parsed_arrows,
             )
 
         return self.render_cube(
@@ -188,15 +203,19 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             mapped_mask,
             rotation or ROTATION,
             distance or DISTANCE,
+            parsed_arrows,
         )
 
-    def render_cube(  # noqa: PLR0914
+    def render_cube(  # noqa: PLR0913, PLR0914, PLR0917
             self,
             image_size: int,
             state: CubeFacelets,
             mask: CubeDisplayMask,
             rotation: str = '',
             distance: float = 0.0,
+            arrows: (
+                list[tuple[Facelet, int, Facelet, int]] | None
+            ) = None,
     ) -> str:
         """
         Build a 3D SVG cube.
@@ -208,6 +227,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             rotation: Camera rotation string for the 3D view, composed of
                       axis-angle pairs (e.g., 'y45x-30').
             distance: Camera distance from the cube center for the 3D view.
+            arrows: Pre-parsed arrow tuples ``(from_face, from_idx,
+                    to_face, to_idx)``. ``None`` means no arrows.
 
         Returns:
             Complete SVG document as a string.
@@ -250,6 +271,22 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                 f'{ body }\n{ "\n".join(face_stickers) }\n</g>',
             )
 
+        if arrows:
+            visible_by_face: dict[Facelet, list[Point2D]] = {
+                face_name: [
+                    self.point_to_svg_coords(c, cx, cy, scale)
+                    for c in corners_2d
+                ]
+                for face_name, corners_2d, _ in visible
+            }
+            arrow_group = self.build_arrows_group(
+                arrows,
+                visible_by_face,
+                image_size,
+            )
+            if arrow_group:
+                face_groups.append(arrow_group)
+
         return self.assemble_svg(image_size, face_groups)
 
     def render_top(  # noqa: PLR0914
@@ -257,6 +294,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             image_size: int,
             state: CubeFacelets,
             mask: CubeDisplayMask,
+            arrows: (
+                list[tuple[Facelet, int, Facelet, int]] | None
+            ) = None,
     ) -> str:
         """
         Build a flat 2D top-face SVG showing top face and adjacent strips.
@@ -269,6 +309,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             image_size: Output image dimension in pixels (width and height).
             state: Complete cube state string representing all facelets.
             mask: Mask to filter which facelets are displayed.
+            arrows: Pre-parsed arrow tuples. Only U-face arrows render
+                    in the top view; other faces are silently skipped.
 
         Returns:
             Complete SVG document as a string.
@@ -341,6 +383,15 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                 ),
             )
 
+        if arrows:
+            arrow_group = self.build_top_arrows_group(
+                arrows,
+                u_corners,
+                image_size,
+            )
+            if arrow_group:
+                face_groups.append(arrow_group)
+
         return self.assemble_svg(image_size, face_groups)
 
     def build_polygon(
@@ -360,6 +411,64 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             f' points="{self.points_to_svg(corners)}"'
             f' fill="{ fill }"/>'
         )
+
+    @staticmethod
+    def build_arrow_svg(
+            from_point: Point2D,
+            to_point: Point2D,
+            color: str,
+            image_size: int,
+    ) -> str:
+        """
+        Build SVG elements for a single arrow.
+
+        Emits an inline line and a triangular arrowhead at the tip,
+        scaled to the image size. Returns an empty string if the arrow
+        has zero length.
+
+        Args:
+            from_point: Start point of the arrow in SVG coordinates.
+            to_point: End point of the arrow in SVG coordinates.
+            color: Stroke and fill color (hex or CSS color string).
+            image_size: Output image dimension used for scaling.
+
+        Returns:
+            SVG snippet containing a ``<line>`` followed by a ``<polygon>``.
+
+        """
+        fx, fy = from_point
+        tx, ty = to_point
+        length = math.hypot(tx - fx, ty - fy)
+
+        if length == 0:
+            return ''
+
+        head_length = image_size / 25
+        ux, uy = (tx - fx) / length, (ty - fy) / length
+        px, py = -uy, ux
+
+        line_end_x = tx - ux * head_length
+        line_end_y = ty - uy * head_length
+        hw = head_length * 0.3
+
+        return '\n'.join([
+            (
+                f'  <line'
+                f' x1="{fx:.2f}" y1="{fy:.2f}"'
+                f' x2="{line_end_x:.2f}" y2="{line_end_y:.2f}"'
+                f' stroke="{color}"'
+                f' stroke-width="{image_size / 100:.2f}"'
+                f' stroke-linecap="round"/>'
+            ),
+            (
+                f'  <polygon'
+                f' points="'
+                f'{tx:.2f},{ty:.2f} '
+                f'{line_end_x + px * hw:.2f},{line_end_y + py * hw:.2f} '
+                f'{line_end_x - px * hw:.2f},{line_end_y - py * hw:.2f}'
+                f'" fill="{color}"/>'
+            ),
+        ])
 
     def get_sticker_fill(self, color_key: str, mask_char: str) -> str:
         """
@@ -419,6 +528,134 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                 )
 
         return stickers
+
+    def build_arrows_group(
+            self,
+            arrows: list[tuple[Facelet, int, Facelet, int]],
+            face_corners: dict[Facelet, list[Point2D]],
+            image_size: int,
+    ) -> str:
+        """
+        Build the arrows SVG group for the 3D view.
+
+        Arrows whose face is not in ``face_corners`` are silently
+        skipped (typically because they fall on a hidden face at the
+        current rotation).
+
+        Args:
+            arrows: Parsed arrow tuples.
+            face_corners: Visible face name to its 4 projected
+                          SVG corners.
+            image_size: Output image dimension used for arrow scaling.
+
+        Returns:
+            SVG group element string, or empty string if no arrows
+            are visible.
+
+        """
+        color = self.palette['arrow']
+        snippets: list[str] = []
+
+        for arrow in arrows:
+            from_face = arrow[0]
+            from_idx = arrow[1]
+            to_idx = arrow[3]
+
+            corners = face_corners.get(from_face)
+
+            if corners is None:
+                continue
+
+            from_row, from_col = divmod(from_idx, self.cube_size)
+            to_row, to_col = divmod(to_idx, self.cube_size)
+
+            from_center = self.sticker_center(
+                self.build_sticker_polygon_points(
+                    corners, from_row, from_col,
+                ),
+            )
+            to_center = self.sticker_center(
+                self.build_sticker_polygon_points(
+                    corners, to_row, to_col,
+                ),
+            )
+
+            snippet = self.build_arrow_svg(
+                from_center, to_center, color, image_size,
+            )
+            if snippet:
+                snippets.append(snippet)
+
+        if not snippets:
+            return ''
+
+        return (
+            '<g class="arrows">\n'
+            + '\n'.join(snippets)
+            + '\n</g>'
+        )
+
+    def build_top_arrows_group(
+            self,
+            arrows: list[tuple[Facelet, int, Facelet, int]],
+            u_corners: list[Point2D],
+            image_size: int,
+    ) -> str:
+        """
+        Build the arrows SVG group for the top view.
+
+        Only U-face arrows are rendered; arrows targeting other faces
+        are silently skipped.
+
+        Args:
+            arrows: Parsed arrow tuples.
+            u_corners: The 4 corners of the U face in SVG coordinates.
+            image_size: Output image dimension used for arrow scaling.
+
+        Returns:
+            SVG group element string, or empty string if no arrows
+            are rendered.
+
+        """
+        color = self.palette['arrow']
+        snippets: list[str] = []
+
+        for arrow in arrows:
+            from_face = arrow[0]
+            from_idx = arrow[1]
+            to_idx = arrow[3]
+
+            if from_face != 'U':
+                continue
+
+            from_row, from_col = divmod(from_idx, self.cube_size)
+            to_row, to_col = divmod(to_idx, self.cube_size)
+
+            from_center = self.sticker_center(
+                self.build_top_sticker_points(
+                    u_corners, from_row, from_col,
+                ),
+            )
+            to_center = self.sticker_center(
+                self.build_top_sticker_points(
+                    u_corners, to_row, to_col,
+                ),
+            )
+
+            snippet = self.build_arrow_svg(
+                from_center, to_center, color, image_size,
+            )
+            if snippet:
+                snippets.append(snippet)
+
+        if not snippets:
+            return ''
+
+        return (
+            '<g class="arrows">\n'
+            + '\n'.join(snippets)
+            + '\n</g>'
+        )
 
     def build_sticker_polygon(
             self,
@@ -791,6 +1028,21 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         )
 
     @staticmethod
+    def sticker_center(
+            corners: list[Point2D],
+    ) -> Point2D:
+        """
+        Compute the centroid of a sticker polygon.
+
+        Returns:
+            Mean (x, y) of the corner points.
+
+        """
+        sx = sum(p[0] for p in corners) / len(corners)
+        sy = sum(p[1] for p in corners) / len(corners)
+        return (sx, sy)
+
+    @staticmethod
     def points_to_svg(points: list[Point2D]) -> str:
         """
         Convert 2D points to an SVG points attribute string.
@@ -857,6 +1109,62 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             (m.group(1), int(m.group(2)))
             for m in ROTATION_PARTS.finditer(rotation)
         ]
+
+    def parse_arrows(
+            self,
+            arrows: str,
+    ) -> list[tuple[Facelet, int, Facelet, int]]:
+        """
+        Parse an arrows specification string into structured tuples.
+
+        Each arrow entry has the form ``<face><index><face><index>`` where
+        face is one of U/R/F/D/L/B and index is a non-negative integer
+        within the current face size. Entries are comma-separated.
+
+        Args:
+            arrows: Arrows specification string; empty means no arrows.
+
+        Returns:
+            List of ``(from_face, from_idx, to_face, to_idx)`` tuples.
+
+        Raises:
+            ValueError: If any entry is malformed, crosses two different
+                faces, has an out-of-range index, or has identical endpoints.
+
+        """
+        if not arrows:
+            return []
+
+        parsed: list[tuple[Facelet, int, Facelet, int]] = []
+
+        for raw in arrows.split(','):
+            entry = raw.strip()
+            match = ARROW_PATTERN.match(entry)
+
+            if match is None:
+                msg = f'Invalid arrow definition: {entry!r}'
+                raise ValueError(msg)
+
+            from_face = cast('Facelet', match.group(1))
+            from_idx = int(match.group(2))
+            to_face = cast('Facelet', match.group(3))
+            to_idx = int(match.group(4))
+
+            if from_face != to_face:
+                msg = f'Cross-face arrows are not supported: {entry!r}'
+                raise ValueError(msg)
+
+            if from_idx >= self.face_size or to_idx >= self.face_size:
+                msg = f'Arrow index out of range for cube size: {entry!r}'
+                raise ValueError(msg)
+
+            if from_idx == to_idx:
+                msg = f'Arrow endpoints are identical: {entry!r}'
+                raise ValueError(msg)
+
+            parsed.append((from_face, from_idx, to_face, to_idx))
+
+        return parsed
 
     @staticmethod
     def assemble_svg(

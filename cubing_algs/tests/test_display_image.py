@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.image import ImageDisplay
+from cubing_algs.display.palettes import PALETTES
 from cubing_algs.vcube import VCube
 
 
@@ -308,17 +309,18 @@ class ResolveFaceColorsTestCase(unittest.TestCase):
     """Tests for palette resolution."""
 
     def test_default_palette_has_all_faces(self) -> None:
-        """Test default palette returns all 6 face colors."""
+        """Test default palette returns all 6 face colors plus metadata keys."""
         colors = ImageDisplay(
             VCube(),
             palette_name='default',
         ).load_palette()
 
-        self.assertEqual(len(colors), 8)
+        self.assertEqual(len(colors), 9)
         for face in 'URFDLB':
             self.assertIn(face, colors)
         self.assertIn('masked', colors)
         self.assertIn('cube_color', colors)
+        self.assertIn('arrow', colors)
 
     def test_unknown_palette_falls_back_to_default(self) -> None:
         """Test unknown palette name falls back to default."""
@@ -389,6 +391,100 @@ class RenderCubeCustomParametersTestCase(unittest.TestCase):
         self.assertTrue(result.startswith('<svg'))
 
 
+class ArrowPaletteTestCase(unittest.TestCase):
+    """Tests for arrow color in the image palette."""
+
+    def test_default_arrow_color(self) -> None:
+        """Default palette exposes the default arrow color."""
+        display = ImageDisplay(VCube())
+        self.assertEqual(display.palette['arrow'], '#000000')
+
+    def test_custom_arrow_color(self) -> None:
+        """Palette with arrow override exposes the custom color."""
+        PALETTES['test_arrow'] = {
+            'faces': (
+                '#FFFFFF', '#FF0000', '#00FF00',
+                '#FFFF00', '#FF7F00', '#0000FF',
+            ),
+            'arrow': '#FF00FF',
+        }
+        try:
+            display = ImageDisplay(VCube(), palette_name='test_arrow')
+            self.assertEqual(display.palette['arrow'], '#FF00FF')
+        finally:
+            del PALETTES['test_arrow']
+
+
+class ParseArrowsTestCase(unittest.TestCase):
+    """Tests for arrows specification parsing."""
+
+    def setUp(self) -> None:
+        """Set up display instance for each test."""
+        self.display = ImageDisplay(VCube())
+
+    def test_empty_string_returns_empty_list(self) -> None:
+        """Empty input returns an empty list."""
+        self.assertEqual(self.display.parse_arrows(''), [])
+
+    def test_single_arrow(self) -> None:
+        """Parse a single arrow definition."""
+        result = self.display.parse_arrows('U0U2')
+        self.assertEqual(result, [('U', 0, 'U', 2)])
+
+    def test_multiple_arrows(self) -> None:
+        """Parse multiple comma-separated arrows."""
+        result = self.display.parse_arrows('U0U2,U2U8,R6R2')
+        self.assertEqual(
+            result,
+            [
+                ('U', 0, 'U', 2),
+                ('U', 2, 'U', 8),
+                ('R', 6, 'R', 2),
+            ],
+        )
+
+    def test_whitespace_tolerance(self) -> None:
+        """Whitespace between entries is stripped."""
+        result = self.display.parse_arrows(' U0U2 , U2U8 ')
+        self.assertEqual(
+            result,
+            [('U', 0, 'U', 2), ('U', 2, 'U', 8)],
+        )
+
+    def test_malformed_raises(self) -> None:
+        """Malformed syntax raises ValueError."""
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0')
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('garbage')
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('X0Y1')
+
+    def test_cross_face_raises(self) -> None:
+        """Arrow across two different faces raises ValueError."""
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0R0')
+
+    def test_out_of_range_raises(self) -> None:
+        """Facelet index beyond face size raises ValueError."""
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U9U0')
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0U9')
+
+    def test_identical_endpoints_raises(self) -> None:
+        """Arrow from a sticker to itself raises ValueError."""
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0U0')
+
+    def test_empty_entry_raises(self) -> None:
+        """Trailing or double commas produce empty entries that raise."""
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0U2,,U2U8')
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0U2,')
+
+
 class BuildTopViewSvgTestCase(unittest.TestCase):
     """Tests for flat top-face SVG rendering."""
 
@@ -439,3 +535,172 @@ class BuildTopViewSvgTestCase(unittest.TestCase):
         cube.rotate("F2 U' R U' R' U F2 U R U R'")
         result = ImageDisplay(cube).render(mode='oll')
         self.assertTrue(result.startswith('<svg'))
+
+
+class StickerCenterTestCase(unittest.TestCase):
+    """Tests for sticker center computation."""
+
+    def test_center_of_unit_square(self) -> None:
+        """Center of a unit square is (0.5, 0.5)."""
+        corners = [
+            (0.0, 0.0),
+            (1.0, 0.0),
+            (1.0, 1.0),
+            (0.0, 1.0),
+        ]
+        result = ImageDisplay.sticker_center(corners)
+        self.assertAlmostEqual(result[0], 0.5)
+        self.assertAlmostEqual(result[1], 0.5)
+
+    def test_center_of_offset_rect(self) -> None:
+        """Center of a rectangle is the mean of its corners."""
+        corners = [
+            (2.0, 3.0),
+            (6.0, 3.0),
+            (6.0, 7.0),
+            (2.0, 7.0),
+        ]
+        result = ImageDisplay.sticker_center(corners)
+        self.assertAlmostEqual(result[0], 4.0)
+        self.assertAlmostEqual(result[1], 5.0)
+
+
+class BuildArrowSvgTestCase(unittest.TestCase):
+    """Tests for individual arrow SVG generation."""
+
+    def test_contains_line_and_polygon(self) -> None:
+        """Arrow SVG contains both a line and a polygon element."""
+        svg = ImageDisplay.build_arrow_svg(
+            (10.0, 10.0),
+            (50.0, 10.0),
+            '#FF0000',
+            200,
+        )
+        self.assertIn('<line', svg)
+        self.assertIn('<polygon', svg)
+
+    def test_uses_provided_color(self) -> None:
+        """Arrow SVG uses the given color for stroke and fill."""
+        svg = ImageDisplay.build_arrow_svg(
+            (10.0, 10.0),
+            (50.0, 10.0),
+            '#FF00FF',
+            200,
+        )
+        self.assertIn('stroke="#FF00FF"', svg)
+        self.assertIn('fill="#FF00FF"', svg)
+
+    def test_scales_with_image_size(self) -> None:
+        """Stroke width scales with the image size."""
+        small = ImageDisplay.build_arrow_svg(
+            (10.0, 10.0), (50.0, 10.0), '#000000', 100,
+        )
+        large = ImageDisplay.build_arrow_svg(
+            (10.0, 10.0), (50.0, 10.0), '#000000', 400,
+        )
+        self.assertIn('stroke-width="1', small)
+        self.assertIn('stroke-width="4', large)
+
+    def test_zero_length_arrow_returns_empty(self) -> None:
+        """Arrow of zero length returns empty string (no-op)."""
+        svg = ImageDisplay.build_arrow_svg(
+            (10.0, 10.0), (10.0, 10.0), '#000000', 200,
+        )
+        self.assertEqual(svg, '')
+
+
+class RenderCubeArrowsTestCase(unittest.TestCase):
+    """Tests for arrow rendering in the 3D cube view."""
+
+    def test_no_arrows_when_empty(self) -> None:
+        """Without arrows, SVG has no arrows group."""
+        svg = ImageDisplay(VCube()).render()
+        self.assertNotIn('class="arrows"', svg)
+
+    def test_with_arrows_creates_group(self) -> None:
+        """Arrow spec produces an arrows group in the SVG."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2')
+        self.assertIn('class="arrows"', svg)
+
+    def test_arrow_uses_palette_color(self) -> None:
+        """Arrow stroke uses the palette arrow color."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2')
+        self.assertIn('stroke="#000000"', svg)
+
+    def test_hidden_face_arrow_silently_skipped(self) -> None:
+        """Arrow on a face not visible at the default rotation is skipped."""
+        # Default rotation y45x-34 shows U, R, F (not D, L, B)
+        svg = ImageDisplay(VCube()).render(arrows='D0D2')
+        self.assertNotIn('class="arrows"', svg)
+
+    def test_multiple_arrows_rendered(self) -> None:
+        """Multiple visible arrows all appear."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2,U2U8,U8U0')
+        start = svg.find('class="arrows"')
+        self.assertNotEqual(start, -1)
+        group_end = svg.find('</g>', start)
+        group_svg = svg[start:group_end]
+        self.assertEqual(group_svg.count('<line'), 3)
+
+    def test_invalid_arrows_raises(self) -> None:
+        """Malformed arrows spec raises ValueError via render."""
+        with self.assertRaises(ValueError):
+            ImageDisplay(VCube()).render(arrows='garbage')
+
+
+class RenderTopArrowsTestCase(unittest.TestCase):
+    """Tests for arrow rendering in the top view."""
+
+    def test_u_arrow_renders(self) -> None:
+        """U-face arrow is rendered in the top view."""
+        svg = ImageDisplay(VCube()).render(
+            layout='top', arrows='U0U8',
+        )
+        self.assertIn('class="arrows"', svg)
+        start = svg.find('class="arrows"')
+        group_end = svg.find('</g>', start)
+        group_svg = svg[start:group_end]
+        self.assertIn('<line', group_svg)
+
+    def test_non_u_arrow_skipped(self) -> None:
+        """Non-U arrows are silently skipped in the top view."""
+        svg = ImageDisplay(VCube()).render(
+            layout='top', arrows='R0R2',
+        )
+        self.assertNotIn('class="arrows"', svg)
+
+    def test_mixed_arrows_keep_only_u(self) -> None:
+        """When mixed, only U arrows render in top view."""
+        svg = ImageDisplay(VCube()).render(
+            layout='top', arrows='U0U2,R0R2',
+        )
+        start = svg.find('class="arrows"')
+        self.assertNotEqual(start, -1)
+        group_end = svg.find('</g>', start)
+        group_svg = svg[start:group_end]
+        self.assertEqual(group_svg.count('<line'), 1)
+
+    def test_top_default_no_arrows(self) -> None:
+        """Top view without arrows has no arrows group."""
+        svg = ImageDisplay(VCube()).render(layout='top')
+        self.assertNotIn('class="arrows"', svg)
+
+
+class ArrowsIntegrationTestCase(unittest.TestCase):
+    """End-to-end integration tests for arrows."""
+
+    def test_scrambled_cube_with_arrows_is_valid_svg(self) -> None:
+        """Arrows on a scrambled cube produce a valid SVG document."""
+        cube = VCube()
+        cube.rotate("R U R' U'")
+        svg = ImageDisplay(cube).render(arrows='U0U2,U2U8,U8U0')
+        self.assertTrue(svg.startswith('<svg'))
+        self.assertTrue(svg.endswith('</svg>'))
+        self.assertIn('class="arrows"', svg)
+
+    def test_arrows_group_appears_after_face_groups(self) -> None:
+        """Arrows group is emitted after face groups (rendered on top)."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2')
+        last_face = svg.rfind('class="face-')
+        arrows_pos = svg.find('class="arrows"')
+        self.assertGreater(arrows_pos, last_face)

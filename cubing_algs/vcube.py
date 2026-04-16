@@ -527,6 +527,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             image_size: int = 0,
             rotation: str = '',
             distance: float = 0.0,
+            arrows: str = '',
     ) -> str:
         """
         Render the cube as an SVG image.
@@ -544,6 +545,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             rotation: Camera rotation string for the 3D view, composed of
                       axis-angle pairs (e.g., 'y45x-30').
             distance: Camera distance from the cube center for the 3D view.
+            arrows: Comma-separated arrow definitions.
 
         Returns:
             SVG string of the cube.
@@ -560,6 +562,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             image_size=image_size,
             rotation=rotation,
             distance=distance,
+            arrows=arrows,
         )
 
     def get_face(self, face: str) -> FaceFacelets:
