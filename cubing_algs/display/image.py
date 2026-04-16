@@ -10,6 +10,7 @@ from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import FaceFacelets
 from cubing_algs.annotations import FaceMask
+from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -34,13 +35,13 @@ if TYPE_CHECKING:
 
 Point3D = tuple[float, float, float]
 Point2D = tuple[float, float]
-FaceData = tuple[str, list[Point2D], int]
+FaceData = tuple[Facelet, list[Point2D], int]
 
 ROTATION_PATTERN: RegexPattern = re.compile(r'^([xyz]-?[0-9]+)+$')
 ROTATION_PARTS: RegexPattern = re.compile(r'([xyz])(-?[0-9]+)')
 
 # Adjacent face layout positions relative to the U face in top view
-TOP_VIEW_LAYOUT: dict[str, str] = {
+TOP_VIEW_LAYOUT: dict[Facelet, str] = {
     'B': 'top',
     'L': 'left',
     'R': 'right',
@@ -60,7 +61,7 @@ CUBE_VERTICES: list[Point3D] = [
 ]
 
 # Face definitions: (name, normal, vertex_indices, face_state_index)
-FACE_DEFS: list[tuple[str, Point3D, list[int], int]] = [
+FACE_DEFS: list[tuple[Facelet, Point3D, list[int], int]] = [
     ('U', (0, 1, 0), [3, 2, 6, 7], 0),
     ('D', (0, -1, 0), [4, 5, 1, 0], 3),
     ('R', (1, 0, 0), [6, 2, 1, 5], 1),
@@ -653,7 +654,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             self.rotate_point(v, rotations) for v in CUBE_VERTICES
         ]
 
-        visible: list[tuple[str, list[Point2D], int, float]] = []
+        visible: list[tuple[Facelet, list[Point2D], int, float]] = []
 
         for name, normal, indices, state_idx in FACE_DEFS:
             rn = self.rotate_point(normal, rotations)
