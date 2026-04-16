@@ -429,7 +429,7 @@ class ParseArrowsTestCase(unittest.TestCase):
     def test_single_arrow(self) -> None:
         """Parse a single arrow definition."""
         result = self.display.parse_arrows('U0U2')
-        self.assertEqual(result, [('U', 0, 'U', 2)])
+        self.assertEqual(result, [('U', 0, 'U', 2, '')])
 
     def test_multiple_arrows(self) -> None:
         """Parse multiple comma-separated arrows."""
@@ -437,9 +437,9 @@ class ParseArrowsTestCase(unittest.TestCase):
         self.assertEqual(
             result,
             [
-                ('U', 0, 'U', 2),
-                ('U', 2, 'U', 8),
-                ('R', 6, 'R', 2),
+                ('U', 0, 'U', 2, ''),
+                ('U', 2, 'U', 8, ''),
+                ('R', 6, 'R', 2, ''),
             ],
         )
 
@@ -448,8 +448,39 @@ class ParseArrowsTestCase(unittest.TestCase):
         result = self.display.parse_arrows(' U0U2 , U2U8 ')
         self.assertEqual(
             result,
-            [('U', 0, 'U', 2), ('U', 2, 'U', 8)],
+            [('U', 0, 'U', 2, ''), ('U', 2, 'U', 8, '')],
         )
+
+    def test_named_color_suffix(self) -> None:
+        """Arrow with named-color suffix records the color."""
+        result = self.display.parse_arrows('U0U2-red')
+        self.assertEqual(result, [('U', 0, 'U', 2, 'red')])
+
+    def test_hex_color_suffix(self) -> None:
+        """Arrow with hex-color suffix records the color."""
+        result = self.display.parse_arrows('U0U2-#ff0000')
+        self.assertEqual(result, [('U', 0, 'U', 2, '#ff0000')])
+
+    def test_mixed_color_suffixes(self) -> None:
+        """Arrows with and without color coexist in one spec."""
+        result = self.display.parse_arrows('U0U2-red,U2U8,U8U0-#00ff00')
+        self.assertEqual(
+            result,
+            [
+                ('U', 0, 'U', 2, 'red'),
+                ('U', 2, 'U', 8, ''),
+                ('U', 8, 'U', 0, '#00ff00'),
+            ],
+        )
+
+    def test_invalid_color_raises(self) -> None:
+        """A malformed color suffix raises ValueError."""
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0U2-')
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0U2-#zz')
+        with self.assertRaises(ValueError):
+            self.display.parse_arrows('U0U2-red!')
 
     def test_malformed_raises(self) -> None:
         """Malformed syntax raises ValueError."""
@@ -627,6 +658,26 @@ class RenderCubeArrowsTestCase(unittest.TestCase):
         svg = ImageDisplay(VCube()).render(arrows='U0U2')
         self.assertIn('stroke="#000000"', svg)
 
+    def test_arrow_uses_custom_named_color(self) -> None:
+        """Arrow with named-color suffix overrides the palette default."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2-red')
+        self.assertIn('stroke="red"', svg)
+        self.assertIn('fill="red"', svg)
+
+    def test_arrow_uses_custom_hex_color(self) -> None:
+        """Arrow with hex-color suffix overrides the palette default."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2-#ff8800')
+        self.assertIn('stroke="#ff8800"', svg)
+        self.assertIn('fill="#ff8800"', svg)
+
+    def test_mixed_arrow_colors_render_independently(self) -> None:
+        """Arrows in one render use their own colors when set."""
+        svg = ImageDisplay(VCube()).render(
+            arrows='U0U2-red,U2U8',
+        )
+        self.assertIn('stroke="red"', svg)
+        self.assertIn('stroke="#000000"', svg)
+
     def test_hidden_face_arrow_silently_skipped(self) -> None:
         """Arrow on a face not visible at the default rotation is skipped."""
         # Default rotation y45x-34 shows U, R, F (not D, L, B)
@@ -684,6 +735,13 @@ class RenderTopArrowsTestCase(unittest.TestCase):
         """Top view without arrows has no arrows group."""
         svg = ImageDisplay(VCube()).render(layout='top')
         self.assertNotIn('class="arrows"', svg)
+
+    def test_top_arrow_uses_custom_color(self) -> None:
+        """Top-view U arrow with color suffix uses that color."""
+        svg = ImageDisplay(VCube()).render(
+            layout='top', arrows='U0U8-#abcdef',
+        )
+        self.assertIn('stroke="#abcdef"', svg)
 
 
 class ArrowsIntegrationTestCase(unittest.TestCase):

@@ -41,7 +41,10 @@ FaceData = tuple[Facelet, list[Point2D], int]
 
 ROTATION_PATTERN: RegexPattern = re.compile(r'^([xyz]-?[0-9]+)+$')
 ROTATION_PARTS: RegexPattern = re.compile(r'([xyz])(-?[0-9]+)')
-ARROW_PATTERN: RegexPattern = re.compile(r'^([URFDLB])(\d+)([URFDLB])(\d+)$')
+ARROW_PATTERN: RegexPattern = re.compile(
+    r'^([URFDLB])(\d+)([URFDLB])(\d+)'
+    r'(?:-(#[0-9a-fA-F]+|[a-zA-Z]+))?$',
+)
 
 # Adjacent face layout positions relative to the U face in top view
 TOP_VIEW_LAYOUT: dict[Facelet, str] = {
@@ -164,7 +167,10 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                       axis-angle pairs (e.g., 'y45x-30').
             distance: Camera distance from the cube center for the 3D view.
             arrows: Comma-separated arrow definitions of the form
-                    ``<face><index><face><index>`` (e.g., 'U0U2,R6R2').
+                    ``<face><index><face><index>`` with an optional
+                    ``-<color>`` suffix (e.g., 'U0U2,R6R2-red,U2U8-#ff0000').
+                    The color may be a CSS named color or a hex value;
+                    when omitted, the palette arrow color is used.
                     Arrows must stay on a single face; invalid entries
                     raise ``ValueError``.
 
@@ -214,7 +220,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             rotation: str = '',
             distance: float = 0.0,
             arrows: (
-                list[tuple[Facelet, int, Facelet, int]] | None
+                list[tuple[Facelet, int, Facelet, int, str]] | None
             ) = None,
     ) -> str:
         """
@@ -228,7 +234,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                       axis-angle pairs (e.g., 'y45x-30').
             distance: Camera distance from the cube center for the 3D view.
             arrows: Pre-parsed arrow tuples ``(from_face, from_idx,
-                    to_face, to_idx)``. ``None`` means no arrows.
+                    to_face, to_idx, color)``. An empty ``color`` falls
+                    back to the palette arrow color. ``None`` means no
+                    arrows.
 
         Returns:
             Complete SVG document as a string.
@@ -295,7 +303,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             state: CubeFacelets,
             mask: CubeDisplayMask,
             arrows: (
-                list[tuple[Facelet, int, Facelet, int]] | None
+                list[tuple[Facelet, int, Facelet, int, str]] | None
             ) = None,
     ) -> str:
         """
@@ -531,7 +539,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
     def build_arrows_group(
             self,
-            arrows: list[tuple[Facelet, int, Facelet, int]],
+            arrows: list[tuple[Facelet, int, Facelet, int, str]],
             face_corners: dict[Facelet, list[Point2D]],
             image_size: int,
     ) -> str:
@@ -543,7 +551,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         current rotation).
 
         Args:
-            arrows: Parsed arrow tuples.
+            arrows: Parsed arrow tuples. The 5th element is the per-arrow
+                    color; an empty string falls back to the palette
+                    arrow color.
             face_corners: Visible face name to its 4 projected
                           SVG corners.
             image_size: Output image dimension used for arrow scaling.
@@ -553,13 +563,14 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             are visible.
 
         """
-        color = self.palette['arrow']
+        default_color = self.palette['arrow']
         snippets: list[str] = []
 
         for arrow in arrows:
             from_face = arrow[0]
             from_idx = arrow[1]
             to_idx = arrow[3]
+            color = arrow[4] or default_color
 
             corners = face_corners.get(from_face)
 
@@ -597,7 +608,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
     def build_top_arrows_group(
             self,
-            arrows: list[tuple[Facelet, int, Facelet, int]],
+            arrows: list[tuple[Facelet, int, Facelet, int, str]],
             u_corners: list[Point2D],
             image_size: int,
     ) -> str:
@@ -608,7 +619,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         are silently skipped.
 
         Args:
-            arrows: Parsed arrow tuples.
+            arrows: Parsed arrow tuples. The 5th element is the per-arrow
+                    color; an empty string falls back to the palette
+                    arrow color.
             u_corners: The 4 corners of the U face in SVG coordinates.
             image_size: Output image dimension used for arrow scaling.
 
@@ -617,13 +630,14 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             are rendered.
 
         """
-        color = self.palette['arrow']
+        default_color = self.palette['arrow']
         snippets: list[str] = []
 
         for arrow in arrows:
             from_face = arrow[0]
             from_idx = arrow[1]
             to_idx = arrow[3]
+            color = arrow[4] or default_color
 
             if from_face != 'U':
                 continue
@@ -1113,19 +1127,23 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
     def parse_arrows(
             self,
             arrows: str,
-    ) -> list[tuple[Facelet, int, Facelet, int]]:
+    ) -> list[tuple[Facelet, int, Facelet, int, str]]:
         """
         Parse an arrows specification string into structured tuples.
 
-        Each arrow entry has the form ``<face><index><face><index>`` where
-        face is one of U/R/F/D/L/B and index is a non-negative integer
-        within the current face size. Entries are comma-separated.
+        Each arrow entry has the form ``<face><index><face><index>`` with
+        an optional ``-<color>`` suffix, where face is one of U/R/F/D/L/B,
+        index is a non-negative integer within the current face size, and
+        color is either a CSS named color (e.g. ``red``) or a hex value
+        (e.g. ``#ff0000``). Entries are comma-separated.
 
         Args:
             arrows: Arrows specification string; empty means no arrows.
 
         Returns:
-            List of ``(from_face, from_idx, to_face, to_idx)`` tuples.
+            List of ``(from_face, from_idx, to_face, to_idx, color)``
+            tuples. ``color`` is an empty string when no color was given,
+            in which case the palette default is used at render time.
 
         Raises:
             ValueError: If any entry is malformed, crosses two different
@@ -1135,7 +1153,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         if not arrows:
             return []
 
-        parsed: list[tuple[Facelet, int, Facelet, int]] = []
+        parsed: list[tuple[Facelet, int, Facelet, int, str]] = []
 
         for raw in arrows.split(','):
             entry = raw.strip()
@@ -1149,6 +1167,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             from_idx = int(match.group(2))
             to_face = cast('Facelet', match.group(3))
             to_idx = int(match.group(4))
+            color = match.group(5) or ''
 
             if from_face != to_face:
                 msg = f'Cross-face arrows are not supported: {entry!r}'
@@ -1162,7 +1181,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                 msg = f'Arrow endpoints are identical: {entry!r}'
                 raise ValueError(msg)
 
-            parsed.append((from_face, from_idx, to_face, to_idx))
+            parsed.append((from_face, from_idx, to_face, to_idx, color))
 
         return parsed
 
