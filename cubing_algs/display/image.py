@@ -4,9 +4,12 @@ import operator
 import re
 from typing import TYPE_CHECKING
 
+from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
+from cubing_algs.annotations import FaceFacelets
+from cubing_algs.annotations import FaceMask
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
@@ -190,7 +193,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             self,
             image_size: int,
             state: CubeFacelets,
-            mask: CubeMask,
+            mask: CubeDisplayMask,
             rotation: str = '',
             distance: float = 0.0,
     ) -> str:
@@ -252,7 +255,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             self,
             image_size: int,
             state: CubeFacelets,
-            mask: CubeMask,
+            mask: CubeDisplayMask,
     ) -> str:
         """
         Build a flat 2D top-face SVG showing top face and adjacent strips.
@@ -387,8 +390,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
     def build_face_stickers(
             self,
             svg_corners: list[Point2D],
-            facelets: str,
-            mask: str,
+            facelets: FaceFacelets,
+            mask: FaceMask,
     ) -> list[str]:
         """
         Build sticker polygon elements for one face.
@@ -537,8 +540,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
     def build_strip_group(  # noqa: PLR0913, PLR0917
             self,
             face_name: str,
-            top_row: str,
-            mask_row: str,
+            top_row: FaceFacelets,
+            mask_row: FaceMask,
             layout: str,
             corners: list[Point2D],
             body_fill: str,
