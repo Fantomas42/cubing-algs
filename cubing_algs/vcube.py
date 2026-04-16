@@ -3,8 +3,8 @@ from functools import cached_property
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CubeCubiesOriented
+from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
-from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import FaceFacelets
 from cubing_algs.annotations import FaceletPieceType
@@ -452,7 +452,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             mode: str = '',
             layout: str = '',
             orientation: CubeOrientation = '',
-            mask: CubeMask = '',
+            mask: CubeDisplayMask = '',
             palette: str = '',
             effect: str = '',
             facelet: str = '',
@@ -495,7 +495,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             mode: str = '',
             layout: str = '',
             orientation: CubeOrientation = '',
-            mask: CubeMask = '',
+            mask: CubeDisplayMask = '',
             palette: str = '',
             effect: str = '',
             facelet: str = '',
@@ -522,7 +522,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             mode: str = '',
             layout: str = '',
             orientation: CubeOrientation = '',
-            mask: CubeMask = '',
+            mask: CubeDisplayMask = '',
             palette: str = '',
             image_size: int = 0,
             rotation: str = '',

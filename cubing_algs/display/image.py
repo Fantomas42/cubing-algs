@@ -7,7 +7,6 @@ from typing import cast
 
 from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
-from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import FaceFacelets
 from cubing_algs.annotations import Facelet
@@ -141,7 +140,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             mode: str = '',
             layout: str = '',
             orientation: CubeOrientation = '',
-            mask: CubeMask = '',
+            mask: CubeDisplayMask = '',
             image_size: int = 0,
             rotation: str = '',
             distance: float = 0.0,

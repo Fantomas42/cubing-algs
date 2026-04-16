@@ -3,8 +3,8 @@ import os
 from typing import TYPE_CHECKING
 from typing import cast
 
+from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
-from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import FaceFacelets
 from cubing_algs.annotations import FaceMask
@@ -83,7 +83,7 @@ class VCubeDisplay(ModeDisplay):
 
     def split_faces(
             self,
-            state: CubeFacelets | CubeMask,
+            state: CubeFacelets | CubeDisplayMask,
     ) -> list[FaceFacelets | FaceMask]:
         """
         Split cube state string into individual face strings.
@@ -106,7 +106,7 @@ class VCubeDisplay(ModeDisplay):
             mode: str = '',
             layout: str = '',
             orientation: CubeOrientation = '',
-            mask: CubeMask = '',
+            mask: CubeDisplayMask = '',
     ) -> str:
         """
         Generate formatted visual representation of the cube state.
