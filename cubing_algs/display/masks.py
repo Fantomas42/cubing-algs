@@ -3,7 +3,7 @@ from cubing_algs.annotations import POVDisplayMask
 
 # 0 Dimmed (transparent)
 # 1 Visible
-# 2 Masked
+# 2 Oriented (masked)
 # 3 Removed
 
 OLL_MASK: POVDisplayMask = (
