@@ -45,6 +45,16 @@ ARROW_PATTERN: RegexPattern = re.compile(
     r'(?:-(#[0-9a-fA-F]+|[a-zA-Z]+))?$',
 )
 
+# Arrow geometry as fractions of the output image size.
+ARROW_STROKE_RATIO = 1 / 40
+ARROW_HEAD_LENGTH_RATIO = 1 / 15
+# Arrow head width as fraction of head length (aspect ratio of the head).
+ARROW_HEAD_WIDTH_RATIO = 1.0
+# Distance pulled back from the sticker center where the tail starts,
+# so the tail stays clear of a head pointing at the same sticker
+# (e.g. opposing arrows like U0U6 and U6U0).
+ARROW_TAIL_OFFSET_RATIO = 1 / 15
+
 # Adjacent face layout positions relative to the U face in top view
 TOP_VIEW_LAYOUT: dict[Facelet, str] = {
     'B': 'top',
@@ -425,22 +435,29 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             to_point: Point2D,
             color: str,
             image_size: int,
+            marker_id: str,
     ) -> str:
         """
-        Build SVG elements for a single arrow.
+        Build an SVG ``<line>`` for a single arrow.
 
-        Emits an inline line and a triangular arrowhead at the tip,
-        scaled to the image size. Returns an empty string if the arrow
-        has zero length.
+        The arrow head itself is drawn by the SVG renderer via the
+        ``marker-end`` reference to a shared ``<marker>`` definition,
+        so a single line element is enough per arrow.
+
+        Returns an empty string if the arrow has zero length.
 
         Args:
             from_point: Start point of the arrow in SVG coordinates.
             to_point: End point of the arrow in SVG coordinates.
-            color: Stroke and fill color (hex or CSS color string).
-            image_size: Output image dimension used for scaling.
+            color: Stroke color (hex or CSS color string). Also drives
+                   the referenced marker's fill.
+            image_size: Output image dimension used for stroke scaling.
+            marker_id: ID of the ``<marker>`` element that draws the
+                       arrow head; must match a marker defined in the
+                       enclosing SVG.
 
         Returns:
-            SVG snippet containing a ``<line>`` followed by a ``<polygon>``.
+            SVG ``<line>`` element string with a ``marker-end`` reference.
 
         """
         fx, fy = from_point
@@ -450,32 +467,77 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         if length == 0:
             return ''
 
-        head_length = image_size / 25
+        # Shorten the line so it ends at the back of the arrow head,
+        # not at its tip. Paired with a ``refX=0`` marker, the triangle
+        # then extends forward from the line's end and its wide back
+        # fully covers the stroke, avoiding visible bleed past the
+        # narrowing tip. For arrows shorter than the head, we keep a
+        # tiny segment so the marker still has a direction to orient to.
+        head_length = image_size * ARROW_HEAD_LENGTH_RATIO
+        end_shorten = min(head_length, length * 0.99)
+        start_shorten = max(
+            0.0,
+            min(image_size * ARROW_TAIL_OFFSET_RATIO,
+                length - end_shorten - 0.01),
+        )
+
         ux, uy = (tx - fx) / length, (ty - fy) / length
-        px, py = -uy, ux
+        line_start_x = fx + start_shorten * ux
+        line_start_y = fy + start_shorten * uy
+        line_end_x = tx - end_shorten * ux
+        line_end_y = ty - end_shorten * uy
 
-        line_end_x = tx - ux * head_length
-        line_end_y = ty - uy * head_length
-        hw = head_length * 0.3
+        stroke_width = image_size * ARROW_STROKE_RATIO
 
-        return '\n'.join([
-            (
-                f'  <line'
-                f' x1="{fx:.2f}" y1="{fy:.2f}"'
-                f' x2="{line_end_x:.2f}" y2="{line_end_y:.2f}"'
-                f' stroke="{color}"'
-                f' stroke-width="{image_size / 100:.2f}"'
-                f' stroke-linecap="round"/>'
-            ),
-            (
-                f'  <polygon'
-                f' points="'
-                f'{tx:.2f},{ty:.2f} '
-                f'{line_end_x + px * hw:.2f},{line_end_y + py * hw:.2f} '
-                f'{line_end_x - px * hw:.2f},{line_end_y - py * hw:.2f}'
-                f'" fill="{color}"/>'
-            ),
-        ])
+        return (
+            f'  <line'
+            f' x1="{line_start_x:.2f}" y1="{line_start_y:.2f}"'
+            f' x2="{line_end_x:.2f}" y2="{line_end_y:.2f}"'
+            f' stroke="{color}"'
+            f' stroke-width="{stroke_width:.2f}"'
+            f' stroke-linecap="butt"'
+            f' marker-end="url(#{marker_id})"/>'
+        )
+
+    @staticmethod
+    def build_arrow_marker(
+            marker_id: str,
+            color: str,
+            image_size: int,
+    ) -> str:
+        """
+        Build an SVG ``<marker>`` definition for an arrow head.
+
+        The marker is a filled triangle oriented automatically along
+        the line direction, sized relative to ``image_size`` in user
+        coordinates so its scale is independent of the stroke width.
+
+        Args:
+            marker_id: Unique ID for this marker inside the SVG
+                       document; referenced by ``marker-end``.
+            color: Fill color of the triangular head.
+            image_size: Output image dimension used for head scaling.
+
+        Returns:
+            SVG ``<marker>`` element string.
+
+        """
+        head_length = image_size * ARROW_HEAD_LENGTH_RATIO
+        head_width = head_length * ARROW_HEAD_WIDTH_RATIO
+
+        # ``refX=0`` places the triangle's back at the line's end point;
+        # the tip then extends forward along the line direction. The
+        # viewBox aspect ratio matches ``markerWidth:markerHeight`` so
+        # the triangle is not squashed by ``preserveAspectRatio``.
+        return (
+            f'  <marker id="{marker_id}"'
+            f' viewBox="0 0 10 10" refX="0" refY="5"'
+            f' markerWidth="{head_length:.2f}"'
+            f' markerHeight="{head_width:.2f}"'
+            f' orient="auto" markerUnits="userSpaceOnUse">\n'
+            f'    <path d="M 0 0 L 10 5 L 0 10 z" fill="{color}"/>\n'
+            f'  </marker>'
+        )
 
     def get_sticker_fill(self, color_key: str, mask_char: str) -> str:
         """
@@ -563,6 +625,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
         """
         default_color = self.palette['arrow']
+        color_to_id: dict[str, str] = {}
         snippets: list[str] = []
 
         for arrow in arrows:
@@ -576,33 +639,28 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             if corners is None:
                 continue
 
-            from_row, from_col = divmod(from_idx, self.cube_size)
-            to_row, to_col = divmod(to_idx, self.cube_size)
-
             from_center = self.sticker_center(
                 self.build_sticker_polygon_points(
-                    corners, from_row, from_col,
+                    corners, *divmod(from_idx, self.cube_size),
                 ),
             )
             to_center = self.sticker_center(
                 self.build_sticker_polygon_points(
-                    corners, to_row, to_col,
+                    corners, *divmod(to_idx, self.cube_size),
                 ),
             )
 
             snippet = self.build_arrow_svg(
                 from_center, to_center, color, image_size,
+                color_to_id.setdefault(
+                    color, f'arrow-head-{len(color_to_id)}',
+                ),
             )
             if snippet:
                 snippets.append(snippet)
 
-        if not snippets:
-            return ''
-
-        return (
-            '<g class="arrows">\n'
-            + '\n'.join(snippets)
-            + '\n</g>'
+        return self.assemble_arrows_group(
+            snippets, color_to_id, image_size,
         )
 
     def build_top_arrows_group(
@@ -630,6 +688,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
         """
         default_color = self.palette['arrow']
+        color_to_id: dict[str, str] = {}
         snippets: list[str] = []
 
         for arrow in arrows:
@@ -641,32 +700,77 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             if from_face != 'U':
                 continue
 
-            from_row, from_col = divmod(from_idx, self.cube_size)
-            to_row, to_col = divmod(to_idx, self.cube_size)
-
             from_center = self.sticker_center(
                 self.build_top_sticker_points(
-                    u_corners, from_row, from_col,
+                    u_corners, *divmod(from_idx, self.cube_size),
                 ),
             )
             to_center = self.sticker_center(
                 self.build_top_sticker_points(
-                    u_corners, to_row, to_col,
+                    u_corners, *divmod(to_idx, self.cube_size),
                 ),
             )
 
             snippet = self.build_arrow_svg(
                 from_center, to_center, color, image_size,
+                color_to_id.setdefault(
+                    color, f'arrow-head-{len(color_to_id)}',
+                ),
             )
             if snippet:
                 snippets.append(snippet)
 
-        if not snippets:
+        return self.assemble_arrows_group(
+            snippets, color_to_id, image_size,
+        )
+
+    @classmethod
+    def assemble_arrows_group(
+            cls,
+            line_snippets: list[str],
+            color_to_id: dict[str, str],
+            image_size: int,
+    ) -> str:
+        """
+        Assemble the arrows ``<g>`` with shared marker ``<defs>``.
+
+        The defs block is emitted only for colors actually used by a
+        rendered arrow line, so unused markers never leak into the
+        output SVG.
+
+        Args:
+            line_snippets: Per-arrow ``<line>`` snippets already built
+                           via :meth:`build_arrow_svg`.
+            color_to_id: Mapping from arrow color to the marker ID
+                         referenced by the line snippets.
+            image_size: Output image dimension used for marker scaling.
+
+        Returns:
+            SVG ``<g class="arrows">`` group string, or an empty string
+            if there are no lines to render.
+
+        """
+        if not line_snippets:
             return ''
+
+        used_ids = {
+            match.group(1)
+            for snippet in line_snippets
+            for match in [re.search(r'url\(#([^)]+)\)', snippet)]
+            if match is not None
+        }
+        defs = [
+            cls.build_arrow_marker(marker_id, color, image_size)
+            for color, marker_id in color_to_id.items()
+            if marker_id in used_ids
+        ]
 
         return (
             '<g class="arrows">\n'
-            + '\n'.join(snippets)
+            '  <defs>\n'
+            + '\n'.join(defs)
+            + '\n  </defs>\n'
+            + '\n'.join(line_snippets)
             + '\n</g>'
         )
 

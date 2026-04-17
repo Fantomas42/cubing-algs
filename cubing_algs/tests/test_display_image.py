@@ -1,4 +1,5 @@
 """Tests for cube image rendering."""
+import re
 import unittest
 from unittest.mock import patch
 
@@ -599,45 +600,89 @@ class StickerCenterTestCase(unittest.TestCase):
 class BuildArrowSvgTestCase(unittest.TestCase):
     """Tests for individual arrow SVG generation."""
 
-    def test_contains_line_and_polygon(self) -> None:
-        """Arrow SVG contains both a line and a polygon element."""
+    def test_contains_line_with_marker_end(self) -> None:
+        """Arrow SVG is a single line referencing a marker."""
         svg = ImageDisplay.build_arrow_svg(
             (10.0, 10.0),
             (50.0, 10.0),
             '#FF0000',
             200,
+            'arrow-head-0',
         )
         self.assertIn('<line', svg)
-        self.assertIn('<polygon', svg)
+        self.assertIn('marker-end="url(#arrow-head-0)"', svg)
+        self.assertNotIn('<polygon', svg)
 
-    def test_uses_provided_color(self) -> None:
-        """Arrow SVG uses the given color for stroke and fill."""
+    def test_uses_provided_color_on_stroke(self) -> None:
+        """Arrow SVG line uses the given color for its stroke."""
         svg = ImageDisplay.build_arrow_svg(
             (10.0, 10.0),
             (50.0, 10.0),
             '#FF00FF',
             200,
+            'arrow-head-0',
         )
         self.assertIn('stroke="#FF00FF"', svg)
-        self.assertIn('fill="#FF00FF"', svg)
 
     def test_scales_with_image_size(self) -> None:
         """Stroke width scales with the image size."""
-        small = ImageDisplay.build_arrow_svg(
-            (10.0, 10.0), (50.0, 10.0), '#000000', 100,
+        small_svg = ImageDisplay.build_arrow_svg(
+            (10.0, 10.0), (50.0, 10.0), '#000000', 100, 'arrow-head-0',
         )
-        large = ImageDisplay.build_arrow_svg(
-            (10.0, 10.0), (50.0, 10.0), '#000000', 400,
+        large_svg = ImageDisplay.build_arrow_svg(
+            (10.0, 10.0), (50.0, 10.0), '#000000', 400, 'arrow-head-0',
         )
-        self.assertIn('stroke-width="1', small)
-        self.assertIn('stroke-width="4', large)
+
+        width_pattern = re.compile(r'stroke-width="([\d.]+)"')
+        small_match = width_pattern.search(small_svg)
+        large_match = width_pattern.search(large_svg)
+        if small_match is None or large_match is None:
+            self.fail('Missing stroke-width attribute in arrow SVG')
+        small_width = float(small_match.group(1))
+        large_width = float(large_match.group(1))
+        self.assertLess(small_width, large_width)
+        self.assertAlmostEqual(large_width, small_width * 4, places=1)
 
     def test_zero_length_arrow_returns_empty(self) -> None:
         """Arrow of zero length returns empty string (no-op)."""
         svg = ImageDisplay.build_arrow_svg(
-            (10.0, 10.0), (10.0, 10.0), '#000000', 200,
+            (10.0, 10.0), (10.0, 10.0), '#000000', 200, 'arrow-head-0',
         )
         self.assertEqual(svg, '')
+
+
+class BuildArrowMarkerTestCase(unittest.TestCase):
+    """Tests for the shared arrow head ``<marker>`` definition."""
+
+    def test_marker_has_expected_attributes(self) -> None:
+        """Marker defines the triangle and orientation metadata."""
+        svg = ImageDisplay.build_arrow_marker(
+            'arrow-head-0', '#123456', 200,
+        )
+        self.assertIn('<marker', svg)
+        self.assertIn('id="arrow-head-0"', svg)
+        self.assertIn('orient="auto"', svg)
+        self.assertIn('markerUnits="userSpaceOnUse"', svg)
+        self.assertIn('<path', svg)
+        self.assertIn('fill="#123456"', svg)
+
+    def test_marker_scales_with_image_size(self) -> None:
+        """Marker head dimensions grow with the image size."""
+        small_svg = ImageDisplay.build_arrow_marker(
+            'arrow-head-0', '#000000', 100,
+        )
+        large_svg = ImageDisplay.build_arrow_marker(
+            'arrow-head-0', '#000000', 400,
+        )
+        width_pattern = re.compile(r'markerWidth="([\d.]+)"')
+        small_match = width_pattern.search(small_svg)
+        large_match = width_pattern.search(large_svg)
+        if small_match is None or large_match is None:
+            self.fail('Missing markerWidth attribute in marker SVG')
+        self.assertLess(
+            float(small_match.group(1)),
+            float(large_match.group(1)),
+        )
 
 
 class RenderCubeArrowsTestCase(unittest.TestCase):
@@ -762,3 +807,28 @@ class ArrowsIntegrationTestCase(unittest.TestCase):
         last_face = svg.rfind('class="face-')
         arrows_pos = svg.find('class="arrows"')
         self.assertGreater(arrows_pos, last_face)
+
+    def test_arrows_group_has_marker_defs(self) -> None:
+        """Arrows group embeds a ``<defs>`` with one marker per color."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2,U2U8')
+        start = svg.find('class="arrows"')
+        end = svg.find('</g>', start)
+        group = svg[start:end]
+        self.assertIn('<defs>', group)
+        self.assertEqual(group.count('<marker'), 1)
+        self.assertEqual(group.count('<line'), 2)
+
+    def test_same_color_arrows_share_single_marker(self) -> None:
+        """Multiple arrows in one color reuse a single marker definition."""
+        svg = ImageDisplay(VCube()).render(arrows='U0U2-red,U2U8-red')
+        self.assertEqual(svg.count('<marker'), 1)
+
+    def test_distinct_colors_produce_distinct_markers(self) -> None:
+        """Each unique arrow color gets its own marker definition."""
+        svg = ImageDisplay(VCube()).render(
+            arrows='U0U2-red,U2U8-#00ff00,U8U0',
+        )
+        start = svg.find('class="arrows"')
+        end = svg.find('</g>', start)
+        group = svg[start:end]
+        self.assertEqual(group.count('<marker'), 3)
