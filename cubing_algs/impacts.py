@@ -53,6 +53,21 @@ CACHED_FACELET_TO_CORNER_PIECE: dict[int, int] = {
 }
 
 
+class OrientationFlags(NamedTuple):
+    """Corner and edge orientation flags shared across pattern helpers."""
+
+    all_corners_oriented: bool
+    all_edges_oriented: bool
+
+
+class FirstLayerFlags(NamedTuple):
+    """First-layer completion flags shared across pattern helpers."""
+
+    d_corners_solved: bool
+    d_edges_solved: bool
+    f2l_edges_solved: bool
+
+
 class CycleAnalysis(NamedTuple):
     """Analysis of permutation cycle structure."""
 
@@ -858,7 +873,231 @@ def classify_parity_signature(
     )
 
 
-def classify_pattern(  # noqa: C901, PLR0912, PLR0915
+def classify_orientation_patterns(
+        cp: list[int], co: list[int],
+        ep: list[int], eo: list[int],
+) -> tuple[list[str], OrientationFlags]:
+    """
+    Classify pattern labels based on piece orientation.
+
+    When both corners and edges are oriented only the aggregate
+    ``ALL_ORIENTED`` label is emitted; the per-piece-type labels are
+    reserved for the cases where only one type is oriented.
+
+    Args:
+        cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
+
+    Returns:
+        Tuple of emitted labels and the orientation flags so callers
+        can reuse them without recomputing.
+
+    """
+    all_corners_oriented = all(
+        cp[i] != i or orientation == 0
+        for i, orientation in enumerate(co)
+    )
+    all_edges_oriented = all(
+        ep[i] != i or orientation == 0
+        for i, orientation in enumerate(eo)
+    )
+
+    patterns: list[str] = []
+    if all_corners_oriented and all_edges_oriented:
+        patterns.append('ALL_ORIENTED')
+    elif all_corners_oriented:
+        patterns.extend(['CORNERS_ORIENTED', 'OLL_CORNERS_DONE'])
+    elif all_edges_oriented:
+        patterns.extend(['EDGES_ORIENTED', 'OLL_EDGES_DONE'])
+
+    return patterns, OrientationFlags(all_corners_oriented, all_edges_oriented)
+
+
+def classify_permutation_patterns(
+        cp: list[int], ep: list[int],
+        orientation: OrientationFlags,
+) -> list[str]:
+    """
+    Classify pattern labels based on piece permutation.
+
+    When both corners and edges are permuted only the aggregate
+    ``ALL_PERMUTED`` label is emitted; the per-piece-type labels cover
+    the cases where only one type is permuted.
+
+    Args:
+        cp: Corner permutation.
+        ep: Edge permutation.
+        orientation: Orientation flags from ``classify_orientation_patterns``.
+
+    Returns:
+        List of emitted permutation-related pattern labels.
+
+    """
+    corners_permuted = cp == SOLVED_CP
+    edges_permuted = ep == SOLVED_EP
+    all_permuted = corners_permuted and edges_permuted
+    all_oriented = (
+        orientation.all_corners_oriented and orientation.all_edges_oriented
+    )
+
+    patterns: list[str] = []
+    if all_permuted:
+        patterns.append('ALL_PERMUTED')
+    elif corners_permuted:
+        patterns.append('CORNERS_PERMUTED')
+    elif edges_permuted:
+        patterns.append('EDGES_PERMUTED')
+
+    if all_oriented and not all_permuted:
+        patterns.append('OLL_COMPLETE_PLL_REMAINING')
+    if all_permuted and not all_oriented:
+        patterns.append('PERMUTED_BUT_MISORIENTED')
+
+    return patterns
+
+
+def classify_first_layer_patterns(
+        cp: list[int], co: list[int],
+        ep: list[int], eo: list[int],
+) -> tuple[list[str], FirstLayerFlags]:
+    """
+    Classify pattern labels based on first layer (D face) progress.
+
+    Args:
+        cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
+
+    Returns:
+        Tuple of emitted labels plus completion flags so last-layer
+        classification can reuse them.
+
+    """
+    d_corners_solved = all(cp[i] == i and co[i] == 0 for i in D_CORNERS)
+    d_edges_solved = all(ep[i] == i and eo[i] == 0 for i in D_EDGES)
+    f2l_edges_solved = d_corners_solved and d_edges_solved and all(
+        ep[i] == i and eo[i] == 0 for i in E_EDGES
+    )
+
+    patterns: list[str] = []
+    if d_corners_solved:
+        patterns.append('FIRST_LAYER_CORNERS_SOLVED')
+    if d_edges_solved:
+        patterns.extend(['FIRST_LAYER_EDGES_SOLVED', 'CROSS_SOLVED'])
+    if d_corners_solved and d_edges_solved:
+        patterns.append('FIRST_LAYER_COMPLETE')
+    if f2l_edges_solved:
+        patterns.append('F2L_COMPLETE')
+
+    return patterns, FirstLayerFlags(
+        d_corners_solved, d_edges_solved, f2l_edges_solved,
+    )
+
+
+def classify_last_layer_patterns(
+        cp: list[int], co: list[int],
+        ep: list[int], eo: list[int],
+        first_layer: FirstLayerFlags,
+) -> list[str]:
+    """
+    Classify pattern labels based on last layer (U face) state.
+
+    Args:
+        cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
+        first_layer: Flags from ``classify_first_layer_patterns`` used
+            to gate the ``OLL_CASE`` label on a completed F2L.
+
+    Returns:
+        List of emitted last-layer pattern labels.
+
+    """
+    u_corners_oriented = all(co[i] == 0 for i in U_CORNERS)
+    u_edges_oriented = all(eo[i] == 0 for i in U_EDGES)
+    last_layer_oriented = u_corners_oriented and u_edges_oriented
+
+    patterns: list[str] = []
+    if last_layer_oriented:
+        patterns.append('LAST_LAYER_ORIENTED')
+
+        u_corners_permuted = all(cp[i] in U_CORNERS for i in U_CORNERS)
+        u_edges_permuted = all(ep[i] in U_EDGES for i in U_EDGES)
+
+        if not (u_corners_permuted and u_edges_permuted):
+            patterns.append('PLL_CASE')
+            if u_corners_permuted:
+                patterns.append('PLL_EDGES_ONLY')
+            elif u_edges_permuted:
+                patterns.append('PLL_CORNERS_ONLY')
+
+    if not last_layer_oriented and first_layer.f2l_edges_solved:
+        patterns.append('OLL_CASE')
+
+    return patterns
+
+
+def classify_scramble_level(cp: list[int]) -> list[str]:
+    """
+    Classify pattern labels based on how many corners left home.
+
+    Args:
+        cp: Corner permutation.
+
+    Returns:
+        List of scramble-level labels (``HIGHLY_SCRAMBLED`` or
+        ``MINIMALLY_SCRAMBLED``).
+
+    """
+    corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)
+
+    patterns: list[str] = []
+    if corners_moved >= 6:
+        patterns.append('HIGHLY_SCRAMBLED')
+    if corners_moved <= 2:
+        patterns.append('MINIMALLY_SCRAMBLED')
+    return patterns
+
+
+def classify_cycle_patterns(
+        cp: list[int], ep: list[int],
+) -> list[str]:
+    """
+    Classify pattern labels based on permutation cycle structure.
+
+    Args:
+        cp: Corner permutation.
+        ep: Edge permutation.
+
+    Returns:
+        List of cycle-structure labels (single cycles, swaps,
+        three-cycles).
+
+    """
+    corner_cycles = find_permutation_cycles(cp)
+    edge_cycles = find_permutation_cycles(ep)
+
+    patterns: list[str] = []
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
+        patterns.append('SINGLE_CORNER_CYCLE')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
+        patterns.append('SINGLE_EDGE_CYCLE')
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
+        patterns.append('SINGLE_CORNER_SWAP')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
+        patterns.append('SINGLE_EDGE_SWAP')
+    if any(len(cycle) == 3 for cycle in corner_cycles):
+        patterns.append('CORNER_THREE_CYCLE')
+    if any(len(cycle) == 3 for cycle in edge_cycles):
+        patterns.append('EDGE_THREE_CYCLE')
+    return patterns
+
+
+def classify_pattern(
         cp: list[int], co: list[int],
         ep: list[int], eo: list[int],
 ) -> list[str]:
@@ -877,160 +1116,31 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         List of pattern names identifying the cube state.
 
     """
-    patterns = []
-
-    # Basic state checks
     if (cp == SOLVED_CP and co == SOLVED_CO and
         ep == SOLVED_EP and eo == SOLVED_EO):
-        patterns.append('SOLVED')
-        return patterns  # If solved, no other patterns apply
+        return ['SOLVED']
 
-    # Orientation patterns — only consider pieces at their home position
-    all_corners_oriented = all(
-        cp[i] != i or orientation == 0
-        for i, orientation in enumerate(co)
+    orientation_patterns, orientation = classify_orientation_patterns(
+        cp, co, ep, eo,
     )
-    all_edges_oriented = all(
-        ep[i] != i or orientation == 0
-        for i, orientation in enumerate(eo)
+    permutation_patterns = classify_permutation_patterns(
+        cp, ep, orientation,
+    )
+    first_layer_patterns, first_layer = classify_first_layer_patterns(
+        cp, co, ep, eo,
+    )
+    last_layer_patterns = classify_last_layer_patterns(
+        cp, co, ep, eo, first_layer,
     )
 
-    if all_corners_oriented and all_edges_oriented:
-        patterns.append('ALL_ORIENTED')
-
-    if all_corners_oriented:
-        patterns.append('CORNERS_ORIENTED')
-
-    if all_edges_oriented:
-        patterns.append('EDGES_ORIENTED')
-
-    # Permutation patterns
-    corners_permuted = cp == SOLVED_CP
-    edges_permuted = ep == SOLVED_EP
-
-    if corners_permuted and edges_permuted:
-        patterns.append('ALL_PERMUTED')
-
-    if corners_permuted:
-        patterns.append('CORNERS_PERMUTED')
-
-    if edges_permuted:
-        patterns.append('EDGES_PERMUTED')
-
-    # CFOP-specific patterns
-    if all_corners_oriented and not all_edges_oriented:
-        patterns.append('OLL_CORNERS_DONE')
-
-    if all_edges_oriented and not all_corners_oriented:
-        patterns.append('OLL_EDGES_DONE')
-
-    if (
-            all_corners_oriented
-            and all_edges_oriented
-            and not (corners_permuted and edges_permuted)
-    ):
-        patterns.append('OLL_COMPLETE_PLL_REMAINING')
-
-    if (
-            corners_permuted and edges_permuted
-            and (not all_corners_oriented or not all_edges_oriented)
-    ):
-        patterns.append('PERMUTED_BUT_MISORIENTED')
-
-    # Layer-by-layer patterns
-    # Check if first layer (D face) corners are solved
-    d_corners_solved = all(
-        cp[i] == i and co[i] == 0
-        for i in D_CORNERS
-    )
-    if d_corners_solved:
-        patterns.append('FIRST_LAYER_CORNERS_SOLVED')
-
-    # Check if first layer edges are solved
-    d_edges_solved = all(
-        ep[i] == i and eo[i] == 0
-        for i in D_EDGES
-    )
-    if d_edges_solved:
-        patterns.append('FIRST_LAYER_EDGES_SOLVED')
-
-    if d_corners_solved and d_edges_solved:
-        patterns.append('FIRST_LAYER_COMPLETE')
-
-    # Check for cross (D edges solved)
-    if d_edges_solved:
-        patterns.append('CROSS_SOLVED')
-
-    # F2L specific patterns
-    f2l_edges_solved = False
-    if d_corners_solved and d_edges_solved:
-        # Check if F2L is complete (D layer + E slice edges)
-        f2l_edges_solved = all(
-            ep[i] == i and eo[i] == 0
-            for i in E_EDGES
-        )
-        if f2l_edges_solved:
-            patterns.append('F2L_COMPLETE')
-
-    # Last layer patterns
-    u_corners_oriented = all(co[i] == 0 for i in U_CORNERS)
-    u_edges_oriented = all(eo[i] == 0 for i in U_EDGES)
-
-    if u_corners_oriented and u_edges_oriented:
-        patterns.append('LAST_LAYER_ORIENTED')
-
-    # PLL patterns (all oriented, but permuted)
-    if u_corners_oriented and u_edges_oriented:
-        u_corners_permuted = all(cp[i] in U_CORNERS for i in U_CORNERS)
-        u_edges_permuted = all(ep[i] in U_EDGES for i in U_EDGES)
-
-        if not u_corners_permuted or not u_edges_permuted:
-            patterns.append('PLL_CASE')
-
-            # Specific PLL types
-            if u_corners_permuted and not u_edges_permuted:
-                patterns.append('PLL_EDGES_ONLY')
-
-            if not u_corners_permuted and u_edges_permuted:
-                patterns.append('PLL_CORNERS_ONLY')
-
-    # OLL patterns (last layer not oriented)
-    if ((not u_corners_oriented or not u_edges_oriented)
-            and d_corners_solved and d_edges_solved and f2l_edges_solved):
-        patterns.append('OLL_CASE')
-
-    # Special patterns
-    # Checkerboard-like (many pieces moved)
-    if len([i for i, pos in enumerate(cp) if pos != i]) >= 6:
-        patterns.append('HIGHLY_SCRAMBLED')
-
-    # Minimal scramble
-    if len([i for i, pos in enumerate(cp) if pos != i]) <= 2:
-        patterns.append('MINIMALLY_SCRAMBLED')
-
-    # Check permutation structure (orientation constraints)
-    corner_cycles = find_permutation_cycles(cp)
-    edge_cycles = find_permutation_cycles(ep)
-
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
-        patterns.append('SINGLE_CORNER_CYCLE')
-
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
-        patterns.append('SINGLE_EDGE_CYCLE')
-
-    # Check for swaps (2-cycles)
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
-        patterns.append('SINGLE_CORNER_SWAP')
-
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
-        patterns.append('SINGLE_EDGE_SWAP')
-
-    # Three-cycles (common in commutators)  # noqa: ERA001
-    if any(len(cycle) == 3 for cycle in corner_cycles):
-        patterns.append('CORNER_THREE_CYCLE')
-
-    if any(len(cycle) == 3 for cycle in edge_cycles):
-        patterns.append('EDGE_THREE_CYCLE')
+    patterns = [
+        *orientation_patterns,
+        *permutation_patterns,
+        *first_layer_patterns,
+        *last_layer_patterns,
+        *classify_scramble_level(cp),
+        *classify_cycle_patterns(cp, ep),
+    ]
 
     if not patterns:
         patterns.append('UNCLASSIFIED')
