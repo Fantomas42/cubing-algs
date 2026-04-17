@@ -68,6 +68,25 @@ class FirstLayerFlags(NamedTuple):
     f2l_edges_solved: bool
 
 
+class PatternClassification(NamedTuple):
+    """
+    Categorized pattern classification for a cube state.
+
+    Each field collects the pattern labels emitted by one focused
+    classifier. ``state`` holds cube-wide labels (``SOLVED``,
+    ``UNCLASSIFIED``); the remaining fields mirror the helpers.
+
+    """
+
+    state: list[str]
+    orientation: list[str]
+    permutation: list[str]
+    first_layer: list[str]
+    last_layer: list[str]
+    scramble: list[str]
+    cycle: list[str]
+
+
 class CycleAnalysis(NamedTuple):
     """Analysis of permutation cycle structure."""
 
@@ -156,7 +175,7 @@ class ImpactData(NamedTuple):
     cubies_parity_signature: ParitySignature | None
     cubies_corner_cycle_analysis: CycleAnalysis | None
     cubies_edge_cycle_analysis: CycleAnalysis | None
-    cubies_patterns: list[str] | None
+    cubies_patterns: PatternClassification | None
 
 
 def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[Facelet, int]:
@@ -1100,11 +1119,12 @@ def classify_cycle_patterns(
 def classify_pattern(
         cp: list[int], co: list[int],
         ep: list[int], eo: list[int],
-) -> list[str]:
+) -> PatternClassification:
     """
     Comprehensive pattern classification for speedcubing.
 
-    Identifies specific cube states and patterns useful for solving.
+    Identifies specific cube states and patterns useful for solving,
+    grouped into categories that mirror the focused classifier helpers.
 
     Args:
         cp: Corner permutation.
@@ -1113,12 +1133,20 @@ def classify_pattern(
         eo: Edge orientation.
 
     Returns:
-        List of pattern names identifying the cube state.
+        PatternClassification with labels grouped by category.
 
     """
     if (cp == SOLVED_CP and co == SOLVED_CO and
         ep == SOLVED_EP and eo == SOLVED_EO):
-        return ['SOLVED']
+        return PatternClassification(
+            state=['SOLVED'],
+            orientation=[],
+            permutation=[],
+            first_layer=[],
+            last_layer=[],
+            scramble=[],
+            cycle=[],
+        )
 
     orientation_patterns, orientation = classify_orientation_patterns(
         cp, co, ep, eo,
@@ -1132,20 +1160,24 @@ def classify_pattern(
     last_layer_patterns = classify_last_layer_patterns(
         cp, co, ep, eo, first_layer,
     )
+    scramble_patterns = classify_scramble_level(cp)
+    cycle_patterns = classify_cycle_patterns(cp, ep)
 
-    patterns = [
-        *orientation_patterns,
-        *permutation_patterns,
-        *first_layer_patterns,
-        *last_layer_patterns,
-        *classify_scramble_level(cp),
-        *classify_cycle_patterns(cp, ep),
-    ]
+    any_classified = any([
+        orientation_patterns, permutation_patterns,
+        first_layer_patterns, last_layer_patterns,
+        scramble_patterns, cycle_patterns,
+    ])
 
-    if not patterns:
-        patterns.append('UNCLASSIFIED')
-
-    return patterns
+    return PatternClassification(
+        state=[] if any_classified else ['UNCLASSIFIED'],
+        orientation=orientation_patterns,
+        permutation=permutation_patterns,
+        first_layer=first_layer_patterns,
+        last_layer=last_layer_patterns,
+        scramble=scramble_patterns,
+        cycle=cycle_patterns,
+    )
 
 
 def compute_cubie_complexity(
@@ -1269,7 +1301,7 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     parity_signature: ParitySignature | None = None
     corner_cycle_analysis: CycleAnalysis | None = None
     edge_cycle_analysis: CycleAnalysis | None = None
-    patterns: list[str] | None = None
+    patterns: PatternClassification | None = None
 
     if size == 3:
         cubie_cube = VCube(size=size)

@@ -310,11 +310,25 @@ def print_cubie_analysis(impacts: 'ImpactData') -> None:
         color=FG_CYAN,
     )
 
-    if impacts.cubies_patterns:
+    patterns = impacts.cubies_patterns
+    if patterns is not None:
         print(colorize('\n  Pattern classification:', FG_BLUE))
-        for pattern in impacts.cubies_patterns:
-            bullet = colorize('•', FG_MAGENTA)
-            print(f'    {bullet} {colorize(pattern, FG_WHITE + BOLD)}')
+        categories: list[tuple[str, list[str]]] = [
+            ('State', patterns.state),
+            ('Orientation', patterns.orientation),
+            ('Permutation', patterns.permutation),
+            ('First layer', patterns.first_layer),
+            ('Last layer', patterns.last_layer),
+            ('Scramble', patterns.scramble),
+            ('Cycle', patterns.cycle),
+        ]
+        for category, labels in categories:
+            if not labels:
+                continue
+            print(f'    {colorize(category, FG_CYAN + BOLD)}')
+            for pattern in labels:
+                bullet = colorize('•', FG_MAGENTA)
+                print(f'      {bullet} {colorize(pattern, FG_WHITE + BOLD)}')
 
 
 def show_impact(algorithm: str) -> None:
