@@ -2,6 +2,7 @@
 import math
 import operator
 import re
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 from typing import cast
 
@@ -624,43 +625,18 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             are visible.
 
         """
-        default_color = self.palette['arrow']
-        color_to_id: dict[str, str] = {}
-        snippets: list[str] = []
-
-        for arrow in arrows:
-            from_face = arrow[0]
-            from_idx = arrow[1]
-            to_idx = arrow[3]
-            color = arrow[4] or default_color
-
-            corners = face_corners.get(from_face)
-
+        def get_center(face: Facelet, idx: int) -> Point2D | None:
+            corners = face_corners.get(face)
             if corners is None:
-                continue
-
-            from_center = self.sticker_center(
+                return None
+            return self.sticker_center(
                 self.build_sticker_polygon_points(
-                    corners, *divmod(from_idx, self.cube_size),
-                ),
-            )
-            to_center = self.sticker_center(
-                self.build_sticker_polygon_points(
-                    corners, *divmod(to_idx, self.cube_size),
+                    corners, *divmod(idx, self.cube_size),
                 ),
             )
 
-            snippet = self.build_arrow_svg(
-                from_center, to_center, color, image_size,
-                color_to_id.setdefault(
-                    color, f'arrow-head-{len(color_to_id)}',
-                ),
-            )
-            if snippet:
-                snippets.append(snippet)
-
-        return self.assemble_arrows_group(
-            snippets, color_to_id, image_size,
+        return self.build_arrows_with_centers(
+            arrows, get_center, image_size,
         )
 
     def build_top_arrows_group(
@@ -687,37 +663,59 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             are rendered.
 
         """
+        def get_center(face: Facelet, idx: int) -> Point2D | None:
+            if face != 'U':
+                return None
+            return self.sticker_center(
+                self.build_top_sticker_points(
+                    u_corners, *divmod(idx, self.cube_size),
+                ),
+            )
+
+        return self.build_arrows_with_centers(
+            arrows, get_center, image_size,
+        )
+
+    def build_arrows_with_centers(
+            self,
+            arrows: list[tuple[Facelet, int, Facelet, int, str]],
+            get_center: Callable[[Facelet, int], Point2D | None],
+            image_size: int,
+    ) -> str:
+        """
+        Build the arrows SVG group from a sticker-center resolver.
+
+        ``get_center`` returns the SVG center for a given face/index, or
+        ``None`` to skip the arrow (hidden face, wrong view, etc.).
+        Marker ``<defs>`` are emitted only for colors that produced a
+        rendered line, so no unused markers leak into the SVG.
+
+        Returns:
+            SVG ``<g class="arrows">`` string, or empty when no arrow
+            renders.
+
+        """
         default_color = self.palette['arrow']
         color_to_id: dict[str, str] = {}
         snippets: list[str] = []
 
-        for arrow in arrows:
-            from_face = arrow[0]
-            from_idx = arrow[1]
-            to_idx = arrow[3]
-            color = arrow[4] or default_color
+        for from_face, from_idx, _, to_idx, raw_color in arrows:
+            from_center = get_center(from_face, from_idx)
+            to_center = get_center(from_face, to_idx)
 
-            if from_face != 'U':
+            if from_center is None or to_center is None:
                 continue
 
-            from_center = self.sticker_center(
-                self.build_top_sticker_points(
-                    u_corners, *divmod(from_idx, self.cube_size),
-                ),
-            )
-            to_center = self.sticker_center(
-                self.build_top_sticker_points(
-                    u_corners, *divmod(to_idx, self.cube_size),
-                ),
+            color = raw_color or default_color
+            marker_id = color_to_id.get(
+                color, f'arrow-head-{len(color_to_id)}',
             )
 
             snippet = self.build_arrow_svg(
-                from_center, to_center, color, image_size,
-                color_to_id.setdefault(
-                    color, f'arrow-head-{len(color_to_id)}',
-                ),
+                from_center, to_center, color, image_size, marker_id,
             )
             if snippet:
+                color_to_id.setdefault(color, marker_id)
                 snippets.append(snippet)
 
         return self.assemble_arrows_group(
@@ -734,15 +732,13 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         """
         Assemble the arrows ``<g>`` with shared marker ``<defs>``.
 
-        The defs block is emitted only for colors actually used by a
-        rendered arrow line, so unused markers never leak into the
-        output SVG.
-
         Args:
             line_snippets: Per-arrow ``<line>`` snippets already built
                            via :meth:`build_arrow_svg`.
             color_to_id: Mapping from arrow color to the marker ID
-                         referenced by the line snippets.
+                         referenced by the line snippets. Callers must
+                         only register colors whose snippet was kept,
+                         so every entry produces a used ``<defs>`` marker.
             image_size: Output image dimension used for marker scaling.
 
         Returns:
@@ -753,16 +749,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         if not line_snippets:
             return ''
 
-        used_ids = {
-            match.group(1)
-            for snippet in line_snippets
-            for match in [re.search(r'url\(#([^)]+)\)', snippet)]
-            if match is not None
-        }
         defs = [
             cls.build_arrow_marker(marker_id, color, image_size)
             for color, marker_id in color_to_id.items()
-            if marker_id in used_ids
         ]
 
         return (
