@@ -41,6 +41,15 @@ F2L_MASK: POVDisplayMask = (
     '000111111'
 )
 
+AF2L_MASK: POVDisplayMask = (
+    '222222222'
+    '222111111'
+    '222111111'
+    '111111111'
+    '222111111'
+    '222111111'
+)
+
 F2L_LL_MASK: POVDisplayMask = (
     '111111111'
     '000111111'

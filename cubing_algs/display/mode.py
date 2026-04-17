@@ -8,6 +8,7 @@ from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.display.constants import F2L_ADJACENT_FACES
 from cubing_algs.display.constants import F2L_FACE_ORIENTATIONS
+from cubing_algs.display.masks import AF2L_MASK
 from cubing_algs.display.masks import CMLL_MASK
 from cubing_algs.display.masks import CROSS_BOTTOM_MASK
 from cubing_algs.display.masks import CROSS_TOP_MASK
@@ -35,7 +36,7 @@ MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'cross-bottom': (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'cross':        (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'f2l':          (F2L_MASK,          '',    'f2l_orientation'),           # noqa: E241
-    'af2l':         (F2L_MASK,          '',    'f2l_orientation'),           # noqa: E241
+    'af2l':         (AF2L_MASK,         '',    'f2l_orientation'),           # noqa: E241
     'f2l+ll':       (F2L_LL_MASK,       '',    'f2l_orientation'),           # noqa: E241
     'f2l+cll':      (F2L_CLL_MASK,      '',    'f2l_orientation'),           # noqa: E241
     'f2l+ell':      (F2L_ELL_MASK,      '',    'f2l_orientation'),           # noqa: E241
