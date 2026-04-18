@@ -1039,7 +1039,8 @@ def classify_last_layer_patterns(
     last_layer_oriented = u_corners_oriented and u_edges_oriented
 
     patterns: list[str] = []
-    if u_edges_oriented:
+    u_edges_in_u_layer = all(ep[i] in U_EDGES for i in U_EDGES)
+    if u_edges_in_u_layer and u_edges_oriented:
         patterns.append('OLL_CROSS_DONE')
 
     if last_layer_oriented:

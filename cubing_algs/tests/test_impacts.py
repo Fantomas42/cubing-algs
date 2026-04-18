@@ -3590,6 +3590,13 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('OLL_CROSS_DONE', patterns.last_layer)
 
+    def test_oll_cross_done_not_emitted_when_u_edge_displaced(self) -> None:
+        """OLL_CROSS_DONE must not fire when a U-layer edge left its slot."""
+        # After R the FR piece sits in the UR slot (ep[0]=8); the cross is broken.
+        cp, co, ep, eo = self.cubies_after('R')
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('OLL_CROSS_DONE', patterns.last_layer)
+
     def test_oll_cross_done_not_emitted_when_u_edge_flipped(self) -> None:
         """OLL_CROSS_DONE must not fire when a U-layer edge is flipped."""
         cp = SOLVED_CP
