@@ -1,9 +1,9 @@
 """Tests for ModeDisplay methods."""
 import unittest
 
+from cubing_algs.display.masks import OLL_MASK
+from cubing_algs.display.masks import PLL_MASK
 from cubing_algs.display.vcube import VCubeDisplay
-from cubing_algs.masks import OLL_MASK
-from cubing_algs.masks import PLL_MASK
 from cubing_algs.vcube import VCube
 
 
@@ -274,14 +274,13 @@ class RealignMaskTestCase(ModeDisplayMixin, unittest.TestCase):
         # z2 puts the physical D face on top.  The realigned mask must mark
         # internal D-face positions (27-35 in URFDLB order) instead of U.
         display = self.make_display('z2')
-        expected = '0' * 27 + '1' * 9 + '0' * 18
+        expected = '000000000000000222000000222111111111000000222000000222'
         self.assertEqual(display.realign_mask(OLL_MASK), expected)
 
     def test_x_shifts_u_positions_to_f_face(self) -> None:
         """After x rotation POV-U positions map to internal F-face slots."""
-        # x: F goes to top, so POV-U aligns with internal F (positions 18-26).
         display = self.make_display('x')
-        expected = '0' * 18 + '1' * 9 + '0' * 27
+        expected = '000000222200200200111111111222000000002002002000000000'
         self.assertEqual(display.realign_mask(OLL_MASK), expected)
 
     def test_all_ones_mask_is_invariant(self) -> None:
@@ -338,12 +337,9 @@ class ScaleMaskTestCase(ModeDisplayMixin, unittest.TestCase):
         self.assertEqual(display.scale_mask(mask, 2), '0' * 24)
 
     def test_downscale_oll_mask(self) -> None:
-        """OLL_MASK scaled to 2x2: U-face corners survive, rest zeros."""
+        """OLL_MASK scaled to 2x2."""
         display = self.make_display()
-        # OLL_MASK: U='111111111', rest all zeros
-        # 2x2 U face: 4 corners from positions 0,2,6,8 → all '1'
-        # 2x2 other faces: corners from positions 0,2,6,8 → all '0'
-        expected = '1111' + '0000' * 5
+        expected = '111122002200000022002200'
         self.assertEqual(display.scale_mask(OLL_MASK, 2), expected)
 
     def test_downscale_corners_only(self) -> None:
