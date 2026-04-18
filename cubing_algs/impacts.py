@@ -1098,6 +1098,35 @@ def classify_scramble_level(
     return patterns
 
 
+def classify_single_cycles(
+        corner_cycles: list[list[int]], edge_cycles: list[list[int]],
+        cp: list[int], ep: list[int],
+) -> list[str]:
+    """
+    Classify single-cycle and swap labels for corners and edges.
+
+    Args:
+        corner_cycles: Corner permutation cycles.
+        edge_cycles: Edge permutation cycles.
+        cp: Corner permutation (used to determine full cycle length).
+        ep: Edge permutation (used to determine full cycle length).
+
+    Returns:
+        List of single-cycle labels.
+
+    """
+    patterns: list[str] = []
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
+        patterns.append('SINGLE_CORNER_CYCLE')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
+        patterns.append('SINGLE_EDGE_CYCLE')
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
+        patterns.append('SINGLE_CORNER_SWAP')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
+        patterns.append('SINGLE_EDGE_SWAP')
+    return patterns
+
+
 def classify_cycle_patterns(
         cp: list[int], ep: list[int],
 ) -> list[str]:
@@ -1118,15 +1147,7 @@ def classify_cycle_patterns(
     corners_solved = cp == SOLVED_CP
     edges_solved = ep == SOLVED_EP
 
-    patterns: list[str] = []
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
-        patterns.append('SINGLE_CORNER_CYCLE')
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
-        patterns.append('SINGLE_EDGE_CYCLE')
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
-        patterns.append('SINGLE_CORNER_SWAP')
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
-        patterns.append('SINGLE_EDGE_SWAP')
+    patterns = classify_single_cycles(corner_cycles, edge_cycles, cp, ep)
 
     has_corner_3_cycle = any(len(c) == 3 for c in corner_cycles)
     has_edge_3_cycle = any(len(c) == 3 for c in edge_cycles)
@@ -1135,8 +1156,12 @@ def classify_cycle_patterns(
         patterns.append('CORNER_THREE_CYCLE')
     if has_edge_3_cycle:
         patterns.append('EDGE_THREE_CYCLE')
+    if any(len(c) == 4 for c in corner_cycles):
+        patterns.append('CORNER_FOUR_CYCLE')
+    if any(len(c) == 4 for c in edge_cycles):
+        patterns.append('EDGE_FOUR_CYCLE')
 
-    # Pure piece-type 3-cycles: only one piece type affected (commutator output).
+    # Pure piece-type 3-cycles: only one piece type affected (commutator).
     if has_corner_3_cycle and edges_solved:
         patterns.append('PURE_CORNER_3_CYCLE')
     if has_edge_3_cycle and corners_solved:

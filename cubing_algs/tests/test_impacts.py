@@ -3459,6 +3459,13 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
     def cubies_after(move: str) -> tuple[
         list[int], list[int], list[int], list[int],
     ]:
+        """
+        Apply a single move and return cubie state.
+
+        Returns:
+            Tuple of (cp, co, ep, eo) after the move.
+
+        """
         cube = VCube(size=3)
         cube.rotate(move)
         cp, co, ep, eo, *_ = cube.cubies
@@ -3544,6 +3551,34 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('EDGE_THREE_CYCLE', patterns.cycle)
 
+    def test_corner_four_cycle(self) -> None:
+        """CORNER_FOUR_CYCLE fires when any 4-cycle exists in corners."""
+        cp = [1, 2, 3, 0, 4, 5, 6, 7]  # 4-cycle: 0→1→2→3
+        patterns = classify_pattern(cp, SOLVED_CO, SOLVED_EP, SOLVED_EO)
+        self.assertIn('CORNER_FOUR_CYCLE', patterns.cycle)
+
+    def test_edge_four_cycle(self) -> None:
+        """EDGE_FOUR_CYCLE fires when any 4-cycle exists in edges."""
+        ep = [1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11]  # 4-cycle: 0→1→2→3
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertIn('EDGE_FOUR_CYCLE', patterns.cycle)
+
+    def test_b_move_classified_via_four_cycles(self) -> None:
+        """B move produces 4-cycles and must not be UNCLASSIFIED."""
+        cp, co, ep, eo = self.cubies_after('B')
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('UNCLASSIFIED', patterns.state)
+        self.assertIn('CORNER_FOUR_CYCLE', patterns.cycle)
+        self.assertIn('EDGE_FOUR_CYCLE', patterns.cycle)
+
+    def test_f_move_classified_via_four_cycles(self) -> None:
+        """F move produces 4-cycles and must not be UNCLASSIFIED."""
+        cp, co, ep, eo = self.cubies_after('F')
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('UNCLASSIFIED', patterns.state)
+        self.assertIn('CORNER_FOUR_CYCLE', patterns.cycle)
+        self.assertIn('EDGE_FOUR_CYCLE', patterns.cycle)
+
     def test_eo_complete_with_edges_oriented(self) -> None:
         """EO_COMPLETE fires when all edges are oriented."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
@@ -3592,7 +3627,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
 
     def test_oll_cross_done_not_emitted_when_u_edge_displaced(self) -> None:
         """OLL_CROSS_DONE must not fire when a U-layer edge left its slot."""
-        # After R the FR piece sits in the UR slot (ep[0]=8); the cross is broken.
+        # After R the FR piece sits in the UR slot (ep[0]=8); cross broken.
         cp, co, ep, eo = self.cubies_after('R')
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertNotIn('OLL_CROSS_DONE', patterns.last_layer)
@@ -3680,7 +3715,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         self.assertNotIn('PURE_EDGE_3_CYCLE', patterns.cycle)
 
     def test_double_corner_swap(self) -> None:
-        """DOUBLE_CORNER_SWAP fires when there are exactly two corner 2-cycles."""
+        """DOUBLE_CORNER_SWAP fires when exactly two corner 2-cycles exist."""
         cp = [1, 0, 3, 2, 4, 5, 6, 7]  # two swaps: (0,1) and (2,3)
         co = SOLVED_CO
         ep = SOLVED_EP
@@ -3696,7 +3731,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
 
     def test_double_edge_swap(self) -> None:
         """DOUBLE_EDGE_SWAP fires when there are exactly two edge 2-cycles."""
-        ep = [1, 0, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11]  # two swaps: (0,1) and (2,3)
+        ep = [1, 0, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11]  # swaps: (0,1) and (2,3)
         patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
         self.assertIn('DOUBLE_EDGE_SWAP', patterns.cycle)
 
