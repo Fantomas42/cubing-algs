@@ -3220,6 +3220,34 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         self.assertIn('EDGES_ORIENTED', patterns.orientation)
         self.assertNotIn('ALL_ORIENTED', patterns.orientation)
 
+    def test_displaced_twisted_corner_not_oriented(self) -> None:
+        """Displaced AND twisted corner must NOT be treated as oriented."""
+        # Corner 0 is swapped with corner 1 (displaced) AND twisted (co[0]=1).
+        # The buggy condition `cp[i] != i or co[i] == 0` short-circuits on
+        # displacement and wrongly emits ALL_ORIENTED / CORNERS_ORIENTED.
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('ALL_ORIENTED', patterns.orientation)
+        self.assertNotIn('CORNERS_ORIENTED', patterns.orientation)
+        self.assertIn('EDGES_ORIENTED', patterns.orientation)
+
+    def test_displaced_flipped_edge_not_oriented(self) -> None:
+        """Displaced AND flipped edge must NOT be treated as oriented."""
+        # Edge 0 is swapped with edge 1 (displaced) AND flipped (eo[0]=1).
+        # The buggy condition `ep[i] != i or eo[i] == 0` short-circuits and
+        # wrongly emits ALL_ORIENTED / EDGES_ORIENTED.
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('ALL_ORIENTED', patterns.orientation)
+        self.assertNotIn('EDGES_ORIENTED', patterns.orientation)
+        self.assertIn('CORNERS_ORIENTED', patterns.orientation)
+
     def test_all_permuted(self) -> None:
         """Test all pieces permuted but misoriented."""
         cp = SOLVED_CP
@@ -3340,33 +3368,47 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         self.assertIn('LAST_LAYER_ORIENTED', patterns.last_layer)
 
     def test_pll_case(self) -> None:
-        """Test PLL case detection - last layer oriented but not permuted."""
+        """
+        Test PLL case detection - last layer oriented,
+        U pieces permuted within U layer.
+        """
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = SOLVED_CO
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        # This gets OLL_COMPLETE_PLL_REMAINING instead of PLL_CASE
-        # because it's oriented but not permuted
         self.assertIn('OLL_COMPLETE_PLL_REMAINING', patterns.permutation)
+        self.assertIn('PLL_CASE', patterns.last_layer)
 
     def test_pll_edges_only(self) -> None:
-        """Test PLL with edges needing permutation outside U layer."""
+        """Test PLL with only U edges needing permutation, corners solved."""
         cp = SOLVED_CP
         co = SOLVED_CO
-        ep = [0, 4, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11]
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('PLL_EDGES_ONLY', patterns.last_layer)
 
     def test_pll_corners_only(self) -> None:
-        """Test PLL with corners needing permutation outside U layer."""
-        cp = [0, 4, 2, 3, 1, 5, 6, 7]
+        """Test PLL with only U corners needing permutation, edges solved."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = SOLVED_CO
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('PLL_CORNERS_ONLY', patterns.last_layer)
+
+    def test_no_pll_case_when_pieces_cross_layers(self) -> None:
+        """
+        Test that PLL_CASE is not emitted when U pieces crossed
+        into other layers.
+        """
+        cp = [0, 4, 2, 3, 1, 5, 6, 7]
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('PLL_CASE', patterns.last_layer)
 
     def test_oll_case(self) -> None:
         """Test OLL case detection."""
@@ -3403,6 +3445,24 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('MINIMALLY_SCRAMBLED', patterns.scramble)
+
+    def test_highly_scrambled_all_edges_moved(self) -> None:
+        """
+        Test that all edges moved with corners untouched
+        gives HIGHLY_SCRAMBLED.
+        """
+        ep = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertIn('HIGHLY_SCRAMBLED', patterns.scramble)
+
+    def test_not_minimally_scrambled_all_edges_flipped(self) -> None:
+        """
+        Test that all edges flipped with corners untouched
+        is not MINIMALLY_SCRAMBLED.
+        """
+        eo = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, SOLVED_EP, eo)
+        self.assertNotIn('MINIMALLY_SCRAMBLED', patterns.scramble)
 
     def test_single_corner_cycle(self) -> None:
         """Test single cycle involving all corners."""

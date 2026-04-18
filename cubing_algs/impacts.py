@@ -893,8 +893,8 @@ def classify_parity_signature(
 
 
 def classify_orientation_patterns(
-        cp: list[int], co: list[int],
-        ep: list[int], eo: list[int],
+        co: list[int],
+        eo: list[int],
 ) -> tuple[list[str], OrientationFlags]:
     """
     Classify pattern labels based on piece orientation.
@@ -904,9 +904,7 @@ def classify_orientation_patterns(
     reserved for the cases where only one type is oriented.
 
     Args:
-        cp: Corner permutation.
         co: Corner orientation.
-        ep: Edge permutation.
         eo: Edge orientation.
 
     Returns:
@@ -914,14 +912,8 @@ def classify_orientation_patterns(
         can reuse them without recomputing.
 
     """
-    all_corners_oriented = all(
-        cp[i] != i or orientation == 0
-        for i, orientation in enumerate(co)
-    )
-    all_edges_oriented = all(
-        ep[i] != i or orientation == 0
-        for i, orientation in enumerate(eo)
-    )
+    all_corners_oriented = all(orientation == 0 for orientation in co)
+    all_edges_oriented = all(orientation == 0 for orientation in eo)
 
     patterns: list[str] = []
     if all_corners_oriented and all_edges_oriented:
@@ -1047,12 +1039,15 @@ def classify_last_layer_patterns(
         u_corners_permuted = all(cp[i] in U_CORNERS for i in U_CORNERS)
         u_edges_permuted = all(ep[i] in U_EDGES for i in U_EDGES)
 
-        if not (u_corners_permuted and u_edges_permuted):
-            patterns.append('PLL_CASE')
-            if u_corners_permuted:
-                patterns.append('PLL_EDGES_ONLY')
-            elif u_edges_permuted:
-                patterns.append('PLL_CORNERS_ONLY')
+        if u_corners_permuted and u_edges_permuted:
+            u_corners_solved = all(cp[i] == i for i in U_CORNERS)
+            u_edges_solved = all(ep[i] == i for i in U_EDGES)
+            if not (u_corners_solved and u_edges_solved):
+                patterns.append('PLL_CASE')
+                if u_corners_solved:
+                    patterns.append('PLL_EDGES_ONLY')
+                elif u_edges_solved:
+                    patterns.append('PLL_CORNERS_ONLY')
 
     if not last_layer_oriented and first_layer.f2l_edges_solved:
         patterns.append('OLL_CASE')
@@ -1060,24 +1055,35 @@ def classify_last_layer_patterns(
     return patterns
 
 
-def classify_scramble_level(cp: list[int]) -> list[str]:
+def classify_scramble_level(
+        cp: list[int], co: list[int],
+        ep: list[int], eo: list[int],
+) -> list[str]:
     """
-    Classify pattern labels based on how many corners left home.
+    Classify pattern labels based on how many pieces are displaced.
 
     Args:
         cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
 
     Returns:
         List of scramble-level labels (``HIGHLY_SCRAMBLED`` or
         ``MINIMALLY_SCRAMBLED``).
 
     """
-    corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)
+    corners_displaced = sum(
+        1 for i in range(8) if cp[i] != i or co[i] != 0
+    )
+    edges_displaced = sum(
+        1 for i in range(12) if ep[i] != i or eo[i] != 0
+    )
 
     patterns: list[str] = []
-    if corners_moved >= 6:
+    if corners_displaced >= 6 or edges_displaced >= 8:
         patterns.append('HIGHLY_SCRAMBLED')
-    if corners_moved <= 2:
+    if corners_displaced <= 2 and edges_displaced <= 2:
         patterns.append('MINIMALLY_SCRAMBLED')
     return patterns
 
@@ -1148,9 +1154,7 @@ def classify_pattern(
             cycle=[],
         )
 
-    orientation_patterns, orientation = classify_orientation_patterns(
-        cp, co, ep, eo,
-    )
+    orientation_patterns, orientation = classify_orientation_patterns(co, eo)
     permutation_patterns = classify_permutation_patterns(
         cp, ep, orientation,
     )
@@ -1160,7 +1164,7 @@ def classify_pattern(
     last_layer_patterns = classify_last_layer_patterns(
         cp, co, ep, eo, first_layer,
     )
-    scramble_patterns = classify_scramble_level(cp)
+    scramble_patterns = classify_scramble_level(cp, co, ep, eo)
     cycle_patterns = classify_cycle_patterns(cp, ep)
 
     any_classified = any([
