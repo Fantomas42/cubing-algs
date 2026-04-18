@@ -3455,6 +3455,32 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
         self.assertIn('HIGHLY_SCRAMBLED', patterns.scramble)
 
+    @staticmethod
+    def cubies_after(move: str) -> tuple[
+        list[int], list[int], list[int], list[int],
+    ]:
+        cube = VCube(size=3)
+        cube.rotate(move)
+        cp, co, ep, eo, *_ = cube.cubies
+        return cp, co, ep, eo
+
+    def test_r_and_l_preserve_edge_orientation(self) -> None:
+        """R and L don't flip any edges so both yield EDGES_ORIENTED."""
+        for move in ('R', 'L'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertIn('EDGES_ORIENTED', patterns.orientation)
+
+    def test_f_and_b_flip_edges_no_orientation_label(self) -> None:
+        """F and B flip 4 edges each, so EDGES_ORIENTED is not emitted."""
+        for move in ('F', 'B'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertNotIn('EDGES_ORIENTED', patterns.orientation)
+                self.assertNotIn('ALL_ORIENTED', patterns.orientation)
+
     def test_not_minimally_scrambled_all_edges_flipped(self) -> None:
         """
         Test that all edges flipped with corners untouched
