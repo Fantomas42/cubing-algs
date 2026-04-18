@@ -447,7 +447,7 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
         self.cube = VCube()
         self.cube.rotate('z2 B L F L F R F L B R')
 
-    def test_cross_mode_grid(self) -> None:
+    def test_cross_bottom_mode_grid(self) -> None:
         """Test cross mode mask highlights cross-relevant facelets."""
         grid = self.show_grid(self.cube, mode='cross')
 
@@ -456,7 +456,7 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
             '          f  d  b \n'
             '          f  l  b \n'
             ' b  r  r  u  f  d  l  d  f  d  d  d \n'
-            ' l  R  R  U  F  B  U  L  r  d  B  b \n'
+            ' l  r  R  U  f  B  U  l  r  d  b  b \n'
             ' l  d  d  l  U  b  r  r  b  u  F  f \n'
             '          f  L  u \n'
             '          f  U  b \n'
@@ -473,7 +473,7 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
             '          B  D  f \n'
             '          r  L  r \n'
             ' l  D  f  d  D  d  b  r  r  u  f  d \n'
-            ' u  L  R  D  B  b  l  R  r  u  F  b \n'
+            ' u  l  R  D  b  b  l  r  r  u  f  b \n'
             ' r  r  b  u  f  f  l  D  d  l  u  b \n'
             '          l  u  u \n'
             '          b  u  F \n'
