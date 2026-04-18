@@ -2,8 +2,8 @@
 # ruff: noqa: T201
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
-from cubing_algs.masks import F2L_MASK
-from cubing_algs.masks import OLL_MASK
+from cubing_algs.display.masks import F2L_MASK
+from cubing_algs.display.masks import OLL_MASK
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
 
@@ -52,6 +52,6 @@ c.show(facelet='emoji')
 print()
 c.show(layout='linear', facelet='emoji')
 print()
-c.show(layout='linear', facelet='emoji', mask=OLL_MASK)
+c.show(layout='linear', mask=OLL_MASK, facelet='emoji')
 print()
 c_hidden.show(layout='linear', facelet='emoji')

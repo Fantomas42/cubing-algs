@@ -203,8 +203,10 @@ class VCubeDisplay(ModeDisplay):
 
         """
         if self.facelet_type == 'emoji':
-            if mask == '0':
+            if mask in {'0', '2'}:
                 return EMOJIS['masked']
+            if mask == '3':
+                return '  '
             if facelet not in FACE_ORDER:
                 return EMOJIS['hidden']
             return EMOJIS[facelet]
