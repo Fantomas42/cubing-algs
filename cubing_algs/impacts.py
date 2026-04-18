@@ -902,6 +902,8 @@ def classify_orientation_patterns(
     When both corners and edges are oriented only the aggregate
     ``ALL_ORIENTED`` label is emitted; the per-piece-type labels are
     reserved for the cases where only one type is oriented.
+    ``EO_COMPLETE`` and ``CO_COMPLETE`` are always emitted alongside
+    their respective oriented labels for unambiguous per-type queries.
 
     Args:
         co: Corner orientation.
@@ -917,11 +919,11 @@ def classify_orientation_patterns(
 
     patterns: list[str] = []
     if all_corners_oriented and all_edges_oriented:
-        patterns.append('ALL_ORIENTED')
+        patterns.extend(['ALL_ORIENTED', 'EO_COMPLETE', 'CO_COMPLETE'])
     elif all_corners_oriented:
-        patterns.extend(['CORNERS_ORIENTED', 'OLL_CORNERS_DONE'])
+        patterns.extend(['CORNERS_ORIENTED', 'CO_COMPLETE', 'OLL_CORNERS_DONE'])
     elif all_edges_oriented:
-        patterns.extend(['EDGES_ORIENTED', 'OLL_EDGES_DONE'])
+        patterns.extend(['EDGES_ORIENTED', 'EO_COMPLETE', 'OLL_EDGES_DONE'])
 
     return patterns, OrientationFlags(all_corners_oriented, all_edges_oriented)
 
@@ -965,6 +967,10 @@ def classify_permutation_patterns(
         patterns.append('OLL_COMPLETE_PLL_REMAINING')
     if all_permuted and not all_oriented:
         patterns.append('PERMUTED_BUT_MISORIENTED')
+
+    # ZZ EOLine: EO complete + DF (index 5) and DB (index 7) in home slots.
+    if orientation.all_edges_oriented and ep[5] == 5 and ep[7] == 7:
+        patterns.append('EOLine_DONE')
 
     return patterns
 
@@ -1033,6 +1039,10 @@ def classify_last_layer_patterns(
     last_layer_oriented = u_corners_oriented and u_edges_oriented
 
     patterns: list[str] = []
+    u_edges_in_u_layer = all(ep[i] in U_EDGES for i in U_EDGES)
+    if u_edges_in_u_layer and u_edges_oriented:
+        patterns.append('OLL_CROSS_DONE')
+
     if last_layer_oriented:
         patterns.append('LAST_LAYER_ORIENTED')
 
@@ -1088,6 +1098,35 @@ def classify_scramble_level(
     return patterns
 
 
+def classify_single_cycles(
+        corner_cycles: list[list[int]], edge_cycles: list[list[int]],
+        cp: list[int], ep: list[int],
+) -> list[str]:
+    """
+    Classify single-cycle and swap labels for corners and edges.
+
+    Args:
+        corner_cycles: Corner permutation cycles.
+        edge_cycles: Edge permutation cycles.
+        cp: Corner permutation (used to determine full cycle length).
+        ep: Edge permutation (used to determine full cycle length).
+
+    Returns:
+        List of single-cycle labels.
+
+    """
+    patterns: list[str] = []
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
+        patterns.append('SINGLE_CORNER_CYCLE')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
+        patterns.append('SINGLE_EDGE_CYCLE')
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
+        patterns.append('SINGLE_CORNER_SWAP')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
+        patterns.append('SINGLE_EDGE_SWAP')
+    return patterns
+
+
 def classify_cycle_patterns(
         cp: list[int], ep: list[int],
 ) -> list[str]:
@@ -1105,20 +1144,35 @@ def classify_cycle_patterns(
     """
     corner_cycles = find_permutation_cycles(cp)
     edge_cycles = find_permutation_cycles(ep)
+    corners_solved = cp == SOLVED_CP
+    edges_solved = ep == SOLVED_EP
 
-    patterns: list[str] = []
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
-        patterns.append('SINGLE_CORNER_CYCLE')
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
-        patterns.append('SINGLE_EDGE_CYCLE')
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
-        patterns.append('SINGLE_CORNER_SWAP')
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
-        patterns.append('SINGLE_EDGE_SWAP')
-    if any(len(cycle) == 3 for cycle in corner_cycles):
+    patterns = classify_single_cycles(corner_cycles, edge_cycles, cp, ep)
+
+    has_corner_3_cycle = any(len(c) == 3 for c in corner_cycles)
+    has_edge_3_cycle = any(len(c) == 3 for c in edge_cycles)
+
+    if has_corner_3_cycle:
         patterns.append('CORNER_THREE_CYCLE')
-    if any(len(cycle) == 3 for cycle in edge_cycles):
+    if has_edge_3_cycle:
         patterns.append('EDGE_THREE_CYCLE')
+    if any(len(c) == 4 for c in corner_cycles):
+        patterns.append('CORNER_FOUR_CYCLE')
+    if any(len(c) == 4 for c in edge_cycles):
+        patterns.append('EDGE_FOUR_CYCLE')
+
+    # Pure piece-type 3-cycles: only one piece type affected (commutator).
+    if has_corner_3_cycle and edges_solved:
+        patterns.append('PURE_CORNER_3_CYCLE')
+    if has_edge_3_cycle and corners_solved:
+        patterns.append('PURE_EDGE_3_CYCLE')
+
+    # Double swaps: two independent 2-cycles (H-perm / Z-perm like structures).
+    if sum(1 for c in corner_cycles if len(c) == 2) == 2:
+        patterns.append('DOUBLE_CORNER_SWAP')
+    if sum(1 for c in edge_cycles if len(c) == 2) == 2:
+        patterns.append('DOUBLE_EDGE_SWAP')
+
     return patterns
 
 
