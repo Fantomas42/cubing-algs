@@ -211,6 +211,9 @@ class VCubeDisplay(ModeDisplay):
                 return EMOJIS['hidden']
             return EMOJIS[facelet]
 
+        if mask == '3':
+            return ' ' * self.facelet_size
+
         if not USE_COLORS or self.facelet_type == 'no-color':
             return f' { facelet } '
 
@@ -222,7 +225,7 @@ class VCubeDisplay(ModeDisplay):
             face_key = facelet
             if adjacent:
                 face_key += '_adjacent'
-            elif mask == '0':
+            elif mask in {'0', '2'}:
                 face_key += '_masked'
             face_color = self.palette[face_key]
 
