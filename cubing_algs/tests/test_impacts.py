@@ -3544,12 +3544,185 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('EDGE_THREE_CYCLE', patterns.cycle)
 
+    def test_eo_complete_with_edges_oriented(self) -> None:
+        """EO_COMPLETE fires when all edges are oriented."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('EO_COMPLETE', patterns.orientation)
+
+    def test_eo_complete_with_all_oriented(self) -> None:
+        """EO_COMPLETE is also emitted under the ALL_ORIENTED label."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('EO_COMPLETE', patterns.orientation)
+        self.assertIn('ALL_ORIENTED', patterns.orientation)
+
+    def test_co_complete_with_corners_oriented(self) -> None:
+        """CO_COMPLETE fires when all corners are oriented."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('CO_COMPLETE', patterns.orientation)
+
+    def test_co_complete_with_all_oriented(self) -> None:
+        """CO_COMPLETE is also emitted under the ALL_ORIENTED label."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('CO_COMPLETE', patterns.orientation)
+
+    def test_oll_cross_done_u_edges_oriented(self) -> None:
+        """OLL_CROSS_DONE fires when all four U-layer edges are EO=0."""
+        cp = SOLVED_CP
+        co = [1, 0, 0, 0, 0, 0, 0, 0]  # corner twisted → not all oriented
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO  # all edges oriented, so U edges are clean
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('OLL_CROSS_DONE', patterns.last_layer)
+
+    def test_oll_cross_done_not_emitted_when_u_edge_flipped(self) -> None:
+        """OLL_CROSS_DONE must not fire when a U-layer edge is flipped."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # UR edge flipped
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('OLL_CROSS_DONE', patterns.last_layer)
+
+    def test_oll_cross_done_with_middle_edges_flipped(self) -> None:
+        """OLL_CROSS_DONE fires even when middle-layer edges are flipped."""
+        cp = SOLVED_CP
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0]  # FR, FL flipped
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('OLL_CROSS_DONE', patterns.last_layer)
+
+    def test_eoline_done(self) -> None:
+        """EOLine_DONE fires when EO is complete and DF+DB are in place."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        # ep[5]=5 (DF), ep[7]=7 (DB) in home slots; other edges scrambled
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('EOLine_DONE', patterns.permutation)
+
+    def test_eoline_done_not_emitted_when_eo_incomplete(self) -> None:
+        """EOLine_DONE must not fire when any edge is flipped."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('EOLine_DONE', patterns.permutation)
+
+    def test_eoline_done_not_emitted_when_df_out_of_place(self) -> None:
+        """EOLine_DONE must not fire when DF is not in its home slot."""
+        cp = SOLVED_CP
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = [0, 1, 2, 3, 4, 6, 5, 7, 8, 9, 10, 11]  # DF↔DL swapped
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('EOLine_DONE', patterns.permutation)
+
+    def test_pure_corner_3_cycle(self) -> None:
+        """PURE_CORNER_3_CYCLE fires when only corners move in a 3-cycle."""
+        cp = [1, 2, 0, 3, 4, 5, 6, 7]  # 3-cycle on corners 0,1,2
+        co = SOLVED_CO
+        ep = SOLVED_EP  # edges untouched
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('PURE_CORNER_3_CYCLE', patterns.cycle)
+
+    def test_pure_corner_3_cycle_not_emitted_when_edges_moved(self) -> None:
+        """PURE_CORNER_3_CYCLE must not fire when edges are also permuted."""
+        cp = [1, 2, 0, 3, 4, 5, 6, 7]
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # edges also moved
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('PURE_CORNER_3_CYCLE', patterns.cycle)
+
+    def test_pure_edge_3_cycle(self) -> None:
+        """PURE_EDGE_3_CYCLE fires when only edges move in a 3-cycle."""
+        cp = SOLVED_CP  # corners untouched
+        co = SOLVED_CO
+        ep = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # 3-cycle on edges 0,1,2
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('PURE_EDGE_3_CYCLE', patterns.cycle)
+
+    def test_pure_edge_3_cycle_not_emitted_when_corners_moved(self) -> None:
+        """PURE_EDGE_3_CYCLE must not fire when corners are also permuted."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]  # corners also moved
+        co = SOLVED_CO
+        ep = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('PURE_EDGE_3_CYCLE', patterns.cycle)
+
+    def test_double_corner_swap(self) -> None:
+        """DOUBLE_CORNER_SWAP fires when there are exactly two corner 2-cycles."""
+        cp = [1, 0, 3, 2, 4, 5, 6, 7]  # two swaps: (0,1) and (2,3)
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('DOUBLE_CORNER_SWAP', patterns.cycle)
+
+    def test_double_corner_swap_not_emitted_for_single_swap(self) -> None:
+        """DOUBLE_CORNER_SWAP must not fire for a single corner swap."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        patterns = classify_pattern(cp, SOLVED_CO, SOLVED_EP, SOLVED_EO)
+        self.assertNotIn('DOUBLE_CORNER_SWAP', patterns.cycle)
+
+    def test_double_edge_swap(self) -> None:
+        """DOUBLE_EDGE_SWAP fires when there are exactly two edge 2-cycles."""
+        ep = [1, 0, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11]  # two swaps: (0,1) and (2,3)
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertIn('DOUBLE_EDGE_SWAP', patterns.cycle)
+
+    def test_double_edge_swap_not_emitted_for_single_swap(self) -> None:
+        """DOUBLE_EDGE_SWAP must not fire for a single edge swap."""
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertNotIn('DOUBLE_EDGE_SWAP', patterns.cycle)
+
+    def test_f_and_b_no_eo_complete(self) -> None:
+        """EO_COMPLETE must not fire after F or B (they flip edges)."""
+        for move in ('F', 'B'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertNotIn('EO_COMPLETE', patterns.orientation)
+
+    def test_r_and_l_have_eo_complete(self) -> None:
+        """EO_COMPLETE fires after R or L (they never flip edges)."""
+        for move in ('R', 'L'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertIn('EO_COMPLETE', patterns.orientation)
+
     def test_unclassified_pattern(self) -> None:
         """Test pattern that doesn't match standard classifications."""
-        cp = [0, 2, 1, 3, 5, 4, 6, 7]
-        co = [1, 1, 1, 0, 0, 0, 0, 0]
-        ep = [2, 1, 0, 3, 5, 4, 6, 7, 8, 9, 10, 11]
-        eo = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        # 5-cycle in both corners and edges (no 2- or 3-cycle), partial
+        # CO/EO including bad U-layer edges, medium scramble level.
+        cp = [1, 2, 3, 4, 0, 5, 6, 7]
+        co = [1, 2, 0, 0, 0, 0, 0, 0]
+        ep = [1, 2, 3, 4, 0, 5, 6, 7, 8, 9, 10, 11]
+        eo = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
         self.assertIn('UNCLASSIFIED', patterns.state)
 
