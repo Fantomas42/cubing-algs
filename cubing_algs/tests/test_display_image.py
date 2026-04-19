@@ -237,6 +237,35 @@ class StickerColorCorrectnessTestCase(unittest.TestCase):
         self.assertIn('fill="#F5F5F5"', svg)
 
 
+class GetStickerFillTestCase(unittest.TestCase):
+    """Tests for get_sticker_fill."""
+
+    def setUp(self) -> None:
+        """Set up display instance."""
+        self.display = ImageDisplay(VCube())
+
+    def test_mask_1_returns_palette_color(self) -> None:
+        """mask_char '1' (visible) returns the palette color for the face."""
+        result = self.display.get_sticker_fill('U', '1')
+        self.assertEqual(result, self.display.palette['U'])
+
+    def test_mask_0_returns_transparent_face_color(self) -> None:
+        """mask_char '0' (hidden) returns face color at 25% opacity."""
+        result = self.display.get_sticker_fill('U', '0')
+        self.assertIn('rgba(', result)
+        self.assertIn('0.25)', result)
+
+    def test_mask_2_returns_masked_color(self) -> None:
+        """mask_char '2' (masked) returns the palette masked color."""
+        result = self.display.get_sticker_fill('U', '2')
+        self.assertEqual(result, self.display.palette['masked'])
+
+    def test_mask_3_returns_fully_transparent(self) -> None:
+        """mask_char '3' (invisible) returns fully transparent fill."""
+        result = self.display.get_sticker_fill('U', '3')
+        self.assertEqual(result, 'rgb(0,0,0,0.0)')
+
+
 class AssembleSvgTestCase(unittest.TestCase):
     """Tests for SVG assembly."""
 

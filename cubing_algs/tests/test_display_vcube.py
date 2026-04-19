@@ -1442,6 +1442,24 @@ class TestVCubeDisplayFaceletTypes(unittest.TestCase):
         self.assertEqual(result, ' U ')
         self.assertNotIn('\x1b[', result)
 
+    def test_display_facelet_emoji_mask_3_returns_spaces(self) -> None:
+        """
+        display_facelet with emoji type and mask='3'
+        returns two spaces.
+        """
+        printer = VCubeDisplay(self.cube, facelet_type='emoji')
+        result = printer.display_facelet('U', mask='3')
+        self.assertEqual(result, '  ')
+
+    def test_display_facelet_mask_3_returns_spaces(self) -> None:
+        """
+        display_facelet with mask='3' returns spaces
+        equal to facelet_size.
+        """
+        printer = VCubeDisplay(self.cube)
+        result = printer.display_facelet('U', mask='3')
+        self.assertEqual(result, ' ' * printer.facelet_size)
+
 
 class TestColorSupport(unittest.TestCase):
     """Tests for color_support() function."""
