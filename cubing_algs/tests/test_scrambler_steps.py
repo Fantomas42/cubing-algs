@@ -13,6 +13,7 @@ from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
 from cubing_algs.scrambler.steps import generate_step_state
 from cubing_algs.scrambler.steps import scramble_easy_cross
+from cubing_algs.scrambler.steps import scramble_edges_oriented
 from cubing_algs.scrambler.steps import scramble_f2l
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
@@ -850,3 +851,78 @@ class TestScrambleF2L(unittest.TestCase):
 
             self.assertIsInstance(scramble, Algorithm)
             self.assertGreater(len(scramble), 0)
+
+
+class TestScrambleEdgesOriented(unittest.TestCase):
+    """Tests for scramble_edges_oriented function."""
+
+    def test_returns_algorithm(self) -> None:
+        """Test that the function returns an Algorithm instance."""
+        scramble = scramble_edges_oriented(rng=Random(42))
+
+        self.assertIsInstance(scramble, Algorithm)
+
+    def test_all_edges_oriented_after_scramble(self) -> None:
+        """Test that applying the scramble leaves all edges oriented."""
+        rng = Random(42)
+        for _ in range(10):
+            scramble = scramble_edges_oriented(rng=rng)
+            cube = VCube(size=3)
+            cube.rotate(str(scramble))
+            _, _, _, eo, *_ = cube.cubies
+
+            self.assertEqual(
+                list(eo),
+                [0] * 12,
+                f'Scramble {scramble} left misoriented edges',
+            )
+
+    def test_no_single_f_or_b_moves(self) -> None:
+        """Test that F, F', B, B' moves are not in the scramble."""
+        rng = Random(42)
+        for _ in range(20):
+            scramble = scramble_edges_oriented(rng=rng)
+            moves = str(scramble).split()
+
+            for move in moves:
+                self.assertNotIn(
+                    move,
+                    ('F', "F'", 'B', "B'"),
+                    f'Forbidden move {move!r} found in {scramble}',
+                )
+
+    def test_deterministic_with_seed(self) -> None:
+        """Test that same seed produces same scramble."""
+        scramble1 = scramble_edges_oriented(rng=Random(42))
+        scramble2 = scramble_edges_oriented(rng=Random(42))
+
+        self.assertEqual(str(scramble1), str(scramble2))
+        self.assertEqual(
+            str(scramble1),
+            "B2 R B2 U F2 R2 U R' D' R F2 R' U2 "
+            "F2 L2 F2 L2 U2 L2 U2 B2 D L F2 R2",
+        )
+
+    def test_different_seeds_produce_different_results(self) -> None:
+        """Test that different seeds produce different scrambles."""
+        scramble1 = scramble_edges_oriented(rng=Random(42))
+        scramble2 = scramble_edges_oriented(rng=Random(777))
+
+        self.assertNotEqual(str(scramble1), str(scramble2))
+
+    def test_custom_iterations(self) -> None:
+        """Test that custom iterations controls the number of moves."""
+        scramble = scramble_edges_oriented(iterations=10, rng=Random(42))
+
+        self.assertEqual(len(scramble), 10)
+        self.assertEqual(
+            str(scramble),
+            "B2 R' F2 D2 L U2 F2 R2 U R'",
+        )
+
+    def test_default_rng_when_none(self) -> None:
+        """Test that a valid scramble is produced when rng is None."""
+        scramble = scramble_edges_oriented(rng=None)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertGreater(len(scramble), 0)

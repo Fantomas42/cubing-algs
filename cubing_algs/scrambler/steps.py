@@ -545,3 +545,27 @@ def scramble_f2l(
     eo = random_edge_orientation(f2l_edges, rng)
 
     return cubies_to_scramble((cp, co, ep, eo))
+
+
+def scramble_edges_oriented(
+        iterations: int | None = None,
+        rng: Random | None = None,
+) -> Algorithm:
+    """
+    Generate a random scramble for a 3x3x3 cube with edges oriented.
+
+    Args:
+        iterations: Number of moves in the scramble (None for automatic).
+        rng: Optional random number generator.
+
+    Returns:
+        Algorithm containing the scramble sequence.
+
+    """
+    move_set = build_cube_move_set(3)
+
+    for move_breaking_orientation in ('B', 'F'):
+        move_set.remove(move_breaking_orientation)
+        move_set.remove(f"{ move_breaking_orientation }'")
+
+    return random_moves(3, move_set, iterations, rng)
