@@ -110,19 +110,30 @@ FINGER_ASSIGNMENTS: dict[str, str] = {
     # Thumb moves (generally comfortable)
     'R': 'thumb', "R'": 'thumb', 'R2': 'thumb',
     'L': 'thumb', "L'": 'thumb', 'L2': 'thumb',
+    'Rw': 'thumb', "Rw'": 'thumb', 'Rw2': 'thumb',
+    'Lw': 'thumb', "Lw'": 'thumb', 'Lw2': 'thumb',
 
     # Index finger moves (most common U moves)
     'U': 'index', "U'": 'index', 'U2': 'index',
     'D': 'index', "D'": 'index', 'D2': 'index',
+    'Uw': 'index', "Uw'": 'index', 'Uw2': 'index',
+    'Dw': 'index', "Dw'": 'index', 'Dw2': 'index',
 
     # Middle finger moves
     'F': 'middle', "F'": 'middle', 'F2': 'middle',
     'B': 'middle', "B'": 'middle', 'B2': 'middle',
+    'Fw': 'middle', "Fw'": 'middle', 'Fw2': 'middle',
+    'Bw': 'middle', "Bw'": 'middle', 'Bw2': 'middle',
 
     # Ring finger moves (slice moves, generally awkward)
     'M': 'ring', "M'": 'ring', 'M2': 'ring',
     'E': 'ring', "E'": 'ring', 'E2': 'ring',
     'S': 'ring', "S'": 'ring', 'S2': 'ring',
+
+    # Rotation moves (matched to their axis face)
+    'x': 'thumb', "x'": 'thumb', 'x2': 'thumb',
+    'y': 'index', "y'": 'index', 'y2': 'index',
+    'z': 'middle', "z'": 'middle', 'z2': 'middle',
 }
 
 # Ergonomic weights for different move types (0-1, higher = more ergonomic)
@@ -456,6 +467,10 @@ def calculate_trigger_bonus(
 def estimate_tps_potential(
     algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
+    *,
+    flow: float,
+    regrip_count: int,
+    balance_ratio: float,
 ) -> float:
     """
     Estimate the maximum theoretical turns per second for this algorithm.
@@ -463,6 +478,9 @@ def estimate_tps_potential(
     Args:
         algorithm: The algorithm to analyze.
         hand_dominance: The hand dominance preference.
+        flow: Pre-computed flow score.
+        regrip_count: Pre-computed regrip count.
+        balance_ratio: Pre-computed hand balance ratio.
 
     Returns:
         Estimated TPS (typically 2.0-15.0).
@@ -482,15 +500,11 @@ def estimate_tps_potential(
         return base_tps
 
     avg_weight = sum(move_weights) / len(move_weights)
-    flow = calculate_flow_score(algorithm)
-    regrips = compute_regrip_count(algorithm)
     non_pause_count = len(move_weights)
-
-    _, _, _, balance_ratio = compute_hand_balance(algorithm)
 
     weight_multiplier = avg_weight
     flow_multiplier = 0.7 + (0.3 * flow)
-    regrip_penalty = max(0.8, 1.0 - (regrips / non_pause_count * 2))
+    regrip_penalty = max(0.8, 1.0 - (regrip_count / non_pause_count * 2))
     balance_bonus = 0.9 + (0.2 * balance_ratio)
 
     estimated_tps = (
@@ -504,6 +518,10 @@ def estimate_tps_potential(
 def calculate_ergonomic_score(
     algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
+    *,
+    flow: float,
+    balance_ratio: float,
+    regrip_count: int,
 ) -> float:
     """
     Calculate an overall ergonomic score for the algorithm.
@@ -513,6 +531,9 @@ def calculate_ergonomic_score(
     Args:
         algorithm: The algorithm to analyze.
         hand_dominance: The hand dominance preference.
+        flow: Pre-computed flow score.
+        balance_ratio: Pre-computed hand balance ratio.
+        regrip_count: Pre-computed regrip count.
 
     Returns:
         Ergonomic score from 0.0 to 1.0.
@@ -530,13 +551,8 @@ def calculate_ergonomic_score(
         return 1.0
 
     avg_move_score = sum(move_weights) / len(move_weights)
-    flow = calculate_flow_score(algorithm)
-
-    _, _, _, balance_ratio = compute_hand_balance(algorithm)
     hand_balance = balance_ratio * 2  # Convert 0-0.5 range to 0-1
-
-    regrips = compute_regrip_count(algorithm)
-    regrip_score = max(0.0, 1.0 - (regrips / len(move_weights)))
+    regrip_score = max(0.0, 1.0 - (regrip_count / len(move_weights)))
 
     return max(0.0, min(1.0,
         avg_move_score * 0.4
@@ -547,42 +563,49 @@ def calculate_ergonomic_score(
 
 
 def classify_algorithm_difficulty(
-    algorithm: 'Algorithm',
-    hand_dominance: HandDominance = HandDominance.RIGHT,
+    ergonomic_score: float,
+    regrip_count: int,
+    flow: float,
 ) -> str:
     """
-    Classify the algorithm into difficulty categories based on ergonomics.
+    Classify an algorithm into difficulty categories based on ergonomics.
 
     Args:
-        algorithm: The algorithm to classify.
-        hand_dominance: The hand dominance preference.
+        ergonomic_score: Pre-computed ergonomic score.
+        regrip_count: Pre-computed regrip count.
+        flow: Pre-computed flow score.
 
     Returns:
         One of: 'Beginner', 'Intermediate', 'Advanced', 'Expert'.
 
     """
-    score = calculate_ergonomic_score(algorithm, hand_dominance)
-    regrips = compute_regrip_count(algorithm)
-    flow = calculate_flow_score(algorithm)
-
-    if (score >= BEGINNER_SCORE
-            and regrips <= BEGINNER_REGRIPS and flow >= BEGINNER_FLOW):
+    if (ergonomic_score >= BEGINNER_SCORE
+            and regrip_count <= BEGINNER_REGRIPS and flow >= BEGINNER_FLOW):
         return 'Beginner'
-    if (score >= INTERMEDIATE_SCORE
-            and regrips <= INTERMEDIATE_REGRIPS
+    if (ergonomic_score >= INTERMEDIATE_SCORE
+            and regrip_count <= INTERMEDIATE_REGRIPS
             and flow >= INTERMEDIATE_FLOW):
         return 'Intermediate'
-    if score >= ADVANCED_SCORE and regrips <= ADVANCED_REGRIPS:
+    if ergonomic_score >= ADVANCED_SCORE and regrip_count <= ADVANCED_REGRIPS:
         return 'Advanced'
     return 'Expert'
 
 
-def suggest_ergonomic_improvements(algorithm: 'Algorithm') -> list[str]:
+def suggest_ergonomic_improvements(
+    algorithm: 'Algorithm',
+    *,
+    regrip_count: int,
+    balance_ratio: float,
+    flow: float,
+) -> list[str]:
     """
     Suggest specific improvements to make the algorithm more ergonomic.
 
     Args:
         algorithm: The algorithm to analyze.
+        regrip_count: Pre-computed regrip count.
+        balance_ratio: Pre-computed hand balance ratio.
+        flow: Pre-computed flow score.
 
     Returns:
         List of improvement suggestions.
@@ -593,22 +616,19 @@ def suggest_ergonomic_improvements(algorithm: 'Algorithm') -> list[str]:
 
     suggestions: list[str] = []
 
-    regrips = compute_regrip_count(algorithm)
     non_pause_count = sum(1 for m in algorithm if not m.is_pause)
 
     if non_pause_count == 0:
         return []
 
-    if regrips > non_pause_count * REGRIP_RATIO_THRESHOLD:
+    if regrip_count > non_pause_count * REGRIP_RATIO_THRESHOLD:
         suggestions.append(
             'Consider reducing cube rotations to minimize regrips',
         )
 
-    _, _, _, balance_ratio = compute_hand_balance(algorithm)
     if balance_ratio * 2 < BALANCE_THRESHOLD:
         suggestions.append('Try to balance moves between both hands')
 
-    flow = calculate_flow_score(algorithm)
     if flow < FLOW_THRESHOLD:
         suggestions.append(
             'Look for alternatives to reduce awkward move transitions',
@@ -870,7 +890,9 @@ def compute_comfort_score(
     if total_moves == 0:
         return 100.0
 
-    # Hand balance component (0-25 points)
+    # Hand balance component (0-12.5 points, not 0-25).
+    # hand_balance_ratio is in [0, 0.5] (min/total), so perfect balance = 12.5.
+    # This intentionally keeps balance from dominating over other factors.
     balance_score = hand_balance_ratio * 25
 
     # Difficulty component (0-25 points, inverted)
@@ -1002,19 +1024,36 @@ def compute_ergonomics(  # noqa: PLR0914
 
     # Advanced metrics
     flow_score_val = calculate_flow_score(algorithm)
-    ergonomic_score = calculate_ergonomic_score(algorithm, hand_dominance)
+    base_ergonomic_score = calculate_ergonomic_score(
+        algorithm, hand_dominance,
+        flow=flow_score_val,
+        balance_ratio=balance_ratio,
+        regrip_count=regrip_count,
+    )
 
     trigger_matches = find_trigger_patterns(algorithm, hand_dominance)
     trigger_bonus, speed_mult = calculate_trigger_bonus(trigger_matches)
-    ergonomic_score = min(1.0, ergonomic_score + trigger_bonus)
+    ergonomic_score = min(1.0, base_ergonomic_score + trigger_bonus)
 
-    estimated_tps = estimate_tps_potential(algorithm, hand_dominance)
+    estimated_tps = estimate_tps_potential(
+        algorithm, hand_dominance,
+        flow=flow_score_val,
+        regrip_count=regrip_count,
+        balance_ratio=balance_ratio,
+    )
     estimated_tps = max(2.0, min(15.0, estimated_tps * speed_mult))
 
     difficulty_classification = classify_algorithm_difficulty(
-        algorithm, hand_dominance,
+        base_ergonomic_score,
+        regrip_count,
+        flow_score_val,
     )
-    suggestions_list = suggest_ergonomic_improvements(algorithm)
+    suggestions_list = suggest_ergonomic_improvements(
+        algorithm,
+        regrip_count=regrip_count,
+        balance_ratio=balance_ratio,
+        flow=flow_score_val,
+    )
 
     trigger_count = len(trigger_matches)
     trigger_coverage = sum(

@@ -1,5 +1,6 @@
 """Tests for ergonomics analysis."""
 import unittest
+from typing import TypedDict
 from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
@@ -31,6 +32,29 @@ from cubing_algs.move import Move
 from cubing_algs.triggers import TRIGGER_PATTERNS
 from cubing_algs.triggers import TriggerMatch
 from cubing_algs.triggers import TriggerPattern
+
+
+class ErgonomicInputs(TypedDict):
+    """Pre-computed inputs shared by ergonomic scoring functions."""
+
+    flow: float
+    balance_ratio: float
+    regrip_count: int
+
+
+def ergonomic_inputs(alg: Algorithm) -> ErgonomicInputs:
+    """
+    Compute the pre-requisite inputs for ergonomic scoring functions.
+
+    Returns:
+        ErgonomicInputs with flow, balance_ratio, and regrip_count.
+
+    """
+    return ErgonomicInputs(
+        flow=calculate_flow_score(alg),
+        balance_ratio=compute_hand_balance(alg)[3],
+        regrip_count=compute_regrip_count(alg),
+    )
 
 
 class TestHandDominance(unittest.TestCase):
@@ -410,17 +434,23 @@ class TestEstimateTpsPotential(unittest.TestCase):
     def test_empty_algorithm(self) -> None:
         """Test TPS for empty algorithm."""
         alg = Algorithm.parse_moves('')
-        self.assertEqual(estimate_tps_potential(alg), 0.0)
+        tps = estimate_tps_potential(
+            alg, flow=1.0, regrip_count=0, balance_ratio=0.5,
+        )
+        self.assertEqual(tps, 0.0)
 
     def test_all_pause_algorithm(self) -> None:
         """Test TPS for non-empty algorithm with only pauses."""
         alg = Algorithm([Move('.')])
-        self.assertEqual(estimate_tps_potential(alg), 8.0)
+        tps = estimate_tps_potential(
+            alg, flow=1.0, regrip_count=0, balance_ratio=0.5,
+        )
+        self.assertEqual(tps, 8.0)
 
     def test_easy_algorithm(self) -> None:
         """Test TPS for easy algorithm."""
         alg = Algorithm.parse_moves("R U R' U'")
-        tps = estimate_tps_potential(alg)
+        tps = estimate_tps_potential(alg, **ergonomic_inputs(alg))
         self.assertGreater(tps, 2.0)
         self.assertLessEqual(tps, 15.0)
 
@@ -428,14 +458,18 @@ class TestEstimateTpsPotential(unittest.TestCase):
         """Test TPS is lower for hard algorithm."""
         easy_alg = Algorithm.parse_moves("R U R' U'")
         hard_alg = Algorithm.parse_moves('B2 E2 S2 D2')
-        easy_tps = estimate_tps_potential(easy_alg)
-        hard_tps = estimate_tps_potential(hard_alg)
+        easy_tps = estimate_tps_potential(
+            easy_alg, **ergonomic_inputs(easy_alg),
+        )
+        hard_tps = estimate_tps_potential(
+            hard_alg, **ergonomic_inputs(hard_alg),
+        )
         self.assertGreater(easy_tps, hard_tps)
 
     def test_bounds(self) -> None:
         """Test that TPS is within expected bounds."""
         alg = Algorithm.parse_moves('R U F L B D M E S')
-        tps = estimate_tps_potential(alg)
+        tps = estimate_tps_potential(alg, **ergonomic_inputs(alg))
         self.assertGreaterEqual(tps, 2.0)
         self.assertLessEqual(tps, 15.0)
 
@@ -446,17 +480,27 @@ class TestCalculateErgonomicScore(unittest.TestCase):
     def test_empty_algorithm(self) -> None:
         """Test score for empty algorithm."""
         alg = Algorithm.parse_moves('')
-        self.assertEqual(calculate_ergonomic_score(alg), 1.0)
+        self.assertEqual(
+            calculate_ergonomic_score(
+                alg, flow=1.0, balance_ratio=0.5, regrip_count=0,
+            ),
+            1.0,
+        )
 
     def test_all_pause_algorithm(self) -> None:
         """Test score for non-empty algorithm with only pauses."""
         alg = Algorithm([Move('.')])
-        self.assertEqual(calculate_ergonomic_score(alg), 1.0)
+        self.assertEqual(
+            calculate_ergonomic_score(
+                alg, flow=1.0, balance_ratio=0.5, regrip_count=0,
+            ),
+            1.0,
+        )
 
     def test_easy_algorithm_high_score(self) -> None:
         """Test that easy algorithms get high scores."""
         alg = Algorithm.parse_moves("R U R' U'")
-        score = calculate_ergonomic_score(alg)
+        score = calculate_ergonomic_score(alg, **ergonomic_inputs(alg))
         self.assertGreater(score, 0.6)
 
     def test_hard_algorithm_lower_score(self) -> None:
@@ -464,14 +508,14 @@ class TestCalculateErgonomicScore(unittest.TestCase):
         easy_alg = Algorithm.parse_moves("R U R' U'")
         hard_alg = Algorithm.parse_moves('B2 E2 S2 D2')
         self.assertGreater(
-            calculate_ergonomic_score(easy_alg),
-            calculate_ergonomic_score(hard_alg),
+            calculate_ergonomic_score(easy_alg, **ergonomic_inputs(easy_alg)),
+            calculate_ergonomic_score(hard_alg, **ergonomic_inputs(hard_alg)),
         )
 
     def test_score_bounded(self) -> None:
         """Test that score is between 0 and 1."""
         alg = Algorithm.parse_moves('R U F L B D M E S')
-        score = calculate_ergonomic_score(alg)
+        score = calculate_ergonomic_score(alg, **ergonomic_inputs(alg))
         self.assertGreaterEqual(score, 0.0)
         self.assertLessEqual(score, 1.0)
 
@@ -482,28 +526,52 @@ class TestClassifyAlgorithmDifficulty(unittest.TestCase):
     def test_easy_algorithm_beginner(self) -> None:
         """Test that very easy algorithms classify as Beginner."""
         alg = Algorithm.parse_moves("R U R'")
-        difficulty = classify_algorithm_difficulty(alg)
+        inputs = ergonomic_inputs(alg)
+        score = calculate_ergonomic_score(alg, **inputs)
+        difficulty = classify_algorithm_difficulty(
+            score, inputs['regrip_count'], inputs['flow'],
+        )
         self.assertIn(difficulty, ['Beginner', 'Intermediate'])
 
     def test_expert_classification(self) -> None:
         """Test that rotation-heavy algorithms classify as Expert."""
         alg = Algorithm.parse_moves('x x x x x x x x')
-        self.assertEqual(classify_algorithm_difficulty(alg), 'Expert')
+        inputs = ergonomic_inputs(alg)
+        score = calculate_ergonomic_score(alg, **inputs)
+        self.assertEqual(
+            classify_algorithm_difficulty(
+                score, inputs['regrip_count'], inputs['flow'],
+            ),
+            'Expert',
+        )
 
     def test_valid_classifications(self) -> None:
         """Test that classification returns valid values."""
         valid = {'Beginner', 'Intermediate', 'Advanced', 'Expert'}
         alg = Algorithm.parse_moves('R U F L B D M E S')
-        difficulty = classify_algorithm_difficulty(alg)
+        inputs = ergonomic_inputs(alg)
+        score = calculate_ergonomic_score(alg, **inputs)
+        difficulty = classify_algorithm_difficulty(
+            score, inputs['regrip_count'], inputs['flow'],
+        )
         self.assertIn(difficulty, valid)
 
     def test_hand_dominance_affects_classification(self) -> None:
         """Test that hand dominance can affect classification."""
-        # L-heavy algorithm should be easier for left-handed
         alg = Algorithm.parse_moves("L U L' U' L U L' U'")
-        right_diff = classify_algorithm_difficulty(alg, HandDominance.RIGHT)
-        left_diff = classify_algorithm_difficulty(alg, HandDominance.LEFT)
-        # At minimum, both should return valid values
+        inputs = ergonomic_inputs(alg)
+        right_score = calculate_ergonomic_score(
+            alg, HandDominance.RIGHT, **inputs,
+        )
+        left_score = calculate_ergonomic_score(
+            alg, HandDominance.LEFT, **inputs,
+        )
+        right_diff = classify_algorithm_difficulty(
+            right_score, inputs['regrip_count'], inputs['flow'],
+        )
+        left_diff = classify_algorithm_difficulty(
+            left_score, inputs['regrip_count'], inputs['flow'],
+        )
         valid = {'Beginner', 'Intermediate', 'Advanced', 'Expert'}
         self.assertIn(right_diff, valid)
         self.assertIn(left_diff, valid)
@@ -515,18 +583,27 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
     def test_empty_algorithm(self) -> None:
         """Test suggestions for empty algorithm."""
         alg = Algorithm.parse_moves('')
-        suggestions = suggest_ergonomic_improvements(alg)
+        suggestions = suggest_ergonomic_improvements(
+            alg, regrip_count=0, balance_ratio=0.5, flow=1.0,
+        )
         self.assertEqual(suggestions, [])
 
     def test_all_pause_algorithm(self) -> None:
         """Test suggestions for non-empty algorithm with only pauses."""
         alg = Algorithm([Move('.')])
-        self.assertEqual(suggest_ergonomic_improvements(alg), [])
+        self.assertEqual(
+            suggest_ergonomic_improvements(
+                alg, regrip_count=0, balance_ratio=0.5, flow=1.0,
+            ),
+            [],
+        )
 
     def test_returns_list_of_strings(self) -> None:
         """Test that suggestions are strings."""
         alg = Algorithm.parse_moves('R U F L B D M E S')
-        suggestions = suggest_ergonomic_improvements(alg)
+        suggestions = suggest_ergonomic_improvements(
+            alg, **ergonomic_inputs(alg),
+        )
         self.assertIsInstance(suggestions, list)
         for s in suggestions:
             self.assertIsInstance(s, str)
@@ -534,14 +611,18 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
     def test_rotation_heavy_algorithm(self) -> None:
         """Test suggestions for algorithm with many rotations."""
         alg = Algorithm.parse_moves('x y z x y')
-        suggestions = suggest_ergonomic_improvements(alg)
+        suggestions = suggest_ergonomic_improvements(
+            alg, **ergonomic_inputs(alg),
+        )
         rotation_suggestion = any('rotation' in s.lower() for s in suggestions)
         self.assertTrue(rotation_suggestion)
 
     def test_imbalanced_algorithm(self) -> None:
         """Test suggestions for right-heavy algorithm."""
         alg = Algorithm.parse_moves('R R R R R R R R')
-        suggestions = suggest_ergonomic_improvements(alg)
+        suggestions = suggest_ergonomic_improvements(
+            alg, **ergonomic_inputs(alg),
+        )
         balance_suggestion = any('balance' in s.lower() for s in suggestions)
         self.assertTrue(balance_suggestion)
 
@@ -723,24 +804,25 @@ class TestComputeFingerDistribution(unittest.TestCase):
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
 
-    def test_rotation_moves_default_to_index(self) -> None:
-        """Test that rotation moves default to index finger."""
-        # Rotation moves are not in FINGER_ASSIGNMENTS, should default to index
+    def test_rotation_moves_mapped_by_axis(self) -> None:
+        """Test that rotation moves are mapped by their axis face."""
         alg = Algorithm.parse_moves('x y z')
         thumb, index, middle, ring = compute_finger_distribution(alg)
-        self.assertEqual(thumb, 0)
-        self.assertEqual(index, 3)  # All rotations default to index
-        self.assertEqual(middle, 0)
+        self.assertEqual(thumb, 1)   # x -> thumb (R-axis)
+        self.assertEqual(index, 1)   # y -> index (U-axis)
+        self.assertEqual(middle, 1)  # z -> middle (F-axis)
         self.assertEqual(ring, 0)
 
-    def test_wide_moves_default_to_index(self) -> None:
-        """Test that wide moves default to index finger."""
-        # Wide moves are not in FINGER_ASSIGNMENTS, should default to index
+    def test_wide_moves_match_base_face(self) -> None:
+        """
+        Test that wide moves are mapped to
+        the same finger as their base face.
+        """
         alg = Algorithm.parse_moves('Rw Uw Fw')
         thumb, index, middle, ring = compute_finger_distribution(alg)
-        self.assertEqual(thumb, 0)
-        self.assertEqual(index, 3)  # All wide moves default to index
-        self.assertEqual(middle, 0)
+        self.assertEqual(thumb, 1)   # Rw -> thumb (like R)
+        self.assertEqual(index, 1)   # Uw -> index (like U)
+        self.assertEqual(middle, 1)  # Fw -> middle (like F)
         self.assertEqual(ring, 0)
 
     def test_ring_finger_not_last_move(self) -> None:
