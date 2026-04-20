@@ -68,6 +68,24 @@ class TestTriggerPattern(unittest.TestCase):
         """Test that all 13 trigger patterns are defined."""
         self.assertEqual(len(TRIGGER_PATTERNS), 13)
 
+    def test_no_primary_moves_in_other_variations(self) -> None:
+        """
+        Test that no pattern's primary moves appear
+        as another pattern's variation.
+        """
+        primary_moves = {p.moves: p.name for p in TRIGGER_PATTERNS}
+        for pattern in TRIGGER_PATTERNS:
+            for variation in pattern.variations:
+                if (
+                        variation in primary_moves
+                        and primary_moves[variation] != pattern.name
+                ):
+                    self.fail(
+                        f"Variation '{variation} "
+                        f"of '{pattern.name}' duplicates "
+                        f"primary moves of '{primary_moves[variation]}'",
+                    )
+
 
 class TestTriggerMatch(unittest.TestCase):
     """Test the TriggerMatch NamedTuple."""
@@ -331,6 +349,14 @@ class TestFindTriggerPatterns(unittest.TestCase):
         # Both should find the pattern
         self.assertGreater(len(matches_right), 0)
         self.assertGreater(len(matches_left), 0)
+
+    def test_repeated_trigger_found_multiple_times(self) -> None:
+        """Test that the same trigger pattern is found at each occurrence."""
+        # Two Sexy Moves separated by F2 (prevents Double Sexy matching)
+        alg = Algorithm.parse_moves("R U R' U' F2 R U R' U'")
+        matches = find_trigger_patterns(alg)
+        sexy_matches = [m for m in matches if m.pattern.name == 'Sexy Move']
+        self.assertEqual(len(sexy_matches), 2)
 
 
 class TestCalculateTriggerBonus(unittest.TestCase):
@@ -790,16 +816,13 @@ class TestComputeRegripCount(unittest.TestCase):
         self.assertEqual(regrips, 2)
 
     def test_with_pauses(self) -> None:
-        """Test regrip count calculation ignores pauses."""
+        """
+        Test that pauses are skipped
+        when finding previous move for regrip check.
+        """
         alg = Algorithm.parse_moves('R . L')
         regrips = compute_regrip_count(alg)
-        # Pauses are skipped; prev non-pause for L is R (but pause in between)
-        # Since pause is at index 1 and L at index 2, moves[1]=pause,
-        # the code checks moves[i-1] which is the pause, and skips.
-        # Actually, index 0=R, 1='.', 2=L.
-        # For L at index 2: prev_move = moves[1] = '.', is_pause=True,
-        # so skipped.
-        self.assertEqual(regrips, 0)
+        self.assertEqual(regrips, 1)
 
 
 class TestComputeFlowBreaks(unittest.TestCase):

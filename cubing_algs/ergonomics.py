@@ -117,7 +117,7 @@ TRIGGER_PATTERNS = [
         category='basic',
         ergonomic_bonus=0.10,
         speed_multiplier=1.2,
-        variations=["L U L' U", "R U' R' U'", "L U' L' U'"],
+        variations=["L U L' U", "L U' L' U'"],
     ),
     TriggerPattern(
         name='Anti-Sune Trigger',
@@ -125,7 +125,7 @@ TRIGGER_PATTERNS = [
         category='basic',
         ergonomic_bonus=0.10,
         speed_multiplier=1.2,
-        variations=["L U' L' U'", "R U R' U", "L U L' U"],
+        variations=["L U' L' U'"],
     ),
 
     # Compound triggers
@@ -425,7 +425,7 @@ def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
         return TRANSITION_PENALTIES['opposite']
 
     # Adjacent faces are moderate
-    if face2 in ADJACENT_FACES.get(face1, set()):
+    if face2 in ADJACENT_FACES.get(face1, ()):
         return TRANSITION_PENALTIES['adjacent']
 
     # Check for hand switches
@@ -549,8 +549,6 @@ def find_trigger_patterns(
                     matches.append(match)
 
                     used_indices.update(range(i, i + pattern_length))
-
-                    break  # Move to next pattern
 
     return matches
 
@@ -863,24 +861,22 @@ def compute_regrip_count(moves: 'Algorithm') -> int:
         Number of estimated regrips required.
 
     """
+    from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+
+    moves = moves.transform(unpause_moves)
     regrip_count = 0
 
     for i, move in enumerate(moves):
-        if move.is_pause:
-            continue
-
         # Rotations always require regrip
         if move.is_rotation_move:
             regrip_count += 1
             continue
 
-        # Check transition from previous non-pause move
         if i > 0:
             prev_move = moves[i - 1]
-            if not prev_move.is_pause:
-                penalty = get_transition_penalty(prev_move, move)
-                if penalty >= TRANSITION_PENALTIES['opposite']:
-                    regrip_count += 1
+            penalty = get_transition_penalty(prev_move, move)
+            if penalty >= TRANSITION_PENALTIES['opposite']:
+                regrip_count += 1
 
     return regrip_count
 
