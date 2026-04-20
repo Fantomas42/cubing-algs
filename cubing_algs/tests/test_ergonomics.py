@@ -13,7 +13,6 @@ from cubing_algs.ergonomics import calculate_ergonomic_score
 from cubing_algs.ergonomics import calculate_flow_score
 from cubing_algs.ergonomics import calculate_trigger_bonus
 from cubing_algs.ergonomics import classify_algorithm_difficulty
-from cubing_algs.ergonomics import compute_comfort_score
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.ergonomics import compute_estimated_execution_time
 from cubing_algs.ergonomics import compute_finger_distribution
@@ -1066,81 +1065,32 @@ class TestComputeEstimatedExecutionTime(unittest.TestCase):
         self.assertEqual(time, expected)
 
 
-class TestComputeComfortScore(unittest.TestCase):
-    """Test comfort score computation (uses 0-1 difficulty scale)."""
-
-    def test_empty_algorithm_perfect_score(self) -> None:
-        """Test that empty algorithm gets perfect score."""
-        score = compute_comfort_score(0.5, 0.0, 0, 0, 0)
-        self.assertEqual(score, 100.0)
-
-    def test_perfect_conditions(self) -> None:
-        """Test maximum comfort: perfect balance, no difficulty, no issues."""
-        score = compute_comfort_score(0.5, 0.0, 0, 0, 4)
-        """
-        balance: 0.5 * 25 = 12.5
-        difficulty: 25 - 0.0 * 25 = 25
-        regrip: 25 - 0 = 25
-        flow: 25 - 0 = 25
-        """
-        expected = 12.5 + 25 + 25 + 25
-        self.assertEqual(score, expected)
-
-    def test_imbalanced_hands_lower_score(self) -> None:
-        """Test that imbalanced hands lower the score."""
-        score = compute_comfort_score(0.0, 0.0, 0, 0, 4)
-        # balance: 0 * 25 = 0  noqa: ERA001
-        expected = 0 + 25 + 25 + 25
-        self.assertEqual(score, expected)
-
-    def test_high_difficulty_lowers_score(self) -> None:
-        """Test that high difficulty lowers the score."""
-        score = compute_comfort_score(0.5, 1.0, 0, 0, 4)
-        # difficulty: 25 - 1.0 * 25 = 0  noqa: ERA001
-        expected = 12.5 + 0 + 25 + 25
-        self.assertEqual(score, expected)
-
-    def test_many_regrips_lower_score(self) -> None:
-        """Test that many regrips lower the score."""
-        score = compute_comfort_score(0.5, 0.0, 4, 0, 4)
-        # regrip: 25 - (4/4 * 25) = 0  noqa: ERA001
-        expected = 12.5 + 25 + 0 + 25
-        self.assertEqual(score, expected)
-
-    def test_many_flow_breaks_lower_score(self) -> None:
-        """Test that many flow breaks lower the score."""
-        score = compute_comfort_score(0.5, 0.0, 0, 3, 4)
-        # flow: 25 - (3/3 * 25) = 0  noqa: ERA001
-        expected = 12.5 + 25 + 25 + 0
-        self.assertEqual(score, expected)
-
-
 class TestGetErgonomicRating(unittest.TestCase):
-    """Test ergonomic rating conversion."""
+    """Test ergonomic rating conversion from ergonomic_score (0-1 scale)."""
 
     def test_excellent_rating(self) -> None:
         """Test excellent rating threshold."""
-        self.assertEqual(get_ergonomic_rating(100.0), 'Excellent')
-        self.assertEqual(get_ergonomic_rating(80.0), 'Excellent')
+        self.assertEqual(get_ergonomic_rating(1.0), 'Excellent')
+        self.assertEqual(get_ergonomic_rating(0.80), 'Excellent')
 
     def test_good_rating(self) -> None:
         """Test good rating threshold."""
-        self.assertEqual(get_ergonomic_rating(79.9), 'Good')
-        self.assertEqual(get_ergonomic_rating(65.0), 'Good')
+        self.assertEqual(get_ergonomic_rating(0.79), 'Good')
+        self.assertEqual(get_ergonomic_rating(0.65), 'Good')
 
     def test_fair_rating(self) -> None:
         """Test fair rating threshold."""
-        self.assertEqual(get_ergonomic_rating(64.9), 'Fair')
-        self.assertEqual(get_ergonomic_rating(50.0), 'Fair')
+        self.assertEqual(get_ergonomic_rating(0.64), 'Fair')
+        self.assertEqual(get_ergonomic_rating(0.50), 'Fair')
 
     def test_poor_rating(self) -> None:
         """Test poor rating threshold."""
-        self.assertEqual(get_ergonomic_rating(49.9), 'Poor')
-        self.assertEqual(get_ergonomic_rating(35.0), 'Poor')
+        self.assertEqual(get_ergonomic_rating(0.49), 'Poor')
+        self.assertEqual(get_ergonomic_rating(0.35), 'Poor')
 
     def test_very_poor_rating(self) -> None:
         """Test very poor rating threshold."""
-        self.assertEqual(get_ergonomic_rating(34.9), 'Very Poor')
+        self.assertEqual(get_ergonomic_rating(0.34), 'Very Poor')
         self.assertEqual(get_ergonomic_rating(0.0), 'Very Poor')
 
 
@@ -1167,7 +1117,6 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.index_finger_moves, 0)
         self.assertEqual(result.middle_finger_moves, 0)
         self.assertEqual(result.ring_finger_moves, 0)
-        self.assertEqual(result.comfort_score, 100.0)
         self.assertEqual(result.ergonomic_rating, 'Excellent')
         # New fields
         self.assertEqual(result.ergonomic_score, 1.0)
@@ -1291,7 +1240,6 @@ class TestComputeErgonomics(unittest.TestCase):
         # Check for specific expected values
         self.assertGreater(result.estimated_execution_time, 0)
         self.assertGreater(result.fingertrick_difficulty, 0)
-        self.assertIsInstance(result.comfort_score, float)
         expected_ratings = ['Excellent', 'Good', 'Fair', 'Poor', 'Very Poor']
         self.assertIn(result.ergonomic_rating, expected_ratings)
 
@@ -1335,7 +1283,6 @@ class TestComputeErgonomics(unittest.TestCase):
 
         self.assertIsInstance(result, ErgonomicsData)
         self.assertTrue(hasattr(result, 'total_moves'))
-        self.assertTrue(hasattr(result, 'comfort_score'))
         self.assertTrue(hasattr(result, 'ergonomic_rating'))
 
         with self.assertRaises(AttributeError):
@@ -1363,7 +1310,6 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertIsInstance(result.hand_balance_ratio, float)
         self.assertIsInstance(result.estimated_execution_time, float)
         self.assertIsInstance(result.fingertrick_difficulty, float)
-        self.assertIsInstance(result.comfort_score, float)
 
         # Test string field
         self.assertIsInstance(result.ergonomic_rating, str)

@@ -55,7 +55,6 @@ class ErgonomicsData(NamedTuple):
     ring_finger_moves: int
 
     # Comfort metrics
-    comfort_score: float
     ergonomic_rating: str
 
     # Advanced metrics
@@ -863,70 +862,24 @@ def compute_estimated_execution_time(
     return (non_pause_moves * base_move_time) + (regrip_count * regrip_penalty)
 
 
-def compute_comfort_score(
-    hand_balance_ratio: float,
-    fingertrick_difficulty: float,
-    regrip_count: int,
-    flow_breaks: int,
-    total_moves: int,
-) -> float:
+def get_ergonomic_rating(ergonomic_score: float) -> str:
     """
-    Calculate overall comfort score (0-100, higher is better).
-
-    Combines various ergonomic factors into a single score.
+    Convert ergonomic score to ergonomic rating.
 
     Args:
-        hand_balance_ratio: Hand balance ratio from compute_hand_balance.
-        fingertrick_difficulty: Difficulty score (0-1) from
-            compute_fingertrick_difficulty.
-        regrip_count: Number of regrips in the algorithm.
-        flow_breaks: Number of awkward transitions.
-        total_moves: Total number of moves in the algorithm.
-
-    Returns:
-        Comfort score from 0 to 100 (higher is more comfortable).
-
-    """
-    if total_moves == 0:
-        return 100.0
-
-    # Hand balance component (0-12.5 points, not 0-25).
-    # hand_balance_ratio is in [0, 0.5] (min/total), so perfect balance = 12.5.
-    # This intentionally keeps balance from dominating over other factors.
-    balance_score = hand_balance_ratio * 25
-
-    # Difficulty component (0-25 points, inverted)
-    difficulty_score = max(0, 25 - (fingertrick_difficulty * 25))
-
-    # Regrip component (0-25 points, fewer regrips is better)
-    regrip_ratio = min(1.0, regrip_count / total_moves)
-    regrip_score = max(0, 25 - (regrip_ratio * 25))
-
-    # Flow component (0-25 points, fewer breaks is better)
-    flow_ratio = min(1.0, flow_breaks / max(1, total_moves - 1))
-    flow_score = max(0, 25 - (flow_ratio * 25))
-
-    return balance_score + difficulty_score + regrip_score + flow_score
-
-
-def get_ergonomic_rating(comfort_score: float) -> str:
-    """
-    Convert comfort score to ergonomic rating.
-
-    Args:
-        comfort_score: Comfort score from 0 to 100.
+        ergonomic_score: Ergonomic score from 0.0 to 1.0.
 
     Returns:
         Human-readable rating string (Excellent, Good, Fair, Poor, Very Poor).
 
     """
-    if comfort_score >= 80:
+    if ergonomic_score >= 0.80:  # noqa: PLR2004
         return 'Excellent'
-    if comfort_score >= 65:
+    if ergonomic_score >= 0.65:  # noqa: PLR2004
         return 'Good'
-    if comfort_score >= 50:
+    if ergonomic_score >= 0.50:  # noqa: PLR2004
         return 'Fair'
-    if comfort_score >= 35:
+    if ergonomic_score >= 0.35:  # noqa: PLR2004
         return 'Poor'
     return 'Very Poor'
 
@@ -973,7 +926,6 @@ def compute_ergonomics(  # noqa: PLR0914
             index_finger_moves=0,
             middle_finger_moves=0,
             ring_finger_moves=0,
-            comfort_score=100.0,
             ergonomic_rating='Excellent',
             ergonomic_score=1.0,
             flow_score=1.0,
@@ -1010,18 +962,6 @@ def compute_ergonomics(  # noqa: PLR0914
     # Calculate execution time
     execution_time = compute_estimated_execution_time(algorithm, regrip_count)
 
-    # Calculate overall comfort score
-    comfort_score = compute_comfort_score(
-        balance_ratio,
-        fingertrick_difficulty,
-        regrip_count,
-        flow_breaks,
-        total_moves,
-    )
-
-    # Get qualitative rating
-    ergonomic_rating = get_ergonomic_rating(comfort_score)
-
     # Advanced metrics
     flow_score_val = calculate_flow_score(algorithm)
     base_ergonomic_score = calculate_ergonomic_score(
@@ -1034,6 +974,9 @@ def compute_ergonomics(  # noqa: PLR0914
     trigger_matches = find_trigger_patterns(algorithm, hand_dominance)
     trigger_bonus, speed_mult = calculate_trigger_bonus(trigger_matches)
     ergonomic_score = min(1.0, base_ergonomic_score + trigger_bonus)
+
+    # Get qualitative rating from the primary ergonomic score
+    ergonomic_rating = get_ergonomic_rating(ergonomic_score)
 
     estimated_tps = estimate_tps_potential(
         algorithm, hand_dominance,
@@ -1076,7 +1019,6 @@ def compute_ergonomics(  # noqa: PLR0914
         index_finger_moves=index,
         middle_finger_moves=middle,
         ring_finger_moves=ring,
-        comfort_score=comfort_score,
         ergonomic_rating=ergonomic_rating,
         ergonomic_score=ergonomic_score,
         flow_score=flow_score_val,

@@ -1711,7 +1711,6 @@ class AlgorithmErgonomicsTestCase(unittest.TestCase):
         ergo = algo.ergonomics
 
         # Check that all expected fields are present
-        self.assertIsNotNone(ergo.comfort_score)
         self.assertIsNotNone(ergo.ergonomic_rating)
         self.assertIsNotNone(ergo.hand_balance_ratio)
 
