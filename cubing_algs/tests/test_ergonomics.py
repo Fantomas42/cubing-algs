@@ -6,11 +6,8 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ERGONOMIC_WEIGHTS
 from cubing_algs.ergonomics import HAND_ASSIGNMENTS
 from cubing_algs.ergonomics import TRANSITION_PENALTIES
-from cubing_algs.ergonomics import TRIGGER_PATTERNS
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import HandDominance
-from cubing_algs.ergonomics import TriggerMatch
-from cubing_algs.ergonomics import TriggerPattern
 from cubing_algs.ergonomics import calculate_ergonomic_score
 from cubing_algs.ergonomics import calculate_flow_score
 from cubing_algs.ergonomics import calculate_trigger_bonus
@@ -31,6 +28,9 @@ from cubing_algs.ergonomics import get_move_key
 from cubing_algs.ergonomics import get_transition_penalty
 from cubing_algs.ergonomics import suggest_ergonomic_improvements
 from cubing_algs.move import Move
+from cubing_algs.triggers import TRIGGER_PATTERNS
+from cubing_algs.triggers import TriggerMatch
+from cubing_algs.triggers import TriggerPattern
 
 
 class TestHandDominance(unittest.TestCase):
