@@ -302,8 +302,7 @@ def compute_face_diversity_score(moves: 'list[Move]') -> float:
 
 
 def compute_flow_memory_score(
-    regrip_count: int,
-    flow_breaks: int,
+    interruptions: int,
     stm: int,
 ) -> float:
     """
@@ -312,8 +311,7 @@ def compute_flow_memory_score(
     More flow interruptions → harder to build muscle memory → harder to recall.
 
     Args:
-        regrip_count: Number of regrips in the algorithm.
-        flow_breaks: Number of flow breaks.
+        interruptions: Number of regrips in the algorithm.
         stm: Slice Turn Metric count for normalization.
 
     Returns:
@@ -323,7 +321,6 @@ def compute_flow_memory_score(
     if stm == 0:
         return 0.0
 
-    interruptions = regrip_count + flow_breaks
     ratio = interruptions / max(1, stm)
     return min(100.0, ratio * 200.0)
 
@@ -457,7 +454,7 @@ def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
 
     # --- Flow score ---
     flow_mem_score = compute_flow_memory_score(
-        ergo.regrip_count, ergo.flow_breaks, stm,
+        ergo.regrip_count, stm,
     )
 
     # --- Move familiarity score ---

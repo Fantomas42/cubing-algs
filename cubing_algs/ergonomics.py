@@ -42,7 +42,6 @@ class ErgonomicsData(NamedTuple):
     # Difficulty metrics
     regrip_count: int
     awkward_moves: int
-    flow_breaks: int
 
     # Execution metrics
     estimated_execution_time: float
@@ -745,53 +744,26 @@ def compute_regrip_count(moves: 'Algorithm') -> int:
 
     moves = moves.transform(unpause_moves)
     regrip_count = 0
+    prev_move = None
 
-    for i, move in enumerate(moves):
-        # Rotations always require regrip
+    for move in moves:
         if move.is_rotation_move:
             regrip_count += 1
             continue
 
-        if i > 0:
-            prev_move = moves[i - 1]
-            penalty = get_transition_penalty(prev_move, move)
-            if penalty >= TRANSITION_PENALTIES['opposite']:
-                regrip_count += 1
+        opposite = TRANSITION_PENALTIES['opposite']
+        high_penalty = (
+            not move.is_rotation_move
+            and prev_move is not None
+            and get_transition_penalty(prev_move, move) >= opposite
+        )
 
-    return regrip_count
-
-
-def compute_flow_breaks(moves: 'Algorithm') -> int:
-    """
-    Count awkward transitions that break the flow of execution.
-
-    Uses transition penalty system to detect difficult transitions.
-
-    Args:
-        moves: 'Algorithm' to analyze.
-
-    Returns:
-        Number of awkward transitions detected.
-
-    """
-    if len(moves) < 2:
-        return 0
-
-    flow_breaks = 0
-    prev_move = None
-
-    for move in moves:
-        if move.is_pause:
-            continue
-
-        if prev_move is not None:
-            penalty = get_transition_penalty(prev_move, move)
-            if penalty >= TRANSITION_PENALTIES['opposite']:
-                flow_breaks += 1
+        if high_penalty:
+            regrip_count += 1
 
         prev_move = move
 
-    return flow_breaks
+    return regrip_count
 
 
 def compute_fingertrick_difficulty(
@@ -919,7 +891,6 @@ def compute_ergonomics(  # noqa: PLR0914
             hand_balance_ratio=0.5,
             regrip_count=0,
             awkward_moves=0,
-            flow_breaks=0,
             estimated_execution_time=0.0,
             fingertrick_difficulty=0.0,
             thumb_moves=0,
@@ -947,7 +918,6 @@ def compute_ergonomics(  # noqa: PLR0914
 
     # Calculate difficulty metrics
     regrip_count = compute_regrip_count(algorithm)
-    flow_breaks = compute_flow_breaks(algorithm)
     fingertrick_difficulty = compute_fingertrick_difficulty(
         algorithm, hand_dominance,
     )
@@ -1012,7 +982,6 @@ def compute_ergonomics(  # noqa: PLR0914
         hand_balance_ratio=balance_ratio,
         regrip_count=regrip_count,
         awkward_moves=awkward_moves,
-        flow_breaks=flow_breaks,
         estimated_execution_time=execution_time,
         fingertrick_difficulty=fingertrick_difficulty,
         thumb_moves=thumb,

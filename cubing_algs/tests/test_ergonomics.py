@@ -17,7 +17,6 @@ from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.ergonomics import compute_estimated_execution_time
 from cubing_algs.ergonomics import compute_finger_distribution
 from cubing_algs.ergonomics import compute_fingertrick_difficulty
-from cubing_algs.ergonomics import compute_flow_breaks
 from cubing_algs.ergonomics import compute_hand_balance
 from cubing_algs.ergonomics import compute_regrip_count
 from cubing_algs.ergonomics import estimate_tps_potential
@@ -868,6 +867,12 @@ class TestComputeRegripCount(unittest.TestCase):
         regrips = compute_regrip_count(alg)
         self.assertEqual(regrips, 1)  # R->L is opposite
 
+    def test_opposite_face_transitions_inverse(self) -> None:
+        """Test that opposite face transitions count as regrips."""
+        alg = Algorithm.parse_moves('L R')
+        regrips = compute_regrip_count(alg)
+        self.assertEqual(regrips, 1)  # R->L is opposite
+
     def test_same_face_no_regrip(self) -> None:
         """Test that same-face consecutive moves don't need regrips."""
         alg = Algorithm.parse_moves("B B' B2")
@@ -878,8 +883,7 @@ class TestComputeRegripCount(unittest.TestCase):
         """Test that rotation moves always count as regrips."""
         alg = Algorithm.parse_moves('R x U')
         regrips = compute_regrip_count(alg)
-        # x is a rotation (1 regrip), x->U also gets rotation penalty (1 regrip)
-        self.assertEqual(regrips, 2)
+        self.assertEqual(regrips, 1)
 
     def test_adjacent_face_no_regrip(self) -> None:
         """Test that adjacent face transitions don't need regrips."""
@@ -905,75 +909,45 @@ class TestComputeRegripCount(unittest.TestCase):
         regrips = compute_regrip_count(alg)
         self.assertEqual(regrips, 1)
 
-
-class TestComputeFlowBreaks(unittest.TestCase):
-    """Test flow breaks computation."""
-
-    def test_empty_algorithm(self) -> None:
-        """Test flow breaks for empty algorithm."""
-        alg = Algorithm.parse_moves('')
-        breaks = compute_flow_breaks(alg)
-        self.assertEqual(breaks, 0)
-
     def test_single_move(self) -> None:
         """Test flow breaks for single move."""
         alg = Algorithm.parse_moves('R')
-        breaks = compute_flow_breaks(alg)
+        breaks = compute_regrip_count(alg)
         self.assertEqual(breaks, 0)
 
-    def test_no_flow_breaks(self) -> None:
-        """Test algorithm with no flow breaks."""
+    def test_no_regrip(self) -> None:
+        """Test algorithm with no regrip."""
         alg = Algorithm.parse_moves("R U R' U'")
-        breaks = compute_flow_breaks(alg)
+        breaks = compute_regrip_count(alg)
         self.assertEqual(breaks, 0)  # All adjacent transitions
 
-    def test_r_to_l_flow_break(self) -> None:
-        """Test R to L transition creates flow break (opposite faces)."""
-        alg = Algorithm.parse_moves('R L')
-        breaks = compute_flow_breaks(alg)
-        self.assertEqual(breaks, 1)  # R to L is opposite
-
-    def test_l_to_r_flow_break(self) -> None:
-        """Test L to R transition creates flow break."""
-        alg = Algorithm.parse_moves('L R')
-        breaks = compute_flow_breaks(alg)
-        self.assertEqual(breaks, 1)  # L to R is opposite
-
-    def test_f_to_b_flow_break(self) -> None:
-        """Test F to B transition creates flow break."""
+    def test_f_to_b_regrip(self) -> None:
+        """Test F to B transition creates regrip."""
         alg = Algorithm.parse_moves('F B')
-        breaks = compute_flow_breaks(alg)
+        breaks = compute_regrip_count(alg)
         self.assertEqual(breaks, 1)  # F to B is opposite
 
-    def test_m_to_r_no_flow_break(self) -> None:
+    def test_m_to_r_no_regrip(self) -> None:
         """Test M to R transition (not opposite, uses default penalty)."""
         alg = Algorithm.parse_moves('M R')
-        breaks = compute_flow_breaks(alg)
+        regrips = compute_regrip_count(alg)
         # M not in ADJACENT_FACES/OPPOSITE_FACES, falls to hand check
         # M='both', R='right', no hand switch since M='both'
         # Default adjacent penalty (0.1) < opposite threshold (0.3)
-        self.assertEqual(breaks, 0)
+        self.assertEqual(regrips, 0)
 
-    def test_multiple_flow_breaks(self) -> None:
-        """Test algorithm with multiple flow breaks."""
+    def test_multiple_regrips(self) -> None:
+        """Test algorithm with multiple regrips."""
         alg = Algorithm.parse_moves('R L F B')
-        breaks = compute_flow_breaks(alg)
+        regrips = compute_regrip_count(alg)
         # R->L opposite, L->F adjacent, F->B opposite
-        self.assertEqual(breaks, 2)
+        self.assertEqual(regrips, 2)
 
-    def test_modifiers_ignored_in_flow_breaks(self) -> None:
-        """Test that move modifiers are ignored when checking flow breaks."""
+    def test_modifiers_ignored_in_regrips(self) -> None:
+        """Test that move modifiers are ignored when checking regrips."""
         alg = Algorithm.parse_moves("R' L2")
-        breaks = compute_flow_breaks(alg)
-        self.assertEqual(breaks, 1)  # R' to L2 is still R to L opposite
-
-    def test_with_pauses(self) -> None:
-        """Test flow breaks with pauses between moves."""
-        alg = Algorithm.parse_moves('R . L')
-        breaks = compute_flow_breaks(alg)
-        # Pauses are skipped; prev_move stays as R when pause is seen
-        # So R->L transition IS detected
-        self.assertEqual(breaks, 1)
+        regrips = compute_regrip_count(alg)
+        self.assertEqual(regrips, 1)  # R' to L2 is still R to L opposite
 
 
 class TestComputeFingertrickDifficulty(unittest.TestCase):
@@ -1110,7 +1084,6 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.hand_balance_ratio, 0.5)
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.awkward_moves, 0)
-        self.assertEqual(result.flow_breaks, 0)
         self.assertEqual(result.estimated_execution_time, 0.0)
         self.assertEqual(result.fingertrick_difficulty, 0.0)
         self.assertEqual(result.thumb_moves, 0)
@@ -1140,7 +1113,6 @@ class TestComputeErgonomics(unittest.TestCase):
         # All handed moves are right
         self.assertEqual(result.hand_balance_ratio, 0.0)
         self.assertEqual(result.regrip_count, 0)  # All adjacent transitions
-        self.assertEqual(result.flow_breaks, 0)  # No opposite transitions
         self.assertEqual(result.thumb_moves, 2)  # R, R'
         self.assertEqual(result.index_finger_moves, 2)  # U, U'
         self.assertEqual(result.middle_finger_moves, 0)
@@ -1165,7 +1137,6 @@ class TestComputeErgonomics(unittest.TestCase):
         # All handed moves are left
         self.assertEqual(result.hand_balance_ratio, 0.0)
         self.assertEqual(result.regrip_count, 0)
-        self.assertEqual(result.flow_breaks, 0)
         self.assertEqual(result.thumb_moves, 2)  # L', L
         self.assertEqual(result.index_finger_moves, 2)  # U', U
         self.assertEqual(result.awkward_moves, 0)
@@ -1181,7 +1152,6 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.both_hand_moves, 4)  # All U moves
         self.assertEqual(result.hand_balance_ratio, 0.5)  # Perfect balance
         self.assertEqual(result.regrip_count, 0)
-        self.assertEqual(result.flow_breaks, 0)
         self.assertEqual(result.thumb_moves, 4)  # R, R', L', L
         self.assertEqual(result.index_finger_moves, 4)  # All U moves
         self.assertEqual(result.awkward_moves, 0)
@@ -1198,7 +1168,6 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.hand_balance_ratio, 0.5)  # No handed moves
         # No rotation moves, no opposite-face transitions
         self.assertEqual(result.regrip_count, 0)
-        self.assertEqual(result.flow_breaks, 0)
         self.assertEqual(result.thumb_moves, 0)
         self.assertEqual(result.index_finger_moves, 0)
         self.assertEqual(result.middle_finger_moves, 0)
@@ -1218,8 +1187,6 @@ class TestComputeErgonomics(unittest.TestCase):
         # All handed moves are right
         self.assertEqual(result.hand_balance_ratio, 0.0)
         self.assertEqual(result.regrip_count, 0)
-        # Can't have flow breaks with one move
-        self.assertEqual(result.flow_breaks, 0)
         self.assertEqual(result.thumb_moves, 1)
         self.assertEqual(result.index_finger_moves, 0)
         self.assertEqual(result.awkward_moves, 0)  # R weight = 1.0 >= 0.6
@@ -1249,14 +1216,12 @@ class TestComputeErgonomics(unittest.TestCase):
         valid_diffs = {'Beginner', 'Intermediate', 'Advanced', 'Expert'}
         self.assertIn(result.difficulty_classification, valid_diffs)
 
-    def test_algorithm_with_flow_breaks(self) -> None:
+    def test_algorithm_with_regrip(self) -> None:
         """Test ergonomics for algorithm with opposite-face transitions."""
         alg = Algorithm.parse_moves('R L F B')
         result = compute_ergonomics(alg)
 
         self.assertEqual(result.total_moves, 4)
-        # R->L opposite, F->B opposite
-        self.assertEqual(result.flow_breaks, 2)
         self.assertEqual(result.right_hand_moves, 2)  # R, F
         self.assertEqual(result.left_hand_moves, 2)  # L, B
         self.assertEqual(result.hand_balance_ratio, 0.5)  # Perfect balance
@@ -1274,7 +1239,6 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 2)  # R, R'
         self.assertEqual(result.both_hand_moves, 1)  # U
         self.assertEqual(result.regrip_count, 0)
-        self.assertEqual(result.flow_breaks, 0)
 
     def test_ergonomics_data_is_immutable_named_tuple(self) -> None:
         """Test that ErgonomicsData is an immutable NamedTuple."""
@@ -1300,7 +1264,6 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertIsInstance(result.both_hand_moves, int)
         self.assertIsInstance(result.regrip_count, int)
         self.assertIsInstance(result.awkward_moves, int)
-        self.assertIsInstance(result.flow_breaks, int)
         self.assertIsInstance(result.thumb_moves, int)
         self.assertIsInstance(result.index_finger_moves, int)
         self.assertIsInstance(result.middle_finger_moves, int)
