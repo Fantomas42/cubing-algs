@@ -1,6 +1,7 @@
 """Tests for ModeDisplay methods."""
 import unittest
 
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
 from cubing_algs.display.masks import OLL_MASK
 from cubing_algs.display.masks import PLL_MASK
 from cubing_algs.display.vcube import VCubeDisplay
@@ -251,6 +252,30 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         """
         display = self.make_display('z2 R F B L')
         self.assertEqual(display.f2l_orientation(), 'DB')
+
+    # Issues found
+
+    def test_issue_01(self) -> None:
+        """Reproduce issue #01."""
+        for orientation, solution in zip(
+                ('', 'y', "y'", 'y2'),
+                ('UF', 'UR', 'UL', 'UB'),
+                strict=True,
+        ):
+            with self.subTest(orientation=orientation):
+                display = self.make_display(
+                    f"{ orientation } R U R' U' M",
+                )
+                self.assertEqual(display.f2l_orientation(), solution)
+
+    def test_issue_02(self) -> None:
+        """Reproduce issue #02."""
+        for solution, orientation in ORIENTATION_FACE_MOVES.items():
+            with self.subTest(orientation=orientation):
+                display = self.make_display(
+                    f"{ orientation } R U' R' U R' F R F' U",
+                )
+                self.assertEqual(display.f2l_orientation(), solution)
 
 
 class RealignMaskTestCase(ModeDisplayMixin, unittest.TestCase):
