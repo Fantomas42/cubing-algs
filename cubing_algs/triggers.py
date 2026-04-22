@@ -35,7 +35,11 @@ TRIGGER_PATTERNS = [
         category='basic',
         ergonomic_bonus=0.15,
         speed_multiplier=1.3,
-        variations=["L U L' U'", "R U' R' U", "L U' L' U"],
+        variations=[
+            "L' U' L U",
+            "R' U' R U",
+            "L U L' U'",
+        ],
     ),
     TriggerPattern(
         name='Sledgehammer',
@@ -43,7 +47,11 @@ TRIGGER_PATTERNS = [
         category='basic',
         ergonomic_bonus=0.12,
         speed_multiplier=1.25,
-        variations=["L' F L F'", "R' D R D'", "L' D L D'"],
+        variations=[
+            "L F' L' F",
+            "R B' R' B",
+            "L' B L B'",
+        ],
     ),
     TriggerPattern(
         name='Sune Trigger',
