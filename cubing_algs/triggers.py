@@ -84,6 +84,17 @@ TRIGGER_PATTERNS = [
         aliases=['Su', 'Half Sune', 'Semi-Sexy', 'Homely'],
     ),
     TriggerPattern(
+        name='Sane Trigger',
+        moves="R U' R' U'",
+        category='basic',
+        ergonomic_bonus=0.10,
+        speed_multiplier=1.2,
+        variations=[
+            "L' U L U",
+        ],
+        aliases=['Sa', 'Half Sane', 'Su backwark'],
+    ),
+    TriggerPattern(
         name='T-Perm Trigger',
         moves="R U R' F'",
         category='basic',

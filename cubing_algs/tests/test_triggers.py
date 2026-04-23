@@ -29,7 +29,7 @@ class TestTriggerPattern(unittest.TestCase):
 
     def test_trigger_patterns_count(self) -> None:
         """Test that all 15 trigger patterns are defined."""
-        self.assertEqual(len(TRIGGER_PATTERNS), 15)
+        self.assertEqual(len(TRIGGER_PATTERNS), 16)
 
     def test_primary_moves_are_unique(self) -> None:
         """Test that each pattern has unique primary moves."""
