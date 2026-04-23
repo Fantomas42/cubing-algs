@@ -60,6 +60,19 @@ TRIGGER_PATTERNS = [
         aliases=['Sledge', 'Hammer'],
     ),
     TriggerPattern(
+        name='Hedgeslammer',
+        moves="F R' F' R",
+        category='basic',
+        ergonomic_bonus=0.12,
+        speed_multiplier=1.25,
+        variations=[
+            "F' L F L'",
+            "B' R B R'",
+            "B L' B' L",
+        ],
+        aliases=['Hedge', 'Slammer'],
+    ),
+    TriggerPattern(
         name='Sune Trigger',
         moves="R U R' U",
         category='basic',
@@ -68,7 +81,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U' L U'",
         ],
-        aliases=['Half Sune', 'Semi-Sexy', 'Homely'],
+        aliases=['Su', 'Half Sune', 'Semi-Sexy', 'Homely'],
     ),
     TriggerPattern(
         name='T-Perm Trigger',
@@ -188,7 +201,7 @@ TRIGGER_PATTERNS = [
             "R' U2 R",
             "L U2 L'",
         ],
-        aliases=['Super', 'Double Extract', 'Long Pull'],
+        aliases=['Ne', 'Super', 'Double Extract', 'Long Pull'],
     ),
 
     # Wide move patterns
