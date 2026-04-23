@@ -29,7 +29,6 @@ from cubing_algs.ergonomics import suggest_ergonomic_improvements
 from cubing_algs.move import Move
 from cubing_algs.triggers import TRIGGER_PATTERNS
 from cubing_algs.triggers import TriggerMatch
-from cubing_algs.triggers import TriggerPattern
 
 
 class ErgonomicInputs(TypedDict):
@@ -67,63 +66,6 @@ class TestHandDominance(unittest.TestCase):
     def test_members(self) -> None:
         """Test enum has exactly three members."""
         self.assertEqual(len(HandDominance), 3)
-
-
-class TestTriggerPattern(unittest.TestCase):
-    """Test the TriggerPattern NamedTuple."""
-
-    def test_creation(self) -> None:
-        """Test basic creation."""
-        pattern = TriggerPattern(
-            name='Test',
-            moves='R U R',
-            category='basic',
-            ergonomic_bonus=0.1,
-            speed_multiplier=1.2,
-            variations=["L U L'"],
-        )
-        self.assertEqual(pattern.name, 'Test')
-        self.assertEqual(pattern.moves, 'R U R')
-        self.assertEqual(pattern.category, 'basic')
-
-    def test_trigger_patterns_count(self) -> None:
-        """Test that all 14 trigger patterns are defined."""
-        self.assertEqual(len(TRIGGER_PATTERNS), 14)
-
-    def test_no_primary_moves_in_other_variations(self) -> None:
-        """
-        Test that no pattern's primary moves appear
-        as another pattern's variation.
-        """
-        primary_moves = {p.moves: p.name for p in TRIGGER_PATTERNS}
-        for pattern in TRIGGER_PATTERNS:
-            for variation in pattern.variations:
-                if (
-                        variation in primary_moves
-                        and primary_moves[variation] != pattern.name
-                ):
-                    self.fail(
-                        f"Variation '{variation} "
-                        f"of '{pattern.name}' duplicates "
-                        f"primary moves of '{primary_moves[variation]}'",
-                    )
-
-
-class TestTriggerMatch(unittest.TestCase):
-    """Test the TriggerMatch NamedTuple."""
-
-    def test_creation(self) -> None:
-        """Test basic creation."""
-        pattern = TRIGGER_PATTERNS[0]
-        match = TriggerMatch(
-            pattern=pattern,
-            start_index=0,
-            end_index=3,
-            matched_moves="R U R' U'",
-        )
-        self.assertEqual(match.start_index, 0)
-        self.assertEqual(match.end_index, 3)
-        self.assertEqual(match.matched_moves, "R U R' U'")
 
 
 class TestGetMoveKey(unittest.TestCase):
