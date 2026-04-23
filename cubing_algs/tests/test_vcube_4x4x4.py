@@ -11,6 +11,7 @@ from cubing_algs.vcube import VCube
 # Solved 4x4x4 state: 96 facelets (6 faces * 16 facelets each)
 # Face order: U, R, F, D, L, B
 SOLVED_4X4X4 = get_solved_facelets(4)
+UNIQUE_4X4X4 = get_unique_facelets(4)
 
 # Expected states after moves (generated from magiccube)
 EXPECTED_4X4X4_R = (
@@ -594,3 +595,49 @@ class Test4x4x4VCubeCheckCustomState(unittest.TestCase):
             self.cube.state,
             self.state,
         )
+
+
+class Test4x4x4MoveConsistency(unittest.TestCase):
+    """
+    Test that 180° and CCW move codes match applying the CW move repeatedly.
+
+    Uses unique facelets so every position has a distinct value — the solved
+    state's symmetry can hide index-pair swaps across face positions.
+    """
+
+    @staticmethod
+    def _apply(state: str, move: str) -> str:
+        return rotate_move(state, move, size=4)
+
+    @staticmethod
+    def _apply_n(state: str, move: str, n: int) -> str:
+        for _ in range(n):
+            state = rotate_move(state, move, size=4)
+        return state
+
+    def test_all_180_moves_equal_cw_twice(self) -> None:
+        """Every X2 direct code must equal X applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self._apply(UNIQUE_4X4X4, move + '2'),
+                    self._apply_n(UNIQUE_4X4X4, move, 2),
+                )
+
+    def test_all_180_moves_equal_ccw_twice(self) -> None:
+        """Every X2 direct code must equal X' applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self._apply(UNIQUE_4X4X4, move + '2'),
+                    self._apply_n(UNIQUE_4X4X4, move + "'", 2),
+                )
+
+    def test_all_ccw_moves_equal_cw_three_times(self) -> None:
+        """Every X' direct code must equal X applied three times."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self._apply(UNIQUE_4X4X4, move + "'"),
+                    self._apply_n(UNIQUE_4X4X4, move, 3),
+                )
