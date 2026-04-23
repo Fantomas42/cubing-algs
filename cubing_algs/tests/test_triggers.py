@@ -30,6 +30,17 @@ class TestTriggerPattern(unittest.TestCase):
         """Test that all 15 trigger patterns are defined."""
         self.assertEqual(len(TRIGGER_PATTERNS), 15)
 
+    def test_primary_moves_are_unique(self) -> None:
+        """Test that each pattern has unique primary moves."""
+        seen: dict[str, str] = {}
+        for pattern in TRIGGER_PATTERNS:
+            if pattern.moves in seen:
+                self.fail(
+                    f"Pattern '{pattern.name}' has the same moves as "
+                    f"'{seen[pattern.moves]}': '{pattern.moves}'"
+                )
+            seen[pattern.moves] = pattern.name
+
     def test_no_primary_moves_in_other_variations(self) -> None:
         """
         Test that no pattern's primary moves appear
