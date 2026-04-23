@@ -8,6 +8,9 @@ class TriggerPattern(NamedTuple):
 
     Triggers are familiar move sequences that speedcubers can execute
     efficiently due to muscle memory and ergonomic flow.
+
+    Variations are mirror algorithùs across M or S slices,
+    for lefty or back versions.
     """
 
     name: str
@@ -88,20 +91,24 @@ TRIGGER_PATTERNS = [
         variations=["L U L' U' L U L' U'"],
     ),
     TriggerPattern(
-        name='Sune',
+        name='Sune',  # Anti-Chair
         moves="R U R' U R U2 R'",
         category='OLL',
         ergonomic_bonus=0.14,
         speed_multiplier=1.3,
-        variations=["L U L' U L U2 L'"],
+        variations=[
+            "L' U' L U' L' U2 L",
+        ],
     ),
     TriggerPattern(
-        name='Anti-Sune',
+        name='Anti-Sune',  # Chair
         moves="R U2 R' U' R U' R'",
         category='OLL',
         ergonomic_bonus=0.14,
         speed_multiplier=1.3,
-        variations=["L U2 L' U' L U' L'"],
+        variations=[
+            "L' U2 L U L' U L",
+        ],
     ),
     TriggerPattern(
         name='T-Perm Trigger',
