@@ -159,22 +159,13 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         """Solved cube has no impacted faces; no orientation."""
         display = self.make_display()
         self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'UF')
 
     def test_u_layer_only_moves_leave_f2l_intact(self) -> None:
         """U-layer moves don't touch F2L rows; no orientation."""
         display = self.make_display('z2 U2')
         self.assertEqual(display.f2l_orientation(), '')
-
-    # ------------------------------------------------------------------
-    # 2 impacted faces — opposite-face pairs (no valid slot)
-    # ------------------------------------------------------------------
-
-    def test_opposite_faces_impacted_returns_no_front(self) -> None:
-        """F+B are impacted but form no corner slot; no front is appended."""
-        # z2 R moves U-colored facelets onto B and D-colored onto F:
-        # (F,B) is not an F2L corner slot so F2L_FACE_ORIENTATIONS returns ''.
-        display = self.make_display('z2 R')
-        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DF')
 
     # ------------------------------------------------------------------
     # 2 impacted faces — valid F2L corner slots
@@ -183,12 +174,14 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
     def test_fl_slot(self) -> None:
         """F and L both impacted → FL slot → front F."""
         display = self.make_display("z2 R' D' R U R' D R U'")
-        self.assertEqual(display.f2l_orientation(), 'DF')
+        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DF')
 
     def test_bl_slot(self) -> None:
         """L and B both impacted → BL slot → front L."""
         display = self.make_display("y' z2 R U R' U'")
-        self.assertEqual(display.f2l_orientation(), 'DL')
+        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DL')
 
     def test_br_slot(self) -> None:
         """R and B both impacted → BR slot → front B."""
@@ -199,15 +192,16 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
     # 1 impacted face — slot inferred from saved_facelets
     # ------------------------------------------------------------------
 
-    def test_one_impacted_face_fr_slot(self) -> None:
-        """Only R face impacted; slot inferred as FR → front R."""
+    def test_one_impacted_face_fl_slot(self) -> None:
+        """Only L face impacted."""
         display = self.make_display("z2 F' L F L'")
         self.assertEqual(display.f2l_orientation(), 'DR')
 
-    def test_one_impacted_face_fl_slot(self) -> None:
-        """Only L face impacted; slot inferred as FL → front F."""
+    def test_one_impacted_face_fr_slot(self) -> None:
+        """Only R face impacted."""
         display = self.make_display("z2 R U' R' U R U' R' U R U' R'")
-        self.assertEqual(display.f2l_orientation(), 'DF')
+        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DF')
 
     # ------------------------------------------------------------------
     # y-rotation invariance — same F2L state, different cube orientation
@@ -226,32 +220,54 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
             with self.subTest(prefix=prefix or 'none'):
                 alg = f'{prefix} {base}' if prefix else base
                 display = self.make_display(alg)
-                self.assertEqual(display.f2l_orientation(), orientation)
+                self.assertEqual(display.f2l_orientation(), '')
+                self.assertEqual(display.cube.orientation, orientation)
 
-    # ------------------------------------------------------------------
-    # Edge cases: 3 and 4 impacted faces (under review — may be buggy)
-    # ------------------------------------------------------------------
+    # -------------------------------------
+    # Edge cases: 2, 3 and 4 impacted faces
+    # -------------------------------------
 
-    def test_three_impacted_faces_current_behaviour(self) -> None:
+    def test_two_impact_faces_right(self) -> None:
+        """F+R+B are impacted."""
+        # z2 R moves U-colored facelets onto B and D-colored onto F:
+        # (F,B) is not an F2L corner slot so F2L_FACE_ORIENTATIONS returns ''.
+        display = self.make_display('z2 R')
+        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DF')
+
+    def test_two_impacted_faces_back(self) -> None:
+        """R+B+L are impacted."""
+        display = self.make_display('z2 B')
+        self.assertEqual(display.f2l_orientation(), 'DL')
+        self.assertEqual(display.cube.orientation, 'DF')
+
+    def test_three_impacted_faces(self) -> None:
         """
-        With 3 impacted faces the method falls into the 1-face branch.
+        With 3 impacted faces the method
+        will keep original orientation.
+        """
+        display = self.make_display('z2 R F')
+        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DF')
 
-        ``saved_facelets`` holds only the *last* impacted face's facelets,
-        so the slot inference is driven by that face alone — the other two
-        impacted faces are ignored. This behaviour is under review.
+    def test_three_impacted_faces_in_back(self) -> None:
+        """
+        With 3 impacted faces the method
+        will find the first face to the right with the most
+        impacted face with a FR slot impacted.
+        """
+        display = self.make_display('z2 R B')
+        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DF')
+
+    def test_four_impacted_faces(self) -> None:
+        """
+        With all 4 faces impacted the method
+        will keep original orientation.
         """
         display = self.make_display('z2 R F B')
-        self.assertEqual(display.f2l_orientation(), 'DF')
-
-    def test_four_impacted_faces_current_behaviour(self) -> None:
-        """
-        With all 4 faces impacted the method again falls into the 1-face branch.
-
-        Only the last impacted face's facelets are used to determine the slot.
-        This behaviour is under review.
-        """
-        display = self.make_display('z2 R F B L')
-        self.assertEqual(display.f2l_orientation(), 'DB')
+        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.cube.orientation, 'DF')
 
     # Issues found
 
@@ -259,14 +275,15 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         """Reproduce issue #01."""
         for orientation, solution in zip(
                 ('', 'y', "y'", 'y2'),
-                ('UF', 'UR', 'UL', 'UB'),
+                ('BU', 'LU', 'RU', 'FU'),
                 strict=True,
         ):
             with self.subTest(orientation=orientation):
                 display = self.make_display(
                     f"{ orientation } R U R' U' M",
                 )
-                self.assertEqual(display.f2l_orientation(), solution)
+                self.assertEqual(display.f2l_orientation(), '')
+                self.assertEqual(display.cube.orientation, solution)
 
     def test_issue_02(self) -> None:
         """Reproduce issue #02."""
@@ -275,7 +292,8 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
                 display = self.make_display(
                     f"{ orientation } R U' R' U R' F R F' U",
                 )
-                self.assertEqual(display.f2l_orientation(), solution)
+                self.assertEqual(display.f2l_orientation(), '')
+                self.assertEqual(display.cube.orientation, solution)
 
 
 class RealignMaskTestCase(ModeDisplayMixin, unittest.TestCase):
@@ -633,7 +651,8 @@ class ResolveModeTestCase(ModeDisplayMixin, unittest.TestCase):
         display = self.make_display()
         _, layout, orientation = display.resolve_mode('f2l')
         self.assertEqual(layout, '')
-        self.assertEqual(orientation, '')  # solved
+        self.assertEqual(orientation, '')
+        self.assertEqual(display.cube.orientation, 'UF')
 
     def test_cross_and_cross_bottom_are_aliases(self) -> None:
         """'cross' and 'cross-bottom' produce identical results."""

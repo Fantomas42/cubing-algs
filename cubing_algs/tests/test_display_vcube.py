@@ -351,8 +351,9 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(
             printer.f2l_orientation(),
-            'DF',
+            '',
         )
+        self.assertEqual(printer.cube.orientation, 'DF')
 
         cube = VCube()
         cube.rotate("y2 z2 R U R' U'")
@@ -361,13 +362,15 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(
             printer.f2l_orientation(),
-            'DB',
+            '',
         )
+        self.assertEqual(printer.cube.orientation, 'DB')
 
     def test_compute_f2l_orientation_edge_cases(self) -> None:
         """Test compute_f2l_front_face with various edge cases."""
         result = self.printer.f2l_orientation()
         self.assertEqual(result, '')
+        self.assertEqual(self.printer.cube.orientation, 'UF')
 
     def test_display_top_down_adjacent_facelets_no_break_line(self) -> None:
         """
