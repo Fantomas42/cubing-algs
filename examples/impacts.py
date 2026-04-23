@@ -4,6 +4,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.triggers import TRIGGER_PATTERNS
 
 if TYPE_CHECKING:
     from cubing_algs.impacts import CycleAnalysis
@@ -346,7 +347,10 @@ def show_impact(algorithm: str) -> None:
     algo.show()
 
 
-if sys.argv[1:]:
+if '--triggers' in sys.argv[1:]:
+    for trigger in TRIGGER_PATTERNS:
+        show_impact(trigger.moves)
+elif sys.argv[1:]:
     for arg in sys.argv[1:]:
         show_impact(arg)
 else:
