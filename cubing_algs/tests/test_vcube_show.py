@@ -593,13 +593,13 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
-            '          R  R  f \n'
-            '          R  d  d \n'
-            '          b  d  d \n'
-            ' F  F  d  l  r  r  f  b  l  d  B  U \n'
-            ' L  L  L  B  B  l  d  R  d  f  F  F \n'
-            ' L  L  L  B  B  d  r  R  B  R  F  F \n'
-            '          U  U  b \n'
+            '          b  R  R \n'
+            '          d  d  R \n'
+            '          d  d  f \n'
+            ' l  r  r  f  b  l  d  B  U  F  F  d \n'
+            ' B  B  l  d  R  d  f  F  F  L  L  L \n'
+            ' B  B  d  r  R  B  R  F  F  L  L  L \n'
+            '          b  U  U \n'
             '          U  U  U \n'
             '          U  U  U '
         )

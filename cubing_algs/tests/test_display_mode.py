@@ -232,13 +232,13 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         # z2 R moves U-colored facelets onto B and D-colored onto F:
         # (F,B) is not an F2L corner slot so F2L_FACE_ORIENTATIONS returns ''.
         display = self.make_display('z2 R')
-        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.f2l_orientation(), 'DL')
         self.assertEqual(display.cube.orientation, 'DF')
 
     def test_two_impacted_faces_back(self) -> None:
         """R+B+L are impacted."""
         display = self.make_display('z2 B')
-        self.assertEqual(display.f2l_orientation(), 'DL')
+        self.assertEqual(display.f2l_orientation(), 'DB')
         self.assertEqual(display.cube.orientation, 'DF')
 
     def test_three_impacted_faces(self) -> None:
@@ -257,7 +257,7 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         impacted face with a FR slot impacted.
         """
         display = self.make_display('z2 R B')
-        self.assertEqual(display.f2l_orientation(), '')
+        self.assertEqual(display.f2l_orientation(), 'DL')
         self.assertEqual(display.cube.orientation, 'DF')
 
     def test_four_impacted_faces(self) -> None:

@@ -134,7 +134,6 @@ class ModeDisplay:
             Characters representing the new face orientation.
 
         """
-        # TODO(me): compute the most slots visible in front
         top, front = list(self.cube.orientation)
         faces = {}
 
@@ -148,40 +147,62 @@ class ModeDisplay:
         ]
 
         for i, face in enumerate(adjacent_faces_sorted):
-            exclusion_pattern = face * (self.face_size - self.cube_size)
             facelets = self.cube.get_face_by_center(face)[
                 self.cube_size:self.face_size
             ]
 
-            if exclusion_pattern != facelets:
-                faces[face] = {
-                    'index': i,
-                    'facelets': facelets,
-                    'start_different': (
-                        facelets[0] != face
-                        or facelets[self.cube_size] != face
-                    ),
-                    'end_different': (
-                        facelets[self.cube_size - 1] != face
-                        or facelets[-1] != face
-                    ),
-                }
+            faces[face] = {
+                'index': i,
+                'facelets': facelets,
+                'start_different': (
+                    facelets[0] != face
+                    or facelets[self.cube_size] != face
+                ),
+                'end_different': (
+                    facelets[self.cube_size - 1] != face
+                    or facelets[-1] != face
+                ),
+            }
 
-        selected_face = front
-        for face, data in faces.items():
-            next_face_data = faces.get(
-                adjacent_faces_sorted[(data['index'] + 1) % face_number],
-                {'start_different': False},
+        for data in faces.values():
+            next_face_data = faces[
+                adjacent_faces_sorted[(data['index'] + 1) % face_number]
+            ]
+            previous_face_data = faces[
+                adjacent_faces_sorted[(data['index'] - 1) % face_number]
+            ]
+
+            has_fr_slot_impacted = (
+                data['end_different']
+                or next_face_data['start_different']
             )
 
-            if (
-                    not data['end_different']
-                    and not next_face_data['start_different']
-            ):
-                continue
+            has_fl_slot_impacted = (
+                data['start_different']
+                or previous_face_data['end_different']
+            )
 
-            selected_face = face
-            break
+            data['fr_slot'] = has_fr_slot_impacted
+            data['fl_slot'] = has_fl_slot_impacted
+
+        double_slot_faces = []
+        single_slot_faces = []
+        check_face_order = [0, 1, 3, 2]
+
+        for face_order_index in check_face_order:
+            face = adjacent_faces_sorted[face_order_index]
+            data = faces[face]
+
+            if data['fr_slot'] and data['fl_slot']:
+                double_slot_faces.append(face)
+            elif data['fr_slot']:
+                single_slot_faces.append(face)
+
+        selected_face = front
+        if double_slot_faces:
+            selected_face = double_slot_faces[0]
+        elif single_slot_faces:
+            selected_face = single_slot_faces[0]
 
         if selected_face == front:
             return ''
