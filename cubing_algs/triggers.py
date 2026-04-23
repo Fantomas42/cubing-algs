@@ -62,15 +62,29 @@ TRIGGER_PATTERNS = [
         category='basic',
         ergonomic_bonus=0.10,
         speed_multiplier=1.2,
-        variations=["L U L' U", "L U' L' U'"],
+        variations=[
+            "L' U' L U'",
+        ],
     ),
     TriggerPattern(
         name='Anti-Sune Trigger',
-        moves="R U' R' U'",
+        moves="R U2 R'",
         category='basic',
         ergonomic_bonus=0.10,
         speed_multiplier=1.2,
-        variations=["L U' L' U'"],
+        variations=[
+            "L' U2 L",
+        ],
+    ),
+    TriggerPattern(
+        name='T-Perm Trigger',
+        moves="R U R' F'",
+        category='basic',
+        ergonomic_bonus=0.08,
+        speed_multiplier=1.15,
+        variations=[
+            "L' U' L F",
+        ],
     ),
 
     # Compound triggers
@@ -80,7 +94,9 @@ TRIGGER_PATTERNS = [
         category='compound',
         ergonomic_bonus=0.18,
         speed_multiplier=1.4,
-        variations=["L U L' U' L' F L F'"],
+        variations=[
+            "L' U' L U L F' L' F",
+        ],
     ),
     TriggerPattern(
         name='Double Sexy',
@@ -88,7 +104,19 @@ TRIGGER_PATTERNS = [
         category='compound',
         ergonomic_bonus=0.20,
         speed_multiplier=1.45,
-        variations=["L U L' U' L U L' U'"],
+        variations=[
+            "L' U' L U L' U' L U",
+        ],
+    ),
+    TriggerPattern(
+        name='Triple Sexy',
+        moves="R U R' U' R U R' U' R U R' U'",
+        category='compound',
+        ergonomic_bonus=0.20,
+        speed_multiplier=1.55,
+        variations=[
+            "L' U' L U L' U' L U L' U' L U",
+        ],
     ),
     TriggerPattern(
         name='Sune',  # Anti-Chair
@@ -109,14 +137,6 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U2 L U L' U L",
         ],
-    ),
-    TriggerPattern(
-        name='T-Perm Trigger',
-        moves="R U R' F'",
-        category='basic',
-        ergonomic_bonus=0.08,
-        speed_multiplier=1.15,
-        variations=["L U L' F"],
     ),
     TriggerPattern(
         name='Niklas',

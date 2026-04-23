@@ -87,8 +87,8 @@ class TestTriggerPattern(unittest.TestCase):
         self.assertEqual(pattern.category, 'basic')
 
     def test_trigger_patterns_count(self) -> None:
-        """Test that all 13 trigger patterns are defined."""
-        self.assertEqual(len(TRIGGER_PATTERNS), 13)
+        """Test that all 14 trigger patterns are defined."""
+        self.assertEqual(len(TRIGGER_PATTERNS), 14)
 
     def test_no_primary_moves_in_other_variations(self) -> None:
         """
