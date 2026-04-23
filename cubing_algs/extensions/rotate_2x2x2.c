@@ -178,12 +178,12 @@ static int apply_move_to_state(char* restrict new_state, const char* restrict st
                 new_state[11] = temp_state[8];  // F[0] -> F[3]
 
                 // 180° front edge rotation (U<-D, R<-L, D<-U, L<-R)
-                new_state[2] = temp_state[12];  // D[0] -> U[2]
-                new_state[3] = temp_state[13];  // D[1] -> U[3]
+                new_state[2] = temp_state[13];  // D[1] -> U[2]
+                new_state[3] = temp_state[12];  // D[0] -> U[3]
                 new_state[4] = temp_state[19];  // L[3] -> R[0]
                 new_state[6] = temp_state[17];  // L[1] -> R[2]
-                new_state[12] = temp_state[2];  // U[2] -> D[0]
-                new_state[13] = temp_state[3];  // U[3] -> D[1]
+                new_state[12] = temp_state[3];  // U[3] -> D[0]
+                new_state[13] = temp_state[2];  // U[2] -> D[1]
                 new_state[17] = temp_state[6];  // R[2] -> L[1]
                 new_state[19] = temp_state[4];  // R[0] -> L[3]
             } else {
@@ -198,8 +198,8 @@ static int apply_move_to_state(char* restrict new_state, const char* restrict st
                 new_state[3] = temp_state[6];   // R[2] -> U[3]
                 new_state[4] = temp_state[13];  // D[1] -> R[0]
                 new_state[6] = temp_state[12];  // D[0] -> R[2]
-                new_state[12] = temp_state[19]; // L[3] -> D[0]
-                new_state[13] = temp_state[17]; // L[1] -> D[1]
+                new_state[12] = temp_state[17]; // L[1] -> D[0]
+                new_state[13] = temp_state[19]; // L[3] -> D[1]
                 new_state[17] = temp_state[3];  // U[3] -> L[1]
                 new_state[19] = temp_state[2];  // U[2] -> L[3]
             }
@@ -230,15 +230,15 @@ static int apply_move_to_state(char* restrict new_state, const char* restrict st
                 new_state[14] = temp_state[13]; // D[1] -> D[2]
                 new_state[15] = temp_state[12]; // D[0] -> D[3]
 
-                // 180° bottom row rotation (F<-B, L<-R, B<-F, R<-L)
-                new_state[6] = temp_state[22];  // B[2] -> R[2]
-                new_state[7] = temp_state[23];  // B[3] -> R[3]
-                new_state[10] = temp_state[6];  // R[2] -> F[2]
-                new_state[11] = temp_state[7];  // R[3] -> F[3]
-                new_state[18] = temp_state[10]; // F[2] -> L[2]
-                new_state[19] = temp_state[11]; // F[3] -> L[3]
-                new_state[22] = temp_state[18]; // L[2] -> B[2]
-                new_state[23] = temp_state[19]; // L[3] -> B[3]
+                // 180° bottom row rotation (R<-L, F<-B, L<-R, B<-F)
+                new_state[6] = temp_state[18];  // L[2] -> R[2]
+                new_state[7] = temp_state[19];  // L[3] -> R[3]
+                new_state[10] = temp_state[22]; // B[2] -> F[2]
+                new_state[11] = temp_state[23]; // B[3] -> F[3]
+                new_state[18] = temp_state[6];  // R[2] -> L[2]
+                new_state[19] = temp_state[7];  // R[3] -> L[3]
+                new_state[22] = temp_state[10]; // F[2] -> B[2]
+                new_state[23] = temp_state[11]; // F[3] -> B[3]
             } else {
                 // Face D rotation counterclockwise
                 new_state[12] = temp_state[13]; // D[1] -> D[0]
@@ -337,12 +337,12 @@ static int apply_move_to_state(char* restrict new_state, const char* restrict st
                 new_state[23] = temp_state[20]; // B[0] -> B[3]
 
                 // 180° back edge rotation (U<-D, R<-L, D<-U, L<-R)
-                new_state[0] = temp_state[14];  // D[2] -> U[0]
-                new_state[1] = temp_state[15];  // D[3] -> U[1]
+                new_state[0] = temp_state[15];  // D[3] -> U[0]
+                new_state[1] = temp_state[14];  // D[2] -> U[1]
                 new_state[5] = temp_state[18];  // L[2] -> R[1]
                 new_state[7] = temp_state[16];  // L[0] -> R[3]
-                new_state[14] = temp_state[0];  // U[0] -> D[2]
-                new_state[15] = temp_state[1];  // U[1] -> D[3]
+                new_state[14] = temp_state[1];  // U[1] -> D[2]
+                new_state[15] = temp_state[0];  // U[0] -> D[3]
                 new_state[16] = temp_state[7];  // R[3] -> L[0]
                 new_state[18] = temp_state[5];  // R[1] -> L[2]
             } else {
