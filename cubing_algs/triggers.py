@@ -120,7 +120,7 @@ TRIGGER_PATTERNS = [
     ),
     TriggerPattern(
         name='Sune',  # Anti-Chair
-        moves="R U R' U R U2 R'",
+        moves="R U R' U R U2 R'",  # Orient 3 corners
         category='OLL',
         ergonomic_bonus=0.14,
         speed_multiplier=1.3,
@@ -130,7 +130,7 @@ TRIGGER_PATTERNS = [
     ),
     TriggerPattern(
         name='Anti-Sune',  # Chair
-        moves="R U2 R' U' R U' R'",
+        moves="R U2 R' U' R U' R'",  # Orient 3 corners
         category='OLL',
         ergonomic_bonus=0.14,
         speed_multiplier=1.3,
@@ -140,11 +140,13 @@ TRIGGER_PATTERNS = [
     ),
     TriggerPattern(
         name='Niklas',
-        moves="R U' L' U R' U' L U",
+        moves="R U' L' U R' U' L",   # Permute 3 corners but also reorient
         category='advanced',
         ergonomic_bonus=0.16,
         speed_multiplier=1.35,
-        variations=["L U' R' U L' U' R U"],
+        variations=[
+            "L' U R U' L U R'",
+        ],
     ),
 
     # Setup patterns
