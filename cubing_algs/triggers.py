@@ -19,6 +19,7 @@ class TriggerPattern(NamedTuple):
     ergonomic_bonus: float
     speed_multiplier: float
     variations: list[str]
+    aliases: list[str]
 
 
 class TriggerMatch(NamedTuple):
@@ -43,6 +44,7 @@ TRIGGER_PATTERNS = [
             "R' U' R U",
             "L U L' U'",
         ],
+        aliases=['Cool Move', 'Sexy'],
     ),
     TriggerPattern(
         name='Sledgehammer',
@@ -55,6 +57,7 @@ TRIGGER_PATTERNS = [
             "R B' R' B",
             "L' B L B'",
         ],
+        aliases=['Sledge', 'Hammer'],
     ),
     TriggerPattern(
         name='Sune Trigger',
@@ -65,16 +68,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U' L U'",
         ],
-    ),
-    TriggerPattern(
-        name='Anti-Sune Trigger',
-        moves="R U2 R'",
-        category='basic',
-        ergonomic_bonus=0.10,
-        speed_multiplier=1.2,
-        variations=[
-            "L' U2 L",
-        ],
+        aliases=['Half Sune', 'Semi-Sexy', 'Homely'],
     ),
     TriggerPattern(
         name='T-Perm Trigger',
@@ -85,6 +79,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U' L F",
         ],
+        aliases=['T-Trigger', 'T Setup'],
     ),
 
     # Compound triggers
@@ -97,6 +92,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U' L U L F' L' F",
         ],
+        aliases=['Sexy Sledge', 'OLL 33'],
     ),
     TriggerPattern(
         name='Double Sexy',
@@ -107,6 +103,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U' L U L' U' L U",
         ],
+        aliases=['Double Cool', 'Sexy Sexy'],
     ),
     TriggerPattern(
         name='Triple Sexy',
@@ -117,9 +114,10 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U' L U L' U' L U L' U' L U",
         ],
+        aliases=['Triple Cool', 'Sexy Sexy Sexy'],
     ),
     TriggerPattern(
-        name='Sune',  # Anti-Chair
+        name='Sune',
         moves="R U R' U R U2 R'",  # Orient 3 corners
         category='OLL',
         ergonomic_bonus=0.14,
@@ -127,6 +125,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U' L U' L' U2 L",
         ],
+        aliases=['Anti-Chair', 'Anti-Chaise', 'OLL 27', 'OCLL 2'],
     ),
     TriggerPattern(
         name='Anti-Sune',  # Chair
@@ -137,6 +136,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U2 L U L' U L",
         ],
+        aliases=['Chair', 'Chaise', 'OLL 26', 'OCLL 3'],
     ),
     TriggerPattern(
         name='Niklas',
@@ -147,6 +147,7 @@ TRIGGER_PATTERNS = [
         variations=[
             "L' U R U' L U R'",
         ],
+        aliases=['3-Corner Cycle'],
     ),
 
     # Setup patterns
@@ -161,6 +162,7 @@ TRIGGER_PATTERNS = [
             "R' U' R",
             "L U L'",
         ],
+        aliases=['Pull', 'Extract', 'Pick Up'],
     ),
     TriggerPattern(
         name='Slot Insert',
@@ -173,6 +175,7 @@ TRIGGER_PATTERNS = [
             "R' U R",
             "L U' L'",
         ],
+        aliases=['Push', 'Insert', 'Put Down'],
     ),
     TriggerPattern(
         name='Slot Extended',
@@ -185,6 +188,7 @@ TRIGGER_PATTERNS = [
             "R' U2 R",
             "L U2 L'",
         ],
+        aliases=['Super', 'Double Extract', 'Long Pull'],
     ),
 
     # Wide move patterns
@@ -194,6 +198,11 @@ TRIGGER_PATTERNS = [
         category='wide',
         ergonomic_bonus=0.12,
         speed_multiplier=1.2,
-        variations=["l U l' U'", "r U' r' U"],
+        variations=[
+            "l' U' l U",
+            "r' U' r U",
+            "l U l' U'",
+        ],
+        aliases=['Wide Cool', 'Fat Sexy'],
     ),
 ]

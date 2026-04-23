@@ -21,6 +21,7 @@ class TestTriggerPattern(unittest.TestCase):
             ergonomic_bonus=0.1,
             speed_multiplier=1.2,
             variations=["L U L'"],
+            aliases=['test'],
         )
         self.assertEqual(pattern.name, 'Test')
         self.assertEqual(pattern.moves, 'R U R')
@@ -28,7 +29,7 @@ class TestTriggerPattern(unittest.TestCase):
 
     def test_trigger_patterns_count(self) -> None:
         """Test that all 15 trigger patterns are defined."""
-        self.assertEqual(len(TRIGGER_PATTERNS), 15)
+        self.assertEqual(len(TRIGGER_PATTERNS), 14)
 
     def test_primary_moves_are_unique(self) -> None:
         """Test that each pattern has unique primary moves."""
