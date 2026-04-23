@@ -151,20 +151,40 @@ TRIGGER_PATTERNS = [
 
     # Setup patterns
     TriggerPattern(
-        name='Right Insert',
+        name='Slot Extract',
         moves="R U R'",
         category='setup',
         ergonomic_bonus=0.06,
         speed_multiplier=1.1,
-        variations=["L U L'", "R U' R'", "L U' L'"],
+        variations=[
+            "L' U' L",
+            "R' U' R",
+            "L U L'",
+        ],
     ),
     TriggerPattern(
-        name='Extended Insert',
+        name='Slot Insert',
+        moves="R U' R'",
+        category='setup',
+        ergonomic_bonus=0.06,
+        speed_multiplier=1.1,
+        variations=[
+            "L' U L",
+            "R' U R",
+            "L U' L'",
+        ],
+    ),
+    TriggerPattern(
+        name='Slot Extended',
         moves="R U2 R'",
         category='setup',
         ergonomic_bonus=0.05,
         speed_multiplier=1.05,
-        variations=["L U2 L'"],
+        variations=[
+            "L' U2 L",
+            "R' U2 R",
+            "L U2 L'",
+        ],
     ),
 
     # Wide move patterns
