@@ -22,6 +22,7 @@ class TestTriggerPattern(unittest.TestCase):
             speed_multiplier=1.2,
             variations=["L U L'"],
             aliases=['test'],
+            description='A test trigger.',
         )
         self.assertEqual(pattern.name, 'Test')
         self.assertEqual(pattern.moves, 'R U R')
@@ -38,7 +39,7 @@ class TestTriggerPattern(unittest.TestCase):
             if pattern.moves in seen:
                 self.fail(
                     f"Pattern '{pattern.name}' has the same moves as "
-                    f"'{seen[pattern.moves]}': '{pattern.moves}'"
+                    f"'{seen[pattern.moves]}': '{pattern.moves}'",
                 )
             seen[pattern.moves] = pattern.name
 
