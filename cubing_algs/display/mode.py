@@ -6,8 +6,6 @@ from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import POVDisplayMask
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
-from cubing_algs.display.constants import F2L_ADJACENT_FACES
-from cubing_algs.display.constants import F2L_FACE_ORIENTATIONS
 from cubing_algs.display.masks import AF2L_MASK
 from cubing_algs.display.masks import CMLL_MASK
 from cubing_algs.display.masks import CROSS_BOTTOM_MASK
@@ -129,50 +127,66 @@ class ModeDisplay:
         Determine the optimal front face orientation for F2L display mode
         keeping the initial top face orientation.
 
-        Align F2L into FR slot for consistent results.
+        Align F2L into FR slot for consistent results,
+        select face with the most broken F2L.
 
         Returns:
             Characters representing the new face orientation.
 
         """
-        impacted_faces = ''
-        saved_facelets = ''
+        # TODO(me): compute the most slots visible in front
+        top, front = list(self.cube.orientation)
+        faces = {}
 
-        top = self.cube.orientation[0]
+        adjacent_faces = ADJACENT_FACES[top]
+        face_number = len(adjacent_faces)
 
-        for face in ADJACENT_FACES[top]:
+        index = adjacent_faces.index(front)
+        adjacent_faces_sorted = [
+            adjacent_faces[(index + i) % face_number]
+            for i in range(face_number)
+        ]
+
+        for i, face in enumerate(adjacent_faces_sorted):
             exclusion_pattern = face * (self.face_size - self.cube_size)
             facelets = self.cube.get_face_by_center(face)[
                 self.cube_size:self.face_size
             ]
 
             if exclusion_pattern != facelets:
-                impacted_faces += face
-                saved_facelets = facelets
+                faces[face] = {
+                    'index': i,
+                    'facelets': facelets,
+                    'start_different': (
+                        facelets[0] != face
+                        or facelets[self.cube_size] != face
+                    ),
+                    'end_different': (
+                        facelets[self.cube_size - 1] != face
+                        or facelets[-1] != face
+                    ),
+                }
 
-        if impacted_faces and len(impacted_faces) != 2:
-            last_face = impacted_faces[-1]
-            index = (
-                0
-                if saved_facelets[0] != last_face
-                or saved_facelets[3] != last_face
-                else 1
+        selected_face = front
+        for face, data in faces.items():
+            next_face_data = faces.get(
+                adjacent_faces_sorted[(data['index'] + 1) % face_number],
+                {'start_different': False},
             )
-            impacted_faces = (
-                last_face
-                # Will not work with U and D
-                + F2L_ADJACENT_FACES[last_face][index]
-            )
 
-        new_front = F2L_FACE_ORIENTATIONS.get(
-            ''.join(sorted(impacted_faces)),
-            '',
-        )
+            if (
+                    not data['end_different']
+                    and not next_face_data['start_different']
+            ):
+                continue
 
-        if not new_front:
+            selected_face = face
+            break
+
+        if selected_face == front:
             return ''
 
-        return f'{ top }{ new_front }'
+        return f'{ top }{ selected_face }'
 
     @staticmethod
     def scale_mask(
