@@ -134,7 +134,7 @@ class ModeDisplay:
             Characters representing the new face orientation.
 
         """
-        top, front = list(self.cube.orientation)
+        top, front = self.cube.orientation
         faces = {}
 
         adjacent_faces = ADJACENT_FACES[top]
@@ -156,7 +156,7 @@ class ModeDisplay:
                 'facelets': facelets,
                 'start_different': (
                     facelets[0] != face
-                    or facelets[self.cube_size] != face
+                    or facelets[-self.cube_size] != face
                 ),
                 'end_different': (
                     facelets[self.cube_size - 1] != face
