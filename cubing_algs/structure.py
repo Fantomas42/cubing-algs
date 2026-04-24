@@ -99,6 +99,16 @@ class BoundedCache[K, V](MutableMapping[K, V]):
             self._cache.popitem(last=False)  # Remove oldest (LRU)
         self._cache[key] = value
 
+    def __contains__(self, key: object) -> bool:
+        """
+        Check membership without promoting the key as recently used.
+
+        Returns:
+            True if the key is in the cache, False otherwise.
+
+        """
+        return key in self._cache
+
     def __delitem__(self, key: K) -> None:
         """Remove item from cache."""
         del self._cache[key]
@@ -179,7 +189,7 @@ class StructureData(NamedTuple):
 
     # Compression metrics
     original_length: int
-    compressed_notation_length: int
+    compressed_notation_char_length: int
     compression_ratio: float
 
     # Structure quality
@@ -198,10 +208,10 @@ class StructureData(NamedTuple):
     average_action_length: float
 
     # Coverage metrics
-    coverage_percent: float  # Percentage of moves covered by structures
+    coverage_ratio: float  # Ratio of moves covered by structures (0.0-1.0)
     uncovered_moves: int
 
-    # Classification statistics (NEW)
+    # Classification statistics
     pure_commutator_count: int  # Pure 8-move commutators
     a9_commutator_count: int  # 9-move commutators with cancellation
     nested_conjugate_count: int  # Conjugates with nested structures
@@ -352,8 +362,9 @@ def classify_commutator(
 
 
 def classify_conjugate(
-        setup: 'Algorithm', action: 'Algorithm',
-        nesting_depth: int = 0,
+    setup: 'Algorithm',
+    action: 'Algorithm',
+    nesting_depth: int = 0,
 ) -> StructureClassification:
     """
     Classify a conjugate based on structure and efficiency.
@@ -698,6 +709,8 @@ def detect_structures(
             )
         elif conjugate:
             best = conjugate
+        elif commutator:
+            best = commutator
 
         if best and best.score >= min_score:
             structures.append(best)
@@ -1064,7 +1077,7 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
             - max_nesting_depth: Maximum nesting depth of structures
             - nested_structure_count: Number of nested structures
             - original_length: Length of original algorithm
-            - compressed_notation_length: Length of compressed notation
+            - compressed_notation_char_length: Length of compressed notation
             - compression_ratio: Ratio of compression (0.0-1.0)
             - average_structure_score: Average quality score
             - best_structure_score: Highest quality score
@@ -1075,7 +1088,7 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
             - shortest_action_length: Shortest action sequence length
             - longest_action_length: Longest action sequence length
             - average_action_length: Average action sequence length
-            - coverage_percent: Percentage of moves covered by structures
+            - coverage_ratio: Ratio of moves covered by structures (0.0-1.0)
             - uncovered_moves: Number of moves not in any structure
 
     """
@@ -1204,7 +1217,7 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
         max_nesting_depth=max_depth,
         nested_structure_count=nested_count,
         original_length=original_length,
-        compressed_notation_length=compressed_length,
+        compressed_notation_char_length=compressed_length,
         compression_ratio=compression_ratio,
         average_structure_score=avg_score,
         best_structure_score=best_score,
@@ -1215,7 +1228,7 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
         shortest_action_length=shortest_action,
         longest_action_length=longest_action,
         average_action_length=avg_action,
-        coverage_percent=coverage,
+        coverage_ratio=coverage,
         uncovered_moves=uncovered,
         pure_commutator_count=pure_comm_count,
         a9_commutator_count=a9_comm_count,

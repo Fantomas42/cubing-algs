@@ -435,7 +435,7 @@ def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
     # --- Structure score ---
     has_structure = struct.total_structures > 0
     structure_score = compute_structure_score(
-        struct.coverage_percent,
+        struct.coverage_ratio,
         struct.compression_ratio,
         has_structure=has_structure,
     )

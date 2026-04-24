@@ -435,7 +435,7 @@ class ComputeStructureTestCase(unittest.TestCase):
 
         self.assertEqual(struct.total_structures, 0)
         self.assertEqual(struct.uncovered_moves, 3)
-        self.assertEqual(struct.coverage_percent, 0.0)
+        self.assertEqual(struct.coverage_ratio, 0.0)
 
     def test_compute_structure_conjugate(self) -> None:
         """Test compute structure conjugate."""
@@ -517,8 +517,8 @@ class ComputeStructureTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
-        self.assertGreaterEqual(struct.coverage_percent, 0.0)
-        self.assertLessEqual(struct.coverage_percent, 1.0)
+        self.assertGreaterEqual(struct.coverage_ratio, 0.0)
+        self.assertLessEqual(struct.coverage_ratio, 1.0)
         self.assertGreaterEqual(struct.uncovered_moves, 0)
         self.assertLessEqual(struct.uncovered_moves, struct.original_length)
 
@@ -1510,8 +1510,8 @@ class ComputeStructureAdditionalTestCase(unittest.TestCase):
 
         # Should have partial coverage (commutator covers first 4 moves)
         if struct.total_structures > 0:
-            self.assertGreater(struct.coverage_percent, 0.0)
-            self.assertLess(struct.coverage_percent, 1.0)
+            self.assertGreater(struct.coverage_ratio, 0.0)
+            self.assertLess(struct.coverage_ratio, 1.0)
             self.assertGreater(struct.uncovered_moves, 0)
 
     def test_compute_structure_multiple_structures_stats(self) -> None:
