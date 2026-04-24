@@ -1,5 +1,6 @@
 """Tests for algorithm structure analysis."""
 import unittest
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.structure import BoundedCache
@@ -1932,3 +1933,17 @@ class CommutatorScoreBranchTestCase(unittest.TestCase):
         assert result is not None  # noqa: S101
         self.assertEqual(len(result.setup), 2)
         self.assertGreater(result.score, 15.0)
+
+
+class CommutatorOnlyBranchTestCase(unittest.TestCase):
+    """Tests for the commutator-only branch in detect_structures."""
+
+    def test_commutator_only_when_conjugate_absent(self) -> None:
+        """When detect_conjugate returns None, commutator is used as best."""
+        algo = Algorithm.parse_moves("R U R' U'")
+
+        with patch('cubing_algs.structure.detect_conjugate', return_value=None):
+            structures = detect_structures(algo, min_score=0)
+
+        self.assertEqual(len(structures), 1)
+        self.assertEqual(structures[0].type, 'commutator')

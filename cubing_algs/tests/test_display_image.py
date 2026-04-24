@@ -714,6 +714,25 @@ class BuildArrowMarkerTestCase(unittest.TestCase):
         )
 
 
+class BuildArrowsWithCentersTestCase(unittest.TestCase):
+    """Tests for build_arrows_with_centers()."""
+
+    def test_zero_length_arrow_is_silently_skipped(self) -> None:
+        """An arrow whose from/to centers are equal is silently skipped."""
+        display = ImageDisplay(VCube())
+
+        def fixed_center(face: str, idx: int) -> tuple[float, float]:
+            return (float(ord(face[0])), 0.0 * idx)
+
+        result = display.build_arrows_with_centers(
+            [('U', 0, 'U', 2, '')],
+            fixed_center,
+            400,
+        )
+
+        self.assertEqual(result, '')
+
+
 class RenderCubeArrowsTestCase(unittest.TestCase):
     """Tests for arrow rendering in the 3D cube view."""
 

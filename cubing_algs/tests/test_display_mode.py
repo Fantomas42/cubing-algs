@@ -338,6 +338,26 @@ class RealignMaskTestCase(ModeDisplayMixin, unittest.TestCase):
         display = self.make_display('x')
         self.assertEqual(display.realign_mask(all_zeros), all_zeros)
 
+    def test_broken_orientation_falls_back_to_history(self) -> None:
+        """When center colors are not unique, history drives rotation."""
+        # Two faces share center color 'U' (positions 4 and 13), so
+        # len(set(face_center_colors)) == 5 != 6 == face_number.
+        state = (
+            'UUUUUUUUU'
+            'RRRRURRRR'
+            'FFFFFFFFF'
+            'DDDDDDDDD'
+            'LLLLLLLLL'
+            'BBBBBBBBB'
+        )
+        cube = VCube(state, check=False, history=['x'])
+        display = VCubeDisplay(cube)
+
+        result = display.realign_mask(OLL_MASK)
+
+        self.assertIsInstance(result, str)
+        self.assertEqual(len(result), 54)
+
 
 class ScaleMaskTestCase(ModeDisplayMixin, unittest.TestCase):
     """Tests for ModeDisplay.scale_mask()."""
