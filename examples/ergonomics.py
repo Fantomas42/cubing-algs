@@ -92,8 +92,8 @@ def show_ergonomics(algorithm: str) -> None:
     stat('Total moves', ergo.total_moves, color=FG_WHITE)
     stat(
         'Comfort score',
-        f'{ergo.comfort_score:.1f}/100',
-        color=gradient_color(ergo.comfort_score, 40, 70),
+        f'{ergo.ergonomic_score * 100:.1f}/100',
+        color=gradient_color(ergo.ergonomic_score * 100, 40, 70),
     )
     stat('Ergonomic rating', ergo.ergonomic_rating, color=FG_CYAN)
     stat('Difficulty', ergo.difficulty_classification, color=FG_YELLOW)
@@ -152,11 +152,6 @@ def show_ergonomics(algorithm: str) -> None:
         'Awkward moves',
         ergo.awkward_moves,
         color=FG_GREEN if ergo.awkward_moves == 0 else FG_YELLOW,
-    )
-    stat(
-        'Flow breaks',
-        ergo.flow_breaks,
-        color=FG_GREEN if ergo.flow_breaks == 0 else FG_YELLOW,
     )
 
     section('TRIGGER PATTERNS', FG_MAGENTA)
@@ -237,8 +232,8 @@ def show_hand_dominance_comparison(algorithm: str) -> None:
         )
         stat(
             '  Comfort score',
-            f'{ergo.comfort_score:.1f}/100',
-            color=gradient_color(ergo.comfort_score, 40, 70),
+            f'{ergo.ergonomic_score * 100:.1f}/100',
+            color=gradient_color(ergo.ergonomic_score * 100, 40, 70),
         )
         stat(
             '  Estimated TPS',

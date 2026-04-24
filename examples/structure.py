@@ -77,7 +77,7 @@ def show_structure(algorithm: str) -> None:  # noqa: PLR0915
     stat('Original length', f'{len(struct.original)} chars', color=FG_YELLOW)
     stat(
         'Compressed length',
-        f'{struct.compressed_notation_length} chars',
+        f'{struct.compressed_notation_char_length} chars',
         color=FG_YELLOW,
     )
     ratio_color = FG_GREEN if struct.compression_ratio < 1.0 else FG_GREY
@@ -112,9 +112,9 @@ def show_structure(algorithm: str) -> None:  # noqa: PLR0915
 
     section('COVERAGE ANALYSIS')
     coverage_color = (
-        FG_GREEN if struct.coverage_percent >= COVERAGE_THRESHOLD else FG_YELLOW
+        FG_GREEN if struct.coverage_ratio >= COVERAGE_THRESHOLD else FG_YELLOW
     )
-    stat('Coverage', f'{struct.coverage_percent:.1%}', color=coverage_color)
+    stat('Coverage', f'{struct.coverage_ratio:.1%}', color=coverage_color)
     uncovered_color = FG_GREY if struct.uncovered_moves == 0 else FG_RED
     stat('Uncovered moves', struct.uncovered_moves, color=uncovered_color)
 
