@@ -15,6 +15,9 @@ FG_GREY = '\x1b[38;5;244m'
 FG_WHITE = '\x1b[38;5;255m'
 
 WIDTH = 70
+COVERAGE_THRESHOLD = 0.8
+SCORE_HIGH = 0.7
+SCORE_MID = 0.4
 
 
 def colorize(text: str, color: str) -> str:
@@ -72,12 +75,24 @@ def show_structure(algorithm: str) -> None:  # noqa: PLR0915
 
     section('COMPRESSION ANALYSIS')
     stat('Original length', f'{len(struct.original)} chars', color=FG_YELLOW)
-    stat('Compressed length', f'{struct.compressed_notation_length} chars', color=FG_YELLOW)
+    stat(
+        'Compressed length',
+        f'{struct.compressed_notation_length} chars',
+        color=FG_YELLOW,
+    )
     ratio_color = FG_GREEN if struct.compression_ratio < 1.0 else FG_GREY
-    stat('Compression ratio', f'{struct.compression_ratio:.1%}', color=ratio_color)
+    stat(
+        'Compression ratio',
+        f'{struct.compression_ratio:.1%}',
+        color=ratio_color,
+    )
 
     section('QUALITY METRICS')
-    stat('Average score', f'{struct.average_structure_score:.2f}', color=FG_CYAN)
+    stat(
+        'Average score',
+        f'{struct.average_structure_score:.2f}',
+        color=FG_CYAN,
+    )
     stat('Best score', f'{struct.best_structure_score:.2f}', color=FG_GREEN)
 
     if struct.total_structures > 0:
@@ -96,7 +111,9 @@ def show_structure(algorithm: str) -> None:  # noqa: PLR0915
         )
 
     section('COVERAGE ANALYSIS')
-    coverage_color = FG_GREEN if struct.coverage_percent >= 0.8 else FG_YELLOW
+    coverage_color = (
+        FG_GREEN if struct.coverage_percent >= COVERAGE_THRESHOLD else FG_YELLOW
+    )
     stat('Coverage', f'{struct.coverage_percent:.1%}', color=coverage_color)
     uncovered_color = FG_GREY if struct.uncovered_moves == 0 else FG_RED
     stat('Uncovered moves', struct.uncovered_moves, color=uncovered_color)
@@ -106,8 +123,16 @@ def show_structure(algorithm: str) -> None:  # noqa: PLR0915
     stat('A9 commutators', struct.a9_commutator_count, color=FG_CYAN)
     stat('Nested conjugates', struct.nested_conjugate_count, color=FG_MAGENTA)
     stat('Simple conjugates', struct.simple_conjugate_count, color=FG_CYAN)
-    stat('With cancellations', struct.structures_with_cancellations, color=FG_YELLOW)
-    stat('Avg moves/structure', f'{struct.average_move_count:.1f}', color=FG_CYAN)
+    stat(
+        'With cancellations',
+        struct.structures_with_cancellations,
+        color=FG_YELLOW,
+    )
+    stat(
+        'Avg moves/structure',
+        f'{struct.average_move_count:.1f}',
+        color=FG_CYAN,
+    )
     stat('Efficiency rating', struct.efficiency_rating, color=FG_MAGENTA)
 
     if struct.structures:
@@ -117,27 +142,49 @@ def show_structure(algorithm: str) -> None:  # noqa: PLR0915
             notation_str = colorize(str(s), FG_WHITE + BOLD)
 
             class_tag = (
-                colorize(f' [{s.classification}]', FG_CYAN) if s.classification else ''
+                colorize(f' [{s.classification}]', FG_CYAN)
+                if s.classification
+                else ''
             )
-            pure_tag = colorize(' (PURE)', FG_GREEN + BOLD) if s.is_pure else ''
-            cancel_tag = colorize(' *cancels*', FG_YELLOW) if s.has_cancellations else ''
+            pure_tag = (
+                colorize(' (PURE)', FG_GREEN + BOLD) if s.is_pure else ''
+            )
+            cancel_tag = (
+                colorize(' *cancels*', FG_YELLOW) if s.has_cancellations else ''
+            )
 
-            print(f'  {colorize(str(idx), FG_GREY)}. {type_str}: {notation_str}{class_tag}{pure_tag}{cancel_tag}')
-            score_color = FG_GREEN if s.score >= 0.7 else FG_YELLOW if s.score >= 0.4 else FG_RED
-            print(
-                f'     {colorize("Score:", FG_GREY)} {colorize(f"{s.score:.2f}", score_color + BOLD)}'
-                f'  {colorize("Moves:", FG_GREY)} {colorize(str(s.move_count), FG_CYAN + BOLD)}'
+            line = (
+                f'  {colorize(str(idx), FG_GREY)}. '
+                f'{type_str}: {notation_str}'
+                f'{class_tag}{pure_tag}{cancel_tag}'
+            )
+            print(line)
+            score_color = (
+                FG_GREEN
+                if s.score >= SCORE_HIGH
+                else FG_YELLOW
+                if s.score >= SCORE_MID
+                else FG_RED
             )
             print(
-                f'     {colorize("Setup:", FG_GREY)} {colorize(str(s.setup), FG_WHITE)}'
-                f' {colorize(f"({len(s.setup)} moves)", FG_GREY)}'
+                f'     {colorize("Score:", FG_GREY)} '
+                f'{colorize(f"{s.score:.2f}", score_color + BOLD)}'
+                f'  {colorize("Moves:", FG_GREY)} '
+                f'{colorize(str(s.move_count), FG_CYAN + BOLD)}',
             )
             print(
-                f'     {colorize("Action:", FG_GREY)} {colorize(str(s.action), FG_WHITE)}'
-                f' {colorize(f"({len(s.action)} moves)", FG_GREY)}'
+                f'     {colorize("Setup:", FG_GREY)} '
+                f'{colorize(str(s.setup), FG_WHITE)}'
+                f' {colorize(f"({len(s.setup)} moves)", FG_GREY)}',
             )
             print(
-                f'     {colorize("Position:", FG_GREY)} {colorize(f"{s.start}-{s.end}", FG_CYAN)}'
+                f'     {colorize("Action:", FG_GREY)} '
+                f'{colorize(str(s.action), FG_WHITE)}'
+                f' {colorize(f"({len(s.action)} moves)", FG_GREY)}',
+            )
+            print(
+                f'     {colorize("Position:", FG_GREY)} '
+                f'{colorize(f"{s.start}-{s.end}", FG_CYAN)}',
             )
     else:
         print()
