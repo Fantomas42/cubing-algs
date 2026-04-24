@@ -1236,6 +1236,36 @@ class ScoreStructureTestCase(unittest.TestCase):
 
         self.assertAlmostEqual(score, expected)
 
+    def test_pure_commutator_beats_longer(self) -> None:
+        """
+        Pure commutator bonus makes it outscore
+        a longer commutator at the same setup length.
+        """
+        setup = Algorithm.parse_moves('R U')
+        pure_action = Algorithm.parse_moves('F D')      # [2,2] → is_pure
+        longer_action = Algorithm.parse_moves('F D B L')  # [2,4]
+
+        pure_score = score_structure(
+            setup, pure_action,
+            is_commutator=True, is_pure=True,
+        )
+        longer_score = score_structure(
+            setup, longer_action,
+            is_commutator=True,
+        )
+
+        self.assertGreater(pure_score, longer_score)
+
+    def test_pure_flag_has_no_effect_on_conjugate(self) -> None:
+        """is_pure bonus only applies to commutators (is_commutator=True)."""
+        setup = Algorithm.parse_moves('R U')
+        action = Algorithm.parse_moves('F D')
+
+        base = score_structure(setup, action)
+        with_pure = score_structure(setup, action, is_pure=True)
+
+        self.assertAlmostEqual(base, with_pure)
+
 
 class IsInverseAtTestCase(unittest.TestCase):
     """Test inverse checking at position."""
