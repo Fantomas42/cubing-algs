@@ -2,6 +2,7 @@
 """Tests for scrambler piece manipulation functions."""
 import unittest
 from random import Random
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import SOLVED_CO
@@ -33,6 +34,7 @@ from cubing_algs.vcube import VCube
 class TestCubiesToScramble(unittest.TestCase):
     """Tests for cubies_to_scramble function."""
 
+    @patch('cubing_algs.solver.solve', new=lambda *_: 'R U')
     def test_solved_state_returns_empty(self) -> None:
         """Test that solved state returns empty algorithm."""
         cubies = (SOLVED_CP, SOLVED_CO, SOLVED_EP, SOLVED_EO)
