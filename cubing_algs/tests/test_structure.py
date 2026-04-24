@@ -14,6 +14,7 @@ from cubing_algs.structure import compress
 from cubing_algs.structure import compress_recursive
 from cubing_algs.structure import compute_structure
 from cubing_algs.structure import count_all_structures
+from cubing_algs.structure import detect_commutator
 from cubing_algs.structure import detect_move_cancellations
 from cubing_algs.structure import detect_structures
 from cubing_algs.structure import inverse_sequence
@@ -1057,6 +1058,39 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # Cache should now contain the inverse
         self.assertGreater(len(cache), 0)
 
+    def test_classify_commutator_a_prime_b_prime_cancellation(self) -> None:
+        """
+        Test that cancellation at the A'|B' boundary is detected.
+
+        [U F, R L U'] = U F R L U' F' U' | U L' R'  (10 moves)
+        Boundaries:
+          A|B : last(A)=F,  first(B)=R  → no cancellation  (different faces)
+          B|A': last(B)=U', first(A')=F' → no cancellation  (different faces)
+          A'|B': last(A')=U', first(B')=U → cancellation    (same face: U)
+        Without the A'|B' check this is misclassified as 'orthogonal'.
+        """
+        setup = Algorithm.parse_moves('U F')
+        action = Algorithm.parse_moves("R L U'")
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
+
+        classification = classify_commutator(setup, action, cache)
+        self.assertEqual(classification, 'A9')
+
+    def test_detect_commutator_has_cancellations_a_prime_b_prime(self) -> None:
+        """
+        Test that detect_commutator sets has_cancellations for A'|B' boundary.
+
+        Same commutator as above: the Structure.has_cancellations field must
+        be True even when the only cancellation is at A'|B'.
+        """
+        algo = Algorithm.parse_moves("U F R L U' F' U' U L' R'")
+        cache: BoundedCache[str, Algorithm] = BoundedCache(100)
+        result = detect_commutator(algo, 0, max_part_len=4, inverse_cache=cache)
+
+        self.assertIsNotNone(result)
+        assert result is not None  # noqa: S101
+        self.assertTrue(result.has_cancellations)
+
 
 class ClassifyConjugateTestCase(unittest.TestCase):
     """Test conjugate classification system."""
@@ -1845,3 +1879,26 @@ class CommutatorScoreBranchTestCase(unittest.TestCase):
         # Should find the best commutator
         self.assertEqual(len(structures), 1)
         self.assertEqual(structures[0].type, 'commutator')
+
+    def test_detect_commutator_returns_best_score_not_last(self) -> None:
+        """
+        Test that detect_commutator keeps the highest-scoring match,
+        not the last one found.
+
+        R U R U R U U' R' U' R' U' R' has two valid commutators at position 0:
+        - [2,4]: setup=[R,U], action=[R,U,R,U] → score=20
+          (found first, a_len=2)
+        - [4,2]: setup=[R,U,R,U], action=[R,U]  → score=5
+          (found last, a_len=4)
+
+        Without the guard the iteration overwrites the best with the last,
+        returning score=5.
+        """
+        algo = Algorithm.parse_moves("R U R U R U U' R' U' R' U' R'")
+        cache: BoundedCache[str, Algorithm] = BoundedCache(100)
+        result = detect_commutator(algo, 0, max_part_len=4, inverse_cache=cache)
+
+        self.assertIsNotNone(result)
+        assert result is not None  # noqa: S101
+        self.assertEqual(len(result.setup), 2)
+        self.assertGreater(result.score, 15.0)

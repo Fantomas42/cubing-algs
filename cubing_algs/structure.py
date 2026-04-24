@@ -341,9 +341,15 @@ def classify_commutator(
         inverse_cache[setup_key] = inverse_sequence(setup)
     setup_inv = inverse_cache[setup_key]
 
+    action_key = str(action)
+    if action_key not in inverse_cache:
+        inverse_cache[action_key] = inverse_sequence(action)
+    action_inv = inverse_cache[action_key]
+
     has_cancel = (
         detect_move_cancellations(setup, action) or
-        detect_move_cancellations(action, setup_inv)
+        detect_move_cancellations(action, setup_inv) or
+        detect_move_cancellations(setup_inv, action_inv)
     )
 
     # A9: Would be 10 moves but has one cancellation
@@ -616,9 +622,9 @@ def detect_commutator(
                     a_part, b_part, is_commutator=True,
                 )
 
-                # Get cached inverse (already populated by is_inverse_at)
-                a_part_key = str(a_part)
-                a_part_inv = inverse_cache[a_part_key]
+                # Get cached inverses (already populated by is_inverse_at)
+                a_part_inv = inverse_cache[str(a_part)]
+                b_part_inv = inverse_cache[str(b_part)]
 
                 # Classify and analyze the commutator
                 classification = classify_commutator(
@@ -626,7 +632,8 @@ def detect_commutator(
                 )
                 has_cancel = (
                     detect_move_cancellations(a_part, b_part) or
-                    detect_move_cancellations(b_part, a_part_inv)
+                    detect_move_cancellations(b_part, a_part_inv) or
+                    detect_move_cancellations(a_part_inv, b_part_inv)
                 )
                 move_count = a_len * 2 + b_len * 2
                 is_pure_comm = (
@@ -634,18 +641,19 @@ def detect_commutator(
                     and b_len == PURE_COMMUTATOR_ACTION_LEN
                 )
 
-                best_structure = Structure(
-                    type='commutator',
-                    setup=a_part,
-                    action=b_part,
-                    start=start,
-                    end=b_end + a_len + b_len,
-                    score=score,
-                    classification=classification,
-                    has_cancellations=has_cancel,
-                    move_count=move_count,
-                    is_pure=is_pure_comm,
-                )
+                if best_structure is None or score > best_structure.score:
+                    best_structure = Structure(
+                        type='commutator',
+                        setup=a_part,
+                        action=b_part,
+                        start=start,
+                        end=b_end + a_len + b_len,
+                        score=score,
+                        classification=classification,
+                        has_cancellations=has_cancel,
+                        move_count=move_count,
+                        is_pure=is_pure_comm,
+                    )
 
     return best_structure
 
