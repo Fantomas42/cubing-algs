@@ -31,10 +31,21 @@ from cubing_algs.scrambler.pieces import swap_pieces
 from cubing_algs.vcube import VCube
 
 
+def fake_solve(*_args: str) -> str:
+    """
+    Fake solve to bypass kociemba solver.
+
+    Returns:
+      Fake solve string.
+
+    """
+    return 'R U'
+
+
 class TestCubiesToScramble(unittest.TestCase):
     """Tests for cubies_to_scramble function."""
 
-    @patch('cubing_algs.solver.solve', new=lambda *_: 'R U')
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_solved_state_returns_empty(self) -> None:
         """Test that solved state returns empty algorithm."""
         cubies = (SOLVED_CP, SOLVED_CO, SOLVED_EP, SOLVED_EO)
