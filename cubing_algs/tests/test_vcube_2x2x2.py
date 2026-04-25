@@ -350,11 +350,25 @@ class Test2x2x2MoveConsistency(unittest.TestCase):
     """
 
     @staticmethod
-    def _apply(state: str, move: str) -> str:
+    def apply(state: str, move: str) -> str:
+        """
+        Apply move.
+
+        Returns:
+           State once move applied.
+
+        """
         return rotate_move(state, move)
 
     @staticmethod
-    def _apply_n(state: str, move: str, n: int) -> str:
+    def apply_n(state: str, move: str, n: int) -> str:
+        """
+        Apply N moves.
+
+        Returns:
+           State once move applied.
+
+        """
         for _ in range(n):
             state = rotate_move(state, move)
         return state
@@ -362,29 +376,29 @@ class Test2x2x2MoveConsistency(unittest.TestCase):
     def test_f2_equals_f_twice(self) -> None:
         """F2 direct code must equal F applied twice."""
         self.assertEqual(
-            self._apply(UNIQUE_2X2X2, 'F2'),
-            self._apply_n(UNIQUE_2X2X2, 'F', 2),
+            self.apply(UNIQUE_2X2X2, 'F2'),
+            self.apply_n(UNIQUE_2X2X2, 'F', 2),
         )
 
     def test_f_prime_equals_f_three_times(self) -> None:
         """F' direct code must equal F applied three times."""
         self.assertEqual(
-            self._apply(UNIQUE_2X2X2, "F'"),
-            self._apply_n(UNIQUE_2X2X2, 'F', 3),
+            self.apply(UNIQUE_2X2X2, "F'"),
+            self.apply_n(UNIQUE_2X2X2, 'F', 3),
         )
 
     def test_d2_equals_d_twice(self) -> None:
         """D2 direct code must equal D applied twice."""
         self.assertEqual(
-            self._apply(UNIQUE_2X2X2, 'D2'),
-            self._apply_n(UNIQUE_2X2X2, 'D', 2),
+            self.apply(UNIQUE_2X2X2, 'D2'),
+            self.apply_n(UNIQUE_2X2X2, 'D', 2),
         )
 
     def test_b2_equals_b_twice(self) -> None:
         """B2 direct code must equal B applied twice."""
         self.assertEqual(
-            self._apply(UNIQUE_2X2X2, 'B2'),
-            self._apply_n(UNIQUE_2X2X2, 'B', 2),
+            self.apply(UNIQUE_2X2X2, 'B2'),
+            self.apply_n(UNIQUE_2X2X2, 'B', 2),
         )
 
     def test_all_180_moves_equal_cw_twice(self) -> None:
@@ -392,8 +406,8 @@ class Test2x2x2MoveConsistency(unittest.TestCase):
         for move in ['U', 'R', 'F', 'D', 'L', 'B']:
             with self.subTest(move=move):
                 self.assertEqual(
-                    self._apply(UNIQUE_2X2X2, move + '2'),
-                    self._apply_n(UNIQUE_2X2X2, move, 2),
+                    self.apply(UNIQUE_2X2X2, move + '2'),
+                    self.apply_n(UNIQUE_2X2X2, move, 2),
                 )
 
     def test_all_ccw_moves_equal_cw_three_times(self) -> None:
@@ -401,8 +415,8 @@ class Test2x2x2MoveConsistency(unittest.TestCase):
         for move in ['U', 'R', 'F', 'D', 'L', 'B']:
             with self.subTest(move=move):
                 self.assertEqual(
-                    self._apply(UNIQUE_2X2X2, move + "'"),
-                    self._apply_n(UNIQUE_2X2X2, move, 3),
+                    self.apply(UNIQUE_2X2X2, move + "'"),
+                    self.apply_n(UNIQUE_2X2X2, move, 3),
                 )
 
     def test_all_180_moves_equal_ccw_twice(self) -> None:
@@ -410,8 +424,8 @@ class Test2x2x2MoveConsistency(unittest.TestCase):
         for move in ['U', 'R', 'F', 'D', 'L', 'B']:
             with self.subTest(move=move):
                 self.assertEqual(
-                    self._apply(UNIQUE_2X2X2, move + '2'),
-                    self._apply_n(UNIQUE_2X2X2, move + "'", 2),
+                    self.apply(UNIQUE_2X2X2, move + '2'),
+                    self.apply_n(UNIQUE_2X2X2, move + "'", 2),
                 )
 
 

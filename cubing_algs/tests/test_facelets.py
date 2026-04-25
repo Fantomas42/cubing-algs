@@ -6,9 +6,9 @@ from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
-from cubing_algs.facelets import _CORNER_LOOKUP
-from cubing_algs.facelets import _EDGE_LOOKUP
-from cubing_algs.facelets import _cache
+from cubing_algs.facelets import CACHE
+from cubing_algs.facelets import CORNER_LOOKUP
+from cubing_algs.facelets import EDGE_LOOKUP
 from cubing_algs.facelets import clear_cache
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import disable_cache
@@ -529,8 +529,8 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
     def test_cache_eviction_facelets(self) -> None:
         """Test cache eviction when max size is reached for facelets cache."""
         # Set a small cache size
-        original_max_size = _cache.max_size
-        _cache.max_size = 2
+        original_max_size = CACHE.max_size
+        CACHE.max_size = 2
 
         try:
             # Fill cache beyond max size using valid states
@@ -552,13 +552,13 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             self.assertLessEqual(info['facelets_cached'], 2)
 
         finally:
-            _cache.max_size = original_max_size
+            CACHE.max_size = original_max_size
 
     def test_cache_eviction_cubies(self) -> None:
         """Test cache eviction when max size is reached for cubies cache."""
         # Set a small cache size
-        original_max_size = _cache.max_size
-        _cache.max_size = 2
+        original_max_size = CACHE.max_size
+        CACHE.max_size = 2
 
         try:
             # Fill cache beyond max size
@@ -594,16 +594,16 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
             self.assertLessEqual(info['cubies_cached'], 2)
 
         finally:
-            _cache.max_size = original_max_size
+            CACHE.max_size = original_max_size
 
     def test_corner_fallback_logic(self) -> None:
         """Test fallback logic for invalid corner states."""
         # Save original lookup
-        original_lookup = _CORNER_LOOKUP.copy()
+        original_lookup = CORNER_LOOKUP.copy()
 
         try:
             # Clear the lookup to force fallback
-            _CORNER_LOOKUP.clear()
+            CORNER_LOOKUP.clear()
 
             # Now all corner lookups will fail and use fallback
             result = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
@@ -615,17 +615,17 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
 
         finally:
             # Restore original lookup
-            _CORNER_LOOKUP.clear()
-            _CORNER_LOOKUP.update(original_lookup)
+            CORNER_LOOKUP.clear()
+            CORNER_LOOKUP.update(original_lookup)
 
     def test_edge_fallback_logic(self) -> None:
         """Test fallback logic for invalid edge states."""
         # Save original lookup
-        original_lookup = _EDGE_LOOKUP.copy()
+        original_lookup = EDGE_LOOKUP.copy()
 
         try:
             # Clear the lookup to force fallback
-            _EDGE_LOOKUP.clear()
+            EDGE_LOOKUP.clear()
 
             # Now all edge lookups will fail and use fallback
             result = facelets_to_cubies(SOLVED_FACELETS_3x3x3)
@@ -637,8 +637,8 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
 
         finally:
             # Restore original lookup
-            _EDGE_LOOKUP.clear()
-            _EDGE_LOOKUP.update(original_lookup)
+            EDGE_LOOKUP.clear()
+            EDGE_LOOKUP.update(original_lookup)
 
     def test_edge_fallback_flipped_orientation(self) -> None:
         """Test fallback logic for flipped edge orientation case."""
@@ -647,11 +647,11 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
         cube.rotate('F')  # This creates a flipped edge
 
         # Save original lookup
-        original_lookup = _EDGE_LOOKUP.copy()
+        original_lookup = EDGE_LOOKUP.copy()
 
         try:
             # Clear the lookup to force fallback
-            _EDGE_LOOKUP.clear()
+            EDGE_LOOKUP.clear()
 
             # This should use fallback and hit the flipped edge case
             result = facelets_to_cubies(cube.state)
@@ -666,8 +666,8 @@ class TestFaceletsOptimizationCoverage(unittest.TestCase):
 
         finally:
             # Restore original lookup
-            _EDGE_LOOKUP.clear()
-            _EDGE_LOOKUP.update(original_lookup)
+            EDGE_LOOKUP.clear()
+            EDGE_LOOKUP.update(original_lookup)
 
     def test_cache_hit_paths(self) -> None:
         """Test cache hit paths explicitly."""

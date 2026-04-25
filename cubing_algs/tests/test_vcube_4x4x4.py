@@ -606,11 +606,25 @@ class Test4x4x4MoveConsistency(unittest.TestCase):
     """
 
     @staticmethod
-    def _apply(state: str, move: str) -> str:
+    def apply(state: str, move: str) -> str:
+        """
+        Apply move.
+
+        Returns:
+           State once move applied.
+
+        """
         return rotate_move(state, move, size=4)
 
     @staticmethod
-    def _apply_n(state: str, move: str, n: int) -> str:
+    def apply_n(state: str, move: str, n: int) -> str:
+        """
+        Apply N moves.
+
+        Returns:
+           State once move applied.
+
+        """
         for _ in range(n):
             state = rotate_move(state, move, size=4)
         return state
@@ -620,8 +634,8 @@ class Test4x4x4MoveConsistency(unittest.TestCase):
         for move in ['U', 'R', 'F', 'D', 'L', 'B']:
             with self.subTest(move=move):
                 self.assertEqual(
-                    self._apply(UNIQUE_4X4X4, move + '2'),
-                    self._apply_n(UNIQUE_4X4X4, move, 2),
+                    self.apply(UNIQUE_4X4X4, move + '2'),
+                    self.apply_n(UNIQUE_4X4X4, move, 2),
                 )
 
     def test_all_180_moves_equal_ccw_twice(self) -> None:
@@ -629,8 +643,8 @@ class Test4x4x4MoveConsistency(unittest.TestCase):
         for move in ['U', 'R', 'F', 'D', 'L', 'B']:
             with self.subTest(move=move):
                 self.assertEqual(
-                    self._apply(UNIQUE_4X4X4, move + '2'),
-                    self._apply_n(UNIQUE_4X4X4, move + "'", 2),
+                    self.apply(UNIQUE_4X4X4, move + '2'),
+                    self.apply_n(UNIQUE_4X4X4, move + "'", 2),
                 )
 
     def test_all_ccw_moves_equal_cw_three_times(self) -> None:
@@ -638,6 +652,6 @@ class Test4x4x4MoveConsistency(unittest.TestCase):
         for move in ['U', 'R', 'F', 'D', 'L', 'B']:
             with self.subTest(move=move):
                 self.assertEqual(
-                    self._apply(UNIQUE_4X4X4, move + "'"),
-                    self._apply_n(UNIQUE_4X4X4, move, 3),
+                    self.apply(UNIQUE_4X4X4, move + "'"),
+                    self.apply_n(UNIQUE_4X4X4, move, 3),
                 )
