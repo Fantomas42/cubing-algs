@@ -6,6 +6,7 @@ to ensure they represent valid, solvable cube configurations.
 Checks include permutation validity, orientation constraints,
 color combinations, and mathematical consistency.
 """
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeOrientation
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import CORNER_NUMBER
@@ -148,7 +149,7 @@ class VCubeIntegrityChecker:
     face_size: int
     face_number: int
 
-    _state: str
+    _state: CubeFacelets
 
     @property
     def face_center_colors(self) -> tuple[str, ...]:

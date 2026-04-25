@@ -15,6 +15,7 @@ Performance improvements:
 - cubies_to_facelets: ~1.1x faster than original
 - With caching: Up to 190x faster for repeated operations
 """
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_NUMBER
@@ -88,21 +89,29 @@ class ConversionCache:
         """
         self.max_size = max_size
         self.facelets_cache: dict[
-            str, tuple[
-                list[int], list[int], list[int],
+            CubeFacelets, tuple[
                 list[int], list[int],
+                list[int], list[int],
+                list[int],
             ],
         ] = {}
         self.cubies_cache: dict[
             tuple[
-                tuple[int, ...], tuple[int, ...], tuple[int, ...],
-                tuple[int, ...], tuple[int, ...], str | None,
-            ], str,
+                tuple[int, ...], tuple[int, ...],
+                tuple[int, ...], tuple[int, ...],
+                tuple[int, ...], str | None,
+            ], CubeFacelets,
         ] = {}
         self._enabled = True
 
-    def get_cubies(self, facelets: str) -> tuple[
-            list[int], list[int], list[int], list[int], list[int]] | None:
+    def get_cubies(
+            self,
+            facelets: CubeFacelets,
+    ) -> tuple[
+            list[int], list[int],
+            list[int], list[int],
+            list[int],
+    ] | None:
         """
         Get cubies from cache or compute and cache.
 
@@ -117,8 +126,15 @@ class ConversionCache:
             return None
         return self.facelets_cache[facelets]
 
-    def set_cubies(self, facelets: str, result: tuple[
-            list[int], list[int], list[int], list[int], list[int]]) -> None:
+    def set_cubies(
+            self,
+            facelets: CubeFacelets,
+            result: tuple[
+                list[int], list[int],
+                list[int], list[int],
+                list[int],
+            ],
+    ) -> None:
         """Cache cubies result."""
         if not self._enabled:
             return
@@ -130,10 +146,14 @@ class ConversionCache:
 
         self.facelets_cache[facelets] = result
 
-    def get_facelets(self, key: tuple[
-            tuple[int, ...], tuple[int, ...], tuple[int, ...],
-            tuple[int, ...], tuple[int, ...], str | None,
-    ]) -> str | None:
+    def get_facelets(
+            self,
+            key: tuple[
+                tuple[int, ...], tuple[int, ...],
+                tuple[int, ...], tuple[int, ...],
+                tuple[int, ...], str | None,
+            ],
+    ) -> CubeFacelets | None:
         """
         Get facelets from cache.
 
@@ -148,10 +168,15 @@ class ConversionCache:
             return None
         return self.cubies_cache[key]
 
-    def set_facelets(self, key: tuple[
-            tuple[int, ...], tuple[int, ...], tuple[int, ...],
-            tuple[int, ...], tuple[int, ...], str | None,
-    ], result: str) -> None:
+    def set_facelets(
+            self,
+            key: tuple[
+                tuple[int, ...], tuple[int, ...],
+                tuple[int, ...], tuple[int, ...],
+                tuple[int, ...], str | None,
+            ],
+            result: CubeFacelets,
+    ) -> None:
         """Cache facelets result."""
         if not self._enabled:
             return
@@ -186,10 +211,14 @@ class ConversionCache:
 CACHE = ConversionCache()
 
 
-def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913, PLR0917
-                       ep: list[int], eo: list[int],
-                       so: list[int],
-                       scheme: str | None = None) -> str:
+def cubies_to_facelets(  # noqa: PLR0913, PLR0917
+        cp: list[int],
+        co: list[int],
+        ep: list[int],
+        eo: list[int],
+        so: list[int],
+        scheme: str | None = None,
+) -> CubeFacelets:
     """
     Convert Corner/Edge Permutation/Orientation cube state
     to the Kociemba facelets representation string.
@@ -262,8 +291,12 @@ def cubies_to_facelets(cp: list[int], co: list[int],  # noqa: PLR0913, PLR0917
     return result
 
 
-def facelets_to_cubies(facelets: str) -> tuple[  # noqa: C901, PLR0912, PLR0914
-        list[int], list[int], list[int], list[int], list[int],
+def facelets_to_cubies(  # noqa: C901, PLR0912, PLR0914
+        facelets: CubeFacelets,
+) -> tuple[
+        list[int], list[int],
+        list[int], list[int],
+        list[int],
 ]:
     """
     Convert Kociemba facelets representation string to

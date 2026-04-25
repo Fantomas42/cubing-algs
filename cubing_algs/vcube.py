@@ -50,7 +50,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     def __init__(
             self,
-            initial: str | None = None,
+            initial: CubeFacelets | None = None,
             *,
             size: int = DEFAULT_CUBE_SIZE,
             check: bool = True,

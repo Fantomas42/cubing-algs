@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from typing import NamedTuple
 from typing import cast
 
+from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import CORNER_FACELET_MAP
@@ -143,7 +144,7 @@ class ImpactData(NamedTuple):
     cube: 'VCube'
 
     # Facelet analysis (visual/spatial impact)
-    facelets_state: str
+    facelets_state: CubeFacelets
     facelets_transformation_mask: str
     facelets_fixed_count: int
     facelets_mobilized_count: int
