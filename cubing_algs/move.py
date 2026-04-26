@@ -384,6 +384,30 @@ class Move(UserString):  # noqa: PLR0904
 
     # Transformations
 
+    def build(
+        self,
+        *,
+        layer: str | None = None,
+        move: str | None = None,
+        modifier: str | None = None,
+        time: str | None = None,
+    ) -> 'Move':
+        """
+        Construct a new Move from this move's components, with overrides.
+
+        Any omitted argument defaults to the corresponding component of self.
+
+        Returns:
+            A new Move with the specified components replaced.
+
+        """
+        return Move(
+            (layer if layer is not None else self.layer)
+            + (move if move is not None else self.raw_base_move)
+            + (modifier if modifier is not None else self.modifier)
+            + (time if time is not None else self.time),
+        )
+
     @cached_property
     def inverted(self) -> 'Move':
         """
@@ -395,19 +419,9 @@ class Move(UserString):  # noqa: PLR0904
         """
         if self.is_double or self.is_pause:
             return self
-
         if self.is_counter_clockwise:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.raw_base_move }'
-                f'{ self.time }',
-            )
-        return Move(
-            f'{ self.layer }'
-            f'{ self.raw_base_move }'
-            f'{ INVERT_CHAR }'
-            f'{ self.time }',
-        )
+            return self.build(modifier='')
+        return self.build(modifier=INVERT_CHAR)
 
     @cached_property
     def doubled(self) -> 'Move':
@@ -419,19 +433,9 @@ class Move(UserString):  # noqa: PLR0904
         """
         if self.is_pause:
             return self
-
         if self.is_double:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.raw_base_move }'
-                f'{ self.time }',
-            )
-        return Move(
-            f'{ self.layer }'
-            f'{ self.raw_base_move }'
-            f'{ DOUBLE_CHAR }'
-            f'{ self.time }',
-        )
+            return self.build(modifier='')
+        return self.build(modifier=DOUBLE_CHAR)
 
     @cached_property
     def unlayered(self) -> 'Move':
@@ -441,11 +445,7 @@ class Move(UserString):  # noqa: PLR0904
         This converts moves like 3Rw to Rw.
         """
         if self.is_layered:
-            return Move(
-                f'{ self.raw_base_move }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
+            return self.build(layer='')
         return self
 
     @cached_property
@@ -456,11 +456,7 @@ class Move(UserString):  # noqa: PLR0904
         This converts moves like 3Rw@200 to 3Rw.
         """
         if self.is_timed:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.raw_base_move }'
-                f'{ self.modifier }',
-            )
+            return self.build(time='')
         return self
 
     @cached_property
@@ -475,12 +471,7 @@ class Move(UserString):  # noqa: PLR0904
         This only affects wide moves.
         """
         if self.is_wide_move and not self.is_sign_move:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.base_move.lower() }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
+            return self.build(move=self.base_move.lower())
         return self
 
     @cached_property
@@ -493,10 +484,5 @@ class Move(UserString):  # noqa: PLR0904
         This only affects wide moves.
         """
         if self.is_sign_move:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.base_move.upper() }{ WIDE_CHAR }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
+            return self.build(move=self.base_move.upper() + WIDE_CHAR)
         return self

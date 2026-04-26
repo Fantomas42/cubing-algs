@@ -393,3 +393,13 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(Move('.@100').time, '@100')
         self.assertEqual(Move('.@100').timed, 100)
+
+    def test_build(self) -> None:
+        """Test build helper assembles moves from overridden components."""
+        m = Move("3-4Rw'@200")
+        self.assertEqual(m.build(), Move("3-4Rw'@200"))
+        self.assertEqual(m.build(modifier=''), Move('3-4Rw@200'))
+        self.assertEqual(m.build(modifier='2'), Move('3-4Rw2@200'))
+        self.assertEqual(m.build(layer=''), Move("Rw'@200"))
+        self.assertEqual(m.build(time=''), Move("3-4Rw'"))
+        self.assertEqual(m.build(move='Uw'), Move("3-4Uw'@200"))
