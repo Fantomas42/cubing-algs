@@ -96,12 +96,14 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertTrue(Move('U').is_clockwise)
         self.assertFalse(Move("U'").is_clockwise)
         self.assertFalse(Move('.').is_clockwise)
+        self.assertFalse(Move('U2').is_clockwise)
 
     def test_is_counter_clockwise(self) -> None:
         """Test is counter clockwise."""
         self.assertTrue(Move("U'").is_counter_clockwise)
         self.assertFalse(Move('U').is_counter_clockwise)
         self.assertFalse(Move('.').is_counter_clockwise)
+        self.assertFalse(Move('U2').is_counter_clockwise)
 
     def test_is_pause(self) -> None:
         """Test is pause."""

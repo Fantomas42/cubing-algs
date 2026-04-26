@@ -25,8 +25,13 @@ class Move(UserString):  # noqa: PLR0904
 
     Extends UserString to provide string-like behavior while adding properties
     for move validation and transformation.
+
     A move consists of an optional layer impacted (such as 2, 3-4),
     a base move (letter) and optional modifiers (such as ', 2, w).
+
+    Move objects must be treated as immutable.
+    All properties are cached via cached_property;
+    mutating self.data after construction will silently return stale values.
 
     Examples of valid moves: U, R', F2, Rw, M, x, 3-4Rw, 2F
     """
@@ -46,7 +51,11 @@ class Move(UserString):  # noqa: PLR0904
 
     @cached_property
     def layer_move_modifier_time(self) -> tuple[str, str, str, str]:
-        """Parse the move string into its component parts."""
+        """
+        Parse the move string into its component parts.
+
+        Assumes non-empty data.
+        """
         layer = ''
         move = ''
         modifier = ''
@@ -350,11 +359,16 @@ class Move(UserString):  # noqa: PLR0904
     @cached_property
     def is_clockwise(self) -> bool:
         """
-        Check if this is a clockwise move.
+        Check if this is a clockwise (quarter-turn) move.
 
-        Moves without the invert character (') are clockwise.
+        Returns True only for non-pause, non-double moves
+        without the invert character.
         """
-        return not self.is_pause and self.modifier != INVERT_CHAR
+        return (
+            not self.is_pause
+            and not self.is_double and
+            self.modifier != INVERT_CHAR
+        )
 
     @cached_property
     def is_counter_clockwise(self) -> bool:
@@ -363,7 +377,10 @@ class Move(UserString):  # noqa: PLR0904
 
         Moves with the invert character (') are counter-clockwise.
         """
-        return not self.is_pause and not self.is_clockwise
+        return (
+            not self.is_pause
+            and self.modifier == INVERT_CHAR
+        )
 
     # Transformations
 
