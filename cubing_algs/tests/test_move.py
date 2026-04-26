@@ -91,6 +91,13 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertTrue(Move('U2').is_double)
         self.assertFalse(Move('.').is_double)
 
+    def test_quarter_turns(self) -> None:
+        """Test quarter_turns returns 1, -1, 2, or 0."""
+        self.assertEqual(Move('U').quarter_turns, 1)
+        self.assertEqual(Move("U'").quarter_turns, -1)
+        self.assertEqual(Move('U2').quarter_turns, 2)
+        self.assertEqual(Move('.').quarter_turns, 0)
+
     def test_is_clockwise(self) -> None:
         """Test is clockwise."""
         self.assertTrue(Move('U').is_clockwise)

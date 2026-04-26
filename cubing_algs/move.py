@@ -382,6 +382,24 @@ class Move(UserString):  # noqa: PLR0904
             and self.modifier == INVERT_CHAR
         )
 
+    @cached_property
+    def quarter_turns(self) -> int:
+        """
+        Number of quarter turns this move represents.
+
+        Returns:
+            1 for clockwise, -1 for counter-clockwise,
+            2 for double, 0 for pause.
+
+        """
+        if self.is_pause:
+            return 0
+        if self.is_double:
+            return 2
+        if self.is_counter_clockwise:
+            return -1
+        return 1
+
     # Transformations
 
     def build(
