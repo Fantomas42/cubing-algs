@@ -2,12 +2,17 @@
 from functools import cached_property
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import CornerOrientation
+from cubing_algs.annotations import CornerPermutation
 from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeOrientation
+from cubing_algs.annotations import EdgeOrientation
+from cubing_algs.annotations import EdgePermutation
 from cubing_algs.annotations import FaceFacelets
 from cubing_algs.annotations import FaceletPieceType
+from cubing_algs.annotations import SpatialOrientation
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
@@ -253,11 +258,11 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     @staticmethod
     def from_cubies(  # noqa: PLR0913 PLR0917
-            cp: list[int],
-            co: list[int],
-            ep: list[int],
-            eo: list[int],
-            so: list[int],
+            cp: CornerPermutation,
+            co: CornerOrientation,
+            ep: EdgePermutation,
+            eo: EdgeOrientation,
+            so: SpatialOrientation,
             scheme: CubeFacelets | None = None,
     ) -> 'VCube':
         """

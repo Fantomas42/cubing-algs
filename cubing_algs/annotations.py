@@ -23,18 +23,18 @@ type FaceletPieceType = Literal[
 # Corner types (8 corners, orientations 0-2)
 type CornerIndex = Literal[0, 1, 2, 3, 4, 5, 6, 7]
 type CornerOrientationValue = Literal[0, 1, 2]
-type CornerPermutation = list[CornerIndex]
-type CornerOrientation = list[CornerOrientationValue]
+type CornerPermutation = list[int]
+type CornerOrientation = list[int]
 
 # Edge types (12 edges, orientations 0-1)
 type EdgeIndex = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 type EdgeOrientationValue = Literal[0, 1]
-type EdgePermutation = list[EdgeIndex]
-type EdgeOrientation = list[EdgeOrientationValue]
+type EdgePermutation = list[int]
+type EdgeOrientation = list[int]
 
 # Face/spatial orientation (6 faces)
 type FaceIndex = Literal[0, 1, 2, 3, 4, 5]
-type SpatialOrientation = list[FaceIndex]
+type SpatialOrientation = list[int]
 
 # Cubie arrays - permutation and orientation
 type Permutation = list[int]
@@ -58,15 +58,15 @@ type CubeDisplayMask = str[DisplayCode]
 
 # Cube cubies tuple (cp, co, ep, eo) - without spatial orientation
 type CubeCubies = tuple[
-    Permutation, Orientation,
-    Permutation, Orientation,
+    CornerPermutation, CornerOrientation,
+    EdgePermutation, EdgeOrientation,
 ]
 
 # Cube cubies tuple (cp, co, ep, eo, so) - with spatial orientation
 type CubeCubiesOriented = tuple[
-    Permutation, Orientation,
-    Permutation, Orientation,
-    Orientation,
+    CornerPermutation, CornerOrientation,
+    EdgePermutation, EdgeOrientation,
+    SpatialOrientation,
 ]
 
 # Regex pattern type

@@ -10,7 +10,11 @@ from typing import TYPE_CHECKING
 from typing import NamedTuple
 from typing import cast
 
+from cubing_algs.annotations import CornerOrientation
+from cubing_algs.annotations import CornerPermutation
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import EdgeOrientation
+from cubing_algs.annotations import EdgePermutation
 from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import CORNER_FACELET_MAP
@@ -158,10 +162,10 @@ class ImpactData(NamedTuple):
     facelets_piece_type_impact: dict[FaceletPieceType, int]
 
     # Cubie analysis (piece-level impact, 3x3x3 only)
-    cubies_corner_permutation: list[int] | None
-    cubies_corner_orientation: list[int] | None
-    cubies_edge_permutation: list[int] | None
-    cubies_edge_orientation: list[int] | None
+    cubies_corner_permutation: CornerPermutation | None
+    cubies_corner_orientation: CornerOrientation | None
+    cubies_edge_permutation: EdgePermutation | None
+    cubies_edge_orientation: EdgeOrientation | None
     cubies_corners_moved: int | None
     cubies_corners_twisted: int | None
     cubies_edges_moved: int | None
@@ -400,8 +404,11 @@ def compute_adjacent_face_manhattan_distance(
     return cube.size + within_face_distance
 
 
-def compute_manhattan_distance(original_pos: int, final_pos: int,
-                               cube: 'VCube') -> int:
+def compute_manhattan_distance(
+        original_pos: int,
+        final_pos: int,
+        cube: 'VCube',
+) -> int:
     """
     Calculate Manhattan displacement distance between two positions.
 
@@ -466,7 +473,8 @@ def compute_within_face_qtm_distance(
 
 def compute_opposite_face_qtm_distance(
         orig: FaceletPosition,
-        final: FaceletPosition) -> int:
+        final: FaceletPosition,
+) -> int:
     """
     Calculate QTM distance for positions on opposite faces.
 
@@ -493,9 +501,11 @@ def compute_opposite_face_qtm_distance(
 
 
 def compute_adjacent_face_edge_qtm_distance(
-        original_pos: int, final_pos: int,
+        original_pos: int,
+        final_pos: int,
         orig_face_pos: int,
-        final_face_pos: int) -> int | None:
+        final_face_pos: int,
+) -> int | None:
     """
     Calculate QTM distance for edge pieces on adjacent faces.
 
@@ -580,8 +590,11 @@ def compute_adjacent_face_qtm_distance(
     return 2
 
 
-def compute_qtm_distance(original_pos: int, final_pos: int,
-                         cube: 'VCube') -> int:
+def compute_qtm_distance(
+        original_pos: int,
+        final_pos: int,
+        cube: 'VCube',
+) -> int:
     """
     Calculate QTM (Quarter Turn Metric) distance between two positions.
 
@@ -894,8 +907,8 @@ def classify_parity_signature(
 
 
 def classify_orientation_patterns(
-        co: list[int],
-        eo: list[int],
+        co: CornerOrientation,
+        eo: EdgeOrientation,
 ) -> tuple[list[str], OrientationFlags]:
     """
     Classify pattern labels based on piece orientation.
@@ -930,7 +943,8 @@ def classify_orientation_patterns(
 
 
 def classify_permutation_patterns(
-        cp: list[int], ep: list[int],
+        cp: CornerPermutation,
+        ep: EdgePermutation,
         orientation: OrientationFlags,
 ) -> list[str]:
     """
@@ -977,8 +991,10 @@ def classify_permutation_patterns(
 
 
 def classify_first_layer_patterns(
-        cp: list[int], co: list[int],
-        ep: list[int], eo: list[int],
+        cp: CornerPermutation,
+        co: CornerOrientation,
+        ep: EdgePermutation,
+        eo: EdgeOrientation,
 ) -> tuple[list[str], FirstLayerFlags]:
     """
     Classify pattern labels based on first layer (D face) progress.
@@ -1016,8 +1032,10 @@ def classify_first_layer_patterns(
 
 
 def classify_last_layer_patterns(
-        cp: list[int], co: list[int],
-        ep: list[int], eo: list[int],
+        cp: CornerPermutation,
+        co: CornerOrientation,
+        ep: EdgePermutation,
+        eo: EdgeOrientation,
         first_layer: FirstLayerFlags,
 ) -> list[str]:
     """
@@ -1067,8 +1085,10 @@ def classify_last_layer_patterns(
 
 
 def classify_scramble_level(
-        cp: list[int], co: list[int],
-        ep: list[int], eo: list[int],
+        cp: CornerPermutation,
+        co: CornerOrientation,
+        ep: EdgePermutation,
+        eo: EdgeOrientation,
 ) -> list[str]:
     """
     Classify pattern labels based on how many pieces are displaced.
@@ -1100,8 +1120,10 @@ def classify_scramble_level(
 
 
 def classify_single_cycles(
-        corner_cycles: list[list[int]], edge_cycles: list[list[int]],
-        cp: list[int], ep: list[int],
+        corner_cycles: list[list[int]],
+        edge_cycles: list[list[int]],
+        cp: CornerPermutation,
+        ep: EdgePermutation,
 ) -> list[str]:
     """
     Classify single-cycle and swap labels for corners and edges.
@@ -1129,7 +1151,8 @@ def classify_single_cycles(
 
 
 def classify_cycle_patterns(
-        cp: list[int], ep: list[int],
+        cp: CornerPermutation,
+        ep: EdgePermutation,
 ) -> list[str]:
     """
     Classify pattern labels based on permutation cycle structure.
@@ -1178,8 +1201,8 @@ def classify_cycle_patterns(
 
 
 def classify_pattern(
-        cp: list[int], co: list[int],
-        ep: list[int], eo: list[int],
+        cp: CornerPermutation, co: CornerOrientation,
+        ep: EdgePermutation, eo: EdgeOrientation,
 ) -> PatternClassification:
     """
     Comprehensive pattern classification for speedcubing.
@@ -1240,8 +1263,10 @@ def classify_pattern(
 
 
 def compute_cubie_complexity(
-    corners_moved: int, corners_twisted: int,
-    edges_moved: int, edges_flipped: int,
+    corners_moved: int,
+    corners_twisted: int,
+    edges_moved: int,
+    edges_flipped: int,
 ) -> tuple[int, str]:
     """
     Compute complexity score and suggested solving approach.
@@ -1275,8 +1300,10 @@ def compute_cubie_complexity(
     return complexity, approach
 
 
-def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
-                    size: int = DEFAULT_CUBE_SIZE) -> ImpactData:
+def compute_impacts(  # noqa: PLR0914, PLR0915
+        algorithm: 'Algorithm',
+        size: int = DEFAULT_CUBE_SIZE,
+) -> ImpactData:
     """
     Compute comprehensive impact metrics for an algorithm.
 
@@ -1342,10 +1369,10 @@ def compute_impacts(algorithm: 'Algorithm',  # noqa: PLR0914, PLR0915
     # 3x3x3-specific analysis (distances, cubies)
     manhattan_distance: DistanceMetrics | None = None
     qtm_distance: DistanceMetrics | None = None
-    cp: list[int] | None = None
-    co: list[int] | None = None
-    ep: list[int] | None = None
-    eo: list[int] | None = None
+    cp: CornerPermutation | None = None
+    co: CornerOrientation | None = None
+    ep: EdgePermutation | None = None
+    eo: EdgeOrientation | None = None
     corners_moved: int | None = None
     corners_twisted: int | None = None
     edges_moved: int | None = None

@@ -15,7 +15,13 @@ Performance improvements:
 - cubies_to_facelets: ~1.1x faster than original
 - With caching: Up to 190x faster for repeated operations
 """
+from cubing_algs.annotations import CornerOrientation
+from cubing_algs.annotations import CornerPermutation
+from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import EdgeOrientation
+from cubing_algs.annotations import EdgePermutation
+from cubing_algs.annotations import SpatialOrientation
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_NUMBER
@@ -88,13 +94,7 @@ class ConversionCache:
         and FIFO eviction.
         """
         self.max_size = max_size
-        self.facelets_cache: dict[
-            CubeFacelets, tuple[
-                list[int], list[int],
-                list[int], list[int],
-                list[int],
-            ],
-        ] = {}
+        self.facelets_cache: dict[CubeFacelets, CubeCubiesOriented] = {}
         self.cubies_cache: dict[
             tuple[
                 tuple[int, ...], tuple[int, ...],
@@ -104,14 +104,7 @@ class ConversionCache:
         ] = {}
         self._enabled = True
 
-    def get_cubies(
-            self,
-            facelets: CubeFacelets,
-    ) -> tuple[
-            list[int], list[int],
-            list[int], list[int],
-            list[int],
-    ] | None:
+    def get_cubies(self, facelets: CubeFacelets) -> CubeCubiesOriented | None:
         """
         Get cubies from cache or compute and cache.
 
@@ -127,13 +120,8 @@ class ConversionCache:
         return self.facelets_cache[facelets]
 
     def set_cubies(
-            self,
-            facelets: CubeFacelets,
-            result: tuple[
-                list[int], list[int],
-                list[int], list[int],
-                list[int],
-            ],
+            self, facelets: CubeFacelets,
+            result: CubeCubiesOriented,
     ) -> None:
         """Cache cubies result."""
         if not self._enabled:
@@ -212,11 +200,11 @@ CACHE = ConversionCache()
 
 
 def cubies_to_facelets(  # noqa: PLR0913, PLR0917
-        cp: list[int],
-        co: list[int],
-        ep: list[int],
-        eo: list[int],
-        so: list[int],
+        cp: CornerPermutation,
+        co: CornerOrientation,
+        ep: EdgePermutation,
+        eo: EdgeOrientation,
+        so: SpatialOrientation,
         scheme: str | None = None,
 ) -> CubeFacelets:
     """
@@ -293,11 +281,7 @@ def cubies_to_facelets(  # noqa: PLR0913, PLR0917
 
 def facelets_to_cubies(  # noqa: C901, PLR0912, PLR0914
         facelets: CubeFacelets,
-) -> tuple[
-        list[int], list[int],
-        list[int], list[int],
-        list[int],
-]:
+) -> CubeCubiesOriented:
     """
     Convert Kociemba facelets representation string to
     Corner/Edge Permutation/Orientation cube state.
