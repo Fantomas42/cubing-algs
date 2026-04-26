@@ -369,6 +369,12 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(Move('2Dw2').layers, [0, 1])
 
+    def test_repr(self) -> None:
+        """Test repr returns Move('...') form."""
+        self.assertEqual(repr(Move('R')), "Move('R')")
+        self.assertEqual(repr(Move('Rw2')), "Move('Rw2')")
+        self.assertEqual(repr(Move("R'")), "Move(\"R'\")")
+
     def test_timed(self) -> None:
         """Test timed."""
         self.assertEqual(Move('R').time, '')

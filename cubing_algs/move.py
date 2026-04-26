@@ -31,6 +31,17 @@ class Move(UserString):  # noqa: PLR0904
     Examples of valid moves: U, R', F2, Rw, M, x, 3-4Rw, 2F
     """
 
+    def __repr__(self) -> str:
+        """
+        Return a string representation that can be used
+        to recreate the move.
+
+        Returns:
+            A Python expression that can recreate this Move object.
+
+        """
+        return f'Move({self.data!r})'
+
     # Parsing
 
     @cached_property
