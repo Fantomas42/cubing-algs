@@ -72,21 +72,50 @@ class Move(UserString):  # noqa: PLR0904
 
     @cached_property
     def layer(self) -> str:
-        """Extract the layers impacted."""
+        """
+        Extract the layer prefix of the move as a string.
+
+        Returns:
+            The raw layer string.
+
+        Examples:
+            '' for 'R'
+            '2' for '2Rw'
+            '3-4' for '3-4Rw'
+
+        """
         return self.layer_move_modifier_time[0]
 
     @cached_property
     def layers(self) -> list[int]:
-        """List of impacted layers, 0-indexed."""
+        """
+        List of 0-indexed layer numbers affected by this move.
+
+        Returns:
+            The list of layers affected.
+
+        Examples:
+            'R' → [0]
+            'Rw' → [0, 1]
+            '3Rw' → [0, 1, 2]
+            '3-4Rw' → [2, 3]
+            '2R' → [1]
+
+        """
         if not self.layer:
+            # No layer prefix: wide moves include layers 0 and 1,
+            # others only 0
             if self.is_wide_move:
                 return [0, 1]
             return [0]
         if '-' not in self.layer:
+            # Single layer prefix: wide moves include layers 0..n,
+            # others only layer n-1
             if self.is_wide_move:
                 return list(range(int(self.layer)))
             return [int(self.layer) - 1]
 
+        # Range layer prefix: e.g. '3-4' → layers 2 and 3
         start, end = self.layer.split('-', 1)
 
         return list(range(int(start) - 1, int(end)))
@@ -151,7 +180,7 @@ class Move(UserString):  # noqa: PLR0904
         if '-' in self.layer and not self.is_wide_move:
             return False
 
-        return not len(self.layer.split('-')) > 2
+        return len(self.layer.split('-')) <= 2
 
     @cached_property
     def is_valid_move(self) -> bool:
