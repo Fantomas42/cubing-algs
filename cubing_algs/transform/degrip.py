@@ -5,6 +5,7 @@ from functools import partial
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.move import Move
 from cubing_algs.transform.offset import offset_moves
+from cubing_algs.transform.rotation import remove_ending_rotations
 
 DEGRIP_X: dict[str, Callable[[Algorithm], Algorithm]] = {
     'x': partial(offset_moves, rotation='x'),
@@ -204,4 +205,21 @@ def degrip_full_moves(old_moves: Algorithm) -> Algorithm:
     """
     return degrip(
         old_moves, DEGRIP_FULL,
+    )
+
+
+def degrip_moves(old_moves: Algorithm) -> Algorithm:
+    """
+    Remove all grip rotations from an algorithm,
+    remove trailing rotations, breaking initial orientation.
+
+    Args:
+        old_moves: The algorithm to process.
+
+    Returns:
+        Algorithm with all grip rotations removed.
+
+    """
+    return remove_ending_rotations(
+        degrip_full_moves(old_moves),
     )
