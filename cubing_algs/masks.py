@@ -151,16 +151,11 @@ def compute_algorithm_mask(
 
     """
     from cubing_algs.solved_state import get_unique_facelets  # noqa: PLC0415
-    from cubing_algs.transform.degrip import degrip_full_moves  # noqa: PLC0415
-    from cubing_algs.transform.rotation import (  # noqa: PLC0415
-        split_moves_ending_rotations,
-    )
+    from cubing_algs.transform.degrip import degrip_moves  # noqa: PLC0415
     from cubing_algs.vcube import VCube  # noqa: PLC0415
 
     unique_facelets = get_unique_facelets(size)
-    deoriented_algo, _orientation = split_moves_ending_rotations(
-        degrip_full_moves(algorithm),
-    )
+    deoriented_algo = degrip_moves(algorithm)
 
     cube_mask = VCube(
         initial=unique_facelets,

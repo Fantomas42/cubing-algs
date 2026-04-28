@@ -1321,11 +1321,8 @@ def compute_impacts(  # noqa: PLR0914, PLR0915
     """
     from cubing_algs.masks import compute_algorithm_mask  # noqa: PLC0415
     from cubing_algs.solved_state import get_unique_facelets  # noqa: PLC0415
-    from cubing_algs.transform.degrip import degrip_full_moves  # noqa: PLC0415
+    from cubing_algs.transform.degrip import degrip_moves  # noqa: PLC0415
     from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
-    from cubing_algs.transform.rotation import (  # noqa: PLC0415
-        remove_ending_rotations,
-    )
     from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
     from cubing_algs.vcube import VCube  # noqa: PLC0415
 
@@ -1393,9 +1390,8 @@ def compute_impacts(  # noqa: PLR0914, PLR0915
         cubie_cube = VCube(size=size)
         # Keep cube in absolute frame
         cubie_cube.rotate(
-            cleaned_algorithm.transform(
-                degrip_full_moves,
-                remove_ending_rotations,
+            degrip_moves(
+                cleaned_algorithm,
             ),
         )
 
