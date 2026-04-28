@@ -23,11 +23,15 @@ Usage:
     python scramble_x_cross.py -s FR FL BR         # xxx-cross (three slots)
     python scramble_x_cross.py --seed 123          # Set random seed
     python scramble_x_cross.py -n 5                # Generate 5 scrambles
+    python scramble_x_cross.py -o UF               # Orient with white on top
+    python scramble_x_cross.py -o RD               # Orient with red on top
 """
 
 import argparse
 from random import Random
 
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
+from cubing_algs.constants import ORIENTATIONS
 from cubing_algs.scrambler.steps import scramble_x_cross
 from cubing_algs.vcube import VCube
 
@@ -41,31 +45,38 @@ CROSS_NAMES = {
 }
 
 
-def show_x_cross(difficulty: str, slots: list[str], rng: Random) -> None:
+def show_x_cross(
+    difficulty: str,
+    slots: list[str],
+    rng: Random,
+    orientation: str,
+) -> None:
     """Display an x-cross scramble with cube visualization."""
     scramble, solution = scramble_x_cross(
         difficulty=difficulty, slots=slots, rng=rng,
     )
 
+    rotation = ORIENTATION_FACE_MOVES[orientation]
+    prefix = f'{rotation} ' if rotation else ''
     cross_name = CROSS_NAMES.get(len(slots), 'x-cross')
 
     print(f'\n   Type: {cross_name}')
     print(f'   Difficulty: {difficulty}')
     print(f'   Slots: {", ".join(slots)}')
-    print(f'   Scramble: z2 {scramble}')
+    print(f'   Scramble: {prefix}{scramble}')
     print(f'   Scramble moves: {len(scramble)}')
     print(f'   Solution: {solution}')
     print(f'   Solution moves: {len(solution)}')
 
     # Show scrambled state
     cube = VCube()
-    cube.rotate('z2' + scramble)
+    cube.rotate(rotation + scramble)
     print('\n   Scrambled state:')
     cube.show(mode='cross')
 
     # Show state after solution
     cube_solved = VCube()
-    cube_solved.rotate('z2' + scramble + solution)
+    cube_solved.rotate(rotation + scramble + solution)
     print(f'\n   After {cross_name} solution:')
     cube_solved.show(mode='f2l')
 
@@ -123,6 +134,14 @@ Examples:
     )
 
     parser.add_argument(
+        '-o', '--orientation',
+        choices=ORIENTATIONS,
+        default='DF',
+        metavar='ORIENTATION',
+        help='Cube orientation, e.g. DF, UF, RD (default: DF)',
+    )
+
+    parser.add_argument(
         '-n', '--count',
         type=int,
         default=1,
@@ -150,7 +169,7 @@ def main() -> None:
     for i in range(args.count):
         if args.count > 1:
             print(f'\n--- Scramble {i + 1} of {args.count} ---')
-        show_x_cross(args.difficulty, args.slots, rng)
+        show_x_cross(args.difficulty, args.slots, rng, args.orientation)
 
     print('\n' + '=' * 60)
     print('Notes:')

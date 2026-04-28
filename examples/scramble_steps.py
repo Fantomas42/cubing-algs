@@ -28,6 +28,8 @@ Usage:
 import argparse
 from random import Random
 
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
+from cubing_algs.constants import ORIENTATIONS
 from cubing_algs.scrambler import scramble_ocll_case
 from cubing_algs.scrambler import scramble_step
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
@@ -132,29 +134,39 @@ STEP_INFO: dict[str, tuple[str, str]] = {
 }
 
 
-def show_step(name: str, rng: Random, *, auf: bool = False) -> None:
+def show_step(
+    name: str,
+    rng: Random,
+    orientation: str,
+    *,
+    auf: bool = False,
+) -> None:
     """Display a step scramble with cube visualization."""
     description, mode = STEP_INFO.get(name, (name, 'oll'))
+    rotation = ORIENTATION_FACE_MOVES[orientation]
+    prefix = f'{rotation} ' if rotation else ''
     print(f'\n   {name}: {description}')
 
     scramble = scramble_step(name, rng=rng, include_auf=auf)
-    print(f'   Scramble: z2 {scramble}')
+    print(f'   Scramble: {prefix}{scramble}')
     print(f'   Moves: {len(scramble)}')
 
     cube = VCube()
-    cube.rotate('z2' + scramble)
+    cube.rotate(rotation + scramble)
     cube.show(mode=mode)
 
 
-def show_ocll_case(case: str, rng: Random) -> None:
+def show_ocll_case(case: str, rng: Random, orientation: str) -> None:
     """Display a specific OCLL case scramble."""
     scramble = scramble_ocll_case(case, rng=rng)
+    rotation = ORIENTATION_FACE_MOVES[orientation]
+    prefix = f'{rotation} ' if rotation else ''
     print(f'\n   OCLL {case}:')
-    print(f'   Scramble: {scramble}')
+    print(f'   Scramble: {prefix}{scramble}')
     print(f'   Moves: {len(scramble)}')
 
     cube = VCube()
-    cube.rotate('z2' + scramble)
+    cube.rotate(rotation + scramble)
     cube.show(mode='oll')
 
 
@@ -190,7 +202,13 @@ def print_list() -> None:
     print('=' * 60)
 
 
-def demo_method(method: str, rng: Random, *, auf: bool = False) -> None:
+def demo_method(
+    method: str,
+    rng: Random,
+    orientation: str,
+    *,
+    auf: bool = False,
+) -> None:
     """Demonstrate steps for a specific method."""
     titles = {
         'cfop': 'CFOP Method (Cross → F2L → OLL → PLL)',
@@ -203,10 +221,16 @@ def demo_method(method: str, rng: Random, *, auf: bool = False) -> None:
 
     section(titles.get(method, method.upper()))
     for step in METHODS.get(method, []):
-        show_step(step, rng, auf=auf)
+        show_step(step, rng, orientation, auf=auf)
 
 
-def demo_steps(steps: list[str], rng: Random, *, auf: bool = False) -> None:
+def demo_steps(
+    steps: list[str],
+    rng: Random,
+    orientation: str,
+    *,
+    auf: bool = False,
+) -> None:
     """Demonstrate specific steps."""
     section('Selected Steps')
     for step in steps:
@@ -218,13 +242,13 @@ def demo_steps(steps: list[str], rng: Random, *, auf: bool = False) -> None:
                 matched = supported
                 break
         if matched:
-            show_step(matched, rng, auf=auf)
+            show_step(matched, rng, orientation, auf=auf)
         else:
             print(f'\n   Warning: Step "{step}" not recognized')
             print(f'   Available: {", ".join(SUPPORTED_STEPS)}')
 
 
-def demo_ocll(cases: list[str] | None, rng: Random) -> None:
+def demo_ocll(cases: list[str] | None, rng: Random, orientation: str) -> None:
     """Demonstrate OCLL cases."""
     section('OCLL Cases')
     print('\nCorner orientation patterns for last layer')
@@ -238,23 +262,23 @@ def demo_ocll(cases: list[str] | None, rng: Random) -> None:
                     matched = ocll
                     break
             if matched:
-                show_ocll_case(matched, rng)
+                show_ocll_case(matched, rng, orientation)
             else:
                 print(f'\n   Warning: OCLL case "{case}" not recognized')
                 print(f'   Available: {", ".join(OCLL_CASES)}')
     else:
         for case in OCLL_CASES:
-            show_ocll_case(case, rng)
+            show_ocll_case(case, rng, orientation)
 
 
-def demo_all(rng: Random, *, auf: bool = False) -> None:
+def demo_all(rng: Random, orientation: str, *, auf: bool = False) -> None:
     """Run all demos."""
     section('Step Scramble Examples - All Speedcubing Methods')
 
     for method in ['cfop', 'cfop-ll', 'cfop-ls', 'zz', 'roux', 'petrus']:
-        demo_method(method, rng, auf=auf)
+        demo_method(method, rng, orientation, auf=auf)
 
-    demo_ocll(None, rng)
+    demo_ocll(None, rng, orientation)
 
     print_list()
 
@@ -319,6 +343,14 @@ Examples:
     )
 
     parser.add_argument(
+        '-o', '--orientation',
+        choices=ORIENTATIONS,
+        default='DF',
+        metavar='ORIENTATION',
+        help='Cube orientation, e.g. DF, UF, RD (default: DF)',
+    )
+
+    parser.add_argument(
         '--seed',
         help='Random seed for reproducibility (default: 42)',
     )
@@ -334,6 +366,7 @@ def main() -> None:
     rng = Random(args.seed)  # noqa: S311
 
     auf = args.auf
+    orientation = args.orientation
 
     # Handle --list
     if args.list:
@@ -342,22 +375,22 @@ def main() -> None:
 
     # Handle --ocll (can be empty list for all cases, or specific cases)
     if args.ocll is not None:
-        demo_ocll(args.ocll or None, rng)
+        demo_ocll(args.ocll or None, rng, orientation)
         return
 
     # Handle --step
     if args.step:
-        demo_steps(args.step, rng, auf=auf)
+        demo_steps(args.step, rng, orientation, auf=auf)
         return
 
     # Handle --method
     if args.method:
         for method in args.method:
-            demo_method(method, rng, auf=auf)
+            demo_method(method, rng, orientation, auf=auf)
         return
 
     # Default: run all demos
-    demo_all(rng, auf=auf)
+    demo_all(rng, orientation, auf=auf)
 
 
 if __name__ == '__main__':

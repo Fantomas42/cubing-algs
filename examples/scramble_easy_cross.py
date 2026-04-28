@@ -15,37 +15,44 @@ Usage:
     python scramble_easy_cross.py -d hard         # Hard difficulty (15 moves)
     python scramble_easy_cross.py --seed 123      # Set random seed
     python scramble_easy_cross.py -n 5            # Generate 5 scrambles
+    python scramble_easy_cross.py -o UF           # Orient with white on top
+    python scramble_easy_cross.py -o RD           # Orient with red on top
 """
 
 import argparse
 from random import Random
 
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
+from cubing_algs.constants import ORIENTATIONS
 from cubing_algs.scrambler.steps import scramble_easy_cross
 from cubing_algs.vcube import VCube
 
 DIFFICULTIES = ['easy', 'normal', 'hard']
 
 
-def show_easy_cross(difficulty: str, rng: Random) -> None:
+def show_easy_cross(difficulty: str, rng: Random, orientation: str) -> None:
     """Display an easy cross scramble with cube visualization."""
     scramble, solution = scramble_easy_cross(difficulty=difficulty, rng=rng)
 
+    rotation = ORIENTATION_FACE_MOVES[orientation]
+    prefix = f'{rotation} ' if rotation else ''
+
     print(f'\n   Difficulty: {difficulty}')
-    print(f'   Scramble: z2 {scramble}')
+    print(f'   Scramble: {prefix}{scramble}')
     print(f'   Scramble moves: {len(scramble)}')
     print(f'   Solution: {solution}')
     print(f'   Solution moves: {len(solution)}')
 
     # Show scrambled state
     cube = VCube()
-    cube.rotate('z2' + scramble)
+    cube.rotate(rotation + scramble)
     print('\n   Scrambled state:')
     cube.show(mode='cross')
 
     # Show state after cross solution
     # (only cross is solved, rest still scrambled)
     cube_solved = VCube()
-    cube_solved.rotate('z2' + scramble + solution)
+    cube_solved.rotate(rotation + scramble + solution)
     print('\n   After cross solution (cross edges solved):')
     cube_solved.show(mode='cross')
 
@@ -93,6 +100,14 @@ Examples:
     )
 
     parser.add_argument(
+        '-o', '--orientation',
+        choices=ORIENTATIONS,
+        default='DF',
+        metavar='ORIENTATION',
+        help='Cube orientation, e.g. DF, UF, RD (default: DF)',
+    )
+
+    parser.add_argument(
         '-n', '--count',
         type=int,
         default=1,
@@ -119,7 +134,7 @@ def main() -> None:
     for i in range(args.count):
         if args.count > 1:
             print(f'\n--- Scramble {i + 1} of {args.count} ---')
-        show_easy_cross(args.difficulty, rng)
+        show_easy_cross(args.difficulty, rng, args.orientation)
 
     print('\n' + '=' * 60)
     print('Notes:')
