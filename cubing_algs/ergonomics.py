@@ -71,92 +71,107 @@ class ErgonomicsData(NamedTuple):
 HAND_ASSIGNMENTS: dict[str, str] = {
     # Right hand dominant moves
     'R': 'right', "R'": 'right', 'R2': 'right',
+    "D'": 'right',
+    'F': 'right',
+    "B'": 'right',
     'Rw': 'right', "Rw'": 'right', 'Rw2': 'right',
-    'F': 'right', "F'": 'right', 'F2': 'right',
-    'Fw': 'right', "Fw'": 'right', 'Fw2': 'right',
+    "Dw'": 'right',
+    'Fw': 'right',
+    "Bw'": 'right',
+    'M': 'right',
+    "E'": 'right',
+    'E2': 'right',
+    'S': 'right',
+    'S2': 'right',
 
     # Left hand dominant moves
     'L': 'left', "L'": 'left', 'L2': 'left',
+    'D': 'left',
+    "F'": 'left',
+    'B': 'left',
     'Lw': 'left', "Lw'": 'left', 'Lw2': 'left',
-    'B': 'left', "B'": 'left', 'B2': 'left',
-    'Bw': 'left', "Bw'": 'left', 'Bw2': 'left',
+    'Dw': 'left',
+    "Fw'": 'left',
+    'Bw': 'left',
+    "M'": 'left',
+    'M2': 'left',
+    'E': 'left',
+    "S'": 'left',
 
-    # Both hands (U and D moves)
+    # Both hands
     'U': 'both', "U'": 'both', 'U2': 'both',
+    'D2': 'both',
+    'F2': 'both',
+    'B2': 'both',
     'Uw': 'both', "Uw'": 'both', 'Uw2': 'both',
-    'D': 'both', "D'": 'both', 'D2': 'both',
-    'Dw': 'both', "Dw'": 'both', 'Dw2': 'both',
-
-    # Slice moves (typically awkward)
-    'M': 'both', "M'": 'both', 'M2': 'both',
-    'E': 'both', "E'": 'both', 'E2': 'both',
-    'S': 'both', "S'": 'both', 'S2': 'both',
-
+    'Dw2': 'both',
+    'Fw2': 'both',
+    'Bw2': 'both',
     'x': 'both', "x'": 'both', 'x2': 'both',
     'y': 'both', "y'": 'both', 'y2': 'both',
     'z': 'both', "z'": 'both', 'z2': 'both',
 }
 
-# Finger assignments for different moves
+
 FINGER_ASSIGNMENTS: dict[str, str] = {
-    # Thumb moves (generally comfortable)
+    # Thumb moves
     'R': 'thumb', "R'": 'thumb', 'R2': 'thumb',
     'L': 'thumb', "L'": 'thumb', 'L2': 'thumb',
     'Rw': 'thumb', "Rw'": 'thumb', 'Rw2': 'thumb',
     'Lw': 'thumb', "Lw'": 'thumb', 'Lw2': 'thumb',
+    'M': 'thumb',
+    'x': 'thumb', "x'": 'thumb', 'x2': 'thumb',
+    'y': 'thumb', "y'": 'thumb', 'y2': 'thumb',
+    'z': 'thumb', "z'": 'thumb', 'z2': 'thumb',
 
     # Index finger moves
     'U': 'index', "U'": 'index', 'U2': 'index',
-    'D': 'index', "D'": 'index', 'D2': 'index',
+    'F': 'index', "F'": 'index', 'F2': 'index',
     'Uw': 'index', "Uw'": 'index', 'Uw2': 'index',
-    'Dw': 'index', "Dw'": 'index', 'Dw2': 'index',
+    'Fw': 'index', "Fw'": 'index', 'Fw2': 'index',
+    "E'": 'index',
+    'E2': 'index',
+    'S': 'index', "S'": 'index', 'S2': 'index',
 
     # Middle finger moves
-    'F': 'middle', "F'": 'middle', 'F2': 'middle',
     'B': 'middle', "B'": 'middle', 'B2': 'middle',
-    'Fw': 'middle', "Fw'": 'middle', 'Fw2': 'middle',
+    'Dw': 'middle', "Dw'": 'middle', 'Dw2': 'middle',
     'Bw': 'middle', "Bw'": 'middle', 'Bw2': 'middle',
+    'E': 'middle',
 
-    # Ring finger moves (slice moves, generally awkward)
-    'M': 'ring', "M'": 'ring', 'M2': 'ring',
-    'E': 'ring', "E'": 'ring', 'E2': 'ring',
-    'S': 'ring', "S'": 'ring', 'S2': 'ring',
-
-    # Rotation moves (matched to their axis face)
-    'x': 'thumb', "x'": 'thumb', 'x2': 'thumb',
-    'y': 'index', "y'": 'index', 'y2': 'index',
-    'z': 'middle', "z'": 'middle', 'z2': 'middle',
+    # Ring finger moves
+    'D': 'ring', "D'": 'ring', 'D2': 'ring',
+    "M'": 'ring',
+    'M2': 'ring',
 }
 
-# Ergonomic weights for different move types (0-1, higher = more ergonomic)
+
 ERGONOMIC_WEIGHTS: dict[str, float] = {
-    # Outer face moves - Right hand dominant moves (most natural)
+    # Outer Face Moves
     'R': 1.0, "R'": 1.0, 'R2': 0.95,
+    'L': 1.0, "L'": 1.0, 'L2': 0.95,
     'U': 1.0, "U'": 1.0, 'U2': 0.9,
-    'F': 0.85, "F'": 0.85, 'F2': 0.8,
+    'D': 0.85, "D'": 0.85, 'D2': 0.8,
+    'F': 0.8, "F'": 0.8, 'F2': 0.75,
+    'B': 0.6, "B'": 0.6, 'B2': 0.55,
 
-    # Left hand moves (less natural for most right-handed cubers)
-    'L': 0.75, "L'": 0.75, 'L2': 0.7,
-    'D': 0.6, "D'": 0.6, 'D2': 0.55,
-    'B': 0.5, "B'": 0.5, 'B2': 0.45,
+    # Wide Moves — 2 layers
+    'Rw': 0.95, "Rw'": 0.95, 'Rw2': 0.9,
+    'Lw': 0.95, "Lw'": 0.95, 'Lw2': 0.9,
+    'Uw': 0.95, "Uw'": 0.95, 'Uw2': 0.9,
+    'Dw': 0.8, "Dw'": 0.8, 'Dw2': 0.75,
+    'Fw': 0.8, "Fw'": 0.8, 'Fw2': 0.75,
+    'Bw': 0.55, "Bw'": 0.55, 'Bw2': 0.5,
 
-    # Slice moves
-    'M': 0.7, "M'": 0.7, 'M2': 0.65,
-    'S': 0.6, "S'": 0.6, 'S2': 0.55,
-    'E': 0.5, "E'": 0.5, 'E2': 0.45,
+    # Slice Moves
+    'M': 0.55, "M'": 0.85, 'M2': 0.8,
+    'E': 0.45, "E'": 0.5, 'E2': 0.45,
+    'S': 0.4, "S'": 0.35, 'S2': 0.35,
 
-    # Cube rotations
-    'x': 0.4, "x'": 0.4, 'x2': 0.35,
-    'y': 0.6, "y'": 0.6, 'y2': 0.55,
-    'z': 0.35, "z'": 0.35, 'z2': 0.3,
-
-    # Wide moves
-    'Rw': 0.8, "Rw'": 0.8, 'Rw2': 0.75,
-    'Uw': 0.85, "Uw'": 0.85, 'Uw2': 0.8,
-    'Fw': 0.7, "Fw'": 0.7, 'Fw2': 0.65,
-    'Lw': 0.65, "Lw'": 0.65, 'Lw2': 0.6,
-    'Dw': 0.55, "Dw'": 0.55, 'Dw2': 0.5,
-    'Bw': 0.45, "Bw'": 0.45, 'Bw2': 0.4,
+    # Cube Rotations
+    'x': 0.4, "x'": 0.4, 'x2': 0.4,
+    'y': 0.5, "y'": 0.5, 'y2': 0.35,
+    'z': 0.4, "z'": 0.4, 'z2': 0.4,
 }
 
 # Threshold for considering a move awkward (weight below this is awkward)
