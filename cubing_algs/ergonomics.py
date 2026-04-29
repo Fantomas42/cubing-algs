@@ -72,26 +72,20 @@ HAND_ASSIGNMENTS: dict[str, str] = {
     # Right hand dominant moves
     'R': 'right', "R'": 'right', 'R2': 'right',
     'Rw': 'right', "Rw'": 'right', 'Rw2': 'right',
-    'r': 'right', "r'": 'right', 'r2': 'right',
     'F': 'right', "F'": 'right', 'F2': 'right',
     'Fw': 'right', "Fw'": 'right', 'Fw2': 'right',
-    'f': 'right', "f'": 'right', 'f2': 'right',
 
     # Left hand dominant moves
     'L': 'left', "L'": 'left', 'L2': 'left',
     'Lw': 'left', "Lw'": 'left', 'Lw2': 'left',
-    'l': 'left', "l'": 'left', 'l2': 'left',
     'B': 'left', "B'": 'left', 'B2': 'left',
     'Bw': 'left', "Bw'": 'left', 'Bw2': 'left',
-    'b': 'left', "b'": 'left', 'b2': 'left',
 
     # Both hands (U and D moves)
     'U': 'both', "U'": 'both', 'U2': 'both',
     'Uw': 'both', "Uw'": 'both', 'Uw2': 'both',
-    'u': 'both', "u'": 'both', 'u2': 'both',
     'D': 'both', "D'": 'both', 'D2': 'both',
     'Dw': 'both', "Dw'": 'both', 'Dw2': 'both',
-    'd': 'both', "d'": 'both', 'd2': 'both',
 
     # Slice moves (typically awkward)
     'M': 'both', "M'": 'both', 'M2': 'both',
@@ -111,7 +105,7 @@ FINGER_ASSIGNMENTS: dict[str, str] = {
     'Rw': 'thumb', "Rw'": 'thumb', 'Rw2': 'thumb',
     'Lw': 'thumb', "Lw'": 'thumb', 'Lw2': 'thumb',
 
-    # Index finger moves (most common U moves)
+    # Index finger moves
     'U': 'index', "U'": 'index', 'U2': 'index',
     'D': 'index', "D'": 'index', 'D2': 'index',
     'Uw': 'index', "Uw'": 'index', 'Uw2': 'index',
@@ -156,15 +150,7 @@ ERGONOMIC_WEIGHTS: dict[str, float] = {
     'y': 0.6, "y'": 0.6, 'y2': 0.55,
     'z': 0.35, "z'": 0.35, 'z2': 0.3,
 
-    # Wide moves (SiGN notation)
-    'r': 0.8, "r'": 0.8, 'r2': 0.75,
-    'u': 0.85, "u'": 0.85, 'u2': 0.8,
-    'f': 0.7, "f'": 0.7, 'f2': 0.65,
-    'l': 0.65, "l'": 0.65, 'l2': 0.6,
-    'd': 0.55, "d'": 0.55, 'd2': 0.5,
-    'b': 0.45, "b'": 0.45, 'b2': 0.4,
-
-    # Wide moves (standard notation)
+    # Wide moves
     'Rw': 0.8, "Rw'": 0.8, 'Rw2': 0.75,
     'Uw': 0.85, "Uw'": 0.85, 'Uw2': 0.8,
     'Fw': 0.7, "Fw'": 0.7, 'Fw2': 0.65,
