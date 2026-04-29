@@ -28,6 +28,17 @@ class HandDominance(Enum):
     AMBIDEXTROUS = 'ambidextrous'
 
 
+class FingerAssignment(Enum):
+    """Enumeration for finger assignments in move execution."""
+
+    NONE = 'none'
+    THUMB = 'thumb'
+    INDEX = 'index'
+    MIDDLE = 'middle'
+    RING = 'ring'
+    PINKY = 'pinky'
+
+
 class ErgonomicsData(NamedTuple):
     """Container for ergonomics computation results."""
 
@@ -52,6 +63,8 @@ class ErgonomicsData(NamedTuple):
     index_finger_moves: int
     middle_finger_moves: int
     ring_finger_moves: int
+    pinky_finger_moves: int
+    none_finger_moves: int
 
     # Comfort metrics
     ergonomic_rating: str
@@ -113,36 +126,36 @@ HAND_ASSIGNMENTS: dict[str, HandDominance] = {
 }
 
 
-FINGER_ASSIGNMENTS: dict[str, str] = {
+FINGER_ASSIGNMENTS: dict[str, FingerAssignment] = {
     # Thumb moves
-    'R': 'thumb', "R'": 'thumb', 'R2': 'thumb',
-    'L': 'thumb', "L'": 'thumb', 'L2': 'thumb',
-    'Rw': 'thumb', "Rw'": 'thumb', 'Rw2': 'thumb',
-    'Lw': 'thumb', "Lw'": 'thumb', 'Lw2': 'thumb',
-    'M': 'thumb',
-    'x': 'thumb', "x'": 'thumb', 'x2': 'thumb',
-    'y': 'thumb', "y'": 'thumb', 'y2': 'thumb',
-    'z': 'thumb', "z'": 'thumb', 'z2': 'thumb',
+    'R': FingerAssignment.THUMB, "R'": FingerAssignment.THUMB, 'R2': FingerAssignment.THUMB,
+    'L': FingerAssignment.THUMB, "L'": FingerAssignment.THUMB, 'L2': FingerAssignment.THUMB,
+    'Rw': FingerAssignment.THUMB, "Rw'": FingerAssignment.THUMB, 'Rw2': FingerAssignment.THUMB,
+    'Lw': FingerAssignment.THUMB, "Lw'": FingerAssignment.THUMB, 'Lw2': FingerAssignment.THUMB,
+    'M': FingerAssignment.THUMB,
+    'x': FingerAssignment.THUMB, "x'": FingerAssignment.THUMB, 'x2': FingerAssignment.THUMB,
+    'y': FingerAssignment.THUMB, "y'": FingerAssignment.THUMB, 'y2': FingerAssignment.THUMB,
+    'z': FingerAssignment.THUMB, "z'": FingerAssignment.THUMB, 'z2': FingerAssignment.THUMB,
 
     # Index finger moves
-    'U': 'index', "U'": 'index', 'U2': 'index',
-    'F': 'index', "F'": 'index', 'F2': 'index',
-    'Uw': 'index', "Uw'": 'index', 'Uw2': 'index',
-    'Fw': 'index', "Fw'": 'index', 'Fw2': 'index',
-    "E'": 'index',
-    'E2': 'index',
-    'S': 'index', "S'": 'index', 'S2': 'index',
+    'U': FingerAssignment.INDEX, "U'": FingerAssignment.INDEX, 'U2': FingerAssignment.INDEX,
+    'F': FingerAssignment.INDEX, "F'": FingerAssignment.INDEX, 'F2': FingerAssignment.INDEX,
+    'Uw': FingerAssignment.INDEX, "Uw'": FingerAssignment.INDEX, 'Uw2': FingerAssignment.INDEX,
+    'Fw': FingerAssignment.INDEX, "Fw'": FingerAssignment.INDEX, 'Fw2': FingerAssignment.INDEX,
+    "E'": FingerAssignment.INDEX,
+    'E2': FingerAssignment.INDEX,
+    'S': FingerAssignment.INDEX, "S'": FingerAssignment.INDEX, 'S2': FingerAssignment.INDEX,
 
     # Middle finger moves
-    'B': 'middle', "B'": 'middle', 'B2': 'middle',
-    'Dw': 'middle', "Dw'": 'middle', 'Dw2': 'middle',
-    'Bw': 'middle', "Bw'": 'middle', 'Bw2': 'middle',
-    'E': 'middle',
+    'B': FingerAssignment.MIDDLE, "B'": FingerAssignment.MIDDLE, 'B2': FingerAssignment.MIDDLE,
+    'Dw': FingerAssignment.MIDDLE, "Dw'": FingerAssignment.MIDDLE, 'Dw2': FingerAssignment.MIDDLE,
+    'Bw': FingerAssignment.MIDDLE, "Bw'": FingerAssignment.MIDDLE, 'Bw2': FingerAssignment.MIDDLE,
+    'E': FingerAssignment.MIDDLE,
 
     # Ring finger moves
-    'D': 'ring', "D'": 'ring', 'D2': 'ring',
-    "M'": 'ring',
-    'M2': 'ring',
+    'D': FingerAssignment.RING, "D'": FingerAssignment.RING, 'D2': FingerAssignment.RING,
+    "M'": FingerAssignment.RING,
+    'M2': FingerAssignment.RING,
 }
 
 
@@ -692,7 +705,7 @@ def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
 
 def compute_finger_distribution(
     moves: 'Algorithm',
-) -> tuple[int, int, int, int]:
+) -> tuple[int, int, int, int, int, int]:
     """
     Calculate finger usage distribution for the algorithm.
 
@@ -700,31 +713,37 @@ def compute_finger_distribution(
         moves: 'Algorithm' to analyze.
 
     Returns:
-        Tuple of (thumb_count, index_count, middle_count, ring_count).
+        Tuple of (thumb_count, index_count, middle_count, ring_count, pinky_count, none_count).
 
     """
     thumb_count = 0
     index_count = 0
     middle_count = 0
     ring_count = 0
+    pinky_count = 0
+    none_count = 0
 
     for move in moves:
         if move.is_pause:
             continue
 
         move_key = get_move_key(move)
-        finger = FINGER_ASSIGNMENTS.get(move_key, 'index')  # Default to index
+        finger = FINGER_ASSIGNMENTS.get(move_key, FingerAssignment.INDEX)
 
-        if finger == 'thumb':
+        if finger == FingerAssignment.THUMB:
             thumb_count += 1
-        elif finger == 'index':
+        elif finger == FingerAssignment.INDEX:
             index_count += 1
-        elif finger == 'middle':
+        elif finger == FingerAssignment.MIDDLE:
             middle_count += 1
-        elif finger == 'ring':
+        elif finger == FingerAssignment.RING:
             ring_count += 1
+        elif finger == FingerAssignment.PINKY:
+            pinky_count += 1
+        elif finger == FingerAssignment.NONE:
+            none_count += 1
 
-    return thumb_count, index_count, middle_count, ring_count
+    return thumb_count, index_count, middle_count, ring_count, pinky_count, none_count
 
 
 def compute_regrip_count(moves: 'Algorithm') -> int:
@@ -898,6 +917,8 @@ def compute_ergonomics(  # noqa: PLR0914
             index_finger_moves=0,
             middle_finger_moves=0,
             ring_finger_moves=0,
+            pinky_finger_moves=0,
+            none_finger_moves=0,
             ergonomic_rating='Excellent',
             ergonomic_score=1.0,
             flow_score=1.0,
@@ -915,7 +936,7 @@ def compute_ergonomics(  # noqa: PLR0914
     )
 
     # Calculate finger distribution
-    thumb, index, middle, ring = compute_finger_distribution(algorithm)
+    thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(algorithm)
 
     # Calculate difficulty metrics
     regrip_count = compute_regrip_count(algorithm)
@@ -989,6 +1010,8 @@ def compute_ergonomics(  # noqa: PLR0914
         index_finger_moves=index,
         middle_finger_moves=middle,
         ring_finger_moves=ring,
+        pinky_finger_moves=pinky,
+        none_finger_moves=none_moves,
         ergonomic_rating=ergonomic_rating,
         ergonomic_score=ergonomic_score,
         flow_score=flow_score_val,

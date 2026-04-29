@@ -8,6 +8,7 @@ from cubing_algs.ergonomics import ERGONOMIC_WEIGHTS
 from cubing_algs.ergonomics import HAND_ASSIGNMENTS
 from cubing_algs.ergonomics import TRANSITION_PENALTIES
 from cubing_algs.ergonomics import ErgonomicsData
+from cubing_algs.ergonomics import FingerAssignment
 from cubing_algs.ergonomics import HandDominance
 from cubing_algs.ergonomics import calculate_ergonomic_score
 from cubing_algs.ergonomics import calculate_flow_score
@@ -66,6 +67,23 @@ class TestHandDominance(unittest.TestCase):
     def test_members(self) -> None:
         """Test enum has exactly three members."""
         self.assertEqual(len(HandDominance), 3)
+
+
+class TestFingerAssignment(unittest.TestCase):
+    """Test the FingerAssignment enum."""
+
+    def test_values(self) -> None:
+        """Test enum values."""
+        self.assertEqual(FingerAssignment.NONE.value, 'none')
+        self.assertEqual(FingerAssignment.THUMB.value, 'thumb')
+        self.assertEqual(FingerAssignment.INDEX.value, 'index')
+        self.assertEqual(FingerAssignment.MIDDLE.value, 'middle')
+        self.assertEqual(FingerAssignment.RING.value, 'ring')
+        self.assertEqual(FingerAssignment.PINKY.value, 'pinky')
+
+    def test_members(self) -> None:
+        """Test enum has exactly six members."""
+        self.assertEqual(len(FingerAssignment), 6)
 
 
 class TestGetMoveKey(unittest.TestCase):
@@ -631,127 +649,150 @@ class TestComputeFingerDistribution(unittest.TestCase):
     def test_empty_algorithm(self) -> None:
         """Test finger distribution for empty algorithm."""
         alg = Algorithm.parse_moves('')
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 0)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_thumb_moves(self) -> None:
         """Test algorithm with thumb moves."""
         alg = Algorithm.parse_moves("R L R' L'")
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 4)  # All R and L moves use thumb
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_index_finger_moves(self) -> None:
         """Test algorithm with index finger moves."""
         alg = Algorithm.parse_moves("U F U' F'")
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 0)
         self.assertEqual(index, 4)  # All U and F moves use index finger
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_middle_finger_moves(self) -> None:
         """Test algorithm with middle finger moves."""
         alg = Algorithm.parse_moves("B B' B2 E")
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 0)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 4)  # All B and E moves use middle finger
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_ring_finger_moves(self) -> None:
         """Test algorithm with ring finger moves (D and M' family)."""
         alg = Algorithm.parse_moves("D D' M' M2")
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 0)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 4)  # D, D', M', M2 use ring finger
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_mixed_finger_usage(self) -> None:
         """Test algorithm with mixed finger usage."""
         alg = Algorithm.parse_moves("R U E M'")
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 1)   # R
         self.assertEqual(index, 1)   # U
         self.assertEqual(middle, 1)  # E
         self.assertEqual(ring, 1)    # M'
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_with_pauses(self) -> None:
         """Test finger distribution calculation ignores pauses."""
         alg = Algorithm.parse_moves('R . U . B')
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 1)  # R
         self.assertEqual(index, 1)  # U
         self.assertEqual(middle, 1)  # B
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_ring_finger_moves_as_last_move(self) -> None:
         """Test algorithm ending with ring finger move for branch coverage."""
         alg = Algorithm.parse_moves("R U M'")
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 1)  # R
         self.assertEqual(index, 1)  # U
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 1)   # M'
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_single_ring_finger_move(self) -> None:
         """Test algorithm with only ring finger move for branch coverage."""
         alg = Algorithm.parse_moves('D')
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 0)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 1)  # D
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_algorithm_ending_with_ring_finger(self) -> None:
         """Test for complete branch coverage with ring finger move at end."""
         # Ring finger moves: D family and M', M2
         for move_str in ['D', "D'", 'D2', "M'", 'M2']:
             alg = Algorithm.parse_moves(move_str)
-            thumb, index, middle, ring = compute_finger_distribution(alg)
+            thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
             self.assertEqual(ring, 1, f'Ring finger count wrong for {move_str}')
-            self.assertEqual(thumb + index + middle, 0,
+            self.assertEqual(thumb + index + middle + pinky + none_moves, 0,
                            f'Other fingers should be 0 for {move_str}')
 
     def test_multiple_ring_finger_moves(self) -> None:
         """Test multiple consecutive ring finger moves for branch coverage."""
         alg = Algorithm.parse_moves("M' D M2")
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 0)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 3)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_empty_finger_distribution_for_coverage(self) -> None:
         """Test edge case to ensure complete branch coverage."""
-        # Create algorithm with specific sequence that might hit missing branch
         moves = [Move("M'")]  # Single ring finger move as Move object
         alg = Algorithm(moves)
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(ring, 1)
+        self.assertEqual(thumb + index + middle + pinky + none_moves, 0)
 
-        # Also test with empty algorithm
         empty_alg = Algorithm([])
-        thumb, index, middle, ring = compute_finger_distribution(empty_alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(empty_alg)
         self.assertEqual(thumb, 0)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_rotation_moves_mapped_by_axis(self) -> None:
         """Test that rotation moves are mapped to thumb."""
         alg = Algorithm.parse_moves('x y z')
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 3)   # x, y, z all map to thumb
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_wide_moves_match_base_face(self) -> None:
         """
@@ -759,33 +800,66 @@ class TestComputeFingerDistribution(unittest.TestCase):
         the same finger as their base face.
         """
         alg = Algorithm.parse_moves('Rw Uw Bw')
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 1)   # Rw -> thumb (like R)
         self.assertEqual(index, 1)   # Uw -> index (like U)
         self.assertEqual(middle, 1)  # Bw -> middle (like B)
         self.assertEqual(ring, 0)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
     def test_ring_finger_not_last_move(self) -> None:
         """Test ring move followed by another for branch coverage."""
-        # This test ensures the branch from ring finger check back to loop
         alg = Algorithm.parse_moves("M' R")  # ring finger then thumb
-        thumb, index, middle, ring = compute_finger_distribution(alg)
+        thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
         self.assertEqual(thumb, 1)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 1)
+        self.assertEqual(pinky, 0)
+        self.assertEqual(none_moves, 0)
 
-    def test_unknown_finger_type_not_counted(self) -> None:
-        """Test that unknown finger types don't increment any counter."""
-        # Mock FINGER_ASSIGNMENTS to return an unknown finger type
-        with patch('cubing_algs.ergonomics.FINGER_ASSIGNMENTS', {'R': 'pinky'}):
-            alg = Algorithm.parse_moves('R')
-            thumb, index, middle, ring = compute_finger_distribution(alg)
-            # Unknown finger type should not increment any counter
+    def test_pinky_finger_moves(self) -> None:
+        """Test that PINKY finger assignment is counted correctly."""
+        with patch(
+            'cubing_algs.ergonomics.FINGER_ASSIGNMENTS',
+            {'R': FingerAssignment.PINKY, "R'": FingerAssignment.PINKY},
+        ):
+            alg = Algorithm.parse_moves("R R'")
+            thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
             self.assertEqual(thumb, 0)
             self.assertEqual(index, 0)
             self.assertEqual(middle, 0)
             self.assertEqual(ring, 0)
+            self.assertEqual(pinky, 2)
+            self.assertEqual(none_moves, 0)
+
+    def test_none_finger_moves(self) -> None:
+        """Test that NONE finger assignment is counted correctly."""
+        with patch(
+            'cubing_algs.ergonomics.FINGER_ASSIGNMENTS',
+            {'R': FingerAssignment.NONE},
+        ):
+            alg = Algorithm.parse_moves('R')
+            thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
+            self.assertEqual(thumb, 0)
+            self.assertEqual(index, 0)
+            self.assertEqual(middle, 0)
+            self.assertEqual(ring, 0)
+            self.assertEqual(pinky, 0)
+            self.assertEqual(none_moves, 1)
+
+    def test_unknown_finger_type_not_counted(self) -> None:
+        """Test that truly unknown (non-enum) finger types don't increment any counter."""
+        with patch('cubing_algs.ergonomics.FINGER_ASSIGNMENTS', {'R': 'unknown'}):
+            alg = Algorithm.parse_moves('R')
+            thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(alg)
+            self.assertEqual(thumb, 0)
+            self.assertEqual(index, 0)
+            self.assertEqual(middle, 0)
+            self.assertEqual(ring, 0)
+            self.assertEqual(pinky, 0)
+            self.assertEqual(none_moves, 0)
 
 
 class TestComputeRegripCount(unittest.TestCase):
@@ -1032,6 +1106,8 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.index_finger_moves, 0)
         self.assertEqual(result.middle_finger_moves, 0)
         self.assertEqual(result.ring_finger_moves, 0)
+        self.assertEqual(result.pinky_finger_moves, 0)
+        self.assertEqual(result.none_finger_moves, 0)
         self.assertEqual(result.ergonomic_rating, 'Excellent')
         # New fields
         self.assertEqual(result.ergonomic_score, 1.0)
@@ -1211,6 +1287,8 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertIsInstance(result.index_finger_moves, int)
         self.assertIsInstance(result.middle_finger_moves, int)
         self.assertIsInstance(result.ring_finger_moves, int)
+        self.assertIsInstance(result.pinky_finger_moves, int)
+        self.assertIsInstance(result.none_finger_moves, int)
 
         # Test float fields
         self.assertIsInstance(result.hand_balance_ratio, float)
