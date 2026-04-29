@@ -193,7 +193,6 @@ def compare_algorithms(algorithms: dict[str, str]) -> None:
 
     rows: list[tuple[str, str, str]] = [
         ('Moves', 'total_moves', ''),
-        ('Comfort', 'comfort_score', '.1f'),
         ('Rating', 'ergonomic_rating', ''),
         ('Difficulty', 'difficulty_classification', ''),
         ('TPS', 'estimated_tps', '.1f'),

@@ -69,7 +69,6 @@ def print_ergonomics(ergo: dict[str, Any]) -> None:
     section('ERGONOMICS')
     print(f'  Rating:                 {ergo["ergonomic_rating"]}')
     print(f'  Difficulty:             {ergo["difficulty_classification"]}')
-    print(f'  Comfort score:          {ergo["comfort_score"]:.1f}/100')
     print(f'  Ergonomic score:        {ergo["ergonomic_score"]:.3f}')
     print(f'  Flow score:             {ergo["flow_score"]:.3f}')
     print(f'  Estimated TPS:          {ergo["estimated_tps"]:.2f}')
@@ -83,7 +82,6 @@ def print_ergonomics(ergo: dict[str, Any]) -> None:
     print(f'  Hand balance ratio:     {ergo["hand_balance_ratio"]:.2f}')
     print(f'  Regrips:                {ergo["regrip_count"]}')
     print(f'  Awkward moves:          {ergo["awkward_moves"]}')
-    print(f'  Flow breaks:            {ergo["flow_breaks"]}')
     print(
         f'  Triggers:               '
         f'{ergo["trigger_count"]} '
@@ -116,7 +114,7 @@ def print_structure(struct: dict[str, Any]) -> None:
     )
     print(
         f'  Coverage:               '
-        f'{struct["coverage_percent"]:.0%} '
+        f'{struct["coverage_ratio"]:.0%} '
         f'({struct["uncovered_moves"]} uncovered)',
     )
     print(
