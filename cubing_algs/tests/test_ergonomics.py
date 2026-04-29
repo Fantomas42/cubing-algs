@@ -227,8 +227,8 @@ class TestGetTransitionPenalty(unittest.TestCase):
         # M and E have base_move not in ADJACENT_FACES/OPPOSITE_FACES.
         # Patch hand assignments so they trigger the hand_switch branch.
         patched = dict(HAND_ASSIGNMENTS)
-        patched['M'] = 'right'
-        patched['E'] = 'left'
+        patched['M'] = HandDominance.RIGHT
+        patched['E'] = HandDominance.LEFT
         with patch('cubing_algs.ergonomics.HAND_ASSIGNMENTS', patched):
             penalty = get_transition_penalty(Move('M'), Move('E'))
         self.assertEqual(penalty, TRANSITION_PENALTIES['hand_switch'])

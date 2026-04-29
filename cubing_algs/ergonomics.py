@@ -68,48 +68,48 @@ class ErgonomicsData(NamedTuple):
 
 
 # Hand assignment for different move types based on speedcubing conventions
-HAND_ASSIGNMENTS: dict[str, str] = {
+HAND_ASSIGNMENTS: dict[str, HandDominance] = {
     # Right hand dominant moves
-    'R': 'right', "R'": 'right', 'R2': 'right',
-    "D'": 'right',
-    'F': 'right',
-    "B'": 'right',
-    'Rw': 'right', "Rw'": 'right', 'Rw2': 'right',
-    "Dw'": 'right',
-    'Fw': 'right',
-    "Bw'": 'right',
-    'M': 'right',
-    "E'": 'right',
-    'E2': 'right',
-    'S': 'right',
-    'S2': 'right',
+    'R': HandDominance.RIGHT, "R'": HandDominance.RIGHT, 'R2': HandDominance.RIGHT,
+    "D'": HandDominance.RIGHT,
+    'F': HandDominance.RIGHT,
+    "B'": HandDominance.RIGHT,
+    'Rw': HandDominance.RIGHT, "Rw'": HandDominance.RIGHT, 'Rw2': HandDominance.RIGHT,
+    "Dw'": HandDominance.RIGHT,
+    'Fw': HandDominance.RIGHT,
+    "Bw'": HandDominance.RIGHT,
+    'M': HandDominance.RIGHT,
+    "E'": HandDominance.RIGHT,
+    'E2': HandDominance.RIGHT,
+    'S': HandDominance.RIGHT,
+    'S2': HandDominance.RIGHT,
 
     # Left hand dominant moves
-    'L': 'left', "L'": 'left', 'L2': 'left',
-    'D': 'left',
-    "F'": 'left',
-    'B': 'left',
-    'Lw': 'left', "Lw'": 'left', 'Lw2': 'left',
-    'Dw': 'left',
-    "Fw'": 'left',
-    'Bw': 'left',
-    "M'": 'left',
-    'M2': 'left',
-    'E': 'left',
-    "S'": 'left',
+    'L': HandDominance.LEFT, "L'": HandDominance.LEFT, 'L2': HandDominance.LEFT,
+    'D': HandDominance.LEFT,
+    "F'": HandDominance.LEFT,
+    'B': HandDominance.LEFT,
+    'Lw': HandDominance.LEFT, "Lw'": HandDominance.LEFT, 'Lw2': HandDominance.LEFT,
+    'Dw': HandDominance.LEFT,
+    "Fw'": HandDominance.LEFT,
+    'Bw': HandDominance.LEFT,
+    "M'": HandDominance.LEFT,
+    'M2': HandDominance.LEFT,
+    'E': HandDominance.LEFT,
+    "S'": HandDominance.LEFT,
 
     # Both hands
-    'U': 'both', "U'": 'both', 'U2': 'both',
-    'D2': 'both',
-    'F2': 'both',
-    'B2': 'both',
-    'Uw': 'both', "Uw'": 'both', 'Uw2': 'both',
-    'Dw2': 'both',
-    'Fw2': 'both',
-    'Bw2': 'both',
-    'x': 'both', "x'": 'both', 'x2': 'both',
-    'y': 'both', "y'": 'both', 'y2': 'both',
-    'z': 'both', "z'": 'both', 'z2': 'both',
+    'U': HandDominance.AMBIDEXTROUS, "U'": HandDominance.AMBIDEXTROUS, 'U2': HandDominance.AMBIDEXTROUS,
+    'D2': HandDominance.AMBIDEXTROUS,
+    'F2': HandDominance.AMBIDEXTROUS,
+    'B2': HandDominance.AMBIDEXTROUS,
+    'Uw': HandDominance.AMBIDEXTROUS, "Uw'": HandDominance.AMBIDEXTROUS, 'Uw2': HandDominance.AMBIDEXTROUS,
+    'Dw2': HandDominance.AMBIDEXTROUS,
+    'Fw2': HandDominance.AMBIDEXTROUS,
+    'Bw2': HandDominance.AMBIDEXTROUS,
+    'x': HandDominance.AMBIDEXTROUS, "x'": HandDominance.AMBIDEXTROUS, 'x2': HandDominance.AMBIDEXTROUS,
+    'y': HandDominance.AMBIDEXTROUS, "y'": HandDominance.AMBIDEXTROUS, 'y2': HandDominance.AMBIDEXTROUS,
+    'z': HandDominance.AMBIDEXTROUS, "z'": HandDominance.AMBIDEXTROUS, 'z2': HandDominance.AMBIDEXTROUS,
 }
 
 
@@ -254,12 +254,12 @@ def get_move_ergonomic_weight(
         return base_weight
 
     # Adjust based on hand dominance
-    hand = HAND_ASSIGNMENTS.get(move_key, 'both')
+    hand = HAND_ASSIGNMENTS.get(move_key, HandDominance.AMBIDEXTROUS)
 
     if hand_dominance == HandDominance.LEFT:
-        if hand == 'right':
+        if hand == HandDominance.RIGHT:
             return max(0.0, base_weight * 0.75)
-        if hand == 'left':
+        if hand == HandDominance.LEFT:
             return min(1.0, base_weight * 1.33)
 
     return base_weight
@@ -302,9 +302,9 @@ def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
     # Check for hand switches
     key1 = get_move_key(move1)
     key2 = get_move_key(move2)
-    hand1 = HAND_ASSIGNMENTS.get(key1, 'both')
-    hand2 = HAND_ASSIGNMENTS.get(key2, 'both')
-    if hand1 not in {hand2, 'both'} and hand2 != 'both':
+    hand1 = HAND_ASSIGNMENTS.get(key1, HandDominance.AMBIDEXTROUS)
+    hand2 = HAND_ASSIGNMENTS.get(key2, HandDominance.AMBIDEXTROUS)
+    if hand1 not in {hand2, HandDominance.AMBIDEXTROUS} and hand2 != HandDominance.AMBIDEXTROUS:
         return TRANSITION_PENALTIES['hand_switch']
 
     return TRANSITION_PENALTIES['adjacent']
@@ -670,11 +670,11 @@ def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
             continue
 
         move_key = get_move_key(move)
-        hand = HAND_ASSIGNMENTS.get(move_key, 'both')
+        hand = HAND_ASSIGNMENTS.get(move_key, HandDominance.AMBIDEXTROUS)
 
-        if hand == 'right':
+        if hand == HandDominance.RIGHT:
             right_count += 1
-        elif hand == 'left':
+        elif hand == HandDominance.LEFT:
             left_count += 1
         else:
             both_count += 1
