@@ -80,112 +80,81 @@ class ErgonomicsData(NamedTuple):
     suggestions: tuple[str, ...]
 
 
-# Hand assignment for different move types based on speedcubing conventions
-HAND_ASSIGNMENTS: dict[str, HandDominance] = {
-    # Right hand dominant moves
-    'R': HandDominance.RIGHT, "R'": HandDominance.RIGHT, 'R2': HandDominance.RIGHT,
-    "D'": HandDominance.RIGHT,
-    'F': HandDominance.RIGHT,
-    "B'": HandDominance.RIGHT,
-    'Rw': HandDominance.RIGHT, "Rw'": HandDominance.RIGHT, 'Rw2': HandDominance.RIGHT,
-    "Dw'": HandDominance.RIGHT,
-    'Fw': HandDominance.RIGHT,
-    "Bw'": HandDominance.RIGHT,
-    'M': HandDominance.RIGHT,
-    "E'": HandDominance.RIGHT,
-    'E2': HandDominance.RIGHT,
-    'S': HandDominance.RIGHT,
-    'S2': HandDominance.RIGHT,
+class MoveProperties(NamedTuple):
+    """Ergonomic properties for a single move."""
 
-    # Left hand dominant moves
-    'L': HandDominance.LEFT, "L'": HandDominance.LEFT, 'L2': HandDominance.LEFT,
-    'D': HandDominance.LEFT,
-    "F'": HandDominance.LEFT,
-    'B': HandDominance.LEFT,
-    'Lw': HandDominance.LEFT, "Lw'": HandDominance.LEFT, 'Lw2': HandDominance.LEFT,
-    'Dw': HandDominance.LEFT,
-    "Fw'": HandDominance.LEFT,
-    'Bw': HandDominance.LEFT,
-    "M'": HandDominance.LEFT,
-    'M2': HandDominance.LEFT,
-    'E': HandDominance.LEFT,
-    "S'": HandDominance.LEFT,
-
-    # Both hands
-    'U': HandDominance.AMBIDEXTROUS, "U'": HandDominance.AMBIDEXTROUS, 'U2': HandDominance.AMBIDEXTROUS,
-    'D2': HandDominance.AMBIDEXTROUS,
-    'F2': HandDominance.AMBIDEXTROUS,
-    'B2': HandDominance.AMBIDEXTROUS,
-    'Uw': HandDominance.AMBIDEXTROUS, "Uw'": HandDominance.AMBIDEXTROUS, 'Uw2': HandDominance.AMBIDEXTROUS,
-    'Dw2': HandDominance.AMBIDEXTROUS,
-    'Fw2': HandDominance.AMBIDEXTROUS,
-    'Bw2': HandDominance.AMBIDEXTROUS,
-    'x': HandDominance.AMBIDEXTROUS, "x'": HandDominance.AMBIDEXTROUS, 'x2': HandDominance.AMBIDEXTROUS,
-    'y': HandDominance.AMBIDEXTROUS, "y'": HandDominance.AMBIDEXTROUS, 'y2': HandDominance.AMBIDEXTROUS,
-    'z': HandDominance.AMBIDEXTROUS, "z'": HandDominance.AMBIDEXTROUS, 'z2': HandDominance.AMBIDEXTROUS,
-}
+    hand: HandDominance
+    finger: FingerAssignment
+    weight: float
 
 
-FINGER_ASSIGNMENTS: dict[str, FingerAssignment] = {
-    # Thumb moves
-    'R': FingerAssignment.THUMB, "R'": FingerAssignment.THUMB, 'R2': FingerAssignment.THUMB,
-    'L': FingerAssignment.THUMB, "L'": FingerAssignment.THUMB, 'L2': FingerAssignment.THUMB,
-    'Rw': FingerAssignment.THUMB, "Rw'": FingerAssignment.THUMB, 'Rw2': FingerAssignment.THUMB,
-    'Lw': FingerAssignment.THUMB, "Lw'": FingerAssignment.THUMB, 'Lw2': FingerAssignment.THUMB,
-    'M': FingerAssignment.THUMB,
-    'x': FingerAssignment.THUMB, "x'": FingerAssignment.THUMB, 'x2': FingerAssignment.THUMB,
-    'y': FingerAssignment.THUMB, "y'": FingerAssignment.THUMB, 'y2': FingerAssignment.THUMB,
-    'z': FingerAssignment.THUMB, "z'": FingerAssignment.THUMB, 'z2': FingerAssignment.THUMB,
+HD = HandDominance
+FA = FingerAssignment
 
-    # Index finger moves
-    'U': FingerAssignment.INDEX, "U'": FingerAssignment.INDEX, 'U2': FingerAssignment.INDEX,
-    'F': FingerAssignment.INDEX, "F'": FingerAssignment.INDEX, 'F2': FingerAssignment.INDEX,
-    'Uw': FingerAssignment.INDEX, "Uw'": FingerAssignment.INDEX, 'Uw2': FingerAssignment.INDEX,
-    'Fw': FingerAssignment.INDEX, "Fw'": FingerAssignment.INDEX, 'Fw2': FingerAssignment.INDEX,
-    "E'": FingerAssignment.INDEX,
-    'E2': FingerAssignment.INDEX,
-    'S': FingerAssignment.INDEX, "S'": FingerAssignment.INDEX, 'S2': FingerAssignment.INDEX,
-
-    # Middle finger moves
-    'B': FingerAssignment.MIDDLE, "B'": FingerAssignment.MIDDLE, 'B2': FingerAssignment.MIDDLE,
-    'Dw': FingerAssignment.MIDDLE, "Dw'": FingerAssignment.MIDDLE, 'Dw2': FingerAssignment.MIDDLE,
-    'Bw': FingerAssignment.MIDDLE, "Bw'": FingerAssignment.MIDDLE, 'Bw2': FingerAssignment.MIDDLE,
-    'E': FingerAssignment.MIDDLE,
-
-    # Ring finger moves
-    'D': FingerAssignment.RING, "D'": FingerAssignment.RING, 'D2': FingerAssignment.RING,
-    "M'": FingerAssignment.RING,
-    'M2': FingerAssignment.RING,
-}
-
-
-ERGONOMIC_WEIGHTS: dict[str, float] = {
+MOVE_DATA: dict[str, MoveProperties] = {
     # Outer Face Moves
-    'R': 1.0, "R'": 1.0, 'R2': 0.95,
-    'L': 1.0, "L'": 1.0, 'L2': 0.95,
-    'U': 1.0, "U'": 1.0, 'U2': 0.9,
-    'D': 0.85, "D'": 0.85, 'D2': 0.8,
-    'F': 0.8, "F'": 0.8, 'F2': 0.75,
-    'B': 0.6, "B'": 0.6, 'B2': 0.55,
-
+    'R': MoveProperties(HD.RIGHT, FA.THUMB, 1.0),
+    "R'": MoveProperties(HD.RIGHT, FA.THUMB, 1.0),
+    'R2': MoveProperties(HD.RIGHT, FA.THUMB, 0.95),
+    'L': MoveProperties(HD.LEFT, FA.THUMB, 1.0),
+    "L'": MoveProperties(HD.LEFT, FA.THUMB, 1.0),
+    'L2': MoveProperties(HD.LEFT, FA.THUMB, 0.95),
+    'U': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 1.0),
+    "U'": MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 1.0),
+    'U2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.9),
+    'D': MoveProperties(HD.LEFT, FA.RING, 0.85),
+    "D'": MoveProperties(HD.RIGHT, FA.RING, 0.85),
+    'D2': MoveProperties(HD.AMBIDEXTROUS, FA.RING, 0.8),
+    'F': MoveProperties(HD.RIGHT, FA.INDEX, 0.8),
+    "F'": MoveProperties(HD.LEFT, FA.INDEX, 0.8),
+    'F2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.75),
+    'B': MoveProperties(HD.LEFT, FA.MIDDLE, 0.6),
+    "B'": MoveProperties(HD.RIGHT, FA.MIDDLE, 0.6),
+    'B2': MoveProperties(HD.AMBIDEXTROUS, FA.MIDDLE, 0.55),
     # Wide Moves — 2 layers
-    'Rw': 0.95, "Rw'": 0.95, 'Rw2': 0.9,
-    'Lw': 0.95, "Lw'": 0.95, 'Lw2': 0.9,
-    'Uw': 0.95, "Uw'": 0.95, 'Uw2': 0.9,
-    'Dw': 0.8, "Dw'": 0.8, 'Dw2': 0.75,
-    'Fw': 0.8, "Fw'": 0.8, 'Fw2': 0.75,
-    'Bw': 0.55, "Bw'": 0.55, 'Bw2': 0.5,
-
+    'Rw': MoveProperties(HD.RIGHT, FA.THUMB, 0.95),
+    "Rw'": MoveProperties(HD.RIGHT, FA.THUMB, 0.95),
+    'Rw2': MoveProperties(HD.RIGHT, FA.THUMB, 0.9),
+    'Lw': MoveProperties(HD.LEFT, FA.THUMB, 0.95),
+    "Lw'": MoveProperties(HD.LEFT, FA.THUMB, 0.95),
+    'Lw2': MoveProperties(HD.LEFT, FA.THUMB, 0.9),
+    'Uw': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.95),
+    "Uw'": MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.95),
+    'Uw2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.9),
+    'Dw': MoveProperties(HD.LEFT, FA.MIDDLE, 0.8),
+    "Dw'": MoveProperties(HD.RIGHT, FA.MIDDLE, 0.8),
+    'Dw2': MoveProperties(HD.AMBIDEXTROUS, FA.MIDDLE, 0.75),
+    'Fw': MoveProperties(HD.RIGHT, FA.INDEX, 0.8),
+    "Fw'": MoveProperties(HD.LEFT, FA.INDEX, 0.8),
+    'Fw2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.75),
+    'Bw': MoveProperties(HD.LEFT, FA.MIDDLE, 0.55),
+    "Bw'": MoveProperties(HD.RIGHT, FA.MIDDLE, 0.55),
+    'Bw2': MoveProperties(HD.AMBIDEXTROUS, FA.MIDDLE, 0.5),
     # Slice Moves
-    'M': 0.55, "M'": 0.85, 'M2': 0.8,
-    'E': 0.45, "E'": 0.5, 'E2': 0.45,
-    'S': 0.4, "S'": 0.35, 'S2': 0.35,
-
+    'M': MoveProperties(HD.RIGHT, FA.THUMB, 0.55),
+    "M'": MoveProperties(HD.LEFT, FA.RING, 0.85),
+    'M2': MoveProperties(HD.LEFT, FA.RING, 0.8),
+    'E': MoveProperties(HD.LEFT, FA.MIDDLE, 0.45),
+    "E'": MoveProperties(HD.RIGHT, FA.INDEX, 0.5),
+    'E2': MoveProperties(HD.RIGHT, FA.INDEX, 0.45),
+    'S': MoveProperties(HD.RIGHT, FA.INDEX, 0.4),
+    "S'": MoveProperties(HD.LEFT, FA.INDEX, 0.35),
+    'S2': MoveProperties(HD.RIGHT, FA.INDEX, 0.35),
     # Cube Rotations
-    'x': 0.4, "x'": 0.4, 'x2': 0.4,
-    'y': 0.5, "y'": 0.5, 'y2': 0.35,
-    'z': 0.4, "z'": 0.4, 'z2': 0.4,
+    'x': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
+    "x'": MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
+    'x2': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
+    'y': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.5),
+    "y'": MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.5),
+    'y2': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.35),
+    'z': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
+    "z'": MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
+    'z2': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
 }
+
+DEFAULT_MOVE_PROPERTIES = MoveProperties(
+    HD.AMBIDEXTROUS, FA.INDEX, 0.5,
+)
 
 # Threshold for considering a move awkward (weight below this is awkward)
 AWKWARD_THRESHOLD = 0.6
@@ -261,13 +230,14 @@ def get_move_ergonomic_weight(
 
     """
     move_key = get_move_key(move)
-    base_weight = ERGONOMIC_WEIGHTS.get(move_key, 0.5)
+    props = MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES)
+    base_weight = props.weight
 
     if hand_dominance == HandDominance.AMBIDEXTROUS:
         return base_weight
 
     # Adjust based on hand dominance
-    hand = HAND_ASSIGNMENTS.get(move_key, HandDominance.AMBIDEXTROUS)
+    hand = props.hand
 
     if hand_dominance == HandDominance.LEFT:
         if hand == HandDominance.RIGHT:
@@ -315,9 +285,12 @@ def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
     # Check for hand switches
     key1 = get_move_key(move1)
     key2 = get_move_key(move2)
-    hand1 = HAND_ASSIGNMENTS.get(key1, HandDominance.AMBIDEXTROUS)
-    hand2 = HAND_ASSIGNMENTS.get(key2, HandDominance.AMBIDEXTROUS)
-    if hand1 not in {hand2, HandDominance.AMBIDEXTROUS} and hand2 != HandDominance.AMBIDEXTROUS:
+    hand1 = MOVE_DATA.get(key1, DEFAULT_MOVE_PROPERTIES).hand
+    hand2 = MOVE_DATA.get(key2, DEFAULT_MOVE_PROPERTIES).hand
+    if (
+        hand1 not in {hand2, HandDominance.AMBIDEXTROUS}
+        and hand2 != HandDominance.AMBIDEXTROUS
+    ):
         return TRANSITION_PENALTIES['hand_switch']
 
     return TRANSITION_PENALTIES['adjacent']
@@ -418,11 +391,12 @@ def find_trigger_patterns(
 
             # Sliding window search
             for i in range(len(algorithm_moves) - pattern_length + 1):
-                if any(idx in used_indices
-                       for idx in range(i, i + pattern_length)):
+                if any(
+                    idx in used_indices for idx in range(i, i + pattern_length)
+                ):
                     continue
 
-                window = algorithm_moves[i:i + pattern_length]
+                window = algorithm_moves[i : i + pattern_length]
                 if window == pattern_list:
                     match = TriggerMatch(
                         pattern=pattern,
@@ -458,10 +432,13 @@ def calculate_trigger_bonus(
     # Weighted speed multiplier
     total_moves = sum(len(m.matched_moves.split()) for m in matches)
     if total_moves > 0:
-        speed_multiplier = sum(
-            m.pattern.speed_multiplier * len(m.matched_moves.split())
-            for m in matches
-        ) / total_moves
+        speed_multiplier = (
+            sum(
+                m.pattern.speed_multiplier * len(m.matched_moves.split())
+                for m in matches
+            )
+            / total_moves
+        )
     else:
         speed_multiplier = 1.0
 
@@ -505,7 +482,8 @@ def estimate_tps_potential(
 
     move_weights = [
         get_move_ergonomic_weight(move, hand_dominance)
-        for move in algorithm if not move.is_pause
+        for move in algorithm
+        if not move.is_pause
     ]
 
     if not move_weights:
@@ -520,8 +498,11 @@ def estimate_tps_potential(
     balance_bonus = 0.9 + (0.2 * balance_ratio)
 
     estimated_tps = (
-        base_tps * weight_multiplier * flow_multiplier
-        * regrip_penalty * balance_bonus
+        base_tps
+        * weight_multiplier
+        * flow_multiplier
+        * regrip_penalty
+        * balance_bonus
     )
 
     return max(2.0, min(15.0, estimated_tps))
@@ -556,7 +537,8 @@ def calculate_ergonomic_score(
 
     move_weights = [
         get_move_ergonomic_weight(move, hand_dominance)
-        for move in algorithm if not move.is_pause
+        for move in algorithm
+        if not move.is_pause
     ]
 
     if not move_weights:
@@ -566,12 +548,16 @@ def calculate_ergonomic_score(
     hand_balance = balance_ratio * 2  # Convert 0-0.5 range to 0-1
     regrip_score = max(0.0, 1.0 - (regrip_count / len(move_weights)))
 
-    return max(0.0, min(1.0,
-        avg_move_score * 0.4
-        + flow * 0.3
-        + hand_balance * 0.15
-        + regrip_score * 0.15,
-    ))
+    return max(
+        0.0,
+        min(
+            1.0,
+            avg_move_score * 0.4
+            + flow * 0.3
+            + hand_balance * 0.15
+            + regrip_score * 0.15,
+        ),
+    )
 
 
 def classify_algorithm_difficulty(
@@ -591,12 +577,17 @@ def classify_algorithm_difficulty(
         One of: 'Beginner', 'Intermediate', 'Advanced', 'Expert'.
 
     """
-    if (ergonomic_score >= BEGINNER_SCORE
-            and regrip_count <= BEGINNER_REGRIPS and flow >= BEGINNER_FLOW):
+    if (
+        ergonomic_score >= BEGINNER_SCORE
+        and regrip_count <= BEGINNER_REGRIPS
+        and flow >= BEGINNER_FLOW
+    ):
         return 'Beginner'
-    if (ergonomic_score >= INTERMEDIATE_SCORE
-            and regrip_count <= INTERMEDIATE_REGRIPS
-            and flow >= INTERMEDIATE_FLOW):
+    if (
+        ergonomic_score >= INTERMEDIATE_SCORE
+        and regrip_count <= INTERMEDIATE_REGRIPS
+        and flow >= INTERMEDIATE_FLOW
+    ):
         return 'Intermediate'
     if ergonomic_score >= ADVANCED_SCORE and regrip_count <= ADVANCED_REGRIPS:
         return 'Advanced'
@@ -648,7 +639,8 @@ def suggest_ergonomic_improvements(
 
     move_weights = [
         get_move_ergonomic_weight(move)
-        for move in algorithm if not move.is_pause
+        for move in algorithm
+        if not move.is_pause
     ]
     avg_weight = sum(move_weights) / len(move_weights) if move_weights else 1.0
     if avg_weight < WEIGHT_THRESHOLD:
@@ -683,7 +675,7 @@ def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
             continue
 
         move_key = get_move_key(move)
-        hand = HAND_ASSIGNMENTS.get(move_key, HandDominance.AMBIDEXTROUS)
+        hand = MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES).hand
 
         if hand == HandDominance.RIGHT:
             right_count += 1
@@ -713,7 +705,8 @@ def compute_finger_distribution(
         moves: 'Algorithm' to analyze.
 
     Returns:
-        Tuple of (thumb_count, index_count, middle_count, ring_count, pinky_count, none_count).
+        Tuple of (thumb_count, index_count, middle_count,
+        ring_count, pinky_count, none_count).
 
     """
     thumb_count = 0
@@ -728,7 +721,7 @@ def compute_finger_distribution(
             continue
 
         move_key = get_move_key(move)
-        finger = FINGER_ASSIGNMENTS.get(move_key, FingerAssignment.INDEX)
+        finger = MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES).finger
 
         if finger == FingerAssignment.THUMB:
             thumb_count += 1
@@ -743,7 +736,14 @@ def compute_finger_distribution(
         elif finger == FingerAssignment.NONE:
             none_count += 1
 
-    return thumb_count, index_count, middle_count, ring_count, pinky_count, none_count
+    return (
+        thumb_count,
+        index_count,
+        middle_count,
+        ring_count,
+        pinky_count,
+        none_count,
+    )
 
 
 def compute_regrip_count(moves: 'Algorithm') -> int:
@@ -936,17 +936,21 @@ def compute_ergonomics(  # noqa: PLR0914
     )
 
     # Calculate finger distribution
-    thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(algorithm)
+    thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(
+        algorithm,
+    )
 
     # Calculate difficulty metrics
     regrip_count = compute_regrip_count(algorithm)
     fingertrick_difficulty = compute_fingertrick_difficulty(
-        algorithm, hand_dominance,
+        algorithm,
+        hand_dominance,
     )
 
     # Count awkward moves (those with low ergonomic weight)
     awkward_moves = sum(
-        1 for move in algorithm
+        1
+        for move in algorithm
         if not move.is_pause
         and get_move_ergonomic_weight(move, hand_dominance) < AWKWARD_THRESHOLD
     )
@@ -957,7 +961,8 @@ def compute_ergonomics(  # noqa: PLR0914
     # Advanced metrics
     flow_score_val = calculate_flow_score(algorithm)
     base_ergonomic_score = calculate_ergonomic_score(
-        algorithm, hand_dominance,
+        algorithm,
+        hand_dominance,
         flow=flow_score_val,
         balance_ratio=balance_ratio,
         regrip_count=regrip_count,
@@ -971,7 +976,8 @@ def compute_ergonomics(  # noqa: PLR0914
     ergonomic_rating = get_ergonomic_rating(ergonomic_score)
 
     estimated_tps = estimate_tps_potential(
-        algorithm, hand_dominance,
+        algorithm,
+        hand_dominance,
         flow=flow_score_val,
         regrip_count=regrip_count,
         balance_ratio=balance_ratio,
