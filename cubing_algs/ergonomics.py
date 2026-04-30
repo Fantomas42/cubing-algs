@@ -382,10 +382,16 @@ def find_trigger_patterns(
     )
 
     for pattern in sorted_patterns:
-        # Check main pattern and all variations
-        patterns_to_check = [pattern.moves, *pattern.variations]
+        # Check main pattern first, then variations.
+        # variation_index: -1 = canonical, 0 = lefty (first), 1+ = back-face.
+        # Lefty receives a lighter penalty than back-face variations whose
+        # empirical execution is noticeably slower than the canonical form.
+        candidates = [
+            (pattern.moves, -1),
+            *((v, i) for i, v in enumerate(pattern.variations)),
+        ]
 
-        for pattern_moves in patterns_to_check:
+        for pattern_moves, variation_index in candidates:
             pattern_list = pattern_moves.split()
             pattern_length = len(pattern_list)
 
@@ -403,6 +409,7 @@ def find_trigger_patterns(
                         start_index=i,
                         end_index=i + pattern_length - 1,
                         matched_moves=' '.join(window),
+                        variation_index=variation_index,
                     )
                     matches.append(match)
 
@@ -427,14 +434,32 @@ def calculate_trigger_bonus(
     if not matches:
         return 0.0, 1.0
 
-    ergonomic_bonus = sum(m.pattern.ergonomic_bonus for m in matches)
+    # Canonical values were calibrated from right-hand executions.
+    # Lefty (variation_index=0) executes close to canonical for this solver.
+    # Back-face variations (variation_index>=1) are noticeably slower.
+    def variation_factor(m: TriggerMatch) -> float:
+        if m.variation_index == -1:
+            return 1.0
+        if m.variation_index == 0:
+            return 0.95  # lefty: minor penalty
+        return 0.85  # back-face: larger penalty
+
+    def effective_bonus(m: TriggerMatch) -> float:
+        return m.pattern.ergonomic_bonus * variation_factor(m)
+
+    def effective_speed(m: TriggerMatch) -> float:
+        # Pull the speed toward 1.0 by the factor, preserving the direction
+        # of the multiplier: 1.95 canonical → 1.95, lefty → 1.90, back → 1.81.
+        return 1.0 + (m.pattern.speed_multiplier - 1.0) * variation_factor(m)
+
+    ergonomic_bonus = sum(effective_bonus(m) for m in matches)
 
     # Weighted speed multiplier
     total_moves = sum(len(m.matched_moves.split()) for m in matches)
     if total_moves > 0:
         speed_multiplier = (
             sum(
-                m.pattern.speed_multiplier * len(m.matched_moves.split())
+                effective_speed(m) * len(m.matched_moves.split())
                 for m in matches
             )
             / total_moves
@@ -450,7 +475,7 @@ def calculate_trigger_bonus(
     if len(matches) >= 2:
         ergonomic_bonus += 0.05
 
-    return min(ergonomic_bonus, 0.3), min(speed_multiplier, 1.8)
+    return min(ergonomic_bonus, 0.3), min(speed_multiplier, 2.0)
 
 
 def estimate_tps_potential(

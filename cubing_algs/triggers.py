@@ -30,6 +30,7 @@ class TriggerMatch(NamedTuple):
     start_index: int
     end_index: int
     matched_moves: str
+    variation_index: int = -1  # -1 = canonical, 0 = lefty, 1+ = back-face
 
 
 TRIGGER_PATTERNS = [
