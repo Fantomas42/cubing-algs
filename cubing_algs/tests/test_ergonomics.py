@@ -187,10 +187,10 @@ class TestGetMoveErgonomicWeight(unittest.TestCase):
     def test_left_handed_both_move_no_change(self) -> None:
         """Test that both-hand moves are not adjusted for left-handed."""
         right_weight = get_move_ergonomic_weight(
-            Move('U'), HandDominance.RIGHT,
+            Move('U2'), HandDominance.RIGHT,
         )
         left_weight = get_move_ergonomic_weight(
-            Move('U'), HandDominance.LEFT,
+            Move('U2'), HandDominance.LEFT,
         )
         self.assertEqual(left_weight, right_weight)
 
@@ -603,32 +603,32 @@ class TestComputeHandBalance(unittest.TestCase):
         """Test algorithm with right-hand dominant moves."""
         alg = Algorithm.parse_moves("R U R' U'")
         right, left, both, ratio = compute_hand_balance(alg)
-        self.assertEqual(right, 2)  # R and R'
-        self.assertEqual(left, 0)
-        self.assertEqual(both, 2)  # U and U'
-        self.assertEqual(ratio, 0.0)  # All handed moves are right
+        self.assertEqual(right, 3)  # R, U, R'
+        self.assertEqual(left, 1)   # U'
+        self.assertEqual(both, 0)
+        self.assertAlmostEqual(ratio, 0.25)  # min(3,1)/(3+1)
 
     def test_left_hand_dominant(self) -> None:
         """Test algorithm with left-hand dominant moves."""
         alg = Algorithm.parse_moves("L' U' L U")
         right, left, both, ratio = compute_hand_balance(alg)
-        self.assertEqual(right, 0)
-        self.assertEqual(left, 2)  # L' and L
-        self.assertEqual(both, 2)  # U' and U
-        self.assertEqual(ratio, 0.0)  # All handed moves are left
+        self.assertEqual(right, 1)  # U
+        self.assertEqual(left, 3)   # L', U', L
+        self.assertEqual(both, 0)
+        self.assertAlmostEqual(ratio, 0.25)  # min(1,3)/(1+3)
 
     def test_balanced_algorithm(self) -> None:
         """Test perfectly balanced algorithm."""
         alg = Algorithm.parse_moves("R U R' U' L' U' L U")
         right, left, both, ratio = compute_hand_balance(alg)
-        self.assertEqual(right, 2)  # R and R'
-        self.assertEqual(left, 2)  # L' and L
-        self.assertEqual(both, 4)  # All U moves
+        self.assertEqual(right, 4)  # R, U, R', U
+        self.assertEqual(left, 4)   # U', L', U', L
+        self.assertEqual(both, 0)
         self.assertEqual(ratio, 0.5)  # Perfect balance
 
     def test_only_both_hand_moves(self) -> None:
         """Test algorithm with only both-hand moves."""
-        alg = Algorithm.parse_moves("U D2 U' D2")
+        alg = Algorithm.parse_moves("U2 D2 F2 B2")
         right, left, both, ratio = compute_hand_balance(alg)
         self.assertEqual(right, 0)
         self.assertEqual(left, 0)
@@ -639,9 +639,9 @@ class TestComputeHandBalance(unittest.TestCase):
         """Test hand balance calculation ignores pauses."""
         alg = Algorithm.parse_moves("R . U . R'")
         right, left, both, ratio = compute_hand_balance(alg)
-        self.assertEqual(right, 2)  # R and R'
+        self.assertEqual(right, 3)  # R, U, R'
         self.assertEqual(left, 0)
-        self.assertEqual(both, 1)  # U
+        self.assertEqual(both, 0)
         self.assertEqual(ratio, 0.0)  # All handed moves are right
 
 
@@ -1163,11 +1163,10 @@ class TestComputeErgonomics(unittest.TestCase):
         result = compute_ergonomics(alg)
 
         self.assertEqual(result.total_moves, 4)
-        self.assertEqual(result.right_hand_moves, 2)  # R, R'
-        self.assertEqual(result.left_hand_moves, 0)
-        self.assertEqual(result.both_hand_moves, 2)  # U, U'
-        # All handed moves are right
-        self.assertEqual(result.hand_balance_ratio, 0.0)
+        self.assertEqual(result.right_hand_moves, 3)  # R, U, R'
+        self.assertEqual(result.left_hand_moves, 1)   # U'
+        self.assertEqual(result.both_hand_moves, 0)
+        self.assertAlmostEqual(result.hand_balance_ratio, 0.25)  # min(3,1)/4
         self.assertEqual(result.regrip_count, 0)  # All adjacent transitions
         self.assertEqual(result.thumb_moves, 2)  # R, R'
         self.assertEqual(result.index_finger_moves, 2)  # U, U'
@@ -1187,11 +1186,10 @@ class TestComputeErgonomics(unittest.TestCase):
         result = compute_ergonomics(alg)
 
         self.assertEqual(result.total_moves, 4)
-        self.assertEqual(result.right_hand_moves, 0)
-        self.assertEqual(result.left_hand_moves, 2)  # L', L
-        self.assertEqual(result.both_hand_moves, 2)  # U', U
-        # All handed moves are left
-        self.assertEqual(result.hand_balance_ratio, 0.0)
+        self.assertEqual(result.right_hand_moves, 1)  # U
+        self.assertEqual(result.left_hand_moves, 3)   # L', U', L
+        self.assertEqual(result.both_hand_moves, 0)
+        self.assertAlmostEqual(result.hand_balance_ratio, 0.25)  # min(1,3)/4
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.thumb_moves, 2)  # L', L
         self.assertEqual(result.index_finger_moves, 2)  # U', U
@@ -1203,9 +1201,9 @@ class TestComputeErgonomics(unittest.TestCase):
         result = compute_ergonomics(alg)
 
         self.assertEqual(result.total_moves, 8)
-        self.assertEqual(result.right_hand_moves, 2)  # R, R'
-        self.assertEqual(result.left_hand_moves, 2)  # L', L
-        self.assertEqual(result.both_hand_moves, 4)  # All U moves
+        self.assertEqual(result.right_hand_moves, 4)  # R, U, R', U
+        self.assertEqual(result.left_hand_moves, 4)   # U', L', U', L
+        self.assertEqual(result.both_hand_moves, 0)
         self.assertEqual(result.hand_balance_ratio, 0.5)  # Perfect balance
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.thumb_moves, 4)  # R, R', L', L
@@ -1255,12 +1253,12 @@ class TestComputeErgonomics(unittest.TestCase):
         result = compute_ergonomics(alg)
 
         self.assertEqual(result.total_moves, 13)
-        # R moves (7) + F = 8 right; F' = 1 left
-        self.assertEqual(result.right_hand_moves, 8)
-        self.assertEqual(result.left_hand_moves, 1)   # F'
-        self.assertEqual(result.both_hand_moves, 4)   # U moves only
-        # 8 right, 1 left → min(8,1)/(8+1) = 1/9
-        self.assertAlmostEqual(result.hand_balance_ratio, 1 / 9)
+        # R moves (7) + F + U + U = 10 right; F' + U' + U' = 3 left
+        self.assertEqual(result.right_hand_moves, 10)
+        self.assertEqual(result.left_hand_moves, 3)   # F', U', U'
+        self.assertEqual(result.both_hand_moves, 0)
+        # 10 right, 3 left → min(10,3)/(10+3) = 3/13
+        self.assertAlmostEqual(result.hand_balance_ratio, 3 / 13)
 
         # Check for specific expected values
         self.assertGreater(result.estimated_execution_time, 0)
@@ -1294,8 +1292,8 @@ class TestComputeErgonomics(unittest.TestCase):
         result = compute_ergonomics(alg)
 
         self.assertEqual(result.total_moves, 3)  # Pauses not counted
-        self.assertEqual(result.right_hand_moves, 2)  # R, R'
-        self.assertEqual(result.both_hand_moves, 1)  # U
+        self.assertEqual(result.right_hand_moves, 3)  # R, U, R'
+        self.assertEqual(result.both_hand_moves, 0)
         self.assertEqual(result.regrip_count, 0)
 
     def test_ergonomics_data_is_immutable_named_tuple(self) -> None:
