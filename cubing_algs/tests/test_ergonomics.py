@@ -817,12 +817,12 @@ class TestComputeFingerDistribution(unittest.TestCase):
         thumb, index, middle, ring, pinky, none_moves = (
             compute_finger_distribution(alg)
         )
-        self.assertEqual(thumb, 3)   # x, y, z all map to thumb
+        self.assertEqual(thumb, 0)
         self.assertEqual(index, 0)
         self.assertEqual(middle, 0)
         self.assertEqual(ring, 0)
         self.assertEqual(pinky, 0)
-        self.assertEqual(none_moves, 0)
+        self.assertEqual(none_moves, 3)   # x, y, z all map to none/all
 
     def test_wide_moves_match_base_face(self) -> None:
         """

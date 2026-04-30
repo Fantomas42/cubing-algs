@@ -141,15 +141,15 @@ MOVE_DATA: dict[str, MoveProperties] = {
     "S'": MoveProperties(HD.LEFT, FA.INDEX, 0.35),
     'S2': MoveProperties(HD.RIGHT, FA.INDEX, 0.35),
     # Cube Rotations
-    'x': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
-    "x'": MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
-    'x2': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
-    'y': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.5),
-    "y'": MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.5),
-    'y2': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.35),
-    'z': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
-    "z'": MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
-    'z2': MoveProperties(HD.AMBIDEXTROUS, FA.THUMB, 0.4),
+    'x': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
+    "x'": MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
+    'x2': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
+    'y': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.5),
+    "y'": MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.5),
+    'y2': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.35),
+    'z': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
+    "z'": MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
+    'z2': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
 }
 
 DEFAULT_MOVE_PROPERTIES = MoveProperties(
