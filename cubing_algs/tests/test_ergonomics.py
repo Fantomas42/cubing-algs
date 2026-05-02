@@ -385,7 +385,7 @@ class TestCalculateTriggerBonus(unittest.TestCase):
         ]
         bonus, multiplier = calculate_trigger_bonus(matches)
         self.assertLessEqual(bonus, 0.3)
-        self.assertLessEqual(multiplier, 1.8)
+        self.assertLessEqual(multiplier, 2.0)
 
 
 class TestEstimateTpsPotential(unittest.TestCase):
@@ -628,7 +628,7 @@ class TestComputeHandBalance(unittest.TestCase):
 
     def test_only_both_hand_moves(self) -> None:
         """Test algorithm with only both-hand moves."""
-        alg = Algorithm.parse_moves("U2 D2 F2 B2")
+        alg = Algorithm.parse_moves('U2 D2 F2 B2')
         right, left, both, ratio = compute_hand_balance(alg)
         self.assertEqual(right, 0)
         self.assertEqual(left, 0)
@@ -1022,8 +1022,8 @@ class TestComputeFingertrickDifficulty(unittest.TestCase):
         """Test algorithm with easy moves has low difficulty."""
         alg = Algorithm.parse_moves('R U')
         difficulty = compute_fingertrick_difficulty(alg)
-        # R=1.0, U=1.0, avg=1.0, difficulty=0.0
-        self.assertAlmostEqual(difficulty, 0.0)
+        # R=0.87, U=0.98, avg=0.925, difficulty=0.075
+        self.assertAlmostEqual(difficulty, 0.075)
 
     def test_difficult_moves(self) -> None:
         """Test algorithm with difficult moves has high difficulty."""
@@ -1036,8 +1036,8 @@ class TestComputeFingertrickDifficulty(unittest.TestCase):
         """Test algorithm with mixed difficulty moves."""
         alg = Algorithm.parse_moves('R M')
         difficulty = compute_fingertrick_difficulty(alg)
-        # R=1.0, M=0.55, avg=0.775, difficulty=0.225
-        self.assertAlmostEqual(difficulty, 0.225)
+        # R=0.87, M=0.55, avg=0.71, difficulty=0.29
+        self.assertAlmostEqual(difficulty, 0.29)
 
     def test_rotation_move_weight(self) -> None:
         """Test that rotation moves use ergonomic weights."""
@@ -1050,8 +1050,8 @@ class TestComputeFingertrickDifficulty(unittest.TestCase):
         """Test fingertrick difficulty calculation ignores pauses."""
         alg = Algorithm.parse_moves('R . U')
         difficulty = compute_fingertrick_difficulty(alg)
-        # R=1.0, U=1.0, avg=1.0, difficulty=0.0
-        self.assertAlmostEqual(difficulty, 0.0)
+        # R=0.87, U=0.98, avg=0.925, difficulty=0.075
+        self.assertAlmostEqual(difficulty, 0.075)
 
     def test_hand_dominance_param(self) -> None:
         """Test that hand dominance affects difficulty."""

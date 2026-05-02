@@ -39,8 +39,8 @@ TRIGGER_PATTERNS = [
         name='Sexy Move',
         moves="R U R' U'",
         category='basic',
-        ergonomic_bonus=0.15,
-        speed_multiplier=1.3,
+        ergonomic_bonus=0.17,
+        speed_multiplier=1.95,
         variations=[
             "L' U' L U",
             "R' U' R U",
@@ -58,8 +58,8 @@ TRIGGER_PATTERNS = [
         name='Sledgehammer',
         moves="R' F R F'",
         category='basic',
-        ergonomic_bonus=0.12,
-        speed_multiplier=1.25,
+        ergonomic_bonus=0.00,
+        speed_multiplier=0.97,
         variations=[
             "L F' L' F",
             "R B' R' B",
@@ -77,8 +77,8 @@ TRIGGER_PATTERNS = [
         name='Hedgeslammer',
         moves="F R' F' R",
         category='basic',
-        ergonomic_bonus=0.12,
-        speed_multiplier=1.25,
+        ergonomic_bonus=0.00,
+        speed_multiplier=0.85,
         variations=[
             "F' L F L'",
             "B' R B R'",
@@ -96,8 +96,8 @@ TRIGGER_PATTERNS = [
         name='Sune Trigger',
         moves="R U R' U",
         category='basic',
-        ergonomic_bonus=0.10,
-        speed_multiplier=1.2,
+        ergonomic_bonus=0.03,
+        speed_multiplier=1.10,
         variations=[
             "L' U' L U'",
         ],
@@ -113,8 +113,8 @@ TRIGGER_PATTERNS = [
         name='Sane Trigger',
         moves="R U' R' U'",
         category='basic',
-        ergonomic_bonus=0.10,
-        speed_multiplier=1.2,
+        ergonomic_bonus=0.07,
+        speed_multiplier=1.27,
         variations=[
             "L' U L U",
         ],
@@ -129,7 +129,7 @@ TRIGGER_PATTERNS = [
         name='T-Perm Trigger',
         moves="R U R' F'",
         category='basic',
-        ergonomic_bonus=0.08,
+        ergonomic_bonus=0.04,
         speed_multiplier=1.15,
         variations=[
             "L' U' L F",
@@ -148,8 +148,8 @@ TRIGGER_PATTERNS = [
         name='Sexy + Sledge',
         moves="R U R' U' R' F R F'",
         category='compound',
-        ergonomic_bonus=0.18,
-        speed_multiplier=1.4,
+        ergonomic_bonus=0.11,
+        speed_multiplier=1.45,
         variations=[
             "L' U' L U L F' L' F",
         ],
@@ -165,8 +165,8 @@ TRIGGER_PATTERNS = [
         name='Double Sexy',
         moves="R U R' U' R U R' U'",
         category='compound',
-        ergonomic_bonus=0.20,
-        speed_multiplier=1.45,
+        ergonomic_bonus=0.12,
+        speed_multiplier=1.54,
         variations=[
             "L' U' L U L' U' L U",
         ],
@@ -182,8 +182,8 @@ TRIGGER_PATTERNS = [
         name='Triple Sexy',
         moves="R U R' U' R U R' U' R U R' U'",
         category='compound',
-        ergonomic_bonus=0.20,
-        speed_multiplier=1.55,
+        ergonomic_bonus=0.16,
+        speed_multiplier=1.88,
         variations=[
             "L' U' L U L' U' L U L' U' L U",
         ],
@@ -217,8 +217,8 @@ TRIGGER_PATTERNS = [
         name='Anti-Sune',  # Chair
         moves="R U2 R' U' R U' R'",  # Orient 3 corners
         category='OLL',
-        ergonomic_bonus=0.14,
-        speed_multiplier=1.3,
+        ergonomic_bonus=0.13,
+        speed_multiplier=1.61,
         variations=[
             "L' U2 L U L' U L",
         ],
@@ -253,8 +253,8 @@ TRIGGER_PATTERNS = [
         name='Slot Extract',
         moves="R U R'",
         category='setup',
-        ergonomic_bonus=0.06,
-        speed_multiplier=1.1,
+        ergonomic_bonus=0.16,
+        speed_multiplier=1.87,
         variations=[
             "L' U' L",
             "R' U' R",
@@ -272,8 +272,8 @@ TRIGGER_PATTERNS = [
         name='Slot Insert',
         moves="R U' R'",
         category='setup',
-        ergonomic_bonus=0.06,
-        speed_multiplier=1.1,
+        ergonomic_bonus=0.11,
+        speed_multiplier=1.47,
         variations=[
             "L' U L",
             "R' U R",
@@ -291,8 +291,8 @@ TRIGGER_PATTERNS = [
         name='Slot Extended',
         moves="R U2 R'",
         category='setup',
-        ergonomic_bonus=0.05,
-        speed_multiplier=1.05,
+        ergonomic_bonus=0.00,
+        speed_multiplier=0.87,
         variations=[
             "L' U2 L",
             "R' U2 R",
