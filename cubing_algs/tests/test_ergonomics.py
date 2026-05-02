@@ -1029,8 +1029,8 @@ class TestComputeFingertrickDifficulty(unittest.TestCase):
         """Test algorithm with difficult moves has high difficulty."""
         alg = Algorithm.parse_moves('S2 E2')
         difficulty = compute_fingertrick_difficulty(alg)
-        # S2=0.35, E2=0.45, avg=0.4, difficulty=0.6
-        self.assertAlmostEqual(difficulty, 0.6)
+        # S2=0.50, E2=0.45, avg=0.475, difficulty=0.525
+        self.assertAlmostEqual(difficulty, 0.525)
 
     def test_mixed_difficulty(self) -> None:
         """Test algorithm with mixed difficulty moves."""
