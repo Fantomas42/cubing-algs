@@ -31,7 +31,7 @@ class HandDominance(Enum):
 class FingerAssignment(Enum):
     """Enumeration for finger assignments in move execution."""
 
-    NONE = 'none'
+    MIXED = 'mixed'
     THUMB = 'thumb'
     INDEX = 'index'
     MIDDLE = 'middle'
@@ -64,7 +64,7 @@ class ErgonomicsData(NamedTuple):
     middle_finger_moves: int
     ring_finger_moves: int
     pinky_finger_moves: int
-    none_finger_moves: int
+    mixed_finger_moves: int
 
     # Comfort metrics
     ergonomic_rating: str
@@ -141,15 +141,15 @@ MOVE_DATA: dict[str, MoveProperties] = {
     "S'": MoveProperties(HD.LEFT, FA.INDEX, 0.45),
     'S2': MoveProperties(HD.RIGHT, FA.INDEX, 0.35),
     # Cube Rotations
-    'x': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
-    "x'": MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
-    'x2': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
-    'y': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.5),
-    "y'": MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.5),
-    'y2': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.35),
-    'z': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
-    "z'": MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
-    'z2': MoveProperties(HD.AMBIDEXTROUS, FA.NONE, 0.4),
+    'x': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    "x'": MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    'x2': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    'y': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.5),
+    "y'": MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.5),
+    'y2': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.35),
+    'z': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    "z'": MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    'z2': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
 }
 
 DEFAULT_MOVE_PROPERTIES = MoveProperties(
@@ -758,7 +758,7 @@ def compute_finger_distribution(
             ring_count += 1
         elif finger == FingerAssignment.PINKY:
             pinky_count += 1
-        elif finger == FingerAssignment.NONE:
+        elif finger == FingerAssignment.MIXED:
             none_count += 1
 
     return (
@@ -943,7 +943,7 @@ def compute_ergonomics(  # noqa: PLR0914
             middle_finger_moves=0,
             ring_finger_moves=0,
             pinky_finger_moves=0,
-            none_finger_moves=0,
+            mixed_finger_moves=0,
             ergonomic_rating='Excellent',
             ergonomic_score=1.0,
             flow_score=1.0,
@@ -961,8 +961,8 @@ def compute_ergonomics(  # noqa: PLR0914
     )
 
     # Calculate finger distribution
-    thumb, index, middle, ring, pinky, none_moves = compute_finger_distribution(
-        algorithm,
+    thumb, index, middle, ring, pinky, mixed_moves = (
+        compute_finger_distribution(algorithm)
     )
 
     # Calculate difficulty metrics
@@ -1042,7 +1042,7 @@ def compute_ergonomics(  # noqa: PLR0914
         middle_finger_moves=middle,
         ring_finger_moves=ring,
         pinky_finger_moves=pinky,
-        none_finger_moves=none_moves,
+        mixed_finger_moves=mixed_moves,
         ergonomic_rating=ergonomic_rating,
         ergonomic_score=ergonomic_score,
         flow_score=flow_score_val,
