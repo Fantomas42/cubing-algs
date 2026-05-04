@@ -7,6 +7,9 @@ transformations between different notations.
 """
 from collections import UserString
 from functools import cached_property
+from typing import ClassVar
+from typing import Self
+from typing import cast
 
 from cubing_algs.constants import ALL_BASIC_MOVES
 from cubing_algs.constants import DOUBLE_CHAR
@@ -35,6 +38,23 @@ class Move(UserString):  # noqa: PLR0904
 
     Examples of valid moves: U, R', F2, Rw, M, x, 3-4Rw, 2F
     """
+
+    _cache: ClassVar[dict[str, 'Move']] = {}
+
+    def __new__(cls, seq: str | UserString = '') -> Self:
+        """Return a cached instance for the given move string."""
+        key = seq.data if isinstance(seq, UserString) else str(seq)
+        if key in cls._cache:
+            return cast('Self', cls._cache[key])
+        instance = super().__new__(cls)
+        cls._cache[key] = instance
+        return instance
+
+    def __init__(self, seq: str | UserString = '') -> None:
+        """Initialize the move, skipping if already cached."""
+        if hasattr(self, 'data'):
+            return
+        super().__init__(seq)
 
     def __repr__(self) -> str:
         """

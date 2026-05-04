@@ -410,3 +410,32 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(m.build(layer=''), Move("Rw'@200"))
         self.assertEqual(m.build(time=''), Move("3-4Rw'"))
         self.assertEqual(m.build(move='Uw'), Move("3-4Uw'@200"))
+
+    def test_cache_identity_same_string(self) -> None:
+        """Test that Move returns the same instance for the same string."""
+        self.assertIs(Move('R'), Move('R'))
+        self.assertIs(Move("R'"), Move("R'"))
+        self.assertIs(Move('Rw2'), Move('Rw2'))
+
+    def test_cache_identity_different_strings(self) -> None:
+        """Test that distinct move strings produce distinct instances."""
+        self.assertIsNot(Move('R'), Move('U'))
+        self.assertIsNot(Move('R'), Move("R'"))
+
+    def test_cache_identity_via_inverted(self) -> None:
+        """Test that inverted.inverted returns the original cached instance."""
+        m = Move('R')
+        self.assertIs(m.inverted.inverted, m)
+
+    def test_cache_identity_via_doubled(self) -> None:
+        """Test that doubled.doubled returns the original cached instance."""
+        m = Move('R')
+        self.assertIs(m.doubled.doubled, m)
+
+    def test_cache_preserves_cached_properties(self) -> None:
+        """Test that cached properties are shared across identical moves."""
+        m1 = Move('F2')
+        _ = m1.is_double
+        m2 = Move('F2')
+        self.assertIs(m1, m2)
+        self.assertTrue(m2.is_double)
