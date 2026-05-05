@@ -21,6 +21,9 @@ from cubing_algs.constants import PAUSE_CHAR
 from cubing_algs.constants import ROTATIONS
 from cubing_algs.constants import WIDE_CHAR
 
+SIGN_MOVE_EXCLUDED = frozenset({WIDE_CHAR, *ROTATIONS})
+CLOCKWISE_EXCLUDED = frozenset({DOUBLE_CHAR, INVERT_CHAR})
+
 
 class Move(UserString):  # noqa: PLR0904
     """
@@ -97,6 +100,10 @@ class Move(UserString):  # noqa: PLR0904
             move = kept[0]
             modifier = kept[1:]
 
+        self.__dict__['layer'] = layer
+        self.__dict__['raw_base_move'] = move
+        self.__dict__['modifier'] = modifier
+        self.__dict__['time'] = time
         return layer, move, modifier, time
 
     @cached_property
@@ -363,7 +370,7 @@ class Move(UserString):  # noqa: PLR0904
         if not self.data.islower():
             return False
 
-        return all(char not in self.data for char in [WIDE_CHAR, *ROTATIONS])
+        return SIGN_MOVE_EXCLUDED.isdisjoint(self.data)
 
     # Modifiers
 
@@ -386,8 +393,7 @@ class Move(UserString):  # noqa: PLR0904
         """
         return (
             not self.is_pause
-            and not self.is_double and
-            self.modifier != INVERT_CHAR
+            and self.modifier not in CLOCKWISE_EXCLUDED
         )
 
     @cached_property
