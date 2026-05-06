@@ -13,7 +13,6 @@ from cubing_algs.exceptions import InvalidCubeStateError
 from cubing_algs.exceptions import InvalidFaceError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.integrity import VCubeIntegrityChecker
-from cubing_algs.masks import F2L_MASK
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
@@ -88,6 +87,71 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertTrue(cube.is_solved)
 
+    def test_undo_single_move(self) -> None:
+        """Test undoing a single move restores previous state."""
+        cube = VCube()
+        state_before = cube.state
+        cube.rotate('R')
+        cube.undo()
+
+        self.assertEqual(cube.state, state_before)
+
+    def test_undo_multiple_moves(self) -> None:
+        """Test undoing multiple moves restores the correct state."""
+        cube = VCube()
+        state_before = cube.state
+        cube.rotate('R U F')
+        cube.undo(3)
+
+        self.assertEqual(cube.state, state_before)
+
+    def test_undo_partial_history(self) -> None:
+        """Test undoing fewer moves than history preserves earlier state."""
+        cube = VCube()
+        cube.rotate('R')
+        state_after_r = cube.state
+        cube.rotate('U F')
+        cube.undo(2)
+
+        self.assertEqual(cube.state, state_after_r)
+
+    def test_undo_updates_history(self) -> None:
+        """Test that undo removes undone moves from history."""
+        cube = VCube()
+        cube.rotate('R U F')
+        cube.undo(2)
+
+        self.assertEqual(cube.history, ['R'])
+
+    def test_undo_does_not_add_to_history(self) -> None:
+        """Test that undo moves are not recorded in history."""
+        cube = VCube()
+        cube.rotate('R')
+        cube.undo()
+
+        self.assertEqual(cube.history, [])
+
+    def test_undo_more_than_history_undoes_all(self) -> None:
+        """
+        Test that undoing more moves than history
+        clamps to available moves.
+        """
+        cube = VCube()
+        cube.rotate('R U')
+        cube.undo(10)
+
+        self.assertEqual(cube.state, SOLVED_FACELETS_3x3x3)
+        self.assertEqual(cube.history, [])
+
+    def test_undo_empty_history_is_noop(self) -> None:
+        """Test that undoing with empty history leaves state unchanged."""
+        cube = VCube()
+        state = cube.state
+        cube.undo(5)
+
+        self.assertEqual(cube.state, state)
+        self.assertEqual(cube.history, [])
+
     def test_rotate_history(self) -> None:
         """Test history tracking with rotate method."""
         cube = VCube()
@@ -149,13 +213,22 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         so = SOLVED_SO
         facelets = '111111011111011011011010010010001001110110000111111100'
 
+        f2l_mask = (
+            '111111111'
+            '111111000'
+            '111111000'
+            '000000000'
+            '111111000'
+            '111111000'
+        )
+
         cube = VCube.from_cubies(
             cp, co, ep, eo, so,
-            F2L_MASK,
+            f2l_mask,
         )
         self.assertEqual(cube.state, facelets)
 
-        cube = VCube(F2L_MASK, check=False)
+        cube = VCube(f2l_mask, check=False)
         cube.rotate('F R')
 
         self.assertEqual(cube.state, facelets)
@@ -526,6 +599,9 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
 
         with self.assertRaises(NotImplementedError):
             _ = incomplete_cube.face_center_colors
+
+        with self.assertRaises(NotImplementedError):
+            _ = incomplete_cube.has_fixed_centers
 
     def test_invalid_length_no_check(self) -> None:
         """Test invalid length no check."""
@@ -1999,31 +2075,23 @@ class VCubeImageTestCase(unittest.TestCase):
         self.assertTrue(result.startswith('<svg'))
         self.assertTrue(result.endswith('</svg>'))
 
-    def test_matches_render_cube(self) -> None:
-        """Test that image() matches render_cube() output."""
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
-
-        cube = VCube()
-        cube.rotate("R U R' U'")
-        self.assertEqual(cube.image(), render_cube(cube))
-
     def test_3d_view(self) -> None:
         """Test 3d view rendering."""
         cube = VCube()
-        result = cube.image(view='3d')
+        result = cube.image(layout='3d')
         self.assertTrue(result.startswith('<svg'))
 
     def test_top_view(self) -> None:
         """Test top view rendering."""
         cube = VCube()
-        result = cube.image(view='top')
+        result = cube.image(layout='top')
         self.assertTrue(result.startswith('<svg'))
         self.assertIn('class="face-U"', result)
 
     def test_custom_size(self) -> None:
         """Test custom image size."""
         cube = VCube()
-        result = cube.image(size=400)
+        result = cube.image(image_size=400)
         self.assertIn('width="400"', result)
         self.assertIn('height="400"', result)
 
@@ -2033,18 +2101,6 @@ class VCubeImageTestCase(unittest.TestCase):
         default = cube.image()
         rotated = cube.image(rotation='y90')
         self.assertNotEqual(default, rotated)
-
-    def test_custom_cube_color(self) -> None:
-        """Test custom cube color."""
-        cube = VCube()
-        result = cube.image(cube_color='#ff0000')
-        self.assertIn('#ff0000', result)
-
-    def test_transparent_cube_color(self) -> None:
-        """Test transparent cube color with alpha."""
-        cube = VCube()
-        result = cube.image(cube_color='#11111180')
-        self.assertIn('fill-opacity', result)
 
     def test_2x2_cube(self) -> None:
         """Test rendering a 2x2 cube."""

@@ -10,6 +10,8 @@ import re
 
 from cubing_algs.annotations import RegexPattern
 
+DEFAULT_CUBE_SIZE = 3
+
 MAX_ITERATIONS = 50
 
 RESLICE_THRESHOLD = 50
@@ -372,12 +374,12 @@ OPPOSITE_FACES = {
 }
 
 ADJACENT_FACES = {
-    'U': ('R', 'L', 'F', 'B'),
-    'R': ('F', 'B', 'U', 'D'),
-    'F': ('U', 'D', 'L', 'R'),
-    'D': ('R', 'L', 'F', 'B'),
-    'L': ('F', 'B', 'U', 'D'),
-    'B': ('U', 'D', 'L', 'R'),
+    'U': ('F', 'R', 'B', 'L'),
+    'R': ('F', 'D', 'B', 'U'),
+    'F': ('D', 'R', 'U', 'L'),
+    'D': ('F', 'L', 'B', 'R'),
+    'L': ('F', 'U', 'B', 'D'),
+    'B': ('U', 'R', 'D', 'L'),
 }
 
 FACE_ORDER = ('U', 'R', 'F', 'D', 'L', 'B')
@@ -390,22 +392,6 @@ FACE_INDEXES = {
 }
 
 FACES = ''.join(FACE_ORDER)
-
-F2L_FACES = ('F', 'L', 'R', 'B')
-
-F2L_FACE_ORIENTATIONS = {
-    'FL': 'F',
-    'FR': 'R',
-    'BL': 'L',
-    'BR': 'B',
-}
-
-F2L_ADJACENT_FACES = {
-    'R': ('B', 'F'),
-    'L': ('F', 'B'),
-    'B': ('L', 'R'),
-    'F': ('R', 'L'),
-}
 
 F2L_EDGE_CORNERS = {  # Edge: Corner
     'FL': 'DLF',

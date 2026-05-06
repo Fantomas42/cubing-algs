@@ -21,7 +21,6 @@ classification system for systematic algorithm analysis.
 import typing
 from collections import OrderedDict
 from collections.abc import MutableMapping
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import Literal
 from typing import NamedTuple
@@ -47,6 +46,11 @@ PURE_COMMUTATOR_SETUP_LEN = 2  # Setup length for pure commutators
 PURE_COMMUTATOR_ACTION_LEN = 2  # Action length for pure commutators
 COMMUTATOR_A9_TOTAL_MOVES = 10  # Total moves in A9 commutator (before cancel)
 MULTI_SETUP_MIN_LENGTH = 3  # Min setup length for "multi-setup" conjugates
+
+# Scoring bonus for pure commutators (2+2+2+2 = 8 moves).
+# A pure [2,2] commutator has base score 10.0; a [2,4] scores 20.0.
+# The 2.5x bonus lifts pure to 25.0, preferring it over [2,4] competitors.
+PURE_COMMUTATOR_SCORE_BONUS = 2.5
 
 # Efficiency rating constants
 EFFICIENCY_EXCELLENT_RATIO = 0.75  # Ratio of pure/A9 for "Excellent"
@@ -100,6 +104,16 @@ class BoundedCache[K, V](MutableMapping[K, V]):
             self._cache.popitem(last=False)  # Remove oldest (LRU)
         self._cache[key] = value
 
+    def __contains__(self, key: object) -> bool:
+        """
+        Check membership without promoting the key as recently used.
+
+        Returns:
+            True if the key is in the cache, False otherwise.
+
+        """
+        return key in self._cache
+
     def __delitem__(self, key: K) -> None:
         """Remove item from cache."""
         del self._cache[key]
@@ -135,8 +149,7 @@ type StructureClassification = Literal[
 ]
 
 
-@dataclass
-class Structure:
+class Structure(NamedTuple):
     """Represents a detected structure (conjugate or commutator)."""
 
     type: StructureType
@@ -181,7 +194,7 @@ class StructureData(NamedTuple):
 
     # Compression metrics
     original_length: int
-    compressed_notation_length: int
+    compressed_notation_char_length: int
     compression_ratio: float
 
     # Structure quality
@@ -200,10 +213,10 @@ class StructureData(NamedTuple):
     average_action_length: float
 
     # Coverage metrics
-    coverage_percent: float  # Percentage of moves covered by structures
+    coverage_ratio: float  # Ratio of moves covered by structures (0.0-1.0)
     uncovered_moves: int
 
-    # Classification statistics (NEW)
+    # Classification statistics
     pure_commutator_count: int  # Pure 8-move commutators
     a9_commutator_count: int  # 9-move commutators with cancellation
     nested_conjugate_count: int  # Conjugates with nested structures
@@ -211,6 +224,32 @@ class StructureData(NamedTuple):
     structures_with_cancellations: int  # Structures with move cancellations
     average_move_count: float  # Average moves per structure
     efficiency_rating: str  # Overall efficiency assessment
+
+
+# Keyed by str(algo); plain dict is safe because algorithm sizes are small
+# (speedcubing algorithms rarely exceed 30 moves, bounding search space).
+type StructureCache = dict[str, list[Structure]]
+
+
+class StructureStats(NamedTuple):
+    """Aggregated metrics computed in a single pass over detected structures."""
+
+    average_structure_score: float
+    best_structure_score: float
+    shortest_setup_length: int
+    longest_setup_length: int
+    average_setup_length: float
+    shortest_action_length: int
+    longest_action_length: int
+    average_action_length: float
+    covered_moves: int
+    pure_commutator_count: int
+    a9_commutator_count: int
+    nested_conjugate_count: int
+    simple_conjugate_count: int
+    structures_with_cancellations: int
+    average_move_count: float
+    efficiency_rating: str
 
 
 def calculate_max_setup_length(algo_length: int) -> int:
@@ -333,9 +372,15 @@ def classify_commutator(
         inverse_cache[setup_key] = inverse_sequence(setup)
     setup_inv = inverse_cache[setup_key]
 
+    action_key = str(action)
+    if action_key not in inverse_cache:
+        inverse_cache[action_key] = inverse_sequence(action)
+    action_inv = inverse_cache[action_key]
+
     has_cancel = (
         detect_move_cancellations(setup, action) or
-        detect_move_cancellations(action, setup_inv)
+        detect_move_cancellations(action, setup_inv) or
+        detect_move_cancellations(setup_inv, action_inv)
     )
 
     # A9: Would be 10 moves but has one cancellation
@@ -354,8 +399,9 @@ def classify_commutator(
 
 
 def classify_conjugate(
-        setup: 'Algorithm', action: 'Algorithm',
-        nesting_depth: int = 0,
+    setup: 'Algorithm',
+    action: 'Algorithm',
+    nesting_depth: int = 0,
 ) -> StructureClassification:
     """
     Classify a conjugate based on structure and efficiency.
@@ -436,6 +482,7 @@ def score_structure(
     action: 'Algorithm',
     *,
     is_commutator: bool = False,
+    is_pure: bool = False,
 ) -> float:
     """
     Score a potential structure based on compression ratio and meaningfulness.
@@ -444,12 +491,16 @@ def score_structure(
     - Shorter setups relative to actions
     - Non-trivial actions (longer is better)
     - Overall compression benefit
+    - Pure commutators (8-move optimal 3-cycles) over longer alternatives
 
     Args:
         setup: The setup (A) part of the structure.
         action: The action (B) part of the structure.
         is_commutator: True for commutator [A, B] = A B A' B',
             False for conjugate [A: B] = A B A'.
+        is_pure: True for pure 8-move commutators (setup=2, action=2).
+            Applies a bonus multiplier so pure commutators outrank longer
+            competitors detected at the same position.
 
     Returns:
         Quality score (higher is better, 0-100+ range).
@@ -476,7 +527,10 @@ def score_structure(
     if len(setup) > len(action):
         setup_penalty = len(action) / len(setup)
 
-    return compression_ratio * action_weight * setup_penalty * SCORE_MULTIPLIER
+    base = compression_ratio * action_weight * setup_penalty * SCORE_MULTIPLIER
+    if is_pure and is_commutator:
+        return base * PURE_COMMUTATOR_SCORE_BONUS
+    return base
 
 
 def detect_conjugate(
@@ -603,13 +657,17 @@ def detect_commutator(
                     algo, b_end + a_len, b_part, inverse_cache,
                 )
             ):
+                is_pure_comm = (
+                    a_len == PURE_COMMUTATOR_SETUP_LEN
+                    and b_len == PURE_COMMUTATOR_ACTION_LEN
+                )
                 score = score_structure(
-                    a_part, b_part, is_commutator=True,
+                    a_part, b_part, is_commutator=True, is_pure=is_pure_comm,
                 )
 
-                # Get cached inverse (already populated by is_inverse_at)
-                a_part_key = str(a_part)
-                a_part_inv = inverse_cache[a_part_key]
+                # Get cached inverses (already populated by is_inverse_at)
+                a_part_inv = inverse_cache[str(a_part)]
+                b_part_inv = inverse_cache[str(b_part)]
 
                 # Classify and analyze the commutator
                 classification = classify_commutator(
@@ -617,26 +675,24 @@ def detect_commutator(
                 )
                 has_cancel = (
                     detect_move_cancellations(a_part, b_part) or
-                    detect_move_cancellations(b_part, a_part_inv)
+                    detect_move_cancellations(b_part, a_part_inv) or
+                    detect_move_cancellations(a_part_inv, b_part_inv)
                 )
                 move_count = a_len * 2 + b_len * 2
-                is_pure_comm = (
-                    a_len == PURE_COMMUTATOR_SETUP_LEN
-                    and b_len == PURE_COMMUTATOR_ACTION_LEN
-                )
 
-                best_structure = Structure(
-                    type='commutator',
-                    setup=a_part,
-                    action=b_part,
-                    start=start,
-                    end=b_end + a_len + b_len,
-                    score=score,
-                    classification=classification,
-                    has_cancellations=has_cancel,
-                    move_count=move_count,
-                    is_pure=is_pure_comm,
-                )
+                if best_structure is None or score > best_structure.score:
+                    best_structure = Structure(
+                        type='commutator',
+                        setup=a_part,
+                        action=b_part,
+                        start=start,
+                        end=b_end + a_len + b_len,
+                        score=score,
+                        classification=classification,
+                        has_cancellations=has_cancel,
+                        move_count=move_count,
+                        is_pure=is_pure_comm,
+                    )
 
     return best_structure
 
@@ -700,6 +756,8 @@ def detect_structures(
             )
         elif conjugate:
             best = conjugate
+        elif commutator:
+            best = commutator
 
         if best and best.score >= min_score:
             structures.append(best)
@@ -714,7 +772,7 @@ def compress_recursive(  # noqa: C901, PLR0912
     algo: 'Algorithm',
     structures: list[Structure],
     offset: int = 0,
-    structure_cache: dict[str, list[Structure]] | None = None,
+    structure_cache: StructureCache | None = None,
 ) -> str:
     """
     Recursively compress an algorithm using detected structures.
@@ -791,7 +849,7 @@ def compress(
     max_setup_len: int | None = None,
     min_score: float | None = None,
     structures: list[Structure] | None = None,
-    structure_cache: dict[str, list[Structure]] | None = None,
+    structure_cache: StructureCache | None = None,
 ) -> str:
     """
     Compress an algorithm into bracket notation showing its structure.
@@ -826,10 +884,11 @@ def compress(
     if structures is None:
         structures = detect_structures(algo, max_setup_len, min_score)
 
+    if structure_cache is None:
+        structure_cache = {}
+
     # Early return for single structure (no sorting/filtering needed)
     if len(structures) <= 1:
-        if structure_cache is None:
-            structure_cache = {}
         return compress_recursive(algo, structures, 0, structure_cache)
 
     # Build a non-overlapping set of structures using greedy approach
@@ -844,9 +903,6 @@ def compress(
             non_overlapping.append(struct)
             last_end = struct.end
 
-    # Use provided cache or create new one for nested structure detection
-    if structure_cache is None:
-        structure_cache = {}
     return compress_recursive(algo, non_overlapping, 0, structure_cache)
 
 
@@ -854,7 +910,7 @@ def count_all_structures(
     structures: list[Structure],
     max_depth: int = DEFAULT_MAX_NESTING_DEPTH,
     current_depth: int = 0,
-    structure_cache: dict[str, list[Structure]] | None = None,
+    structure_cache: StructureCache | None = None,
 ) -> tuple[int, int, int]:
     """
     Recursively count all structures including nested ones.
@@ -928,7 +984,7 @@ def count_all_structures(
 
 def calculate_nesting_depth(
     structures: list[Structure],
-    structure_cache: dict[str, list[Structure]] | None = None,
+    structure_cache: StructureCache | None = None,
     max_depth: int = DEFAULT_MAX_NESTING_DEPTH,
     current_depth: int = 0,
 ) -> tuple[int, int]:
@@ -1033,7 +1089,106 @@ def calculate_efficiency_rating(
     return 'Poor'
 
 
-def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
+def compute_structure_stats(structures: list[Structure]) -> StructureStats:  # noqa: PLR0914
+    """
+    Compute aggregated metrics over a list of structures in a single pass.
+
+    Returns:
+        StructureStats with all per-structure metrics aggregated.
+
+    """
+    if not structures:
+        return StructureStats(
+            average_structure_score=0.0,
+            best_structure_score=0.0,
+            shortest_setup_length=0,
+            longest_setup_length=0,
+            average_setup_length=0.0,
+            shortest_action_length=0,
+            longest_action_length=0,
+            average_action_length=0.0,
+            covered_moves=0,
+            pure_commutator_count=0,
+            a9_commutator_count=0,
+            nested_conjugate_count=0,
+            simple_conjugate_count=0,
+            structures_with_cancellations=0,
+            average_move_count=0.0,
+            efficiency_rating=calculate_efficiency_rating(0, 0, 0.0, 0),
+        )
+
+    avg_score = sum(s.score for s in structures) / len(structures)
+    best_score = max(s.score for s in structures)
+
+    shortest_setup = longest_setup = 0
+    shortest_action = longest_action = 0
+    total_setup_len = 0
+    total_action_len = 0
+    covered_moves = 0
+    total_move_count = 0
+    pure_comm_count = 0
+    a9_comm_count = 0
+    nested_conj_count = 0
+    simple_conj_count = 0
+    cancel_count = 0
+
+    for i, s in enumerate(structures):
+        setup_len = len(s.setup)
+        action_len = len(s.action)
+
+        if i == 0:
+            shortest_setup = longest_setup = setup_len
+            shortest_action = longest_action = action_len
+        else:
+            shortest_setup = min(shortest_setup, setup_len)
+            longest_setup = max(longest_setup, setup_len)
+            shortest_action = min(shortest_action, action_len)
+            longest_action = max(longest_action, action_len)
+
+        total_setup_len += setup_len
+        total_action_len += action_len
+        covered_moves += s.end - s.start
+        total_move_count += s.move_count
+
+        if s.type == 'commutator':
+            if s.is_pure:
+                pure_comm_count += 1
+            elif s.classification == 'A9':
+                a9_comm_count += 1
+        elif s.classification == 'nested':
+            nested_conj_count += 1
+        elif s.classification == 'simple':
+            simple_conj_count += 1
+
+        if s.has_cancellations:
+            cancel_count += 1
+
+    struct_count = len(structures)
+    avg_move_count = total_move_count / struct_count
+
+    return StructureStats(
+        average_structure_score=avg_score,
+        best_structure_score=best_score,
+        shortest_setup_length=shortest_setup,
+        longest_setup_length=longest_setup,
+        average_setup_length=total_setup_len / struct_count,
+        shortest_action_length=shortest_action,
+        longest_action_length=longest_action,
+        average_action_length=total_action_len / struct_count,
+        covered_moves=covered_moves,
+        pure_commutator_count=pure_comm_count,
+        a9_commutator_count=a9_comm_count,
+        nested_conjugate_count=nested_conj_count,
+        simple_conjugate_count=simple_conj_count,
+        structures_with_cancellations=cancel_count,
+        average_move_count=avg_move_count,
+        efficiency_rating=calculate_efficiency_rating(
+            pure_comm_count, a9_comm_count, avg_move_count, struct_count,
+        ),
+    )
+
+
+def compute_structure(
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,
@@ -1057,144 +1212,38 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
         min_score: Minimum structure score (auto-calculated)
 
     Returns:
-        StructureData: Namedtuple containing all calculated structure metrics:
-            - original: Original algorithm string
-            - compressed: Compressed notation string
-            - total_structures: Total number of structures detected
-            - conjugate_count: Number of conjugate patterns
-            - commutator_count: Number of commutator patterns
-            - max_nesting_depth: Maximum nesting depth of structures
-            - nested_structure_count: Number of nested structures
-            - original_length: Length of original algorithm
-            - compressed_notation_length: Length of compressed notation
-            - compression_ratio: Ratio of compression (0.0-1.0)
-            - average_structure_score: Average quality score
-            - best_structure_score: Highest quality score
-            - structures: List of detected Structure objects
-            - shortest_setup_length: Shortest setup sequence length
-            - longest_setup_length: Longest setup sequence length
-            - average_setup_length: Average setup sequence length
-            - shortest_action_length: Shortest action sequence length
-            - longest_action_length: Longest action sequence length
-            - average_action_length: Average action sequence length
-            - coverage_percent: Percentage of moves covered by structures
-            - uncovered_moves: Number of moves not in any structure
+        StructureData with all calculated structure metrics.
 
     """
     original_str = str(algo)
     structures = detect_structures(algo, max_setup_len, min_score)
 
-    # Create shared cache for all nested structure detection (use string keys)
-    structure_cache: dict[str, list[Structure]] = {}
+    # Shared cache threads through all nested-detection calls below
+    structure_cache: StructureCache = {}
 
-    # Compress using pre-computed structures and shared cache
     compressed_str = compress(
-        algo, max_setup_len, min_score,
-        structures,
-        structure_cache,
+        algo, max_setup_len, min_score, structures, structure_cache,
     )
-
-    # Count structure types (including nested structures) with cache
     total_count, conjugate_count, commutator_count = (
         count_all_structures(structures, structure_cache=structure_cache)
         if structures else (0, 0, 0)
     )
-
-    # Calculate nesting with cache
     max_depth, nested_count = (
         calculate_nesting_depth(structures, structure_cache)
         if structures else (0, 0)
     )
 
-    # Compression metrics
     original_length = len(algo)
     compressed_length = len(compressed_str)
-    compression_ratio = 0.0
-    if original_length > 0:
-        compression_ratio = 1.0 - (compressed_length / len(original_str))
+    compression_ratio = (
+        1.0 - (compressed_length / len(original_str))
+        if original_length > 0 else 0.0
+    )
 
-    # Structure quality scores
-    avg_score = 0.0
-    best_score = 0.0
-    if structures:
-        avg_score = sum(s.score for s in structures) / len(structures)
-        best_score = max(s.score for s in structures)
-
-    # Batch all structure iterations into a single pass for better performance
-    shortest_setup = 0
-    longest_setup = 0
-    total_setup_len = 0
-    shortest_action = 0
-    longest_action = 0
-    total_action_len = 0
-    covered_moves = 0
-    total_move_count = 0
-    pure_comm_count = 0
-    a9_comm_count = 0
-    nested_conj_count = 0
-    simple_conj_count = 0
-    cancel_count = 0
-
-    if structures:
-        # Single pass over all structures to compute all metrics
-        for i, s in enumerate(structures):
-            setup_len = len(s.setup)
-            action_len = len(s.action)
-
-            # Setup/action length tracking
-            if i == 0:
-                shortest_setup = longest_setup = setup_len
-                shortest_action = longest_action = action_len
-            else:
-                shortest_setup = min(shortest_setup, setup_len)
-                longest_setup = max(longest_setup, setup_len)
-                shortest_action = min(shortest_action, action_len)
-                longest_action = max(longest_action, action_len)
-
-            total_setup_len += setup_len
-            total_action_len += action_len
-
-            # Coverage
-            covered_moves += s.end - s.start
-
-            # Move count
-            total_move_count += s.move_count
-
-            # Classification counts - branch once on type to reduce comparisons
-            if s.type == 'commutator':
-                if s.is_pure:
-                    pure_comm_count += 1
-                elif s.classification == 'A9':
-                    a9_comm_count += 1
-            elif s.classification == 'nested':
-                nested_conj_count += 1
-            elif s.classification == 'simple':
-                simple_conj_count += 1
-
-            if s.has_cancellations:
-                cancel_count += 1
-
-        struct_count = len(structures)
-        avg_setup = total_setup_len / struct_count
-        avg_action = total_action_len / struct_count
-        avg_move_count = total_move_count / struct_count
-    else:
-        avg_setup = 0.0
-        avg_action = 0.0
-        avg_move_count = 0.0
-
-    # Coverage analysis
-    uncovered = original_length - covered_moves
-    coverage = 0.0
-    if original_length > 0:
-        coverage = covered_moves / original_length
-
-    # Efficiency rating based on classifications
-    efficiency = calculate_efficiency_rating(
-        pure_comm_count,
-        a9_comm_count,
-        avg_move_count,
-        len(structures),
+    stats = compute_structure_stats(structures)
+    uncovered = original_length - stats.covered_moves
+    coverage = (
+        stats.covered_moves / original_length if original_length > 0 else 0.0
     )
 
     return StructureData(
@@ -1206,24 +1255,24 @@ def compute_structure(  # noqa: C901, PLR0914, PLR0912, PLR0915
         max_nesting_depth=max_depth,
         nested_structure_count=nested_count,
         original_length=original_length,
-        compressed_notation_length=compressed_length,
+        compressed_notation_char_length=compressed_length,
         compression_ratio=compression_ratio,
-        average_structure_score=avg_score,
-        best_structure_score=best_score,
+        average_structure_score=stats.average_structure_score,
+        best_structure_score=stats.best_structure_score,
         structures=structures,
-        shortest_setup_length=shortest_setup,
-        longest_setup_length=longest_setup,
-        average_setup_length=avg_setup,
-        shortest_action_length=shortest_action,
-        longest_action_length=longest_action,
-        average_action_length=avg_action,
-        coverage_percent=coverage,
+        shortest_setup_length=stats.shortest_setup_length,
+        longest_setup_length=stats.longest_setup_length,
+        average_setup_length=stats.average_setup_length,
+        shortest_action_length=stats.shortest_action_length,
+        longest_action_length=stats.longest_action_length,
+        average_action_length=stats.average_action_length,
+        coverage_ratio=coverage,
         uncovered_moves=uncovered,
-        pure_commutator_count=pure_comm_count,
-        a9_commutator_count=a9_comm_count,
-        nested_conjugate_count=nested_conj_count,
-        simple_conjugate_count=simple_conj_count,
-        structures_with_cancellations=cancel_count,
-        average_move_count=avg_move_count,
-        efficiency_rating=efficiency,
+        pure_commutator_count=stats.pure_commutator_count,
+        a9_commutator_count=stats.a9_commutator_count,
+        nested_conjugate_count=stats.nested_conjugate_count,
+        simple_conjugate_count=stats.simple_conjugate_count,
+        structures_with_cancellations=stats.structures_with_cancellations,
+        average_move_count=stats.average_move_count,
+        efficiency_rating=stats.efficiency_rating,
     )

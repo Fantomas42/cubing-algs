@@ -99,9 +99,9 @@ def split_moves(moves: str) -> list[Move]:
 
     """
     return [
-        Move(x.strip())
+        Move(s)
         for x in MOVE_SPLIT.split(moves)
-        if x.strip()
+        if (s := x.strip())
     ]
 
 

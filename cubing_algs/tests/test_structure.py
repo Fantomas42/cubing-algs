@@ -1,5 +1,6 @@
 """Tests for algorithm structure analysis."""
 import unittest
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.structure import BoundedCache
@@ -14,6 +15,7 @@ from cubing_algs.structure import compress
 from cubing_algs.structure import compress_recursive
 from cubing_algs.structure import compute_structure
 from cubing_algs.structure import count_all_structures
+from cubing_algs.structure import detect_commutator
 from cubing_algs.structure import detect_move_cancellations
 from cubing_algs.structure import detect_structures
 from cubing_algs.structure import inverse_sequence
@@ -435,7 +437,7 @@ class ComputeStructureTestCase(unittest.TestCase):
 
         self.assertEqual(struct.total_structures, 0)
         self.assertEqual(struct.uncovered_moves, 3)
-        self.assertEqual(struct.coverage_percent, 0.0)
+        self.assertEqual(struct.coverage_ratio, 0.0)
 
     def test_compute_structure_conjugate(self) -> None:
         """Test compute structure conjugate."""
@@ -517,8 +519,8 @@ class ComputeStructureTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("R U R' U'")
         struct = compute_structure(algo, min_score=0)
 
-        self.assertGreaterEqual(struct.coverage_percent, 0.0)
-        self.assertLessEqual(struct.coverage_percent, 1.0)
+        self.assertGreaterEqual(struct.coverage_ratio, 0.0)
+        self.assertLessEqual(struct.coverage_ratio, 1.0)
         self.assertGreaterEqual(struct.uncovered_moves, 0)
         self.assertLessEqual(struct.uncovered_moves, struct.original_length)
 
@@ -1057,6 +1059,39 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # Cache should now contain the inverse
         self.assertGreater(len(cache), 0)
 
+    def test_classify_commutator_a_prime_b_prime_cancellation(self) -> None:
+        """
+        Test that cancellation at the A'|B' boundary is detected.
+
+        [U F, R L U'] = U F R L U' F' U' | U L' R'  (10 moves)
+        Boundaries:
+          A|B : last(A)=F,  first(B)=R  → no cancellation  (different faces)
+          B|A': last(B)=U', first(A')=F' → no cancellation  (different faces)
+          A'|B': last(A')=U', first(B')=U → cancellation    (same face: U)
+        Without the A'|B' check this is misclassified as 'orthogonal'.
+        """
+        setup = Algorithm.parse_moves('U F')
+        action = Algorithm.parse_moves("R L U'")
+        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
+
+        classification = classify_commutator(setup, action, cache)
+        self.assertEqual(classification, 'A9')
+
+    def test_detect_commutator_has_cancellations_a_prime_b_prime(self) -> None:
+        """
+        Test that detect_commutator sets has_cancellations for A'|B' boundary.
+
+        Same commutator as above: the Structure.has_cancellations field must
+        be True even when the only cancellation is at A'|B'.
+        """
+        algo = Algorithm.parse_moves("U F R L U' F' U' U L' R'")
+        cache: BoundedCache[str, Algorithm] = BoundedCache(100)
+        result = detect_commutator(algo, 0, max_part_len=4, inverse_cache=cache)
+
+        self.assertIsNotNone(result)
+        assert result is not None  # noqa: S101
+        self.assertTrue(result.has_cancellations)
+
 
 class ClassifyConjugateTestCase(unittest.TestCase):
     """Test conjugate classification system."""
@@ -1201,6 +1236,36 @@ class ScoreStructureTestCase(unittest.TestCase):
         score = score_structure(setup, action, is_commutator=True)
 
         self.assertAlmostEqual(score, expected)
+
+    def test_pure_commutator_beats_longer(self) -> None:
+        """
+        Pure commutator bonus makes it outscore
+        a longer commutator at the same setup length.
+        """
+        setup = Algorithm.parse_moves('R U')
+        pure_action = Algorithm.parse_moves('F D')      # [2,2] → is_pure
+        longer_action = Algorithm.parse_moves('F D B L')  # [2,4]
+
+        pure_score = score_structure(
+            setup, pure_action,
+            is_commutator=True, is_pure=True,
+        )
+        longer_score = score_structure(
+            setup, longer_action,
+            is_commutator=True,
+        )
+
+        self.assertGreater(pure_score, longer_score)
+
+    def test_pure_flag_has_no_effect_on_conjugate(self) -> None:
+        """is_pure bonus only applies to commutators (is_commutator=True)."""
+        setup = Algorithm.parse_moves('R U')
+        action = Algorithm.parse_moves('F D')
+
+        base = score_structure(setup, action)
+        with_pure = score_structure(setup, action, is_pure=True)
+
+        self.assertAlmostEqual(base, with_pure)
 
 
 class IsInverseAtTestCase(unittest.TestCase):
@@ -1510,8 +1575,8 @@ class ComputeStructureAdditionalTestCase(unittest.TestCase):
 
         # Should have partial coverage (commutator covers first 4 moves)
         if struct.total_structures > 0:
-            self.assertGreater(struct.coverage_percent, 0.0)
-            self.assertLess(struct.coverage_percent, 1.0)
+            self.assertGreater(struct.coverage_ratio, 0.0)
+            self.assertLess(struct.coverage_ratio, 1.0)
             self.assertGreater(struct.uncovered_moves, 0)
 
     def test_compute_structure_multiple_structures_stats(self) -> None:
@@ -1843,5 +1908,42 @@ class CommutatorScoreBranchTestCase(unittest.TestCase):
         structures = detect_structures(algo, min_score=0)
 
         # Should find the best commutator
+        self.assertEqual(len(structures), 1)
+        self.assertEqual(structures[0].type, 'commutator')
+
+    def test_detect_commutator_returns_best_score_not_last(self) -> None:
+        """
+        Test that detect_commutator keeps the highest-scoring match,
+        not the last one found.
+
+        R U R U R U U' R' U' R' U' R' has two valid commutators at position 0:
+        - [2,4]: setup=[R,U], action=[R,U,R,U] → score=20
+          (found first, a_len=2)
+        - [4,2]: setup=[R,U,R,U], action=[R,U]  → score=5
+          (found last, a_len=4)
+
+        Without the guard the iteration overwrites the best with the last,
+        returning score=5.
+        """
+        algo = Algorithm.parse_moves("R U R U R U U' R' U' R' U' R'")
+        cache: BoundedCache[str, Algorithm] = BoundedCache(100)
+        result = detect_commutator(algo, 0, max_part_len=4, inverse_cache=cache)
+
+        self.assertIsNotNone(result)
+        assert result is not None  # noqa: S101
+        self.assertEqual(len(result.setup), 2)
+        self.assertGreater(result.score, 15.0)
+
+
+class CommutatorOnlyBranchTestCase(unittest.TestCase):
+    """Tests for the commutator-only branch in detect_structures."""
+
+    def test_commutator_only_when_conjugate_absent(self) -> None:
+        """When detect_conjugate returns None, commutator is used as best."""
+        algo = Algorithm.parse_moves("R U R' U'")
+
+        with patch('cubing_algs.structure.detect_conjugate', return_value=None):
+            structures = detect_structures(algo, min_score=0)
+
         self.assertEqual(len(structures), 1)
         self.assertEqual(structures[0].type, 'commutator')

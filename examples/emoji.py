@@ -1,10 +1,30 @@
 """Demonstrate emoji facelet display mode for cube visualization."""
 # ruff: noqa: T201
-from cubing_algs.masks import F2L_MASK
-from cubing_algs.masks import OLL_MASK
-from cubing_algs.masks import facelets_masked
+from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import CubeMask
+from cubing_algs.display.masks import F2L_MASK
+from cubing_algs.display.masks import OLL_MASK
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.vcube import VCube
+
+
+def facelets_masked(state: CubeFacelets, mask: CubeMask) -> CubeMask:
+    """
+    Mask facelets.
+
+    Returns:
+      A state masked.
+
+    """
+    masked = []
+    for i, m in enumerate(mask):
+        if m == '1':
+            masked.append(state[i])
+        else:
+            masked.append('-')
+
+    return ''.join(masked)
+
 
 c = VCube()
 
@@ -20,18 +40,18 @@ c_hidden.rotate("R U R' U' L F L' F' z2 F U F' R' F R U' R' F' R z2")
 print('Before:')
 c.show()
 print()
-c.show(mode='linear')
+c.show(layout='linear')
 print()
-c.show(mode='linear', mask=OLL_MASK)
+c.show(layout='linear', mask=OLL_MASK)
 print()
-c_hidden.show(mode='linear')
+c_hidden.show(layout='linear')
 
 
 print('After:')
 c.show(facelet='emoji')
 print()
-c.show(mode='linear', facelet='emoji')
+c.show(layout='linear', facelet='emoji')
 print()
-c.show(mode='linear', facelet='emoji', mask=OLL_MASK)
+c.show(layout='linear', mask=OLL_MASK, facelet='emoji')
 print()
-c_hidden.show(mode='linear', facelet='emoji')
+c_hidden.show(layout='linear', facelet='emoji')

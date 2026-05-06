@@ -7,12 +7,10 @@ repetition, face diversity, flow, and move familiarity.
 
 Higher scores indicate algorithms that are harder to memorize.
 """
-from __future__ import annotations
-
 import math
 from collections import Counter
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import NamedTuple
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -69,8 +67,7 @@ RATING_THRESHOLDS: list[tuple[float, str]] = [
 ]
 
 
-@dataclass(frozen=True)
-class MemoryData:
+class MemoryData(NamedTuple):
     """Container for memory difficulty computation results."""
 
     # Composite
@@ -243,7 +240,7 @@ def compute_repetition_score(repeated_patterns: int, stm: int) -> float:
     return max(0.0, 100.0 - reduction)
 
 
-def get_move_face(move: Move) -> str | None:
+def get_move_face(move: 'Move') -> str | None:
     """
     Extract the face letter from a move.
 
@@ -261,7 +258,7 @@ def get_move_face(move: Move) -> str | None:
     return move.base_move
 
 
-def compute_face_diversity_score(moves: list[Move]) -> float:
+def compute_face_diversity_score(moves: 'list[Move]') -> float:
     """
     Compute face diversity sub-score.
 
@@ -305,8 +302,7 @@ def compute_face_diversity_score(moves: list[Move]) -> float:
 
 
 def compute_flow_memory_score(
-    regrip_count: int,
-    flow_breaks: int,
+    interruptions: int,
     stm: int,
 ) -> float:
     """
@@ -315,8 +311,7 @@ def compute_flow_memory_score(
     More flow interruptions → harder to build muscle memory → harder to recall.
 
     Args:
-        regrip_count: Number of regrips in the algorithm.
-        flow_breaks: Number of flow breaks.
+        interruptions: Number of regrips in the algorithm.
         stm: Slice Turn Metric count for normalization.
 
     Returns:
@@ -326,12 +321,11 @@ def compute_flow_memory_score(
     if stm == 0:
         return 0.0
 
-    interruptions = regrip_count + flow_breaks
     ratio = interruptions / max(1, stm)
     return min(100.0, ratio * 200.0)
 
 
-def compute_move_familiarity_score(moves: list[Move]) -> float:
+def compute_move_familiarity_score(moves: 'list[Move]') -> float:
     """
     Compute move familiarity sub-score.
 
@@ -383,7 +377,7 @@ def get_memory_rating(score: float) -> str:
     return 'Trivial'
 
 
-def compute_memory(algorithm: Algorithm) -> MemoryData:  # noqa: PLR0914
+def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
     """
     Compute comprehensive memory difficulty metrics for an algorithm.
 
@@ -441,7 +435,7 @@ def compute_memory(algorithm: Algorithm) -> MemoryData:  # noqa: PLR0914
     # --- Structure score ---
     has_structure = struct.total_structures > 0
     structure_score = compute_structure_score(
-        struct.coverage_percent,
+        struct.coverage_ratio,
         struct.compression_ratio,
         has_structure=has_structure,
     )
@@ -460,7 +454,7 @@ def compute_memory(algorithm: Algorithm) -> MemoryData:  # noqa: PLR0914
 
     # --- Flow score ---
     flow_mem_score = compute_flow_memory_score(
-        ergo.regrip_count, ergo.flow_breaks, stm,
+        ergo.regrip_count, stm,
     )
 
     # --- Move familiarity score ---

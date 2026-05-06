@@ -12,6 +12,7 @@ from cubing_algs.display.palettes import build_ansi_palette
 from cubing_algs.display.palettes import foreground_hex_to_ansi
 from cubing_algs.display.palettes import hex_to_ansi
 from cubing_algs.display.palettes import hex_to_rgb
+from cubing_algs.display.palettes import hex_to_rgba
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.palettes import register_palette
 from cubing_algs.exceptions import PaletteAlreadyExistsError
@@ -62,6 +63,38 @@ class TestHexToAnsi(unittest.TestCase):
         result = build_ansi_color(bg, fg)
         expected = '\x1b[48;2;255;0;0m\x1b[38;2;255;255;255m'
         self.assertEqual(result, expected)
+
+
+class HexToRgbaTestCase(unittest.TestCase):
+    """Tests for hex_to_rgba conversion."""
+
+    def test_six_digit_hex(self) -> None:
+        """Test #rrggbb returns full opacity."""
+        r, g, b, a = hex_to_rgba('#ff0000')
+        self.assertEqual((r, g, b), (255, 0, 0))
+        self.assertAlmostEqual(a, 1.0)
+
+    def test_eight_digit_hex(self) -> None:
+        """Test #rrggbbaa returns correct alpha."""
+        r, g, b, a = hex_to_rgba('#11111180')
+        self.assertEqual((r, g, b), (17, 17, 17))
+        self.assertAlmostEqual(a, 128 / 255.0, places=3)
+
+    def test_fully_transparent(self) -> None:
+        """Test #rrggbb00 returns zero alpha."""
+        _, _, _, a = hex_to_rgba('#ff000000')
+        self.assertAlmostEqual(a, 0.0)
+
+    def test_fully_opaque_eight_digit(self) -> None:
+        """Test #rrggbbff returns full opacity."""
+        _, _, _, a = hex_to_rgba('#ff0000ff')
+        self.assertAlmostEqual(a, 1.0)
+
+    def test_without_diese(self) -> None:
+        """Test rrggbbaa returns correct opacity."""
+        r, g, b, a = hex_to_rgba('11111180')
+        self.assertEqual((r, g, b), (17, 17, 17))
+        self.assertAlmostEqual(a, 128 / 255.0, places=3)
 
 
 class TestBuildAnsiPalette(unittest.TestCase):

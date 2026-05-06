@@ -4,7 +4,6 @@ import argparse
 import time
 from pathlib import Path
 
-from cubing_algs.display.image import render_cube
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
 
@@ -207,7 +206,7 @@ for group_idx, group in enumerate(axis_groups):
         )
         for angle in range(360):
             rotation = rotation_fmt.format(angle=angle)
-            svg = render_cube(cube, size=200, rotation=rotation)
+            svg = cube.image(rotation=rotation)
             # Prefix gradient IDs to avoid collisions between frames
             prefix = f'{axis_id}{angle}-'
             assert svg is not None  # noqa: S101

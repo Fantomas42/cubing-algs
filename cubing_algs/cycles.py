@@ -2,6 +2,7 @@
 from math import lcm
 from typing import TYPE_CHECKING
 
+from cubing_algs.annotations import Permutation
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
 
 
-def permutation_order(permutation: list[int]) -> int:
+def permutation_order(permutation: Permutation) -> int:
     """
     Compute the order of a permutation (LCM of cycle lengths).
 

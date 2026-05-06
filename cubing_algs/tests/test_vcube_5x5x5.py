@@ -10,6 +10,7 @@ from cubing_algs.vcube import VCube
 # Solved 5x5x5 state: 150 facelets (6 faces * 25 facelets each)
 # Face order: U, R, F, D, L, B
 SOLVED_5X5X5 = get_solved_facelets(5)
+UNIQUE_5X5X5 = get_unique_facelets(5)
 
 # Expected states for slice moves (M, E, S) - verified against MagicCube
 EXPECTED_5X5X5 = {
@@ -160,6 +161,10 @@ class Test5x5x5VCube(unittest.TestCase):
         self.assertEqual(
             self.cube.orientation, 'DF',
         )
+
+    def test_check_integrity(self) -> None:
+        """Test check_integrity on a 5x5x5 cube."""
+        self.assertTrue(self.cube.check_integrity())
 
 
 class Test5x5x5ScrambledVCube(unittest.TestCase):
@@ -722,13 +727,91 @@ class Test5x5x5VCubeCustomFacelets(unittest.TestCase):
     def setUp(self) -> None:
         """Set up required components."""
         self.state = get_unique_facelets(5)
-        self.cube = VCube(initial=self.state, size=5)
+        self.cube = VCube(initial=self.state, size=5, check=False)
 
     def test_rotate(self) -> None:
-        """Test get face center indexes."""
+        """Test rotate."""
         self.cube.rotate('F R U')
 
         self.assertNotEqual(
             self.cube.state,
             self.state,
         )
+
+
+class Test5x5x5VCubeCheckCustomState(unittest.TestCase):
+    """Test VCube implementation for 5x5x5 with scrambled facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = EXPECTED_5X5X5_R
+        self.cube = VCube(initial=self.state, size=5, check=True)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test5x5x5MoveConsistency(unittest.TestCase):
+    """
+    Test that 180° and CCW move codes match applying the CW move repeatedly.
+
+    Uses unique facelets so every position has a distinct value — the solved
+    state's symmetry can hide index-pair swaps across face positions.
+    """
+
+    @staticmethod
+    def apply(state: str, move: str) -> str:
+        """
+        Apply move.
+
+        Returns:
+           State once move applied.
+
+        """
+        return rotate_move(state, move, size=5)
+
+    @staticmethod
+    def apply_n(state: str, move: str, n: int) -> str:
+        """
+        Apply N moves.
+
+        Returns:
+           State once move applied.
+
+        """
+        for _ in range(n):
+            state = rotate_move(state, move, size=5)
+        return state
+
+    def test_all_180_moves_equal_cw_twice(self) -> None:
+        """Every X2 direct code must equal X applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_5X5X5, move + '2'),
+                    self.apply_n(UNIQUE_5X5X5, move, 2),
+                )
+
+    def test_all_180_moves_equal_ccw_twice(self) -> None:
+        """Every X2 direct code must equal X' applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_5X5X5, move + '2'),
+                    self.apply_n(UNIQUE_5X5X5, move + "'", 2),
+                )
+
+    def test_all_ccw_moves_equal_cw_three_times(self) -> None:
+        """Every X' direct code must equal X applied three times."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_5X5X5, move + "'"),
+                    self.apply_n(UNIQUE_5X5X5, move, 3),
+                )

@@ -91,17 +91,26 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertTrue(Move('U2').is_double)
         self.assertFalse(Move('.').is_double)
 
+    def test_quarter_turns(self) -> None:
+        """Test quarter_turns returns 1, -1, 2, or 0."""
+        self.assertEqual(Move('U').quarter_turns, 1)
+        self.assertEqual(Move("U'").quarter_turns, -1)
+        self.assertEqual(Move('U2').quarter_turns, 2)
+        self.assertEqual(Move('.').quarter_turns, 0)
+
     def test_is_clockwise(self) -> None:
         """Test is clockwise."""
         self.assertTrue(Move('U').is_clockwise)
         self.assertFalse(Move("U'").is_clockwise)
         self.assertFalse(Move('.').is_clockwise)
+        self.assertFalse(Move('U2').is_clockwise)
 
     def test_is_counter_clockwise(self) -> None:
         """Test is counter clockwise."""
         self.assertTrue(Move("U'").is_counter_clockwise)
         self.assertFalse(Move('U').is_counter_clockwise)
         self.assertFalse(Move('.').is_counter_clockwise)
+        self.assertFalse(Move('U2').is_counter_clockwise)
 
     def test_is_pause(self) -> None:
         """Test is pause."""
@@ -369,6 +378,12 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(Move('2Dw2').layers, [0, 1])
 
+    def test_repr(self) -> None:
+        """Test repr returns Move('...') form."""
+        self.assertEqual(repr(Move('R')), "Move('R')")
+        self.assertEqual(repr(Move('Rw2')), "Move('Rw2')")
+        self.assertEqual(repr(Move("R'")), "Move(\"R'\")")
+
     def test_timed(self) -> None:
         """Test timed."""
         self.assertEqual(Move('R').time, '')
@@ -385,3 +400,42 @@ class MoveTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(Move('.@100').time, '@100')
         self.assertEqual(Move('.@100').timed, 100)
+
+    def test_build(self) -> None:
+        """Test build helper assembles moves from overridden components."""
+        m = Move("3-4Rw'@200")
+        self.assertEqual(m.build(), Move("3-4Rw'@200"))
+        self.assertEqual(m.build(modifier=''), Move('3-4Rw@200'))
+        self.assertEqual(m.build(modifier='2'), Move('3-4Rw2@200'))
+        self.assertEqual(m.build(layer=''), Move("Rw'@200"))
+        self.assertEqual(m.build(time=''), Move("3-4Rw'"))
+        self.assertEqual(m.build(move='Uw'), Move("3-4Uw'@200"))
+
+    def test_cache_identity_same_string(self) -> None:
+        """Test that Move returns the same instance for the same string."""
+        self.assertIs(Move('R'), Move('R'))
+        self.assertIs(Move("R'"), Move("R'"))
+        self.assertIs(Move('Rw2'), Move('Rw2'))
+
+    def test_cache_identity_different_strings(self) -> None:
+        """Test that distinct move strings produce distinct instances."""
+        self.assertIsNot(Move('R'), Move('U'))
+        self.assertIsNot(Move('R'), Move("R'"))
+
+    def test_cache_identity_via_inverted(self) -> None:
+        """Test that inverted.inverted returns the original cached instance."""
+        m = Move('R')
+        self.assertIs(m.inverted.inverted, m)
+
+    def test_cache_identity_via_doubled(self) -> None:
+        """Test that doubled.doubled returns the original cached instance."""
+        m = Move('R')
+        self.assertIs(m.doubled.doubled, m)
+
+    def test_cache_preserves_cached_properties(self) -> None:
+        """Test that cached properties are shared across identical moves."""
+        m1 = Move('F2')
+        _ = m1.is_double
+        m2 = Move('F2')
+        self.assertIs(m1, m2)
+        self.assertTrue(m2.is_double)

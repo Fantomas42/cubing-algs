@@ -5,10 +5,10 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.offset import PARSED_OFFSET_TABLES
+from cubing_algs.transform.offset import compose_offset_tables
 from cubing_algs.transform.offset import offset_x2_moves
-from cubing_algs.transform.translate import PARSED_OFFSET_TABLES
-from cubing_algs.transform.translate import compose_offset_tables
-from cubing_algs.transform.translate import rotate_move
+from cubing_algs.transform.offset import rotate_move
 from cubing_algs.transform.translate import translate_moves
 from cubing_algs.transform.translate import translate_pov_moves
 

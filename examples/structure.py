@@ -2,96 +2,193 @@
 # ruff: noqa: T201
 from cubing_algs.algorithm import Algorithm
 
+RESET = '\x1b[0m'
+BOLD = '\x1b[1m'
+
+FG_RED = '\x1b[38;5;203m'
+FG_GREEN = '\x1b[38;5;77m'
+FG_YELLOW = '\x1b[38;5;221m'
+FG_BLUE = '\x1b[38;5;75m'
+FG_MAGENTA = '\x1b[38;5;177m'
+FG_CYAN = '\x1b[38;5;80m'
+FG_GREY = '\x1b[38;5;244m'
+FG_WHITE = '\x1b[38;5;255m'
+
+WIDTH = 70
+COVERAGE_THRESHOLD = 0.8
+SCORE_HIGH = 0.7
+SCORE_MID = 0.4
+
+
+def colorize(text: str, color: str) -> str:
+    """
+    Wrap text with ANSI color codes.
+
+    Returns:
+        The text surrounded by the given color escape and a reset.
+
+    """
+    return f'{color}{text}{RESET}'
+
+
+def header(title: str) -> None:
+    """Print a section header with a colored rule."""
+    rule = colorize('=' * WIDTH, FG_CYAN)
+    print()
+    print(rule)
+    print(colorize(f'  {title}', FG_CYAN + BOLD))
+    print(rule)
+
+
+def section(title: str) -> None:
+    """Print a subsection title with a thin rule."""
+    print()
+    print(colorize(f'▸ {title}', FG_BLUE + BOLD))
+    print(colorize('-' * WIDTH, FG_GREY))
+
+
+def stat(label: str, value: object, *, color: str = FG_CYAN) -> None:
+    """Print a label/value pair with aligned columns."""
+    label_part = colorize(f'  {label:<24}', FG_GREY)
+    value_part = colorize(str(value), color + BOLD)
+    print(f'{label_part} {value_part}')
+
 
 def show_structure(algorithm: str) -> None:  # noqa: PLR0915
     """Display comprehensive structure analysis for an algorithm."""
-    print(f'{"=" * 70}')
-    print(f'Algorithm: {algorithm}')
-    print('=' * 70)
+    header(f'Algorithm: {algorithm}')
 
     algo = Algorithm.parse_moves(algorithm)
     struct = algo.structure
 
-    # Basic Information
-    print('\nBASIC INFORMATION')
-    print('-' * 70)
-    print(f'  Original:            {struct.original}')
-    print(f'  Compressed:          {struct.compressed}')
-    print(f'  Original length:     {struct.original_length} moves')
+    section('BASIC INFORMATION')
+    stat('Original', struct.original, color=FG_WHITE)
+    stat('Compressed', struct.compressed, color=FG_WHITE)
+    stat('Move count', f'{struct.original_length} moves', color=FG_YELLOW)
 
-    # Structure Counts
-    print('\nSTRUCTURE DETECTION')
-    print('-' * 70)
-    print(f'  Total structures:    {struct.total_structures}')
-    print(f'  Conjugates:          {struct.conjugate_count}')
-    print(f'  Commutators:         {struct.commutator_count}')
-    print(f'  Max nesting depth:   {struct.max_nesting_depth}')
-    print(f'  Nested structures:   {struct.nested_structure_count}')
+    section('STRUCTURE DETECTION')
+    stat('Total structures', struct.total_structures, color=FG_MAGENTA)
+    stat('Conjugates', struct.conjugate_count)
+    stat('Commutators', struct.commutator_count)
+    stat('Max nesting depth', struct.max_nesting_depth)
+    stat('Nested structures', struct.nested_structure_count)
 
-    # Compression Metrics
-    print('\nCOMPRESSION ANALYSIS')
-    print('-' * 70)
-    print(f'  Original length:     {struct.original_length} moves')
-    print(f'  Compressed length:   {struct.compressed_notation_length} chars')
-    print(f'  Compression ratio:   {struct.compression_ratio:.1%}')
+    section('COMPRESSION ANALYSIS')
+    stat('Original length', f'{len(struct.original)} chars', color=FG_YELLOW)
+    stat(
+        'Compressed length',
+        f'{struct.compressed_notation_char_length} chars',
+        color=FG_YELLOW,
+    )
+    ratio_color = FG_GREEN if struct.compression_ratio < 1.0 else FG_GREY
+    stat(
+        'Compression ratio',
+        f'{struct.compression_ratio:.1%}',
+        color=ratio_color,
+    )
 
-    # Quality Metrics
-    print('\nQUALITY METRICS')
-    print('-' * 70)
-    print(f'  Average score:       {struct.average_structure_score:.2f}')
-    print(f'  Best score:          {struct.best_structure_score:.2f}')
+    section('QUALITY METRICS')
+    stat(
+        'Average score',
+        f'{struct.average_structure_score:.2f}',
+        color=FG_CYAN,
+    )
+    stat('Best score', f'{struct.best_structure_score:.2f}', color=FG_GREEN)
 
-    # Setup and Action Analysis
     if struct.total_structures > 0:
-        print('\nSETUP AND ACTION ANALYSIS')
-        print('-' * 70)
-        print(
-            f'  Setup lengths:       {struct.shortest_setup_length}-'
-            f'{struct.longest_setup_length} '
+        section('SETUP AND ACTION ANALYSIS')
+        stat(
+            'Setup lengths',
+            f'{struct.shortest_setup_length}-{struct.longest_setup_length} '
             f'(avg: {struct.average_setup_length:.1f})',
+            color=FG_CYAN,
         )
-        print(
-            f'  Action lengths:      {struct.shortest_action_length}-'
-            f'{struct.longest_action_length} '
+        stat(
+            'Action lengths',
+            f'{struct.shortest_action_length}-{struct.longest_action_length} '
             f'(avg: {struct.average_action_length:.1f})',
+            color=FG_CYAN,
         )
 
-    # Coverage Analysis
-    print('\nCOVERAGE ANALYSIS')
-    print('-' * 70)
-    print(f'  Coverage:            {struct.coverage_percent:.1%}')
-    print(f'  Uncovered moves:     {struct.uncovered_moves}')
+    section('COVERAGE ANALYSIS')
+    coverage_color = (
+        FG_GREEN if struct.coverage_ratio >= COVERAGE_THRESHOLD else FG_YELLOW
+    )
+    stat('Coverage', f'{struct.coverage_ratio:.1%}', color=coverage_color)
+    uncovered_color = FG_GREY if struct.uncovered_moves == 0 else FG_RED
+    stat('Uncovered moves', struct.uncovered_moves, color=uncovered_color)
 
-    # Classification Statistics (NEW)
-    print('\nCLASSIFICATION STATISTICS')
-    print('-' * 70)
-    print(f'  Pure commutators:    {struct.pure_commutator_count}')
-    print(f'  A9 commutators:      {struct.a9_commutator_count}')
-    print(f'  Nested conjugates:   {struct.nested_conjugate_count}')
-    print(f'  Simple conjugates:   {struct.simple_conjugate_count}')
-    print(f'  With cancellations:  {struct.structures_with_cancellations}')
-    print(f'  Avg moves/structure: {struct.average_move_count:.1f}')
-    print(f'  Efficiency rating:   {struct.efficiency_rating}')
+    section('CLASSIFICATION STATISTICS')
+    stat('Pure commutators', struct.pure_commutator_count, color=FG_GREEN)
+    stat('A9 commutators', struct.a9_commutator_count, color=FG_CYAN)
+    stat('Nested conjugates', struct.nested_conjugate_count, color=FG_MAGENTA)
+    stat('Simple conjugates', struct.simple_conjugate_count, color=FG_CYAN)
+    stat(
+        'With cancellations',
+        struct.structures_with_cancellations,
+        color=FG_YELLOW,
+    )
+    stat(
+        'Avg moves/structure',
+        f'{struct.average_move_count:.1f}',
+        color=FG_CYAN,
+    )
+    stat('Efficiency rating', struct.efficiency_rating, color=FG_MAGENTA)
 
-    # Detailed Structures
     if struct.structures:
-        print('\nDETAILED STRUCTURES')
-        print('-' * 70)
+        section('DETAILED STRUCTURES')
         for idx, s in enumerate(struct.structures, 1):
-            class_tag = f' [{s.classification}]' if s.classification else ''
-            pure_tag = ' (PURE)' if s.is_pure else ''
-            cancel_tag = ' *cancels*' if s.has_cancellations else ''
+            type_str = colorize(s.type.capitalize(), FG_BLUE + BOLD)
+            notation_str = colorize(str(s), FG_WHITE + BOLD)
 
-            print(
-                f'  {idx}. {s.type.capitalize()}: {s}'
-                f'{class_tag}{pure_tag}{cancel_tag}',
+            class_tag = (
+                colorize(f' [{s.classification}]', FG_CYAN)
+                if s.classification
+                else ''
             )
-            print(f'     Score: {s.score:.2f} | Moves: {s.move_count}')
-            print(f'     Setup: {s.setup} ({len(s.setup)} moves)')
-            print(f'     Action: {s.action} ({len(s.action)} moves)')
-            print(f'     Position: {s.start}-{s.end}')
+            pure_tag = (
+                colorize(' (PURE)', FG_GREEN + BOLD) if s.is_pure else ''
+            )
+            cancel_tag = (
+                colorize(' *cancels*', FG_YELLOW) if s.has_cancellations else ''
+            )
+
+            line = (
+                f'  {colorize(str(idx), FG_GREY)}. '
+                f'{type_str}: {notation_str}'
+                f'{class_tag}{pure_tag}{cancel_tag}'
+            )
+            print(line)
+            score_color = (
+                FG_GREEN
+                if s.score >= SCORE_HIGH
+                else FG_YELLOW
+                if s.score >= SCORE_MID
+                else FG_RED
+            )
+            print(
+                f'     {colorize("Score:", FG_GREY)} '
+                f'{colorize(f"{s.score:.2f}", score_color + BOLD)}'
+                f'  {colorize("Moves:", FG_GREY)} '
+                f'{colorize(str(s.move_count), FG_CYAN + BOLD)}',
+            )
+            print(
+                f'     {colorize("Setup:", FG_GREY)} '
+                f'{colorize(str(s.setup), FG_WHITE)}'
+                f' {colorize(f"({len(s.setup)} moves)", FG_GREY)}',
+            )
+            print(
+                f'     {colorize("Action:", FG_GREY)} '
+                f'{colorize(str(s.action), FG_WHITE)}'
+                f' {colorize(f"({len(s.action)} moves)", FG_GREY)}',
+            )
+            print(
+                f'     {colorize("Position:", FG_GREY)} '
+                f'{colorize(f"{s.start}-{s.end}", FG_CYAN)}',
+            )
     else:
-        print('\nNo structures found.')
+        print()
+        print(colorize('  No structures found.', FG_GREY))
 
     print()
 

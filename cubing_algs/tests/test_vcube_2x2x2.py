@@ -4,11 +4,13 @@ import unittest
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.extensions.rotate_2x2x2 import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 2x2x2 state: 24 facelets (6 faces * 4 facelets each)
 # Face order: U, R, F, D, L, B
 SOLVED_2X2X2 = get_solved_facelets(2)
+UNIQUE_2X2X2 = get_unique_facelets(2)
 
 # Expected states after moves
 EXPECTED_2X2X2_R = 'UFUFRRRRFDFDDBDBLLLLUBUB'
@@ -47,6 +49,10 @@ class Test2x2x2VCube(unittest.TestCase):
         self.assertEqual(
             self.cube.orientation, 'DF',
         )
+
+    def test_check_integrity(self) -> None:
+        """Test check_integrity on a 2x2x2 cube."""
+        self.assertTrue(self.cube.check_integrity())
 
 
 class Test2x2x2BasicMoves(unittest.TestCase):
@@ -296,4 +302,153 @@ class Test2x2x2SliceMoveErrors(unittest.TestCase):
         self.assertIn(
             'M moves are only allowed on odd-sized cubes',
             str(context.exception),
+        )
+
+
+class Test2x2x2VCubeCustomFacelets(unittest.TestCase):
+    """Test VCube implementation for 2x2x2 with custom facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = get_unique_facelets(2)
+        self.cube = VCube(initial=self.state, size=2, check=False)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test2x2x2VCubeCheckCustomState(unittest.TestCase):
+    """Test VCube implementation for 2x2x2 with scrambled facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = EXPECTED_2X2X2_R
+        self.cube = VCube(initial=self.state, size=2, check=True)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test2x2x2MoveConsistency(unittest.TestCase):
+    """
+    Test that 180° and CCW move codes match applying the CW move repeatedly.
+
+    Uses unique facelets so every position has a distinct value — the solved
+    state's symmetry can hide index-pair swaps (e.g. L[1] == L[3] == 'L').
+    """
+
+    @staticmethod
+    def apply(state: str, move: str) -> str:
+        """
+        Apply move.
+
+        Returns:
+           State once move applied.
+
+        """
+        return rotate_move(state, move)
+
+    @staticmethod
+    def apply_n(state: str, move: str, n: int) -> str:
+        """
+        Apply N moves.
+
+        Returns:
+           State once move applied.
+
+        """
+        for _ in range(n):
+            state = rotate_move(state, move)
+        return state
+
+    def test_f2_equals_f_twice(self) -> None:
+        """F2 direct code must equal F applied twice."""
+        self.assertEqual(
+            self.apply(UNIQUE_2X2X2, 'F2'),
+            self.apply_n(UNIQUE_2X2X2, 'F', 2),
+        )
+
+    def test_f_prime_equals_f_three_times(self) -> None:
+        """F' direct code must equal F applied three times."""
+        self.assertEqual(
+            self.apply(UNIQUE_2X2X2, "F'"),
+            self.apply_n(UNIQUE_2X2X2, 'F', 3),
+        )
+
+    def test_d2_equals_d_twice(self) -> None:
+        """D2 direct code must equal D applied twice."""
+        self.assertEqual(
+            self.apply(UNIQUE_2X2X2, 'D2'),
+            self.apply_n(UNIQUE_2X2X2, 'D', 2),
+        )
+
+    def test_b2_equals_b_twice(self) -> None:
+        """B2 direct code must equal B applied twice."""
+        self.assertEqual(
+            self.apply(UNIQUE_2X2X2, 'B2'),
+            self.apply_n(UNIQUE_2X2X2, 'B', 2),
+        )
+
+    def test_all_180_moves_equal_cw_twice(self) -> None:
+        """Every X2 direct code must equal X applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_2X2X2, move + '2'),
+                    self.apply_n(UNIQUE_2X2X2, move, 2),
+                )
+
+    def test_all_ccw_moves_equal_cw_three_times(self) -> None:
+        """Every X' direct code must equal X applied three times."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_2X2X2, move + "'"),
+                    self.apply_n(UNIQUE_2X2X2, move, 3),
+                )
+
+    def test_all_180_moves_equal_ccw_twice(self) -> None:
+        """Every X2 direct code must equal X' applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_2X2X2, move + '2'),
+                    self.apply_n(UNIQUE_2X2X2, move + "'", 2),
+                )
+
+
+class Test2x2x2VCubeRotateIssue01(unittest.TestCase):
+    """Test VCube rotate implementation issues for 2x2x2."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = (
+            'DDDD'
+            'RLLL'
+            'FBFF'
+            'UUUU'
+            'LRRR'
+            'BFBB'
+        )
+        self.cube = VCube(size=2, check=True)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate("z2 R U' R' U' F2 U' R U R' U F2")
+
+        self.assertEqual(
+            self.cube.state,
+            self.state,
         )

@@ -15,7 +15,7 @@ def show_algorithm(name: str, algorithm: str, **kw: object) -> None:
     """
     algo = parse_moves(algorithm)
 
-    print(f'{ name}: { algo }')
+    print(f'{ name }: { algo }')
 
     algo.show(**kw)  # type: ignore[arg-type]
 

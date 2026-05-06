@@ -258,9 +258,6 @@ class TestMovePermutations(unittest.TestCase):
                             f'The move { move } has failed',
                         )
 
-                        if suffix != '2':
-                            pass
-
                     except Exception as e:  # noqa: BLE001
                         self.fail(f'The move { move } has failed: { e }')
 

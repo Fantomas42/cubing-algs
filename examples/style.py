@@ -30,7 +30,7 @@ def show_cube_style(style_name: str, sizes: tuple[int, ...]) -> None:
         print(f'Size: {size}')
         cube = VCube(size=size)
         cube.show(
-            mode='linear',
+            layout='linear',
             style=style_name,
         )
 

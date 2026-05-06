@@ -268,10 +268,14 @@ print(algo.structure.total_structures)   # 1
 print(algo.structure.max_nesting_depth)  # 1
 
 # Impact analysis - spatial effects on cube
-print(algo.impacts.affected_facelet_count)  # Number of facelets that change position
-print(algo.impacts.average_distance)        # Average movement distance
-print(algo.impacts.total_displacement)      # Total displacement of all facelets
-print(algo.impacts.max_distance)            # Maximum distance any facelet moves
+impacts = algo.impacts()
+print(impacts.facelets_mobilized_count)     # Number of facelets that change position
+print(impacts.facelets_scrambled_percent)   # Fraction of movable facelets displaced
+print(impacts.facelets_face_mobility)       # Impact breakdown by face
+
+# Impact analysis on larger cubes
+impacts_5x5 = algo.impacts(size=5)
+print(impacts_5x5.facelets_mobilized_count)  # Facelets affected on 5x5x5
 
 # Ergonomics analysis - execution comfort
 print(algo.ergonomics.comfort_rating)       # Overall execution difficulty (0-10)
@@ -704,7 +708,6 @@ The library is optimized for performance:
 - **LRU Caching**: Facelet ↔ cubie conversion uses LRU caching (512 entries) for repeated operations
 - **Lazy Evaluation**: Algorithm transforms are composable and don't execute until needed
 - **Lightweight State**: Virtual cube state is a simple 54-character string with minimal overhead
-- **Cached Properties**: Algorithm analysis properties (metrics, impacts, etc.) are computed once and cached
 
 **Performance characteristics:**
 - Move execution: ~1-2 microseconds per move (C extension)
@@ -843,7 +846,7 @@ m_symmetric = base_alg.transform(symmetry_m_moves)
 # Analyze algorithms
 print(f"Original: {base_alg} ({base_alg.metrics.htm} HTM)")
 print(f"Comfort: {base_alg.ergonomics.comfort_rating}/10")
-print(f"Affected pieces: {base_alg.impacts.affected_facelet_count}")
+print(f"Affected pieces: {base_alg.impacts().facelets_mobilized_count}")
 print(f"Inverse: {inverse} ({inverse.metrics.htm} HTM)")
 
 # Test on virtual cube

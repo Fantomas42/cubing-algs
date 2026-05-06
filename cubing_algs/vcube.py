@@ -2,11 +2,23 @@
 from functools import cached_property
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.annotations import Mask
+from cubing_algs.annotations import CornerOrientation
+from cubing_algs.annotations import CornerPermutation
+from cubing_algs.annotations import CubeCubiesOriented
+from cubing_algs.annotations import CubeDisplayMask
+from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import CubeOrientation
+from cubing_algs.annotations import EdgeOrientation
+from cubing_algs.annotations import EdgePermutation
+from cubing_algs.annotations import FaceFacelets
+from cubing_algs.annotations import FaceletPieceType
+from cubing_algs.annotations import SpatialOrientation
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.constants import OFFSET_ORIENTATION_MAP
+from cubing_algs.display.image import ImageDisplay
 from cubing_algs.display.vcube import VCubeDisplay
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidFaceIndexError
@@ -23,6 +35,7 @@ from cubing_algs.move import Move
 from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
 from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solver import facelets_to_facelets_algorithm
+from cubing_algs.transform.invert import invert_moves
 
 
 class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
@@ -40,10 +53,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
     face_number: int = FACE_NUMBER
 
-    def __init__(self, initial: str | None = None, *,
-                 size: int = 3,
-                 check: bool = True,
-                 history: list[str] | None = None) -> None:
+    def __init__(
+            self,
+            initial: CubeFacelets | None = None,
+            *,
+            size: int = DEFAULT_CUBE_SIZE,
+            check: bool = True,
+            history: list[str] | None = None,
+    ) -> None:
         """
         Initialize a virtual cube with optional initial state and history.
 
@@ -67,7 +84,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         if initial:
             self._state = initial
-            if check and size == 3:
+            if check:
                 self.check_integrity()
         elif size == 3:
             self._state = SOLVED_FACELETS_3x3x3
@@ -77,7 +94,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         self.history: list[str] = history or []
 
     @property
-    def state(self) -> str:
+    def state(self) -> CubeFacelets:
         """Get the current state of the cube as a facelet string."""
         return self._state
 
@@ -107,8 +124,65 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             return 0
         return self.size + 1
 
+    @cached_property
+    def facelet_piece_types(self) -> dict[int, list[FaceletPieceType]]:
+        """
+        Get the piece types for every facelet index on the cube.
+
+        Each value is a list ordered from most specific to least specific,
+        e.g. ['midge', 'edge'] or ['fixed_center', 'center'].
+
+        Returns:
+            Dictionary mapping facelet index to piece type list.
+
+        """
+        size = self.size
+        middle = size // 2
+        is_odd = self.has_fixed_centers
+        result: dict[int, list[FaceletPieceType]] = {}
+
+        for i in range(self.face_size):
+            row, col = divmod(i, size)
+
+            on_row_border = row == 0 or row == size - 1
+            on_col_border = col == 0 or col == size - 1
+
+            if on_row_border and on_col_border:
+                result[i] = ['corner']
+            elif on_row_border or on_col_border:
+                if is_odd and middle in {row, col}:
+                    result[i] = ['midge', 'edge']
+                else:
+                    result[i] = ['wing', 'edge']
+            elif is_odd and row == middle and col == middle:
+                result[i] = ['fixed_center', 'center']
+            elif is_odd and middle in {row, col}:
+                result[i] = ['t_center', 'center']
+            elif min(row, size - 1 - row) == min(col, size - 1 - col):
+                result[i] = ['x_center', 'center']
+            else:
+                result[i] = ['oblique_center', 'center']
+
+        return result
+
+    def get_facelet_piece_types(
+            self,
+            facelet_index: int,
+    ) -> list[FaceletPieceType]:
+        """
+        Get the piece types for a specific facelet index.
+
+        Args:
+            facelet_index: Global facelet index (0-based).
+
+        Returns:
+            List of piece types from most specific to family.
+
+        """
+        return self.facelet_piece_types[facelet_index % self.face_size]
+
     @property
-    def orientation(self) -> str:
+    def orientation(self) -> CubeOrientation:
         """
         Get the cube's orientation as a two-character string.
 
@@ -164,9 +238,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return all(face * self.face_size in self._state for face in FACE_ORDER)
 
     @property
-    def cubies(self) -> tuple[
-            list[int], list[int], list[int], list[int], list[int],
-    ]:
+    def cubies(self) -> CubeCubiesOriented:
         """
         Convert the cube state to cubie representation.
 
@@ -185,10 +257,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         raise NotSupportedCubeSizeError(msg)
 
     @staticmethod
-    def from_cubies(cp: list[int], co: list[int],  # noqa: PLR0913 PLR0917
-                    ep: list[int], eo: list[int],
-                    so: list[int],
-                    scheme: str | None = None) -> 'VCube':
+    def from_cubies(  # noqa: PLR0913 PLR0917
+            cp: CornerPermutation,
+            co: CornerOrientation,
+            ep: EdgePermutation,
+            eo: EdgeOrientation,
+            so: SpatialOrientation,
+            scheme: CubeFacelets | None = None,
+    ) -> 'VCube':
         """
         Create a VCube from cubie representation.
 
@@ -209,7 +285,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             check=not bool(scheme),
         )
 
-    def is_equal(self, other_cube: 'VCube', *, strict: bool = True) -> bool:
+    def is_equal(
+            self,
+            other_cube: 'VCube',
+            *,
+            strict: bool = True,
+    ) -> bool:
         """
         Compare two cubes for equality with optional orientation flexibility.
 
@@ -233,8 +314,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return self._state == oriented_copy._state  # noqa: SLF001
 
-    def rotate(self, moves: Algorithm | Move | str, *,
-               history: bool = True) -> str:
+    def rotate(
+            self,
+            moves: Algorithm | Move | str,
+            *,
+            history: bool = True,
+    ) -> CubeFacelets:
         """
         Apply a sequence of moves to the cube.
 
@@ -270,6 +355,22 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
                 self.history.extend(moves_str.split(' '))
             return self._state
 
+    def undo(self, move_number: int = 1) -> CubeFacelets:
+        """
+        Undo moves from history.
+
+        Args:
+            move_number: Number of moves to undo. Default is 1.
+
+        Returns:
+            The new state of the cube after undoing the moves.
+
+        """
+        moves = Algorithm(Move(m) for m in self.history[-move_number:])
+        del self.history[-move_number:]
+
+        return self.rotate(invert_moves(moves), history=False)
+
     def copy(self, *, full: bool = False) -> 'VCube':
         """
         Create a copy of the cube with optional history preservation.
@@ -292,7 +393,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             history=history,
         )
 
-    def compute_orientation_moves(self, faces: str) -> str:
+    def compute_orientation_moves(self, faces: CubeOrientation) -> str:
         """
         Calculate the moves needed to orient the cube to specific faces.
 
@@ -319,7 +420,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         except KeyError as e:
             raise InvalidOrientationError(str(e)) from e
 
-    def oriented_copy(self, faces: str, *, full: bool = False) -> 'VCube':
+    def oriented_copy(
+            self,
+            faces: CubeOrientation,
+            *,
+            full: bool = False,
+    ) -> 'VCube':
         """
         Create a copy of the cube oriented to specific faces.
 
@@ -345,17 +451,27 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         return cube
 
-    def display(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
-                mask: Mask = '', palette: str = '',
-                effect: str = '', facelet: str = '',
-                style: str = '') -> str:
+    def display(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: CubeOrientation = '',
+            mask: CubeDisplayMask = '',
+            palette: str = '',
+            effect: str = '',
+            facelet: str = '',
+            style: str = '',
+    ) -> str:
         """
         Generate a visual representation of the cube.
 
         Args:
-            mode: Display mode for the visualization.
-            orientation: Desired orientation for display.
-            mask: Mask to apply to the display.
+            mode: Display mode for layout/orientation/mask
+                  (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout ('cube', 'top', 'linear', 'extended').
+            orientation: Cube orientation string for reorienting the view.
+            mask: Mask to filter which facelets are displayed.
             palette: Color palette to use.
             effect: Visual effect to apply.
             facelet: Facelet mode for display.
@@ -365,57 +481,96 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             A string containing the visual representation of the cube.
 
         """
-        return VCubeDisplay(self, palette, effect, facelet, style).display(
-            mode, orientation, mask,
+        return VCubeDisplay(
+            self,
+            palette,
+            effect,
+            facelet,
+            style,
+        ).display(
+            mode=mode,
+            layout=layout,
+            orientation=orientation,
+            mask=mask,
         )
 
-    def show(self, mode: str = '', orientation: str = '',  # noqa: PLR0913 PLR0917
-             mask: Mask = '', palette: str = '',
-             effect: str = '', facelet: str = '',
-             style: str = '') -> None:
+    def show(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: CubeOrientation = '',
+            mask: CubeDisplayMask = '',
+            palette: str = '',
+            effect: str = '',
+            facelet: str = '',
+            style: str = '',
+    ) -> None:
         """Print a visual representation of the cube."""
         print(  # noqa: T201
             self.display(
-                mode, orientation, mask,
-                palette, effect, facelet,
-                style,
+                mode=mode,
+                layout=layout,
+                orientation=orientation,
+                mask=mask,
+                palette=palette,
+                effect=effect,
+                facelet=facelet,
+                style=style,
             ),
             end='',
         )
 
-    def image(self, *, size: int = 200,  # noqa: PLR0913
-              view: str = '3d', mask: Mask = '',
-              rotation: str = 'y45x-34',
-              distance: float = 10.0,
-              cube_color: str = '#111111',
-              palette_name: str = 'default') -> str:
+    def image(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: CubeOrientation = '',
+            mask: CubeDisplayMask = '',
+            palette: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0.0,
+            arrows: str = '',
+    ) -> str:
         """
         Render the cube as an SVG image.
 
         Args:
-            size: Image dimension in pixels.
-            view: Rendering mode. ``'3d'`` for perspective view,
-                ``'top'`` for flat top-face with adjacent strips.
-            mask: Mask to apply on the cube.
-            rotation: Axis-angle rotation string (3d view only).
-            distance: Camera distance for perspective projection
-                (3d view only).
-            cube_color: Hex color for cube body between stickers.
-            palette_name: Color palette name for sticker colors.
+            mode: Display preset that sets layout, orientation, and mask
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout; 'top' renders a flat 2D top-view,
+                    otherwise a 3D perspective view is used.
+            orientation: Cube orientation string for reorienting the view
+                         before rendering.
+            mask: Mask to filter which facelets are displayed.
+            palette: Color palette name for sticker colors.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string for the 3D view, composed of
+                      axis-angle pairs (e.g., 'y45x-30').
+            distance: Camera distance from the cube center for the 3D view.
+            arrows: Comma-separated arrow definitions.
 
         Returns:
             SVG string of the cube.
 
         """
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
-
-        return render_cube(
-            self, size=size, view=view, mask=mask,
-            rotation=rotation, distance=distance,
-            cube_color=cube_color, palette_name=palette_name,
+        return ImageDisplay(
+            self,
+            palette,
+        ).render(
+            mode=mode,
+            layout=layout,
+            orientation=orientation,
+            mask=mask,
+            image_size=image_size,
+            rotation=rotation,
+            distance=distance,
+            arrows=arrows,
         )
 
-    def get_face(self, face: str) -> str:
+    def get_face(self, face: str) -> FaceFacelets:
         """
         Get the facelets of a specific face by face letter.
 
@@ -448,7 +603,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         except ValueError as e:
             raise InvalidFaceIndexError(str(e)) from e
 
-    def get_face_by_center(self, face: str) -> str:
+    def get_face_by_center(self, face: str) -> FaceFacelets:
         """
         Get the facelets of a face by its center color.
 
@@ -473,7 +628,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         Returns:
             An algorithm to apply.
 
+        Raises:
+            NotSupportedCubeSizeError: If cube.size != 3 or other.size != 3
+
         """
+        if self.size != 3 or other.size != 3:
+            msg = f'to_algorithm is not available on cube with size {self.size}'
+            raise NotSupportedCubeSizeError(msg)
+
         self_uf = self.oriented_copy('UF', full=False)
         other_uf = other.oriented_copy('UF', full=False)
 

@@ -7,6 +7,9 @@ transformations between different notations.
 """
 from collections import UserString
 from functools import cached_property
+from typing import ClassVar
+from typing import Self
+from typing import cast
 
 from cubing_algs.constants import ALL_BASIC_MOVES
 from cubing_algs.constants import DOUBLE_CHAR
@@ -18,6 +21,9 @@ from cubing_algs.constants import PAUSE_CHAR
 from cubing_algs.constants import ROTATIONS
 from cubing_algs.constants import WIDE_CHAR
 
+SIGN_MOVE_EXCLUDED = frozenset({WIDE_CHAR, *ROTATIONS})
+CLOCKWISE_EXCLUDED = frozenset({DOUBLE_CHAR, INVERT_CHAR})
+
 
 class Move(UserString):  # noqa: PLR0904
     """
@@ -25,17 +31,54 @@ class Move(UserString):  # noqa: PLR0904
 
     Extends UserString to provide string-like behavior while adding properties
     for move validation and transformation.
+
     A move consists of an optional layer impacted (such as 2, 3-4),
     a base move (letter) and optional modifiers (such as ', 2, w).
 
+    Move objects must be treated as immutable.
+    All properties are cached via cached_property;
+    mutating self.data after construction will silently return stale values.
+
     Examples of valid moves: U, R', F2, Rw, M, x, 3-4Rw, 2F
     """
+
+    _cache: ClassVar[dict[str, 'Move']] = {}
+
+    def __new__(cls, seq: str | UserString = '') -> Self:
+        """Return a cached instance for the given move string."""
+        key = seq.data if isinstance(seq, UserString) else str(seq)
+        if key in cls._cache:
+            return cast('Self', cls._cache[key])
+        instance = super().__new__(cls)
+        cls._cache[key] = instance
+        return instance
+
+    def __init__(self, seq: str | UserString = '') -> None:
+        """Initialize the move, skipping if already cached."""
+        if hasattr(self, 'data'):
+            return
+        super().__init__(seq)
+
+    def __repr__(self) -> str:
+        """
+        Return a string representation that can be used
+        to recreate the move.
+
+        Returns:
+            A Python expression that can recreate this Move object.
+
+        """
+        return f'Move({self.data!r})'
 
     # Parsing
 
     @cached_property
     def layer_move_modifier_time(self) -> tuple[str, str, str, str]:
-        """Parse the move string into its component parts."""
+        """
+        Parse the move string into its component parts.
+
+        Assumes non-empty data.
+        """
         layer = ''
         move = ''
         modifier = ''
@@ -57,25 +100,58 @@ class Move(UserString):  # noqa: PLR0904
             move = kept[0]
             modifier = kept[1:]
 
+        self.__dict__['layer'] = layer
+        self.__dict__['raw_base_move'] = move
+        self.__dict__['modifier'] = modifier
+        self.__dict__['time'] = time
         return layer, move, modifier, time
 
     @cached_property
     def layer(self) -> str:
-        """Extract the layers impacted."""
+        """
+        Extract the layer prefix of the move as a string.
+
+        Returns:
+            The raw layer string.
+
+        Examples:
+            '' for 'R'
+            '2' for '2Rw'
+            '3-4' for '3-4Rw'
+
+        """
         return self.layer_move_modifier_time[0]
 
     @cached_property
     def layers(self) -> list[int]:
-        """List of impacted layers, 0-indexed."""
+        """
+        List of 0-indexed layer numbers affected by this move.
+
+        Returns:
+            The list of layers affected.
+
+        Examples:
+            'R' → [0]
+            'Rw' → [0, 1]
+            '3Rw' → [0, 1, 2]
+            '3-4Rw' → [2, 3]
+            '2R' → [1]
+
+        """
         if not self.layer:
+            # No layer prefix: wide moves include layers 0 and 1,
+            # others only 0
             if self.is_wide_move:
                 return [0, 1]
             return [0]
         if '-' not in self.layer:
+            # Single layer prefix: wide moves include layers 0..n,
+            # others only layer n-1
             if self.is_wide_move:
                 return list(range(int(self.layer)))
             return [int(self.layer) - 1]
 
+        # Range layer prefix: e.g. '3-4' → layers 2 and 3
         start, end = self.layer.split('-', 1)
 
         return list(range(int(start) - 1, int(end)))
@@ -140,7 +216,7 @@ class Move(UserString):  # noqa: PLR0904
         if '-' in self.layer and not self.is_wide_move:
             return False
 
-        return not len(self.layer.split('-')) > 2
+        return len(self.layer.split('-')) <= 2
 
     @cached_property
     def is_valid_move(self) -> bool:
@@ -294,7 +370,7 @@ class Move(UserString):  # noqa: PLR0904
         if not self.data.islower():
             return False
 
-        return all(char not in self.data for char in [WIDE_CHAR, *ROTATIONS])
+        return SIGN_MOVE_EXCLUDED.isdisjoint(self.data)
 
     # Modifiers
 
@@ -310,11 +386,15 @@ class Move(UserString):  # noqa: PLR0904
     @cached_property
     def is_clockwise(self) -> bool:
         """
-        Check if this is a clockwise move.
+        Check if this is a clockwise (quarter-turn) move.
 
-        Moves without the invert character (') are clockwise.
+        Returns True only for non-pause, non-double moves
+        without the invert character.
         """
-        return not self.is_pause and self.modifier != INVERT_CHAR
+        return (
+            not self.is_pause
+            and self.modifier not in CLOCKWISE_EXCLUDED
+        )
 
     @cached_property
     def is_counter_clockwise(self) -> bool:
@@ -323,9 +403,54 @@ class Move(UserString):  # noqa: PLR0904
 
         Moves with the invert character (') are counter-clockwise.
         """
-        return not self.is_pause and not self.is_clockwise
+        return (
+            not self.is_pause
+            and self.modifier == INVERT_CHAR
+        )
+
+    @cached_property
+    def quarter_turns(self) -> int:
+        """
+        Number of quarter turns this move represents.
+
+        Returns:
+            1 for clockwise, -1 for counter-clockwise,
+            2 for double, 0 for pause.
+
+        """
+        if self.is_pause:
+            return 0
+        if self.is_double:
+            return 2
+        if self.is_counter_clockwise:
+            return -1
+        return 1
 
     # Transformations
+
+    def build(
+        self,
+        *,
+        layer: str | None = None,
+        move: str | None = None,
+        modifier: str | None = None,
+        time: str | None = None,
+    ) -> 'Move':
+        """
+        Construct a new Move from this move's components, with overrides.
+
+        Any omitted argument defaults to the corresponding component of self.
+
+        Returns:
+            A new Move with the specified components replaced.
+
+        """
+        return Move(
+            (layer if layer is not None else self.layer)
+            + (move if move is not None else self.raw_base_move)
+            + (modifier if modifier is not None else self.modifier)
+            + (time if time is not None else self.time),
+        )
 
     @cached_property
     def inverted(self) -> 'Move':
@@ -338,19 +463,9 @@ class Move(UserString):  # noqa: PLR0904
         """
         if self.is_double or self.is_pause:
             return self
-
         if self.is_counter_clockwise:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.raw_base_move }'
-                f'{ self.time }',
-            )
-        return Move(
-            f'{ self.layer }'
-            f'{ self.raw_base_move }'
-            f'{ INVERT_CHAR }'
-            f'{ self.time }',
-        )
+            return self.build(modifier='')
+        return self.build(modifier=INVERT_CHAR)
 
     @cached_property
     def doubled(self) -> 'Move':
@@ -362,19 +477,9 @@ class Move(UserString):  # noqa: PLR0904
         """
         if self.is_pause:
             return self
-
         if self.is_double:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.raw_base_move }'
-                f'{ self.time }',
-            )
-        return Move(
-            f'{ self.layer }'
-            f'{ self.raw_base_move }'
-            f'{ DOUBLE_CHAR }'
-            f'{ self.time }',
-        )
+            return self.build(modifier='')
+        return self.build(modifier=DOUBLE_CHAR)
 
     @cached_property
     def unlayered(self) -> 'Move':
@@ -384,11 +489,7 @@ class Move(UserString):  # noqa: PLR0904
         This converts moves like 3Rw to Rw.
         """
         if self.is_layered:
-            return Move(
-                f'{ self.raw_base_move }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
+            return self.build(layer='')
         return self
 
     @cached_property
@@ -399,11 +500,7 @@ class Move(UserString):  # noqa: PLR0904
         This converts moves like 3Rw@200 to 3Rw.
         """
         if self.is_timed:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.raw_base_move }'
-                f'{ self.modifier }',
-            )
+            return self.build(time='')
         return self
 
     @cached_property
@@ -418,12 +515,7 @@ class Move(UserString):  # noqa: PLR0904
         This only affects wide moves.
         """
         if self.is_wide_move and not self.is_sign_move:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.base_move.lower() }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
+            return self.build(move=self.base_move.lower())
         return self
 
     @cached_property
@@ -436,10 +528,5 @@ class Move(UserString):  # noqa: PLR0904
         This only affects wide moves.
         """
         if self.is_sign_move:
-            return Move(
-                f'{ self.layer }'
-                f'{ self.base_move.upper() }{ WIDE_CHAR }'
-                f'{ self.modifier }'
-                f'{ self.time }',
-            )
+            return self.build(move=self.base_move.upper() + WIDE_CHAR)
         return self

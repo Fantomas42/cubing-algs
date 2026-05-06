@@ -1,4 +1,3 @@
-# ruff: noqa: PLC0415
 """
 Impact analysis tools for Rubik's cube algorithms.
 
@@ -9,11 +8,19 @@ and statistical analysis of the algorithm's effect on the cube.
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 from typing import NamedTuple
-from typing import TypedDict
+from typing import cast
 
+from cubing_algs.annotations import CornerOrientation
+from cubing_algs.annotations import CornerPermutation
+from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import EdgeOrientation
+from cubing_algs.annotations import EdgePermutation
+from cubing_algs.annotations import Facelet
+from cubing_algs.annotations import FaceletPieceType
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import D_CORNERS
 from cubing_algs.constants import D_EDGES
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import E_EDGES
 from cubing_algs.constants import EDGE_FACELET_MAP
 from cubing_algs.constants import FACE_EDGES_INDEX
@@ -31,10 +38,8 @@ from cubing_algs.constants import U_CORNERS
 from cubing_algs.constants import U_EDGES
 from cubing_algs.face_transforms import transform_adjacent_position
 from cubing_algs.face_transforms import transform_opposite_position
-from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.integrity import compute_parity
 from cubing_algs.integrity import find_permutation_cycles
-from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -53,7 +58,41 @@ CACHED_FACELET_TO_CORNER_PIECE: dict[int, int] = {
 }
 
 
-class CycleAnalysis(TypedDict):
+class OrientationFlags(NamedTuple):
+    """Corner and edge orientation flags shared across pattern helpers."""
+
+    all_corners_oriented: bool
+    all_edges_oriented: bool
+
+
+class FirstLayerFlags(NamedTuple):
+    """First-layer completion flags shared across pattern helpers."""
+
+    d_corners_solved: bool
+    d_edges_solved: bool
+    f2l_edges_solved: bool
+
+
+class PatternClassification(NamedTuple):
+    """
+    Categorized pattern classification for a cube state.
+
+    Each field collects the pattern labels emitted by one focused
+    classifier. ``state`` holds cube-wide labels (``SOLVED``,
+    ``UNCLASSIFIED``); the remaining fields mirror the helpers.
+
+    """
+
+    state: list[str]
+    orientation: list[str]
+    permutation: list[str]
+    first_layer: list[str]
+    last_layer: list[str]
+    scramble: list[str]
+    cycle: list[str]
+
+
+class CycleAnalysis(NamedTuple):
     """Analysis of permutation cycle structure."""
 
     cycle_count: int
@@ -64,6 +103,14 @@ class CycleAnalysis(TypedDict):
     two_cycles: int
     three_cycles: int
     four_plus_cycles: int
+
+
+class ParitySignature(NamedTuple):
+    """Parity classification of an algorithm's corner and edge permutations."""
+
+    signature: str
+    is_valid: bool
+    implications: list[str]
 
 
 class DistanceMetrics(NamedTuple):
@@ -79,7 +126,7 @@ class FaceletPosition(NamedTuple):
     """Parsed facelet position information."""
 
     face_index: int
-    face_name: str
+    face_name: Facelet
     face_position: int
     row: int
     col: int
@@ -101,41 +148,42 @@ class ImpactData(NamedTuple):
     cube: 'VCube'
 
     # Facelet analysis (visual/spatial impact)
-    facelets_state: str
+    facelets_state: CubeFacelets
     facelets_transformation_mask: str
     facelets_fixed_count: int
     facelets_mobilized_count: int
     facelets_scrambled_percent: float
     facelets_permutations: dict[int, int]
-    facelets_manhattan_distance: DistanceMetrics
-    facelets_qtm_distance: DistanceMetrics
-    facelets_face_mobility: dict[str, int]
-    facelets_face_to_face_matrix: dict[str, dict[str, int]]
+    facelets_face_mobility: dict[Facelet, int]
+    facelets_face_to_face_matrix: dict[Facelet, dict[Facelet, int]]
     facelets_symmetry: dict[str, bool]
-    facelets_layer_analysis: dict[str, int]
+    facelets_qtm_distance: DistanceMetrics | None
+    facelets_manhattan_distance: DistanceMetrics | None
+    facelets_piece_type_impact: dict[FaceletPieceType, int]
 
-    # Cubie analysis (piece-level impact)
-    cubies_corner_permutation: list[int]
-    cubies_corner_orientation: list[int]
-    cubies_edge_permutation: list[int]
-    cubies_edge_orientation: list[int]
-    cubies_corners_moved: int
-    cubies_corners_twisted: int
-    cubies_edges_moved: int
-    cubies_edges_flipped: int
-    cubies_corner_cycles: list[list[int]]
-    cubies_edge_cycles: list[list[int]]
-    cubies_complexity_score: int
-    cubies_suggested_approach: str
-    cubies_corner_parity: int
-    cubies_edge_parity: int
-    cubies_parity_valid: bool
-    cubies_corner_cycle_analysis: CycleAnalysis
-    cubies_edge_cycle_analysis: CycleAnalysis
-    cubies_patterns: list[str]
+    # Cubie analysis (piece-level impact, 3x3x3 only)
+    cubies_corner_permutation: CornerPermutation | None
+    cubies_corner_orientation: CornerOrientation | None
+    cubies_edge_permutation: EdgePermutation | None
+    cubies_edge_orientation: EdgeOrientation | None
+    cubies_corners_moved: int | None
+    cubies_corners_twisted: int | None
+    cubies_edges_moved: int | None
+    cubies_edges_flipped: int | None
+    cubies_corner_cycles: list[list[int]] | None
+    cubies_edge_cycles: list[list[int]] | None
+    cubies_complexity_score: int | None
+    cubies_suggested_approach: str | None
+    cubies_corner_parity: int | None
+    cubies_edge_parity: int | None
+    cubies_parity_valid: bool | None
+    cubies_parity_signature: ParitySignature | None
+    cubies_corner_cycle_analysis: CycleAnalysis | None
+    cubies_edge_cycle_analysis: CycleAnalysis | None
+    cubies_patterns: PatternClassification | None
 
 
-def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
+def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[Facelet, int]:
     """
     Calculate face impact from impact mask.
 
@@ -147,13 +195,13 @@ def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[str, int]:
         Dictionary mapping face names to counts of affected facelets.
 
     """
-    face_impact = {}
+    face_impact: dict[Facelet, int] = {}
 
     for i, face_name in enumerate(FACE_ORDER):
         start_idx = i * cube.face_size
         end_idx = start_idx + cube.face_size
         face_mask = impact_mask[start_idx:end_idx]
-        face_impact[face_name] = face_mask.count('1')
+        face_impact[cast('Facelet', face_name)] = face_mask.count('1')
 
     return face_impact
 
@@ -171,7 +219,7 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
 
     """
     face_index = position // cube.face_size
-    face_name = FACE_ORDER[face_index]
+    face_name = cast('Facelet', FACE_ORDER[face_index])
     position_in_face = position % cube.face_size
     row = position_in_face // cube.size
     col = position_in_face % cube.size
@@ -224,24 +272,18 @@ def positions_on_adjacent_corners(pos1: int, pos2: int, cube: 'VCube') -> bool:
         True if positions are on adjacent corners.
 
     """
-    corner1 = None
-    corner2 = None
+    idx1 = CACHED_FACELET_TO_CORNER_PIECE.get(pos1)
+    idx2 = CACHED_FACELET_TO_CORNER_PIECE.get(pos2)
 
-    for corner in CORNER_FACELET_MAP:
-        if pos1 in corner:
-            corner1 = corner
-        if pos2 in corner:
-            corner2 = corner
-
-    if corner1 is None or corner2 is None:
+    if idx1 is None or idx2 is None:
         return False
 
-    if corner1 == corner2:  # Same corner
+    if idx1 == idx2:  # Same corner
         return False
 
     # Get the faces for each corner
-    faces1 = {p // cube.face_size for p in corner1}
-    faces2 = {p // cube.face_size for p in corner2}
+    faces1 = {p // cube.face_size for p in CORNER_FACELET_MAP[idx1]}
+    faces2 = {p // cube.face_size for p in CORNER_FACELET_MAP[idx2]}
 
     # Adjacent corners share exactly 2 faces (an edge)
     return len(faces1 & faces2) == 2
@@ -362,8 +404,11 @@ def compute_adjacent_face_manhattan_distance(
     return cube.size + within_face_distance
 
 
-def compute_manhattan_distance(original_pos: int, final_pos: int,
-                               cube: 'VCube') -> int:
+def compute_manhattan_distance(
+        original_pos: int,
+        final_pos: int,
+        cube: 'VCube',
+) -> int:
     """
     Calculate Manhattan displacement distance between two positions.
 
@@ -428,7 +473,8 @@ def compute_within_face_qtm_distance(
 
 def compute_opposite_face_qtm_distance(
         orig: FaceletPosition,
-        final: FaceletPosition) -> int:
+        final: FaceletPosition,
+) -> int:
     """
     Calculate QTM distance for positions on opposite faces.
 
@@ -455,9 +501,11 @@ def compute_opposite_face_qtm_distance(
 
 
 def compute_adjacent_face_edge_qtm_distance(
-        original_pos: int, final_pos: int,
+        original_pos: int,
+        final_pos: int,
         orig_face_pos: int,
-        final_face_pos: int) -> int | None:
+        final_face_pos: int,
+) -> int | None:
     """
     Calculate QTM distance for edge pieces on adjacent faces.
 
@@ -542,8 +590,11 @@ def compute_adjacent_face_qtm_distance(
     return 2
 
 
-def compute_qtm_distance(original_pos: int, final_pos: int,
-                         cube: 'VCube') -> int:
+def compute_qtm_distance(
+        original_pos: int,
+        final_pos: int,
+        cube: 'VCube',
+) -> int:
     """
     Calculate QTM (Quarter Turn Metric) distance between two positions.
 
@@ -624,7 +675,7 @@ def compute_distance_metrics(
 def compute_face_to_face_matrix(
         permutations: dict[int, int],
         cube: 'VCube',
-) -> dict[str, dict[str, int]]:
+) -> dict[Facelet, dict[Facelet, int]]:
     """
     Compute face-to-face movement matrix.
 
@@ -638,14 +689,15 @@ def compute_face_to_face_matrix(
         Nested dictionary: matrix[orig_face][dest_face] = count.
 
     """
-    matrix: dict[str, dict[str, int]] = {
-        face: dict.fromkeys(FACE_ORDER, 0)
+    matrix: dict[Facelet, dict[Facelet, int]] = {
+        cast('Facelet', face):
+        cast('dict[Facelet, int]', dict.fromkeys(FACE_ORDER, 0))
         for face in FACE_ORDER
     }
 
     for orig_pos, final_pos in permutations.items():
-        orig_face = FACE_ORDER[orig_pos // cube.face_size]
-        final_face = FACE_ORDER[final_pos // cube.face_size]
+        orig_face = cast('Facelet', FACE_ORDER[orig_pos // cube.face_size])
+        final_face = cast('Facelet', FACE_ORDER[final_pos // cube.face_size])
         matrix[orig_face][final_face] += 1
 
     return matrix
@@ -695,62 +747,34 @@ def detect_symmetry(mask: str, cube: 'VCube') -> dict[str, bool]:
     }
 
 
-def analyze_layers(
+def analyze_piece_type_impact(
         permutations: dict[int, int],
         cube: 'VCube',
-) -> dict[str, int]:
+) -> dict[FaceletPieceType, int]:
     """
-    Analyze impact by cube layers.
+    Count moved facelets by specific piece type.
 
-    Separates facelets into outer layer (edges/corners) and center pieces.
+    Counts moved facelets for every piece type in the type hierarchy.
+
+    Each facelet contributes to all its types — specific and family.
+    For example, a 3x3x3 edge facelet (type list: ['midge', 'edge']) increments
+    both 'midge' and 'edge', so family totals remain available alongside
+    specific breakdowns.
 
     Args:
         permutations: Dictionary mapping original to final positions.
         cube: The virtual cube for size context.
 
     Returns:
-        Dictionary with layer counts (centers_moved, outer_layer_moved, etc).
+        Dictionary mapping piece type names to counts of moved facelets.
+        Only piece types with at least one moved facelet are included.
 
     """
-    # Center of each face (position 4 in 3x3 grid)
-    center_indices = {
-        i * cube.face_size + cube.center_index
-        for i in range(FACE_NUMBER)
-    }
-    edge_indices = set()
-    corner_indices = set()
-
-    for face_idx in range(FACE_NUMBER):
-        face_start = face_idx * cube.face_size
-        # Corners: positions 0, 2, 6, 8 in each face
-        corner_indices.update({
-            face_start + 0, face_start + 2,
-            face_start + 6, face_start + 8,
-        })
-        # Edges: positions 1, 3, 5, 7 in each face
-        edge_indices.update({
-            face_start + 1, face_start + 3,
-            face_start + 5, face_start + 7,
-        })
-
-    centers_moved = sum(
-        1 for pos in permutations
-        if pos in center_indices
-    )
-    edges_moved = sum(
-        1 for pos in permutations
-        if pos in edge_indices
-    )
-    corners_moved = sum(
-        1 for pos in permutations
-        if pos in corner_indices
-    )
-
-    return {
-        'centers_moved': centers_moved,
-        'edges_moved': edges_moved,
-        'corners_moved': corners_moved,
-    }
+    counts: dict[FaceletPieceType, int] = {}
+    for pos in permutations:
+        for piece_type in cube.get_facelet_piece_types(pos):
+            counts[piece_type] = counts.get(piece_type, 0) + 1
+    return counts
 
 
 def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
@@ -765,39 +789,215 @@ def analyze_cycles(cycles: list[list[int]]) -> CycleAnalysis:
 
     """
     if not cycles:
-        return {
-            'cycle_count': 0,
-            'cycle_lengths': [],
-            'min_cycle_length': 0,
-            'max_cycle_length': 0,
-            'total_pieces_in_cycles': 0,
-            'two_cycles': 0,
-            'three_cycles': 0,
-            'four_plus_cycles': 0,
-        }
+        return CycleAnalysis(
+            cycle_count=0,
+            cycle_lengths=[],
+            min_cycle_length=0,
+            max_cycle_length=0,
+            total_pieces_in_cycles=0,
+            two_cycles=0,
+            three_cycles=0,
+            four_plus_cycles=0,
+        )
 
     cycle_lengths = [len(c) for c in cycles]
 
-    return {
-        'cycle_count': len(cycles),
-        'cycle_lengths': cycle_lengths,
-        'min_cycle_length': min(cycle_lengths),
-        'max_cycle_length': max(cycle_lengths),
-        'total_pieces_in_cycles': sum(cycle_lengths),
-        'two_cycles': sum(1 for length in cycle_lengths if length == 2),
-        'three_cycles': sum(1 for length in cycle_lengths if length == 3),
-        'four_plus_cycles': sum(1 for length in cycle_lengths if length >= 4),
-    }
+    return CycleAnalysis(
+        cycle_count=len(cycles),
+        cycle_lengths=cycle_lengths,
+        min_cycle_length=min(cycle_lengths),
+        max_cycle_length=max(cycle_lengths),
+        total_pieces_in_cycles=sum(cycle_lengths),
+        two_cycles=sum(1 for length in cycle_lengths if length == 2),
+        three_cycles=sum(1 for length in cycle_lengths if length == 3),
+        four_plus_cycles=sum(1 for length in cycle_lengths if length >= 4),
+    )
 
 
-def classify_pattern(  # noqa: C901, PLR0912, PLR0915
-        cp: list[int], co: list[int],
-        ep: list[int], eo: list[int],
+PARITY_LABELS: dict[int, str] = {0: 'even', 1: 'odd'}
+
+
+def classify_parity_signature(
+        corner_parity: int,
+        edge_parity: int,
+) -> ParitySignature:
+    """
+    Classify the parity signature of an algorithm's permutation.
+
+    Parity is a mathematical property of permutations: even permutations
+    can be decomposed into an even number of transpositions (swaps), odd
+    permutations into an odd number. On a valid 3x3x3 cube, corner and
+    edge parities must always match.
+
+    Args:
+        corner_parity: Parity of the corner permutation (0=even, 1=odd).
+        edge_parity: Parity of the edge permutation (0=even, 1=odd).
+
+    Returns:
+        ParitySignature with parity values, a signature string, validity
+        flag, and human-readable implications.
+
+    """
+    signature = f'{PARITY_LABELS[corner_parity]}-{PARITY_LABELS[edge_parity]}'
+    is_valid = corner_parity == edge_parity
+
+    implications: list[str] = []
+
+    if not is_valid:
+        corner_label = PARITY_LABELS[corner_parity]
+        edge_label = PARITY_LABELS[edge_parity]
+        implications.extend([
+            (
+                f'Corners have {corner_label} permutation parity,'
+                f' edges have {edge_label} — they must always match'
+            ),
+            (
+                'Every quarter turn flips both corner and edge parity'
+                ' simultaneously, so they can never diverge on a real cube'
+            ),
+            (
+                'Physically impossible on a standard 3x3x3: only achievable'
+                ' by disassembling the cube or swapping stickers'
+            ),
+        ])
+    elif corner_parity == 0:
+        implications.extend([
+            (
+                'Even permutation: corners and edges each undergo'
+                ' an even number of 2-cycles (swaps)'
+            ),
+            (
+                "Can be built entirely from commutators [A, B] = A B A' B'"
+                " and conjugates [A: B] = A B A' — no bare swaps needed"
+            ),
+            (
+                'Decomposes into 3-cycles, which is why pure commutator algs'
+                ' always move exactly 3 pieces per piece type'
+            ),
+            (
+                'A single quarter turn (R, U, ...) is odd, so this algorithm'
+                ' uses an even count of quarter turns net of half turns'
+            ),
+        ])
+    else:
+        implications.extend([
+            (
+                'Odd permutation: corners and edges each undergo'
+                ' an odd number of 2-cycles (swaps)'
+            ),
+            (
+                'A single quarter turn (R, U, ...) is itself an odd'
+                ' permutation, so one unmatched quarter turn drives this'
+            ),
+            (
+                'Cannot be built from commutators alone — at minimum one'
+                ' bare swap or unpaired quarter turn is required'
+            ),
+            (
+                'Typical of algorithms like T-perm or J-perm that swap'
+                ' one pair of corners and one pair of edges simultaneously'
+            ),
+        ])
+
+    return ParitySignature(
+        signature=signature,
+        is_valid=is_valid,
+        implications=implications,
+    )
+
+
+def classify_orientation_patterns(
+        co: CornerOrientation,
+        eo: EdgeOrientation,
+) -> tuple[list[str], OrientationFlags]:
+    """
+    Classify pattern labels based on piece orientation.
+
+    When both corners and edges are oriented only the aggregate
+    ``ALL_ORIENTED`` label is emitted; the per-piece-type labels are
+    reserved for the cases where only one type is oriented.
+    ``EO_COMPLETE`` and ``CO_COMPLETE`` are always emitted alongside
+    their respective oriented labels for unambiguous per-type queries.
+
+    Args:
+        co: Corner orientation.
+        eo: Edge orientation.
+
+    Returns:
+        Tuple of emitted labels and the orientation flags so callers
+        can reuse them without recomputing.
+
+    """
+    all_corners_oriented = all(orientation == 0 for orientation in co)
+    all_edges_oriented = all(orientation == 0 for orientation in eo)
+
+    patterns: list[str] = []
+    if all_corners_oriented and all_edges_oriented:
+        patterns.extend(['ALL_ORIENTED', 'EO_COMPLETE', 'CO_COMPLETE'])
+    elif all_corners_oriented:
+        patterns.extend(['CORNERS_ORIENTED', 'CO_COMPLETE', 'OLL_CORNERS_DONE'])
+    elif all_edges_oriented:
+        patterns.extend(['EDGES_ORIENTED', 'EO_COMPLETE', 'OLL_EDGES_DONE'])
+
+    return patterns, OrientationFlags(all_corners_oriented, all_edges_oriented)
+
+
+def classify_permutation_patterns(
+        cp: CornerPermutation,
+        ep: EdgePermutation,
+        orientation: OrientationFlags,
 ) -> list[str]:
     """
-    Comprehensive pattern classification for speedcubing.
+    Classify pattern labels based on piece permutation.
 
-    Identifies specific cube states and patterns useful for solving.
+    When both corners and edges are permuted only the aggregate
+    ``ALL_PERMUTED`` label is emitted; the per-piece-type labels cover
+    the cases where only one type is permuted.
+
+    Args:
+        cp: Corner permutation.
+        ep: Edge permutation.
+        orientation: Orientation flags from ``classify_orientation_patterns``.
+
+    Returns:
+        List of emitted permutation-related pattern labels.
+
+    """
+    corners_permuted = cp == SOLVED_CP
+    edges_permuted = ep == SOLVED_EP
+    all_permuted = corners_permuted and edges_permuted
+    all_oriented = (
+        orientation.all_corners_oriented and orientation.all_edges_oriented
+    )
+
+    patterns: list[str] = []
+    if all_permuted:
+        patterns.append('ALL_PERMUTED')
+    elif corners_permuted:
+        patterns.append('CORNERS_PERMUTED')
+    elif edges_permuted:
+        patterns.append('EDGES_PERMUTED')
+
+    if all_oriented and not all_permuted:
+        patterns.append('OLL_COMPLETE_PLL_REMAINING')
+    if all_permuted and not all_oriented:
+        patterns.append('PERMUTED_BUT_MISORIENTED')
+
+    # ZZ EOLine: EO complete + DF (index 5) and DB (index 7) in home slots.
+    if orientation.all_edges_oriented and ep[5] == 5 and ep[7] == 7:
+        patterns.append('EOLine_DONE')
+
+    return patterns
+
+
+def classify_first_layer_patterns(
+        cp: CornerPermutation,
+        co: CornerOrientation,
+        ep: EdgePermutation,
+        eo: EdgeOrientation,
+) -> tuple[list[str], FirstLayerFlags]:
+    """
+    Classify pattern labels based on first layer (D face) progress.
 
     Args:
         cp: Corner permutation.
@@ -806,168 +1006,267 @@ def classify_pattern(  # noqa: C901, PLR0912, PLR0915
         eo: Edge orientation.
 
     Returns:
-        List of pattern names identifying the cube state.
+        Tuple of emitted labels plus completion flags so last-layer
+        classification can reuse them.
 
     """
-    patterns = []
-
-    # Basic state checks
-    if (cp == SOLVED_CP and co == SOLVED_CO and
-        ep == SOLVED_EP and eo == SOLVED_EO):
-        patterns.append('SOLVED')
-        return patterns  # If solved, no other patterns apply
-
-    # Orientation patterns
-    all_corners_oriented = all(orientation == 0 for orientation in co)
-    all_edges_oriented = all(orientation == 0 for orientation in eo)
-
-    if all_corners_oriented and all_edges_oriented:
-        patterns.append('ALL_ORIENTED')
-
-    if all_corners_oriented:
-        patterns.append('CORNERS_ORIENTED')
-
-    if all_edges_oriented:
-        patterns.append('EDGES_ORIENTED')
-
-    # Permutation patterns
-    corners_permuted = cp == SOLVED_CP
-    edges_permuted = ep == SOLVED_EP
-
-    if corners_permuted and edges_permuted:
-        patterns.append('ALL_PERMUTED')
-
-    if corners_permuted:
-        patterns.append('CORNERS_PERMUTED')
-
-    if edges_permuted:
-        patterns.append('EDGES_PERMUTED')
-
-    # CFOP-specific patterns
-    if all_corners_oriented and not all_edges_oriented:
-        patterns.append('OLL_CORNERS_DONE')
-
-    if all_edges_oriented and not all_corners_oriented:
-        patterns.append('OLL_EDGES_DONE')
-
-    if (
-            all_corners_oriented
-            and all_edges_oriented
-            and not (corners_permuted and edges_permuted)
-    ):
-        patterns.append('OLL_COMPLETE_PLL_REMAINING')
-
-    if (
-            corners_permuted and edges_permuted
-            and (not all_corners_oriented or not all_edges_oriented)
-    ):
-        patterns.append('PERMUTED_BUT_MISORIENTED')
-
-    # Layer-by-layer patterns
-    # Check if first layer (D face) corners are solved
-    d_corners_solved = all(
-        cp[i] == i and co[i] == 0
-        for i in D_CORNERS
+    d_corners_solved = all(cp[i] == i and co[i] == 0 for i in D_CORNERS)
+    d_edges_solved = all(ep[i] == i and eo[i] == 0 for i in D_EDGES)
+    f2l_edges_solved = d_corners_solved and d_edges_solved and all(
+        ep[i] == i and eo[i] == 0 for i in E_EDGES
     )
+
+    patterns: list[str] = []
     if d_corners_solved:
         patterns.append('FIRST_LAYER_CORNERS_SOLVED')
-
-    # Check if first layer edges are solved
-    d_edges = D_EDGES
-    d_edges_solved = all(
-        ep[i] == i and eo[i] == 0
-        for i in d_edges
-    )
     if d_edges_solved:
-        patterns.append('FIRST_LAYER_EDGES_SOLVED')
-
+        patterns.extend(['FIRST_LAYER_EDGES_SOLVED', 'CROSS_SOLVED'])
     if d_corners_solved and d_edges_solved:
         patterns.append('FIRST_LAYER_COMPLETE')
+    if f2l_edges_solved:
+        patterns.append('F2L_COMPLETE')
 
-    # Check for cross (D edges solved)
-    if d_edges_solved:
-        patterns.append('CROSS_SOLVED')
+    return patterns, FirstLayerFlags(
+        d_corners_solved, d_edges_solved, f2l_edges_solved,
+    )
 
-    # F2L specific patterns
-    f2l_edges_solved = False
-    if d_corners_solved and d_edges_solved:
-        # Check if F2L is complete (D layer + E slice edges)
-        f2l_edges_solved = all(
-            ep[i] == i and eo[i] == 0
-            for i in E_EDGES
-        )
-        if f2l_edges_solved:
-            patterns.append('F2L_COMPLETE')
 
-    # Last layer patterns
+def classify_last_layer_patterns(
+        cp: CornerPermutation,
+        co: CornerOrientation,
+        ep: EdgePermutation,
+        eo: EdgeOrientation,
+        first_layer: FirstLayerFlags,
+) -> list[str]:
+    """
+    Classify pattern labels based on last layer (U face) state.
+
+    Args:
+        cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
+        first_layer: Flags from ``classify_first_layer_patterns`` used
+            to gate the ``OLL_CASE`` label on a completed F2L.
+
+    Returns:
+        List of emitted last-layer pattern labels.
+
+    """
     u_corners_oriented = all(co[i] == 0 for i in U_CORNERS)
     u_edges_oriented = all(eo[i] == 0 for i in U_EDGES)
+    last_layer_oriented = u_corners_oriented and u_edges_oriented
 
-    if u_corners_oriented and u_edges_oriented:
+    patterns: list[str] = []
+    u_edges_in_u_layer = all(ep[i] in U_EDGES for i in U_EDGES)
+    if u_edges_in_u_layer and u_edges_oriented:
+        patterns.append('OLL_CROSS_DONE')
+
+    if last_layer_oriented:
         patterns.append('LAST_LAYER_ORIENTED')
 
-    # PLL patterns (all oriented, but permuted)
-    if u_corners_oriented and u_edges_oriented:
         u_corners_permuted = all(cp[i] in U_CORNERS for i in U_CORNERS)
         u_edges_permuted = all(ep[i] in U_EDGES for i in U_EDGES)
 
-        if not u_corners_permuted or not u_edges_permuted:
-            patterns.append('PLL_CASE')
+        if u_corners_permuted and u_edges_permuted:
+            u_corners_solved = all(cp[i] == i for i in U_CORNERS)
+            u_edges_solved = all(ep[i] == i for i in U_EDGES)
+            if not (u_corners_solved and u_edges_solved):
+                patterns.append('PLL_CASE')
+                if u_corners_solved:
+                    patterns.append('PLL_EDGES_ONLY')
+                elif u_edges_solved:
+                    patterns.append('PLL_CORNERS_ONLY')
 
-            # Specific PLL types
-            if u_corners_permuted and not u_edges_permuted:
-                patterns.append('PLL_EDGES_ONLY')
-
-            if not u_corners_permuted and u_edges_permuted:
-                patterns.append('PLL_CORNERS_ONLY')
-
-    # OLL patterns (last layer not oriented)
-    if ((not u_corners_oriented or not u_edges_oriented)
-            and d_corners_solved and d_edges_solved and f2l_edges_solved):
+    if not last_layer_oriented and first_layer.f2l_edges_solved:
         patterns.append('OLL_CASE')
-
-    # Special patterns
-    # Checkerboard-like (many pieces moved)
-    if len([i for i, pos in enumerate(cp) if pos != i]) >= 6:
-        patterns.append('HIGHLY_SCRAMBLED')
-
-    # Minimal scramble
-    if len([i for i, pos in enumerate(cp) if pos != i]) <= 2:
-        patterns.append('MINIMALLY_SCRAMBLED')
-
-    # Check permutation structure (orientation constraints)
-    corner_cycles = find_permutation_cycles(cp)
-    edge_cycles = find_permutation_cycles(ep)
-
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
-        patterns.append('SINGLE_CORNER_CYCLE')
-
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
-        patterns.append('SINGLE_EDGE_CYCLE')
-
-    # Check for swaps (2-cycles)
-    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
-        patterns.append('SINGLE_CORNER_SWAP')
-
-    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
-        patterns.append('SINGLE_EDGE_SWAP')
-
-    # Three-cycles (common in commutators)  # noqa: ERA001
-    if any(len(cycle) == 3 for cycle in corner_cycles):
-        patterns.append('CORNER_THREE_CYCLE')
-
-    if any(len(cycle) == 3 for cycle in edge_cycles):
-        patterns.append('EDGE_THREE_CYCLE')
-
-    if not patterns:
-        patterns.append('UNCLASSIFIED')
 
     return patterns
 
 
+def classify_scramble_level(
+        cp: CornerPermutation,
+        co: CornerOrientation,
+        ep: EdgePermutation,
+        eo: EdgeOrientation,
+) -> list[str]:
+    """
+    Classify pattern labels based on how many pieces are displaced.
+
+    Args:
+        cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
+
+    Returns:
+        List of scramble-level labels (``HIGHLY_SCRAMBLED`` or
+        ``MINIMALLY_SCRAMBLED``).
+
+    """
+    corners_displaced = sum(
+        1 for i in range(8) if cp[i] != i or co[i] != 0
+    )
+    edges_displaced = sum(
+        1 for i in range(12) if ep[i] != i or eo[i] != 0
+    )
+
+    patterns: list[str] = []
+    if corners_displaced >= 6 or edges_displaced >= 8:
+        patterns.append('HIGHLY_SCRAMBLED')
+    if corners_displaced <= 2 and edges_displaced <= 2:
+        patterns.append('MINIMALLY_SCRAMBLED')
+    return patterns
+
+
+def classify_single_cycles(
+        corner_cycles: list[list[int]],
+        edge_cycles: list[list[int]],
+        cp: CornerPermutation,
+        ep: EdgePermutation,
+) -> list[str]:
+    """
+    Classify single-cycle and swap labels for corners and edges.
+
+    Args:
+        corner_cycles: Corner permutation cycles.
+        edge_cycles: Edge permutation cycles.
+        cp: Corner permutation (used to determine full cycle length).
+        ep: Edge permutation (used to determine full cycle length).
+
+    Returns:
+        List of single-cycle labels.
+
+    """
+    patterns: list[str] = []
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == len(cp):
+        patterns.append('SINGLE_CORNER_CYCLE')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == len(ep):
+        patterns.append('SINGLE_EDGE_CYCLE')
+    if len(corner_cycles) == 1 and len(corner_cycles[0]) == 2:
+        patterns.append('SINGLE_CORNER_SWAP')
+    if len(edge_cycles) == 1 and len(edge_cycles[0]) == 2:
+        patterns.append('SINGLE_EDGE_SWAP')
+    return patterns
+
+
+def classify_cycle_patterns(
+        cp: CornerPermutation,
+        ep: EdgePermutation,
+) -> list[str]:
+    """
+    Classify pattern labels based on permutation cycle structure.
+
+    Args:
+        cp: Corner permutation.
+        ep: Edge permutation.
+
+    Returns:
+        List of cycle-structure labels (single cycles, swaps,
+        three-cycles).
+
+    """
+    corner_cycles = find_permutation_cycles(cp)
+    edge_cycles = find_permutation_cycles(ep)
+    corners_solved = cp == SOLVED_CP
+    edges_solved = ep == SOLVED_EP
+
+    patterns = classify_single_cycles(corner_cycles, edge_cycles, cp, ep)
+
+    has_corner_3_cycle = any(len(c) == 3 for c in corner_cycles)
+    has_edge_3_cycle = any(len(c) == 3 for c in edge_cycles)
+
+    if has_corner_3_cycle:
+        patterns.append('CORNER_THREE_CYCLE')
+    if has_edge_3_cycle:
+        patterns.append('EDGE_THREE_CYCLE')
+    if any(len(c) == 4 for c in corner_cycles):
+        patterns.append('CORNER_FOUR_CYCLE')
+    if any(len(c) == 4 for c in edge_cycles):
+        patterns.append('EDGE_FOUR_CYCLE')
+
+    # Pure piece-type 3-cycles: only one piece type affected (commutator).
+    if has_corner_3_cycle and edges_solved:
+        patterns.append('PURE_CORNER_3_CYCLE')
+    if has_edge_3_cycle and corners_solved:
+        patterns.append('PURE_EDGE_3_CYCLE')
+
+    # Double swaps: two independent 2-cycles (H-perm / Z-perm like structures).
+    if sum(1 for c in corner_cycles if len(c) == 2) == 2:
+        patterns.append('DOUBLE_CORNER_SWAP')
+    if sum(1 for c in edge_cycles if len(c) == 2) == 2:
+        patterns.append('DOUBLE_EDGE_SWAP')
+
+    return patterns
+
+
+def classify_pattern(
+        cp: CornerPermutation, co: CornerOrientation,
+        ep: EdgePermutation, eo: EdgeOrientation,
+) -> PatternClassification:
+    """
+    Comprehensive pattern classification for speedcubing.
+
+    Identifies specific cube states and patterns useful for solving,
+    grouped into categories that mirror the focused classifier helpers.
+
+    Args:
+        cp: Corner permutation.
+        co: Corner orientation.
+        ep: Edge permutation.
+        eo: Edge orientation.
+
+    Returns:
+        PatternClassification with labels grouped by category.
+
+    """
+    if (cp == SOLVED_CP and co == SOLVED_CO and
+        ep == SOLVED_EP and eo == SOLVED_EO):
+        return PatternClassification(
+            state=['SOLVED'],
+            orientation=[],
+            permutation=[],
+            first_layer=[],
+            last_layer=[],
+            scramble=[],
+            cycle=[],
+        )
+
+    orientation_patterns, orientation = classify_orientation_patterns(co, eo)
+    permutation_patterns = classify_permutation_patterns(
+        cp, ep, orientation,
+    )
+    first_layer_patterns, first_layer = classify_first_layer_patterns(
+        cp, co, ep, eo,
+    )
+    last_layer_patterns = classify_last_layer_patterns(
+        cp, co, ep, eo, first_layer,
+    )
+    scramble_patterns = classify_scramble_level(cp, co, ep, eo)
+    cycle_patterns = classify_cycle_patterns(cp, ep)
+
+    any_classified = any([
+        orientation_patterns, permutation_patterns,
+        first_layer_patterns, last_layer_patterns,
+        scramble_patterns, cycle_patterns,
+    ])
+
+    return PatternClassification(
+        state=[] if any_classified else ['UNCLASSIFIED'],
+        orientation=orientation_patterns,
+        permutation=permutation_patterns,
+        first_layer=first_layer_patterns,
+        last_layer=last_layer_patterns,
+        scramble=scramble_patterns,
+        cycle=cycle_patterns,
+    )
+
+
 def compute_cubie_complexity(
-    corners_moved: int, corners_twisted: int,
-    edges_moved: int, edges_flipped: int,
+    corners_moved: int,
+    corners_twisted: int,
+    edges_moved: int,
+    edges_flipped: int,
 ) -> tuple[int, str]:
     """
     Compute complexity score and suggested solving approach.
@@ -977,9 +1276,9 @@ def compute_cubie_complexity(
 
     Args:
         corners_moved: Number of corners out of place.
-        corners_twisted: Number of corners incorrectly oriented.
+        corners_twisted: Number of corners in their home position but twisted.
         edges_moved: Number of edges out of place.
-        edges_flipped: Number of edges incorrectly oriented.
+        edges_flipped: Number of edges in their home position but flipped.
 
     Returns:
         Tuple of (complexity_score, suggested_approach).
@@ -1001,130 +1300,137 @@ def compute_cubie_complexity(
     return complexity, approach
 
 
-def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
+def compute_impacts(  # noqa: PLR0914, PLR0915
+        algorithm: 'Algorithm',
+        size: int = DEFAULT_CUBE_SIZE,
+) -> ImpactData:
     """
-    Compute comprehensive impact metrics for an algorithm on a 3x3x3 cube.
+    Compute comprehensive impact metrics for an algorithm.
 
-    Analyzes both facelet-level (visual/spatial) and cubie-level (piece)
-    impacts of the algorithm on the cube state.
+    Analyzes facelet-level (visual/spatial) impacts for any cube size.
+    Cubie-level (piece) analysis is only available for 3x3x3 cubes.
+
+    Args:
+        algorithm: The algorithm to analyze.
+        size: Size of the cube (default 3).
 
     Returns:
-        ImpactData: Namedtuple containing comprehensive impact metrics:
-
-        Facelet metrics (visual/spatial impact):
-            - facelets_transformation_mask: Binary mask of impacted facelets
-            - facelets_fixed_count: Count of unmoved facelets
-            - facelets_mobilized_count: Total number of moved facelets
-            - facelets_scrambled_percent: Percent of moved facelets
-            - facelets_permutations: Mapping of original to final positions
-            - facelets_manhattan_distance.distances: Manhattan distances for
-              each facelet traveled
-            - facelets_manhattan_distance.mean: Average Manhattan facelet
-              displacement
-            - facelets_manhattan_distance.max: Maximum Manhattan facelet
-              displacement
-            - facelets_manhattan_distance.sum: Total Manhattan displacement
-              across all facelets
-            - facelets_qtm_distance.distances: QTM distances for
-              each facelet traveled
-            - facelets_qtm_distance.mean: Average QTM facelet displacement
-            - facelets_qtm_distance.max: Maximum QTM facelet displacement
-            - facelets_qtm_distance.sum: Total QTM displacement across all
-              facelets
-            - facelets_face_mobility: Impact breakdown by face
-
-        Cubie metrics (piece-level impact):
-            - cubies_corners_moved: Number of corners out of position
-            - cubies_corners_twisted: Number of misoriented corners
-            - cubies_edges_moved: Number of edges out of position
-            - cubies_edges_flipped: Number of flipped edges
-            - cubies_corner_cycles: Permutation cycles in corner arrangement
-            - cubies_edge_cycles: Permutation cycles in edge arrangement
-            - cubies_complexity_score: Overall solving complexity estimate
-            - cubies_suggested_approach: Recommended solving strategy
+        ImpactData with facelet metrics for all sizes.
+        Cubie metrics and distance metrics are None for non-3x3x3.
 
     """
-    from cubing_algs.transform.timing import untime_moves
-    from cubing_algs.vcube import VCube
+    from cubing_algs.masks import compute_algorithm_mask  # noqa: PLC0415
+    from cubing_algs.solved_state import get_unique_facelets  # noqa: PLC0415
+    from cubing_algs.transform.degrip import degrip_moves  # noqa: PLC0415
+    from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+    from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
+    from cubing_algs.vcube import VCube  # noqa: PLC0415
 
-    cube = VCube(size=3)
-    cube.rotate(untime_moves(algorithm))
-    cube = cube.oriented_copy('UF')
-
-    state_unique_moved = cubies_to_facelets(
-        *cube.cubies,
-        UNIQUE_FACELETS_3x3x3,
+    cleaned_algorithm = algorithm.transform(
+        unpause_moves,
+        untime_moves,
     )
 
-    mask = ''.join(
-        '0' if f1 == f2 else '1'
-        for f1, f2 in zip(
-                UNIQUE_FACELETS_3x3x3,
-                state_unique_moved,
-                strict=True,
-        )
+    cube = VCube(size=size)
+    cube.rotate(cleaned_algorithm)
+
+    mask, transformed_state = compute_algorithm_mask(
+        cleaned_algorithm, size,
     )
 
-    permutations = {}
-    for original_pos in range(len(UNIQUE_FACELETS_3x3x3)):
-        final_pos = state_unique_moved.find(
-            UNIQUE_FACELETS_3x3x3[original_pos],
+    unique_facelets = get_unique_facelets(size)
+    permutations: dict[int, int] = {}
+    for original_pos in range(len(unique_facelets)):
+        final_pos = transformed_state.find(
+            unique_facelets[original_pos],
         )
 
         if final_pos != original_pos:
             permutations[original_pos] = final_pos
 
-    # Compute distance metrics using helper function
-    manhattan_distance = compute_distance_metrics(
-        permutations, cube, compute_manhattan_distance,
-    )
-    qtm_distance = compute_distance_metrics(
-        permutations, cube, compute_qtm_distance,
-    )
-
+    # Facelet metrics (size-agnostic)
     fixed_count = mask.count('0')
     mobilized_count = mask.count('1')
-    # Center facelets should not move
+    # Odd-sized cubes have fixed center facelets (one per face)
+    immovable_count = cube.face_number if cube.has_fixed_centers else 0
     scrambled_percent = mobilized_count / (
-        len(UNIQUE_FACELETS_3x3x3) - cube.face_number
+        len(unique_facelets) - immovable_count
     )
 
     face_mobility = compute_face_impact(mask, cube)
-
     face_to_face_matrix = compute_face_to_face_matrix(permutations, cube)
     symmetry = detect_symmetry(mask, cube)
-    layer_analysis = analyze_layers(permutations, cube)
 
-    # Cubie analysis
-    cp, co, ep, eo, _so = cube.cubies
+    piece_type_impact = analyze_piece_type_impact(permutations, cube)
 
-    # Count corners moved and twisted
-    corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)
-    corners_twisted = sum(1 for orientation in co if orientation != 0)
+    # 3x3x3-specific analysis (distances, cubies)
+    manhattan_distance: DistanceMetrics | None = None
+    qtm_distance: DistanceMetrics | None = None
+    cp: CornerPermutation | None = None
+    co: CornerOrientation | None = None
+    ep: EdgePermutation | None = None
+    eo: EdgeOrientation | None = None
+    corners_moved: int | None = None
+    corners_twisted: int | None = None
+    edges_moved: int | None = None
+    edges_flipped: int | None = None
+    corner_cycles: list[list[int]] | None = None
+    edge_cycles: list[list[int]] | None = None
+    complexity_score: int | None = None
+    suggested_approach: str | None = None
+    corner_parity: int | None = None
+    edge_parity: int | None = None
+    parity_valid: bool | None = None
+    parity_signature: ParitySignature | None = None
+    corner_cycle_analysis: CycleAnalysis | None = None
+    edge_cycle_analysis: CycleAnalysis | None = None
+    patterns: PatternClassification | None = None
 
-    # Count edges moved and flipped
-    edges_moved = sum(1 for i, pos in enumerate(ep) if pos != i)
-    edges_flipped = sum(1 for orientation in eo if orientation != 0)
+    if size == 3:
+        cubie_cube = VCube(size=size)
+        # Keep cube in absolute frame
+        cubie_cube.rotate(
+            degrip_moves(
+                cleaned_algorithm,
+            ),
+        )
 
-    # Find permutation cycles
-    corner_cycles = find_permutation_cycles(cp)
-    edge_cycles = find_permutation_cycles(ep)
+        manhattan_distance = compute_distance_metrics(
+            permutations, cubie_cube, compute_manhattan_distance,
+        )
+        qtm_distance = compute_distance_metrics(
+            permutations, cubie_cube, compute_qtm_distance,
+        )
+        cp, co, ep, eo, _so = cubie_cube.cubies
 
-    # Compute complexity and approach
-    complexity_score, suggested_approach = compute_cubie_complexity(
-        corners_moved,
-        corners_twisted,
-        edges_moved,
-        edges_flipped,
-    )
+        corners_moved = sum(1 for i, pos in enumerate(cp) if pos != i)
+        corners_twisted = sum(
+            1 for i, (pos, orientation) in enumerate(zip(cp, co, strict=True))
+            if pos == i and orientation != 0
+        )
+        edges_moved = sum(1 for i, pos in enumerate(ep) if pos != i)
+        edges_flipped = sum(
+            1 for i, (pos, orientation) in enumerate(zip(ep, eo, strict=True))
+            if pos == i and orientation != 0
+        )
 
-    # New cubie analyses
-    corner_parity = compute_parity(cp)
-    edge_parity = compute_parity(ep)
-    parity_valid = corner_parity == edge_parity
-    corner_cycle_analysis = analyze_cycles(corner_cycles)
-    edge_cycle_analysis = analyze_cycles(edge_cycles)
-    patterns = classify_pattern(cp, co, ep, eo)
+        corner_cycles = find_permutation_cycles(cp)
+        edge_cycles = find_permutation_cycles(ep)
+
+        complexity_score, suggested_approach = compute_cubie_complexity(
+            corners_moved,
+            corners_twisted,
+            edges_moved,
+            edges_flipped,
+        )
+
+        corner_parity = compute_parity(cp)
+        edge_parity = compute_parity(ep)
+        parity_valid = corner_parity == edge_parity
+        parity_signature = classify_parity_signature(corner_parity, edge_parity)
+        corner_cycle_analysis = analyze_cycles(corner_cycles)
+        edge_cycle_analysis = analyze_cycles(edge_cycles)
+        patterns = classify_pattern(cp, co, ep, eo)
 
     return ImpactData(
         cube=cube,
@@ -1141,7 +1447,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
         facelets_face_mobility=face_mobility,
         facelets_face_to_face_matrix=face_to_face_matrix,
         facelets_symmetry=symmetry,
-        facelets_layer_analysis=layer_analysis,
+        facelets_piece_type_impact=piece_type_impact,
 
         # Cubie analysis
         cubies_corner_permutation=cp,
@@ -1159,6 +1465,7 @@ def compute_impacts(algorithm: 'Algorithm') -> ImpactData:  # noqa: PLR0914
         cubies_corner_parity=corner_parity,
         cubies_edge_parity=edge_parity,
         cubies_parity_valid=parity_valid,
+        cubies_parity_signature=parity_signature,
         cubies_corner_cycle_analysis=corner_cycle_analysis,
         cubies_edge_cycle_analysis=edge_cycle_analysis,
         cubies_patterns=patterns,

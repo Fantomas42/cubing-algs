@@ -6,14 +6,18 @@ from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Self
 
+from cubing_algs.annotations import CubeMask
+from cubing_algs.annotations import CubeOrientation
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import compute_ergonomics
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.impacts import ImpactData
 from cubing_algs.impacts import compute_impacts
 from cubing_algs.memory import MemoryData
@@ -21,7 +25,6 @@ from cubing_algs.memory import compute_memory
 from cubing_algs.metrics import MetricsData
 from cubing_algs.metrics import compute_metrics
 from cubing_algs.move import Move
-from cubing_algs.solved_state import UNIQUE_FACELETS_3x3x3
 from cubing_algs.structure import StructureData
 from cubing_algs.structure import compute_structure
 
@@ -45,13 +48,16 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             self.data.extend(initlist)
 
     @staticmethod
-    def parse_moves(items: Iterable[Move | str] | Move | str,
-                    *, trust_input: bool = False) -> 'Algorithm':
+    def parse_moves(
+            moves: Iterable[Move | str] | Move | str,
+            *,
+            trust_input: bool = False,
+    ) -> 'Algorithm':
         """
         Parse a string or list of strings into an Algorithm object.
 
         Args:
-            items: A string or iterable of Move objects or strings
+            moves: A string or iterable of Move objects or strings
                 representing moves.
             trust_input: If True, trust the input and skip cleaning
                 and validation steps.
@@ -62,7 +68,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """
         from cubing_algs.parsing import parse_moves  # noqa: PLC0415
 
-        return parse_moves(items, trust_input=trust_input)
+        return parse_moves(moves, trust_input=trust_input)
 
     @staticmethod
     def parse_move(item: Move | str) -> Move:
@@ -221,6 +227,50 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         return mod_moves
 
+    def validate_cube_size(self, size: int) -> None:
+        """
+        Ensure the given cube size can accommodate this algorithm.
+
+        Raises:
+            InvalidCubeSizeError: If cube size is less than minimal cube size.
+
+        """
+        if size < self.min_cube_size:
+            msg = (
+                'Cube size is too small for this algorithm '
+                f'({ size } < { self.min_cube_size })'
+            )
+            raise InvalidCubeSizeError(msg)
+
+    def impacts(self, size: int = DEFAULT_CUBE_SIZE) -> ImpactData:
+        """
+        Analyze the spatial impact of this algorithm on a cube.
+
+        Computes comprehensive metrics about how the algorithm affects
+        individual facelets on the cube, including movement patterns,
+        distances, and face-level statistics.
+
+        Cubie-level analysis is only available for 3x3x3 cubes.
+
+        Args:
+            size: Size of the cube (default 3).
+
+        Returns:
+            An ImpactData object containing comprehensive impact metrics.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("R U R' U'")
+            >>> impacts = alg.impacts()
+            >>> impacts.facelets_mobilized_count
+            18  # 18 out of 54 facelets are affected
+            >>> impacts.facelets_scrambled_percent
+            0.33  # About 33% of the cube is scrambled
+
+        """
+        self.validate_cube_size(size)
+
+        return compute_impacts(self, size=size)
+
     @property
     def cycles(self) -> int:
         """
@@ -268,26 +318,6 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         """
         return compute_metrics(self)
-
-    @property
-    def impacts(self) -> ImpactData:
-        """
-        Analyze the spatial impact of this algorithm on 3x3x3 cube.
-
-        Computes comprehensive metrics about how the algorithm affects
-        individual facelets on the cube, including movement patterns,
-        distances, and face-level statistics.
-
-        Example:
-            >>> alg = Algorithm.parse_moves("R U R' U'")
-            >>> impacts = alg.impacts
-            >>> impacts.facelets_mobilized_count
-            18  # 18 out of 54 facelets are affected
-            >>> impacts.facelets_scrambled_percent
-            0.33  # About 33% of the cube is scrambled
-
-        """
-        return compute_impacts(self)
 
     @property
     def ergonomics(self) -> ErgonomicsData:
@@ -398,8 +428,77 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             for m in self
         )
 
-    def show(self, size: int = 3, mode: str = '',
-             *, impact_mask: bool = True) -> 'VCube':
+    @property
+    def has_pauses(self) -> bool:
+        """Check if algorithm contains pauses."""
+        return any(m.is_pause for m in self)
+
+    @property
+    def has_times(self) -> bool:
+        """Check if algorithm timed moves."""
+        return any(m.is_timed for m in self)
+
+    def get_cube_and_impact_mask(
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            impact_mask: bool = True,
+    ) -> tuple['VCube', CubeMask]:
+        """
+        Apply this algorithm to a fresh cube and return it with an impact mask.
+
+        Strips pauses and timed moves, applies the cleaned algorithm to a new
+        VCube, and optionally computes a mask string identifying which facelets
+        were moved by the algorithm.
+
+        Args:
+            size: Size of the cube (default 3).
+            impact_mask: If True, compute and return a mask string marking
+                moved facelets. If False, the mask is an empty string.
+
+        Returns:
+            A tuple of (cube, mask) where cube is the VCube after the algorithm
+            is applied, and mask is the CubeMask string of impacted facelets
+            by the algorithm or '' when impact_mask is False.
+
+        """
+        from cubing_algs.masks import compute_algorithm_mask  # noqa: PLC0415
+        from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+        from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        self.validate_cube_size(size)
+
+        cleaned_algo = self.transform(
+            unpause_moves,
+            untime_moves,
+        )
+
+        cube = VCube(size=size)
+        cube.rotate(cleaned_algo)
+
+        moved_facelets_mask = ''
+
+        if impact_mask:
+            moved_facelets_mask, _ = compute_algorithm_mask(
+                cleaned_algo, size,
+            )
+
+        return cube, moved_facelets_mask
+
+    def show(  # noqa: PLR0913
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: CubeOrientation = '',
+            palette: str = '',
+            effect: str = '',
+            facelet: str = '',
+            style: str = '',
+            impact_mask: bool = True,
+    ) -> 'VCube':
         """
         Visualize the algorithm's effect on a cube.
 
@@ -408,76 +507,135 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
         Args:
             size: Size of the cube.
-            mode: Display mode for the cube visualization.
+            mode: Display mode for layout/orientation/mask
+                  (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout ('cube', 'top', 'linear', 'extended').
+            orientation: Cube orientation string for reorienting the view.
+            palette: Color palette to use.
+            effect: Visual effect to apply.
+            facelet: Facelet mode for display.
+            style: Letter style preset to apply.
             impact_mask: Show affected facelets with a mask.
 
         Returns:
             A VCube object with the algorithm applied.
 
         """
-        from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
-        from cubing_algs.vcube import VCube  # noqa: PLC0415
-
-        cube = VCube(size=size)
-        cube.rotate(untime_moves(self))
-
-        cube = cube.oriented_copy('UF')
-
-        mask = ''
-        if impact_mask and size == 3:
-            state_unique_moved = cubies_to_facelets(
-                *cube.cubies,
-                UNIQUE_FACELETS_3x3x3,
-            )
-
-            mask = ''.join(
-                '0' if f1 == f2 else '1'
-                for f1, f2 in zip(
-                        UNIQUE_FACELETS_3x3x3,
-                        state_unique_moved,
-                        strict=True,
-                )
-            )
+        cube, moved_facelets_mask = self.get_cube_and_impact_mask(
+            size=size,
+            impact_mask=impact_mask,
+        )
 
         cube.show(
             mode=mode,
-            mask=mask,
+            layout=layout,
+            orientation=orientation,
+            mask=moved_facelets_mask,
+            palette=palette,
+            effect=effect,
+            facelet=facelet,
+            style=style,
         )
 
         return cube
 
-    def image(self, *, size: int = 200,  # noqa: PLR0913
-              cube_size: int | None = None,
-              view: str = '3d', mask: str = '',
-              rotation: str = 'y45x-34',
-              distance: float = 10.0,
-              cube_color: str = '#111111',
-              palette_name: str = 'default') -> str:
+    def image(  # noqa: PLR0913
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: CubeOrientation = '',
+            palette: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0,
+            impact_mask: bool = True,
+    ) -> str:
         """
-        Render the algorithm's effect on a cube as an SVG image.
+        Generate image of the algorithm's effect on a cube.
+
+        Creates a VCube, applies this algorithm to it, and displays the result
+        with a mask showing which facelets are affected by the algorithm.
 
         Args:
-            size: Image dimension in pixels.
-            cube_size: Cube dimension (2 for 2x2, 3 for 3x3,
-                etc.). Defaults to 3 if not specified.
-            view: Rendering mode. ``'3d'`` for perspective view,
-                ``'top'`` for flat top-face with adjacent strips.
-            mask: Mask to apply on the cube.
-            rotation: Axis-angle rotation string (3d view only).
-            distance: Camera distance for perspective projection
-                (3d view only).
-            cube_color: Hex color for cube body between stickers.
-            palette_name: Color palette name for sticker colors.
+            size: Size of the cube (default 3).
+            mode: Display preset that sets layout, orientation, and mask
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            layout: Display layout; 'top' renders a flat 2D top-view,
+                    otherwise a 3D perspective view is used.
+            orientation: Cube orientation string for reorienting the view
+                         before rendering.
+            palette: Color palette name for sticker colors.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string for the 3D view, composed of
+                      axis-angle pairs (e.g., 'y45x-30').
+            distance: Camera distance from the cube center for the 3D view.
+            impact_mask: If True, highlight facelets moved by the algorithm.
 
         Returns:
             SVG string of the cube.
 
         """
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
-
-        return render_cube(
-            self, size=size, cube_size=cube_size,
-            view=view, mask=mask, rotation=rotation,
-            distance=distance, cube_color=cube_color,
-            palette_name=palette_name,
+        cube, moved_facelets_mask = self.get_cube_and_impact_mask(
+            size=size,
+            impact_mask=impact_mask,
         )
+
+        return cube.image(
+            mode=mode,
+            layout=layout,
+            orientation=orientation,
+            mask=moved_facelets_mask,
+            palette=palette,
+            image_size=image_size,
+            rotation=rotation,
+            distance=distance,
+        )
+
+    def to_dict(self, size: int = DEFAULT_CUBE_SIZE) -> dict[str, Any]:
+        """
+        Export algorithm data as a plain, JSON-serializable dict.
+
+        Aggregates the move string, every analysis property, and the
+        impacts computed for the given cube size. Nested data containers
+        (NamedTuple) are recursively flattened to plain dicts.
+
+        Args:
+            size: Cube size used for impacts computation.
+
+        Returns:
+            A dict aggregating the algorithm moves and all its computed
+            properties and analyses.
+
+        """
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        def flatten(obj: object) -> object:
+            if isinstance(obj, VCube | Algorithm | Move):
+                return obj.state if isinstance(obj, VCube) else str(obj)
+            if isinstance(obj, tuple) and hasattr(obj, '_asdict'):
+                named: dict[str, object] = obj._asdict()
+                return {k: flatten(v) for k, v in named.items()}
+            if isinstance(obj, list | tuple):
+                return [flatten(v) for v in obj]
+            if isinstance(obj, dict):
+                return {k: flatten(v) for k, v in obj.items()}
+            return obj
+
+        return {
+            'moves': str(self),
+            'cycles': self.cycles,
+            'min_cube_size': self.min_cube_size,
+            'is_standard': self.is_standard,
+            'is_sign': self.is_sign,
+            'has_rotations': self.has_rotations,
+            'has_internal_rotations': self.has_internal_rotations,
+            'has_pauses': self.has_pauses,
+            'has_times': self.has_times,
+            'metrics': flatten(self.metrics),
+            'ergonomics': flatten(self.ergonomics),
+            'structure': flatten(self.structure),
+            'memory': flatten(self.memory),
+            'impacts': flatten(self.impacts(size)),
+        }

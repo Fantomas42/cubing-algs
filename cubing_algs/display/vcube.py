@@ -1,31 +1,29 @@
 """Visual representation and display formatting for virtual cube states."""
 import os
-import re
 from typing import TYPE_CHECKING
+from typing import cast
 
-from cubing_algs.annotations import Mask
-from cubing_algs.annotations import RegexPattern
-from cubing_algs.constants import F2L_ADJACENT_FACES
-from cubing_algs.constants import F2L_FACE_ORIENTATIONS
-from cubing_algs.constants import F2L_FACES
+from cubing_algs.annotations import CubeDisplayMask
+from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import CubeOrientation
+from cubing_algs.annotations import FaceFacelets
+from cubing_algs.annotations import FaceMask
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display.constants import ANSI_TO_RGB
+from cubing_algs.display.constants import DEFAULT_EFFECT
+from cubing_algs.display.constants import DEFAULT_PALETTE
+from cubing_algs.display.constants import DEFAULT_STYLE
+from cubing_algs.display.constants import EMOJIS
+from cubing_algs.display.constants import LAYOUT_METHODS
 from cubing_algs.display.effects import load_effect
+from cubing_algs.display.mode import ModeDisplay
 from cubing_algs.display.palettes import load_palette
-from cubing_algs.display.styles import get_piece_types
 from cubing_algs.display.styles import load_style
-from cubing_algs.facelets import cubies_to_facelets
-from cubing_algs.facelets import facelets_to_cubies
-from cubing_algs.masks import CROSS_MASK
-from cubing_algs.masks import F2L_CLL_MASK
-from cubing_algs.masks import F2L_ELL_MASK
-from cubing_algs.masks import F2L_LL_MASK
-from cubing_algs.masks import F2L_MASK
-from cubing_algs.masks import L3_MASK
-from cubing_algs.masks import OLL_MASK
-from cubing_algs.masks import PLL_MASK
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from cubing_algs.vcube import VCube  # pragma: no cover
 
 
@@ -44,27 +42,8 @@ def color_support() -> bool:
 
 USE_COLORS = color_support()
 
-DEFAULT_EFFECT = os.getenv('CUBING_ALGS_EFFECT', '')
-DEFAULT_PALETTE = os.getenv('CUBING_ALGS_PALETTE', 'default')
-DEFAULT_STYLE = os.getenv('CUBING_ALGS_STYLE', 'default')
 
-ANSI_TO_RGB: RegexPattern = re.compile(
-    r'\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m',
-)
-
-EMOJIS = {
-    'U': '⬜',
-    'D': '🟨',
-    'F': '🟩',
-    'B': '🟦',
-    'L': '🟧',
-    'R': '🟥',
-    'masked': '⬛',
-    'hidden': '❓',
-}
-
-
-class VCubeDisplay:
+class VCubeDisplay(ModeDisplay):
     """
     Handle visual representation and display formatting for virtual cubes.
 
@@ -74,15 +53,18 @@ class VCubeDisplay:
 
     facelet_size = 3
 
-    def __init__(self, cube: 'VCube',
-                 palette_name: str = '',
-                 effect_name: str = '',
-                 facelet_type: str = '',
-                 style_name: str = '') -> None:
+    def __init__(
+            self,
+            cube: 'VCube',
+            palette_name: str = '',
+            effect_name: str = '',
+            facelet_type: str = '',
+            style_name: str = '',
+    ) -> None:
         """Initialize display handler with cube instance and visual settings."""
         self.cube = cube
         self.cube_size: int = cube.size
-        self.face_size: int = self.cube_size * self.cube_size
+        self.face_size: int = cube.face_size
         self.face_number: int = cube.face_number
 
         self.effect_name = (effect_name or DEFAULT_EFFECT).lower()
@@ -99,67 +81,10 @@ class VCubeDisplay:
         elif self.facelet_type in {'condensed', 'emoji'}:
             self.facelet_size = 1
 
-    def compute_mask(self, cube: 'VCube', mask: Mask) -> Mask:
-        """
-        Convert mask string to facelets format for display filtering.
-
-        Args:
-            cube: The virtual cube instance to process.
-            mask: Mask string in cubies format or empty string.
-
-        Returns:
-            Facelets format mask string where '1' indicates visible facelets.
-
-        """
-        if not mask:
-            return '1' * (self.face_number * self.face_size)
-
-        return cubies_to_facelets(
-            *facelets_to_cubies(cube.state),
-            mask,
-        )
-
-    def compute_f2l_front_face(self) -> str:
-        """
-        Determine the optimal front face orientation for F2L display mode.
-
-        Returns:
-            Single character representing the optimal front face for F2L.
-
-        """
-        impacted_faces = ''
-        saved_facelets = ''
-        cube_d_top = self.cube.oriented_copy('D')
-
-        for face in F2L_FACES:
-            exclusion_pattern = face * 6
-            facelets = cube_d_top.get_face_by_center(face)[
-                self.cube_size:self.face_size
-            ]
-
-            if exclusion_pattern != facelets:
-                impacted_faces += face
-                saved_facelets = facelets
-
-        if impacted_faces and len(impacted_faces) != 2:
-            last_face = impacted_faces[-1]
-            index = (
-                0
-                if saved_facelets[0] != last_face
-                or saved_facelets[3] != last_face
-                else 1
-            )
-            impacted_faces = (
-                last_face
-                + F2L_ADJACENT_FACES[last_face][index]
-            )
-
-        return F2L_FACE_ORIENTATIONS.get(
-            ''.join(sorted(impacted_faces)),
-            '',
-        )
-
-    def split_faces(self, state: str) -> list[str]:
+    def split_faces(
+            self,
+            state: CubeFacelets | CubeDisplayMask,
+    ) -> list[FaceFacelets | FaceMask]:
         """
         Split cube state string into individual face strings.
 
@@ -175,67 +100,67 @@ class VCubeDisplay:
             for i in range(self.face_number)
         ]
 
-    def display(self, mode: str = '', orientation: str = '',  # noqa: C901
-                mask: Mask = '') -> str:
+    def display(
+            self,
+            *,
+            mode: str = '',
+            layout: str = '',
+            orientation: CubeOrientation = '',
+            mask: CubeDisplayMask = '',
+    ) -> str:
         """
         Generate formatted visual representation of the cube state.
 
+        ``mode`` is a convenient shorthand that presets ``mask``,
+        ``orientation``, and ``layout`` for common solving stages.
+        Any explicit argument overrides what ``mode`` would have implied.
+
         Args:
-            mode: Display mode (e.g., 'oll', 'pll', 'cross', 'f2l', 'extended').
-            orientation: Cube orientation string for reorienting the view.
-            mask: Custom mask to filter which facelets are displayed.
+            mode: Solving-stage preset.
+                Sets mask, orientation, and layout together.
+                Supported values: ``'oll'``, ``'pll'``, ``'ll'``,
+                ``'cross'``, ``'f2l'``, ``'af2l'``, ``'f2l+ll'``,
+                ``'f2l+cll'``, ``'f2l+ell'``.
+            layout: Face arrangement for the output.
+                One of ``'cube'`` (cross net, default),
+                ``'top'`` (U face with one row of each adjacent face),
+                ``'extended'`` (full unfolded net), or
+                ``'linear'`` (every face printed side by side row by row).
+            orientation: Two-character string that rotates the cube to change
+                the viewer's point of view before rendering (e.g. ``'UF'``
+                keeps U on top and F in front, ``'DF'`` puts D on top).
+            mask: Mask to filter which facelets are displayed.
 
         Returns:
             Formatted string representation of the cube state.
 
         """
-        mode_mask = ''
-        display_method = self.display_cube
-        default_orientation = ''
-        mode = mode.lower()
+        mode_mask, mode_layout, mode_orientation = self.resolve_mode(
+            mode.lower(),
+        )
 
-        # Only work for 3x3x3
-        if mode == 'oll':
-            mode_mask = OLL_MASK
-            display_method = self.display_top_face
-            default_orientation = 'D'
-        elif mode == 'pll':
-            mode_mask = PLL_MASK
-            display_method = self.display_top_face
-            default_orientation = 'D'
-        elif mode == 'll':
-            mode_mask = L3_MASK
-            display_method = self.display_top_face
-            default_orientation = 'D'
-        elif mode == 'cross':
-            mode_mask = CROSS_MASK
-            default_orientation = 'FU'
-        elif mode in {'f2l', 'af2l'}:
-            mode_mask = F2L_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+ll':
-            mode_mask = F2L_LL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+cll':
-            mode_mask = F2L_CLL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'f2l+ell':
-            mode_mask = F2L_ELL_MASK
-            default_orientation = f'D{ self.compute_f2l_front_face() }'
-        elif mode == 'extended':
-            display_method = self.display_extended_net
-        elif mode == 'linear':
-            display_method = self.display_linear
+        display_method = cast(
+            'Callable[[list[FaceFacelets], list[FaceMask]], str]',
+            getattr(
+                self,
+                LAYOUT_METHODS.get(
+                    layout.lower() or mode_layout,
+                    'display_cube',
+                ),
+            ),
+        )
 
-        final_orientation = orientation or default_orientation
+        final_orientation = orientation or mode_orientation
         if final_orientation:
-            cube = self.cube.oriented_copy(final_orientation)
+            cube = self.cube.oriented_copy(final_orientation, full=True)
         else:
             cube = self.cube
 
         faces = self.split_faces(cube.state)
         masked_faces = self.split_faces(
-            self.compute_mask(cube, mask or mode_mask),
+            self.map_mask(
+                cube, mask or mode_mask,
+            ),
         )
 
         return display_method(faces, masked_faces)
@@ -256,9 +181,14 @@ class VCubeDisplay:
 
         return ' ' * (self.facelet_size * count)
 
-    def display_facelet(self, facelet: str, mask: str = '',  # noqa: C901, PLR0911, PLR0912
-                        facelet_index: int | None = None,
-                        *, adjacent: bool = False) -> str:
+    def display_facelet(  # noqa: C901, PLR0911, PLR0912
+            self,
+            facelet: str,
+            mask: str = '',
+            facelet_index: int | None = None,
+            *,
+            adjacent: bool = False,
+    ) -> str:
         """
         Format a single facelet with colors and effects for display.
 
@@ -273,23 +203,30 @@ class VCubeDisplay:
 
         """
         if self.facelet_type == 'emoji':
-            if mask == '0':
+            if mask in {'0', '2'}:
                 return EMOJIS['masked']
+            if mask == '3':
+                return '  '
             if facelet not in FACE_ORDER:
                 return EMOJIS['hidden']
             return EMOJIS[facelet]
+
+        if mask == '3':
+            return ' ' * self.facelet_size
 
         if not USE_COLORS or self.facelet_type == 'no-color':
             return f' { facelet } '
 
         if facelet not in FACE_ORDER:
-            face_color = self.palette['hidden']
+            face_color = self.palette[
+                'hidden_adjacent' if adjacent else 'hidden'
+            ]
         else:
             face_key = facelet
-            if mask == '0':
-                face_key += '_masked'
-            elif adjacent:
+            if adjacent:
                 face_key += '_adjacent'
+            elif mask in {'0', '2'}:
+                face_key += '_masked'
             face_color = self.palette[face_key]
 
         if self.effect and not adjacent and facelet_index is not None:
@@ -332,8 +269,13 @@ class VCubeDisplay:
             f'{ self.palette["reset"] }'
         )
 
-    def display_face_row(self, faces: list[str], faces_mask: list[str],
-                         face_key: str, row: int) -> str:
+    def display_face_row(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            face_key: str,
+            row: int,
+    ) -> str:
         """
         Display a complete row of a face.
 
@@ -360,9 +302,15 @@ class VCubeDisplay:
 
         return result
 
-    def display_facelet_by_face(self, faces: list[str], faces_mask: list[str],
-                                face_key: str, index: int, *,
-                                adjacent: bool = True) -> str:
+    def display_facelet_by_face(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            face_key: str,
+            index: int,
+            *,
+            adjacent: bool = True,
+    ) -> str:
         """
         Display a specific facelet from a face using face key and index.
 
@@ -386,9 +334,15 @@ class VCubeDisplay:
             adjacent=adjacent,
         )
 
-    def display_face_indexes(self, faces: list[str], faces_mask: list[str],
-                             face_key: str, indexes: list[int], *,
-                             adjacent: bool = True) -> str:
+    def display_face_indexes(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            face_key: str,
+            indexes: list[int],
+            *,
+            adjacent: bool = True,
+    ) -> str:
         """
         Display multiple facelets from a face using specified indexes.
 
@@ -412,13 +366,18 @@ class VCubeDisplay:
             for idx in indexes
         )
 
-    def display_row_with_sides(self, faces: list[str], faces_mask: list[str],  # noqa: PLR0913 PLR0917
-                               center_face: str,
-                               left_indexes: list[int],
-                               right_indexes: list[int],
-                               row: int,
-                               leading_spaces: int = 0, *,
-                               adjacent: bool = True) -> str:
+    def display_row_with_sides(  # noqa: PLR0913 PLR0917
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+            center_face: str,
+            left_indexes: list[int],
+            right_indexes: list[int],
+            row: int,
+            leading_spaces: int = 0,
+            *,
+            adjacent: bool = True,
+    ) -> str:
         """
         Display a row with center face and adjacent side facelets.
 
@@ -457,8 +416,12 @@ class VCubeDisplay:
 
         return row_result
 
-    def display_top_down_face(self, face: str, face_mask: str,
-                              face_index: int) -> str:
+    def display_top_down_face(
+            self,
+            face: FaceFacelets,
+            face_mask: FaceMask,
+            face_index: int,
+    ) -> str:
         """
         Display a complete face in top-down view with proper spacing.
 
@@ -486,13 +449,18 @@ class VCubeDisplay:
 
         return result
 
-    def display_top_down_adjacent_facelets(self, face: str, face_mask: str,  # noqa: PLR0913
-                                           face_index: int, *,
-                                           top: bool = False,
-                                           end: bool = False,
-                                           spaces: int = 0,
-                                           adjacent: bool = True,
-                                           break_line: bool = True) -> str:
+    def display_top_down_adjacent_facelets(  # noqa: PLR0913
+            self,
+            face: FaceFacelets,
+            face_mask: FaceMask,
+            face_index: int,
+            *,
+            top: bool = False,
+            end: bool = False,
+            spaces: int = 0,
+            adjacent: bool = True,
+            break_line: bool = True,
+    ) -> str:
         """
         Display adjacent facelets in a linear arrangement.
 
@@ -533,7 +501,11 @@ class VCubeDisplay:
 
         return result
 
-    def display_cube(self, faces: list[str], faces_mask: list[str]) -> str:
+    def display_cube(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display cube in standard unfolded net layout.
 
@@ -573,8 +545,11 @@ class VCubeDisplay:
 
         return result
 
-    def display_top_face(self, faces: list[str],
-                         faces_mask: list[str]) -> str:
+    def display_top_face(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display only the top face with surrounding adjacent facelets.
 
@@ -602,8 +577,9 @@ class VCubeDisplay:
         )
 
         # Middle
-        l_indexes = [0, 1, 2]
-        r_indexes = [2, 1, 0]
+        top_row = list(range(self.cube_size))
+        l_indexes = top_row
+        r_indexes = top_row[::-1]
         for row in range(self.cube_size):
             result += self.display_row_with_sides(
                 faces, faces_mask, 'U',
@@ -627,8 +603,11 @@ class VCubeDisplay:
 
         return result
 
-    def display_extended_net(self, faces: list[str],
-                             faces_mask: list[str]) -> str:
+    def display_extended_net(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display cube as an extended net layout.
 
@@ -641,6 +620,11 @@ class VCubeDisplay:
 
         """
         b_face_idx = FACE_INDEXES['B']
+        n = self.cube_size
+        top_row = list(range(n))
+        left_col = [i * n for i in range(n)]
+        right_col = [i * n + (n - 1) for i in range(n)]
+        bottom_row = list(range(n * (n - 1), n * n))
 
         # Top section with U face
         result = self.display_top_down_adjacent_facelets(
@@ -654,8 +638,8 @@ class VCubeDisplay:
             adjacent=True,
         )
 
-        top_l_indexes = [0, 1, 2]
-        top_r_indexes = [2, 1, 0]
+        top_l_indexes = top_row
+        top_r_indexes = top_row[::-1]
         for row in range(self.cube_size):
             result += self.display_row_with_sides(
                 faces, faces_mask, 'U',
@@ -668,20 +652,20 @@ class VCubeDisplay:
         result += self.display_spaces(1)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'U', [0, 3, 6],
+            'U', left_col,
             adjacent=True,
         )
         result += self.display_spaces(self.cube_size + 2)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'U', [8, 5, 2, 2, 1, 0],
+            'U', right_col[::-1] + top_row[::-1],
             adjacent=True,
         )
         result += '\n'
 
         # Central section with L F R B faces
-        mid_b_indexes = [2, 5, 8]
-        mid_l_indexes = [0, 3, 6]
+        mid_b_indexes = right_col
+        mid_l_indexes = left_col
 
         for row in range(self.cube_size):
             result += self.display_facelet_by_face(
@@ -716,20 +700,20 @@ class VCubeDisplay:
         result += self.display_spaces(1)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'D', [6, 3, 0],
+            'D', left_col[::-1],
             adjacent=True,
         )
         result += self.display_spaces(self.cube_size + 2)
         result += self.display_face_indexes(
             faces, faces_mask,
-            'D', [2, 5, 8, 8, 7, 6],
+            'D', right_col + bottom_row[::-1],
             adjacent=True,
         )
         result += '\n'
 
         # Bottom section with D face
-        bottom_l_indexes = [8, 7, 6]
-        bottom_r_indexes = [6, 7, 8]
+        bottom_l_indexes = bottom_row[::-1]
+        bottom_r_indexes = bottom_row
         for row in range(self.cube_size):
             result += self.display_row_with_sides(
                 faces, faces_mask, 'D',
@@ -751,8 +735,11 @@ class VCubeDisplay:
 
         return result
 
-    def display_linear(self, faces: list[str],
-                       faces_mask: list[str]) -> str:
+    def display_linear(
+            self,
+            faces: list[FaceFacelets],
+            faces_mask: list[FaceMask],
+    ) -> str:
         """
         Display facelets in a linear arrangement.
 
@@ -767,15 +754,19 @@ class VCubeDisplay:
         result = ''
 
         for row in range(self.cube_size):
-            for face in FACE_ORDER:
-                result += self.display_face_row(faces, faces_mask, face, row)
-                result += ' '
+            result += ' '.join(
+                self.display_face_row(faces, faces_mask, face, row)
+                for face in FACE_ORDER
+            )
             result += '\n'
 
         return result
 
-    def position_based_effect(self, facelet_colors: str,
-                              facelet_index: int) -> str:
+    def position_based_effect(
+            self,
+            facelet_colors: str,
+            facelet_index: int,
+    ) -> str:
         """
         Apply position-based visual effects to facelet colors.
 
@@ -808,8 +799,11 @@ class VCubeDisplay:
             f'\x1b[38;2;{ ";".join(str(c) for c in new_foreground_rgb) }m'
         )
 
-    def letter_style_ansi(self, facelet_index: int,
-                          face_color: str) -> tuple[str, str]:
+    def letter_style_ansi(
+            self,
+            facelet_index: int,
+            face_color: str,
+    ) -> tuple[str, str]:
         """
         Resolve ANSI letter style codes for a facelet position.
 
@@ -821,7 +815,7 @@ class VCubeDisplay:
             Tuple of (style_start, style_end) ANSI sequences.
 
         """
-        piece_types = get_piece_types(facelet_index, self.cube_size)
+        piece_types = self.cube.get_facelet_piece_types(facelet_index)
 
         for piece_type in piece_types:
             style_ansi = self.style[piece_type]

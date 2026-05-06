@@ -1,18 +1,15 @@
 """Tests for binary mask operations."""
 import unittest
 
-from cubing_algs.masks import _CACHE_SIZE_LIMIT
-from cubing_algs.masks import _MASK_CACHE
-from cubing_algs.masks import FULL_MASK
-from cubing_algs.masks import facelets_masked
+from cubing_algs.algorithm import Algorithm
+from cubing_algs.masks import compute_algorithm_mask
 from cubing_algs.masks import intersection_masks
 from cubing_algs.masks import negate_mask
-from cubing_algs.masks import state_masked
 from cubing_algs.masks import union_masks
-from cubing_algs.solved_state import SOLVED_FACELETS_3x3x3
+from cubing_algs.solved_state import get_unique_facelets
 
 
-class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
+class TestBinaryMasks(unittest.TestCase):
     """Tests for binary mask operations on cube states."""
 
     def test_union(self) -> None:
@@ -78,160 +75,117 @@ class TestBinaryMasks(unittest.TestCase):  # noqa: PLR0904
         """Test negate empty."""
         self.assertEqual(negate_mask(''), '')
 
-    def test_facelets_masked_basic(self) -> None:
-        """Test facelets masked basic."""
-        facelets = 'ABCD'
-        mask = '1010'
-        expected = 'A-C-'
-        self.assertEqual(facelets_masked(facelets, mask), expected)
 
-    def test_facelets_masked_all_ones(self) -> None:
-        """Test facelets masked all ones."""
-        facelets = 'ABCD'
-        mask = '1111'
-        expected = 'ABCD'
-        self.assertEqual(facelets_masked(facelets, mask), expected)
+class TestComputeAlgorithmMask(unittest.TestCase):
+    """Tests for compute_algorithm_mask."""
 
-    def test_facelets_masked_all_zeros(self) -> None:
-        """Test facelets masked all zeros."""
-        facelets = 'ABCD'
-        mask = '0000'
-        expected = '----'
-        self.assertEqual(facelets_masked(facelets, mask), expected)
+    def test_identity_algorithm(self) -> None:
+        """Empty algorithm should produce all-zeros mask."""
+        algo = Algorithm.parse_moves('')
+        mask, state = compute_algorithm_mask(algo, 3)
 
-    def test_facelets_masked_empty(self) -> None:
-        """Test facelets masked empty."""
-        facelets = ''
-        mask = ''
-        expected = ''
-        self.assertEqual(facelets_masked(facelets, mask), expected)
+        self.assertEqual(mask, '0' * 54)
+        self.assertEqual(state, get_unique_facelets(3))
 
-    def test_facelets_masked_single_char(self) -> None:
-        """Test facelets masked single char."""
-        facelets = 'X'
-        mask = '1'
-        expected = 'X'
-        self.assertEqual(facelets_masked(facelets, mask), expected)
+    def test_single_move(self) -> None:
+        """R move affects exactly 20 facelets."""
+        algo = Algorithm.parse_moves('R')
+        mask, _ = compute_algorithm_mask(algo, 3)
 
-        facelets = 'X'
-        mask = '0'
-        expected = '-'
-        self.assertEqual(facelets_masked(facelets, mask), expected)
+        self.assertEqual(len(mask), 54)
+        self.assertEqual(mask.count('1'), 20)
 
-    def test_facelets_masked_real_cube_pattern(self) -> None:
-        """Test facelets masked real cube pattern."""
-        facelets = SOLVED_FACELETS_3x3x3[:9]
-        mask = '101010101'
-        expected = 'U-U-U-U-U'
-        self.assertEqual(facelets_masked(facelets, mask), expected)
+    def test_inverse_same_mask(self) -> None:
+        """An algorithm and its inverse affect the same facelets."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        algo_inv = Algorithm.parse_moves("U R U' R'")
+        mask, _ = compute_algorithm_mask(algo, 3)
+        mask_inv, _ = compute_algorithm_mask(algo_inv, 3)
 
-    def test_state_masked_basic(self) -> None:
-        """Test state masked basic."""
-        mask = FULL_MASK
-        result = state_masked(SOLVED_FACELETS_3x3x3, mask)
+        self.assertEqual(mask, mask_inv)
 
-        self.assertEqual(result, SOLVED_FACELETS_3x3x3)
+    def test_rotation_only(self) -> None:
+        """Pure rotation should produce all-zeros mask."""
+        algo = Algorithm.parse_moves('y')
+        mask, _ = compute_algorithm_mask(algo, 3)
 
-    def test_state_masked_all_zeros(self) -> None:
-        """Test state masked all zeros."""
-        mask = '0' * 54
-        result = state_masked(SOLVED_FACELETS_3x3x3, mask)
+        self.assertEqual(mask, '0' * 54)
 
-        self.assertEqual(result, '-' * 54)
+    def test_rotation_with_move(self) -> None:
+        """Rotation + move should only mark the move's facelets."""
+        algo_bare = Algorithm.parse_moves('B')
+        algo_rotated = Algorithm.parse_moves('y R')
 
-    def test_state_masked_partial(self) -> None:
-        """Test state masked partial."""
-        mask = '1' * 9 + '0' * 45
-        result = state_masked(SOLVED_FACELETS_3x3x3, mask)
+        mask_bare, _ = compute_algorithm_mask(algo_bare, 3)
+        mask_rotated, _ = compute_algorithm_mask(algo_rotated, 3)
 
-        self.assertEqual(
-            result,
-            'UUUUUUUUU---------------------------------------------',
-        )
+        # y R is equivalent to B in solved-state coordinates
+        self.assertEqual(mask_bare, mask_rotated)
 
-    def test_state_masked_different_state(self) -> None:
-        """Test state masked different state."""
-        scrambled_state = (
-            'LUULUUFFFLBBRRRRRRUUUFFDFFDRRBDDBDDBFFRLLDLLDLLDUBBUBB'
-        )
-        mask = '1' * 27 + '0' * 27
-        result = state_masked(scrambled_state, mask)
+    def test_mask_length_matches_cube_size(self) -> None:
+        """Mask length equals 6 * size * size."""
+        for size in (2, 3, 4):
+            algo = Algorithm.parse_moves('R')
+            mask, state = compute_algorithm_mask(algo, size=size)
+            expected_length = 6 * size * size
 
-        self.assertEqual(
-            result,
-            '-UU-UUFFF---RRRRRRUUUFF-FF-RR-------FFR---------U--U--',
-        )
+            self.assertEqual(len(mask), expected_length)
+            self.assertEqual(len(state), expected_length)
 
-    def test_facelets_masked_cache_hit(self) -> None:
-        """Test cache hit path in optimized facelets_masked."""
-        _MASK_CACHE.clear()
+    def test_solved_algorithm_cycle(self) -> None:
+        """Applying R4 returns to solved, mask should be all zeros."""
+        algo = Algorithm.parse_moves('R R R R')
+        mask, _ = compute_algorithm_mask(algo, 3)
 
-        facelets = 'ABCD'
-        mask = '1010'
+        self.assertEqual(mask, '0' * 54)
 
-        # First call - cache miss
-        result1 = facelets_masked(facelets, mask)
-        self.assertEqual(result1, 'A-C-')
-        self.assertIn(mask, _MASK_CACHE)
+    def test_transformed_state_enables_permutation(self) -> None:
+        """Transformed state can be used to compute permutations."""
+        algo = Algorithm.parse_moves('R')
+        mask, transformed_state = compute_algorithm_mask(algo, 3)
+        unique_facelets = get_unique_facelets(3)
 
-        # Second call - cache hit (covers lines 74-75)
-        result2 = facelets_masked(facelets, mask)
-        self.assertEqual(result2, 'A-C-')
-        self.assertEqual(result1, result2)
+        permutations: dict[int, int] = {}
+        for pos in range(len(unique_facelets)):
+            final = transformed_state.find(unique_facelets[pos])
+            if final != pos:
+                permutations[pos] = final
 
-    def test_facelets_masked_cache_eviction(self) -> None:
-        """Test cache eviction when size limit is reached."""
-        _MASK_CACHE.clear()
+        # Every '1' in mask should have a permutation entry
+        for i, bit in enumerate(mask):
+            if bit == '1':
+                self.assertIn(i, permutations)
+            else:
+                self.assertNotIn(i, permutations)
 
-        # Directly manipulate cache to test eviction by filling it beyond limit
-        # This allows us to test the eviction logic paths (lines 86-88)
+    def test_2x2x2_cube(self) -> None:
+        """Mask works on 2x2x2 cubes."""
+        algo = Algorithm.parse_moves('R')
+        mask, _ = compute_algorithm_mask(algo, size=2)
 
-        # Fill cache manually to exactly the limit
-        for i in range(_CACHE_SIZE_LIMIT):
-            # Create unique keys and dummy values
-            key_prefix = f'test_mask_{i:04d}'
-            mask_key = key_prefix + '0' * (54 - len(key_prefix))
-            _MASK_CACHE[mask_key] = tuple(bool(j % 2) for j in range(54))
+        self.assertEqual(len(mask), 24)
+        self.assertEqual(mask.count('1'), 12)
 
-        # Verify cache is at limit
-        self.assertEqual(len(_MASK_CACHE), _CACHE_SIZE_LIMIT)
+    def test_4x4x4_cube(self) -> None:
+        """Mask works on 4x4x4 cubes."""
+        algo = Algorithm.parse_moves('R')
+        mask, _ = compute_algorithm_mask(algo, size=4)
 
-        # Now call facelets_masked with a new unique mask to trigger eviction
-        test_facelets = SOLVED_FACELETS_3x3x3
-        trigger_mask = '1' + '0' * 53  # Unique mask not in cache
+        self.assertEqual(len(mask), 96)
+        self.assertEqual(mask.count('1'), 32)
 
-        result = facelets_masked(test_facelets, trigger_mask)
+    def test_5x5x5_cube(self) -> None:
+        """Mask works on 5x5x5 cubes."""
+        algo = Algorithm.parse_moves('R')
+        mask, _ = compute_algorithm_mask(algo, size=5)
 
-        # Verify eviction occurred - cache should be reduced and new mask added
-        expected_size = _CACHE_SIZE_LIMIT // 2 + 1
-        self.assertEqual(len(_MASK_CACHE), expected_size)
+        self.assertEqual(len(mask), 150)
+        self.assertEqual(mask.count('1'), 44)
 
-        # The triggering mask should be in the cache
-        self.assertIn(trigger_mask, _MASK_CACHE)
+    def test_sexy_move(self) -> None:
+        """Sexy move (R U R' U') affects a known number of facelets."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        mask, _ = compute_algorithm_mask(algo, 3)
 
-        # Verify the result is correct
-        expected_result = 'U' + '-' * 53
-        self.assertEqual(result, expected_result)
-
-    def test_facelets_masked_cache_behavior_with_repeated_patterns(
-        self,
-    ) -> None:
-        """Test cache behavior with realistic repeated mask usage."""
-        _MASK_CACHE.clear()
-
-        # Test with cube-sized strings and common patterns
-        facelets = SOLVED_FACELETS_3x3x3
-        common_masks = [FULL_MASK, '0' * 54, '1' * 27 + '0' * 27]
-
-        # First round - populate cache
-        results1 = [facelets_masked(facelets, mask) for mask in common_masks]
-
-        # Verify all masks are cached
-        for mask in common_masks:
-            self.assertIn(mask, _MASK_CACHE)
-
-        # Second round - should hit cache
-        results2 = [facelets_masked(facelets, mask) for mask in common_masks]
-
-        # Results should be identical
-        self.assertEqual(results1, results2)
+        mobilized = mask.count('1')
+        self.assertEqual(mobilized, 18)

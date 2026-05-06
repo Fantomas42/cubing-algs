@@ -1,5 +1,7 @@
 """Tests for algorithm impact analysis."""
 import unittest
+from typing import TYPE_CHECKING
+from typing import cast
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import FACE_NUMBER
@@ -8,10 +10,14 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
+from cubing_algs.impacts import CycleAnalysis
 from cubing_algs.impacts import DistanceMetrics
 from cubing_algs.impacts import ImpactData
+from cubing_algs.impacts import ParitySignature
+from cubing_algs.impacts import PatternClassification
 from cubing_algs.impacts import analyze_cycles
-from cubing_algs.impacts import analyze_layers
+from cubing_algs.impacts import analyze_piece_type_impact
+from cubing_algs.impacts import classify_parity_signature
 from cubing_algs.impacts import classify_pattern
 from cubing_algs.impacts import compute_cubie_complexity
 from cubing_algs.impacts import compute_face_impact
@@ -23,7 +29,11 @@ from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
 from cubing_algs.impacts import parse_facelet_position
 from cubing_algs.impacts import positions_on_adjacent_corners
+from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
+
+if TYPE_CHECKING:
+    from cubing_algs.annotations import Facelet
 
 
 class TestImpactData(unittest.TestCase):
@@ -58,7 +68,7 @@ class TestImpactData(unittest.TestCase):
             },
             facelets_face_to_face_matrix={},
             facelets_symmetry={},
-            facelets_layer_analysis={},
+            facelets_piece_type_impact={},
             cubies_corner_permutation=SOLVED_CP,
             cubies_corner_orientation=SOLVED_CO,
             cubies_edge_permutation=SOLVED_EP,
@@ -74,27 +84,36 @@ class TestImpactData(unittest.TestCase):
             cubies_corner_parity=0,
             cubies_edge_parity=0,
             cubies_parity_valid=True,
-            cubies_corner_cycle_analysis={
-                'cycle_count': 0,
-                'cycle_lengths': [],
-                'min_cycle_length': 0,
-                'max_cycle_length': 0,
-                'total_pieces_in_cycles': 0,
-                'two_cycles': 0,
-                'three_cycles': 0,
-                'four_plus_cycles': 0,
-            },
-            cubies_edge_cycle_analysis={
-                'cycle_count': 0,
-                'cycle_lengths': [],
-                'min_cycle_length': 0,
-                'max_cycle_length': 0,
-                'total_pieces_in_cycles': 0,
-                'two_cycles': 0,
-                'three_cycles': 0,
-                'four_plus_cycles': 0,
-            },
-            cubies_patterns=['SOLVED'],
+            cubies_corner_cycle_analysis=CycleAnalysis(
+                cycle_count=0,
+                cycle_lengths=[],
+                min_cycle_length=0,
+                max_cycle_length=0,
+                total_pieces_in_cycles=0,
+                two_cycles=0,
+                three_cycles=0,
+                four_plus_cycles=0,
+            ),
+            cubies_edge_cycle_analysis=CycleAnalysis(
+                cycle_count=0,
+                cycle_lengths=[],
+                min_cycle_length=0,
+                max_cycle_length=0,
+                total_pieces_in_cycles=0,
+                two_cycles=0,
+                three_cycles=0,
+                four_plus_cycles=0,
+            ),
+            cubies_patterns=PatternClassification(
+                state=['SOLVED'],
+                orientation=[],
+                permutation=[],
+                first_layer=[],
+                last_layer=[],
+                scramble=[],
+                cycle=[],
+            ),
+            cubies_parity_signature=classify_parity_signature(0, 0),
         )
 
         self.assertIsInstance(impact_data.cube, VCube)
@@ -107,18 +126,26 @@ class TestImpactData(unittest.TestCase):
             impact_data.facelets_manhattan_distance,
             DistanceMetrics,
         )
-        self.assertEqual(impact_data.facelets_manhattan_distance.distances, {})
-        self.assertEqual(impact_data.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(impact_data.facelets_manhattan_distance.max, 0)
-        self.assertEqual(impact_data.facelets_manhattan_distance.sum, 0)
+        manhattan = cast(
+            'DistanceMetrics',
+            impact_data.facelets_manhattan_distance,
+        )
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
         self.assertIsInstance(
             impact_data.facelets_qtm_distance,
             DistanceMetrics,
         )
-        self.assertEqual(impact_data.facelets_qtm_distance.distances, {})
-        self.assertEqual(impact_data.facelets_qtm_distance.mean, 0.0)
-        self.assertEqual(impact_data.facelets_qtm_distance.max, 0)
-        self.assertEqual(impact_data.facelets_qtm_distance.sum, 0)
+        qtm = cast(
+            'DistanceMetrics',
+            impact_data.facelets_qtm_distance,
+        )
+        self.assertEqual(qtm.distances, {})
+        self.assertEqual(qtm.mean, 0.0)
+        self.assertEqual(qtm.max, 0)
+        self.assertEqual(qtm.sum, 0)
         self.assertIsInstance(impact_data.facelets_face_mobility, dict)
         self.assertEqual(impact_data.cubies_corners_moved, 0)
         self.assertEqual(impact_data.cubies_corners_twisted, 0)
@@ -128,7 +155,10 @@ class TestImpactData(unittest.TestCase):
     def test_impact_data_field_access(self) -> None:
         """Test individual field access on ImpactData."""
         cube = VCube()
-        face_mobility = {'U': 1, 'R': 2, 'F': 3, 'D': 4, 'L': 5, 'B': 6}
+        face_mobility: dict[Facelet, int] = {
+            'U': 1, 'R': 2, 'F': 3,
+            'D': 4, 'L': 5, 'B': 6,
+        }
 
         impact_data = ImpactData(
             cube=cube,
@@ -153,10 +183,10 @@ class TestImpactData(unittest.TestCase):
             facelets_face_mobility=face_mobility,
             facelets_face_to_face_matrix={'U': {'R': 1, 'F': 2}},
             facelets_symmetry={'all_faces_same': False},
-            facelets_layer_analysis={
-                'centers_moved': 1,
-                'edges_moved': 2,
-                'corners_moved': 3,
+            facelets_piece_type_impact={
+                'center': 1,
+                'edge': 2,
+                'corner': 3,
             },
             cubies_corner_permutation=SOLVED_CP,
             cubies_corner_orientation=[0, 1, 0, 0, 0, 0, 0, 0],
@@ -175,27 +205,36 @@ class TestImpactData(unittest.TestCase):
             cubies_corner_parity=0,
             cubies_edge_parity=0,
             cubies_parity_valid=True,
-            cubies_corner_cycle_analysis={
-                'cycle_count': 1,
-                'cycle_lengths': [2],
-                'min_cycle_length': 2,
-                'max_cycle_length': 2,
-                'total_pieces_in_cycles': 2,
-                'two_cycles': 1,
-                'three_cycles': 0,
-                'four_plus_cycles': 0,
-            },
-            cubies_edge_cycle_analysis={
-                'cycle_count': 1,
-                'cycle_lengths': [3],
-                'min_cycle_length': 3,
-                'max_cycle_length': 3,
-                'total_pieces_in_cycles': 3,
-                'two_cycles': 0,
-                'three_cycles': 1,
-                'four_plus_cycles': 0,
-            },
-            cubies_patterns=['EDGES_ORIENTED', 'CORNERS_PERMUTED'],
+            cubies_corner_cycle_analysis=CycleAnalysis(
+                cycle_count=1,
+                cycle_lengths=[2],
+                min_cycle_length=2,
+                max_cycle_length=2,
+                total_pieces_in_cycles=2,
+                two_cycles=1,
+                three_cycles=0,
+                four_plus_cycles=0,
+            ),
+            cubies_edge_cycle_analysis=CycleAnalysis(
+                cycle_count=1,
+                cycle_lengths=[3],
+                min_cycle_length=3,
+                max_cycle_length=3,
+                total_pieces_in_cycles=3,
+                two_cycles=0,
+                three_cycles=1,
+                four_plus_cycles=0,
+            ),
+            cubies_patterns=PatternClassification(
+                state=[],
+                orientation=['EDGES_ORIENTED'],
+                permutation=['CORNERS_PERMUTED'],
+                first_layer=[],
+                last_layer=[],
+                scramble=[],
+                cycle=[],
+            ),
+            cubies_parity_signature=classify_parity_signature(0, 0),
         )
 
         # Test all fields are accessible
@@ -207,17 +246,22 @@ class TestImpactData(unittest.TestCase):
             20.0 / 54.0,
         )
         self.assertEqual(impact_data.facelets_permutations[0], 10)
-        self.assertEqual(
-            impact_data.facelets_manhattan_distance.distances[1],
-            3,
+        manhattan = cast(
+            'DistanceMetrics',
+            impact_data.facelets_manhattan_distance,
         )
-        self.assertEqual(impact_data.facelets_manhattan_distance.mean, 2.5)
-        self.assertEqual(impact_data.facelets_manhattan_distance.max, 3)
-        self.assertEqual(impact_data.facelets_manhattan_distance.sum, 5)
-        self.assertEqual(impact_data.facelets_qtm_distance.distances[1], 2)
-        self.assertEqual(impact_data.facelets_qtm_distance.mean, 1.5)
-        self.assertEqual(impact_data.facelets_qtm_distance.max, 2)
-        self.assertEqual(impact_data.facelets_qtm_distance.sum, 3)
+        self.assertEqual(manhattan.distances[1], 3)
+        self.assertEqual(manhattan.mean, 2.5)
+        self.assertEqual(manhattan.max, 3)
+        self.assertEqual(manhattan.sum, 5)
+        qtm = cast(
+            'DistanceMetrics',
+            impact_data.facelets_qtm_distance,
+        )
+        self.assertEqual(qtm.distances[1], 2)
+        self.assertEqual(qtm.mean, 1.5)
+        self.assertEqual(qtm.max, 2)
+        self.assertEqual(qtm.sum, 3)
         self.assertEqual(impact_data.facelets_face_mobility['U'], 1)
         self.assertEqual(impact_data.cubies_corners_moved, 2)
         self.assertEqual(impact_data.cubies_complexity_score, 7)
@@ -2033,14 +2077,22 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
             with self.subTest(rotation=rotation_str):
                 algorithm = Algorithm.parse_moves(rotation_str)
                 result = compute_impacts(algorithm)
+                manhattan = cast(
+                    'DistanceMetrics',
+                    result.facelets_manhattan_distance,
+                )
+                qtm = cast(
+                    'DistanceMetrics',
+                    result.facelets_qtm_distance,
+                )
 
                 self.assertEqual(
-                    result.facelets_manhattan_distance.sum, 0,
+                    manhattan.sum, 0,
                     f"Rotation '{rotation_str}' should have zero "
                     "Manhattan displacement",
                 )
                 self.assertEqual(
-                    result.facelets_qtm_distance.sum, 0,
+                    qtm.sum, 0,
                     f"Rotation '{rotation_str}' should have zero "
                     "QTM displacement",
                 )
@@ -2059,6 +2111,14 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
         # Get baseline distance (no rotation)
         baseline_algo = Algorithm.parse_moves(scramble)
         baseline_result = compute_impacts(baseline_algo)
+        baseline_manhattan = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_manhattan_distance,
+        )
+        baseline_qtm = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_qtm_distance,
+        )
 
         for rotation_str in rotations:
             with self.subTest(rotation=rotation_str):
@@ -2067,17 +2127,25 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
                     f'{ rotation_str } { scramble }',
                 )
                 rotated_result = compute_impacts(rotated_algo)
+                rotated_manhattan = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_manhattan_distance,
+                )
+                rotated_qtm = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_qtm_distance,
+                )
 
                 # Distance metrics should be identical
                 self.assertEqual(
-                    rotated_result.facelets_manhattan_distance.sum,
-                    baseline_result.facelets_manhattan_distance.sum,
+                    rotated_manhattan.sum,
+                    baseline_manhattan.sum,
                     'Manhattan distance should be same with pre-rotation '
                     f"{ rotation_str }'",
                 )
                 self.assertEqual(
-                    rotated_result.facelets_qtm_distance.sum,
-                    baseline_result.facelets_qtm_distance.sum,
+                    rotated_qtm.sum,
+                    baseline_qtm.sum,
                     'QTM distance should be same with pre-rotation '
                     f"'{ rotation_str }'",
                 )
@@ -2097,6 +2165,14 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
         # Get baseline distance (no rotation)
         baseline_algo = Algorithm.parse_moves(scramble)
         baseline_result = compute_impacts(baseline_algo)
+        baseline_manhattan = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_manhattan_distance,
+        )
+        baseline_qtm = cast(
+            'DistanceMetrics',
+            baseline_result.facelets_qtm_distance,
+        )
 
         for rotation_str in rotations:
             with self.subTest(rotation=rotation_str):
@@ -2105,17 +2181,25 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
                     f'{scramble} {rotation_str}',
                 )
                 rotated_result = compute_impacts(rotated_algo)
+                rotated_manhattan = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_manhattan_distance,
+                )
+                rotated_qtm = cast(
+                    'DistanceMetrics',
+                    rotated_result.facelets_qtm_distance,
+                )
 
                 # Distance metrics should be identical
                 self.assertEqual(
-                    rotated_result.facelets_manhattan_distance.sum,
-                    baseline_result.facelets_manhattan_distance.sum,
+                    rotated_manhattan.sum,
+                    baseline_manhattan.sum,
                     'Manhattan distance should be same with post-rotation '
                     f"'{ rotation_str }'",
                 )
                 self.assertEqual(
-                    rotated_result.facelets_qtm_distance.sum,
-                    baseline_result.facelets_qtm_distance.sum,
+                    rotated_qtm.sum,
+                    baseline_qtm.sum,
                     'QTM distance should be same with post-rotation '
                     f"'{ rotation_str }'",
                 )
@@ -2127,7 +2211,7 @@ class TestRotationOnlyAlgorithms(unittest.TestCase):
                 )
 
 
-class TestComputeImpacts(unittest.TestCase):
+class TestComputeImpacts(unittest.TestCase):  # noqa: PLR0904
     """Test the compute_impacts function."""
 
     def test_empty_algorithm_no_impact(self) -> None:
@@ -2139,14 +2223,16 @@ class TestComputeImpacts(unittest.TestCase):
         self.assertEqual(result.facelets_mobilized_count, 0)
         self.assertEqual(result.facelets_scrambled_percent, 0.0)
         self.assertEqual(result.facelets_permutations, {})
-        self.assertEqual(result.facelets_manhattan_distance.distances, {})
-        self.assertEqual(result.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertEqual(result.facelets_manhattan_distance.sum, 0)
-        self.assertEqual(result.facelets_qtm_distance.distances, {})
-        self.assertEqual(result.facelets_qtm_distance.mean, 0.0)
-        self.assertEqual(result.facelets_qtm_distance.max, 0)
-        self.assertEqual(result.facelets_qtm_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
+        qtm = cast('DistanceMetrics', result.facelets_qtm_distance)
+        self.assertEqual(qtm.distances, {})
+        self.assertEqual(qtm.mean, 0.0)
+        self.assertEqual(qtm.max, 0)
+        self.assertEqual(qtm.sum, 0)
         self.assertEqual(result.facelets_transformation_mask, '0' * 54)
 
         # All faces should have zero mobility
@@ -2175,10 +2261,11 @@ class TestComputeImpacts(unittest.TestCase):
         self.assertGreater(len(result.facelets_permutations), 0)
 
         # Should have distance metrics
-        if result.facelets_manhattan_distance.distances:
-            self.assertGreater(result.facelets_manhattan_distance.mean, 0)
-            self.assertGreater(result.facelets_manhattan_distance.max, 0)
-            self.assertGreater(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
+            self.assertGreater(manhattan.mean, 0)
+            self.assertGreater(manhattan.max, 0)
+            self.assertGreater(manhattan.sum, 0)
 
     def test_double_move_impact(self) -> None:
         """Test impact of a double move."""
@@ -2208,13 +2295,25 @@ class TestComputeImpacts(unittest.TestCase):
         algo_rp = Algorithm.parse_moves("R'")
         result_rp = compute_impacts(algo_rp)
 
+        manhattan_r = cast(
+            'DistanceMetrics',
+            result_r.facelets_manhattan_distance,
+        )
+        manhattan_r2 = cast(
+            'DistanceMetrics',
+            result_r2.facelets_manhattan_distance,
+        )
+        manhattan_rp = cast(
+            'DistanceMetrics',
+            result_rp.facelets_manhattan_distance,
+        )
         self.assertGreater(
-            result_r2.facelets_manhattan_distance.sum,
-            result_r.facelets_manhattan_distance.sum,
+            manhattan_r2.sum,
+            manhattan_r.sum,
         )
         self.assertEqual(
-            result_r.facelets_manhattan_distance.sum,
-            result_rp.facelets_manhattan_distance.sum,
+            manhattan_r.sum,
+            manhattan_rp.sum,
         )
 
     def test_inverse_moves_cancel(self) -> None:
@@ -2227,10 +2326,11 @@ class TestComputeImpacts(unittest.TestCase):
         self.assertEqual(result.facelets_fixed_count, 54)
         self.assertEqual(result.facelets_scrambled_percent, 0.0)
         self.assertEqual(result.facelets_permutations, {})
-        self.assertEqual(result.facelets_manhattan_distance.distances, {})
-        self.assertEqual(result.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertEqual(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
 
     def test_four_moves_cancel(self) -> None:
         """Test that four identical moves cancel out."""
@@ -2255,10 +2355,30 @@ class TestComputeImpacts(unittest.TestCase):
         )
 
         # Should have distance metrics
-        if result.facelets_manhattan_distance.distances:
-            self.assertGreaterEqual(result.facelets_manhattan_distance.mean, 0)
-            self.assertGreaterEqual(result.facelets_manhattan_distance.max, 0)
-            self.assertGreaterEqual(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
+            self.assertGreaterEqual(manhattan.mean, 0)
+            self.assertGreaterEqual(manhattan.max, 0)
+            self.assertGreaterEqual(manhattan.sum, 0)
+
+    def test_pause_and_timed_algorithm_impact(self) -> None:
+        """Test impact of a complex algorithm."""
+        algorithm = Algorithm.parse_moves("R@1 .@2 U@3 R'@4 .@5 U'@6")
+        result = compute_impacts(algorithm)
+
+        # This is a common algorithm that should affect multiple faces
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            54,
+        )
+
+        # Should have distance metrics
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
+            self.assertGreaterEqual(manhattan.mean, 0)
+            self.assertGreaterEqual(manhattan.max, 0)
+            self.assertGreaterEqual(manhattan.sum, 0)
 
     def test_algorithm_with_rotations(self) -> None:
         """Test impact of algorithm with cube rotations."""
@@ -2318,30 +2438,31 @@ class TestComputeImpacts(unittest.TestCase):
         algorithm = Algorithm.parse_moves('R U')
         result = compute_impacts(algorithm)
 
-        if result.facelets_manhattan_distance.distances:
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
             # Distance mean should match manual calculation
-            values = list(result.facelets_manhattan_distance.distances.values())
+            values = list(manhattan.distances.values())
             calculated_mean = sum(values) / len(values)
             self.assertAlmostEqual(
-                result.facelets_manhattan_distance.mean,
+                manhattan.mean,
                 calculated_mean,
             )
 
             # Distance sum should match
             distance_sum = sum(
-                result.facelets_manhattan_distance.distances.values(),
+                manhattan.distances.values(),
             )
             self.assertEqual(
-                result.facelets_manhattan_distance.sum,
+                manhattan.sum,
                 distance_sum,
             )
 
             # Distance max should match
             distance_max = max(
-                result.facelets_manhattan_distance.distances.values(),
+                manhattan.distances.values(),
             )
             self.assertEqual(
-                result.facelets_manhattan_distance.max,
+                manhattan.max,
                 distance_max,
             )
 
@@ -2442,12 +2563,13 @@ class TestComputeImpacts(unittest.TestCase):
         algorithm = Algorithm.parse_moves('R U F D L B')
         result = compute_impacts(algorithm)
 
-        for distance in result.facelets_manhattan_distance.distances.values():
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        for distance in manhattan.distances.values():
             self.assertGreaterEqual(distance, 0)
 
-        self.assertGreaterEqual(result.facelets_manhattan_distance.mean, 0)
-        self.assertGreaterEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertGreaterEqual(result.facelets_manhattan_distance.sum, 0)
+        self.assertGreaterEqual(manhattan.mean, 0)
+        self.assertGreaterEqual(manhattan.max, 0)
+        self.assertGreaterEqual(manhattan.sum, 0)
 
     def test_empty_permutations_empty_distances(self) -> None:
         """Test when no moves occur, permutations and distances are empty."""
@@ -2455,10 +2577,11 @@ class TestComputeImpacts(unittest.TestCase):
         result = compute_impacts(algorithm)
 
         self.assertEqual(result.facelets_permutations, {})
-        self.assertEqual(result.facelets_manhattan_distance.distances, {})
-        self.assertEqual(result.facelets_manhattan_distance.mean, 0.0)
-        self.assertEqual(result.facelets_manhattan_distance.max, 0)
-        self.assertEqual(result.facelets_manhattan_distance.sum, 0)
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        self.assertEqual(manhattan.distances, {})
+        self.assertEqual(manhattan.mean, 0.0)
+        self.assertEqual(manhattan.max, 0)
+        self.assertEqual(manhattan.sum, 0)
 
 
 class TestComputeImpactsEdgeCases(unittest.TestCase):
@@ -2492,6 +2615,171 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
         self.assertIsInstance(result.facelets_face_mobility, dict)
         self.assertEqual(len(result.facelets_face_mobility), 6)
 
+    def test_single_face_moves_have_symmetric_cubie_orientation_counts(
+            self,
+    ) -> None:
+        """
+        Test that all single face moves report the same orientation counts.
+
+        corners_twisted and edges_flipped count only pieces in their home
+        position but mis-oriented. Any single face move cycles pieces out of
+        place — it never leaves a piece at home but mis-oriented — so both
+        counts are 0 for every face move regardless of which face is turned.
+        """
+        for move in ('R', "R'", 'R2', 'U', 'F', 'B', 'L', 'D'):
+            with self.subTest(move=move):
+                result = compute_impacts(Algorithm.parse_moves(move))
+                self.assertEqual(
+                    result.cubies_corners_twisted,
+                    0,
+                    msg=f'{move} should have 0 corners twisted in place',
+                )
+                self.assertEqual(
+                    result.cubies_edges_flipped,
+                    0,
+                    msg=f'{move} should have 0 edges flipped in place',
+                )
+
+    def test_trailing_rotation_does_not_affect_cubie_analysis(self) -> None:
+        """Test that trailing rotations are normalized for cubie analysis."""
+        result_r = compute_impacts(Algorithm.parse_moves('R'))
+        result_r_y = compute_impacts(Algorithm.parse_moves('R y'))
+
+        # Cubie analysis should be identical regardless of trailing rotation
+        self.assertEqual(
+            result_r.cubies_corner_permutation,
+            result_r_y.cubies_corner_permutation,
+        )
+        self.assertEqual(
+            result_r.cubies_corner_orientation,
+            result_r_y.cubies_corner_orientation,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_permutation,
+            result_r_y.cubies_edge_permutation,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_orientation,
+            result_r_y.cubies_edge_orientation,
+        )
+        self.assertEqual(
+            result_r.cubies_corners_moved,
+            result_r_y.cubies_corners_moved,
+        )
+        self.assertEqual(
+            result_r.cubies_corners_twisted,
+            result_r_y.cubies_corners_twisted,
+        )
+        self.assertEqual(
+            result_r.cubies_edges_moved,
+            result_r_y.cubies_edges_moved,
+        )
+        self.assertEqual(
+            result_r.cubies_edges_flipped,
+            result_r_y.cubies_edges_flipped,
+        )
+        self.assertEqual(
+            result_r.cubies_corner_cycles,
+            result_r_y.cubies_corner_cycles,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_cycles,
+            result_r_y.cubies_edge_cycles,
+        )
+        self.assertEqual(
+            result_r.cubies_complexity_score,
+            result_r_y.cubies_complexity_score,
+        )
+        self.assertEqual(
+            result_r.cubies_corner_parity,
+            result_r_y.cubies_corner_parity,
+        )
+        self.assertEqual(
+            result_r.cubies_edge_parity,
+            result_r_y.cubies_edge_parity,
+        )
+        self.assertEqual(
+            result_r.cubies_parity_valid,
+            result_r_y.cubies_parity_valid,
+        )
+        self.assertEqual(
+            result_r.cubies_patterns,
+            result_r_y.cubies_patterns,
+        )
+
+    def test_leading_rotation_is_absorbed_into_face_moves(self) -> None:
+        """
+        Test that a leading rotation is degripped
+        into its face equivalent.
+
+        y R is physically equivalent to B (y rotates the cube so R face
+        becomes B in the original orientation)
+
+        """
+        result_b = compute_impacts(Algorithm.parse_moves('B'))
+        result_y_r = compute_impacts(Algorithm.parse_moves('y R'))
+
+        self.assertEqual(
+            result_b.cubies_corner_permutation,
+            result_y_r.cubies_corner_permutation,
+        )
+        self.assertEqual(
+            result_b.cubies_corner_orientation,
+            result_y_r.cubies_corner_orientation,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_permutation,
+            result_y_r.cubies_edge_permutation,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_orientation,
+            result_y_r.cubies_edge_orientation,
+        )
+        self.assertEqual(
+            result_b.cubies_corners_moved,
+            result_y_r.cubies_corners_moved,
+        )
+        self.assertEqual(
+            result_b.cubies_corners_twisted,
+            result_y_r.cubies_corners_twisted,
+        )
+        self.assertEqual(
+            result_b.cubies_edges_moved,
+            result_y_r.cubies_edges_moved,
+        )
+        self.assertEqual(
+            result_b.cubies_edges_flipped,
+            result_y_r.cubies_edges_flipped,
+        )
+        self.assertEqual(
+            result_b.cubies_corner_cycles,
+            result_y_r.cubies_corner_cycles,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_cycles,
+            result_y_r.cubies_edge_cycles,
+        )
+        self.assertEqual(
+            result_b.cubies_complexity_score,
+            result_y_r.cubies_complexity_score,
+        )
+        self.assertEqual(
+            result_b.cubies_corner_parity,
+            result_y_r.cubies_corner_parity,
+        )
+        self.assertEqual(
+            result_b.cubies_edge_parity,
+            result_y_r.cubies_edge_parity,
+        )
+        self.assertEqual(
+            result_b.cubies_parity_valid,
+            result_y_r.cubies_parity_valid,
+        )
+        self.assertEqual(
+            result_b.cubies_patterns,
+            result_y_r.cubies_patterns,
+        )
+
     def test_identical_algorithms_identical_results(self) -> None:
         """Test that identical algorithms produce identical results."""
         algorithm1 = Algorithm.parse_moves("R U R' U'")
@@ -2516,9 +2804,17 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
             result1.facelets_permutations,
             result2.facelets_permutations,
         )
+        manhattan1 = cast(
+            'DistanceMetrics',
+            result1.facelets_manhattan_distance,
+        )
+        manhattan2 = cast(
+            'DistanceMetrics',
+            result2.facelets_manhattan_distance,
+        )
         self.assertEqual(
-            result1.facelets_manhattan_distance.distances,
-            result2.facelets_manhattan_distance.distances,
+            manhattan1.distances,
+            manhattan2.distances,
         )
         self.assertEqual(
             result1.facelets_face_mobility,
@@ -2533,24 +2829,25 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
         )
         result = compute_impacts(algorithm)
 
-        if result.facelets_manhattan_distance.distances:
+        manhattan = cast('DistanceMetrics', result.facelets_manhattan_distance)
+        if manhattan.distances:
             # Mean should be precise
             manual_mean = (
-                sum(result.facelets_manhattan_distance.distances.values())
-                / len(result.facelets_manhattan_distance.distances)
+                sum(manhattan.distances.values())
+                / len(manhattan.distances)
             )
             self.assertAlmostEqual(
-                result.facelets_manhattan_distance.mean,
+                manhattan.mean,
                 manual_mean,
                 places=10,
             )
 
             # Sum should be exact
             distance_sum = sum(
-                result.facelets_manhattan_distance.distances.values(),
+                manhattan.distances.values(),
             )
             self.assertEqual(
-                result.facelets_manhattan_distance.sum,
+                manhattan.sum,
                 distance_sum,
             )
 
@@ -2597,14 +2894,17 @@ class TestComputeFaceToFaceMatrix(unittest.TestCase):
         for face in FACE_ORDER:
             self.assertIn(face, matrix)
             for target_face in FACE_ORDER:
-                self.assertEqual(matrix[face][target_face], 0)
+                self.assertEqual(
+                    matrix[cast('Facelet', face)][cast('Facelet', target_face)],
+                    0,
+                )
 
     def test_same_face_permutation(self) -> None:
         """Test permutation within same face."""
         permutations = {0: 1, 1: 2, 2: 0}
         matrix = compute_face_to_face_matrix(permutations, self.cube)
         self.assertEqual(matrix['U']['U'], 3)
-        for face in ['R', 'F', 'D', 'L', 'B']:
+        for face in cast('list[Facelet]', ['R', 'F', 'D', 'L', 'B']):
             self.assertEqual(matrix['U'][face], 0)
 
     def test_cross_face_permutation(self) -> None:
@@ -2634,9 +2934,9 @@ class TestComputeFaceToFaceMatrix(unittest.TestCase):
         self.assertEqual(len(matrix), 6)
         for face in FACE_ORDER:
             self.assertIn(face, matrix)
-            self.assertEqual(len(matrix[face]), 6)
+            self.assertEqual(len(matrix[cast('Facelet', face)]), 6)
             for target_face in FACE_ORDER:
-                self.assertIn(target_face, matrix[face])
+                self.assertIn(target_face, matrix[cast('Facelet', face)])
 
 
 class TestDetectSymmetry(unittest.TestCase):
@@ -2703,55 +3003,57 @@ class TestDetectSymmetry(unittest.TestCase):
         self.assertFalse(result['full_impact'])
 
 
-class TestAnalyzeLayers(unittest.TestCase):
-    """Test the analyze_layers function."""
+class TestAnalyzePieceTypeImpact(unittest.TestCase):
+    """Test the analyze_piece_type_impact function."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
         self.cube = VCube()
 
     def test_no_permutations(self) -> None:
-        """Test with no permutations."""
-        result = analyze_layers({}, self.cube)
-        self.assertEqual(result['centers_moved'], 0)
-        self.assertEqual(result['edges_moved'], 0)
-        self.assertEqual(result['corners_moved'], 0)
+        """Test with no permutations returns empty dict."""
+        result = analyze_piece_type_impact({}, self.cube)
+        self.assertEqual(result, {})
 
     def test_only_centers_moved(self) -> None:
-        """Test when only center pieces move."""
+        """Test when only center pieces move (fixed_center on 3x3x3)."""
         permutations = {4: 13, 13: 4}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 2)
-        self.assertEqual(result['edges_moved'], 0)
-        self.assertEqual(result['corners_moved'], 0)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['fixed_center'], 2)
+        self.assertEqual(result['center'], 2)
+        self.assertNotIn('midge', result)
+        self.assertNotIn('corner', result)
 
     def test_only_edges_moved(self) -> None:
-        """Test when only edge pieces move."""
+        """Test when only edge pieces move — specific and family counted."""
         permutations = {1: 3, 3: 1, 5: 7, 7: 5}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 0)
-        self.assertEqual(result['edges_moved'], 4)
-        self.assertEqual(result['corners_moved'], 0)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['midge'], 4)
+        self.assertEqual(result['edge'], 4)
+        self.assertNotIn('fixed_center', result)
+        self.assertNotIn('corner', result)
 
     def test_only_corners_moved(self) -> None:
         """Test when only corner pieces move."""
         permutations = {0: 2, 2: 0, 6: 8, 8: 6}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 0)
-        self.assertEqual(result['edges_moved'], 0)
-        self.assertEqual(result['corners_moved'], 4)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['corner'], 4)
+        self.assertNotIn('center', result)
+        self.assertNotIn('edge', result)
 
-    def test_mixed_layer_movement(self) -> None:
-        """Test when different layer types move."""
+    def test_mixed_piece_type_movement(self) -> None:
+        """Test when different piece types move — hierarchy fully expanded."""
         permutations = {
-            0: 1,
-            1: 2,
-            4: 13,
+            0: 1,   # corner
+            1: 2,   # midge (also counts as edge)
+            4: 13,  # fixed_center (also counts as center)
         }
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['centers_moved'], 1)
-        self.assertEqual(result['edges_moved'], 1)
-        self.assertEqual(result['corners_moved'], 1)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['corner'], 1)
+        self.assertEqual(result['midge'], 1)
+        self.assertEqual(result['edge'], 1)
+        self.assertEqual(result['fixed_center'], 1)
+        self.assertEqual(result['center'], 1)
 
     def test_all_corners_moved(self) -> None:
         """Test all corner positions move."""
@@ -2763,8 +3065,8 @@ class TestAnalyzeLayers(unittest.TestCase):
                 face_start + 6, face_start + 8,
             ])
         permutations = {pos: (pos + 1) % 54 for pos in corner_positions}
-        result = analyze_layers(permutations, self.cube)
-        self.assertEqual(result['corners_moved'], 24)
+        result = analyze_piece_type_impact(permutations, self.cube)
+        self.assertEqual(result['corner'], 24)
 
 
 class TestAnalyzeCycles(unittest.TestCase):
@@ -2773,84 +3075,96 @@ class TestAnalyzeCycles(unittest.TestCase):
     def test_empty_cycles(self) -> None:
         """Test with no cycles."""
         result = analyze_cycles([])
-        self.assertEqual(result['cycle_count'], 0)
-        self.assertEqual(result['cycle_lengths'], [])
-        self.assertEqual(result['min_cycle_length'], 0)
-        self.assertEqual(result['max_cycle_length'], 0)
-        self.assertEqual(result['total_pieces_in_cycles'], 0)
-        self.assertEqual(result['two_cycles'], 0)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 0)
+        self.assertEqual(result.cycle_lengths, [])
+        self.assertEqual(result.min_cycle_length, 0)
+        self.assertEqual(result.max_cycle_length, 0)
+        self.assertEqual(result.total_pieces_in_cycles, 0)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_single_two_cycle(self) -> None:
         """Test single 2-cycle analysis."""
         cycles = [[0, 1]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['cycle_lengths'], [2])
-        self.assertEqual(result['min_cycle_length'], 2)
-        self.assertEqual(result['max_cycle_length'], 2)
-        self.assertEqual(result['total_pieces_in_cycles'], 2)
-        self.assertEqual(result['two_cycles'], 1)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [2])
+        self.assertEqual(result.min_cycle_length, 2)
+        self.assertEqual(result.max_cycle_length, 2)
+        self.assertEqual(result.total_pieces_in_cycles, 2)
+        self.assertEqual(result.two_cycles, 1)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_single_three_cycle(self) -> None:
         """Test single 3-cycle analysis."""
         cycles = [[0, 1, 2]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['cycle_lengths'], [3])
-        self.assertEqual(result['min_cycle_length'], 3)
-        self.assertEqual(result['max_cycle_length'], 3)
-        self.assertEqual(result['total_pieces_in_cycles'], 3)
-        self.assertEqual(result['two_cycles'], 0)
-        self.assertEqual(result['three_cycles'], 1)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [3])
+        self.assertEqual(result.min_cycle_length, 3)
+        self.assertEqual(result.max_cycle_length, 3)
+        self.assertEqual(result.total_pieces_in_cycles, 3)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 1)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_single_four_plus_cycle(self) -> None:
         """Test 4+ cycle analysis."""
         cycles = [[0, 1, 2, 3]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['cycle_lengths'], [4])
-        self.assertEqual(result['min_cycle_length'], 4)
-        self.assertEqual(result['max_cycle_length'], 4)
-        self.assertEqual(result['total_pieces_in_cycles'], 4)
-        self.assertEqual(result['two_cycles'], 0)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 1)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [4])
+        self.assertEqual(result.min_cycle_length, 4)
+        self.assertEqual(result.max_cycle_length, 4)
+        self.assertEqual(result.total_pieces_in_cycles, 4)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 1)
 
     def test_multiple_mixed_cycles(self) -> None:
         """Test multiple cycles of different lengths."""
         cycles = [[0, 1], [2, 3, 4], [5, 6, 7, 8, 9]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 3)
-        self.assertEqual(result['cycle_lengths'], [2, 3, 5])
-        self.assertEqual(result['min_cycle_length'], 2)
-        self.assertEqual(result['max_cycle_length'], 5)
-        self.assertEqual(result['total_pieces_in_cycles'], 10)
-        self.assertEqual(result['two_cycles'], 1)
-        self.assertEqual(result['three_cycles'], 1)
-        self.assertEqual(result['four_plus_cycles'], 1)
+        self.assertEqual(result.cycle_count, 3)
+        self.assertEqual(result.cycle_lengths, [2, 3, 5])
+        self.assertEqual(result.min_cycle_length, 2)
+        self.assertEqual(result.max_cycle_length, 5)
+        self.assertEqual(result.total_pieces_in_cycles, 10)
+        self.assertEqual(result.two_cycles, 1)
+        self.assertEqual(result.three_cycles, 1)
+        self.assertEqual(result.four_plus_cycles, 1)
 
     def test_multiple_two_cycles(self) -> None:
         """Test multiple 2-cycles."""
         cycles = [[0, 1], [2, 3], [4, 5]]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 3)
-        self.assertEqual(result['two_cycles'], 3)
-        self.assertEqual(result['three_cycles'], 0)
-        self.assertEqual(result['four_plus_cycles'], 0)
+        self.assertEqual(result.cycle_count, 3)
+        self.assertEqual(result.two_cycles, 3)
+        self.assertEqual(result.three_cycles, 0)
+        self.assertEqual(result.four_plus_cycles, 0)
 
     def test_long_cycle(self) -> None:
         """Test long cycle."""
         cycles = [SOLVED_CP]
         result = analyze_cycles(cycles)
-        self.assertEqual(result['cycle_count'], 1)
-        self.assertEqual(result['min_cycle_length'], 8)
-        self.assertEqual(result['max_cycle_length'], 8)
-        self.assertEqual(result['four_plus_cycles'], 1)
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.min_cycle_length, 8)
+        self.assertEqual(result.max_cycle_length, 8)
+        self.assertEqual(result.four_plus_cycles, 1)
+
+    def test_cycle_analysis_supports_attribute_access(self) -> None:
+        """CycleAnalysis fields must be accessible via dot notation."""
+        result = analyze_cycles([[0, 1, 2]])
+        self.assertEqual(result.cycle_count, 1)
+        self.assertEqual(result.cycle_lengths, [3])
+        self.assertEqual(result.min_cycle_length, 3)
+        self.assertEqual(result.max_cycle_length, 3)
+        self.assertEqual(result.total_pieces_in_cycles, 3)
+        self.assertEqual(result.two_cycles, 0)
+        self.assertEqual(result.three_cycles, 1)
+        self.assertEqual(result.four_plus_cycles, 0)
 
 
 class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
@@ -2863,8 +3177,13 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('SOLVED', patterns)
-        self.assertEqual(len(patterns), 1)
+        self.assertEqual(patterns.state, ['SOLVED'])
+        self.assertEqual(patterns.orientation, [])
+        self.assertEqual(patterns.permutation, [])
+        self.assertEqual(patterns.first_layer, [])
+        self.assertEqual(patterns.last_layer, [])
+        self.assertEqual(patterns.scramble, [])
+        self.assertEqual(patterns.cycle, [])
 
     def test_all_oriented(self) -> None:
         """Test all pieces oriented but not permuted."""
@@ -2873,27 +3192,61 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('ALL_ORIENTED', patterns)
+        self.assertIn('ALL_ORIENTED', patterns.orientation)
 
     def test_corners_oriented_only(self) -> None:
-        """Test only corners oriented."""
+        """
+        Test only corners oriented,
+        edges are flipped at their home position.
+        """
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = SOLVED_CO
-        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('CORNERS_ORIENTED', patterns)
-        self.assertNotIn('ALL_ORIENTED', patterns)
+        self.assertIn('CORNERS_ORIENTED', patterns.orientation)
+        self.assertNotIn('ALL_ORIENTED', patterns.orientation)
 
     def test_edges_oriented_only(self) -> None:
-        """Test only edges oriented."""
-        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        """
+        Test only edges oriented,
+        corners are twisted at their home position.
+        """
+        cp = SOLVED_CP
         co = [1, 0, 0, 0, 0, 0, 0, 0]
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('EDGES_ORIENTED', patterns)
-        self.assertNotIn('ALL_ORIENTED', patterns)
+        self.assertIn('EDGES_ORIENTED', patterns.orientation)
+        self.assertNotIn('ALL_ORIENTED', patterns.orientation)
+
+    def test_displaced_twisted_corner_not_oriented(self) -> None:
+        """Displaced AND twisted corner must NOT be treated as oriented."""
+        # Corner 0 is swapped with corner 1 (displaced) AND twisted (co[0]=1).
+        # The buggy condition `cp[i] != i or co[i] == 0` short-circuits on
+        # displacement and wrongly emits ALL_ORIENTED / CORNERS_ORIENTED.
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('ALL_ORIENTED', patterns.orientation)
+        self.assertNotIn('CORNERS_ORIENTED', patterns.orientation)
+        self.assertIn('EDGES_ORIENTED', patterns.orientation)
+
+    def test_displaced_flipped_edge_not_oriented(self) -> None:
+        """Displaced AND flipped edge must NOT be treated as oriented."""
+        # Edge 0 is swapped with edge 1 (displaced) AND flipped (eo[0]=1).
+        # The buggy condition `ep[i] != i or eo[i] == 0` short-circuits and
+        # wrongly emits ALL_ORIENTED / EDGES_ORIENTED.
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('ALL_ORIENTED', patterns.orientation)
+        self.assertNotIn('EDGES_ORIENTED', patterns.orientation)
+        self.assertIn('CORNERS_ORIENTED', patterns.orientation)
 
     def test_all_permuted(self) -> None:
         """Test all pieces permuted but misoriented."""
@@ -2902,7 +3255,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('ALL_PERMUTED', patterns)
+        self.assertIn('ALL_PERMUTED', patterns.permutation)
 
     def test_corners_permuted_only(self) -> None:
         """Test only corners permuted."""
@@ -2911,8 +3264,8 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('CORNERS_PERMUTED', patterns)
-        self.assertNotIn('ALL_PERMUTED', patterns)
+        self.assertIn('CORNERS_PERMUTED', patterns.permutation)
+        self.assertNotIn('ALL_PERMUTED', patterns.permutation)
 
     def test_edges_permuted_only(self) -> None:
         """Test only edges permuted."""
@@ -2921,26 +3274,26 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('EDGES_PERMUTED', patterns)
-        self.assertNotIn('ALL_PERMUTED', patterns)
+        self.assertIn('EDGES_PERMUTED', patterns.permutation)
+        self.assertNotIn('ALL_PERMUTED', patterns.permutation)
 
     def test_oll_corners_done(self) -> None:
         """Test OLL with corners oriented."""
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = SOLVED_CO
-        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        ep = SOLVED_EP
         eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('OLL_CORNERS_DONE', patterns)
+        self.assertIn('OLL_CORNERS_DONE', patterns.orientation)
 
     def test_oll_edges_done(self) -> None:
         """Test OLL with edges oriented."""
-        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        cp = SOLVED_CP
         co = [1, 0, 0, 0, 0, 0, 0, 0]
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('OLL_EDGES_DONE', patterns)
+        self.assertIn('OLL_EDGES_DONE', patterns.orientation)
 
     def test_oll_complete_pll_remaining(self) -> None:
         """Test OLL complete but PLL remaining."""
@@ -2949,7 +3302,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('OLL_COMPLETE_PLL_REMAINING', patterns)
+        self.assertIn('OLL_COMPLETE_PLL_REMAINING', patterns.permutation)
 
     def test_permuted_but_misoriented(self) -> None:
         """Test pieces permuted but misoriented."""
@@ -2958,7 +3311,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('PERMUTED_BUT_MISORIENTED', patterns)
+        self.assertIn('PERMUTED_BUT_MISORIENTED', patterns.permutation)
 
     def test_first_layer_corners_solved(self) -> None:
         """Test first layer corners solved."""
@@ -2967,7 +3320,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('FIRST_LAYER_CORNERS_SOLVED', patterns)
+        self.assertIn('FIRST_LAYER_CORNERS_SOLVED', patterns.first_layer)
 
     def test_first_layer_edges_solved(self) -> None:
         """Test first layer edges solved."""
@@ -2976,7 +3329,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('FIRST_LAYER_EDGES_SOLVED', patterns)
+        self.assertIn('FIRST_LAYER_EDGES_SOLVED', patterns.first_layer)
 
     def test_first_layer_complete(self) -> None:
         """Test first layer complete."""
@@ -2985,7 +3338,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('FIRST_LAYER_COMPLETE', patterns)
+        self.assertIn('FIRST_LAYER_COMPLETE', patterns.first_layer)
 
     def test_cross_solved(self) -> None:
         """Test cross solved."""
@@ -2994,7 +3347,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('CROSS_SOLVED', patterns)
+        self.assertIn('CROSS_SOLVED', patterns.first_layer)
 
     def test_f2l_complete(self) -> None:
         """Test F2L complete."""
@@ -3003,7 +3356,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('F2L_COMPLETE', patterns)
+        self.assertIn('F2L_COMPLETE', patterns.first_layer)
 
     def test_last_layer_oriented(self) -> None:
         """Test last layer oriented."""
@@ -3012,36 +3365,50 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('LAST_LAYER_ORIENTED', patterns)
+        self.assertIn('LAST_LAYER_ORIENTED', patterns.last_layer)
 
     def test_pll_case(self) -> None:
-        """Test PLL case detection - last layer oriented but not permuted."""
+        """
+        Test PLL case detection - last layer oriented,
+        U pieces permuted within U layer.
+        """
         cp = [1, 0, 2, 3, 4, 5, 6, 7]
         co = SOLVED_CO
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        # This gets OLL_COMPLETE_PLL_REMAINING instead of PLL_CASE
-        # because it's oriented but not permuted
-        self.assertIn('OLL_COMPLETE_PLL_REMAINING', patterns)
+        self.assertIn('OLL_COMPLETE_PLL_REMAINING', patterns.permutation)
+        self.assertIn('PLL_CASE', patterns.last_layer)
 
     def test_pll_edges_only(self) -> None:
-        """Test PLL with edges needing permutation outside U layer."""
+        """Test PLL with only U edges needing permutation, corners solved."""
         cp = SOLVED_CP
         co = SOLVED_CO
-        ep = [0, 4, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11]
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('PLL_EDGES_ONLY', patterns)
+        self.assertIn('PLL_EDGES_ONLY', patterns.last_layer)
 
     def test_pll_corners_only(self) -> None:
-        """Test PLL with corners needing permutation outside U layer."""
+        """Test PLL with only U corners needing permutation, edges solved."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('PLL_CORNERS_ONLY', patterns.last_layer)
+
+    def test_no_pll_case_when_pieces_cross_layers(self) -> None:
+        """
+        Test that PLL_CASE is not emitted when U pieces crossed
+        into other layers.
+        """
         cp = [0, 4, 2, 3, 1, 5, 6, 7]
         co = SOLVED_CO
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('PLL_CORNERS_ONLY', patterns)
+        self.assertNotIn('PLL_CASE', patterns.last_layer)
 
     def test_oll_case(self) -> None:
         """Test OLL case detection."""
@@ -3050,7 +3417,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('OLL_CASE', patterns)
+        self.assertIn('OLL_CASE', patterns.last_layer)
 
     def test_oll_case_with_f2l_incomplete(self) -> None:
         """Test OLL case when F2L is not complete."""
@@ -3059,7 +3426,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [0, 1, 2, 3, 4, 5, 6, 7, 9, 8, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertNotIn('OLL_CASE', patterns)
+        self.assertNotIn('OLL_CASE', patterns.last_layer)
 
     def test_highly_scrambled(self) -> None:
         """Test highly scrambled pattern."""
@@ -3068,7 +3435,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('HIGHLY_SCRAMBLED', patterns)
+        self.assertIn('HIGHLY_SCRAMBLED', patterns.scramble)
 
     def test_minimally_scrambled(self) -> None:
         """Test minimally scrambled pattern."""
@@ -3077,7 +3444,58 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('MINIMALLY_SCRAMBLED', patterns)
+        self.assertIn('MINIMALLY_SCRAMBLED', patterns.scramble)
+
+    def test_highly_scrambled_all_edges_moved(self) -> None:
+        """
+        Test that all edges moved with corners untouched
+        gives HIGHLY_SCRAMBLED.
+        """
+        ep = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertIn('HIGHLY_SCRAMBLED', patterns.scramble)
+
+    @staticmethod
+    def cubies_after(move: str) -> tuple[
+        list[int], list[int], list[int], list[int],
+    ]:
+        """
+        Apply a single move and return cubie state.
+
+        Returns:
+            Tuple of (cp, co, ep, eo) after the move.
+
+        """
+        cube = VCube(size=3)
+        cube.rotate(move)
+        cp, co, ep, eo, *_ = cube.cubies
+        return cp, co, ep, eo
+
+    def test_r_and_l_preserve_edge_orientation(self) -> None:
+        """R and L don't flip any edges so both yield EDGES_ORIENTED."""
+        for move in ('R', 'L'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertIn('EDGES_ORIENTED', patterns.orientation)
+
+    def test_f_and_b_flip_edges_no_orientation_label(self) -> None:
+        """F and B flip 4 edges each, so EDGES_ORIENTED is not emitted."""
+        for move in ('F', 'B'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertNotIn('EDGES_ORIENTED', patterns.orientation)
+                self.assertNotIn('ALL_ORIENTED', patterns.orientation)
+
+    def test_not_minimally_scrambled_all_edges_flipped(self) -> None:
+        """
+        Test that all edges flipped with corners untouched
+        is not MINIMALLY_SCRAMBLED.
+        """
+        eo = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, SOLVED_EP, eo)
+        self.assertNotIn('MINIMALLY_SCRAMBLED', patterns.scramble)
 
     def test_single_corner_cycle(self) -> None:
         """Test single cycle involving all corners."""
@@ -3086,7 +3504,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('SINGLE_CORNER_CYCLE', patterns)
+        self.assertIn('SINGLE_CORNER_CYCLE', patterns.cycle)
 
     def test_single_edge_cycle(self) -> None:
         """Test single cycle involving all edges."""
@@ -3095,7 +3513,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('SINGLE_EDGE_CYCLE', patterns)
+        self.assertIn('SINGLE_EDGE_CYCLE', patterns.cycle)
 
     def test_single_corner_swap(self) -> None:
         """Test single corner swap."""
@@ -3104,7 +3522,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('SINGLE_CORNER_SWAP', patterns)
+        self.assertIn('SINGLE_CORNER_SWAP', patterns.cycle)
 
     def test_single_edge_swap(self) -> None:
         """Test single edge swap."""
@@ -3113,7 +3531,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('SINGLE_EDGE_SWAP', patterns)
+        self.assertIn('SINGLE_EDGE_SWAP', patterns.cycle)
 
     def test_corner_three_cycle(self) -> None:
         """Test corner 3-cycle pattern."""
@@ -3122,7 +3540,7 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = SOLVED_EP
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('CORNER_THREE_CYCLE', patterns)
+        self.assertIn('CORNER_THREE_CYCLE', patterns.cycle)
 
     def test_edge_three_cycle(self) -> None:
         """Test edge 3-cycle pattern."""
@@ -3131,16 +3549,331 @@ class TestClassifyPattern(unittest.TestCase):  # noqa: PLR0904
         ep = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         eo = SOLVED_EO
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('EDGE_THREE_CYCLE', patterns)
+        self.assertIn('EDGE_THREE_CYCLE', patterns.cycle)
+
+    def test_corner_four_cycle(self) -> None:
+        """CORNER_FOUR_CYCLE fires when any 4-cycle exists in corners."""
+        cp = [1, 2, 3, 0, 4, 5, 6, 7]  # 4-cycle: 0→1→2→3
+        patterns = classify_pattern(cp, SOLVED_CO, SOLVED_EP, SOLVED_EO)
+        self.assertIn('CORNER_FOUR_CYCLE', patterns.cycle)
+
+    def test_edge_four_cycle(self) -> None:
+        """EDGE_FOUR_CYCLE fires when any 4-cycle exists in edges."""
+        ep = [1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11]  # 4-cycle: 0→1→2→3
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertIn('EDGE_FOUR_CYCLE', patterns.cycle)
+
+    def test_b_move_classified_via_four_cycles(self) -> None:
+        """B move produces 4-cycles and must not be UNCLASSIFIED."""
+        cp, co, ep, eo = self.cubies_after('B')
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('UNCLASSIFIED', patterns.state)
+        self.assertIn('CORNER_FOUR_CYCLE', patterns.cycle)
+        self.assertIn('EDGE_FOUR_CYCLE', patterns.cycle)
+
+    def test_f_move_classified_via_four_cycles(self) -> None:
+        """F move produces 4-cycles and must not be UNCLASSIFIED."""
+        cp, co, ep, eo = self.cubies_after('F')
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('UNCLASSIFIED', patterns.state)
+        self.assertIn('CORNER_FOUR_CYCLE', patterns.cycle)
+        self.assertIn('EDGE_FOUR_CYCLE', patterns.cycle)
+
+    def test_eo_complete_with_edges_oriented(self) -> None:
+        """EO_COMPLETE fires when all edges are oriented."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('EO_COMPLETE', patterns.orientation)
+
+    def test_eo_complete_with_all_oriented(self) -> None:
+        """EO_COMPLETE is also emitted under the ALL_ORIENTED label."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('EO_COMPLETE', patterns.orientation)
+        self.assertIn('ALL_ORIENTED', patterns.orientation)
+
+    def test_co_complete_with_corners_oriented(self) -> None:
+        """CO_COMPLETE fires when all corners are oriented."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('CO_COMPLETE', patterns.orientation)
+
+    def test_co_complete_with_all_oriented(self) -> None:
+        """CO_COMPLETE is also emitted under the ALL_ORIENTED label."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('CO_COMPLETE', patterns.orientation)
+
+    def test_oll_cross_done_u_edges_oriented(self) -> None:
+        """OLL_CROSS_DONE fires when all four U-layer edges are EO=0."""
+        cp = SOLVED_CP
+        co = [1, 0, 0, 0, 0, 0, 0, 0]  # corner twisted → not all oriented
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO  # all edges oriented, so U edges are clean
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('OLL_CROSS_DONE', patterns.last_layer)
+
+    def test_oll_cross_done_not_emitted_when_u_edge_displaced(self) -> None:
+        """OLL_CROSS_DONE must not fire when a U-layer edge left its slot."""
+        # After R the FR piece sits in the UR slot (ep[0]=8); cross broken.
+        cp, co, ep, eo = self.cubies_after('R')
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('OLL_CROSS_DONE', patterns.last_layer)
+
+    def test_oll_cross_done_not_emitted_when_u_edge_flipped(self) -> None:
+        """OLL_CROSS_DONE must not fire when a U-layer edge is flipped."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # UR edge flipped
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('OLL_CROSS_DONE', patterns.last_layer)
+
+    def test_oll_cross_done_with_middle_edges_flipped(self) -> None:
+        """OLL_CROSS_DONE fires even when middle-layer edges are flipped."""
+        cp = SOLVED_CP
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0]  # FR, FL flipped
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('OLL_CROSS_DONE', patterns.last_layer)
+
+    def test_eoline_done(self) -> None:
+        """EOLine_DONE fires when EO is complete and DF+DB are in place."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        # ep[5]=5 (DF), ep[7]=7 (DB) in home slots; other edges scrambled
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('EOLine_DONE', patterns.permutation)
+
+    def test_eoline_done_not_emitted_when_eo_incomplete(self) -> None:
+        """EOLine_DONE must not fire when any edge is flipped."""
+        cp = SOLVED_CP
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('EOLine_DONE', patterns.permutation)
+
+    def test_eoline_done_not_emitted_when_df_out_of_place(self) -> None:
+        """EOLine_DONE must not fire when DF is not in its home slot."""
+        cp = SOLVED_CP
+        co = [1, 0, 0, 0, 0, 0, 0, 0]
+        ep = [0, 1, 2, 3, 4, 6, 5, 7, 8, 9, 10, 11]  # DF↔DL swapped
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('EOLine_DONE', patterns.permutation)
+
+    def test_pure_corner_3_cycle(self) -> None:
+        """PURE_CORNER_3_CYCLE fires when only corners move in a 3-cycle."""
+        cp = [1, 2, 0, 3, 4, 5, 6, 7]  # 3-cycle on corners 0,1,2
+        co = SOLVED_CO
+        ep = SOLVED_EP  # edges untouched
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('PURE_CORNER_3_CYCLE', patterns.cycle)
+
+    def test_pure_corner_3_cycle_not_emitted_when_edges_moved(self) -> None:
+        """PURE_CORNER_3_CYCLE must not fire when edges are also permuted."""
+        cp = [1, 2, 0, 3, 4, 5, 6, 7]
+        co = SOLVED_CO
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # edges also moved
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('PURE_CORNER_3_CYCLE', patterns.cycle)
+
+    def test_pure_edge_3_cycle(self) -> None:
+        """PURE_EDGE_3_CYCLE fires when only edges move in a 3-cycle."""
+        cp = SOLVED_CP  # corners untouched
+        co = SOLVED_CO
+        ep = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # 3-cycle on edges 0,1,2
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('PURE_EDGE_3_CYCLE', patterns.cycle)
+
+    def test_pure_edge_3_cycle_not_emitted_when_corners_moved(self) -> None:
+        """PURE_EDGE_3_CYCLE must not fire when corners are also permuted."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]  # corners also moved
+        co = SOLVED_CO
+        ep = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertNotIn('PURE_EDGE_3_CYCLE', patterns.cycle)
+
+    def test_double_corner_swap(self) -> None:
+        """DOUBLE_CORNER_SWAP fires when exactly two corner 2-cycles exist."""
+        cp = [1, 0, 3, 2, 4, 5, 6, 7]  # two swaps: (0,1) and (2,3)
+        co = SOLVED_CO
+        ep = SOLVED_EP
+        eo = SOLVED_EO
+        patterns = classify_pattern(cp, co, ep, eo)
+        self.assertIn('DOUBLE_CORNER_SWAP', patterns.cycle)
+
+    def test_double_corner_swap_not_emitted_for_single_swap(self) -> None:
+        """DOUBLE_CORNER_SWAP must not fire for a single corner swap."""
+        cp = [1, 0, 2, 3, 4, 5, 6, 7]
+        patterns = classify_pattern(cp, SOLVED_CO, SOLVED_EP, SOLVED_EO)
+        self.assertNotIn('DOUBLE_CORNER_SWAP', patterns.cycle)
+
+    def test_double_edge_swap(self) -> None:
+        """DOUBLE_EDGE_SWAP fires when there are exactly two edge 2-cycles."""
+        ep = [1, 0, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11]  # swaps: (0,1) and (2,3)
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertIn('DOUBLE_EDGE_SWAP', patterns.cycle)
+
+    def test_double_edge_swap_not_emitted_for_single_swap(self) -> None:
+        """DOUBLE_EDGE_SWAP must not fire for a single edge swap."""
+        ep = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        patterns = classify_pattern(SOLVED_CP, SOLVED_CO, ep, SOLVED_EO)
+        self.assertNotIn('DOUBLE_EDGE_SWAP', patterns.cycle)
+
+    def test_f_and_b_no_eo_complete(self) -> None:
+        """EO_COMPLETE must not fire after F or B (they flip edges)."""
+        for move in ('F', 'B'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertNotIn('EO_COMPLETE', patterns.orientation)
+
+    def test_r_and_l_have_eo_complete(self) -> None:
+        """EO_COMPLETE fires after R or L (they never flip edges)."""
+        for move in ('R', 'L'):
+            with self.subTest(move=move):
+                cp, co, ep, eo = self.cubies_after(move)
+                patterns = classify_pattern(cp, co, ep, eo)
+                self.assertIn('EO_COMPLETE', patterns.orientation)
 
     def test_unclassified_pattern(self) -> None:
         """Test pattern that doesn't match standard classifications."""
-        cp = [0, 2, 1, 3, 5, 4, 6, 7]
-        co = [1, 1, 1, 0, 0, 0, 0, 0]
-        ep = [2, 1, 0, 3, 5, 4, 6, 7, 8, 9, 10, 11]
-        eo = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        # 5-cycle in both corners and edges (no 2- or 3-cycle), partial
+        # CO/EO including bad U-layer edges, medium scramble level.
+        cp = [1, 2, 3, 4, 0, 5, 6, 7]
+        co = [1, 2, 0, 0, 0, 0, 0, 0]
+        ep = [1, 2, 3, 4, 0, 5, 6, 7, 8, 9, 10, 11]
+        eo = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         patterns = classify_pattern(cp, co, ep, eo)
-        self.assertIn('UNCLASSIFIED', patterns)
+        self.assertIn('UNCLASSIFIED', patterns.state)
+
+    def test_symmetry_variations_give_same_patterns(self) -> None:
+        """
+        Symmetry variations of an algorithm must yield identical patterns.
+
+        Sune and AntiSune are mirror variations of the same OLL case.
+        They move different pieces but produce the same structural pattern,
+        so classify_pattern should return the same set for both.
+        """
+        sune = Algorithm.parse_moves("R U R' U R U2 R'")
+        anti_sune = Algorithm.parse_moves("R U2 R' U' R U' R'")
+
+        sune_impacts = compute_impacts(sune)
+        anti_sune_impacts = compute_impacts(anti_sune)
+
+        self.assertEqual(
+            sune_impacts.cubies_patterns,
+            anti_sune_impacts.cubies_patterns,
+        )
+
+
+class TestClassifyParitySignature(unittest.TestCase):
+    """Test the classify_parity_signature function."""
+
+    def test_identity(self) -> None:
+        """Identity permutation should be even-even and valid."""
+        result = classify_parity_signature(0, 0)
+        self.assertEqual(result.signature, 'even-even')
+        self.assertTrue(result.is_valid)
+
+    def test_identity_implications(self) -> None:
+        """Even-even (identity) permutation should mention commutators."""
+        result = classify_parity_signature(0, 0)
+        self.assertTrue(
+            any('commutator' in s for s in result.implications),
+        )
+
+    def test_three_cycles_even_even(self) -> None:
+        """3-cycles are even permutations."""
+        result = classify_parity_signature(0, 0)
+        self.assertEqual(result.signature, 'even-even')
+        self.assertTrue(result.is_valid)
+
+    def test_even_even_commutator_implication(self) -> None:
+        """Even-even algorithms should mention commutators."""
+        result = classify_parity_signature(0, 0)
+        self.assertTrue(
+            any('commutator' in s for s in result.implications),
+        )
+
+    def test_single_swaps_odd_odd(self) -> None:
+        """Single 2-cycles are odd permutations."""
+        result = classify_parity_signature(1, 1)
+        self.assertEqual(result.signature, 'odd-odd')
+        self.assertTrue(result.is_valid)
+
+    def test_odd_odd_quarter_turn_implication(self) -> None:
+        """Odd-odd algorithms should mention quarter turns."""
+        result = classify_parity_signature(1, 1)
+        self.assertTrue(
+            any('quarter turn' in s for s in result.implications),
+        )
+
+    def test_even_odd_invalid(self) -> None:
+        """Mismatched parities should be invalid."""
+        result = classify_parity_signature(0, 1)
+        self.assertEqual(result.signature, 'even-odd')
+        self.assertFalse(result.is_valid)
+
+    def test_odd_even_invalid(self) -> None:
+        """Mismatched parities should be invalid."""
+        result = classify_parity_signature(1, 0)
+        self.assertEqual(result.signature, 'odd-even')
+        self.assertFalse(result.is_valid)
+
+    def test_invalid_parity_implication(self) -> None:
+        """Invalid parity should mention impossibility."""
+        result = classify_parity_signature(0, 1)
+        self.assertTrue(
+            any('impossible' in s for s in result.implications),
+        )
+
+    def test_return_type_fields(self) -> None:
+        """Result should have all expected NamedTuple fields."""
+        result = classify_parity_signature(0, 0)
+        self.assertIsInstance(result.signature, str)
+        self.assertIsInstance(result.is_valid, bool)
+        self.assertIsInstance(result.implications, list)
+
+    def test_parity_signature_supports_attribute_access(self) -> None:
+        """ParitySignature fields must be accessible via dot notation."""
+        result = classify_parity_signature(0, 0)
+        self.assertEqual(result.signature, 'even-even')
+        self.assertTrue(result.is_valid)
+        self.assertIsInstance(result.implications, list)
+
+    def test_compute_impacts_populates_parity_signature(self) -> None:
+        """compute_impacts should populate cubies_parity_signature."""
+        algo = parse_moves("R U R' U'")
+        impact = compute_impacts(algo)
+        self.assertIsNotNone(impact.cubies_parity_signature)
+        sig = cast('ParitySignature', impact.cubies_parity_signature)
+        self.assertIn(
+            sig.signature,
+            ('even-even', 'odd-odd', 'even-odd', 'odd-even'),
+        )
+        self.assertTrue(sig.is_valid)
 
 
 class TestComputeCubieComplexity(unittest.TestCase):
@@ -3260,10 +3993,11 @@ class TestOrientationInvariance(unittest.TestCase):
                         oriented_algo = algorithm + orientation
 
                     impacts = compute_impacts(oriented_algo)
-                    distance_metrics = (
+                    distance_metrics = cast(
+                        'DistanceMetrics',
                         impacts.facelets_manhattan_distance
                         if metric_type == 'manhattan'
-                        else impacts.facelets_qtm_distance
+                        else impacts.facelets_qtm_distance,
                     )
 
                     results.append(
@@ -3334,10 +4068,11 @@ class TestFaceInvariance(unittest.TestCase):
         for face_move in face_moves:
             algorithm = Algorithm.parse_moves(face_move)
             impacts = compute_impacts(algorithm)
-            distance_metrics = (
+            distance_metrics = cast(
+                'DistanceMetrics',
                 impacts.facelets_manhattan_distance
                 if metric_type == 'manhattan'
-                else impacts.facelets_qtm_distance
+                else impacts.facelets_qtm_distance,
             )
 
             results.append(
@@ -3458,3 +4193,231 @@ class TestPositionsOnAdjacentCorners(unittest.TestCase):
         # URF [8, 9, 20] and DBL [33, 53, 42] don't share an edge
         result = positions_on_adjacent_corners(8, 33, self.cube)
         self.assertFalse(result)
+
+
+class TestComputeImpactsMultiSize(unittest.TestCase):
+    """Test compute_impacts with cube sizes other than 3x3x3."""
+
+    def test_2x2x2_single_move(self) -> None:
+        """Test impact of a single move on 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        total_facelets = 24  # 6 faces * 4 facelets
+        self.assertEqual(
+            len(result.facelets_transformation_mask),
+            total_facelets,
+        )
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            total_facelets,
+        )
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        # 2x2x2 has no fixed centers (even-sized)
+        expected_percent = result.facelets_mobilized_count / total_facelets
+        self.assertAlmostEqual(
+            result.facelets_scrambled_percent,
+            expected_percent,
+        )
+
+    def test_2x2x2_empty_algorithm(self) -> None:
+        """Test empty algorithm on 2x2x2 produces no impact."""
+        algorithm = Algorithm()
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertEqual(result.facelets_fixed_count, 24)
+        self.assertEqual(result.facelets_mobilized_count, 0)
+        self.assertEqual(result.facelets_scrambled_percent, 0.0)
+        self.assertEqual(result.facelets_permutations, {})
+        self.assertEqual(result.facelets_transformation_mask, '0' * 24)
+
+    def test_2x2x2_cubie_fields_are_none(self) -> None:
+        """Test that cubie fields are None for 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertIsNone(result.cubies_corner_permutation)
+        self.assertIsNone(result.cubies_corner_orientation)
+        self.assertIsNone(result.cubies_edge_permutation)
+        self.assertIsNone(result.cubies_edge_orientation)
+        self.assertIsNone(result.cubies_corners_moved)
+        self.assertIsNone(result.cubies_corners_twisted)
+        self.assertIsNone(result.cubies_edges_moved)
+        self.assertIsNone(result.cubies_edges_flipped)
+        self.assertIsNone(result.cubies_corner_cycles)
+        self.assertIsNone(result.cubies_edge_cycles)
+        self.assertIsNone(result.cubies_complexity_score)
+        self.assertIsNone(result.cubies_suggested_approach)
+        self.assertIsNone(result.cubies_patterns)
+
+    def test_2x2x2_distance_fields_are_none(self) -> None:
+        """Test that distance and layer fields are None for 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertIsNone(result.facelets_manhattan_distance)
+        self.assertIsNone(result.facelets_qtm_distance)
+
+    def test_2x2x2_piece_type_impact(self) -> None:
+        """Test piece type impact for 2x2x2 has only corners."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        impact = result.facelets_piece_type_impact
+        self.assertEqual(impact['corner'], 12)
+        self.assertNotIn('midge', impact)
+        self.assertNotIn('fixed_center', impact)
+
+    def test_2x2x2_facelet_metrics_populated(self) -> None:
+        """Test that size-agnostic facelet metrics are populated for 2x2x2."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=2)
+
+        self.assertIsInstance(result.facelets_face_mobility, dict)
+        self.assertEqual(len(result.facelets_face_mobility), 6)
+        self.assertIsInstance(result.facelets_face_to_face_matrix, dict)
+        self.assertIsInstance(result.facelets_symmetry, dict)
+
+    def test_4x4x4_single_move(self) -> None:
+        """Test impact of a single move on 4x4x4."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=4)
+
+        total_facelets = 96  # 6 faces * 16 facelets
+        self.assertEqual(
+            len(result.facelets_transformation_mask),
+            total_facelets,
+        )
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            total_facelets,
+        )
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        # 4x4x4 has no fixed centers (even-sized)
+        expected_percent = result.facelets_mobilized_count / total_facelets
+        self.assertAlmostEqual(
+            result.facelets_scrambled_percent,
+            expected_percent,
+        )
+        self.assertIsNone(result.cubies_corner_permutation)
+
+    def test_5x5x5_single_move(self) -> None:
+        """Test impact of a single move on 5x5x5."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        total_facelets = 150  # 6 faces * 25 facelets
+        self.assertEqual(
+            len(result.facelets_transformation_mask),
+            total_facelets,
+        )
+        self.assertEqual(
+            result.facelets_fixed_count + result.facelets_mobilized_count,
+            total_facelets,
+        )
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        # 5x5x5 has 6 fixed centers (odd-sized)
+        expected_percent = (
+            result.facelets_mobilized_count / (total_facelets - 6)
+        )
+        self.assertAlmostEqual(
+            result.facelets_scrambled_percent,
+            expected_percent,
+        )
+
+    def test_5x5x5_empty_algorithm(self) -> None:
+        """Test empty algorithm on 5x5x5 produces no impact."""
+        algorithm = Algorithm()
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertEqual(result.facelets_fixed_count, 150)
+        self.assertEqual(result.facelets_mobilized_count, 0)
+        self.assertEqual(result.facelets_scrambled_percent, 0.0)
+        self.assertEqual(result.facelets_transformation_mask, '0' * 150)
+
+    def test_5x5x5_cubie_and_distance_fields_are_none(self) -> None:
+        """Test that cubie and distance fields are None for 5x5x5."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertIsNone(result.cubies_corner_permutation)
+        self.assertIsNone(result.cubies_complexity_score)
+        self.assertIsNone(result.facelets_manhattan_distance)
+        self.assertIsNone(result.facelets_qtm_distance)
+
+    def test_5x5x5_piece_type_impact(self) -> None:
+        """Test piece type impact for 5x5x5 uses granular types."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        impact = result.facelets_piece_type_impact
+        # Specific piece types
+        self.assertEqual(impact['corner'], 12)
+        self.assertEqual(impact['wing'], 16)
+        self.assertEqual(impact['midge'], 8)
+        self.assertEqual(impact['x_center'], 4)
+        self.assertEqual(impact['t_center'], 4)
+        # Family totals (each facelet also counts for its family)
+        self.assertEqual(impact['edge'], 24)   # wing + midge
+        self.assertEqual(impact['center'], 8)  # x_center + t_center
+        self.assertNotIn('fixed_center', impact)
+
+    def test_5x5x5_wide_move(self) -> None:
+        """Test impact of a wide move on 5x5x5."""
+        algorithm = Algorithm.parse_moves('3Rw')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertGreater(result.facelets_mobilized_count, 0)
+        self.assertGreater(result.facelets_scrambled_percent, 0.0)
+        self.assertLessEqual(result.facelets_scrambled_percent, 1.0)
+
+    def test_5x5x5_scrambled_percent_bounded(self) -> None:
+        """Test that scrambled_percent stays within [0, 1] for 5x5x5."""
+        algorithm = Algorithm.parse_moves('R U F D L B')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertGreaterEqual(result.facelets_scrambled_percent, 0.0)
+        self.assertLessEqual(result.facelets_scrambled_percent, 1.0)
+
+    def test_5x5x5_face_mobility(self) -> None:
+        """Test face mobility analysis on 5x5x5."""
+        algorithm = Algorithm.parse_moves('R')
+        result = compute_impacts(algorithm, size=5)
+
+        self.assertEqual(len(result.facelets_face_mobility), 6)
+        # R move should not affect L face
+        self.assertEqual(result.facelets_face_mobility['L'], 0)
+        # R move should affect R face
+        self.assertGreater(result.facelets_face_mobility['R'], 0)
+
+    def test_3x3x3_cubie_fields_not_none(self) -> None:
+        """Test that cubie fields are populated for 3x3x3."""
+        algorithm = Algorithm.parse_moves("R U R' U'")
+        result = compute_impacts(algorithm, size=3)
+
+        self.assertIsNotNone(result.cubies_corner_permutation)
+        self.assertIsNotNone(result.cubies_corner_orientation)
+        self.assertIsNotNone(result.cubies_edge_permutation)
+        self.assertIsNotNone(result.cubies_edge_orientation)
+        self.assertIsNotNone(result.facelets_manhattan_distance)
+        self.assertIsNotNone(result.facelets_qtm_distance)
+        self.assertIsNotNone(result.facelets_piece_type_impact)
+        self.assertIsNotNone(result.cubies_patterns)
+
+    def test_scrambled_percent_identity_algorithm(self) -> None:
+        """Test scrambled_percent is 0 for identity algorithms."""
+        # R4 is identity on any cube
+        algorithm = Algorithm.parse_moves('R R R R')
+        for size in (2, 3, 4, 5):
+            with self.subTest(size=size):
+                result = compute_impacts(algorithm, size=size)
+                self.assertEqual(result.facelets_scrambled_percent, 0.0)
+
+    def test_scrambled_percent_consistency_across_sizes(self) -> None:
+        """Test that R move scrambles a consistent fraction across sizes."""
+        for size in (2, 3, 4, 5):
+            with self.subTest(size=size):
+                algorithm = Algorithm.parse_moves('R')
+                result = compute_impacts(algorithm, size=size)
+                self.assertGreater(result.facelets_scrambled_percent, 0.0)
+                self.assertLessEqual(result.facelets_scrambled_percent, 1.0)

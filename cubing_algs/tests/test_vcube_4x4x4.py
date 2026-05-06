@@ -5,11 +5,13 @@ from cubing_algs.constants import FACE_ORDER
 from cubing_algs.exceptions import NotSupportedCubeSizeError
 from cubing_algs.extensions.rotate_dynamic import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
+from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.vcube import VCube
 
 # Solved 4x4x4 state: 96 facelets (6 faces * 16 facelets each)
 # Face order: U, R, F, D, L, B
 SOLVED_4X4X4 = get_solved_facelets(4)
+UNIQUE_4X4X4 = get_unique_facelets(4)
 
 # Expected states after moves (generated from magiccube)
 EXPECTED_4X4X4_R = (
@@ -85,6 +87,16 @@ class Test4x4x4VCube(unittest.TestCase):
         """Test cubies."""
         with self.assertRaises(NotSupportedCubeSizeError):
             _ = self.cube.cubies
+
+    def test_check_integrity(self) -> None:
+        """Test check_integrity on a 4x4x4 cube."""
+        self.assertTrue(self.cube.check_integrity())
+
+    def test_to_algorithm(self) -> None:
+        """Test to_algorithm raises on non-3x3x3 cubes."""
+        other = VCube(size=4)
+        with self.assertRaises(NotSupportedCubeSizeError):
+            self.cube.to_algorithm(other)
 
 
 class Test4x4x4ScrambledVCube(unittest.TestCase):
@@ -547,3 +559,99 @@ class Test4x4x4SiGNNotation(unittest.TestCase):
         # Apply inverse to return to solved
         cube.rotate("U r U' r'")
         self.assertTrue(cube.is_solved)
+
+
+class Test4x4x4VCubeCustomFacelets(unittest.TestCase):
+    """Test VCube implementation for 4x4x4 with custom facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = get_unique_facelets(4)
+        self.cube = VCube(initial=self.state, size=4, check=False)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test4x4x4VCubeCheckCustomState(unittest.TestCase):
+    """Test VCube implementation for 4x4x4 with scrambled facelets."""
+
+    def setUp(self) -> None:
+        """Set up required components."""
+        self.state = EXPECTED_4X4X4_R
+        self.cube = VCube(initial=self.state, size=4, check=True)
+
+    def test_rotate(self) -> None:
+        """Test rotate."""
+        self.cube.rotate('F R U')
+
+        self.assertNotEqual(
+            self.cube.state,
+            self.state,
+        )
+
+
+class Test4x4x4MoveConsistency(unittest.TestCase):
+    """
+    Test that 180° and CCW move codes match applying the CW move repeatedly.
+
+    Uses unique facelets so every position has a distinct value — the solved
+    state's symmetry can hide index-pair swaps across face positions.
+    """
+
+    @staticmethod
+    def apply(state: str, move: str) -> str:
+        """
+        Apply move.
+
+        Returns:
+           State once move applied.
+
+        """
+        return rotate_move(state, move, size=4)
+
+    @staticmethod
+    def apply_n(state: str, move: str, n: int) -> str:
+        """
+        Apply N moves.
+
+        Returns:
+           State once move applied.
+
+        """
+        for _ in range(n):
+            state = rotate_move(state, move, size=4)
+        return state
+
+    def test_all_180_moves_equal_cw_twice(self) -> None:
+        """Every X2 direct code must equal X applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_4X4X4, move + '2'),
+                    self.apply_n(UNIQUE_4X4X4, move, 2),
+                )
+
+    def test_all_180_moves_equal_ccw_twice(self) -> None:
+        """Every X2 direct code must equal X' applied twice, for all faces."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_4X4X4, move + '2'),
+                    self.apply_n(UNIQUE_4X4X4, move + "'", 2),
+                )
+
+    def test_all_ccw_moves_equal_cw_three_times(self) -> None:
+        """Every X' direct code must equal X applied three times."""
+        for move in ['U', 'R', 'F', 'D', 'L', 'B']:
+            with self.subTest(move=move):
+                self.assertEqual(
+                    self.apply(UNIQUE_4X4X4, move + "'"),
+                    self.apply_n(UNIQUE_4X4X4, move, 3),
+                )

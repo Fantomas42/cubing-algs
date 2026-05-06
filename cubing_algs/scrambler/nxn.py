@@ -7,10 +7,14 @@ from cubing_algs.scrambler.moves import build_cube_move_set
 from cubing_algs.scrambler.moves import random_moves
 
 
-def scramble(cube_size: int, iterations: int | None = None, *,
-             inner_layers: bool = False,
-             right_handed: bool = True,
-             rng: Random | None = None) -> Algorithm:
+def scramble(
+        cube_size: int,
+        iterations: int | None = None,
+        *,
+        inner_layers: bool = False,
+        right_handed: bool = True,
+        rng: Random | None = None,
+) -> Algorithm:
     """
     Generate a random scramble for a cube of the specified size.
 

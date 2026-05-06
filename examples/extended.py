@@ -10,4 +10,4 @@ print('Before:')
 c.show()
 
 print('After:')
-c.show('extended')
+c.show(layout='extended')

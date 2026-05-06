@@ -6,18 +6,18 @@ of algorithms, including hand balance, fingertrick difficulty,
 regrip requirements, trigger pattern detection, and overall
 execution comfort.
 """
-from __future__ import annotations
-
-from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
+from typing import NamedTuple
 
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.move import Move
+from cubing_algs.triggers import TRIGGER_PATTERNS
+from cubing_algs.triggers import TriggerMatch
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
-    from cubing_algs.move import Move  # pragma: no cover
 
 
 class HandDominance(Enum):
@@ -28,40 +28,18 @@ class HandDominance(Enum):
     AMBIDEXTROUS = 'ambidextrous'
 
 
-@dataclass
-class TriggerPattern:
-    """
-    Represents a common speedcubing trigger or pattern.
+class FingerAssignment(Enum):
+    """Enumeration for finger assignments in move execution."""
 
-    Triggers are familiar move sequences that speedcubers can execute
-    efficiently due to muscle memory and ergonomic flow.
-    """
-
-    name: str
-    moves: str
-    category: str
-    ergonomic_bonus: float
-    speed_multiplier: float
-    variations: list[str]
-
-    def __post_init__(self) -> None:
-        """Normalize the moves string and variations."""
-        self.moves = ' '.join(self.moves.split())
-        self.variations = [' '.join(var.split()) for var in self.variations]
+    MIXED = 'mixed'
+    THUMB = 'thumb'
+    INDEX = 'index'
+    MIDDLE = 'middle'
+    RING = 'ring'
+    PINKY = 'pinky'
 
 
-@dataclass
-class TriggerMatch:
-    """Represents a detected trigger pattern in an algorithm."""
-
-    pattern: TriggerPattern
-    start_index: int
-    end_index: int
-    matched_moves: str
-
-
-@dataclass(frozen=True)
-class ErgonomicsData:
+class ErgonomicsData(NamedTuple):
     """Container for ergonomics computation results."""
 
     total_moves: int
@@ -75,7 +53,6 @@ class ErgonomicsData:
     # Difficulty metrics
     regrip_count: int
     awkward_moves: int
-    flow_breaks: int
 
     # Execution metrics
     estimated_execution_time: float
@@ -86,9 +63,10 @@ class ErgonomicsData:
     index_finger_moves: int
     middle_finger_moves: int
     ring_finger_moves: int
+    pinky_finger_moves: int
+    mixed_finger_moves: int
 
     # Comfort metrics
-    comfort_score: float
     ergonomic_rating: str
 
     # Advanced metrics
@@ -102,216 +80,81 @@ class ErgonomicsData:
     suggestions: tuple[str, ...]
 
 
-# Common speedcubing triggers and patterns
-TRIGGER_PATTERNS = [
-    # Basic triggers (highest priority)
-    TriggerPattern(
-        name='Sexy Move',
-        moves="R U R' U'",
-        category='basic',
-        ergonomic_bonus=0.15,
-        speed_multiplier=1.3,
-        variations=["L U L' U'", "R U' R' U", "L U' L' U"],
-    ),
-    TriggerPattern(
-        name='Sledgehammer',
-        moves="R' F R F'",
-        category='basic',
-        ergonomic_bonus=0.12,
-        speed_multiplier=1.25,
-        variations=["L' F L F'", "R' D R D'", "L' D L D'"],
-    ),
-    TriggerPattern(
-        name='Sune Trigger',
-        moves="R U R' U",
-        category='basic',
-        ergonomic_bonus=0.10,
-        speed_multiplier=1.2,
-        variations=["L U L' U", "R U' R' U'", "L U' L' U'"],
-    ),
-    TriggerPattern(
-        name='Anti-Sune Trigger',
-        moves="R U' R' U'",
-        category='basic',
-        ergonomic_bonus=0.10,
-        speed_multiplier=1.2,
-        variations=["L U' L' U'", "R U R' U", "L U L' U"],
-    ),
+class MoveProperties(NamedTuple):
+    """Ergonomic properties for a single move."""
 
-    # Compound triggers
-    TriggerPattern(
-        name='Sexy + Sledge',
-        moves="R U R' U' R' F R F'",
-        category='compound',
-        ergonomic_bonus=0.18,
-        speed_multiplier=1.4,
-        variations=["L U L' U' L' F L F'"],
-    ),
-    TriggerPattern(
-        name='Double Sexy',
-        moves="R U R' U' R U R' U'",
-        category='compound',
-        ergonomic_bonus=0.20,
-        speed_multiplier=1.45,
-        variations=["L U L' U' L U L' U'"],
-    ),
-    TriggerPattern(
-        name='Sune',
-        moves="R U R' U R U2 R'",
-        category='OLL',
-        ergonomic_bonus=0.14,
-        speed_multiplier=1.3,
-        variations=["L U L' U L U2 L'"],
-    ),
-    TriggerPattern(
-        name='Anti-Sune',
-        moves="R U2 R' U' R U' R'",
-        category='OLL',
-        ergonomic_bonus=0.14,
-        speed_multiplier=1.3,
-        variations=["L U2 L' U' L U' L'"],
-    ),
-    TriggerPattern(
-        name='T-Perm Trigger',
-        moves="R U R' F'",
-        category='basic',
-        ergonomic_bonus=0.08,
-        speed_multiplier=1.15,
-        variations=["L U L' F"],
-    ),
-    TriggerPattern(
-        name='Niklas',
-        moves="R U' L' U R' U' L U",
-        category='advanced',
-        ergonomic_bonus=0.16,
-        speed_multiplier=1.35,
-        variations=["L U' R' U L' U' R U"],
-    ),
-
-    # Setup patterns
-    TriggerPattern(
-        name='Right Insert',
-        moves="R U R'",
-        category='setup',
-        ergonomic_bonus=0.06,
-        speed_multiplier=1.1,
-        variations=["L U L'", "R U' R'", "L U' L'"],
-    ),
-    TriggerPattern(
-        name='Extended Insert',
-        moves="R U2 R'",
-        category='setup',
-        ergonomic_bonus=0.05,
-        speed_multiplier=1.05,
-        variations=["L U2 L'"],
-    ),
-
-    # Wide move patterns
-    TriggerPattern(
-        name='Wide Sexy',
-        moves="r U r' U'",
-        category='wide',
-        ergonomic_bonus=0.12,
-        speed_multiplier=1.2,
-        variations=["l U l' U'", "r U' r' U"],
-    ),
-]
+    hand: HandDominance
+    finger: FingerAssignment
+    weight: float
 
 
-# Hand assignment for different move types based on speedcubing conventions
-HAND_ASSIGNMENTS: dict[str, str] = {
-    # Right hand dominant moves
-    'R': 'right', "R'": 'right', 'R2': 'right',
-    'Rw': 'right', "Rw'": 'right', 'Rw2': 'right',
-    'r': 'right', "r'": 'right', 'r2': 'right',
-    'F': 'right', "F'": 'right', 'F2': 'right',
-    'Fw': 'right', "Fw'": 'right', 'Fw2': 'right',
-    'f': 'right', "f'": 'right', 'f2': 'right',
+HD = HandDominance
+FA = FingerAssignment
 
-    # Left hand dominant moves
-    'L': 'left', "L'": 'left', 'L2': 'left',
-    'Lw': 'left', "Lw'": 'left', 'Lw2': 'left',
-    'l': 'left', "l'": 'left', 'l2': 'left',
-    'B': 'left', "B'": 'left', 'B2': 'left',
-    'Bw': 'left', "Bw'": 'left', 'Bw2': 'left',
-    'b': 'left', "b'": 'left', 'b2': 'left',
-
-    # Both hands (U and D moves)
-    'U': 'both', "U'": 'both', 'U2': 'both',
-    'Uw': 'both', "Uw'": 'both', 'Uw2': 'both',
-    'u': 'both', "u'": 'both', 'u2': 'both',
-    'D': 'both', "D'": 'both', 'D2': 'both',
-    'Dw': 'both', "Dw'": 'both', 'Dw2': 'both',
-    'd': 'both', "d'": 'both', 'd2': 'both',
-
-    # Slice moves (typically awkward)
-    'M': 'both', "M'": 'both', 'M2': 'both',
-    'E': 'both', "E'": 'both', 'E2': 'both',
-    'S': 'both', "S'": 'both', 'S2': 'both',
-
-    'x': 'both', "x'": 'both', 'x2': 'both',
-    'y': 'both', "y'": 'both', 'y2': 'both',
-    'z': 'both', "z'": 'both', 'z2': 'both',
+MOVE_DATA: dict[str, MoveProperties] = {
+    # Outer Face Moves
+    'R': MoveProperties(HD.RIGHT, FA.THUMB, 0.87),
+    "R'": MoveProperties(HD.RIGHT, FA.THUMB, 1.0),
+    'R2': MoveProperties(HD.RIGHT, FA.THUMB, 0.82),
+    'L': MoveProperties(HD.LEFT, FA.THUMB, 0.87),
+    "L'": MoveProperties(HD.LEFT, FA.THUMB, 0.96),
+    'L2': MoveProperties(HD.LEFT, FA.THUMB, 0.80),
+    'U': MoveProperties(HD.RIGHT, FA.INDEX, 0.98),
+    "U'": MoveProperties(HD.LEFT, FA.INDEX, 1.0),
+    'U2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.85),
+    'D': MoveProperties(HD.LEFT, FA.RING, 0.49),
+    "D'": MoveProperties(HD.RIGHT, FA.RING, 0.54),
+    'D2': MoveProperties(HD.AMBIDEXTROUS, FA.RING, 0.45),
+    'F': MoveProperties(HD.RIGHT, FA.INDEX, 0.82),
+    "F'": MoveProperties(HD.LEFT, FA.INDEX, 0.90),
+    'F2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.86),
+    'B': MoveProperties(HD.LEFT, FA.MIDDLE, 0.89),
+    "B'": MoveProperties(HD.RIGHT, FA.MIDDLE, 0.97),
+    'B2': MoveProperties(HD.AMBIDEXTROUS, FA.MIDDLE, 0.84),
+    # Wide Moves — 2 layers
+    'Rw': MoveProperties(HD.RIGHT, FA.THUMB, 0.77),
+    "Rw'": MoveProperties(HD.RIGHT, FA.THUMB, 0.90),
+    'Rw2': MoveProperties(HD.RIGHT, FA.THUMB, 0.72),
+    'Lw': MoveProperties(HD.LEFT, FA.THUMB, 0.77),
+    "Lw'": MoveProperties(HD.LEFT, FA.THUMB, 0.86),
+    'Lw2': MoveProperties(HD.LEFT, FA.THUMB, 0.70),
+    'Uw': MoveProperties(HD.RIGHT, FA.INDEX, 0.88),
+    "Uw'": MoveProperties(HD.LEFT, FA.INDEX, 0.90),
+    'Uw2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.75),
+    'Dw': MoveProperties(HD.LEFT, FA.MIDDLE, 0.39),
+    "Dw'": MoveProperties(HD.RIGHT, FA.MIDDLE, 0.44),
+    'Dw2': MoveProperties(HD.AMBIDEXTROUS, FA.MIDDLE, 0.35),
+    'Fw': MoveProperties(HD.RIGHT, FA.INDEX, 0.72),
+    "Fw'": MoveProperties(HD.LEFT, FA.INDEX, 0.80),
+    'Fw2': MoveProperties(HD.AMBIDEXTROUS, FA.INDEX, 0.76),
+    'Bw': MoveProperties(HD.LEFT, FA.MIDDLE, 0.79),
+    "Bw'": MoveProperties(HD.RIGHT, FA.MIDDLE, 0.87),
+    'Bw2': MoveProperties(HD.AMBIDEXTROUS, FA.MIDDLE, 0.74),
+    # Slice Moves
+    'M': MoveProperties(HD.RIGHT, FA.THUMB, 0.55),
+    "M'": MoveProperties(HD.LEFT, FA.RING, 0.67),
+    'M2': MoveProperties(HD.LEFT, FA.RING, 0.62),
+    'E': MoveProperties(HD.LEFT, FA.MIDDLE, 0.45),
+    "E'": MoveProperties(HD.RIGHT, FA.INDEX, 0.5),
+    'E2': MoveProperties(HD.RIGHT, FA.INDEX, 0.45),
+    'S': MoveProperties(HD.RIGHT, FA.INDEX, 0.59),
+    "S'": MoveProperties(HD.LEFT, FA.INDEX, 0.45),
+    'S2': MoveProperties(HD.RIGHT, FA.INDEX, 0.5),
+    # Cube Rotations
+    'x': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    "x'": MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    'x2': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    'y': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.5),
+    "y'": MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.5),
+    'y2': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.35),
+    'z': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    "z'": MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
+    'z2': MoveProperties(HD.AMBIDEXTROUS, FA.MIXED, 0.4),
 }
 
-# Finger assignments for different moves
-FINGER_ASSIGNMENTS: dict[str, str] = {
-    # Thumb moves (generally comfortable)
-    'R': 'thumb', "R'": 'thumb', 'R2': 'thumb',
-    'L': 'thumb', "L'": 'thumb', 'L2': 'thumb',
-
-    # Index finger moves (most common U moves)
-    'U': 'index', "U'": 'index', 'U2': 'index',
-    'D': 'index', "D'": 'index', 'D2': 'index',
-
-    # Middle finger moves
-    'F': 'middle', "F'": 'middle', 'F2': 'middle',
-    'B': 'middle', "B'": 'middle', 'B2': 'middle',
-
-    # Ring finger moves (slice moves, generally awkward)
-    'M': 'ring', "M'": 'ring', 'M2': 'ring',
-    'E': 'ring', "E'": 'ring', 'E2': 'ring',
-    'S': 'ring', "S'": 'ring', 'S2': 'ring',
-}
-
-# Ergonomic weights for different move types (0-1, higher = more ergonomic)
-ERGONOMIC_WEIGHTS: dict[str, float] = {
-    # Outer face moves - Right hand dominant moves (most natural)
-    'R': 1.0, "R'": 1.0, 'R2': 0.95,
-    'U': 1.0, "U'": 1.0, 'U2': 0.9,
-    'F': 0.85, "F'": 0.85, 'F2': 0.8,
-
-    # Left hand moves (less natural for most right-handed cubers)
-    'L': 0.75, "L'": 0.75, 'L2': 0.7,
-    'D': 0.6, "D'": 0.6, 'D2': 0.55,
-    'B': 0.5, "B'": 0.5, 'B2': 0.45,
-
-    # Slice moves
-    'M': 0.7, "M'": 0.7, 'M2': 0.65,
-    'S': 0.6, "S'": 0.6, 'S2': 0.55,
-    'E': 0.5, "E'": 0.5, 'E2': 0.45,
-
-    # Cube rotations
-    'x': 0.4, "x'": 0.4, 'x2': 0.35,
-    'y': 0.6, "y'": 0.6, 'y2': 0.55,
-    'z': 0.35, "z'": 0.35, 'z2': 0.3,
-
-    # Wide moves (SiGN notation)
-    'r': 0.8, "r'": 0.8, 'r2': 0.75,
-    'u': 0.85, "u'": 0.85, 'u2': 0.8,
-    'f': 0.7, "f'": 0.7, 'f2': 0.65,
-    'l': 0.65, "l'": 0.65, 'l2': 0.6,
-    'd': 0.55, "d'": 0.55, 'd2': 0.5,
-    'b': 0.45, "b'": 0.45, 'b2': 0.4,
-
-    # Wide moves (standard notation)
-    'Rw': 0.8, "Rw'": 0.8, 'Rw2': 0.75,
-    'Uw': 0.85, "Uw'": 0.85, 'Uw2': 0.8,
-    'Fw': 0.7, "Fw'": 0.7, 'Fw2': 0.65,
-    'Lw': 0.65, "Lw'": 0.65, 'Lw2': 0.6,
-    'Dw': 0.55, "Dw'": 0.55, 'Dw2': 0.5,
-    'Bw': 0.45, "Bw'": 0.45, 'Bw2': 0.4,
-}
+DEFAULT_MOVE_PROPERTIES = MoveProperties(
+    HD.AMBIDEXTROUS, FA.INDEX, 0.5,
+)
 
 # Threshold for considering a move awkward (weight below this is awkward)
 AWKWARD_THRESHOLD = 0.6
@@ -387,18 +230,19 @@ def get_move_ergonomic_weight(
 
     """
     move_key = get_move_key(move)
-    base_weight = ERGONOMIC_WEIGHTS.get(move_key, 0.5)
+    props = MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES)
+    base_weight = props.weight
 
     if hand_dominance == HandDominance.AMBIDEXTROUS:
         return base_weight
 
     # Adjust based on hand dominance
-    hand = HAND_ASSIGNMENTS.get(move_key, 'both')
+    hand = props.hand
 
     if hand_dominance == HandDominance.LEFT:
-        if hand == 'right':
+        if hand == HandDominance.RIGHT:
             return max(0.0, base_weight * 0.75)
-        if hand == 'left':
+        if hand == HandDominance.LEFT:
             return min(1.0, base_weight * 1.33)
 
     return base_weight
@@ -435,21 +279,24 @@ def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
         return TRANSITION_PENALTIES['opposite']
 
     # Adjacent faces are moderate
-    if face2 in ADJACENT_FACES.get(face1, set()):
+    if face2 in ADJACENT_FACES.get(face1, ()):
         return TRANSITION_PENALTIES['adjacent']
 
     # Check for hand switches
     key1 = get_move_key(move1)
     key2 = get_move_key(move2)
-    hand1 = HAND_ASSIGNMENTS.get(key1, 'both')
-    hand2 = HAND_ASSIGNMENTS.get(key2, 'both')
-    if hand1 not in {hand2, 'both'} and hand2 != 'both':
+    hand1 = MOVE_DATA.get(key1, DEFAULT_MOVE_PROPERTIES).hand
+    hand2 = MOVE_DATA.get(key2, DEFAULT_MOVE_PROPERTIES).hand
+    if (
+        hand1 not in {hand2, HandDominance.AMBIDEXTROUS}
+        and hand2 != HandDominance.AMBIDEXTROUS
+    ):
         return TRANSITION_PENALTIES['hand_switch']
 
     return TRANSITION_PENALTIES['adjacent']
 
 
-def calculate_flow_score(algorithm: Algorithm) -> float:
+def calculate_flow_score(algorithm: 'Algorithm') -> float:
     """
     Calculate the overall flow score of an algorithm.
 
@@ -485,7 +332,7 @@ def calculate_flow_score(algorithm: Algorithm) -> float:
     return max(0.0, 1.0 - (avg_penalty / max_possible_penalty))
 
 
-def normalize_algorithm_string(algorithm: Algorithm) -> str:
+def normalize_algorithm_string(algorithm: 'Algorithm') -> str:
     """
     Convert algorithm to normalized string for pattern matching.
 
@@ -499,7 +346,7 @@ def normalize_algorithm_string(algorithm: Algorithm) -> str:
 
 
 def find_trigger_patterns(
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> list[TriggerMatch]:
     """
@@ -535,32 +382,38 @@ def find_trigger_patterns(
     )
 
     for pattern in sorted_patterns:
-        # Check main pattern and all variations
-        patterns_to_check = [pattern.moves, *pattern.variations]
+        # Check main pattern first, then variations.
+        # variation_index: -1 = canonical, 0 = lefty (first), 1+ = back-face.
+        # Lefty receives a lighter penalty than back-face variations whose
+        # empirical execution is noticeably slower than the canonical form.
+        candidates = [
+            (pattern.moves, -1),
+            *((v, i) for i, v in enumerate(pattern.variations)),
+        ]
 
-        for pattern_moves in patterns_to_check:
+        for pattern_moves, variation_index in candidates:
             pattern_list = pattern_moves.split()
             pattern_length = len(pattern_list)
 
             # Sliding window search
             for i in range(len(algorithm_moves) - pattern_length + 1):
-                if any(idx in used_indices
-                       for idx in range(i, i + pattern_length)):
+                if any(
+                    idx in used_indices for idx in range(i, i + pattern_length)
+                ):
                     continue
 
-                window = algorithm_moves[i:i + pattern_length]
+                window = algorithm_moves[i : i + pattern_length]
                 if window == pattern_list:
                     match = TriggerMatch(
                         pattern=pattern,
                         start_index=i,
                         end_index=i + pattern_length - 1,
                         matched_moves=' '.join(window),
+                        variation_index=variation_index,
                     )
                     matches.append(match)
 
                     used_indices.update(range(i, i + pattern_length))
-
-                    break  # Move to next pattern
 
     return matches
 
@@ -581,15 +434,36 @@ def calculate_trigger_bonus(
     if not matches:
         return 0.0, 1.0
 
-    ergonomic_bonus = sum(m.pattern.ergonomic_bonus for m in matches)
+    # Canonical values were calibrated from right-hand executions.
+    # Lefty (variation_index=0) executes close to canonical for this solver.
+    # Back-face variations (variation_index>=1) are noticeably slower.
+    def variation_factor(m: TriggerMatch) -> float:
+        if m.variation_index == -1:
+            return 1.0
+        if m.variation_index == 0:
+            return 0.95  # lefty: minor penalty
+        return 0.85  # back-face: larger penalty
+
+    def effective_bonus(m: TriggerMatch) -> float:
+        return m.pattern.ergonomic_bonus * variation_factor(m)
+
+    def effective_speed(m: TriggerMatch) -> float:
+        # Pull the speed toward 1.0 by the factor, preserving the direction
+        # of the multiplier: 1.95 canonical → 1.95, lefty → 1.90, back → 1.81.
+        return 1.0 + (m.pattern.speed_multiplier - 1.0) * variation_factor(m)
+
+    ergonomic_bonus = sum(effective_bonus(m) for m in matches)
 
     # Weighted speed multiplier
     total_moves = sum(len(m.matched_moves.split()) for m in matches)
     if total_moves > 0:
-        speed_multiplier = sum(
-            m.pattern.speed_multiplier * len(m.matched_moves.split())
-            for m in matches
-        ) / total_moves
+        speed_multiplier = (
+            sum(
+                effective_speed(m) * len(m.matched_moves.split())
+                for m in matches
+            )
+            / total_moves
+        )
     else:
         speed_multiplier = 1.0
 
@@ -601,12 +475,16 @@ def calculate_trigger_bonus(
     if len(matches) >= 2:
         ergonomic_bonus += 0.05
 
-    return min(ergonomic_bonus, 0.3), min(speed_multiplier, 1.8)
+    return min(ergonomic_bonus, 0.3), min(speed_multiplier, 2.0)
 
 
 def estimate_tps_potential(
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
+    *,
+    flow: float,
+    regrip_count: int,
+    balance_ratio: float,
 ) -> float:
     """
     Estimate the maximum theoretical turns per second for this algorithm.
@@ -614,6 +492,9 @@ def estimate_tps_potential(
     Args:
         algorithm: The algorithm to analyze.
         hand_dominance: The hand dominance preference.
+        flow: Pre-computed flow score.
+        regrip_count: Pre-computed regrip count.
+        balance_ratio: Pre-computed hand balance ratio.
 
     Returns:
         Estimated TPS (typically 2.0-15.0).
@@ -626,35 +507,39 @@ def estimate_tps_potential(
 
     move_weights = [
         get_move_ergonomic_weight(move, hand_dominance)
-        for move in algorithm if not move.is_pause
+        for move in algorithm
+        if not move.is_pause
     ]
 
     if not move_weights:
         return base_tps
 
     avg_weight = sum(move_weights) / len(move_weights)
-    flow = calculate_flow_score(algorithm)
-    regrips = compute_regrip_count(algorithm)
     non_pause_count = len(move_weights)
-
-    _, _, _, balance_ratio = compute_hand_balance(algorithm)
 
     weight_multiplier = avg_weight
     flow_multiplier = 0.7 + (0.3 * flow)
-    regrip_penalty = max(0.8, 1.0 - (regrips / non_pause_count * 2))
+    regrip_penalty = max(0.8, 1.0 - (regrip_count / non_pause_count * 2))
     balance_bonus = 0.9 + (0.2 * balance_ratio)
 
     estimated_tps = (
-        base_tps * weight_multiplier * flow_multiplier
-        * regrip_penalty * balance_bonus
+        base_tps
+        * weight_multiplier
+        * flow_multiplier
+        * regrip_penalty
+        * balance_bonus
     )
 
     return max(2.0, min(15.0, estimated_tps))
 
 
 def calculate_ergonomic_score(
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
+    *,
+    flow: float,
+    balance_ratio: float,
+    regrip_count: int,
 ) -> float:
     """
     Calculate an overall ergonomic score for the algorithm.
@@ -664,6 +549,9 @@ def calculate_ergonomic_score(
     Args:
         algorithm: The algorithm to analyze.
         hand_dominance: The hand dominance preference.
+        flow: Pre-computed flow score.
+        balance_ratio: Pre-computed hand balance ratio.
+        regrip_count: Pre-computed regrip count.
 
     Returns:
         Ergonomic score from 0.0 to 1.0.
@@ -674,66 +562,78 @@ def calculate_ergonomic_score(
 
     move_weights = [
         get_move_ergonomic_weight(move, hand_dominance)
-        for move in algorithm if not move.is_pause
+        for move in algorithm
+        if not move.is_pause
     ]
 
     if not move_weights:
         return 1.0
 
     avg_move_score = sum(move_weights) / len(move_weights)
-    flow = calculate_flow_score(algorithm)
-
-    _, _, _, balance_ratio = compute_hand_balance(algorithm)
     hand_balance = balance_ratio * 2  # Convert 0-0.5 range to 0-1
+    regrip_score = max(0.0, 1.0 - (regrip_count / len(move_weights)))
 
-    regrips = compute_regrip_count(algorithm)
-    regrip_score = max(0.0, 1.0 - (regrips / len(move_weights)))
-
-    return max(0.0, min(1.0,
-        avg_move_score * 0.4
-        + flow * 0.3
-        + hand_balance * 0.15
-        + regrip_score * 0.15,
-    ))
+    return max(
+        0.0,
+        min(
+            1.0,
+            avg_move_score * 0.4
+            + flow * 0.3
+            + hand_balance * 0.15
+            + regrip_score * 0.15,
+        ),
+    )
 
 
 def classify_algorithm_difficulty(
-    algorithm: Algorithm,
-    hand_dominance: HandDominance = HandDominance.RIGHT,
+    ergonomic_score: float,
+    regrip_count: int,
+    flow: float,
 ) -> str:
     """
-    Classify the algorithm into difficulty categories based on ergonomics.
+    Classify an algorithm into difficulty categories based on ergonomics.
 
     Args:
-        algorithm: The algorithm to classify.
-        hand_dominance: The hand dominance preference.
+        ergonomic_score: Pre-computed ergonomic score.
+        regrip_count: Pre-computed regrip count.
+        flow: Pre-computed flow score.
 
     Returns:
         One of: 'Beginner', 'Intermediate', 'Advanced', 'Expert'.
 
     """
-    score = calculate_ergonomic_score(algorithm, hand_dominance)
-    regrips = compute_regrip_count(algorithm)
-    flow = calculate_flow_score(algorithm)
-
-    if (score >= BEGINNER_SCORE
-            and regrips <= BEGINNER_REGRIPS and flow >= BEGINNER_FLOW):
+    if (
+        ergonomic_score >= BEGINNER_SCORE
+        and regrip_count <= BEGINNER_REGRIPS
+        and flow >= BEGINNER_FLOW
+    ):
         return 'Beginner'
-    if (score >= INTERMEDIATE_SCORE
-            and regrips <= INTERMEDIATE_REGRIPS
-            and flow >= INTERMEDIATE_FLOW):
+    if (
+        ergonomic_score >= INTERMEDIATE_SCORE
+        and regrip_count <= INTERMEDIATE_REGRIPS
+        and flow >= INTERMEDIATE_FLOW
+    ):
         return 'Intermediate'
-    if score >= ADVANCED_SCORE and regrips <= ADVANCED_REGRIPS:
+    if ergonomic_score >= ADVANCED_SCORE and regrip_count <= ADVANCED_REGRIPS:
         return 'Advanced'
     return 'Expert'
 
 
-def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
+def suggest_ergonomic_improvements(
+    algorithm: 'Algorithm',
+    *,
+    regrip_count: int,
+    balance_ratio: float,
+    flow: float,
+) -> list[str]:
     """
     Suggest specific improvements to make the algorithm more ergonomic.
 
     Args:
         algorithm: The algorithm to analyze.
+        regrip_count: Pre-computed regrip count.
+        balance_ratio: Pre-computed hand balance ratio.
+        flow: Pre-computed flow score.
 
     Returns:
         List of improvement suggestions.
@@ -744,22 +644,19 @@ def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
 
     suggestions: list[str] = []
 
-    regrips = compute_regrip_count(algorithm)
     non_pause_count = sum(1 for m in algorithm if not m.is_pause)
 
     if non_pause_count == 0:
         return []
 
-    if regrips > non_pause_count * REGRIP_RATIO_THRESHOLD:
+    if regrip_count > non_pause_count * REGRIP_RATIO_THRESHOLD:
         suggestions.append(
             'Consider reducing cube rotations to minimize regrips',
         )
 
-    _, _, _, balance_ratio = compute_hand_balance(algorithm)
     if balance_ratio * 2 < BALANCE_THRESHOLD:
         suggestions.append('Try to balance moves between both hands')
 
-    flow = calculate_flow_score(algorithm)
     if flow < FLOW_THRESHOLD:
         suggestions.append(
             'Look for alternatives to reduce awkward move transitions',
@@ -767,7 +664,8 @@ def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
 
     move_weights = [
         get_move_ergonomic_weight(move)
-        for move in algorithm if not move.is_pause
+        for move in algorithm
+        if not move.is_pause
     ]
     avg_weight = sum(move_weights) / len(move_weights) if move_weights else 1.0
     if avg_weight < WEIGHT_THRESHOLD:
@@ -782,12 +680,12 @@ def suggest_ergonomic_improvements(algorithm: Algorithm) -> list[str]:
     return suggestions
 
 
-def compute_hand_balance(moves: Algorithm) -> tuple[int, int, int, float]:
+def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
     """
     Calculate hand balance metrics for the algorithm.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
 
     Returns:
         Tuple of (right_count, left_count, both_count, balance_ratio).
@@ -802,11 +700,11 @@ def compute_hand_balance(moves: Algorithm) -> tuple[int, int, int, float]:
             continue
 
         move_key = get_move_key(move)
-        hand = HAND_ASSIGNMENTS.get(move_key, 'both')
+        hand = MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES).hand
 
-        if hand == 'right':
+        if hand == HandDominance.RIGHT:
             right_count += 1
-        elif hand == 'left':
+        elif hand == HandDominance.LEFT:
             left_count += 1
         else:
             both_count += 1
@@ -823,43 +721,57 @@ def compute_hand_balance(moves: Algorithm) -> tuple[int, int, int, float]:
 
 
 def compute_finger_distribution(
-    moves: Algorithm,
-) -> tuple[int, int, int, int]:
+    moves: 'Algorithm',
+) -> tuple[int, int, int, int, int, int]:
     """
     Calculate finger usage distribution for the algorithm.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
 
     Returns:
-        Tuple of (thumb_count, index_count, middle_count, ring_count).
+        Tuple of (thumb_count, index_count, middle_count,
+        ring_count, pinky_count, none_count).
 
     """
     thumb_count = 0
     index_count = 0
     middle_count = 0
     ring_count = 0
+    pinky_count = 0
+    none_count = 0
 
     for move in moves:
         if move.is_pause:
             continue
 
         move_key = get_move_key(move)
-        finger = FINGER_ASSIGNMENTS.get(move_key, 'index')  # Default to index
+        finger = MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES).finger
 
-        if finger == 'thumb':
+        if finger == FingerAssignment.THUMB:
             thumb_count += 1
-        elif finger == 'index':
+        elif finger == FingerAssignment.INDEX:
             index_count += 1
-        elif finger == 'middle':
+        elif finger == FingerAssignment.MIDDLE:
             middle_count += 1
-        elif finger == 'ring':
+        elif finger == FingerAssignment.RING:
             ring_count += 1
+        elif finger == FingerAssignment.PINKY:
+            pinky_count += 1
+        elif finger == FingerAssignment.MIXED:
+            none_count += 1
 
-    return thumb_count, index_count, middle_count, ring_count
+    return (
+        thumb_count,
+        index_count,
+        middle_count,
+        ring_count,
+        pinky_count,
+        none_count,
+    )
 
 
-def compute_regrip_count(moves: Algorithm) -> int:
+def compute_regrip_count(moves: 'Algorithm') -> int:
     """
     Estimate the number of regrips required for the algorithm.
 
@@ -867,69 +779,40 @@ def compute_regrip_count(moves: Algorithm) -> int:
     transitions with penalty >= opposite-face penalty.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
 
     Returns:
         Number of estimated regrips required.
 
     """
+    from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+
+    moves = moves.transform(unpause_moves)
     regrip_count = 0
+    prev_move = None
 
-    for i, move in enumerate(moves):
-        if move.is_pause:
-            continue
-
-        # Rotations always require regrip
+    for move in moves:
         if move.is_rotation_move:
             regrip_count += 1
             continue
 
-        # Check transition from previous non-pause move
-        if i > 0:
-            prev_move = moves[i - 1]
-            if not prev_move.is_pause:
-                penalty = get_transition_penalty(prev_move, move)
-                if penalty >= TRANSITION_PENALTIES['opposite']:
-                    regrip_count += 1
+        opposite = TRANSITION_PENALTIES['opposite']
+        high_penalty = (
+            not move.is_rotation_move
+            and prev_move is not None
+            and get_transition_penalty(prev_move, move) >= opposite
+        )
+
+        if high_penalty:
+            regrip_count += 1
+
+        prev_move = move
 
     return regrip_count
 
 
-def compute_flow_breaks(moves: Algorithm) -> int:
-    """
-    Count awkward transitions that break the flow of execution.
-
-    Uses transition penalty system to detect difficult transitions.
-
-    Args:
-        moves: Algorithm to analyze.
-
-    Returns:
-        Number of awkward transitions detected.
-
-    """
-    if len(moves) < 2:
-        return 0
-
-    flow_breaks = 0
-    prev_move = None
-
-    for move in moves:
-        if move.is_pause:
-            continue
-
-        if prev_move is not None:
-            penalty = get_transition_penalty(prev_move, move)
-            if penalty >= TRANSITION_PENALTIES['opposite']:
-                flow_breaks += 1
-
-        prev_move = move
-
-    return flow_breaks
-
-
 def compute_fingertrick_difficulty(
-    moves: Algorithm,
+    moves: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> float:
     """
@@ -939,7 +822,7 @@ def compute_fingertrick_difficulty(
     execution (inverted from weight scale).
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
         hand_dominance: The hand dominance preference.
 
     Returns:
@@ -968,7 +851,7 @@ def compute_fingertrick_difficulty(
 
 
 def compute_estimated_execution_time(
-    moves: Algorithm,
+    moves: 'Algorithm',
     regrip_count: int,
 ) -> float:
     """
@@ -977,7 +860,7 @@ def compute_estimated_execution_time(
     Based on average move times and regrip penalties.
 
     Args:
-        moves: Algorithm to analyze.
+        moves: 'Algorithm' to analyze.
         regrip_count: Number of regrips in the algorithm.
 
     Returns:
@@ -996,74 +879,30 @@ def compute_estimated_execution_time(
     return (non_pause_moves * base_move_time) + (regrip_count * regrip_penalty)
 
 
-def compute_comfort_score(
-    hand_balance_ratio: float,
-    fingertrick_difficulty: float,
-    regrip_count: int,
-    flow_breaks: int,
-    total_moves: int,
-) -> float:
+def get_ergonomic_rating(ergonomic_score: float) -> str:
     """
-    Calculate overall comfort score (0-100, higher is better).
-
-    Combines various ergonomic factors into a single score.
+    Convert ergonomic score to ergonomic rating.
 
     Args:
-        hand_balance_ratio: Hand balance ratio from compute_hand_balance.
-        fingertrick_difficulty: Difficulty score (0-1) from
-            compute_fingertrick_difficulty.
-        regrip_count: Number of regrips in the algorithm.
-        flow_breaks: Number of awkward transitions.
-        total_moves: Total number of moves in the algorithm.
-
-    Returns:
-        Comfort score from 0 to 100 (higher is more comfortable).
-
-    """
-    if total_moves == 0:
-        return 100.0
-
-    # Hand balance component (0-25 points)
-    balance_score = hand_balance_ratio * 25
-
-    # Difficulty component (0-25 points, inverted)
-    difficulty_score = max(0, 25 - (fingertrick_difficulty * 25))
-
-    # Regrip component (0-25 points, fewer regrips is better)
-    regrip_ratio = min(1.0, regrip_count / total_moves)
-    regrip_score = max(0, 25 - (regrip_ratio * 25))
-
-    # Flow component (0-25 points, fewer breaks is better)
-    flow_ratio = min(1.0, flow_breaks / max(1, total_moves - 1))
-    flow_score = max(0, 25 - (flow_ratio * 25))
-
-    return balance_score + difficulty_score + regrip_score + flow_score
-
-
-def get_ergonomic_rating(comfort_score: float) -> str:
-    """
-    Convert comfort score to ergonomic rating.
-
-    Args:
-        comfort_score: Comfort score from 0 to 100.
+        ergonomic_score: Ergonomic score from 0.0 to 1.0.
 
     Returns:
         Human-readable rating string (Excellent, Good, Fair, Poor, Very Poor).
 
     """
-    if comfort_score >= 80:
+    if ergonomic_score >= 0.80:  # noqa: PLR2004
         return 'Excellent'
-    if comfort_score >= 65:
+    if ergonomic_score >= 0.65:  # noqa: PLR2004
         return 'Good'
-    if comfort_score >= 50:
+    if ergonomic_score >= 0.50:  # noqa: PLR2004
         return 'Fair'
-    if comfort_score >= 35:
+    if ergonomic_score >= 0.35:  # noqa: PLR2004
         return 'Poor'
     return 'Very Poor'
 
 
 def compute_ergonomics(  # noqa: PLR0914
-    algorithm: Algorithm,
+    algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> ErgonomicsData:
     """
@@ -1097,14 +936,14 @@ def compute_ergonomics(  # noqa: PLR0914
             hand_balance_ratio=0.5,
             regrip_count=0,
             awkward_moves=0,
-            flow_breaks=0,
             estimated_execution_time=0.0,
             fingertrick_difficulty=0.0,
             thumb_moves=0,
             index_finger_moves=0,
             middle_finger_moves=0,
             ring_finger_moves=0,
-            comfort_score=100.0,
+            pinky_finger_moves=0,
+            mixed_finger_moves=0,
             ergonomic_rating='Excellent',
             ergonomic_score=1.0,
             flow_score=1.0,
@@ -1122,18 +961,21 @@ def compute_ergonomics(  # noqa: PLR0914
     )
 
     # Calculate finger distribution
-    thumb, index, middle, ring = compute_finger_distribution(algorithm)
+    thumb, index, middle, ring, pinky, mixed_moves = (
+        compute_finger_distribution(algorithm)
+    )
 
     # Calculate difficulty metrics
     regrip_count = compute_regrip_count(algorithm)
-    flow_breaks = compute_flow_breaks(algorithm)
     fingertrick_difficulty = compute_fingertrick_difficulty(
-        algorithm, hand_dominance,
+        algorithm,
+        hand_dominance,
     )
 
     # Count awkward moves (those with low ergonomic weight)
     awkward_moves = sum(
-        1 for move in algorithm
+        1
+        for move in algorithm
         if not move.is_pause
         and get_move_ergonomic_weight(move, hand_dominance) < AWKWARD_THRESHOLD
     )
@@ -1141,33 +983,43 @@ def compute_ergonomics(  # noqa: PLR0914
     # Calculate execution time
     execution_time = compute_estimated_execution_time(algorithm, regrip_count)
 
-    # Calculate overall comfort score
-    comfort_score = compute_comfort_score(
-        balance_ratio,
-        fingertrick_difficulty,
-        regrip_count,
-        flow_breaks,
-        total_moves,
-    )
-
-    # Get qualitative rating
-    ergonomic_rating = get_ergonomic_rating(comfort_score)
-
     # Advanced metrics
     flow_score_val = calculate_flow_score(algorithm)
-    ergonomic_score = calculate_ergonomic_score(algorithm, hand_dominance)
+    base_ergonomic_score = calculate_ergonomic_score(
+        algorithm,
+        hand_dominance,
+        flow=flow_score_val,
+        balance_ratio=balance_ratio,
+        regrip_count=regrip_count,
+    )
 
     trigger_matches = find_trigger_patterns(algorithm, hand_dominance)
     trigger_bonus, speed_mult = calculate_trigger_bonus(trigger_matches)
-    ergonomic_score = min(1.0, ergonomic_score + trigger_bonus)
+    ergonomic_score = min(1.0, base_ergonomic_score + trigger_bonus)
 
-    estimated_tps = estimate_tps_potential(algorithm, hand_dominance)
+    # Get qualitative rating from the primary ergonomic score
+    ergonomic_rating = get_ergonomic_rating(ergonomic_score)
+
+    estimated_tps = estimate_tps_potential(
+        algorithm,
+        hand_dominance,
+        flow=flow_score_val,
+        regrip_count=regrip_count,
+        balance_ratio=balance_ratio,
+    )
     estimated_tps = max(2.0, min(15.0, estimated_tps * speed_mult))
 
     difficulty_classification = classify_algorithm_difficulty(
-        algorithm, hand_dominance,
+        base_ergonomic_score,
+        regrip_count,
+        flow_score_val,
     )
-    suggestions_list = suggest_ergonomic_improvements(algorithm)
+    suggestions_list = suggest_ergonomic_improvements(
+        algorithm,
+        regrip_count=regrip_count,
+        balance_ratio=balance_ratio,
+        flow=flow_score_val,
+    )
 
     trigger_count = len(trigger_matches)
     trigger_coverage = sum(
@@ -1183,14 +1035,14 @@ def compute_ergonomics(  # noqa: PLR0914
         hand_balance_ratio=balance_ratio,
         regrip_count=regrip_count,
         awkward_moves=awkward_moves,
-        flow_breaks=flow_breaks,
         estimated_execution_time=execution_time,
         fingertrick_difficulty=fingertrick_difficulty,
         thumb_moves=thumb,
         index_finger_moves=index,
         middle_finger_moves=middle,
         ring_finger_moves=ring,
-        comfort_score=comfort_score,
+        pinky_finger_moves=pinky,
+        mixed_finger_moves=mixed_moves,
         ergonomic_rating=ergonomic_rating,
         ergonomic_score=ergonomic_score,
         flow_score=flow_score_val,

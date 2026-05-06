@@ -2,6 +2,7 @@
 """Tests for step-based scramble generation."""
 import unittest
 from random import Random
+from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import SOLVED_CO
@@ -13,11 +14,23 @@ from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
 from cubing_algs.scrambler.steps import generate_step_state
 from cubing_algs.scrambler.steps import scramble_easy_cross
+from cubing_algs.scrambler.steps import scramble_edges_oriented
 from cubing_algs.scrambler.steps import scramble_f2l
 from cubing_algs.scrambler.steps import scramble_ocll_case
 from cubing_algs.scrambler.steps import scramble_step
 from cubing_algs.scrambler.steps import scramble_x_cross
 from cubing_algs.vcube import VCube
+
+
+def fake_solve(*_args: str) -> str:
+    """
+    Fake solve to bypass kociemba solver.
+
+    Returns:
+      Fake solve string.
+
+    """
+    return 'R U'
 
 
 class TestGenerateStepState(unittest.TestCase):
@@ -136,6 +149,7 @@ class TestGenerateStepState(unittest.TestCase):
 class TestScrambleStep(unittest.TestCase):
     """Tests for scramble_step function."""
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_all_steps_with_kociemba(self) -> None:
         """Test all step types with kociemba installed."""
         rng = Random(42)
@@ -198,6 +212,7 @@ class TestScrambleStep(unittest.TestCase):
             "U' F B' R2 F B' L2 U' F2 U B2 U' R2 B2 D' B2",
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_default_rng_when_none(self) -> None:
         """Test that default RNG is used when None is passed."""
         scramble = scramble_step('PLL', None, include_auf=False)
@@ -284,6 +299,7 @@ class TestScrambleOCLLCase(unittest.TestCase):
             "R U R D R' U' R B2 U' L2 U L2 D' B2 R2 U'",
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_default_rng_when_none(self) -> None:
         """Test that default RNG is used when None is passed."""
         scramble = scramble_ocll_case('T', None)
@@ -333,6 +349,7 @@ class TestSupportedSteps(unittest.TestCase):
 class TestScrambleEasyCross(unittest.TestCase):
     """Tests for easy cross scramble generation."""
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_easy(self) -> None:
         """Test scramble_easy_cross with easy difficulty."""
         _, solution = scramble_easy_cross('easy')
@@ -342,6 +359,7 @@ class TestScrambleEasyCross(unittest.TestCase):
             3,
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_normal(self) -> None:
         """Test scramble_easy_cross with normal difficulty."""
         _, solution = scramble_easy_cross('normal')
@@ -351,6 +369,7 @@ class TestScrambleEasyCross(unittest.TestCase):
             5,
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_hard(self) -> None:
         """Test scramble_easy_cross with hard difficulty."""
         _, solution = scramble_easy_cross('hard')
@@ -360,6 +379,7 @@ class TestScrambleEasyCross(unittest.TestCase):
             7,
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_invalid_difficulty(self) -> None:
         """Test scramble_easy_cross with invalid difficulty."""
         _, solution = scramble_easy_cross('invalid')
@@ -424,6 +444,7 @@ class TestScrambleEasyCross(unittest.TestCase):
 class TestScrambleXCross(unittest.TestCase):
     """Tests for x-cross scramble generation."""
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_easy(self) -> None:
         """Test scramble_x_cross with easy difficulty."""
         _, solution = scramble_x_cross('easy')
@@ -433,6 +454,7 @@ class TestScrambleXCross(unittest.TestCase):
             5,
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_normal(self) -> None:
         """Test scramble_x_cross with normal difficulty."""
         _, solution = scramble_x_cross('normal')
@@ -442,6 +464,7 @@ class TestScrambleXCross(unittest.TestCase):
             7,
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_hard(self) -> None:
         """Test scramble_x_cross with hard difficulty."""
         _, solution = scramble_x_cross('hard')
@@ -451,6 +474,7 @@ class TestScrambleXCross(unittest.TestCase):
             9,
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_invalid_difficulty(self) -> None:
         """Test scramble_x_cross with invalid difficulty."""
         _, solution = scramble_x_cross('invalid')
@@ -590,6 +614,7 @@ class TestScrambleXCross(unittest.TestCase):
             'Different slots should produce different x-cross scrambles',
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_returns_valid_algorithms(self) -> None:
         """Test scramble_x_cross returns valid Algorithm instances."""
         scramble, solution = scramble_x_cross('normal', ['FR'], Random(42))
@@ -597,6 +622,7 @@ class TestScrambleXCross(unittest.TestCase):
         self.assertIsInstance(scramble, Algorithm)
         self.assertIsInstance(solution, Algorithm)
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_default_parameters(self) -> None:
         """Test scramble_x_cross with all default parameters."""
         scramble, solution = scramble_x_cross()
@@ -606,6 +632,7 @@ class TestScrambleXCross(unittest.TestCase):
         self.assertGreater(len(scramble), 0)
         self.assertGreater(len(solution), 0)
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_all_slots(self) -> None:
         """Test scramble_x_cross works with all valid slots."""
         valid_slots = ['FR', 'FL', 'BR', 'BL']
@@ -619,6 +646,7 @@ class TestScrambleXCross(unittest.TestCase):
             self.assertGreater(len(scramble), 0)
             self.assertGreater(len(solution), 0)
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_all_difficulties(self) -> None:
         """Test scramble_x_cross works with all valid difficulties."""
         valid_difficulties = ['easy', 'normal', 'hard']
@@ -650,6 +678,7 @@ class TestScrambleXCross(unittest.TestCase):
             scramble_x_cross(slots=['FR', 'FL', 'BR', 'BL'])
 
 
+@patch('cubing_algs.solver.solve', new=fake_solve)
 class TestScrambleMultiSlotCross(unittest.TestCase):
     """Tests for xx-cross and xxx-cross scramble generation."""
 
@@ -737,6 +766,7 @@ class TestScrambleF2L(unittest.TestCase):
             "L2 U2 L B D L D2 B' D L2 B2 L2 U' L2 U B2 U2 L2",
         )
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_f2l_default_parameters(self) -> None:
         """Test scramble_f2l with all default parameters."""
         scramble = scramble_f2l()
@@ -744,6 +774,7 @@ class TestScrambleF2L(unittest.TestCase):
         self.assertIsInstance(scramble, Algorithm)
         self.assertGreater(len(scramble), 0)
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_f2l_default_slot_is_fr(self) -> None:
         """Test scramble_f2l defaults to FR slot."""
         rng1 = Random(42)
@@ -834,12 +865,14 @@ class TestScrambleF2L(unittest.TestCase):
         with self.assertRaises(InvalidSlotSpecError):
             scramble_f2l(slots=['FR', 'XX'])
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_f2l_returns_algorithm_instance(self) -> None:
         """Test scramble_f2l returns a valid Algorithm instance."""
         scramble = scramble_f2l(slots=['FR'], rng=Random(42))
 
         self.assertIsInstance(scramble, Algorithm)
 
+    @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_f2l_all_slots_valid(self) -> None:
         """Test scramble_f2l works with each individual valid slot."""
         valid_slots = ['FR', 'FL', 'BR', 'BL']
@@ -850,3 +883,78 @@ class TestScrambleF2L(unittest.TestCase):
 
             self.assertIsInstance(scramble, Algorithm)
             self.assertGreater(len(scramble), 0)
+
+
+class TestScrambleEdgesOriented(unittest.TestCase):
+    """Tests for scramble_edges_oriented function."""
+
+    def test_returns_algorithm(self) -> None:
+        """Test that the function returns an Algorithm instance."""
+        scramble = scramble_edges_oriented(rng=Random(42))
+
+        self.assertIsInstance(scramble, Algorithm)
+
+    def test_all_edges_oriented_after_scramble(self) -> None:
+        """Test that applying the scramble leaves all edges oriented."""
+        rng = Random(42)
+        for _ in range(10):
+            scramble = scramble_edges_oriented(rng=rng)
+            cube = VCube(size=3)
+            cube.rotate(str(scramble))
+            _, _, _, eo, *_ = cube.cubies
+
+            self.assertEqual(
+                list(eo),
+                [0] * 12,
+                f'Scramble {scramble} left misoriented edges',
+            )
+
+    def test_no_single_f_or_b_moves(self) -> None:
+        """Test that F, F', B, B' moves are not in the scramble."""
+        rng = Random(42)
+        for _ in range(20):
+            scramble = scramble_edges_oriented(rng=rng)
+            moves = str(scramble).split()
+
+            for move in moves:
+                self.assertNotIn(
+                    move,
+                    ('F', "F'", 'B', "B'"),
+                    f'Forbidden move {move!r} found in {scramble}',
+                )
+
+    def test_deterministic_with_seed(self) -> None:
+        """Test that same seed produces same scramble."""
+        scramble1 = scramble_edges_oriented(rng=Random(42))
+        scramble2 = scramble_edges_oriented(rng=Random(42))
+
+        self.assertEqual(str(scramble1), str(scramble2))
+        self.assertEqual(
+            str(scramble1),
+            "B2 R B2 U F2 R2 U R' D' R F2 R' U2 "
+            "F2 L2 F2 L2 U2 L2 U2 B2 D L F2 R2",
+        )
+
+    def test_different_seeds_produce_different_results(self) -> None:
+        """Test that different seeds produce different scrambles."""
+        scramble1 = scramble_edges_oriented(rng=Random(42))
+        scramble2 = scramble_edges_oriented(rng=Random(777))
+
+        self.assertNotEqual(str(scramble1), str(scramble2))
+
+    def test_custom_iterations(self) -> None:
+        """Test that custom iterations controls the number of moves."""
+        scramble = scramble_edges_oriented(iterations=10, rng=Random(42))
+
+        self.assertEqual(len(scramble), 10)
+        self.assertEqual(
+            str(scramble),
+            "B2 R' F2 D2 L U2 F2 R2 U R'",
+        )
+
+    def test_default_rng_when_none(self) -> None:
+        """Test that a valid scramble is produced when rng is None."""
+        scramble = scramble_edges_oriented(rng=None)
+
+        self.assertIsInstance(scramble, Algorithm)
+        self.assertGreater(len(scramble), 0)

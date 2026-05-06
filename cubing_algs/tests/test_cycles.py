@@ -191,7 +191,7 @@ class ComputeCyclesTestCase(unittest.TestCase):  # noqa: PLR0904
         result = compute_cycles(algorithm)
         self.assertEqual(result, 2520)
 
-    def test_order_2520_with_wide_and_slice_moves_merz(self) -> None:
+    def test_order_2520_with_wide_and_slice_moves_mzrg(self) -> None:
         """
         Test that order 2520 is reachable using wide and slice moves.
 
@@ -206,6 +206,12 @@ class ComputeCyclesTestCase(unittest.TestCase):  # noqa: PLR0904
         algorithm = Algorithm.parse_moves("R2 u' l' 2F'")
         result = compute_cycles(algorithm)
         self.assertEqual(result, -1)
+
+    def test_input_with_pauses_and_time(self) -> None:
+        """Test that compute_cycles accepts Algorithm objects."""
+        algorithm = Algorithm.parse_moves("R@1 .@2 U@3 R'@4 .@5 U'@6")
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, 6)
 
 
 class PermutationOrderTestCase(unittest.TestCase):

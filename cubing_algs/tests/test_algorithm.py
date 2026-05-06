@@ -1,4 +1,6 @@
 """Tests for the Algorithm class."""
+import json
+import re
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -6,6 +8,7 @@ from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
+from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
 from cubing_algs.move import Move
@@ -696,6 +699,26 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertFalse(algo.has_internal_rotations)
 
+    def test_has_pauses(self) -> None:
+        """Test has pauses."""
+        algo = parse_moves("R U . R' U'")
+
+        self.assertTrue(algo.has_pauses)
+
+        algo = parse_moves("R U R' U'")
+
+        self.assertFalse(algo.has_pauses)
+
+    def test_has_times(self) -> None:
+        """Test has timed moves."""
+        algo = parse_moves("R@0.5 U R' U'")
+
+        self.assertTrue(algo.has_times)
+
+        algo = parse_moves("R U R' U'")
+
+        self.assertFalse(algo.has_times)
+
 
 class AlgorithmCyclesPropertyTestCase(unittest.TestCase):
     """Test cases for the Algorithm.cycles property."""
@@ -788,10 +811,116 @@ class AlgorithmCyclesPropertyTestCase(unittest.TestCase):
         self.assertEqual(result, 80)
 
 
-class AlgorithmShowTestCase(unittest.TestCase):
-    """Test cases for the Algorithm.show method."""
+class AlgorithmShowMixin:
+    """Testing tools for Algorithm.show() output verification."""
 
-    def test_show_method_basic(self) -> None:
+    ANSI_RE = re.compile(r'\x1b\[[^m]*m')
+    # Default palette masked background: '#444444' → rgb(68,68,68)
+    MASKED_BG = '\x1b[48;2;68;68;68m'
+
+    @staticmethod
+    def show_output(algo: Algorithm,  # noqa: PLR0913
+                    size: int = 3,
+                    mode: str = '',
+                    orientation: str = '',
+                    layout: str = '', *,
+                    impact_mask: bool = True) -> str:
+        """
+        Run algo.show() and capture stdout.
+
+        Returns:
+            Raw stdout output including ANSI escape codes.
+
+        """
+        buf = StringIO()
+        with (
+            patch('cubing_algs.display.vcube.USE_COLORS', new=True),
+            redirect_stdout(buf),
+        ):
+            algo.show(
+                size=size,
+                mode=mode,
+                orientation=orientation,
+                layout=layout,
+                impact_mask=impact_mask,
+            )
+        return buf.getvalue()
+
+    def show_stripped(self, algo: Algorithm,  # noqa: PLR0913
+                      size: int = 3,
+                      mode: str = '',
+                      orientation: str = '',
+                      layout: str = '', *,
+                      impact_mask: bool = True) -> str:
+        """
+        Run algo.show() and return output with ANSI codes stripped.
+
+        Returns:
+            Plain text output with face letters and spacing.
+
+        """
+        return self.ANSI_RE.sub(
+            '',
+            self.show_output(
+                algo,
+                size=size,
+                mode=mode,
+                orientation=orientation,
+                layout=layout,
+                impact_mask=impact_mask,
+            ),
+        )
+
+    def show_grid(self, algo: Algorithm,  # noqa: PLR0913
+                  size: int = 3,
+                  mode: str = '',
+                  orientation: str = '',
+                  layout: str = '', *,
+                  impact_mask: bool = True) -> str:
+        """
+        Run algo.show() and return a readable grid.
+
+        Same layout as stripped output, but with case encoding:
+        Uppercase = dimmed (masked), lowercase = bright (affected).
+
+        Returns:
+            Grid string with case-encoded mask information.
+
+        """
+        raw = self.show_output(
+            algo,
+            size=size,
+            mode=mode,
+            orientation=orientation,
+            layout=layout,
+            impact_mask=impact_mask,
+        )
+
+        i = 0
+        result: list[str] = []
+        is_masked = False
+
+        while i < len(raw):
+            if raw[i] == '\x1b':
+                end = raw.index('m', i) + 1
+                seq = raw[i:end]
+                if seq.startswith('\x1b[48;2;'):
+                    is_masked = seq == self.MASKED_BG
+                i = end
+            elif raw[i].isalpha():
+                result.append(raw[i].upper() if is_masked else raw[i].lower())
+                i += 1
+            else:
+                result.append(raw[i])
+                i += 1
+        return ''.join(result).rstrip('\n')
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class AlgorithmShowTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """Test cases for Algorithm.show without mask."""
+
+    def test_show_returns_vcube(self) -> None:
         """Test show method returns VCube instance."""
         algo = Algorithm.parse_moves("R U R'")
 
@@ -800,43 +929,770 @@ class AlgorithmShowTestCase(unittest.TestCase):
 
         self.assertIsInstance(result, VCube)
 
-    def test_show_method_with_parameters(self) -> None:
-        """Test show method with mode and orientation parameters."""
+    def test_show_renders_solved_cube(self) -> None:
+        """Test show renders solved cube for empty algorithm."""
+        output = self.show_stripped(Algorithm())
+
+        expected = (
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_renders_r_move(self) -> None:
+        """Test show renders single R move correctly."""
+        output = self.show_stripped(
+            Algorithm.parse_moves('R'),
+        )
+
+        expected = (
+            '          U  U  F \n'
+            '          U  U  F \n'
+            '          U  U  F \n'
+            ' L  L  L  F  F  D  R  R  R  U  B  B \n'
+            ' L  L  L  F  F  D  R  R  R  U  B  B \n'
+            ' L  L  L  F  F  D  R  R  R  U  B  B \n'
+            '          D  D  B \n'
+            '          D  D  B \n'
+            '          D  D  B \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_renders_r_u_r_prime(self) -> None:
+        """Test show renders R U R' correctly."""
+        output = self.show_stripped(
+            Algorithm.parse_moves("R U R'"),
+        )
+
+        expected = (
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          F  F  L \n'
+            ' F  F  D  R  R  U  B  R  R  B  L  L \n'
+            ' L  L  L  F  F  U  B  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  U  R  R  B  B  B \n'
+            '          D  D  R \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_oll_mode(self) -> None:
+        """Test show renders OLL mode layout."""
+        output = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            mode='oll',
+        )
+
+        expected = (
+            '          l  l  B \n'
+            '       f  u  u  U  R \n'
+            '       f  u  U  U  R \n'
+            '       d  f  f  l  b \n'
+            '          r  r  u '
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_oll_mode_single_r(self) -> None:
+        """Test show renders OLL mode for single R move."""
+        output = self.show_grid(
+            Algorithm.parse_moves('R'),
+            mode='oll',
+        )
+
+        expected = (
+            '          B  B  u \n'
+            '       L  U  U  f  r \n'
+            '       L  U  U  f  r \n'
+            '       L  U  U  f  r \n'
+            '          F  F  d '
+        )
+        self.assertEqual(output, expected)
+
+    def test_show_strips_timing(self) -> None:
+        """Test show strips timing from moves before applying."""
+        output_timed = self.show_stripped(
+            Algorithm.parse_moves('R@50 U@75'),
+        )
+        output_plain = self.show_stripped(
+            Algorithm.parse_moves('R U'),
+        )
+
+        self.assertEqual(output_timed, output_plain)
+
+    def test_show_orients_cube_to_uf(self) -> None:
+        """Test show returns cube oriented to UF."""
         algo = Algorithm.parse_moves("R U R'")
-
-        with redirect_stdout(StringIO()):
-            result = algo.show(mode='oll')
-
-        self.assertIsInstance(result, VCube)
-
-    def test_show_method_without_impact_mask(self) -> None:
-        """Test show method with impact_mask disabled."""
-        algo = Algorithm.parse_moves("R U R'")
-
-        with redirect_stdout(StringIO()):
-            result = algo.show(impact_mask=False)
-
-        self.assertIsInstance(result, VCube)
-
-    def test_show_method_empty_algorithm(self) -> None:
-        """Test show method with empty algorithm."""
-        algo = Algorithm()
 
         with redirect_stdout(StringIO()):
             result = algo.show()
 
-        self.assertIsInstance(result, VCube)
+        self.assertEqual(result.orientation, 'UF')
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class AlgorithmShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask.
+
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
+    """
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          u  u  U \n'
+            '          u  U  U \n'
+            '          f  f  l \n'
+            ' f  f  d  r  r  u  b  R  R  B  l  l \n'
+            ' L  L  L  F  F  u  b  R  R  B  B  B \n'
+            ' L  L  L  F  F  f  u  R  R  B  B  B \n'
+            '          D  D  r \n'
+            '          D  D  D \n'
+            '          D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_without_mask_all_bright(self) -> None:
+        """Test impact_mask=False renders all facelets bright."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            impact_mask=False,
+        )
+
+        self.assertTrue(
+            all(c.islower() or not c.isalpha() for c in grid),
+            f'Expected all bright facelets without mask, got:\n{grid}',
+        )
+
+    def test_show_with_mask_empty(self) -> None:
+        """Test empty algorithm dims all facelets."""
+        grid = self.show_grid(
+            Algorithm(),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            ' L  L  L  F  F  F  R  R  R  B  B  B \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  U  f \n'
+            '          U  U  f \n'
+            '          U  U  f \n'
+            ' L  L  L  F  F  d  r  r  r  u  B  B \n'
+            ' L  L  L  F  F  d  r  R  r  u  B  B \n'
+            ' L  L  L  F  F  d  r  r  r  u  B  B \n'
+            '          D  D  b \n'
+            '          D  D  b \n'
+            '          D  D  b '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_mse_moves(self) -> None:
+        """Test impact mask highlights slice moves only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('M2 S2 E2'),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  d  U \n'
+            '          d  U  d \n'
+            '          U  d  U \n'
+            ' L  r  L  F  b  F  R  l  R  B  f  B \n'
+            ' r  L  r  b  F  b  l  R  l  f  B  f \n'
+            ' L  r  L  F  b  F  R  l  R  B  f  B \n'
+            '          D  u  D \n'
+            '          u  D  u \n'
+            '          D  u  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix highlights R-layer only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  U  r \n'
+            '          U  U  r \n'
+            '          U  U  r \n'
+            ' F  F  F  R  R  d  b  b  b  u  L  L \n'
+            ' F  F  F  R  R  d  b  B  b  u  L  L \n'
+            ' F  F  F  R  R  d  b  b  b  u  L  L \n'
+            '          D  D  l \n'
+            '          D  D  l \n'
+            '          D  D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_orientation_df(self) -> None:
+        """
+        Test impact mask with y rotation prefix highlights R-layer only,
+        with custom DF orientation.
+        """
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            orientation='DF',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          l  l  l \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            ' d  R  R  F  F  F  L  L  u  b  b  b \n'
+            ' d  R  R  F  F  F  L  L  u  b  B  b \n'
+            ' d  R  R  F  F  F  L  L  u  b  b  b \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          r  r  r '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_orientation_uf(self) -> None:
+        """
+        Test impact mask with y rotation prefix highlights R-layer only,
+        with custom UF orientation.
+        """
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            orientation='UF',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          r  r  r \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            ' u  L  L  F  F  F  R  R  d  b  b  b \n'
+            ' u  L  L  F  F  F  R  R  d  b  B  b \n'
+            ' u  L  L  F  F  F  R  R  d  b  b  b \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          l  l  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          u  u  U \n'
+            '          u  U  U \n'
+            '          r  r  f \n'
+            ' r  r  d  b  b  u  l  B  B  L  f  f \n'
+            ' F  F  F  R  R  u  l  B  B  L  L  L \n'
+            ' F  F  F  R  R  r  u  B  B  L  L  L \n'
+            '          D  D  b \n'
+            '          D  D  D \n'
+            '          D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime_orientation_uf(self) -> None:
+        """
+        Test impact mask with y rotation prefix highlights R-layer only,
+        with custom UF orientation.
+        """
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            orientation='UF',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          U  U  f \n'
+            '          u  U  r \n'
+            '          u  u  r \n'
+            ' L  f  f  r  r  d  b  b  u  l  B  B \n'
+            ' L  L  L  F  F  F  R  R  u  l  B  B \n'
+            ' L  L  L  F  F  F  R  R  r  u  B  B \n'
+            '          D  D  D \n'
+            '          D  D  D \n'
+            '          D  D  b '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_pll_t(self) -> None:
+        """Test impact mask with z2 rotation prefix for PLL T perm."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("z2 R U R' U' R' F R2 U' R' U' R U R' F'"),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          D  D  d \n'
+            '          d  D  d \n'
+            '          D  D  d \n'
+            ' R  l  R  F  F  l  b  r  f  l  B  B \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h(self) -> None:
+        """Test impact mask with z2 rotation prefix for OLL 21 H."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            impact_mask=True,
+        )
+
+        expected = (
+            '          b  D  b \n'
+            '          D  D  D \n'
+            '          f  D  f \n'
+            ' l  R  l  d  F  d  r  L  r  d  B  d \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            ' R  R  R  F  F  F  L  L  L  B  B  B \n'
+            '          U  U  U \n'
+            '          U  U  U \n'
+            '          U  U  U '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h_oll_mode(self) -> None:
+        """Test impact mask with z2 OLL 21 H using OLL mode (top layout)."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            mode='oll',
+            impact_mask=True,
+        )
+
+        expected = (
+            '          d  B  d \n'
+            '       l  b  D  b  r \n'
+            '       R  D  D  D  L \n'
+            '       l  f  D  f  r \n'
+            '          d  F  d '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h_oll_linear(self) -> None:
+        """Test impact mask with z2 OLL 21 H using OLL mode, linear layout."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            mode='oll',
+            layout='linear',
+            impact_mask=True,
+        )
+
+        expected = (
+            ' b  D  b   r  L  r   d  F  d   U  U  U   l  R  l   d  B  d \n'
+            ' D  D  D   L  L  L   F  F  F   U  U  U   R  R  R   B  B  B \n'
+            ' f  D  f   L  L  L   F  F  F   U  U  U   R  R  R   B  B  B '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_z2_oll_21_h_oll_extended(self) -> None:
+        """Test impact mask with z2 OLL 21 H using OLL mode, extended layout."""
+        grid = self.show_grid(
+            Algorithm.parse_moves(
+                "z2 F R U R' U' R U R' U' R U R' U' F'",
+            ),
+            mode='oll',
+            layout='extended',
+            impact_mask=True,
+        )
+
+        expected = (
+            '                d  b  d \n'
+            '             l  b  D  b  r \n'
+            '             r  D  D  D  l \n'
+            '             l  f  D  f  r \n'
+            '    b  d  f                 f  d  b  b  d  b \n'
+            ' d  l  R  l     d  F  d     r  L  r  d  B  d  l \n'
+            ' b  R  R  R     F  F  F     L  L  L  B  B  B  r \n'
+            ' b  R  R  R     F  F  F     L  L  L  B  B  B  r \n'
+            '    u  u  u                 u  u  u  u  u  u \n'
+            '             r  U  U  U  l \n'
+            '             r  U  U  U  l \n'
+            '             r  U  U  U  l \n'
+            '                b  b  b '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class Algorithm2x2x2ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask on 2x2x2.
+
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
+    """
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       U  f \n'
+            '       U  f \n'
+            ' L  L  F  d  r  r  u  B \n'
+            ' L  L  F  d  r  r  u  B \n'
+            '       D  b \n'
+            '       D  b '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       u  U \n'
+            '       f  l \n'
+            ' f  d  r  u  b  R  B  l \n'
+            ' L  L  F  f  u  R  B  B \n'
+            '       D  r \n'
+            '       D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix on 2x2x2."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       U  r \n'
+            '       U  r \n'
+            ' F  F  R  d  b  b  u  L \n'
+            ' F  F  R  d  b  b  u  L \n'
+            '       D  l \n'
+            '       D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R' on 2x2x2."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            size=2,
+            impact_mask=True,
+        )
+        expected = (
+            '       u  U \n'
+            '       r  f \n'
+            ' r  d  b  u  l  B  L  f \n'
+            ' F  F  R  r  u  B  L  L \n'
+            '       D  b \n'
+            '       D  D '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class Algorithm4x4x4ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask on 4x4x4.
+
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
+    """
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             U  U  U  f \n'
+            '             U  U  U  f \n'
+            '             U  U  U  f \n'
+            '             U  U  U  f \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            ' L  L  L  L  F  F  F  d  r  r  r  r  u  B  B  B \n'
+            '             D  D  D  b \n'
+            '             D  D  D  b \n'
+            '             D  D  D  b \n'
+            '             D  D  D  b '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             f  f  f  l \n'
+            ' f  f  f  d  r  r  r  u  b  R  R  R  B  l  l  l \n'
+            ' L  L  L  L  F  F  F  u  b  R  R  R  B  B  B  B \n'
+            ' L  L  L  L  F  F  F  u  b  R  R  R  B  B  B  B \n'
+            ' L  L  L  L  F  F  F  f  u  R  R  R  B  B  B  B \n'
+            '             D  D  D  r \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix on 4x4x4."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             U  U  U  r \n'
+            '             U  U  U  r \n'
+            '             U  U  U  r \n'
+            '             U  U  U  r \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            ' F  F  F  F  R  R  R  d  b  b  b  b  u  L  L  L \n'
+            '             D  D  D  l \n'
+            '             D  D  D  l \n'
+            '             D  D  D  l \n'
+            '             D  D  D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R' on 4x4x4."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            size=4,
+            impact_mask=True,
+        )
+        expected = (
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             u  u  u  U \n'
+            '             r  r  r  f \n'
+            ' r  r  r  d  b  b  b  u  l  B  B  B  L  f  f  f \n'
+            ' F  F  F  F  R  R  R  u  l  B  B  B  L  L  L  L \n'
+            ' F  F  F  F  R  R  R  u  l  B  B  B  L  L  L  L \n'
+            ' F  F  F  F  R  R  R  r  u  B  B  B  L  L  L  L \n'
+            '             D  D  D  b \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D \n'
+            '             D  D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+
+@patch('cubing_algs.display.vcube.DEFAULT_PALETTE', 'default')
+class Algorithm5x5x5ShowMaskTestCase(AlgorithmShowMixin, unittest.TestCase):
+    """
+    Test cases for Algorithm.show with impact mask on 5x5x5.
+
+    Grid notation: Uppercase = dimmed (masked),
+    lowercase = bright (affected).
+    """
+
+    def test_show_with_mask_r_move(self) -> None:
+        """Test impact mask highlights R-layer facelets only."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('R'),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            '                U  U  U  U  f \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  R  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  d  r  r  r  r  r  u  B  B  B  B \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  b '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_r_u_r_prime(self) -> None:
+        """Test impact mask highlights affected facelets for R U R'."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("R U R'"),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                u  u  u  u  U \n'
+            '                u  u  u  u  U \n'
+            '                u  u  U  u  U \n'
+            '                u  u  u  u  U \n'
+            '                f  f  f  f  l \n'
+            ' f  f  f  f  d  r  r  r  r  u  b  R  R  R  R  B  l  l  l  l \n'
+            ' L  L  L  L  L  F  F  F  F  u  b  R  R  R  R  B  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  u  b  R  R  R  R  B  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  u  b  R  R  R  R  B  B  B  B  B \n'
+            ' L  L  L  L  L  F  F  F  F  f  u  R  R  R  R  B  B  B  B  B \n'
+            '                D  D  D  D  r \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r(self) -> None:
+        """Test impact mask with y rotation prefix on 5x5x5."""
+        grid = self.show_grid(
+            Algorithm.parse_moves('y R'),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            '                U  U  U  U  r \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  B  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  d  b  b  b  b  b  u  L  L  L  L \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l \n'
+            '                D  D  D  D  l '
+        )
+        self.assertEqual(grid, expected)
+
+    def test_show_with_mask_y_r_u_r_prime(self) -> None:
+        """Test impact mask with y rotation prefix for R U R' on 5x5x5."""
+        grid = self.show_grid(
+            Algorithm.parse_moves("y R U R'"),
+            size=5,
+            impact_mask=True,
+        )
+        expected = (
+            '                u  u  u  u  U \n'
+            '                u  u  u  u  U \n'
+            '                u  u  U  u  U \n'
+            '                u  u  u  u  U \n'
+            '                r  r  r  r  f \n'
+            ' r  r  r  r  d  b  b  b  b  u  l  B  B  B  B  L  f  f  f  f \n'
+            ' F  F  F  F  F  R  R  R  R  u  l  B  B  B  B  L  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  u  l  B  B  B  B  L  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  u  l  B  B  B  B  L  L  L  L  L \n'
+            ' F  F  F  F  F  R  R  R  R  r  u  B  B  B  B  L  L  L  L  L \n'
+            '                D  D  D  D  b \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D \n'
+            '                D  D  D  D  D '
+        )
+        self.assertEqual(grid, expected)
 
 
 class AlgorithmImpactsTestCase(unittest.TestCase):
-    """Test cases for the Algorithm.impacts property."""
+    """Test cases for the Algorithm.impacts method."""
 
-    def test_impacts_property_returns_impact_data(self) -> None:
-        """Test impacts property returns ImpactData."""
+    def test_impacts_method_returns_impact_data(self) -> None:
+        """Test impacts method returns ImpactData."""
         algo = Algorithm.parse_moves("R U R' U'")
-        impacts = algo.impacts
+        impacts = algo.impacts()
 
         self.assertIsInstance(impacts, ImpactData)
+
+    def test_impacts_raises_on_too_small_cube_size(self) -> None:
+        """Test impacts raises InvalidCubeSizeError for undersized cube."""
+        algo = Algorithm.parse_moves('3Rw')
+
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.impacts(size=3)
+
+    def test_get_cube_and_impact_mask_raises_on_too_small_cube_size(
+            self,
+    ) -> None:
+        """Test get_cube_and_impact_mask raises for undersized cube."""
+        algo = Algorithm.parse_moves('3Rw')
+
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.get_cube_and_impact_mask(size=3)
+
+    def test_validate_cube_size_accepts_valid_size(self) -> None:
+        """Test validate_cube_size does not raise for valid size."""
+        algo = Algorithm.parse_moves("R U R' U'")
+
+        try:
+            algo.validate_cube_size(3)
+        except InvalidCubeSizeError:
+            self.fail('validate_cube_size raised unexpectedly')
+
+    def test_validate_cube_size_raises_on_too_small(self) -> None:
+        """Test validate_cube_size raises for undersized cube."""
+        algo = Algorithm.parse_moves('3Rw')
+
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.validate_cube_size(3)
 
 
 class AlgorithmErgonomicsTestCase(unittest.TestCase):
@@ -855,7 +1711,6 @@ class AlgorithmErgonomicsTestCase(unittest.TestCase):
         ergo = algo.ergonomics
 
         # Check that all expected fields are present
-        self.assertIsNotNone(ergo.comfort_score)
         self.assertIsNotNone(ergo.ergonomic_rating)
         self.assertIsNotNone(ergo.hand_balance_ratio)
 
@@ -878,19 +1733,15 @@ class AlgorithmImageTestCase(unittest.TestCase):
         self.assertTrue(result.startswith('<svg'))
         self.assertTrue(result.endswith('</svg>'))
 
-    def test_matches_render_cube(self) -> None:
-        """Test that image() matches render_cube() output."""
-        from cubing_algs.display.image import render_cube  # noqa: PLC0415
-
-        algo = Algorithm.parse_moves("R U R' U'")
-        self.assertEqual(algo.image(), render_cube(algo))
-
     def test_matches_vcube_image(self) -> None:
         """Test that Algorithm.image() matches VCube.image()."""
         algo = Algorithm.parse_moves("R U R' U'")
         cube = VCube()
         cube.rotate(algo)
-        self.assertEqual(algo.image(), cube.image())
+        self.assertEqual(
+            algo.image(impact_mask=False),
+            cube.image(),
+        )
 
     def test_empty_algorithm(self) -> None:
         """Test rendering an empty algorithm."""
@@ -901,27 +1752,27 @@ class AlgorithmImageTestCase(unittest.TestCase):
     def test_3d_view(self) -> None:
         """Test 3d view rendering."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(view='3d')
+        result = algo.image(layout='3d')
         self.assertTrue(result.startswith('<svg'))
 
     def test_top_view(self) -> None:
         """Test top view rendering."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(view='top')
+        result = algo.image(layout='top')
         self.assertTrue(result.startswith('<svg'))
         self.assertIn('class="face-U"', result)
 
     def test_custom_size(self) -> None:
         """Test custom image size."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(size=300)
+        result = algo.image(image_size=300)
         self.assertIn('width="300"', result)
         self.assertIn('height="300"', result)
 
-    def test_cube_size_parameter(self) -> None:
-        """Test explicit cube_size parameter."""
+    def test_size_parameter(self) -> None:
+        """Test explicit cube size parameter."""
         algo = Algorithm.parse_moves('R')
-        result = algo.image(cube_size=2)
+        result = algo.image(size=2)
         self.assertTrue(result.startswith('<svg'))
 
     def test_custom_rotation(self) -> None:
@@ -931,15 +1782,67 @@ class AlgorithmImageTestCase(unittest.TestCase):
         rotated = algo.image(rotation='y90')
         self.assertNotEqual(default, rotated)
 
-    def test_custom_cube_color(self) -> None:
-        """Test custom cube color."""
-        algo = Algorithm.parse_moves('R')
-        result = algo.image(cube_color='#ff0000')
-        self.assertIn('#ff0000', result)
-
     def test_custom_distance(self) -> None:
         """Test custom camera distance."""
         algo = Algorithm.parse_moves('R')
         default = algo.image()
         closer = algo.image(distance=5.0)
         self.assertNotEqual(default, closer)
+
+
+class AlgorithmToDictTestCase(unittest.TestCase):
+    """Tests for the Algorithm.to_dict method."""
+
+    def test_expected_keys(self) -> None:
+        """to_dict returns every documented top-level key."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.to_dict()
+        self.assertEqual(
+            set(result),
+            {
+                'moves', 'cycles', 'min_cube_size',
+                'is_standard', 'is_sign',
+                'has_rotations', 'has_internal_rotations',
+                'has_pauses', 'has_times',
+                'metrics', 'ergonomics', 'structure',
+                'memory', 'impacts',
+            },
+        )
+
+    def test_moves_is_string(self) -> None:
+        """Moves entry is the stringified algorithm."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        self.assertEqual(algo.to_dict()['moves'], "R U R' U'")
+
+    def test_nested_are_plain_dicts(self) -> None:
+        """Data containers are flattened to plain dicts."""
+        algo = Algorithm.parse_moves("R U R' U' F R U R' U' F'")
+        result = algo.to_dict()
+        for key in ('metrics', 'ergonomics', 'structure', 'memory', 'impacts'):
+            self.assertIsInstance(result[key], dict)
+
+    def test_json_serializable(self) -> None:
+        """The full dict is JSON-serializable."""
+        algo = Algorithm.parse_moves("R U R' U' F R U R' U' F'")
+        payload = json.dumps(algo.to_dict())
+        self.assertGreater(len(payload), 0)
+
+    def test_impacts_cube_is_facelets_string(self) -> None:
+        """VCube inside impacts is flattened to its facelets state string."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.to_dict()
+        cube = result['impacts']['cube']
+        self.assertIsInstance(cube, str)
+        self.assertEqual(len(cube), 54)
+
+    def test_size_parameter_validates(self) -> None:
+        """to_dict propagates cube-size validation from impacts."""
+        algo = Algorithm.parse_moves('3Rw')
+        with self.assertRaises(InvalidCubeSizeError):
+            algo.to_dict(size=2)
+
+    def test_size_parameter_accepted(self) -> None:
+        """to_dict accepts a custom cube size."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        result = algo.to_dict(size=4)
+        self.assertEqual(len(result['impacts']['cube']), 6 * 4 * 4)

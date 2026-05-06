@@ -197,22 +197,22 @@ class FlowMemoryScoreTestCase(unittest.TestCase):
 
     def test_zero_stm(self) -> None:
         """Zero STM → score 0."""
-        score = compute_flow_memory_score(0, 0, 0)
+        score = compute_flow_memory_score(0, 0)
         self.assertEqual(score, 0.0)
 
     def test_no_interruptions(self) -> None:
         """No interruptions → score 0."""
-        score = compute_flow_memory_score(0, 0, 10)
+        score = compute_flow_memory_score(0, 10)
         self.assertEqual(score, 0.0)
 
     def test_many_interruptions(self) -> None:
         """Many interruptions → high score."""
-        score = compute_flow_memory_score(5, 5, 10)
+        score = compute_flow_memory_score(10, 10)
         self.assertGreater(score, 50.0)
 
     def test_capped_at_100(self) -> None:
         """Score should not exceed 100."""
-        score = compute_flow_memory_score(100, 100, 10)
+        score = compute_flow_memory_score(100, 10)
         self.assertLessEqual(score, 100.0)
 
 

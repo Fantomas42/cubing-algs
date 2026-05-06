@@ -9,6 +9,7 @@ from cubing_algs.constants import ROTATIONS
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.degrip import degrip_full_moves
+from cubing_algs.transform.degrip import degrip_moves
 from cubing_algs.transform.degrip import degrip_x_moves
 from cubing_algs.transform.degrip import degrip_y_moves
 from cubing_algs.transform.degrip import degrip_z_moves
@@ -491,5 +492,15 @@ class TransformDegripTestCase(unittest.TestCase):
             remove_ending_rotations(
                 degrip_full_moves(provide),
             ),
+            expect,
+        )
+
+    def test_degrip_direct_big_moves_timed_paused(self) -> None:
+        """Test degrip_moves."""
+        provide = parse_moves('z2@100 .@150 3R@200')
+        expect = parse_moves('.@150 3L@200')
+
+        self.assertEqual(
+            degrip_moves(provide),
             expect,
         )
