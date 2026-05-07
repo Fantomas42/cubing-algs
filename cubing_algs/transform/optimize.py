@@ -153,20 +153,16 @@ def optimize_triple_moves_inplace(
     changed = False
 
     while i < len(moves) - 1:
+        m0, m1 = moves[i], moves[i + 1]
         if (
-                not moves[i].is_pause
-                and moves[i].base_move == moves[i + 1].base_move
-                and moves[i].layer == moves[i + 1].layer
-                and moves[i].is_wide_move == moves[i + 1].is_wide_move
+                not m0.is_pause
+                and m0.base_move == m1.base_move
+                and m0.layer == m1.layer
+                and m0.is_wide_move == m1.is_wide_move
+                and m0.is_double != m1.is_double
         ):
-            if moves[i].is_double and not moves[i + 1].is_double:
-                moves[i:i + 2] = [moves[i + 1].inverted]
-                changed = True
-            elif not moves[i].is_double and moves[i + 1].is_double:
-                moves[i:i + 2] = [moves[i].inverted]
-                changed = True
-            else:
-                i += 1
+            moves[i:i + 2] = [m1.inverted if m0.is_double else m0.inverted]
+            changed = True
         else:
             i += 1
 
