@@ -562,13 +562,12 @@ class TransformOptimizeTestCase(unittest.TestCase):
                 msg=f'optimize_triple_moves incorrectly simplified {alg!r}',
             )
 
-        # optimize_repeat_three_moves: mixed wide/normal triplets must not simplify
+        # optimize_repeat_three_moves: mixed wide/normal must not simplify
         for alg in ('r r R', 'r R R', "r' r' R'", "r' R' R'"):
             provide = parse_moves(alg)
+            msg = f'optimize_repeat_three_moves simplified {alg!r}'
             self.assertEqual(
-                optimize_repeat_three_moves(provide),
-                provide,
-                msg=f'optimize_repeat_three_moves incorrectly simplified {alg!r}',
+                optimize_repeat_three_moves(provide), provide, msg=msg,
             )
 
         # optimize_do_undo_moves: r R' and R r' are not inverse pairs

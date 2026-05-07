@@ -1,6 +1,11 @@
 """Move optimization functions for reducing algorithm length and complexity."""
+from typing import TYPE_CHECKING
+
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import MAX_ITERATIONS
+
+if TYPE_CHECKING:
+    from cubing_algs.move import Move
 
 
 def optimize_repeat_three_moves_inplace(
@@ -66,21 +71,16 @@ def optimize_do_undo_moves_inplace(
     if max_depth <= 0:
         return moves
 
-    i = 0
-    changed = False
-
-    while i < len(moves) - 1:
-        if (
-            not moves[i].is_pause
-            and moves[i].inverted.untimed == moves[i + 1].untimed
-        ):
-            moves[i:i + 2] = []
-            changed = True
+    stack: list[Move] = []
+    for move in moves:
+        top = stack[-1] if stack else None
+        if top and not top.is_pause and top.inverted.untimed == move.untimed:
+            stack.pop()
         else:
-            i += 1
+            stack.append(move)
 
-    if changed:
-        return optimize_do_undo_moves_inplace(moves, max_depth - 1)
+    if len(stack) < len(moves):
+        moves[:] = stack
 
     return moves
 
