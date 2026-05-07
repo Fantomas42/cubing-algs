@@ -157,6 +157,7 @@ def optimize_triple_moves_inplace(
                 not moves[i].is_pause
                 and moves[i].base_move == moves[i + 1].base_move
                 and moves[i].layer == moves[i + 1].layer
+                and moves[i].is_wide_move == moves[i + 1].is_wide_move
         ):
             if moves[i].is_double and not moves[i + 1].is_double:
                 moves[i:i + 2] = [moves[i + 1].inverted]

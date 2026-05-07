@@ -550,3 +550,41 @@ class TransformOptimizeTestCase(unittest.TestCase):
             optimize_triple_moves(provide),
             expect,
         )
+
+    def test_optimize_wide_vs_normal_moves_not_combined(self) -> None:
+        """Wide and normal moves on the same face must never be combined."""
+        # optimize_triple_moves: r' R2 and r R2 must not simplify
+        for alg in ("r' R2", 'r R2', 'R2 r', "R2 r'"):
+            provide = parse_moves(alg)
+            self.assertEqual(
+                optimize_triple_moves(provide),
+                provide,
+                msg=f'optimize_triple_moves incorrectly simplified {alg!r}',
+            )
+
+        # optimize_repeat_three_moves: mixed wide/normal triplets must not simplify
+        for alg in ('r r R', 'r R R', "r' r' R'", "r' R' R'"):
+            provide = parse_moves(alg)
+            self.assertEqual(
+                optimize_repeat_three_moves(provide),
+                provide,
+                msg=f'optimize_repeat_three_moves incorrectly simplified {alg!r}',
+            )
+
+        # optimize_do_undo_moves: r R' and R r' are not inverse pairs
+        for alg in ("r R'", "R r'", 'r R', 'R r'):
+            provide = parse_moves(alg)
+            self.assertEqual(
+                optimize_do_undo_moves(provide),
+                provide,
+                msg=f'optimize_do_undo_moves incorrectly simplified {alg!r}',
+            )
+
+        # optimize_double_moves: r R and R r are not the same move
+        for alg in ('r R', 'R r', "r' R'", "R' r'"):
+            provide = parse_moves(alg)
+            self.assertEqual(
+                optimize_double_moves(provide),
+                provide,
+                msg=f'optimize_double_moves incorrectly simplified {alg!r}',
+            )
