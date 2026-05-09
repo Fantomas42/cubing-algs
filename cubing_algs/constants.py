@@ -8,6 +8,7 @@ transformations, and visual display.
 """
 import re
 
+from cubing_algs.annotations import CubeOrientation
 from cubing_algs.annotations import RegexPattern
 
 DEFAULT_CUBE_SIZE = 3
@@ -461,7 +462,7 @@ ORIENTATIONS: list[str] = [
 # Optimal rotation sequences for each of the 24 cube orientations.
 # Maps orientation (top-face + front-face) to the shortest rotation
 # sequence (at most 2 moves) that achieves it from solved (UF).
-ORIENTATION_FACE_MOVES: dict[str, str] = {
+ORIENTATION_FACE_MOVES: dict[CubeOrientation, str] = {
     'UF': '',
     'UR': 'y',
     'UL': "y'",
