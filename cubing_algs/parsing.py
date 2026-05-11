@@ -12,6 +12,7 @@ from collections.abc import Iterable
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
+from cubing_algs.constants import AUF_CHAR
 from cubing_algs.constants import MOVE_SPLIT
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.move import Move
@@ -245,6 +246,6 @@ def parse_moves_cfop(raw_moves: Iterable[Move | str] | Move | str,
 
     return algo.transform(
         trim_moves('y'),
-        trim_moves('U'),
+        trim_moves(AUF_CHAR),
         to_fixpoint=True,
     )

@@ -10,6 +10,7 @@ from typing import Final
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CubeCubies
+from cubing_algs.constants import AUF_CHAR
 from cubing_algs.constants import F2L_EDGE_CORNERS
 from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
@@ -32,6 +33,7 @@ from cubing_algs.scrambler.pieces import random_corner_orientation
 from cubing_algs.scrambler.pieces import random_edge_orientation
 from cubing_algs.scrambler.pieces import random_permutation
 from cubing_algs.transform.invert import invert_moves
+from cubing_algs.transform.trim import trim_moves
 from cubing_algs.vcube import VCube
 
 
@@ -420,7 +422,10 @@ def scramble_easy_cross(
 
     # Build scramble and solution
     scramble = cubies_to_scramble(cubies)
-    solution = moves.transform(invert_moves)
+    solution = moves.transform(
+        invert_moves,
+        trim_moves(AUF_CHAR, start=False, end=True),
+    )
 
     return scramble, solution
 
@@ -491,7 +496,10 @@ def scramble_x_cross(  # noqa: PLR0914
 
     # Build scramble and solution
     scramble = cubies_to_scramble(cubies)
-    solution = moves.transform(invert_moves)
+    solution = moves.transform(
+        invert_moves,
+        trim_moves(AUF_CHAR, start=False, end=True),
+    )
 
     return scramble, solution
 

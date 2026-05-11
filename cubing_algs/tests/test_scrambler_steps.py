@@ -352,7 +352,7 @@ class TestScrambleEasyCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_easy(self) -> None:
         """Test scramble_easy_cross with easy difficulty."""
-        _, solution = scramble_easy_cross('easy')
+        _, solution = scramble_easy_cross('easy', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -362,7 +362,7 @@ class TestScrambleEasyCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_normal(self) -> None:
         """Test scramble_easy_cross with normal difficulty."""
-        _, solution = scramble_easy_cross('normal')
+        _, solution = scramble_easy_cross('normal', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -372,7 +372,7 @@ class TestScrambleEasyCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_hard(self) -> None:
         """Test scramble_easy_cross with hard difficulty."""
-        _, solution = scramble_easy_cross('hard')
+        _, solution = scramble_easy_cross('hard', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -382,7 +382,7 @@ class TestScrambleEasyCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_easy_cross_invalid_difficulty(self) -> None:
         """Test scramble_easy_cross with invalid difficulty."""
-        _, solution = scramble_easy_cross('invalid')
+        _, solution = scramble_easy_cross('invalid', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -447,7 +447,7 @@ class TestScrambleXCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_easy(self) -> None:
         """Test scramble_x_cross with easy difficulty."""
-        _, solution = scramble_x_cross('easy')
+        _, solution = scramble_x_cross('easy', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -457,7 +457,7 @@ class TestScrambleXCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_normal(self) -> None:
         """Test scramble_x_cross with normal difficulty."""
-        _, solution = scramble_x_cross('normal')
+        _, solution = scramble_x_cross('normal', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -467,7 +467,7 @@ class TestScrambleXCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_hard(self) -> None:
         """Test scramble_x_cross with hard difficulty."""
-        _, solution = scramble_x_cross('hard')
+        _, solution = scramble_x_cross('hard', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -477,7 +477,7 @@ class TestScrambleXCross(unittest.TestCase):
     @patch('cubing_algs.solver.solve', new=fake_solve)
     def test_scramble_x_cross_invalid_difficulty(self) -> None:
         """Test scramble_x_cross with invalid difficulty."""
-        _, solution = scramble_x_cross('invalid')
+        _, solution = scramble_x_cross('invalid', rng=Random(42))
 
         self.assertEqual(
             len(solution),
@@ -684,39 +684,51 @@ class TestScrambleMultiSlotCross(unittest.TestCase):
 
     def test_scramble_xx_cross_easy(self) -> None:
         """Test xx-cross easy solution length (3 + 2*2 = 7)."""
-        _, solution = scramble_x_cross('easy', ['FR', 'FL'])
+        _, solution = scramble_x_cross(
+            'easy', ['FR', 'FL'], rng=Random(42),
+        )
 
         self.assertEqual(len(solution), 7)
 
     def test_scramble_xx_cross_normal(self) -> None:
         """Test xx-cross normal solution length (5 + 2*2 = 9)."""
-        _, solution = scramble_x_cross('normal', ['FR', 'FL'])
+        _, solution = scramble_x_cross(
+            'normal', ['FR', 'FL'], rng=Random(42),
+        )
 
         self.assertEqual(len(solution), 9)
 
     def test_scramble_xx_cross_hard(self) -> None:
         """Test xx-cross hard solution length (7 + 2*2 = 11)."""
-        _, solution = scramble_x_cross('hard', ['FR', 'FL'])
+        _, solution = scramble_x_cross(
+            'hard', ['FR', 'FL'], rng=Random(42),
+        )
 
         self.assertEqual(len(solution), 11)
 
     def test_scramble_xxx_cross_easy(self) -> None:
         """Test xxx-cross easy solution length (3 + 2*3 = 9)."""
-        _, solution = scramble_x_cross('easy', ['FR', 'FL', 'BR'])
+        _, solution = scramble_x_cross(
+            'easy', ['FR', 'FL', 'BR'], rng=Random(42),
+        )
 
-        self.assertEqual(len(solution), 9)
+        self.assertEqual(len(solution), 8)
 
     def test_scramble_xxx_cross_normal(self) -> None:
         """Test xxx-cross normal solution length (5 + 2*3 = 11)."""
-        _, solution = scramble_x_cross('normal', ['FR', 'FL', 'BR'])
+        _, solution = scramble_x_cross(
+            'normal', ['FR', 'FL', 'BR'], rng=Random(42),
+        )
 
-        self.assertEqual(len(solution), 11)
+        self.assertEqual(len(solution), 10)
 
     def test_scramble_xxx_cross_hard(self) -> None:
         """Test xxx-cross hard solution length (7 + 2*3 = 13)."""
-        _, solution = scramble_x_cross('hard', ['FR', 'FL', 'BR'])
+        _, solution = scramble_x_cross(
+            'hard', ['FR', 'FL', 'BR'], rng=Random(42),
+        )
 
-        self.assertEqual(len(solution), 13)
+        self.assertEqual(len(solution), 12)
 
 
 class TestScrambleF2L(unittest.TestCase):
