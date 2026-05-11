@@ -597,8 +597,7 @@
             "rU2R'U2r'FRF'",
             "R'F'RU'L'ULR'FR",
             "r'U'rU'R'URr'Ur",
-            "x2B'r'Dr'B'r2Bx2",
-            "R'F'LF'LU2D2R2U2D2F2U2D2L"
+            "x2B'r'Dr'B'r2Bx2"
         ],
         "aliases": [
             "Left Wide Sune",
@@ -3020,7 +3019,6 @@
             "RUR'URU'R'URU'BU'B'R'",
             "RUR'F'RU2R'U'RU'R'UFRU'R'",
             "rR'U'R'U'RUx'RU'R'Uxr'R",
-            "B'RU'LD2L2UR'LU'FBD2B'",
             "FRU'R'URUR'URU'R'URU'R'F'",
             "FURU'R2F'RURU'R'FRUR'U'F'",
             "RUR'U'R'FR2U'R'U'RUR'URU'R'F'"
@@ -3355,7 +3353,6 @@
             "R'U2RUR'F'U'FURU2R'U'R",
             "RU2R2FRF'RU'R'U'R'FRF'",
             "FRF'rUR'r'RUR'U'rU'r'",
-            "L2B2DF2U'L2DU'R'FR2F'R'",
             "RUR'U'R'FRF'R'U2RUR'UR",
             "R'U'R'FRF'RU'R'URU'R'U2R",
             "FRUR'U'F'UF'rUR'U'r'FR",
@@ -3437,10 +3434,7 @@
             }
         ],
         "status": "OK",
-        "symmetry": "simple",
-        "two-phase": [
-            "L2B2DF2U'L2DU'R'FR2F'R'"
-        ]
+        "symmetry": "simple"
     },
     {
         "algorithms": [
@@ -3544,7 +3538,6 @@
             "R'U'RU'R'URURB'R'B",
             "FRUR'U'RUR'U'R'F'rURU'r'",
             "RUR'F'RUR'F'U'FRU'R'FRU'R'",
-            "B'URB'R'D'FR'F'UR2L2UD'B2",
             "l'U'LU'L'U2lRUR'L'U2RU'R'U2LURU'R'",
             "R'F'rU'r'F2U'RUR'U'R2DR'URD'R'U2R'UR"
         ],
@@ -3594,10 +3587,7 @@
         "optimal_stm": 10,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "status": "OK",
-        "two-phase": [
-            "B'URB'R'D'FR'F'UR2L2UD'B2"
-        ]
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -3910,8 +3900,7 @@
             "LF'L'FLF'L'FL'U'LUL'U'L",
             "rU2R'U'RU'r'U'RUR'URU2R'",
             "RUR'URU'R'URU'R'U'R'FRF'",
-            "LU2l'UlU'l'U'lU'L'ULU2L'",
-            "FUFRL2B'RD'B'UR2F2B2L2D'"
+            "LU2l'UlU'l'U'lU'L'ULU2L'"
         ],
         "aliases": [
             "Awkward Fish",
@@ -3948,10 +3937,7 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "status": "OK",
-        "two-phase": [
-            "FUFRL2B'RD'B'UR2F2B2L2D'"
-        ]
+        "status": "OK"
     },
     {
         "algorithms": [
@@ -4517,7 +4503,6 @@
             "L'U2LUL'ULF'L'U'LUF",
             "FURU'R'F'URU2R'U'RU'R'",
             "r'U'RU'R'U2r2U2R'U'RU'r'",
-            "R'F'B'D2BU2FR'L'D2RL2",
             "SRU2R2U'R2U'R2U2RUS'",
             "R'U'RU'R'U2RrU2R'U'RU'r'",
             "rUR'URU2r'l'U2LUL'Ul"
@@ -4562,10 +4547,7 @@
         "optimal_stm": 9,
         "probability": 0.018518518518518517,
         "probability_label": "1/54",
-        "status": "OK",
-        "two-phase": [
-            "R'F'B'D2BU2FR'L'D2RL2"
-        ]
+        "status": "OK"
     },
     {
         "algorithms": [
