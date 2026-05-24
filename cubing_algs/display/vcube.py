@@ -41,9 +41,7 @@ def color_support() -> bool:
         return True
     if os.environ.get('WT_SESSION') or os.environ.get('ANSICON'):
         return True
-    if os.environ.get('TERM_PROGRAM') in {'vscode', 'Hyper'}:
-        return True
-    return False
+    return os.environ.get('TERM_PROGRAM') in {'vscode', 'Hyper'}
 
 
 USE_COLORS = color_support()
