@@ -37,7 +37,13 @@ def color_support() -> bool:
     """
     if os.environ.get('COLORTERM', '') in {'truecolor', '24bit'}:
         return True
-    return '256color' in os.environ.get('TERM', '')
+    if '256color' in os.environ.get('TERM', ''):
+        return True
+    if os.environ.get('WT_SESSION') or os.environ.get('ANSICON'):
+        return True
+    if os.environ.get('TERM_PROGRAM') in {'vscode', 'Hyper'}:
+        return True
+    return False
 
 
 USE_COLORS = color_support()
