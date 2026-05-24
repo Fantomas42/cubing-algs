@@ -291,7 +291,8 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 def scramble_step(
         step: str,
         rng: Random | None = None,
-        *, include_auf: bool = False,
+        *,
+        include_auf: bool = False,
 ) -> Algorithm:
     """
     Generate a scramble for a specific speedcubing step.
