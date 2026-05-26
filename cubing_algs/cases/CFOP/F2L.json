@@ -144,7 +144,8 @@
     {
         "algorithms": [
             "r'U2R2UR2Ur",
-            "y'UR'U2RU2R'UR"
+            "y'UR'U2RU2R'UR",
+            "UF'U2L'ULU'F"
         ],
         "code": "08",
         "family": "Disconnected pairs",
