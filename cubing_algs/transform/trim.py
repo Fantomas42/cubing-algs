@@ -5,8 +5,10 @@ from cubing_algs.algorithm import Algorithm
 
 
 def find_trim_start(
-        old_moves: Algorithm, trim_move: str,
-        lo: int, hi: int,
+        old_moves: Algorithm,
+        trim_move: str,
+        lo: int,
+        hi: int,
 ) -> int:
     """
     Find start boundary after trimming target moves and adjacent pauses.
@@ -34,8 +36,10 @@ def find_trim_start(
 
 
 def find_trim_end(
-        old_moves: Algorithm, trim_move: str,
-        lo: int, hi: int,
+        old_moves: Algorithm,
+        trim_move: str,
+        lo: int,
+        hi: int,
 ) -> int:
     """
     Find end boundary after trimming target moves and adjacent pauses.
@@ -64,7 +68,9 @@ def find_trim_end(
 
 def trim_moves(
         trim_move: str,
-        *, start: bool = True, end: bool = True,
+        *,
+        start: bool = True,
+        end: bool = True,
 ) -> Callable[[Algorithm], Algorithm]:
     """
     Remove specified moves from the start and/or end of an algorithm.
