@@ -154,7 +154,7 @@
         ],
         "main": "r'U2R2UR2Ur",
         "name": "F2L 08",
-        "optimal_cycles": 14,
+        "optimal_cycles": 5,
         "optimal_htm": 7,
         "optimal_stm": 7,
         "probability": 0.023809523809523808,
