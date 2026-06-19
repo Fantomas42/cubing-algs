@@ -83,9 +83,9 @@ algo = parse_moves("R:U:R':U'")       # With colons
 algo = parse_moves("R(U)R'[U']")      # With brackets/parentheses
 algo = parse_moves("3Rw 3-4u' 2R2")   # For big cubes
 
-# Parse CFOP style (removes starting/ending U/y rotations)
-from cubing_algs.parsing import parse_moves_cfop
-algo = parse_moves_cfop("y U R U R' U'")  # Will remove the initial y
+# Parse last layer style (removes starting/ending U and y moves)
+from cubing_algs.parsing import parse_moves_last_layer
+algo = parse_moves_last_layer("y U R U R' U R U2 R'")  # Removes the leading y and U
 ```
 
 ## Commutators and Conjugates

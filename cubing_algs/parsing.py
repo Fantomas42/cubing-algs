@@ -226,18 +226,18 @@ def parse_moves(
     return Algorithm(moves)
 
 
-def parse_moves_cfop(
+def parse_moves_last_layer(
         raw_moves: Iterable[Move | str] | Move | str,
         *,
         trust_input: bool = True,
 ) -> Algorithm:
     """
-    Parse moves specifically for CFOP method algorithms.
+    Parse moves for last layer (LL) algorithms.
 
     Similar to parse_moves, but also removes typical setup and restoration
     moves (y and U rotations) from the beginning and end of the algorithm.
-    This is useful for standardizing CFOP algorithms, which often include
-    such moves for convenience.
+    This is useful for standardizing last layer algorithms, which often
+    include such moves for convenience.
 
     Args:
         raw_moves: The moves to parse, as a string, iterable, or Algorithm.

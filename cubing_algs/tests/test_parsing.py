@@ -9,7 +9,7 @@ from cubing_algs.parsing import check_moves
 from cubing_algs.parsing import clean_moves
 from cubing_algs.parsing import clean_multiline_and_comments
 from cubing_algs.parsing import parse_moves
-from cubing_algs.parsing import parse_moves_cfop
+from cubing_algs.parsing import parse_moves_last_layer
 from cubing_algs.parsing import split_moves
 
 
@@ -528,33 +528,33 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
         )
 
 
-class ParseMovesCFOPTestCase(unittest.TestCase):
-    """Tests for the parse_moves_cfop function."""
+class ParseMovesLastLayerTestCase(unittest.TestCase):
+    """Tests for the parse_moves_last_layer function."""
 
-    def test_parse_moves_cfop(self) -> None:
-        """Test parse moves cfop."""
+    def test_parse_moves_last_layer(self) -> None:
+        """Test parse moves last layer."""
         moves = 'R2 L2'
         expect = ['R2', 'L2']
         self.assertEqual(
-            parse_moves_cfop(moves),
+            parse_moves_last_layer(moves),
             expect,
         )
 
-    def test_parse_moves_cfop_cleaned(self) -> None:
-        """Test parse moves cfop cleaned."""
+    def test_parse_moves_last_layer_cleaned(self) -> None:
+        """Test parse moves last layer cleaned."""
         moves = 'U R2 L2 y'
         expect = ['R2', 'L2']
         self.assertEqual(
-            parse_moves_cfop(moves),
+            parse_moves_last_layer(moves),
             expect,
         )
 
-    def test_parse_moves_cfop_cleaned_advanced(self) -> None:
-        """Test parse moves cfop cleaned."""
+    def test_parse_moves_last_layer_cleaned_advanced(self) -> None:
+        """Test parse moves last layer cleaned."""
         moves = "U' y  R2 L2 U y2"
         expect = ['R2', 'L2']
         self.assertEqual(
-            parse_moves_cfop(moves),
+            parse_moves_last_layer(moves),
             expect,
         )
 
