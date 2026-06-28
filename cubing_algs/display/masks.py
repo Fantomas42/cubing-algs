@@ -1,18 +1,21 @@
 """Display masks for displaying different pieces."""
 from cubing_algs.annotations import POVDisplayMask
 
-# 0 Dimmed (transparent)
+# 0 Dimmed
 # 1 Visible
-# 2 Oriented (masked)
+# 2 Masked
 # 3 Removed
+# 4 Oriented
 
 EMPTY_MASK: POVDisplayMask = '0' * 54
 
 FULL_MASK: POVDisplayMask = '1' * 54
 
-ORIENTED_MASK: POVDisplayMask = '2' * 54
+MASKED_MASK: POVDisplayMask = '2' * 54
 
 HIDDEN_MASK: POVDisplayMask = '3' * 54
+
+ORIENTED_MASK: POVDisplayMask = '4' * 54
 
 CROSS_BOTTOM_MASK: POVDisplayMask = (
     '222202222'

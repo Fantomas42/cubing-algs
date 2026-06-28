@@ -5,7 +5,7 @@ from typing import Literal
 # Facelet, Mask and DisplayCode
 type Facelet = Literal['U', 'R', 'F', 'D', 'L', 'B']
 type Mask = Literal['0', '1']
-type DisplayCode = Literal['0', '1', '2', '3']
+type DisplayCode = Literal['0', '1', '2', '3', '4']
 
 # Piece type for corners and edges
 type PieceType = Literal['corner', 'edge']

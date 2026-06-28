@@ -19,6 +19,7 @@ from cubing_algs.display.masks import FULL_MASK
 from cubing_algs.display.masks import HIDDEN_MASK
 from cubing_algs.display.masks import L3_MASK
 from cubing_algs.display.masks import LSE_MASK
+from cubing_algs.display.masks import MASKED_MASK
 from cubing_algs.display.masks import OLL_MASK
 from cubing_algs.display.masks import ORIENTED_MASK
 from cubing_algs.display.masks import PLL_MASK
@@ -40,8 +41,9 @@ MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'f2l+ell':      (F2L_ELL_MASK,      '',    'f2l_orientation'),           # noqa: E241
     'cmll':         (CMLL_MASK,         'top', ''),                          # noqa: E241
     'lse':          (LSE_MASK,          '',    ''),                          # noqa: E241
+    'empty':        (EMPTY_MASK,        '',    ''),                          # noqa: E241
     'full':         (FULL_MASK,         '',    ''),                          # noqa: E241
-    'masked':       (EMPTY_MASK,        '',    ''),                          # noqa: E241
+    'masked':       (MASKED_MASK,       '',    ''),                          # noqa: E241
     'oriented':     (ORIENTED_MASK,     '',    ''),                          # noqa: E241
     'hidden':       (HIDDEN_MASK,       '',    ''),                          # noqa: E241
 }
