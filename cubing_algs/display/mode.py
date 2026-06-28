@@ -10,12 +10,11 @@ from cubing_algs.display.masks import AF2L_MASK
 from cubing_algs.display.masks import CMLL_MASK
 from cubing_algs.display.masks import CROSS_BOTTOM_MASK
 from cubing_algs.display.masks import CROSS_TOP_MASK
-from cubing_algs.display.masks import EMPTY_MASK
+from cubing_algs.display.masks import DIMMED_MASK
 from cubing_algs.display.masks import F2L_CLL_MASK
 from cubing_algs.display.masks import F2L_ELL_MASK
 from cubing_algs.display.masks import F2L_LL_MASK
 from cubing_algs.display.masks import F2L_MASK
-from cubing_algs.display.masks import FULL_MASK
 from cubing_algs.display.masks import HIDDEN_MASK
 from cubing_algs.display.masks import L3_MASK
 from cubing_algs.display.masks import LSE_MASK
@@ -23,6 +22,7 @@ from cubing_algs.display.masks import MASKED_MASK
 from cubing_algs.display.masks import OLL_MASK
 from cubing_algs.display.masks import ORIENTED_MASK
 from cubing_algs.display.masks import PLL_MASK
+from cubing_algs.display.masks import VISIBLE_MASK
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube
@@ -41,11 +41,11 @@ MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'f2l+ell':      (F2L_ELL_MASK,      '',    'f2l_orientation'),           # noqa: E241
     'cmll':         (CMLL_MASK,         'top', ''),                          # noqa: E241
     'lse':          (LSE_MASK,          '',    ''),                          # noqa: E241
-    'empty':        (EMPTY_MASK,        '',    ''),                          # noqa: E241
-    'full':         (FULL_MASK,         '',    ''),                          # noqa: E241
+    'visible':      (VISIBLE_MASK,      '',    ''),                          # noqa: E241
+    'dimmed':       (DIMMED_MASK,       '',    ''),                          # noqa: E241
     'masked':       (MASKED_MASK,       '',    ''),                          # noqa: E241
-    'oriented':     (ORIENTED_MASK,     '',    ''),                          # noqa: E241
     'hidden':       (HIDDEN_MASK,       '',    ''),                          # noqa: E241
+    'oriented':     (ORIENTED_MASK,     '',    ''),                          # noqa: E241
 }
 
 

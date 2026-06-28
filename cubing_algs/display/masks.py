@@ -4,12 +4,12 @@ from cubing_algs.annotations import POVDisplayMask
 # 0 Dimmed
 # 1 Visible
 # 2 Masked
-# 3 Removed
+# 3 Hidden
 # 4 Oriented
 
-EMPTY_MASK: POVDisplayMask = '0' * 54
+DIMMED_MASK: POVDisplayMask = '0' * 54
 
-FULL_MASK: POVDisplayMask = '1' * 54
+VISIBLE_MASK: POVDisplayMask = '1' * 54
 
 MASKED_MASK: POVDisplayMask = '2' * 54
 
