@@ -179,11 +179,11 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='oll')
 
         expected = (
-            '          b  D  D \n'
-            '       D  l  f  r  f \n'
-            '       r  D  D  D  b \n'
-            '       r  b  l  D  l \n'
-            '          D  D  f '
+            '             D  D \n'
+            '       D             \n'
+            '          D  D  D    \n'
+            '                D    \n'
+            '          D  D    '
         )
         self.assertEqual(grid, expected)
 
@@ -192,9 +192,9 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='oll', layout='linear')
 
         expected = (
-            ' l  f  r   l  b  f   D  D  f   u  u  u   D  r  r   D  D  b \n'
+            '                     D  D      u  u  u   D         D  D    \n'
             ' D  D  D   l  l  l   f  f  f   u  u  u   r  r  r   b  b  b \n'
-            ' b  l  D   l  l  l   f  f  f   u  u  u   r  r  r   b  b  b '
+            '       D   l  l  l   f  f  f   u  u  u   r  r  r   b  b  b '
         )
         self.assertEqual(grid, expected)
 
@@ -204,11 +204,11 @@ class VCubeShowOLLTestCase(VCubeShowMixin, unittest.TestCase):
 
         expected = (
             '                B  D  D \n'
-            '             D  l  f  r  F \n'
+            '             D           F \n'
             '             R  D  D  D  B \n'
-            '             R  b  l  D  L \n'
+            '             R        D  L \n'
             '    L  D  B                 D  D  R  R  F  L \n'
-            ' B  D  r  r     D  D  f     l  b  f  D  D  b  D \n'
+            ' B  D           D  D                 D  D     D \n'
             ' B  r  r  r     f  f  f     l  l  l  b  b  b  R \n'
             ' B  r  r  r     f  f  f     l  l  l  b  b  b  R \n'
             '    U  U  U                 U  U  U  U  U  U \n'
@@ -317,11 +317,11 @@ class VCubeShowOLLExampleTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='oll')
 
         expected = (
-            '          u  R  R \n'
-            '       R  b  d  f  d \n'
-            '       f  R  R  R  u \n'
-            '       f  u  b  R  b \n'
-            '          R  R  d '
+            '             R  R \n'
+            '       R             \n'
+            '          R  R  R    \n'
+            '                R    \n'
+            '          R  R    '
         )
         self.assertEqual(grid, expected)
 
@@ -330,11 +330,11 @@ class VCubeShowOLLExampleTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='oll', orientation='RU')
 
         expected = (
-            '          d  R  R \n'
-            '       b  R  b  u  f \n'
-            '       u  R  R  R  f \n'
-            '       d  f  d  b  R \n'
-            '          R  R  u '
+            '             R  R \n'
+            '          R          \n'
+            '          R  R  R    \n'
+            '                   R \n'
+            '          R  R    '
         )
         self.assertEqual(grid, expected)
 
@@ -346,8 +346,8 @@ class VCubeShowOLLExampleTestCase(VCubeShowMixin, unittest.TestCase):
             '          l  l  l \n'
             '       f  u  u  u  b \n'
             '       f  u  u  u  b \n'
-            '       R  u  R  R  d \n'
-            '          b  d  f '
+            '       R     R  R    \n'
+            '                  '
         )
         self.assertEqual(grid, expected)
 
@@ -452,15 +452,15 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='cross')
 
         expected = (
-            '          r  l  r \n'
-            '          f  d  b \n'
-            '          f  l  b \n'
-            ' b  r  r  u  f  d  l  d  f  d  d  d \n'
-            ' l  r  R  U  f  B  U  l  r  d  b  b \n'
-            ' l  d  d  l  U  b  r  r  b  u  F  f \n'
-            '          f  L  u \n'
-            '          f  U  b \n'
-            '          u  U  l '
+            '                  \n'
+            '             d    \n'
+            '                  \n'
+            '                                    \n'
+            '    r  R  U  f  B  U  l        b    \n'
+            '             U                 F    \n'
+            '             L    \n'
+            '             U    \n'
+            '             U    '
         )
         self.assertEqual(grid, expected)
 
@@ -469,15 +469,15 @@ class VCubeShowCrossTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(self.cube, mode='cross-top')
 
         expected = (
-            '          b  l  f \n'
-            '          B  D  f \n'
-            '          r  L  r \n'
-            ' l  D  f  d  D  d  b  r  r  u  f  d \n'
-            ' u  l  R  D  b  b  l  r  r  u  f  b \n'
-            ' r  r  b  u  f  f  l  D  d  l  u  b \n'
-            '          l  u  u \n'
-            '          b  u  F \n'
-            '          u  l  f '
+            '                  \n'
+            '          B  D    \n'
+            '             L    \n'
+            '    D        D                      \n'
+            '    l  R  D  b        r        f    \n'
+            '                      D             \n'
+            '                  \n'
+            '             u  F \n'
+            '                  '
         )
         self.assertEqual(grid, expected)
 
@@ -593,13 +593,13 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
-            '          b  R  R \n'
-            '          d  d  R \n'
-            '          d  d  f \n'
-            ' l  r  r  f  b  l  d  B  U  F  F  d \n'
-            ' B  B  l  d  R  d  f  F  F  L  L  L \n'
-            ' B  B  d  r  R  B  R  F  F  L  L  L \n'
-            '          b  U  U \n'
+            '             R  R \n'
+            '                R \n'
+            '                  \n'
+            '                      B  U  F  F    \n'
+            ' B  B        R        F  F  L  L  L \n'
+            ' B  B        R  B  R  F  F  L  L  L \n'
+            '             U  U \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -612,15 +612,15 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
-            '          d  d  f \n'
-            '          d  d  r \n'
-            '          L  L  r \n'
-            ' l  l  U  B  B  d  b  d  d  r  f  f \n'
-            ' b  F  F  L  L  F  R  B  B  R  R  d \n'
-            ' b  F  F  L  L  F  U  B  B  R  R  d \n'
+            '                  \n'
+            '                  \n'
+            '          L  L    \n'
+            '       U  B  B                      \n'
+            '    F  F  L  L  F  R  B  B  R  R    \n'
+            '    F  F  L  L  F  U  B  B  R  R    \n'
             '          U  U  R \n'
             '          U  U  U \n'
-            '          l  U  U '
+            '             U  U '
         )
         self.assertEqual(grid, expected)
 
@@ -631,13 +631,13 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
-            '          l  d  b \n'
-            '          L  d  d \n'
-            '          L  L  l \n'
-            ' f  F  F  U  B  b  d  l  r  d  f  d \n'
-            ' F  F  d  b  L  r  d  B  B  R  R  R \n'
-            ' F  F  B  U  L  r  d  B  B  R  R  R \n'
-            '          L  U  f \n'
+            '                  \n'
+            '          L       \n'
+            '          L  L    \n'
+            '    F  F  U  B                      \n'
+            ' F  F        L        B  B  R  R  R \n'
+            ' F  F  B  U  L        B  B  R  R  R \n'
+            '          L  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -757,9 +757,9 @@ class VCubeShowNon3x3ModeTestCase(VCubeShowMixin, unittest.TestCase):
         """
         Test that mode sets the layout but applies no masking on a 4x4x4.
 
-        OLL mode implies layout='top'. The output must match an explicit
+        PLL mode implies layout='top'. The output must match an explicit
         layout='top' call (same layout, no mask difference).
         """
-        output_mode = self.show_stripped(self.cube, mode='oll')
+        output_mode = self.show_stripped(self.cube, mode='pll')
         output_top = self.show_stripped(self.cube, layout='top')
         self.assertEqual(output_mode, output_top)
