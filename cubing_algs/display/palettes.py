@@ -713,6 +713,8 @@ DEFAULT_MASKED_BACKGROUND = '#444444'
 
 DEFAULT_ADJACENT_BACKGROUND = '#00004E'
 
+DEFAULT_ORIENTED_BACKGROUND = '#40E0D0'
+
 DEFAULT_HIDDEN_FOREGROUND = '#DADADA'
 
 DEFAULT_ARROW_COLOR = '#000000'
@@ -726,6 +728,7 @@ def build_ansi_palette(  # noqa: PLR0913, PLR0917
         cube_color: str = DEFAULT_CUBE_COLOR,  # noqa: ARG001
         masked_background: str = DEFAULT_MASKED_BACKGROUND,
         adjacent_background: str = DEFAULT_ADJACENT_BACKGROUND,
+        oriented_background: str = DEFAULT_ORIENTED_BACKGROUND,
         hidden_ansi: str = DEFAULT_HIDDEN_ANSI,
         hidden_adjacent_ansi: str = '',
 ) -> dict[str, str]:
@@ -743,7 +746,8 @@ def build_ansi_palette(  # noqa: PLR0913, PLR0917
         font: Default font color hex string.
         cube_color: Cube color.
         masked_background: Background color for masked facelets.
-        adjacent_background: Background color for adjacent faces.
+        adjacent_background: Background color for adjacent facelets.
+        oriented_background: Background color for oriented facelets.
         hidden_ansi: ANSI sequence for hidden facelets.
         hidden_adjacent_ansi: ANSI sequence for hidden facelets in adjacent
             position. Defaults to adjacent_background with a neutral foreground.
@@ -762,6 +766,7 @@ def build_ansi_palette(  # noqa: PLR0913, PLR0917
         'reset': '\x1b[0;0m',
         'hidden': hidden_ansi,
         'hidden_adjacent': hidden_adjacent_ansi,
+        'oriented': background_hex_to_ansi(oriented_background),
     }
 
     for face, face_config in zip(FACE_ORDER, faces, strict=True):
@@ -870,6 +875,10 @@ def load_palette(palette_name: str) -> dict[str, str]:
         adjacent_background=config.get(
             'adjacent_background',
             DEFAULT_ADJACENT_BACKGROUND,
+        ),
+        oriented_background=config.get(
+            'oriented_background',
+            DEFAULT_ORIENTED_BACKGROUND,
         ),
         hidden_ansi=config.get('hidden_ansi', DEFAULT_HIDDEN_ANSI),
         hidden_adjacent_ansi=config.get('hidden_adjacent_ansi', ''),

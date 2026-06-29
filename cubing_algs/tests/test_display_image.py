@@ -345,7 +345,7 @@ class ResolveFaceColorsTestCase(unittest.TestCase):
             palette_name='default',
         ).load_palette()
 
-        self.assertEqual(len(colors), 9)
+        self.assertEqual(len(colors), 10)
         for face in 'URFDLB':
             self.assertIn(face, colors)
         self.assertIn('masked', colors)

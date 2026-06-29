@@ -21,6 +21,7 @@ EMOJIS = {
     'L': '🟧',
     'R': '🟥',
     'masked': '⬛',
+    'oriented': '🟪',
     'hidden': '❓',
 }
 

@@ -28,6 +28,7 @@ from cubing_algs.display.mode import ModeDisplay
 from cubing_algs.display.palettes import DEFAULT_ARROW_COLOR
 from cubing_algs.display.palettes import DEFAULT_CUBE_COLOR
 from cubing_algs.display.palettes import DEFAULT_MASKED_BACKGROUND
+from cubing_algs.display.palettes import DEFAULT_ORIENTED_BACKGROUND
 from cubing_algs.display.palettes import PALETTES
 from cubing_algs.display.palettes import hex_to_rgb
 from cubing_algs.display.palettes import hex_to_rgba
@@ -133,6 +134,10 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         palette['masked'] = config.get(
             'masked_background',
             DEFAULT_MASKED_BACKGROUND,
+        )
+        palette['oriented'] = config.get(
+            'oriented_background',
+            DEFAULT_ORIENTED_BACKGROUND,
         )
         palette['cube_color'] = config.get(
             'cube_color',
@@ -558,6 +563,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
         if mask_char == '3':
             return 'rgb(0,0,0,0.0)'
+
+        if mask_char == '4':
+            return self.palette['oriented']
 
         fill = self.palette[color_key]
 

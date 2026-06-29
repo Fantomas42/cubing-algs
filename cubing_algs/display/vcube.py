@@ -209,6 +209,8 @@ class VCubeDisplay(ModeDisplay):
         if self.facelet_type == 'emoji':
             if mask in {'0', '2'}:
                 return EMOJIS['masked']
+            if mask == '4':
+                return EMOJIS['oriented']
             if mask == '3':
                 return '  '
             if facelet not in FACE_ORDER:
@@ -232,8 +234,11 @@ class VCubeDisplay(ModeDisplay):
             elif mask == '0':
                 face_key += '_masked'
             elif mask == '2':
-                face_key += '_masked'
                 facelet = ' '
+                face_key += '_masked'
+            elif mask == '4':
+                facelet = ' '
+                face_key = 'oriented'
             face_color = self.palette[face_key]
 
         if self.effect and not adjacent and facelet_index is not None:
