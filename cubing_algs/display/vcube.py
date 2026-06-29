@@ -229,8 +229,11 @@ class VCubeDisplay(ModeDisplay):
             face_key = facelet
             if adjacent:
                 face_key += '_adjacent'
-            elif mask in {'0', '2'}:
+            elif mask == '0':
                 face_key += '_masked'
+            elif mask == '2':
+                face_key += '_masked'
+                facelet = ' '
             face_color = self.palette[face_key]
 
         if self.effect and not adjacent and facelet_index is not None:
