@@ -20,6 +20,7 @@ class PaletteConfig(TypedDict, total=False):
     cube_color: str
     masked_background: str
     adjacent_background: str
+    oriented_background: str
     hidden_ansi: str
     hidden_adjacent_ansi: str
     arrow: str
