@@ -16,6 +16,7 @@ from cubing_algs.annotations import RegexPattern
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.constants import DEFAULT_PALETTE
+from cubing_algs.display.constants import DIM_LUMINANCE_FACTOR
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.constants import IMAGE_SIZE
 from cubing_algs.display.constants import MIN_DISTANCE
@@ -24,6 +25,8 @@ from cubing_algs.display.constants import STICKER_GAP
 from cubing_algs.display.constants import STRIP_DEPTH
 from cubing_algs.display.constants import STRIP_TAPER
 from cubing_algs.display.constants import VISIBILITY_EPSILON
+from cubing_algs.display.effects import hls_to_rgb
+from cubing_algs.display.effects import rgb_to_hls
 from cubing_algs.display.mode import ModeDisplay
 from cubing_algs.display.palettes import DEFAULT_ARROW_COLOR
 from cubing_algs.display.palettes import DEFAULT_CUBE_COLOR
@@ -551,8 +554,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
         Args:
             color_key: Face letter identifying the facelet color in the palette.
-            mask_char: Mask character; '0' uses masked color, '2' applies
-                       50% transparency, '1' uses the normal color.
+            mask_char: Mask character; '0' darkens the color (dimmed),
+                       '2' uses the masked color, '1' uses the normal color.
 
         Returns:
             SVG fill color string.
@@ -570,8 +573,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         fill = self.palette[color_key]
 
         if mask_char == '0':
-            r, g, b = hex_to_rgb(fill)
-            return f'rgba({r},{g},{b},0.25)'
+            hue, lit, sat = rgb_to_hls(hex_to_rgb(fill))
+            r, g, b = hls_to_rgb(hue, lit * DIM_LUMINANCE_FACTOR, sat)
+            return f'rgb({r},{g},{b})'
 
         return fill
 

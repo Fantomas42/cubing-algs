@@ -249,11 +249,11 @@ class GetStickerFillTestCase(unittest.TestCase):
         result = self.display.get_sticker_fill('U', '1')
         self.assertEqual(result, self.display.palette['U'])
 
-    def test_mask_0_returns_transparent_face_color(self) -> None:
-        """mask_char '0' (hidden) returns face color at 25% opacity."""
+    def test_mask_0_returns_dimmed_face_color(self) -> None:
+        """mask_char '0' (hidden) returns a darkened face color."""
         result = self.display.get_sticker_fill('U', '0')
-        self.assertIn('rgba(', result)
-        self.assertIn('0.25)', result)
+        self.assertRegex(result, r'^rgb\(\d+,\d+,\d+\)$')
+        self.assertNotEqual(result, self.display.palette['U'])
 
     def test_mask_2_returns_masked_color(self) -> None:
         """mask_char '2' (masked) returns the palette masked color."""

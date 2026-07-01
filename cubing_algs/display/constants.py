@@ -49,3 +49,6 @@ STRIP_DEPTH = 0.4
 
 # Inward taper per side as fraction of U face edge length
 STRIP_TAPER = 0.05
+
+# Lightness multiplier applied to dimmed (hidden) stickers
+DIM_LUMINANCE_FACTOR = 0.55
