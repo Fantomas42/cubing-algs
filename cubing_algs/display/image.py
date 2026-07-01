@@ -565,7 +565,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             return self.palette['masked']
 
         if mask_char == '3':
-            return 'rgb(0,0,0,0.0)'
+            return self.palette['cube_color']
 
         if mask_char == '4':
             return self.palette['oriented']
