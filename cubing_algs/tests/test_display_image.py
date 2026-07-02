@@ -260,10 +260,10 @@ class GetStickerFillTestCase(unittest.TestCase):
         result = self.display.get_sticker_fill('U', '2')
         self.assertEqual(result, self.display.palette['masked'])
 
-    def test_mask_3_returns_fully_transparent(self) -> None:
-        """mask_char '3' (invisible) returns fully transparent fill."""
+    def test_mask_3_returns_cube_color(self) -> None:
+        """mask_char '3' (hidden) returns the palette cube color."""
         result = self.display.get_sticker_fill('U', '3')
-        self.assertEqual(result, 'rgb(0,0,0,0.0)')
+        self.assertEqual(result, self.display.palette['cube_color'])
 
 
 class AssembleSvgTestCase(unittest.TestCase):
