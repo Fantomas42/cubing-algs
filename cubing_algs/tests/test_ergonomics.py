@@ -4,6 +4,7 @@ from typing import TypedDict
 from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.ergonomics import AWKWARD_THRESHOLD
 from cubing_algs.ergonomics import MOVE_DATA
 from cubing_algs.ergonomics import TRANSITION_PENALTIES
 from cubing_algs.ergonomics import VARIATION_FACTORS
@@ -196,6 +197,93 @@ class TestGetMoveErgonomicWeight(unittest.TestCase):
             Move('U2'), HandDominance.LEFT,
         )
         self.assertEqual(left_weight, right_weight)
+
+
+class TestMoveDataCalibration(unittest.TestCase):
+    """Test the calibration of the MOVE_DATA weight table."""
+
+    ISSUE_B_BASED = (
+        "U' B R D' L' U L' U' U U L U F' U F U' B' U B U' U' U' L' U L "
+        "L U L' U' U B' U' U' B U' B U U B' U U B U' B' U B' U B U' U' "
+        "B' U B B L U L' U' B' F U R U' R' F' U U' U'"
+    )
+    ISSUE_R_BASED = (
+        "U' R F D' B' U B' U' U U B U L' U L U' R' U R U' U' U' B' U B "
+        "B U B' U' U R' U' U' R U' R U U R' U U R U' R' U R' U R U' U' "
+        "R' U R R B U B' U' R' L U F U' F' L' U U' U'"
+    )
+
+    def test_back_face_below_right_face(self) -> None:
+        """Test that B moves are rated below their R counterparts."""
+        for b_key, r_key in (('B', 'R'), ("B'", "R'"), ('B2', 'R2')):
+            with self.subTest(b_key=b_key, r_key=r_key):
+                self.assertLess(
+                    MOVE_DATA[b_key].weight, MOVE_DATA[r_key].weight,
+                )
+
+    def test_left_face_above_back_face(self) -> None:
+        """Test that L moves are rated above their B counterparts."""
+        for l_key, b_key in (('L', 'B'), ("L'", "B'"), ('L2', 'B2')):
+            with self.subTest(l_key=l_key, b_key=b_key):
+                self.assertGreater(
+                    MOVE_DATA[l_key].weight, MOVE_DATA[b_key].weight,
+                )
+
+    def test_home_grip_faces_in_top_band(self) -> None:
+        """Test that R/U/F quarter turns sit in the top band."""
+        for key in ('R', "R'", 'U', "U'", 'F', "F'"):
+            with self.subTest(key=key):
+                self.assertGreaterEqual(MOVE_DATA[key].weight, 0.85)
+
+    def test_b_d_faces_in_low_band(self) -> None:
+        """Test that B/D moves sit clearly lower and count as awkward."""
+        for face in ('B', 'D'):
+            for suffix in ('', "'", '2'):
+                key = face + suffix
+                with self.subTest(key=key):
+                    self.assertGreaterEqual(MOVE_DATA[key].weight, 0.4)
+                    self.assertLess(
+                        MOVE_DATA[key].weight, AWKWARD_THRESHOLD,
+                    )
+
+    def test_slices_and_rotations_below_b_d(self) -> None:
+        """Test that slices and rotations sit below the B/D band."""
+        b_d_floor = min(
+            MOVE_DATA[face + suffix].weight
+            for face in ('B', 'D')
+            for suffix in ('', "'", '2')
+        )
+        slice_and_rotation_keys = [
+            key for key in MOVE_DATA
+            if key[0] in 'MESxyz'
+        ]
+        for key in slice_and_rotation_keys:
+            with self.subTest(key=key):
+                self.assertLess(MOVE_DATA[key].weight, b_d_floor)
+
+    def test_awkward_moves_reflect_b_d_moves(self) -> None:
+        """Test that B/D-heavy algorithms report their awkward moves."""
+        b_based = compute_ergonomics(Algorithm.parse_moves(self.ISSUE_B_BASED))
+        r_based = compute_ergonomics(Algorithm.parse_moves(self.ISSUE_R_BASED))
+
+        self.assertEqual(b_based.awkward_moves, 16)
+        self.assertEqual(r_based.awkward_moves, 10)
+
+    def test_average_weight_r_based_above_b_based(self) -> None:
+        """Test that the R-based algorithm has better move weights."""
+        b_based = Algorithm.parse_moves(self.ISSUE_B_BASED)
+        r_based = Algorithm.parse_moves(self.ISSUE_R_BASED)
+
+        def average_weight(algorithm: Algorithm) -> float:
+            weights = [
+                get_move_ergonomic_weight(move)
+                for move in algorithm
+            ]
+            return sum(weights) / len(weights)
+
+        self.assertGreater(
+            average_weight(r_based), average_weight(b_based),
+        )
 
 
 class TestGetTransitionPenalty(unittest.TestCase):
@@ -1136,36 +1224,36 @@ class TestComputeFingertrickDifficulty(unittest.TestCase):
         """Test algorithm with easy moves has low difficulty."""
         alg = Algorithm.parse_moves('R U')
         difficulty = compute_fingertrick_difficulty(alg)
-        # R=0.87, U=0.98, avg=0.925, difficulty=0.075
-        self.assertAlmostEqual(difficulty, 0.075)
+        # R=0.95, U=0.98, avg=0.965, difficulty=0.035
+        self.assertAlmostEqual(difficulty, 0.035)
 
     def test_difficult_moves(self) -> None:
         """Test algorithm with difficult moves has high difficulty."""
         alg = Algorithm.parse_moves('S2 E2')
         difficulty = compute_fingertrick_difficulty(alg)
-        # S2=0.50, E2=0.45, avg=0.475, difficulty=0.525
-        self.assertAlmostEqual(difficulty, 0.525)
+        # S2=0.35, E2=0.30, avg=0.325, difficulty=0.675
+        self.assertAlmostEqual(difficulty, 0.675)
 
     def test_mixed_difficulty(self) -> None:
         """Test algorithm with mixed difficulty moves."""
         alg = Algorithm.parse_moves('R M')
         difficulty = compute_fingertrick_difficulty(alg)
-        # R=0.87, M=0.55, avg=0.71, difficulty=0.29
-        self.assertAlmostEqual(difficulty, 0.29)
+        # R=0.95, M=0.42, avg=0.685, difficulty=0.315
+        self.assertAlmostEqual(difficulty, 0.315)
 
     def test_rotation_move_weight(self) -> None:
         """Test that rotation moves use ergonomic weights."""
         alg = Algorithm([Move('x')])
         difficulty = compute_fingertrick_difficulty(alg)
-        # x=0.4, difficulty=0.6
-        self.assertAlmostEqual(difficulty, 0.6)
+        # x=0.28, difficulty=0.72
+        self.assertAlmostEqual(difficulty, 0.72)
 
     def test_with_pauses(self) -> None:
         """Test fingertrick difficulty calculation ignores pauses."""
         alg = Algorithm.parse_moves('R . U')
         difficulty = compute_fingertrick_difficulty(alg)
-        # R=0.87, U=0.98, avg=0.925, difficulty=0.075
-        self.assertAlmostEqual(difficulty, 0.075)
+        # R=0.95, U=0.98, avg=0.965, difficulty=0.035
+        self.assertAlmostEqual(difficulty, 0.035)
 
     def test_hand_dominance_param(self) -> None:
         """Test that hand dominance affects difficulty."""
@@ -1355,9 +1443,8 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.index_finger_moves, 2)  # E2, S2
         self.assertEqual(result.middle_finger_moves, 0)
         self.assertEqual(result.ring_finger_moves, 1)   # M2
-        # M2=0.8 is not awkward; E2=0.45, S2=0.35 are
-        # below AWKWARD_THRESHOLD=0.6
-        self.assertEqual(result.awkward_moves, 2)
+        # M2=0.45, E2=0.30, S2=0.35 are all below AWKWARD_THRESHOLD=0.6
+        self.assertEqual(result.awkward_moves, 3)
 
     def test_single_move_algorithm(self) -> None:
         """Test ergonomics for single move algorithm."""
@@ -1411,8 +1498,8 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.hand_balance_ratio, 0.5)  # Perfect balance
         # R->L opposite (regrip), F->B opposite (regrip)
         self.assertEqual(result.regrip_count, 2)
-        # R=1.0, L=1.0, F=0.8, B=0.6 — all >= AWKWARD_THRESHOLD=0.6
-        self.assertEqual(result.awkward_moves, 0)
+        # B=0.52 is below AWKWARD_THRESHOLD=0.6; R, L, F are not
+        self.assertEqual(result.awkward_moves, 1)
 
     def test_algorithm_with_pauses(self) -> None:
         """Test ergonomics calculation ignores pauses correctly."""
