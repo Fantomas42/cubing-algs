@@ -7,6 +7,8 @@ from cubing_algs.impacts import compute_impacts
 from cubing_algs.triggers import TRIGGER_PATTERNS
 from cubing_algs.triggers import TriggerMatch
 from cubing_algs.triggers import TriggerPattern
+from cubing_algs.triggers import TriggerVariation
+from cubing_algs.triggers import VariationKind
 
 
 class TestTriggerPattern(unittest.TestCase):
@@ -20,7 +22,7 @@ class TestTriggerPattern(unittest.TestCase):
             category='basic',
             ergonomic_bonus=0.1,
             speed_multiplier=1.2,
-            variations=["L U L'"],
+            variations=[TriggerVariation("L U L'", VariationKind.LEFTY)],
             aliases=['test'],
             description='A test trigger.',
         )
@@ -52,14 +54,54 @@ class TestTriggerPattern(unittest.TestCase):
         for pattern in TRIGGER_PATTERNS:
             for variation in pattern.variations:
                 if (
-                        variation in primary_moves
-                        and primary_moves[variation] != pattern.name
+                        variation.moves in primary_moves
+                        and primary_moves[variation.moves] != pattern.name
                 ):
                     self.fail(
-                        f"Variation '{variation} "
+                        f"Variation '{variation.moves} "
                         f"of '{pattern.name}' duplicates "
-                        f"primary moves of '{primary_moves[variation]}'",
+                        f"primary moves of '{primary_moves[variation.moves]}'",
                     )
+
+
+class TestTriggerVariationKinds(unittest.TestCase):
+    """Test that trigger variations carry an explicit kind."""
+
+    def test_variations_are_typed(self) -> None:
+        """Test that every variation is a TriggerVariation with a kind."""
+        for pattern in TRIGGER_PATTERNS:
+            for variation in pattern.variations:
+                with self.subTest(
+                        pattern=pattern.name, variation=variation,
+                ):
+                    self.assertIsInstance(variation, TriggerVariation)
+                    self.assertIsInstance(variation.kind, VariationKind)
+
+    def test_back_face_variations_marked_back(self) -> None:
+        """Test that variations using the B face are marked BACK."""
+        for pattern in TRIGGER_PATTERNS:
+            for variation in pattern.variations:
+                with self.subTest(
+                        pattern=pattern.name, variation=variation.moves,
+                ):
+                    uses_back = any(
+                        token.upper().startswith('B')
+                        for token in variation.moves.split()
+                    )
+                    if uses_back:
+                        self.assertEqual(variation.kind, VariationKind.BACK)
+                    else:
+                        self.assertNotEqual(
+                            variation.kind, VariationKind.BACK,
+                        )
+
+    def test_left_hand_variations_marked_lefty(self) -> None:
+        """Test that L-based mirror variations are marked LEFTY."""
+        sexy = next(p for p in TRIGGER_PATTERNS if p.name == 'Sexy Move')
+        kinds = {v.moves: v.kind for v in sexy.variations}
+        self.assertEqual(kinds["L' U' L U"], VariationKind.LEFTY)
+        self.assertEqual(kinds["R' U' R U"], VariationKind.INVERSE)
+        self.assertEqual(kinds["L U L' U'"], VariationKind.LEFTY)
 
 
 class TestTriggerMatch(unittest.TestCase):
@@ -122,14 +164,16 @@ class TestTriggerVariationsConsistency(unittest.TestCase):
                 continue
             main_impact = self.impacts_for(trigger.moves)
             for variation in trigger.variations:
-                with self.subTest(trigger=trigger.name, variation=variation):
-                    var_impact = self.impacts_for(variation)
+                with self.subTest(
+                        trigger=trigger.name, variation=variation.moves,
+                ):
+                    var_impact = self.impacts_for(variation.moves)
                     self.assertEqual(
                         main_impact,
                         var_impact,
                         msg=(
                             f"Trigger '{trigger.name}': variation "
-                            f"'{variation}' has different cubie impacts "
+                            f"'{variation.moves}' has different cubie impacts "
                             f"than main '{trigger.moves}'.\n"
                             f"  main:      {main_impact}\n"
                             f"  variation: {var_impact}"

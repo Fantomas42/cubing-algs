@@ -1,5 +1,27 @@
 """Common speedcubing trigger patterns and match results."""
+from enum import Enum
 from typing import NamedTuple
+
+
+class VariationKind(Enum):
+    """
+    Kind of a trigger variation relative to its canonical form.
+
+    LEFTY: mirror across the M slice, executed with the left hand.
+    INVERSE: mirror across the S slice staying on comfortable faces.
+    BACK: variation involving the B face, noticeably slower to execute.
+    """
+
+    LEFTY = 'lefty'
+    INVERSE = 'inverse'
+    BACK = 'back'
+
+
+class TriggerVariation(NamedTuple):
+    """A variation of a trigger pattern with its execution kind."""
+
+    moves: str
+    kind: VariationKind
 
 
 class TriggerPattern(NamedTuple):
@@ -10,7 +32,7 @@ class TriggerPattern(NamedTuple):
     efficiently due to muscle memory and ergonomic flow.
 
     Variations are mirror algorithms across M or S slices,
-    for lefty or back versions.
+    for lefty, inverse or back versions.
     """
 
     name: str
@@ -18,7 +40,7 @@ class TriggerPattern(NamedTuple):
     category: str
     ergonomic_bonus: float
     speed_multiplier: float
-    variations: list[str]
+    variations: list[TriggerVariation]
     aliases: list[str]
     description: str
 
@@ -30,8 +52,11 @@ class TriggerMatch(NamedTuple):
     start_index: int
     end_index: int
     matched_moves: str
-    variation_index: int = -1  # -1 = canonical, 0 = lefty, 1+ = back-face
+    variation: TriggerVariation | None = None  # None = canonical form
 
+
+TV = TriggerVariation
+VK = VariationKind
 
 TRIGGER_PATTERNS = [
     # Basic triggers (highest priority)
@@ -42,9 +67,9 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.17,
         speed_multiplier=1.95,
         variations=[
-            "L' U' L U",
-            "R' U' R U",
-            "L U L' U'",
+            TV("L' U' L U", VK.LEFTY),
+            TV("R' U' R U", VK.INVERSE),
+            TV("L U L' U'", VK.LEFTY),
         ],
         aliases=['Cool Move', 'Sexy'],
         description=(
@@ -61,9 +86,9 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.00,
         speed_multiplier=0.97,
         variations=[
-            "L F' L' F",
-            "R B' R' B",
-            "L' B L B'",
+            TV("L F' L' F", VK.LEFTY),
+            TV("R B' R' B", VK.BACK),
+            TV("L' B L B'", VK.BACK),
         ],
         aliases=['Sledge', 'Hammer'],
         description=(
@@ -80,9 +105,9 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.00,
         speed_multiplier=0.85,
         variations=[
-            "F' L F L'",
-            "B' R B R'",
-            "B L' B' L",
+            TV("F' L F L'", VK.LEFTY),
+            TV("B' R B R'", VK.BACK),
+            TV("B L' B' L", VK.BACK),
         ],
         aliases=['Hedge', 'Slammer'],
         description=(
@@ -99,7 +124,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.03,
         speed_multiplier=1.10,
         variations=[
-            "L' U' L U'",
+            TV("L' U' L U'", VK.LEFTY),
         ],
         aliases=['Su', 'Half Sune', 'Semi-Sexy', 'Homely'],
         description=(
@@ -116,7 +141,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.07,
         speed_multiplier=1.27,
         variations=[
-            "L' U L U",
+            TV("L' U L U", VK.LEFTY),
         ],
         aliases=['Sa', 'Half Sane', 'Su backwark'],
         description=(
@@ -132,7 +157,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.04,
         speed_multiplier=1.15,
         variations=[
-            "L' U' L F",
+            TV("L' U' L F", VK.LEFTY),
         ],
         aliases=['T-Trigger', 'T Setup'],
         description=(
@@ -151,7 +176,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.11,
         speed_multiplier=1.45,
         variations=[
-            "L' U' L U L F' L' F",
+            TV("L' U' L U L F' L' F", VK.LEFTY),
         ],
         aliases=['Sexy Sledge', 'OLL 33'],
         description=(
@@ -168,7 +193,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.12,
         speed_multiplier=1.54,
         variations=[
-            "L' U' L U L' U' L U",
+            TV("L' U' L U L' U' L U", VK.LEFTY),
         ],
         aliases=['Double Cool', 'Sexy Sexy'],
         description=(
@@ -185,7 +210,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.16,
         speed_multiplier=1.88,
         variations=[
-            "L' U' L U L' U' L U L' U' L U",
+            TV("L' U' L U L' U' L U L' U' L U", VK.LEFTY),
         ],
         aliases=['Triple Cool', 'Sexy Sexy Sexy'],
         description=(
@@ -202,7 +227,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.14,
         speed_multiplier=1.3,
         variations=[
-            "L' U' L U' L' U2 L",
+            TV("L' U' L U' L' U2 L", VK.LEFTY),
         ],
         aliases=['Anti-Chair', 'Anti-Chaise', 'OLL 27', 'OCLL 2'],
         description=(
@@ -220,7 +245,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.13,
         speed_multiplier=1.61,
         variations=[
-            "L' U2 L U L' U L",
+            TV("L' U2 L U L' U L", VK.LEFTY),
         ],
         aliases=['Chair', 'Chaise', 'OLL 26', 'OCLL 3'],
         description=(
@@ -237,7 +262,7 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.16,
         speed_multiplier=1.35,
         variations=[
-            "L' U R U' L U R'",
+            TV("L' U R U' L U R'", VK.LEFTY),
         ],
         aliases=['3-Corner Cycle'],
         description=(
@@ -256,9 +281,9 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.16,
         speed_multiplier=1.87,
         variations=[
-            "L' U' L",
-            "R' U' R",
-            "L U L'",
+            TV("L' U' L", VK.LEFTY),
+            TV("R' U' R", VK.INVERSE),
+            TV("L U L'", VK.LEFTY),
         ],
         aliases=['Pull', 'Extract', 'Pick Up'],
         description=(
@@ -275,9 +300,9 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.11,
         speed_multiplier=1.47,
         variations=[
-            "L' U L",
-            "R' U R",
-            "L U' L'",
+            TV("L' U L", VK.LEFTY),
+            TV("R' U R", VK.INVERSE),
+            TV("L U' L'", VK.LEFTY),
         ],
         aliases=['Push', 'Insert', 'Put Down'],
         description=(
@@ -294,9 +319,9 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.00,
         speed_multiplier=0.87,
         variations=[
-            "L' U2 L",
-            "R' U2 R",
-            "L U2 L'",
+            TV("L' U2 L", VK.LEFTY),
+            TV("R' U2 R", VK.INVERSE),
+            TV("L U2 L'", VK.LEFTY),
         ],
         aliases=['Ne', 'Super', 'Double Extract', 'Long Pull'],
         description=(
@@ -315,9 +340,9 @@ TRIGGER_PATTERNS = [
         ergonomic_bonus=0.12,
         speed_multiplier=1.2,
         variations=[
-            "l' U' l U",
-            "r' U' r U",
-            "l U l' U'",
+            TV("l' U' l U", VK.LEFTY),
+            TV("r' U' r U", VK.INVERSE),
+            TV("l U l' U'", VK.LEFTY),
         ],
         aliases=['Wide Cool', 'Fat Sexy'],
         description=(

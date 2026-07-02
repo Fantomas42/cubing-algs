@@ -6,6 +6,7 @@ from unittest.mock import patch
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import MOVE_DATA
 from cubing_algs.ergonomics import TRANSITION_PENALTIES
+from cubing_algs.ergonomics import VARIATION_FACTORS
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import FingerAssignment
 from cubing_algs.ergonomics import HandDominance
@@ -26,10 +27,12 @@ from cubing_algs.ergonomics import get_ergonomic_rating
 from cubing_algs.ergonomics import get_move_ergonomic_weight
 from cubing_algs.ergonomics import get_move_key
 from cubing_algs.ergonomics import get_transition_penalty
+from cubing_algs.ergonomics import normalize_algorithm_string
 from cubing_algs.ergonomics import suggest_ergonomic_improvements
 from cubing_algs.move import Move
 from cubing_algs.triggers import TRIGGER_PATTERNS
 from cubing_algs.triggers import TriggerMatch
+from cubing_algs.triggers import VariationKind
 
 
 class ErgonomicInputs(TypedDict):
@@ -234,6 +237,24 @@ class TestGetTransitionPenalty(unittest.TestCase):
         penalty = get_transition_penalty(Move('F'), Move('B'))
         self.assertEqual(penalty, TRANSITION_PENALTIES['opposite'])
 
+    def test_hand_switch_beats_adjacency(self) -> None:
+        """Test that switching hands on adjacent faces costs hand_switch."""
+        # R (right) → F' (left): adjacent faces but different hands
+        penalty = get_transition_penalty(Move('R'), Move("F'"))
+        self.assertEqual(penalty, TRANSITION_PENALTIES['hand_switch'])
+
+    def test_same_hand_adjacent_faces(self) -> None:
+        """Test that same-hand adjacent transitions cost adjacent."""
+        # R (right) → F (right): adjacent faces, same hand
+        penalty = get_transition_penalty(Move('R'), Move('F'))
+        self.assertEqual(penalty, TRANSITION_PENALTIES['adjacent'])
+
+    def test_ambidextrous_adjacent_no_hand_switch(self) -> None:
+        """Test that ambidextrous moves never count as hand switches."""
+        # R (right) → U2 (ambidextrous): adjacent faces
+        penalty = get_transition_penalty(Move('R'), Move('U2'))
+        self.assertEqual(penalty, TRANSITION_PENALTIES['adjacent'])
+
     def test_slice_to_slice_default(self) -> None:
         """Test slice-to-slice transitions use default adjacent penalty."""
         # M and S are not in ADJACENT_FACES or OPPOSITE_FACES, same hand
@@ -278,6 +299,25 @@ class TestCalculateFlowScore(unittest.TestCase):
         alg = Algorithm.parse_moves('R L R L')
         score = calculate_flow_score(alg)
         self.assertLess(score, 0.5)
+
+
+class TestNormalizeAlgorithmString(unittest.TestCase):
+    """Test the normalize_algorithm_string function."""
+
+    def test_standard_notation_unchanged(self) -> None:
+        """Test that standard notation is preserved."""
+        alg = Algorithm.parse_moves("R U R' U'")
+        self.assertEqual(normalize_algorithm_string(alg), "R U R' U'")
+
+    def test_sign_notation_converted_to_standard(self) -> None:
+        """Test that SiGN wide moves are converted to standard notation."""
+        alg = Algorithm.parse_moves("r U r' U'")
+        self.assertEqual(normalize_algorithm_string(alg), "Rw U Rw' U'")
+
+    def test_pauses_removed(self) -> None:
+        """Test that pauses are removed from the normalized string."""
+        alg = Algorithm.parse_moves('R . U .')
+        self.assertEqual(normalize_algorithm_string(alg), 'R U')
 
 
 class TestFindTriggerPatterns(unittest.TestCase):
@@ -334,6 +374,18 @@ class TestFindTriggerPatterns(unittest.TestCase):
         self.assertGreater(len(matches_right), 0)
         self.assertGreater(len(matches_left), 0)
 
+    def test_wide_trigger_detected_in_sign_notation(self) -> None:
+        """Test that wide triggers are detected on SiGN-written algorithms."""
+        alg = Algorithm.parse_moves("r U r' U'")
+        pattern_names = [m.pattern.name for m in find_trigger_patterns(alg)]
+        self.assertIn('Wide Sexy', pattern_names)
+
+    def test_wide_trigger_detected_in_standard_notation(self) -> None:
+        """Test that wide triggers are detected on standard-written algos."""
+        alg = Algorithm.parse_moves("Rw U Rw' U'")
+        pattern_names = [m.pattern.name for m in find_trigger_patterns(alg)]
+        self.assertIn('Wide Sexy', pattern_names)
+
     def test_repeated_trigger_found_multiple_times(self) -> None:
         """Test that the same trigger pattern is found at each occurrence."""
         # Two Sexy Moves separated by F2 (prevents Double Sexy matching)
@@ -369,6 +421,60 @@ class TestCalculateTriggerBonus(unittest.TestCase):
         bonus, multiplier = calculate_trigger_bonus([match])
         self.assertGreaterEqual(bonus, 0.0)
         self.assertEqual(multiplier, 1.0)
+
+    def test_canonical_match_has_no_variation(self) -> None:
+        """Test that a canonical match carries no variation."""
+        alg = Algorithm.parse_moves("R U R' U'")
+        matches = find_trigger_patterns(alg)
+        sexy = next(m for m in matches if m.pattern.name == 'Sexy Move')
+        self.assertIsNone(sexy.variation)
+
+    def test_inverse_variation_gets_inverse_factor(self) -> None:
+        """Test that right-hand inverse variations avoid the back penalty."""
+        alg = Algorithm.parse_moves("R' U' R U")
+        matches = find_trigger_patterns(alg)
+        sexy = next(m for m in matches if m.pattern.name == 'Sexy Move')
+        if sexy.variation is None:
+            self.fail('Inverse Sexy Move match should carry a variation')
+        self.assertEqual(sexy.variation.kind, VariationKind.INVERSE)
+        bonus = calculate_trigger_bonus([sexy])[0]
+        expected_bonus = (
+            sexy.pattern.ergonomic_bonus
+            * VARIATION_FACTORS[VariationKind.INVERSE]
+        )
+        self.assertAlmostEqual(bonus, expected_bonus)
+
+    def test_back_variation_gets_back_factor(self) -> None:
+        """Test that back-face variations get the back penalty."""
+        alg = Algorithm.parse_moves("R B' R' B")
+        matches = find_trigger_patterns(alg)
+        sledge = next(
+            m for m in matches if m.pattern.name == 'Sledgehammer'
+        )
+        if sledge.variation is None:
+            self.fail('Back Sledgehammer match should carry a variation')
+        self.assertEqual(sledge.variation.kind, VariationKind.BACK)
+        multiplier = calculate_trigger_bonus([sledge])[1]
+        expected_multiplier = 1.0 + (
+            (sledge.pattern.speed_multiplier - 1.0)
+            * VARIATION_FACTORS[VariationKind.BACK]
+        )
+        self.assertAlmostEqual(multiplier, expected_multiplier)
+
+    def test_lefty_variation_gets_lefty_factor(self) -> None:
+        """Test that lefty variations get the lefty factor."""
+        alg = Algorithm.parse_moves("L' U' L U")
+        matches = find_trigger_patterns(alg)
+        sexy = next(m for m in matches if m.pattern.name == 'Sexy Move')
+        if sexy.variation is None:
+            self.fail('Lefty Sexy Move match should carry a variation')
+        self.assertEqual(sexy.variation.kind, VariationKind.LEFTY)
+        bonus = calculate_trigger_bonus([sexy])[0]
+        expected_bonus = (
+            sexy.pattern.ergonomic_bonus
+            * VARIATION_FACTORS[VariationKind.LEFTY]
+        )
+        self.assertAlmostEqual(bonus, expected_bonus)
 
     def test_bonus_capped(self) -> None:
         """Test that bonus is capped at 0.3."""
@@ -939,6 +1045,14 @@ class TestComputeRegripCount(unittest.TestCase):
         regrips = compute_regrip_count(alg)
         self.assertEqual(regrips, 1)
 
+    def test_no_transition_counted_across_rotation(self) -> None:
+        """Test that transitions across a rotation are not evaluated."""
+        # R and L are opposite, but the rotation regrip between them
+        # already resets the hands: only the rotation counts.
+        alg = Algorithm.parse_moves('R x L')
+        regrips = compute_regrip_count(alg)
+        self.assertEqual(regrips, 1)
+
     def test_adjacent_face_no_regrip(self) -> None:
         """Test that adjacent face transitions don't need regrips."""
         alg = Algorithm.parse_moves('R U F')
@@ -1156,6 +1270,20 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.trigger_coverage, 0)
         self.assertEqual(result.detected_patterns, ())
         self.assertEqual(result.suggestions, ())
+
+    def test_classification_consistent_with_exposed_score(self) -> None:
+        """Test that classification derives from the exposed score."""
+        # Sune: the trigger bonus lifts the final score above the
+        # Beginner threshold; classification must follow the same score
+        # as ergonomic_rating.
+        alg = Algorithm.parse_moves("R U R' U R U2 R'")
+        result = compute_ergonomics(alg)
+        expected = classify_algorithm_difficulty(
+            result.ergonomic_score,
+            result.regrip_count,
+            result.flow_score,
+        )
+        self.assertEqual(result.difficulty_classification, expected)
 
     def test_sexy_move_right_hand_heavy(self) -> None:
         """Test ergonomics for sexy move (R U R' U') - right-hand heavy."""

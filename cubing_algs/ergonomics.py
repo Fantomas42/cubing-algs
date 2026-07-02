@@ -7,14 +7,17 @@ regrip requirements, trigger pattern detection, and overall
 execution comfort.
 """
 from enum import Enum
+from functools import cache
 from typing import TYPE_CHECKING
 from typing import NamedTuple
 
-from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.move import Move
 from cubing_algs.triggers import TRIGGER_PATTERNS
 from cubing_algs.triggers import TriggerMatch
+from cubing_algs.triggers import TriggerPattern
+from cubing_algs.triggers import TriggerVariation
+from cubing_algs.triggers import VariationKind
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
@@ -169,12 +172,26 @@ INTERMEDIATE_REGRIPS = 3
 ADVANCED_SCORE = 0.45
 ADVANCED_REGRIPS = 6
 
+# Ergonomic rating thresholds
+EXCELLENT_SCORE = 0.80
+GOOD_SCORE = 0.65
+FAIR_SCORE = 0.50
+POOR_SCORE = 0.35
+
 # Suggestion thresholds
 REGRIP_RATIO_THRESHOLD = 0.2
 BALANCE_THRESHOLD = 0.6
 FLOW_THRESHOLD = 0.6
 WEIGHT_THRESHOLD = 0.6
 ROTATION_RATIO_THRESHOLD = 0.15
+
+# Ergonomic factors applied to trigger bonuses and speed multipliers
+# depending on the matched variation kind (canonical form gets 1.0).
+VARIATION_FACTORS: dict[VariationKind, float] = {
+    VariationKind.LEFTY: 0.95,
+    VariationKind.INVERSE: 0.95,
+    VariationKind.BACK: 0.85,
+}
 
 TRANSITION_PENALTIES: dict[str, float] = {
     'same_face': 0.0,
@@ -248,7 +265,7 @@ def get_move_ergonomic_weight(
     return base_weight
 
 
-def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
+def get_transition_penalty(move1: Move, move2: Move) -> float:
     """
     Calculate the ergonomic penalty for transitioning between two moves.
 
@@ -278,11 +295,9 @@ def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
     if OPPOSITE_FACES.get(face1) == face2:
         return TRANSITION_PENALTIES['opposite']
 
-    # Adjacent faces are moderate
-    if face2 in ADJACENT_FACES.get(face1, ()):
-        return TRANSITION_PENALTIES['adjacent']
-
-    # Check for hand switches
+    # Hand switches cost more than staying on the same hand.
+    # Checked before adjacency: distinct non-opposite faces are
+    # always adjacent, so adjacency alone cannot discriminate.
     key1 = get_move_key(move1)
     key2 = get_move_key(move2)
     hand1 = MOVE_DATA.get(key1, DEFAULT_MOVE_PROPERTIES).hand
@@ -293,6 +308,7 @@ def get_transition_penalty(move1: Move, move2: Move) -> float:  # noqa: PLR0911
     ):
         return TRANSITION_PENALTIES['hand_switch']
 
+    # Same-hand transitions between different faces are moderate
     return TRANSITION_PENALTIES['adjacent']
 
 
@@ -336,13 +352,36 @@ def normalize_algorithm_string(algorithm: 'Algorithm') -> str:
     """
     Convert algorithm to normalized string for pattern matching.
 
+    Pauses are removed and moves are converted to standard notation.
+
     Returns:
-        Space-separated string of non-pause moves.
+        Space-separated string of non-pause moves in standard notation.
 
     """
     from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+    from cubing_algs.transform.sign import unsign_moves  # noqa: PLC0415
 
-    return str(algorithm.transform(unpause_moves))
+    return str(algorithm.transform(unpause_moves, unsign_moves))
+
+
+@cache
+def normalize_moves_string(moves: str) -> str:
+    """
+    Normalize a space-separated move string to standard notation.
+
+    Cached string-level wrapper around normalize_algorithm_string,
+    used to normalize the static trigger pattern strings once.
+
+    Args:
+        moves: Space-separated move string.
+
+    Returns:
+        Space-separated move string in standard notation.
+
+    """
+    from cubing_algs.parsing import parse_moves  # noqa: PLC0415
+
+    return normalize_algorithm_string(parse_moves(moves))
 
 
 def find_trigger_patterns(
@@ -370,29 +409,33 @@ def find_trigger_patterns(
     used_indices: set[int] = set()
 
     # Sort patterns: longer first, then by ergonomic bonus
-    # Left-handed users get a slight bonus for left-hand patterns
+    # Left-handed users get a slight bonus for patterns with a lefty form
     left_bonus = 0.01 if hand_dominance == HandDominance.LEFT else 0.0
+
+    def has_lefty_variation(pattern: TriggerPattern) -> bool:
+        return any(
+            variation.kind == VariationKind.LEFTY
+            for variation in pattern.variations
+        )
+
     sorted_patterns = sorted(
         TRIGGER_PATTERNS,
         key=lambda p: (
             len(p.moves.split()),
-            p.ergonomic_bonus + (left_bonus if 'L' in p.moves else 0.0),
+            p.ergonomic_bonus + (left_bonus if has_lefty_variation(p) else 0.0),
         ),
         reverse=True,
     )
 
     for pattern in sorted_patterns:
         # Check main pattern first, then variations.
-        # variation_index: -1 = canonical, 0 = lefty (first), 1+ = back-face.
-        # Lefty receives a lighter penalty than back-face variations whose
-        # empirical execution is noticeably slower than the canonical form.
-        candidates = [
-            (pattern.moves, -1),
-            *((v, i) for i, v in enumerate(pattern.variations)),
+        candidates: list[tuple[str, TriggerVariation | None]] = [
+            (pattern.moves, None),
+            *((variation.moves, variation) for variation in pattern.variations),
         ]
 
-        for pattern_moves, variation_index in candidates:
-            pattern_list = pattern_moves.split()
+        for pattern_moves, variation in candidates:
+            pattern_list = normalize_moves_string(pattern_moves).split()
             pattern_length = len(pattern_list)
 
             # Sliding window search
@@ -409,7 +452,7 @@ def find_trigger_patterns(
                         start_index=i,
                         end_index=i + pattern_length - 1,
                         matched_moves=' '.join(window),
-                        variation_index=variation_index,
+                        variation=variation,
                     )
                     matches.append(match)
 
@@ -435,14 +478,12 @@ def calculate_trigger_bonus(
         return 0.0, 1.0
 
     # Canonical values were calibrated from right-hand executions.
-    # Lefty (variation_index=0) executes close to canonical for this solver.
-    # Back-face variations (variation_index>=1) are noticeably slower.
+    # Lefty and inverse variations execute close to canonical,
+    # back-face variations are noticeably slower.
     def variation_factor(m: TriggerMatch) -> float:
-        if m.variation_index == -1:
+        if m.variation is None:
             return 1.0
-        if m.variation_index == 0:
-            return 0.95  # lefty: minor penalty
-        return 0.85  # back-face: larger penalty
+        return VARIATION_FACTORS[m.variation.kind]
 
     def effective_bonus(m: TriggerMatch) -> float:
         return m.pattern.ergonomic_bonus * variation_factor(m)
@@ -789,21 +830,21 @@ def compute_regrip_count(moves: 'Algorithm') -> int:
 
     moves = moves.transform(unpause_moves)
     regrip_count = 0
-    prev_move = None
+    prev_move: Move | None = None
+    opposite = TRANSITION_PENALTIES['opposite']
 
     for move in moves:
         if move.is_rotation_move:
             regrip_count += 1
+            # The rotation regrip resets the hands: transitions
+            # across it are not evaluated.
+            prev_move = None
             continue
 
-        opposite = TRANSITION_PENALTIES['opposite']
-        high_penalty = (
-            not move.is_rotation_move
-            and prev_move is not None
+        if (
+            prev_move is not None
             and get_transition_penalty(prev_move, move) >= opposite
-        )
-
-        if high_penalty:
+        ):
             regrip_count += 1
 
         prev_move = move
@@ -890,13 +931,13 @@ def get_ergonomic_rating(ergonomic_score: float) -> str:
         Human-readable rating string (Excellent, Good, Fair, Poor, Very Poor).
 
     """
-    if ergonomic_score >= 0.80:  # noqa: PLR2004
+    if ergonomic_score >= EXCELLENT_SCORE:
         return 'Excellent'
-    if ergonomic_score >= 0.65:  # noqa: PLR2004
+    if ergonomic_score >= GOOD_SCORE:
         return 'Good'
-    if ergonomic_score >= 0.50:  # noqa: PLR2004
+    if ergonomic_score >= FAIR_SCORE:
         return 'Fair'
-    if ergonomic_score >= 0.35:  # noqa: PLR2004
+    if ergonomic_score >= POOR_SCORE:
         return 'Poor'
     return 'Very Poor'
 
@@ -1010,7 +1051,7 @@ def compute_ergonomics(  # noqa: PLR0914
     estimated_tps = max(2.0, min(15.0, estimated_tps * speed_mult))
 
     difficulty_classification = classify_algorithm_difficulty(
-        base_ergonomic_score,
+        ergonomic_score,
         regrip_count,
         flow_score_val,
     )

@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
+from cubing_algs.ergonomics import HandDominance
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
@@ -1720,6 +1721,22 @@ class AlgorithmErgonomicsTestCase(unittest.TestCase):
         ergo = algo.ergonomics
 
         self.assertIsInstance(ergo, ErgonomicsData)
+
+    def test_compute_ergonomics_defaults_to_right_hand(self) -> None:
+        """Test that the method matches the property for right-handers."""
+        algo = Algorithm.parse_moves("R U R' U'")
+
+        self.assertEqual(algo.compute_ergonomics(), algo.ergonomics)
+
+    def test_compute_ergonomics_left_hand_differs(self) -> None:
+        """Test that left-hand dominance changes the metrics."""
+        algo = Algorithm.parse_moves("R U R' U'")
+        right = algo.compute_ergonomics(HandDominance.RIGHT)
+        left = algo.compute_ergonomics(HandDominance.LEFT)
+
+        self.assertNotEqual(
+            right.fingertrick_difficulty, left.fingertrick_difficulty,
+        )
 
 
 class AlgorithmImageTestCase(unittest.TestCase):
