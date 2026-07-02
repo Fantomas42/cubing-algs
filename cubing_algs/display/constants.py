@@ -52,3 +52,7 @@ STRIP_TAPER = 0.05
 
 # Lightness multiplier applied to dimmed (hidden) stickers
 DIM_LUMINANCE_FACTOR = 0.55
+
+# Mirror effects
+MIRROR_OFFSET = 2.2
+MIRROR_ALPHA = 0.5

@@ -20,6 +20,8 @@ from cubing_algs.display.constants import DIM_LUMINANCE_FACTOR
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.constants import IMAGE_SIZE
 from cubing_algs.display.constants import MIN_DISTANCE
+from cubing_algs.display.constants import MIRROR_ALPHA
+from cubing_algs.display.constants import MIRROR_OFFSET
 from cubing_algs.display.constants import ROTATION
 from cubing_algs.display.constants import STICKER_GAP
 from cubing_algs.display.constants import STRIP_DEPTH
@@ -221,6 +223,16 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                 parsed_arrows,
             )
 
+        if (layout or mode_layout) == 'mirror':
+            return self.render_mirror(
+                image_size or IMAGE_SIZE,
+                cube.state,
+                mapped_mask,
+                rotation=rotation or ROTATION,
+                distance=distance or DISTANCE,
+                arrows=parsed_arrows,
+            )
+
         return self.render_cube(
             image_size or IMAGE_SIZE,
             cube.state,
@@ -280,6 +292,108 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         # exactly the projected face area, so near edge-on faces do not
         # leave gaps that would show through a larger silhouette fill.
         face_groups: list[str] = []
+        for face_name, corners_2d, face_state_idx in visible:
+            svg_corners = [
+                self.point_to_svg_coords(c, cx, cy, scale)
+                for c in corners_2d
+            ]
+            face_start = face_state_idx * self.face_size
+            face_stickers = self.build_face_stickers(
+                svg_corners,
+                state[face_start:face_start + self.face_size],
+                mask[face_start:face_start + self.face_size],
+            )
+            body = self.build_polygon(svg_corners, body_fill)
+            face_groups.append(
+                f'<g class="face-{ face_name }">\n'
+                f'{ body }\n{ "\n".join(face_stickers) }\n</g>',
+            )
+
+        if arrows:
+            visible_by_face: dict[Facelet, list[Point2D]] = {
+                face_name: [
+                    self.point_to_svg_coords(c, cx, cy, scale)
+                    for c in corners_2d
+                ]
+                for face_name, corners_2d, _ in visible
+            }
+            arrow_group = self.build_arrows_group(
+                arrows,
+                visible_by_face,
+                image_size,
+            )
+            if arrow_group:
+                face_groups.append(arrow_group)
+
+        return self.assemble_svg(image_size, face_groups)
+
+    def render_mirror(  # noqa: PLR0913, PLR0914
+            self,
+            image_size: int,
+            state: CubeFacelets,
+            mask: CubeDisplayMask,
+            *,
+            rotation: str = '',
+            distance: float = 0.0,
+            arrows: (
+                list[tuple[Facelet, int, Facelet, int, str]] | None
+            ) = None,
+    ) -> str:
+        """
+        Build a 3D SVG cube with hidden faces shown as ghost panels.
+
+        Renders the cube normally, then prepends the 3 hidden faces as
+        semi-transparent groups offset outward along their 3D normals.
+        Hidden faces respect the mask the same way visible faces do.
+
+        Args:
+            image_size: Output image dimension in pixels (width and height).
+            state: Complete cube state string representing all facelets.
+            mask: Mask to filter which facelets are displayed.
+            rotation: Camera rotation string (e.g. 'y45x-34').
+            distance: Camera distance from the cube center.
+            arrows: Pre-parsed arrow tuples. Only visible-face arrows
+                    render; hidden-face arrows are silently skipped.
+
+        Returns:
+            Complete SVG document as a string.
+
+        """
+        distance = max(distance, MIN_DISTANCE + 0.01)
+        rotations = self.parse_rotation(rotation)
+        visible = self.compute_visible_faces(rotations, distance)
+
+        margin = image_size * 0.002
+        max_extent = math.sqrt(
+            3 * distance ** 2 / (distance ** 2 - 3),
+        )
+        scale = (image_size - 2 * margin) / (2 * max_extent)
+        cx, cy = image_size / 2, image_size / 2
+
+        cr, cg, cb, ca = hex_to_rgba(self.palette['cube_color'])
+        body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
+
+        face_groups: list[str] = []
+
+        for face_name, corners_2d, face_state_idx in self.compute_mirror_faces(
+                rotations, distance,
+        ):
+            svg_corners = [
+                self.point_to_svg_coords(c, cx, cy, scale)
+                for c in corners_2d
+            ]
+            face_start = face_state_idx * self.face_size
+            face_stickers = self.build_face_stickers(
+                svg_corners,
+                state[face_start:face_start + self.face_size],
+                mask[face_start:face_start + self.face_size],
+            )
+            body = self.build_polygon(svg_corners, body_fill)
+            face_groups.append(
+                f'<g class="face-{ face_name }" opacity="{ MIRROR_ALPHA }">\n'
+                f'{ body }\n{ "\n".join(face_stickers) }\n</g>',
+            )
+
         for face_name, corners_2d, face_state_idx in visible:
             svg_corners = [
                 self.point_to_svg_coords(c, cx, cy, scale)
@@ -1030,6 +1144,53 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         return [
             (name, corners, idx)
             for name, corners, idx, _ in visible
+        ]
+
+    def compute_mirror_faces(
+            self,
+            rotations: list[tuple[str, int]],
+            distance: float,
+    ) -> list[FaceData]:
+        """
+        Compute hidden faces with a 3D offset along their normals.
+
+        Each hidden face (rotated normal z ≤ VISIBILITY_EPSILON) has its
+        vertices translated by MIRROR_OFFSET * rotated_normal before
+        projection, displacing it outward in camera space.
+
+        Args:
+            rotations: List of (axis, degrees) rotation pairs.
+            distance: Camera distance for perspective projection.
+
+        Returns:
+            List of (face_name, corner_2d_points, face_state_index)
+            sorted back-to-front by average z-depth.
+
+        """
+        rotated = [self.rotate_point(v, rotations) for v in CUBE_VERTICES]
+        mirror: list[tuple[Facelet, list[Point2D], int, float]] = []
+
+        for name, normal, indices, state_idx in FACE_DEFS:
+            rn = self.rotate_point(normal, rotations)
+            if rn[2] > VISIBILITY_EPSILON:
+                continue
+            offset_vertices = [
+                (
+                    rotated[i][0] + MIRROR_OFFSET * rn[0],
+                    rotated[i][1] + MIRROR_OFFSET * rn[1],
+                    rotated[i][2] + MIRROR_OFFSET * rn[2],
+                )
+                for i in indices
+            ]
+            corners_2d = [self.project(c, distance) for c in offset_vertices]
+            avg_z = sum(v[2] for v in offset_vertices) / 4
+            mirror.append((name, corners_2d, state_idx, avg_z))
+
+        mirror.sort(key=operator.itemgetter(3))
+
+        return [
+            (name, corners, idx)
+            for name, corners, idx, _ in mirror
         ]
 
     @staticmethod
