@@ -1,9 +1,29 @@
 """Tests for mirror layout rendering."""
+import re
 import unittest
 
 from cubing_algs.display.constants import DISTANCE
+from cubing_algs.display.constants import MIRROR_FIT_TOLERANCE
 from cubing_algs.display.image import ImageDisplay
 from cubing_algs.vcube import VCube
+
+
+def extract_polygon_points(svg: str) -> list[tuple[float, float]]:
+    """
+    Extract all polygon corner coordinates from an SVG document.
+
+    Returns:
+        List of (x, y) coordinate pairs.
+
+    """
+    points: list[tuple[float, float]] = []
+
+    for attribute in re.findall(r'points="([^"]+)"', svg):
+        for pair in attribute.split():
+            x, y = pair.split(',')
+            points.append((float(x), float(y)))
+
+    return points
 
 
 class ComputeMirrorFacesTestCase(unittest.TestCase):
@@ -104,6 +124,22 @@ class RenderMirrorTestCase(unittest.TestCase):
             arrows=[('U', 0, 'U', 8, '')],
         )
         self.assertIn('class="arrows"', svg)
+
+    def test_panels_fit_in_viewbox(self) -> None:
+        """Ghost panels overflow the viewBox by at most the tolerance."""
+        overflow = 100.0 * MIRROR_FIT_TOLERANCE
+
+        for rotation in ('y45x-34', 'y-120x20', 'x30z15'):
+            svg = self.display.render_mirror(
+                200, self.cube.state, '1' * 54,
+                rotation=rotation,
+                distance=DISTANCE,
+            )
+            for x, y in extract_polygon_points(svg):
+                self.assertGreaterEqual(x, -overflow, rotation)
+                self.assertLessEqual(x, 200.0 + overflow, rotation)
+                self.assertGreaterEqual(y, -overflow, rotation)
+                self.assertLessEqual(y, 200.0 + overflow, rotation)
 
     def test_arrows_on_hidden_face_skipped(self) -> None:
         """Arrow on a hidden face (D at y45x-34) is silently skipped."""

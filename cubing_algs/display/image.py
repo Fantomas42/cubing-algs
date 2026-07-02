@@ -21,6 +21,7 @@ from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.constants import IMAGE_SIZE
 from cubing_algs.display.constants import MIN_DISTANCE
 from cubing_algs.display.constants import MIRROR_ALPHA
+from cubing_algs.display.constants import MIRROR_FIT_TOLERANCE
 from cubing_algs.display.constants import MIRROR_OFFSET
 from cubing_algs.display.constants import ROTATION
 from cubing_algs.display.constants import STICKER_GAP
@@ -281,9 +282,22 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         )
 
         margin = image_size * 0.002
-        max_extent = math.sqrt(
-            3 * distance ** 2 / (distance ** 2 - 3),
-        )
+        if mirror:
+            # Ghost panels extend beyond the cube's bounding sphere by
+            # MIRROR_OFFSET, so fit the scale to the actual projected
+            # corners. A projected planar quad is bounded by its
+            # corners, so this fit is exact for any rotation. The
+            # tolerance lets the outermost panel corners overflow the
+            # frame slightly, enlarging the whole scene.
+            max_extent = max(
+                max(abs(x), abs(y))
+                for _, corners_2d, _ in visible + mirrored
+                for x, y in corners_2d
+            ) / (1 + MIRROR_FIT_TOLERANCE)
+        else:
+            max_extent = math.sqrt(
+                3 * distance ** 2 / (distance ** 2 - 3),
+            )
         scale = (image_size - 2 * margin) / (2 * max_extent)
         cx, cy = image_size / 2, image_size / 2
 
