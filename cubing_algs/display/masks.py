@@ -169,3 +169,21 @@ EO_EDGE_MASK: POVDisplayMask = (
     '222211222'
     '222414222'
 )
+
+L6EO_MASK: POVDisplayMask = (
+    '040414040'  # U edges oriented, center reference
+    '020000000'  # UR side sticker masked
+    '020010020'  # UF / DF side stickers masked, center reference
+    '040010040'  # DF / DB edges oriented, center reference
+    '020000000'  # UL side sticker masked
+    '020010020'  # UB / DB side stickers masked, center reference
+)
+
+L10P_MASK: POVDisplayMask = (
+    '111111111'  # last layer corners + edges + center visible
+    '111000000'  # LL corners + UR edge visible
+    '111010010'  # LL corners + UF / DF edges + center visible
+    '010010010'  # DF / DB edges + center visible
+    '111000000'  # LL corners + UL edge visible
+    '111010010'  # LL corners + UB / DB edges + center visible
+)
