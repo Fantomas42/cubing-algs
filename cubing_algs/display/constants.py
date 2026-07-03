@@ -54,7 +54,7 @@ STRIP_TAPER = 0.05
 DIM_LUMINANCE_FACTOR = 0.55
 
 # Mirror effects
-MIRROR_OFFSET = 2.2
+MIRROR_OFFSET = 1.3
 MIRROR_ALPHA = 0.8
 
 # Allowed ghost panel overflow beyond the frame, as a fraction of the
