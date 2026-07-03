@@ -55,7 +55,7 @@ DIM_LUMINANCE_FACTOR = 0.55
 
 # Mirror effects
 MIRROR_OFFSET = 2.2
-MIRROR_ALPHA = 0.5
+MIRROR_ALPHA = 0.8
 
 # Allowed ghost panel overflow beyond the frame, as a fraction of the
 # half image size. Enlarges the whole scene at the cost of slightly

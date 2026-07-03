@@ -304,9 +304,12 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         cr, cg, cb, ca = hex_to_rgba(self.palette['cube_color'])
         body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
 
-        passes: list[tuple[list[FaceData], str]] = [
-            (mirrored, f' opacity="{ MIRROR_ALPHA }"'),
-            (visible, ''),
+        # Ghost panels skip the cube body color entirely: their sticker
+        # gaps stay transparent instead of showing the plastic color,
+        # so they read as translucent projections rather than cube parts.
+        passes: list[tuple[list[FaceData], str, str]] = [
+            (mirrored, f' opacity="{ MIRROR_ALPHA }"', 'none'),
+            (visible, '', body_fill),
         ]
 
         # Draw each face back-to-front: ghost panels first, then for
@@ -317,7 +320,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         face_groups: list[str] = []
         visible_corners: dict[Facelet, list[Point2D]] = {}
 
-        for faces, opacity in passes:
+        for faces, opacity, fill in passes:
             for face_name, corners_2d, face_state_idx in faces:
                 svg_corners = [
                     self.point_to_svg_coords(c, cx, cy, scale)
@@ -331,7 +334,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                     state[face_start:face_start + self.face_size],
                     mask[face_start:face_start + self.face_size],
                 )
-                body = self.build_polygon(svg_corners, body_fill)
+                body = self.build_polygon(svg_corners, fill)
                 face_groups.append(
                     f'<g class="face-{ face_name }"{ opacity }>\n'
                     f'{ body }\n{ "\n".join(face_stickers) }\n</g>',

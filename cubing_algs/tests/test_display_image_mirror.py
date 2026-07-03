@@ -97,7 +97,7 @@ class RenderMirrorTestCase(unittest.TestCase):
             200, self.cube.state, '1' * 54, rotation='y45x-34',
         )
         for face in ('D', 'L', 'B'):
-            self.assertIn(f'<g class="face-{face}" opacity="0.5">', svg)
+            self.assertIn(f'<g class="face-{face}" opacity="0.8">', svg)
 
     def test_visible_faces_no_opacity(self) -> None:
         """Visible face groups do not have an opacity attribute."""
@@ -150,6 +150,53 @@ class RenderMirrorTestCase(unittest.TestCase):
         )
         self.assertNotIn('class="arrows"', svg)
 
+    def get_face_group_body(self, svg: str, face: str) -> str:
+        """
+        Extract the body polygon line of a face group from an SVG document.
+
+        Returns:
+            The body polygon line for the given face.
+
+        """
+        match = re.search(
+            rf'<g class="face-{face}"[^>]*>\n(.*?)\n',
+            svg,
+        )
+        if match is None:
+            self.fail(f'Face group not found for {face!r}')
+        return match.group(1)
+
+    def test_hidden_face_body_has_no_cube_color(self) -> None:
+        """Ghost panel body polygons are not filled with the cube color."""
+        svg = self.display.render_mirror(
+            200, self.cube.state, '1' * 54, rotation='y45x-34',
+        )
+        cube_color = self.display.palette['cube_color']
+        r, g, b = (
+            int(cube_color[i:i + 2], 16) for i in (1, 3, 5)
+        )
+        cube_color_fill = f'rgba({r},{g},{b},1.00)'
+
+        for face in ('D', 'L', 'B'):
+            body = self.get_face_group_body(svg, face)
+            self.assertIn('fill="none"', body)
+            self.assertNotIn(cube_color_fill, body)
+
+    def test_visible_face_body_keeps_cube_color(self) -> None:
+        """Visible face body polygons still use the cube color fill."""
+        svg = self.display.render_mirror(
+            200, self.cube.state, '1' * 54, rotation='y45x-34',
+        )
+        cube_color = self.display.palette['cube_color']
+        r, g, b = (
+            int(cube_color[i:i + 2], 16) for i in (1, 3, 5)
+        )
+        cube_color_fill = f'rgba({r},{g},{b},1.00)'
+
+        for face in ('U', 'F', 'R'):
+            body = self.get_face_group_body(svg, face)
+            self.assertIn(cube_color_fill, body)
+
 
 class RenderMirrorRoutingTestCase(unittest.TestCase):
     """Tests for layout='mirror' routing through render()."""
@@ -179,4 +226,4 @@ class RenderMirrorRoutingTestCase(unittest.TestCase):
         svg = self.display.render(layout='mirror', rotation='y45x-34')
         self.assertEqual(svg.count('<g class="face-'), 6)
         for face in ('D', 'L', 'B'):
-            self.assertIn(f'<g class="face-{face}" opacity="0.5">', svg)
+            self.assertIn(f'<g class="face-{face}" opacity="0.8">', svg)
