@@ -63,7 +63,8 @@ class ErgonomicsData(NamedTuple):
             better).
         awkward_moves: Moves with an ergonomic weight below
             AWKWARD_THRESHOLD (count, lower is better).
-        estimated_execution_time: Estimated execution time in seconds.
+        estimated_execution_time: Estimated execution time in seconds,
+            including regrip and pause time.
         fingertrick_comfort: Average ergonomic move weight, 0.0
             (awkward) to 1.0 (comfortable).
         thumb_moves: Moves assigned to the thumb.
@@ -265,6 +266,9 @@ BASE_MOVE_TIME = 0.28
 # Additional seconds per regrip.
 REGRIP_TIME_PENALTY = 0.07
 
+# Seconds per pause: one comfortable move worth of hesitation.
+PAUSE_TIME = BASE_MOVE_TIME
+
 
 def get_move_key(move: Move) -> str:
     """
@@ -402,6 +406,9 @@ def calculate_flow_score(algorithm: 'Algorithm') -> float:
     Calculate the overall flow score of an algorithm.
 
     Higher scores indicate better flow with fewer awkward transitions.
+    Pauses are transparent: transitions are evaluated between the
+    moves surrounding them, so inserting pauses cannot improve flow.
+    Their time cost is handled by the temporal model instead.
 
     Args:
         algorithm: The algorithm to analyze.
@@ -410,24 +417,19 @@ def calculate_flow_score(algorithm: 'Algorithm') -> float:
         Flow score from 0.0 to 1.0.
 
     """
-    if len(algorithm) <= 1:
+    from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
+
+    moves = algorithm.transform(unpause_moves)
+
+    if len(moves) <= 1:
         return 1.0
 
-    total_penalty = 0.0
-    transition_count = 0
+    total_penalty = sum(
+        get_transition_penalty(moves[i - 1], moves[i])
+        for i in range(1, len(moves))
+    )
 
-    for i in range(1, len(algorithm)):
-        prev_move = algorithm[i - 1]
-        curr_move = algorithm[i]
-
-        if not prev_move.is_pause and not curr_move.is_pause:
-            total_penalty += get_transition_penalty(prev_move, curr_move)
-            transition_count += 1
-
-    if transition_count == 0:
-        return 1.0
-
-    avg_penalty = total_penalty / transition_count
+    avg_penalty = total_penalty / (len(moves) - 1)
 
     # Normalize on the effective penalty range of regular transitions
     # (up to opposite-face) so values spread; rotation-heavy algorithms
@@ -761,7 +763,8 @@ def suggest_ergonomic_improvements(
 
     if regrip_count > non_pause_count * REGRIP_RATIO_THRESHOLD:
         suggestions.append(
-            'Consider reducing cube rotations to minimize regrips',
+            'Consider reducing rotations and opposite-face transitions'
+            ' to minimize regrips',
         )
 
     if balance_ratio < BALANCE_THRESHOLD:
@@ -986,7 +989,7 @@ def compute_estimated_execution_time(
     Estimate algorithm execution time in seconds.
 
     Sums per-move execution times, speeds up trigger-covered moves by
-    the trigger's speed factor, and adds regrip penalties.
+    the trigger's speed factor, and adds regrip and pause penalties.
 
     Args:
         moves: 'Algorithm' to analyze.
@@ -1004,6 +1007,8 @@ def compute_estimated_execution_time(
     if not non_pause_moves:
         return 0.0
 
+    pause_count = len(moves) - len(non_pause_moves)
+
     speed_factors = [1.0] * len(non_pause_moves)
     for match in trigger_matches:
         factor = trigger_speed_factor(match)
@@ -1015,7 +1020,11 @@ def compute_estimated_execution_time(
         for move, factor in zip(non_pause_moves, speed_factors, strict=True)
     )
 
-    return move_times + (regrip_count * REGRIP_TIME_PENALTY)
+    return (
+        move_times
+        + (regrip_count * REGRIP_TIME_PENALTY)
+        + (pause_count * PAUSE_TIME)
+    )
 
 
 def get_ergonomic_rating(ergonomic_score: float) -> str:

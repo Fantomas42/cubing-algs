@@ -7,6 +7,7 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import AWKWARD_THRESHOLD
 from cubing_algs.ergonomics import BASE_MOVE_TIME
 from cubing_algs.ergonomics import MOVE_DATA
+from cubing_algs.ergonomics import PAUSE_TIME
 from cubing_algs.ergonomics import REGRIP_TIME_PENALTY
 from cubing_algs.ergonomics import TRANSITION_PENALTIES
 from cubing_algs.ergonomics import VARIATION_FACTORS
@@ -479,6 +480,16 @@ class TestCalculateFlowScore(unittest.TestCase):
         score = calculate_flow_score(alg)
         self.assertGreater(score, 0.55)
 
+    def test_pauses_are_transparent_for_flow(self) -> None:
+        """Test that inserting pauses does not change the flow score."""
+        without_pauses = Algorithm.parse_moves('R B L D R B')
+        with_pauses = Algorithm.parse_moves('R . B . L . D . R . B')
+        self.assertLess(calculate_flow_score(without_pauses), 1.0)
+        self.assertEqual(
+            calculate_flow_score(with_pauses),
+            calculate_flow_score(without_pauses),
+        )
+
     def test_normalized_on_effective_penalty_range(self) -> None:
         """Test that flow is normalized by the opposite-face penalty."""
         # All transitions adjacent: avg penalty 0.1 out of a 0.3 ceiling
@@ -867,6 +878,18 @@ class TestErgonomicScoreDesaturation(unittest.TestCase):
 class TestClassifyAlgorithmDifficulty(unittest.TestCase):
     """Test the classify_algorithm_difficulty function."""
 
+    def test_beginner_classification(self) -> None:
+        """Test that a comfortable, flowing algorithm is Beginner."""
+        alg = Algorithm.parse_moves("U U'")
+        inputs = score_inputs(alg)
+        score = calculate_ergonomic_score(inputs)
+        self.assertEqual(
+            classify_algorithm_difficulty(
+                score, inputs.regrip_count, inputs.flow,
+            ),
+            'Beginner',
+        )
+
     def test_easy_algorithm_beginner(self) -> None:
         """Test that very easy algorithms classify as Beginner."""
         alg = Algorithm.parse_moves("R U R'")
@@ -968,6 +991,21 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
         )
         balance_suggestion = any('balance' in s.lower() for s in suggestions)
         self.assertTrue(balance_suggestion)
+
+    def test_regrip_suggestion_names_actual_causes(self) -> None:
+        """Test that the regrip suggestion fits rotation-free regrips."""
+        alg = Algorithm.parse_moves("R L' R L' R L'")
+        result = compute_ergonomics(alg)
+        self.assertGreater(result.regrip_count, 0)
+        self.assertNotIn(
+            'Consider reducing cube rotations to minimize regrips',
+            result.suggestions,
+        )
+        self.assertIn(
+            'Consider reducing rotations and opposite-face transitions'
+            ' to minimize regrips',
+            result.suggestions,
+        )
 
     def test_awkward_moves_suggestion_follows_hand_dominance(self) -> None:
         """Test that the awkward-moves suggestion uses the analyzed hand."""
@@ -1535,13 +1573,18 @@ class TestComputeEstimatedExecutionTime(unittest.TestCase):
         self.assertAlmostEqual(time, expected)
 
     def test_with_pauses(self) -> None:
-        """Test execution time calculation ignores pauses."""
+        """Test that each pause adds PAUSE_TIME to the execution time."""
         with_pause = Algorithm.parse_moves('R . U')
         without_pause = Algorithm.parse_moves('R U')
         self.assertAlmostEqual(
             compute_estimated_execution_time(with_pause, 0),
-            compute_estimated_execution_time(without_pause, 0),
+            compute_estimated_execution_time(without_pause, 0) + PAUSE_TIME,
         )
+
+    def test_only_pauses_cost_no_time(self) -> None:
+        """Test that an algorithm without real moves takes no time."""
+        alg = Algorithm.parse_moves('. . .')
+        self.assertEqual(compute_estimated_execution_time(alg, 0), 0.0)
 
     def test_trigger_speeds_up_covered_moves(self) -> None:
         """Test that trigger-covered moves execute at the trigger speed."""
@@ -1857,6 +1900,21 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 3)  # R, U, R'
         self.assertEqual(result.both_hand_moves, 0)
         self.assertEqual(result.regrip_count, 0)
+
+    def test_pauses_cannot_improve_score(self) -> None:
+        """Test that inserting pauses costs time and never helps the score."""
+        without_pauses = Algorithm.parse_moves("R B L' D R B")
+        with_pauses = Algorithm.parse_moves("R . B . L' . D . R . B")
+        plain = compute_ergonomics(without_pauses)
+        paused = compute_ergonomics(with_pauses)
+
+        self.assertEqual(paused.ergonomic_score, plain.ergonomic_score)
+        self.assertEqual(paused.flow_score, plain.flow_score)
+        self.assertGreater(
+            paused.estimated_execution_time,
+            plain.estimated_execution_time,
+        )
+        self.assertLess(paused.estimated_tps, plain.estimated_tps)
 
     def test_ergonomics_data_is_immutable_named_tuple(self) -> None:
         """Test that ErgonomicsData is an immutable NamedTuple."""
