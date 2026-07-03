@@ -54,6 +54,11 @@ class TriggerMatch(NamedTuple):
     matched_moves: str
     variation: TriggerVariation | None = None  # None = canonical form
 
+    @property
+    def length(self) -> int:
+        """Number of moves covered by the match."""
+        return self.end_index - self.start_index + 1
+
 
 TV = TriggerVariation
 VK = VariationKind

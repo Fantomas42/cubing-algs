@@ -574,9 +574,11 @@ def trigger_speed_factor(match: TriggerMatch) -> float:
     """
     Get the effective speed multiplier of a matched trigger.
 
-    The pattern multiplier is pulled toward 1.0 by the variation factor,
-    preserving its direction: 1.95 canonical → 1.95, lefty → 1.90,
-    back → 1.81.
+    Degraded variations are never faster than the canonical form:
+    the speed benefit of fast triggers shrinks with the variation
+    factor (Sexy Move 1.95 canonical → 1.90 lefty → 1.81 back) while
+    the slowness of slow triggers grows (Hedgeslammer 0.85 canonical
+    → 0.82 back).
 
     Args:
         match: Trigger match to evaluate.
@@ -585,9 +587,12 @@ def trigger_speed_factor(match: TriggerMatch) -> float:
         Speed multiplier applied to the moves covered by the trigger.
 
     """
-    return 1.0 + (match.pattern.speed_multiplier - 1.0) * variation_factor(
-        match,
-    )
+    deviation = match.pattern.speed_multiplier - 1.0
+    factor = variation_factor(match)
+
+    if deviation >= 0:
+        return 1.0 + deviation * factor
+    return 1.0 + deviation / factor
 
 
 def trigger_quality(match: TriggerMatch) -> float:
@@ -634,7 +639,7 @@ def calculate_trigger_score(
         return 0.0
 
     weighted_coverage = sum(
-        (match.end_index - match.start_index + 1) * trigger_quality(match)
+        match.length * trigger_quality(match)
         for match in matches
     )
 
@@ -644,55 +649,41 @@ def calculate_trigger_score(
 class ErgonomicScoreInputs(NamedTuple):
     """Pre-computed metrics feeding the ergonomic score."""
 
+    total_moves: int
+    fingertrick_comfort: float
     flow: float
     balance_ratio: float
     regrip_count: int
     trigger_score: float
 
 
-def calculate_ergonomic_score(
-    algorithm: 'Algorithm',
-    hand_dominance: HandDominance = HandDominance.RIGHT,
-    *,
-    inputs: ErgonomicScoreInputs,
-) -> float:
+def calculate_ergonomic_score(inputs: ErgonomicScoreInputs) -> float:
     """
-    Calculate an overall ergonomic score for the algorithm.
+    Calculate an overall ergonomic score from pre-computed metrics.
 
     Weighted average of move comfort, flow, trigger coverage,
     hand balance and regrip components, all on a 0-1 scale.
 
     Args:
-        algorithm: The algorithm to analyze.
-        hand_dominance: The hand dominance preference.
-        inputs: Pre-computed flow, balance, regrip and trigger metrics.
+        inputs: Pre-computed comfort, flow, balance, regrip and
+            trigger metrics.
 
     Returns:
         Ergonomic score from 0.0 to 1.0.
 
     """
-    if len(algorithm) == 0:
+    if inputs.total_moves == 0:
         return 1.0
 
-    move_weights = [
-        get_move_ergonomic_weight(move, hand_dominance)
-        for move in algorithm
-        if not move.is_pause
-    ]
-
-    if not move_weights:
-        return 1.0
-
-    avg_move_score = sum(move_weights) / len(move_weights)
     regrip_score = max(
-        0.0, 1.0 - (inputs.regrip_count / len(move_weights)),
+        0.0, 1.0 - (inputs.regrip_count / inputs.total_moves),
     )
 
     return max(
         0.0,
         min(
             1.0,
-            avg_move_score * SCORE_WEIGHT_MOVES
+            inputs.fingertrick_comfort * SCORE_WEIGHT_MOVES
             + inputs.flow * SCORE_WEIGHT_FLOW
             + inputs.trigger_score * SCORE_WEIGHT_TRIGGERS
             + inputs.balance_ratio * SCORE_WEIGHT_BALANCE
@@ -741,6 +732,7 @@ def suggest_ergonomic_improvements(
     regrip_count: int,
     balance_ratio: float,
     flow: float,
+    fingertrick_comfort: float,
 ) -> list[str]:
     """
     Suggest specific improvements to make the algorithm more ergonomic.
@@ -750,6 +742,8 @@ def suggest_ergonomic_improvements(
         regrip_count: Pre-computed regrip count.
         balance_ratio: Pre-computed hand balance ratio.
         flow: Pre-computed flow score.
+        fingertrick_comfort: Pre-computed fingertrick comfort, on the
+            analyzed hand.
 
     Returns:
         List of improvement suggestions.
@@ -778,13 +772,7 @@ def suggest_ergonomic_improvements(
             'Look for alternatives to reduce awkward move transitions',
         )
 
-    move_weights = [
-        get_move_ergonomic_weight(move)
-        for move in algorithm
-        if not move.is_pause
-    ]
-    avg_weight = sum(move_weights) / len(move_weights) if move_weights else 1.0
-    if avg_weight < WEIGHT_THRESHOLD:
+    if fingertrick_comfort < WEIGHT_THRESHOLD:
         suggestions.append(
             'Consider alternatives to D, B, and slice moves where possible',
         )
@@ -1118,17 +1106,16 @@ def compute_ergonomics(  # noqa: PLR0914
 
     # Calculate difficulty metrics
     regrip_count = compute_regrip_count(algorithm)
-    fingertrick_comfort = compute_fingertrick_comfort(
-        algorithm,
-        hand_dominance,
-    )
 
-    # Count awkward moves (those with low ergonomic weight)
+    # Move weights are computed once: they feed the comfort average,
+    # the awkward count and the ergonomic score
+    move_weights = [
+        get_move_ergonomic_weight(move, hand_dominance)
+        for move in non_pause_moves
+    ]
+    fingertrick_comfort = sum(move_weights) / total_moves
     awkward_moves = sum(
-        1
-        for move in algorithm
-        if not move.is_pause
-        and get_move_ergonomic_weight(move, hand_dominance) < AWKWARD_THRESHOLD
+        1 for weight in move_weights if weight < AWKWARD_THRESHOLD
     )
 
     # Detect triggers first: they speed up the moves they cover
@@ -1147,9 +1134,9 @@ def compute_ergonomics(  # noqa: PLR0914
     flow_score_val = calculate_flow_score(algorithm)
     trigger_score = calculate_trigger_score(trigger_matches, total_moves)
     ergonomic_score = calculate_ergonomic_score(
-        algorithm,
-        hand_dominance,
-        inputs=ErgonomicScoreInputs(
+        ErgonomicScoreInputs(
+            total_moves=total_moves,
+            fingertrick_comfort=fingertrick_comfort,
             flow=flow_score_val,
             balance_ratio=balance_ratio,
             regrip_count=regrip_count,
@@ -1170,12 +1157,11 @@ def compute_ergonomics(  # noqa: PLR0914
         regrip_count=regrip_count,
         balance_ratio=balance_ratio,
         flow=flow_score_val,
+        fingertrick_comfort=fingertrick_comfort,
     )
 
     trigger_count = len(trigger_matches)
-    trigger_coverage = sum(
-        len(m.matched_moves.split()) for m in trigger_matches
-    )
+    trigger_coverage = sum(m.length for m in trigger_matches)
     detected_patterns = tuple(m.pattern.name for m in trigger_matches)
 
     return ErgonomicsData(
