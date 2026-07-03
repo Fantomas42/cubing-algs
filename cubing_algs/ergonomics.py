@@ -6,6 +6,7 @@ of algorithms, including hand balance, fingertrick difficulty,
 regrip requirements, trigger pattern detection, and overall
 execution comfort.
 """
+from collections.abc import Sequence
 from enum import Enum
 from functools import cache
 from typing import TYPE_CHECKING
@@ -204,6 +205,13 @@ TRANSITION_PENALTIES: dict[str, float] = {
 
 # Cube rotations are hand-neutral: the left-handed mirror keeps them as-is.
 MIRROR_IGNORE_MOVES = {'x', 'y', 'z'}
+
+# Temporal model calibration (decision D2): seconds for a weight-1.0 move,
+# chosen so a clean R/U algorithm like Sune lands around 4.5 effective TPS.
+BASE_MOVE_TIME = 0.28
+
+# Additional seconds per regrip.
+REGRIP_TIME_PENALTY = 0.07
 
 
 def get_move_key(move: Move) -> str:
@@ -486,52 +494,64 @@ def find_trigger_patterns(
     return matches
 
 
-def calculate_trigger_bonus(
-    matches: list[TriggerMatch],
-) -> tuple[float, float]:
+def variation_factor(match: TriggerMatch) -> float:
     """
-    Calculate ergonomic bonuses from detected trigger patterns.
+    Get the ergonomic factor of a matched trigger variation.
+
+    Canonical values were calibrated from right-hand executions.
+    Lefty and inverse variations execute close to canonical,
+    back-face variations are noticeably slower.
+
+    Args:
+        match: Trigger match to evaluate.
+
+    Returns:
+        Factor from 0.0 to 1.0, 1.0 for the canonical form.
+
+    """
+    if match.variation is None:
+        return 1.0
+    return VARIATION_FACTORS[match.variation.kind]
+
+
+def trigger_speed_factor(match: TriggerMatch) -> float:
+    """
+    Get the effective speed multiplier of a matched trigger.
+
+    The pattern multiplier is pulled toward 1.0 by the variation factor,
+    preserving its direction: 1.95 canonical → 1.95, lefty → 1.90,
+    back → 1.81.
+
+    Args:
+        match: Trigger match to evaluate.
+
+    Returns:
+        Speed multiplier applied to the moves covered by the trigger.
+
+    """
+    return 1.0 + (match.pattern.speed_multiplier - 1.0) * variation_factor(
+        match,
+    )
+
+
+def calculate_trigger_bonus(matches: list[TriggerMatch]) -> float:
+    """
+    Calculate the ergonomic bonus from detected trigger patterns.
 
     Args:
         matches: List of trigger matches to evaluate.
 
     Returns:
-        Tuple of (ergonomic_bonus, speed_multiplier).
+        Ergonomic bonus from 0.0 to 0.3.
 
     """
     if not matches:
-        return 0.0, 1.0
-
-    # Canonical values were calibrated from right-hand executions.
-    # Lefty and inverse variations execute close to canonical,
-    # back-face variations are noticeably slower.
-    def variation_factor(m: TriggerMatch) -> float:
-        if m.variation is None:
-            return 1.0
-        return VARIATION_FACTORS[m.variation.kind]
+        return 0.0
 
     def effective_bonus(m: TriggerMatch) -> float:
         return m.pattern.ergonomic_bonus * variation_factor(m)
 
-    def effective_speed(m: TriggerMatch) -> float:
-        # Pull the speed toward 1.0 by the factor, preserving the direction
-        # of the multiplier: 1.95 canonical → 1.95, lefty → 1.90, back → 1.81.
-        return 1.0 + (m.pattern.speed_multiplier - 1.0) * variation_factor(m)
-
     ergonomic_bonus = sum(effective_bonus(m) for m in matches)
-
-    # Weighted speed multiplier
-    total_moves = sum(len(m.matched_moves.split()) for m in matches)
-    if total_moves > 0:
-        speed_multiplier = (
-            sum(
-                effective_speed(m) * len(m.matched_moves.split())
-                for m in matches
-            )
-            / total_moves
-        )
-    else:
-        speed_multiplier = 1.0
 
     # Diminishing returns for multiple patterns
     if len(matches) > 1:
@@ -541,62 +561,7 @@ def calculate_trigger_bonus(
     if len(matches) >= 2:
         ergonomic_bonus += 0.05
 
-    return min(ergonomic_bonus, 0.3), min(speed_multiplier, 2.0)
-
-
-def estimate_tps_potential(
-    algorithm: 'Algorithm',
-    hand_dominance: HandDominance = HandDominance.RIGHT,
-    *,
-    flow: float,
-    regrip_count: int,
-    balance_ratio: float,
-) -> float:
-    """
-    Estimate the maximum theoretical turns per second for this algorithm.
-
-    Args:
-        algorithm: The algorithm to analyze.
-        hand_dominance: The hand dominance preference.
-        flow: Pre-computed flow score.
-        regrip_count: Pre-computed regrip count.
-        balance_ratio: Pre-computed hand balance ratio.
-
-    Returns:
-        Estimated TPS (typically 2.0-15.0).
-
-    """
-    if len(algorithm) == 0:
-        return 0.0
-
-    base_tps = 8.0
-
-    move_weights = [
-        get_move_ergonomic_weight(move, hand_dominance)
-        for move in algorithm
-        if not move.is_pause
-    ]
-
-    if not move_weights:
-        return base_tps
-
-    avg_weight = sum(move_weights) / len(move_weights)
-    non_pause_count = len(move_weights)
-
-    weight_multiplier = avg_weight
-    flow_multiplier = 0.7 + (0.3 * flow)
-    regrip_penalty = max(0.8, 1.0 - (regrip_count / non_pause_count * 2))
-    balance_bonus = 0.9 + (0.2 * balance_ratio)
-
-    estimated_tps = (
-        base_tps
-        * weight_multiplier
-        * flow_multiplier
-        * regrip_penalty
-        * balance_bonus
-    )
-
-    return max(2.0, min(15.0, estimated_tps))
+    return min(ergonomic_bonus, 0.3)
 
 
 def calculate_ergonomic_score(
@@ -916,33 +881,68 @@ def compute_fingertrick_difficulty(
     return 1.0 - avg_weight
 
 
+def compute_move_execution_time(
+    move: Move,
+    hand_dominance: HandDominance = HandDominance.RIGHT,
+) -> float:
+    """
+    Estimate the execution time of a single move in seconds.
+
+    Derived from the ergonomic weight: a weight-1.0 move takes
+    BASE_MOVE_TIME, the least ergonomic moves take up to twice that.
+
+    Args:
+        move: The move to analyze.
+        hand_dominance: The hand dominance preference.
+
+    Returns:
+        Estimated move time in seconds.
+
+    """
+    weight = get_move_ergonomic_weight(move, hand_dominance)
+    return 2 * BASE_MOVE_TIME / (1 + weight)
+
+
 def compute_estimated_execution_time(
     moves: 'Algorithm',
     regrip_count: int,
+    trigger_matches: Sequence[TriggerMatch] = (),
+    hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> float:
     """
     Estimate algorithm execution time in seconds.
 
-    Based on average move times and regrip penalties.
+    Sums per-move execution times, speeds up trigger-covered moves by
+    the trigger's speed factor, and adds regrip penalties.
 
     Args:
         moves: 'Algorithm' to analyze.
         regrip_count: Number of regrips in the algorithm.
+        trigger_matches: Detected triggers; their indices refer to the
+            non-pause move sequence.
+        hand_dominance: The hand dominance preference.
 
     Returns:
         Estimated execution time in seconds.
 
     """
-    if not moves:
+    non_pause_moves = [move for move in moves if not move.is_pause]
+
+    if not non_pause_moves:
         return 0.0
 
-    # Base execution times (in seconds)
-    base_move_time = 0.15  # Average time per move for experienced speedcuber
-    regrip_penalty = 0.07  # Additional time per regrip
+    speed_factors = [1.0] * len(non_pause_moves)
+    for match in trigger_matches:
+        factor = trigger_speed_factor(match)
+        for index in range(match.start_index, match.end_index + 1):
+            speed_factors[index] = factor
 
-    non_pause_moves = sum(1 for move in moves if not move.is_pause)
+    move_times = sum(
+        compute_move_execution_time(move, hand_dominance) / factor
+        for move, factor in zip(non_pause_moves, speed_factors, strict=True)
+    )
 
-    return (non_pause_moves * base_move_time) + (regrip_count * regrip_penalty)
+    return move_times + (regrip_count * REGRIP_TIME_PENALTY)
 
 
 def get_ergonomic_rating(ergonomic_score: float) -> str:
@@ -1046,8 +1046,17 @@ def compute_ergonomics(  # noqa: PLR0914
         and get_move_ergonomic_weight(move, hand_dominance) < AWKWARD_THRESHOLD
     )
 
-    # Calculate execution time
-    execution_time = compute_estimated_execution_time(algorithm, regrip_count)
+    # Detect triggers first: they speed up the moves they cover
+    trigger_matches = find_trigger_patterns(algorithm, hand_dominance)
+
+    # Calculate execution time; TPS is derived from it
+    execution_time = compute_estimated_execution_time(
+        algorithm,
+        regrip_count,
+        trigger_matches,
+        hand_dominance,
+    )
+    estimated_tps = total_moves / execution_time
 
     # Advanced metrics
     flow_score_val = calculate_flow_score(algorithm)
@@ -1059,21 +1068,11 @@ def compute_ergonomics(  # noqa: PLR0914
         regrip_count=regrip_count,
     )
 
-    trigger_matches = find_trigger_patterns(algorithm, hand_dominance)
-    trigger_bonus, speed_mult = calculate_trigger_bonus(trigger_matches)
+    trigger_bonus = calculate_trigger_bonus(trigger_matches)
     ergonomic_score = min(1.0, base_ergonomic_score + trigger_bonus)
 
     # Get qualitative rating from the primary ergonomic score
     ergonomic_rating = get_ergonomic_rating(ergonomic_score)
-
-    estimated_tps = estimate_tps_potential(
-        algorithm,
-        hand_dominance,
-        flow=flow_score_val,
-        regrip_count=regrip_count,
-        balance_ratio=balance_ratio,
-    )
-    estimated_tps = max(2.0, min(15.0, estimated_tps * speed_mult))
 
     difficulty_classification = classify_algorithm_difficulty(
         ergonomic_score,
