@@ -187,13 +187,25 @@ FLOW_THRESHOLD = 0.6
 WEIGHT_THRESHOLD = 0.6
 ROTATION_RATIO_THRESHOLD = 0.15
 
-# Ergonomic factors applied to trigger bonuses and speed multipliers
+# Ergonomic factors applied to trigger qualities and speed multipliers
 # depending on the matched variation kind (canonical form gets 1.0).
 VARIATION_FACTORS: dict[VariationKind, float] = {
     VariationKind.LEFTY: 0.95,
     VariationKind.INVERSE: 0.95,
     VariationKind.BACK: 0.85,
 }
+
+# Best in-catalogue trigger bonus, used to normalize trigger quality to 0-1.
+MAX_TRIGGER_BONUS = max(p.ergonomic_bonus for p in TRIGGER_PATTERNS)
+
+# Weighted-average composition of the ergonomic score (weights sum to 1.0).
+# Calibrated so the acceptance algorithms of the 2.4 refactor discriminate:
+# hand balance is kept low so one-handed OLLs are not unduly penalized.
+SCORE_WEIGHT_MOVES = 0.40
+SCORE_WEIGHT_FLOW = 0.25
+SCORE_WEIGHT_TRIGGERS = 0.15
+SCORE_WEIGHT_BALANCE = 0.05
+SCORE_WEIGHT_REGRIPS = 0.15
 
 TRANSITION_PENALTIES: dict[str, float] = {
     'same_face': 0.0,
@@ -376,9 +388,13 @@ def calculate_flow_score(algorithm: 'Algorithm') -> float:
         return 1.0
 
     avg_penalty = total_penalty / transition_count
-    max_possible_penalty = TRANSITION_PENALTIES['rotation']
 
-    return max(0.0, 1.0 - (avg_penalty / max_possible_penalty))
+    # Normalize on the effective penalty range of regular transitions
+    # (up to opposite-face) so values spread; rotation-heavy algorithms
+    # exceed the ceiling and bottom out at 0.
+    max_effective_penalty = TRANSITION_PENALTIES['opposite']
+
+    return max(0.0, 1.0 - (avg_penalty / max_effective_penalty))
 
 
 def normalize_algorithm_string(algorithm: 'Algorithm') -> str:
@@ -534,55 +550,82 @@ def trigger_speed_factor(match: TriggerMatch) -> float:
     )
 
 
-def calculate_trigger_bonus(matches: list[TriggerMatch]) -> float:
+def trigger_quality(match: TriggerMatch) -> float:
     """
-    Calculate the ergonomic bonus from detected trigger patterns.
+    Get the ergonomic quality of a matched trigger, from 0.0 to 1.0.
+
+    The pattern's ergonomic bonus is normalized against the best
+    in-catalogue bonus, then scaled by the variation factor: a canonical
+    Sexy Move rates 1.0, awkward patterns rate near 0.0.
 
     Args:
-        matches: List of trigger matches to evaluate.
+        match: Trigger match to evaluate.
 
     Returns:
-        Ergonomic bonus from 0.0 to 0.3.
+        Quality factor from 0.0 to 1.0.
 
     """
-    if not matches:
+    return (
+        match.pattern.ergonomic_bonus / MAX_TRIGGER_BONUS
+    ) * variation_factor(match)
+
+
+def calculate_trigger_score(
+    matches: Sequence[TriggerMatch],
+    total_moves: int,
+) -> float:
+    """
+    Calculate the trigger component of the ergonomic score.
+
+    Quality-weighted trigger coverage: each matched move contributes its
+    trigger's quality, normalized by the algorithm length. An algorithm
+    fully covered by top-quality triggers scores 1.0, one without any
+    trigger scores 0.0.
+
+    Args:
+        matches: Detected trigger matches.
+        total_moves: Number of non-pause moves in the algorithm.
+
+    Returns:
+        Trigger score from 0.0 to 1.0.
+
+    """
+    if total_moves == 0 or not matches:
         return 0.0
 
-    def effective_bonus(m: TriggerMatch) -> float:
-        return m.pattern.ergonomic_bonus * variation_factor(m)
+    weighted_coverage = sum(
+        (match.end_index - match.start_index + 1) * trigger_quality(match)
+        for match in matches
+    )
 
-    ergonomic_bonus = sum(effective_bonus(m) for m in matches)
+    return min(1.0, weighted_coverage / total_moves)
 
-    # Diminishing returns for multiple patterns
-    if len(matches) > 1:
-        ergonomic_bonus *= 0.9
 
-    # Bonus for multiple triggers
-    if len(matches) >= 2:
-        ergonomic_bonus += 0.05
+class ErgonomicScoreInputs(NamedTuple):
+    """Pre-computed metrics feeding the ergonomic score."""
 
-    return min(ergonomic_bonus, 0.3)
+    flow: float
+    balance_ratio: float
+    regrip_count: int
+    trigger_score: float
 
 
 def calculate_ergonomic_score(
     algorithm: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
     *,
-    flow: float,
-    balance_ratio: float,
-    regrip_count: int,
+    inputs: ErgonomicScoreInputs,
 ) -> float:
     """
     Calculate an overall ergonomic score for the algorithm.
 
-    Combines multiple ergonomic factors into a single score.
+    Weighted average of move comfort, flow, trigger coverage,
+    hand balance and regrip components, all on a 0-1 scale.
 
     Args:
         algorithm: The algorithm to analyze.
         hand_dominance: The hand dominance preference.
-        flow: Pre-computed flow score.
-        balance_ratio: Pre-computed hand balance ratio.
-        regrip_count: Pre-computed regrip count.
+        inputs: Pre-computed flow, balance, regrip and trigger metrics.
 
     Returns:
         Ergonomic score from 0.0 to 1.0.
@@ -601,17 +644,20 @@ def calculate_ergonomic_score(
         return 1.0
 
     avg_move_score = sum(move_weights) / len(move_weights)
-    hand_balance = balance_ratio * 2  # Convert 0-0.5 range to 0-1
-    regrip_score = max(0.0, 1.0 - (regrip_count / len(move_weights)))
+    hand_balance = inputs.balance_ratio * 2  # Convert 0-0.5 range to 0-1
+    regrip_score = max(
+        0.0, 1.0 - (inputs.regrip_count / len(move_weights)),
+    )
 
     return max(
         0.0,
         min(
             1.0,
-            avg_move_score * 0.4
-            + flow * 0.3
-            + hand_balance * 0.15
-            + regrip_score * 0.15,
+            avg_move_score * SCORE_WEIGHT_MOVES
+            + inputs.flow * SCORE_WEIGHT_FLOW
+            + inputs.trigger_score * SCORE_WEIGHT_TRIGGERS
+            + hand_balance * SCORE_WEIGHT_BALANCE
+            + regrip_score * SCORE_WEIGHT_REGRIPS,
         ),
     )
 
@@ -1060,16 +1106,17 @@ def compute_ergonomics(  # noqa: PLR0914
 
     # Advanced metrics
     flow_score_val = calculate_flow_score(algorithm)
-    base_ergonomic_score = calculate_ergonomic_score(
+    trigger_score = calculate_trigger_score(trigger_matches, total_moves)
+    ergonomic_score = calculate_ergonomic_score(
         algorithm,
         hand_dominance,
-        flow=flow_score_val,
-        balance_ratio=balance_ratio,
-        regrip_count=regrip_count,
+        inputs=ErgonomicScoreInputs(
+            flow=flow_score_val,
+            balance_ratio=balance_ratio,
+            regrip_count=regrip_count,
+            trigger_score=trigger_score,
+        ),
     )
-
-    trigger_bonus = calculate_trigger_bonus(trigger_matches)
-    ergonomic_score = min(1.0, base_ergonomic_score + trigger_bonus)
 
     # Get qualitative rating from the primary ergonomic score
     ergonomic_rating = get_ergonomic_rating(ergonomic_score)

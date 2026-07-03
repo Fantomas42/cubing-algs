@@ -10,13 +10,14 @@ from cubing_algs.ergonomics import MOVE_DATA
 from cubing_algs.ergonomics import REGRIP_TIME_PENALTY
 from cubing_algs.ergonomics import TRANSITION_PENALTIES
 from cubing_algs.ergonomics import VARIATION_FACTORS
+from cubing_algs.ergonomics import ErgonomicScoreInputs
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import FingerAssignment
 from cubing_algs.ergonomics import HandDominance
 from cubing_algs.ergonomics import MoveProperties
 from cubing_algs.ergonomics import calculate_ergonomic_score
 from cubing_algs.ergonomics import calculate_flow_score
-from cubing_algs.ergonomics import calculate_trigger_bonus
+from cubing_algs.ergonomics import calculate_trigger_score
 from cubing_algs.ergonomics import classify_algorithm_difficulty
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.ergonomics import compute_estimated_execution_time
@@ -40,26 +41,44 @@ from cubing_algs.triggers import TriggerMatch
 from cubing_algs.triggers import VariationKind
 
 
-class ErgonomicInputs(TypedDict):
-    """Pre-computed inputs shared by ergonomic scoring functions."""
+class SuggestionInputs(TypedDict):
+    """Pre-computed inputs for suggest_ergonomic_improvements."""
 
     flow: float
     balance_ratio: float
     regrip_count: int
 
 
-def ergonomic_inputs(alg: Algorithm) -> ErgonomicInputs:
+def suggestion_inputs(alg: Algorithm) -> SuggestionInputs:
     """
-    Compute the pre-requisite inputs for ergonomic scoring functions.
+    Compute the pre-requisite inputs for improvement suggestions.
 
     Returns:
-        ErgonomicInputs with flow, balance_ratio, and regrip_count.
+        SuggestionInputs with flow, balance_ratio, and regrip_count.
 
     """
-    return ErgonomicInputs(
+    return SuggestionInputs(
         flow=calculate_flow_score(alg),
         balance_ratio=compute_hand_balance(alg)[3],
         regrip_count=compute_regrip_count(alg),
+    )
+
+
+def score_inputs(alg: Algorithm) -> ErgonomicScoreInputs:
+    """
+    Compute the pre-requisite inputs for calculate_ergonomic_score.
+
+    Returns:
+        ErgonomicScoreInputs with flow, balance, regrip
+        and trigger metrics.
+
+    """
+    total_moves = sum(1 for move in alg if not move.is_pause)
+    return ErgonomicScoreInputs(
+        trigger_score=calculate_trigger_score(
+            find_trigger_patterns(alg), total_moves,
+        ),
+        **suggestion_inputs(alg),
     )
 
 
@@ -447,13 +466,28 @@ class TestCalculateFlowScore(unittest.TestCase):
         """Test flow score for smooth algorithm with adjacent moves."""
         alg = Algorithm.parse_moves("R U R' U'")
         score = calculate_flow_score(alg)
-        self.assertGreater(score, 0.7)
+        self.assertGreater(score, 0.55)
+
+    def test_normalized_on_effective_penalty_range(self) -> None:
+        """Test that flow is normalized by the opposite-face penalty."""
+        # All transitions adjacent: avg penalty 0.1 out of a 0.3 ceiling
+        alg = Algorithm.parse_moves('R U R U')
+        expected = 1.0 - (
+            TRANSITION_PENALTIES['adjacent']
+            / TRANSITION_PENALTIES['opposite']
+        )
+        self.assertAlmostEqual(calculate_flow_score(alg), expected)
 
     def test_choppy_algorithm(self) -> None:
         """Test flow score for algorithm with opposite transitions."""
         alg = Algorithm.parse_moves('R L R L')
         score = calculate_flow_score(alg)
         self.assertLess(score, 0.5)
+
+    def test_opposite_transitions_exhaust_flow(self) -> None:
+        """Test that opposite-only transitions bottom out the flow."""
+        alg = Algorithm.parse_moves('R L R L')
+        self.assertAlmostEqual(calculate_flow_score(alg), 0.0)
 
 
 class TestNormalizeAlgorithmString(unittest.TestCase):
@@ -550,26 +584,42 @@ class TestFindTriggerPatterns(unittest.TestCase):
         self.assertEqual(len(sexy_matches), 2)
 
 
-class TestCalculateTriggerBonus(unittest.TestCase):
-    """Test the calculate_trigger_bonus function."""
+class TestCalculateTriggerScore(unittest.TestCase):
+    """Test the calculate_trigger_score function."""
 
     def test_no_matches(self) -> None:
-        """Test bonus with no matches."""
-        self.assertEqual(calculate_trigger_bonus([]), 0.0)
+        """Test score with no matches."""
+        self.assertEqual(calculate_trigger_score([], 4), 0.0)
 
-    def test_single_match(self) -> None:
-        """Test bonus with single match."""
+    def test_no_moves(self) -> None:
+        """Test score with no moves."""
+        self.assertEqual(calculate_trigger_score([], 0), 0.0)
+
+    def test_full_coverage_best_trigger(self) -> None:
+        """Test that full coverage by the best trigger scores 1.0."""
         alg = Algorithm.parse_moves("R U R' U'")
         matches = find_trigger_patterns(alg)
-        self.assertGreater(calculate_trigger_bonus(matches), 0.0)
+        self.assertAlmostEqual(calculate_trigger_score(matches, 4), 1.0)
 
-    def test_empty_matched_moves(self) -> None:
-        """Test bonus calculation when matched_moves is empty."""
-        pattern = TRIGGER_PATTERNS[0]
-        match = TriggerMatch(
-            pattern=pattern, start_index=0, end_index=0, matched_moves='',
+    def test_partial_coverage_scores_lower(self) -> None:
+        """Test that uncovered moves dilute the score."""
+        alg = Algorithm.parse_moves("R U R' U'")
+        matches = find_trigger_patterns(alg)
+        full = calculate_trigger_score(matches, 4)
+        diluted = calculate_trigger_score(matches, 8)
+        self.assertAlmostEqual(diluted, full / 2)
+
+    def test_quality_weighted_by_pattern_bonus(self) -> None:
+        """Test that low-bonus triggers contribute less than high-bonus."""
+        sexy_alg = Algorithm.parse_moves("R U R' U'")
+        sledge_alg = Algorithm.parse_moves("R' F R F'")
+        sexy_score = calculate_trigger_score(
+            find_trigger_patterns(sexy_alg), 4,
         )
-        self.assertGreaterEqual(calculate_trigger_bonus([match]), 0.0)
+        sledge_score = calculate_trigger_score(
+            find_trigger_patterns(sledge_alg), 4,
+        )
+        self.assertLess(sledge_score, sexy_score)
 
     def test_canonical_match_has_no_variation(self) -> None:
         """Test that a canonical match carries no variation."""
@@ -586,12 +636,13 @@ class TestCalculateTriggerBonus(unittest.TestCase):
         if sexy.variation is None:
             self.fail('Inverse Sexy Move match should carry a variation')
         self.assertEqual(sexy.variation.kind, VariationKind.INVERSE)
-        bonus = calculate_trigger_bonus([sexy])
-        expected_bonus = (
-            sexy.pattern.ergonomic_bonus
-            * VARIATION_FACTORS[VariationKind.INVERSE]
+        canonical = calculate_trigger_score(
+            find_trigger_patterns(Algorithm.parse_moves("R U R' U'")), 4,
         )
-        self.assertAlmostEqual(bonus, expected_bonus)
+        self.assertAlmostEqual(
+            calculate_trigger_score([sexy], 4),
+            canonical * VARIATION_FACTORS[VariationKind.INVERSE],
+        )
 
     def test_back_variation_gets_back_factor(self) -> None:
         """Test that back-face variations get the back penalty."""
@@ -617,16 +668,16 @@ class TestCalculateTriggerBonus(unittest.TestCase):
         if sexy.variation is None:
             self.fail('Lefty Sexy Move match should carry a variation')
         self.assertEqual(sexy.variation.kind, VariationKind.LEFTY)
-        bonus = calculate_trigger_bonus([sexy])
-        expected_bonus = (
-            sexy.pattern.ergonomic_bonus
-            * VARIATION_FACTORS[VariationKind.LEFTY]
+        canonical = calculate_trigger_score(
+            find_trigger_patterns(Algorithm.parse_moves("R U R' U'")), 4,
         )
-        self.assertAlmostEqual(bonus, expected_bonus)
+        self.assertAlmostEqual(
+            calculate_trigger_score([sexy], 4),
+            canonical * VARIATION_FACTORS[VariationKind.LEFTY],
+        )
 
-    def test_bonus_capped(self) -> None:
-        """Test that bonus is capped at 0.3."""
-        # Create many fake matches with high bonuses
+    def test_score_bounded(self) -> None:
+        """Test that score never exceeds 1.0."""
         pattern = TRIGGER_PATTERNS[0]
         matches = [
             TriggerMatch(
@@ -637,7 +688,7 @@ class TestCalculateTriggerBonus(unittest.TestCase):
             )
             for i in range(10)
         ]
-        self.assertLessEqual(calculate_trigger_bonus(matches), 0.3)
+        self.assertLessEqual(calculate_trigger_score(matches, 4), 1.0)
 
 
 class TestTriggerSpeedFactor(unittest.TestCase):
@@ -671,7 +722,11 @@ class TestCalculateErgonomicScore(unittest.TestCase):
         alg = Algorithm.parse_moves('')
         self.assertEqual(
             calculate_ergonomic_score(
-                alg, flow=1.0, balance_ratio=0.5, regrip_count=0,
+                alg,
+                inputs=ErgonomicScoreInputs(
+                    flow=1.0, balance_ratio=0.5,
+                    regrip_count=0, trigger_score=0.0,
+                ),
             ),
             1.0,
         )
@@ -681,7 +736,11 @@ class TestCalculateErgonomicScore(unittest.TestCase):
         alg = Algorithm([Move('.')])
         self.assertEqual(
             calculate_ergonomic_score(
-                alg, flow=1.0, balance_ratio=0.5, regrip_count=0,
+                alg,
+                inputs=ErgonomicScoreInputs(
+                    flow=1.0, balance_ratio=0.5,
+                    regrip_count=0, trigger_score=0.0,
+                ),
             ),
             1.0,
         )
@@ -689,7 +748,7 @@ class TestCalculateErgonomicScore(unittest.TestCase):
     def test_easy_algorithm_high_score(self) -> None:
         """Test that easy algorithms get high scores."""
         alg = Algorithm.parse_moves("R U R' U'")
-        score = calculate_ergonomic_score(alg, **ergonomic_inputs(alg))
+        score = calculate_ergonomic_score(alg, inputs=score_inputs(alg))
         self.assertGreater(score, 0.6)
 
     def test_hard_algorithm_lower_score(self) -> None:
@@ -697,16 +756,93 @@ class TestCalculateErgonomicScore(unittest.TestCase):
         easy_alg = Algorithm.parse_moves("R U R' U'")
         hard_alg = Algorithm.parse_moves('B2 E2 S2 D2')
         self.assertGreater(
-            calculate_ergonomic_score(easy_alg, **ergonomic_inputs(easy_alg)),
-            calculate_ergonomic_score(hard_alg, **ergonomic_inputs(hard_alg)),
+            calculate_ergonomic_score(easy_alg, inputs=score_inputs(easy_alg)),
+            calculate_ergonomic_score(hard_alg, inputs=score_inputs(hard_alg)),
         )
 
     def test_score_bounded(self) -> None:
         """Test that score is between 0 and 1."""
         alg = Algorithm.parse_moves('R U F L B D M E S')
-        score = calculate_ergonomic_score(alg, **ergonomic_inputs(alg))
+        score = calculate_ergonomic_score(alg, inputs=score_inputs(alg))
         self.assertGreaterEqual(score, 0.0)
         self.assertLessEqual(score, 1.0)
+
+
+class TestErgonomicScoreDesaturation(unittest.TestCase):
+    """
+    Acceptance criteria for the desaturated ergonomic score (phase 2.4).
+
+    Four F2L-style algorithms differing only by their base face must get
+    four distinct, non-saturated scores ordered sensibly, while clean
+    OLL algorithms stay high and B/D/E-based ones stay low.
+    """
+
+    F_BASED = (
+        "U' F L D' R' U R' U' U U R U B' U B U' F' U F U' U' U' R' U R "
+        "R U R' U' U F' U' U' F U' F U U F' U U F U' F' U F' U F U' U' "
+        "F' U F F R U R' U' F' B U L U' L' B' U U' U'"
+    )
+    L_BASED = (
+        "U' L B D' F' U F' U' U U F U R' U R U' L' U L U' U' U' F' U F "
+        "F U F' U' U L' U' U' L U' L U U L' U U L U' L' U L' U L U' U' "
+        "L' U L L F U F' U' L' R U B U' B' R' U U' U'"
+    )
+    B_BASED = (
+        "U' B R D' L' U L' U' U U L U F' U F U' B' U B U' U' U' L' U L "
+        "L U L' U' U B' U' U' B U' B U U B' U U B U' B' U B' U B U' U' "
+        "B' U B B L U L' U' B' F U R U' R' F' U U' U'"
+    )
+    R_BASED = (
+        "U' R F D' B' U B' U' U U B U L' U L U' R' U R U' U' U' B' U B "
+        "B U B' U' U R' U' U' R U' R U U R' U U R U' R' U R' U R U' U' "
+        "R' U R R B U B' U' R' L U F U' F' L' U U' U'"
+    )
+
+    def scores(self) -> dict[str, float]:
+        """
+        Compute the ergonomic scores of the four reference algorithms.
+
+        Returns:
+            Mapping of base-face label to ergonomic score.
+
+        """
+        return {
+            name: compute_ergonomics(
+                Algorithm.parse_moves(moves),
+            ).ergonomic_score
+            for name, moves in [
+                ('F', self.F_BASED),
+                ('L', self.L_BASED),
+                ('B', self.B_BASED),
+                ('R', self.R_BASED),
+            ]
+        }
+
+    def test_four_distinct_scores(self) -> None:
+        """Test that the four reference algorithms get distinct scores."""
+        scores = self.scores()
+        self.assertEqual(len(set(scores.values())), 4)
+
+    def test_no_saturation(self) -> None:
+        """Test that no reference algorithm saturates the scale."""
+        for name, score in self.scores().items():
+            with self.subTest(base=name):
+                self.assertLess(score, 0.85)
+
+    def test_r_based_beats_b_based(self) -> None:
+        """Test that the R-based variant outscores the B-based one."""
+        scores = self.scores()
+        self.assertGreater(scores['R'], scores['B'])
+
+    def test_clean_oll_stays_high(self) -> None:
+        """Test that a clean R/U algorithm like Sune scores above 0.8."""
+        sune = Algorithm.parse_moves("R U R' U R U2 R'")
+        self.assertGreater(compute_ergonomics(sune).ergonomic_score, 0.8)
+
+    def test_awkward_faces_score_low(self) -> None:
+        """Test that a B/D/E-based algorithm scores below 0.5."""
+        awkward = Algorithm.parse_moves('B2 E2 S2 D2')
+        self.assertLess(compute_ergonomics(awkward).ergonomic_score, 0.5)
 
 
 class TestClassifyAlgorithmDifficulty(unittest.TestCase):
@@ -715,21 +851,21 @@ class TestClassifyAlgorithmDifficulty(unittest.TestCase):
     def test_easy_algorithm_beginner(self) -> None:
         """Test that very easy algorithms classify as Beginner."""
         alg = Algorithm.parse_moves("R U R'")
-        inputs = ergonomic_inputs(alg)
-        score = calculate_ergonomic_score(alg, **inputs)
+        inputs = score_inputs(alg)
+        score = calculate_ergonomic_score(alg, inputs=inputs)
         difficulty = classify_algorithm_difficulty(
-            score, inputs['regrip_count'], inputs['flow'],
+            score, inputs.regrip_count, inputs.flow,
         )
         self.assertIn(difficulty, ['Beginner', 'Intermediate'])
 
     def test_expert_classification(self) -> None:
         """Test that rotation-heavy algorithms classify as Expert."""
         alg = Algorithm.parse_moves('x x x x x x x x')
-        inputs = ergonomic_inputs(alg)
-        score = calculate_ergonomic_score(alg, **inputs)
+        inputs = score_inputs(alg)
+        score = calculate_ergonomic_score(alg, inputs=inputs)
         self.assertEqual(
             classify_algorithm_difficulty(
-                score, inputs['regrip_count'], inputs['flow'],
+                score, inputs.regrip_count, inputs.flow,
             ),
             'Expert',
         )
@@ -738,28 +874,28 @@ class TestClassifyAlgorithmDifficulty(unittest.TestCase):
         """Test that classification returns valid values."""
         valid = {'Beginner', 'Intermediate', 'Advanced', 'Expert'}
         alg = Algorithm.parse_moves('R U F L B D M E S')
-        inputs = ergonomic_inputs(alg)
-        score = calculate_ergonomic_score(alg, **inputs)
+        inputs = score_inputs(alg)
+        score = calculate_ergonomic_score(alg, inputs=inputs)
         difficulty = classify_algorithm_difficulty(
-            score, inputs['regrip_count'], inputs['flow'],
+            score, inputs.regrip_count, inputs.flow,
         )
         self.assertIn(difficulty, valid)
 
     def test_hand_dominance_affects_classification(self) -> None:
         """Test that hand dominance can affect classification."""
         alg = Algorithm.parse_moves("L U L' U' L U L' U'")
-        inputs = ergonomic_inputs(alg)
+        inputs = score_inputs(alg)
         right_score = calculate_ergonomic_score(
-            alg, HandDominance.RIGHT, **inputs,
+            alg, HandDominance.RIGHT, inputs=inputs,
         )
         left_score = calculate_ergonomic_score(
-            alg, HandDominance.LEFT, **inputs,
+            alg, HandDominance.LEFT, inputs=inputs,
         )
         right_diff = classify_algorithm_difficulty(
-            right_score, inputs['regrip_count'], inputs['flow'],
+            right_score, inputs.regrip_count, inputs.flow,
         )
         left_diff = classify_algorithm_difficulty(
-            left_score, inputs['regrip_count'], inputs['flow'],
+            left_score, inputs.regrip_count, inputs.flow,
         )
         valid = {'Beginner', 'Intermediate', 'Advanced', 'Expert'}
         self.assertIn(right_diff, valid)
@@ -791,7 +927,7 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
         """Test that suggestions are strings."""
         alg = Algorithm.parse_moves('R U F L B D M E S')
         suggestions = suggest_ergonomic_improvements(
-            alg, **ergonomic_inputs(alg),
+            alg, **suggestion_inputs(alg),
         )
         self.assertIsInstance(suggestions, list)
         for s in suggestions:
@@ -801,7 +937,7 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
         """Test suggestions for algorithm with many rotations."""
         alg = Algorithm.parse_moves('x y z x y')
         suggestions = suggest_ergonomic_improvements(
-            alg, **ergonomic_inputs(alg),
+            alg, **suggestion_inputs(alg),
         )
         rotation_suggestion = any('rotation' in s.lower() for s in suggestions)
         self.assertTrue(rotation_suggestion)
@@ -810,7 +946,7 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
         """Test suggestions for right-heavy algorithm."""
         alg = Algorithm.parse_moves('R R R R R R R R')
         suggestions = suggest_ergonomic_improvements(
-            alg, **ergonomic_inputs(alg),
+            alg, **suggestion_inputs(alg),
         )
         balance_suggestion = any('balance' in s.lower() for s in suggestions)
         self.assertTrue(balance_suggestion)
@@ -1562,7 +1698,7 @@ class TestComputeErgonomics(unittest.TestCase):
 
         # New fields
         self.assertGreater(result.ergonomic_score, 0.5)
-        self.assertGreater(result.flow_score, 0.7)
+        self.assertGreater(result.flow_score, 0.55)
         self.assertGreater(result.estimated_tps, 2.0)
         self.assertGreater(result.trigger_count, 0)  # Should detect Sexy Move
 
