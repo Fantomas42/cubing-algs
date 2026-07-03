@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from typing import NamedTuple
 
 from cubing_algs.constants import OPPOSITE_FACES
+from cubing_algs.constants import SYMMETRY_M
 from cubing_algs.move import Move
 from cubing_algs.triggers import TRIGGER_PATTERNS
 from cubing_algs.triggers import TriggerMatch
@@ -201,6 +202,9 @@ TRANSITION_PENALTIES: dict[str, float] = {
     'rotation': 0.5,
 }
 
+# Cube rotations are hand-neutral: the left-handed mirror keeps them as-is.
+MIRROR_IGNORE_MOVES = {'x', 'y', 'z'}
+
 
 def get_move_key(move: Move) -> str:
     """
@@ -229,6 +233,34 @@ def get_move_key(move: Move) -> str:
     return str(base_move)
 
 
+@cache
+def mirror_move_key(move_key: str) -> str:
+    """
+    Mirror a move key across the M slice.
+
+    R and L layers are swapped and the turn direction is inverted
+    (R becomes L', M becomes M'), while cube rotations and pauses
+    are left unchanged.
+
+    Args:
+        move_key: Move key to mirror, as returned by get_move_key.
+
+    Returns:
+        The mirrored move key.
+
+    """
+    from cubing_algs.parsing import parse_moves  # noqa: PLC0415
+    from cubing_algs.transform.symmetry import symmetry_moves  # noqa: PLC0415
+
+    return str(
+        symmetry_moves(
+            parse_moves(move_key),
+            MIRROR_IGNORE_MOVES,
+            SYMMETRY_M,
+        ),
+    )
+
+
 def get_move_ergonomic_weight(
     move: Move,
     hand_dominance: HandDominance = HandDominance.RIGHT,
@@ -237,6 +269,10 @@ def get_move_ergonomic_weight(
     Get the ergonomic weight for a single move.
 
     Returns a value between 0 and 1, where 1 is the most ergonomic.
+
+    MOVE_DATA holds right-handed weights; for left-handed users the
+    weight of the mirrored move is used instead, making both hands
+    perfectly symmetric.
 
     Args:
         move: The move to analyze.
@@ -247,22 +283,11 @@ def get_move_ergonomic_weight(
 
     """
     move_key = get_move_key(move)
-    props = MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES)
-    base_weight = props.weight
-
-    if hand_dominance == HandDominance.AMBIDEXTROUS:
-        return base_weight
-
-    # Adjust based on hand dominance
-    hand = props.hand
 
     if hand_dominance == HandDominance.LEFT:
-        if hand == HandDominance.RIGHT:
-            return max(0.0, base_weight * 0.75)
-        if hand == HandDominance.LEFT:
-            return min(1.0, base_weight * 1.33)
+        move_key = mirror_move_key(move_key)
 
-    return base_weight
+    return MOVE_DATA.get(move_key, DEFAULT_MOVE_PROPERTIES).weight
 
 
 def get_transition_penalty(move1: Move, move2: Move) -> float:

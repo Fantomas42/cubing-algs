@@ -28,6 +28,7 @@ from cubing_algs.ergonomics import get_ergonomic_rating
 from cubing_algs.ergonomics import get_move_ergonomic_weight
 from cubing_algs.ergonomics import get_move_key
 from cubing_algs.ergonomics import get_transition_penalty
+from cubing_algs.ergonomics import mirror_move_key
 from cubing_algs.ergonomics import normalize_algorithm_string
 from cubing_algs.ergonomics import suggest_ergonomic_improvements
 from cubing_algs.move import Move
@@ -197,6 +198,69 @@ class TestGetMoveErgonomicWeight(unittest.TestCase):
             Move('U2'), HandDominance.LEFT,
         )
         self.assertEqual(left_weight, right_weight)
+
+    def test_left_weight_is_mirrored_table_lookup(self) -> None:
+        """Test that LEFT weights come from the mirrored move entry."""
+        expectations = (
+            ('R', "L'"),
+            ("R'", 'L'),
+            ('R2', 'L2'),
+            ('L', "R'"),
+            ('U', "U'"),
+            ("U'", 'U'),
+            ('Rw', "Lw'"),
+            ('Lw2', 'Rw2'),
+            ('M', "M'"),
+            ('E2', 'E2'),
+            ('S', "S'"),
+            ('x', 'x'),
+            ("y'", "y'"),
+            ('z2', 'z2'),
+        )
+        for move_key, mirrored_key in expectations:
+            with self.subTest(move=move_key, mirror=mirrored_key):
+                self.assertEqual(
+                    get_move_ergonomic_weight(
+                        Move(move_key), HandDominance.LEFT,
+                    ),
+                    MOVE_DATA[mirrored_key].weight,
+                )
+
+    def test_left_weight_mirror_property(self) -> None:
+        """Test weight(m, LEFT) == weight(mirror(m), RIGHT) for all moves."""
+        for move_key in MOVE_DATA:
+            with self.subTest(move=move_key):
+                mirrored_key = mirror_move_key(move_key)
+                self.assertEqual(
+                    get_move_ergonomic_weight(
+                        Move(move_key), HandDominance.LEFT,
+                    ),
+                    get_move_ergonomic_weight(
+                        Move(mirrored_key), HandDominance.RIGHT,
+                    ),
+                )
+
+
+class TestMirrorMoveKey(unittest.TestCase):
+    """Test the mirror_move_key helper."""
+
+    def test_mirror_is_an_involution(self) -> None:
+        """Test that mirroring twice returns the original key."""
+        for move_key in MOVE_DATA:
+            with self.subTest(move=move_key):
+                self.assertEqual(
+                    mirror_move_key(mirror_move_key(move_key)), move_key,
+                )
+
+    def test_mirror_covers_move_data(self) -> None:
+        """Test that every mirrored key is still a MOVE_DATA entry."""
+        for move_key in MOVE_DATA:
+            with self.subTest(move=move_key):
+                self.assertIn(mirror_move_key(move_key), MOVE_DATA)
+
+    def test_mirror_keeps_pauses_unchanged(self) -> None:
+        """Test that pauses are left unchanged by the mirror."""
+        self.assertEqual(mirror_move_key('.'), '.')
 
 
 class TestMoveDataCalibration(unittest.TestCase):
