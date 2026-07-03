@@ -15,6 +15,7 @@ from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import MAX_ITERATIONS
 from cubing_algs.cycles import compute_cycles
 from cubing_algs.ergonomics import ErgonomicsData
+from cubing_algs.ergonomics import HandDominance
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidMoveError
@@ -326,7 +327,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         of this algorithm.
 
         Computes comprehensive ergonomic metrics including hand balance,
-        fingertrick difficulty, regrip requirements, flow analysis, and
+        fingertrick comfort, regrip requirements, flow analysis, and
         overall execution comfort. This analysis considers speedcubing
         conventions for finger assignments and identifies awkward transitions.
 
@@ -337,15 +338,40 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         Example:
             >>> alg = Algorithm.parse_moves("R U R' U' R' F R F'")
             >>> ergo = alg.ergonomics
-            >>> ergo.comfort_score
-            72.5  # Comfort rating out of 100
+            >>> ergo.ergonomic_score
+            0.93  # Overall score from 0.0 to 1.0
             >>> ergo.ergonomic_rating
-            'Good'  # Qualitative assessment
+            'Excellent'  # Qualitative assessment
             >>> ergo.hand_balance_ratio
-            0.4  # Hand balance (0.5 is perfect)
+            0.5  # Hand balance (1.0 is perfect)
 
         """
-        return compute_ergonomics(self)
+        return self.compute_ergonomics()
+
+    def compute_ergonomics(
+            self,
+            hand_dominance: HandDominance = HandDominance.RIGHT,
+    ) -> ErgonomicsData:
+        """
+        Analyze the ergonomic properties for a given hand dominance.
+
+        Same analysis as the `ergonomics` property, but lets the caller
+        pick the hand dominance the metrics are computed for.
+
+        Args:
+            hand_dominance: The hand dominance preference.
+
+        Returns:
+            ErgonomicsData containing all calculated ergonomic metrics.
+
+        Example:
+            >>> alg = Algorithm.parse_moves("R U R' U'")
+            >>> lefty = alg.compute_ergonomics(HandDominance.LEFT)
+            >>> lefty.fingertrick_comfort
+            0.89  # Easier for a left-handed cuber
+
+        """
+        return compute_ergonomics(self, hand_dominance)
 
     @property
     def structure(self) -> StructureData:

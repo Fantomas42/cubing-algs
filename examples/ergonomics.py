@@ -116,8 +116,8 @@ def show_ergonomics(algorithm: str) -> None:
         color=gradient_color(ergo.flow_score, 0.4, 0.7),
     )
     stat(
-        'Fingertrick difficulty',
-        f'{ergo.fingertrick_difficulty:.2f}',
+        'Fingertrick comfort',
+        f'{ergo.fingertrick_comfort:.2f}',
         color=FG_YELLOW,
     )
 
@@ -127,13 +127,8 @@ def show_ergonomics(algorithm: str) -> None:
     stat('Both hands moves', ergo.both_hand_moves, color=FG_CYAN)
     stat(
         'Balance ratio',
-        f'{ergo.hand_balance_ratio:.2f} (0.5 = perfect)',
-        color=gradient_color(
-            abs(ergo.hand_balance_ratio - 0.5),
-            0.3,
-            0.1,
-            invert=True,
-        ),
+        f'{ergo.hand_balance_ratio:.2f} (1.0 = perfect)',
+        color=gradient_color(ergo.hand_balance_ratio, 0.4, 0.8),
     )
 
     section('FINGER DISTRIBUTION', FG_ORANGE)

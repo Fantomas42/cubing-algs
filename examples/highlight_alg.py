@@ -72,7 +72,7 @@ def build_pattern_variants() -> list[tuple[TriggerPattern, list[str]]]:
     for pattern in TRIGGER_PATTERNS:
         entries.append((pattern, parse_move_strings(pattern.moves)))
         entries.extend(
-            (pattern, parse_move_strings(variation))
+            (pattern, parse_move_strings(variation.moves))
             for variation in pattern.variations
         )
     entries.sort(key=lambda x: len(x[1]), reverse=True)
