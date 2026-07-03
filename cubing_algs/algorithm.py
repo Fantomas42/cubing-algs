@@ -327,7 +327,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         of this algorithm.
 
         Computes comprehensive ergonomic metrics including hand balance,
-        fingertrick difficulty, regrip requirements, flow analysis, and
+        fingertrick comfort, regrip requirements, flow analysis, and
         overall execution comfort. This analysis considers speedcubing
         conventions for finger assignments and identifies awkward transitions.
 
@@ -343,7 +343,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             >>> ergo.ergonomic_rating
             'Excellent'  # Qualitative assessment
             >>> ergo.hand_balance_ratio
-            0.25  # Hand balance (0.5 is perfect)
+            0.5  # Hand balance (1.0 is perfect)
 
         """
         return self.compute_ergonomics()
@@ -367,8 +367,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         Example:
             >>> alg = Algorithm.parse_moves("R U R' U'")
             >>> lefty = alg.compute_ergonomics(HandDominance.LEFT)
-            >>> lefty.fingertrick_difficulty
-            0.22  # Harder for a left-handed cuber
+            >>> lefty.fingertrick_comfort
+            0.89  # Easier for a left-handed cuber
 
         """
         return compute_ergonomics(self, hand_dominance)

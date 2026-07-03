@@ -22,7 +22,7 @@ from cubing_algs.ergonomics import classify_algorithm_difficulty
 from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.ergonomics import compute_estimated_execution_time
 from cubing_algs.ergonomics import compute_finger_distribution
-from cubing_algs.ergonomics import compute_fingertrick_difficulty
+from cubing_algs.ergonomics import compute_fingertrick_comfort
 from cubing_algs.ergonomics import compute_hand_balance
 from cubing_algs.ergonomics import compute_move_execution_time
 from cubing_algs.ergonomics import compute_regrip_count
@@ -953,7 +953,7 @@ class TestSuggestErgonomicImprovements(unittest.TestCase):
 
 
 class TestComputeHandBalance(unittest.TestCase):
-    """Test hand balance computation."""
+    """Test hand balance computation (ratio 0-1, 1 = perfectly balanced)."""
 
     def test_empty_algorithm(self) -> None:
         """Test hand balance for empty algorithm."""
@@ -962,7 +962,7 @@ class TestComputeHandBalance(unittest.TestCase):
         self.assertEqual(right, 0)
         self.assertEqual(left, 0)
         self.assertEqual(both, 0)
-        self.assertEqual(ratio, 0.5)  # Perfect balance for empty algorithm
+        self.assertEqual(ratio, 1.0)  # Perfect balance for empty algorithm
 
     def test_right_hand_dominant(self) -> None:
         """Test algorithm with right-hand dominant moves."""
@@ -971,7 +971,7 @@ class TestComputeHandBalance(unittest.TestCase):
         self.assertEqual(right, 3)  # R, U, R'
         self.assertEqual(left, 1)   # U'
         self.assertEqual(both, 0)
-        self.assertAlmostEqual(ratio, 0.25)  # min(3,1)/(3+1)
+        self.assertAlmostEqual(ratio, 0.5)  # 2*min(3,1)/(3+1)
 
     def test_left_hand_dominant(self) -> None:
         """Test algorithm with left-hand dominant moves."""
@@ -980,7 +980,7 @@ class TestComputeHandBalance(unittest.TestCase):
         self.assertEqual(right, 1)  # U
         self.assertEqual(left, 3)   # L', U', L
         self.assertEqual(both, 0)
-        self.assertAlmostEqual(ratio, 0.25)  # min(1,3)/(1+3)
+        self.assertAlmostEqual(ratio, 0.5)  # 2*min(1,3)/(1+3)
 
     def test_balanced_algorithm(self) -> None:
         """Test perfectly balanced algorithm."""
@@ -989,7 +989,7 @@ class TestComputeHandBalance(unittest.TestCase):
         self.assertEqual(right, 4)  # R, U, R', U
         self.assertEqual(left, 4)   # U', L', U', L
         self.assertEqual(both, 0)
-        self.assertEqual(ratio, 0.5)  # Perfect balance
+        self.assertEqual(ratio, 1.0)  # Perfect balance
 
     def test_only_both_hand_moves(self) -> None:
         """Test algorithm with only both-hand moves."""
@@ -998,7 +998,16 @@ class TestComputeHandBalance(unittest.TestCase):
         self.assertEqual(right, 0)
         self.assertEqual(left, 0)
         self.assertEqual(both, 4)
-        self.assertEqual(ratio, 0.5)  # Perfect balance when no handed moves
+        self.assertEqual(ratio, 1.0)  # Perfect balance when no handed moves
+
+    def test_ambidextrous_moves_excluded_from_ratio(self) -> None:
+        """Test that both-hand moves do not dilute the ratio (D3)."""
+        alg = Algorithm.parse_moves('R L U2 D2')
+        right, left, both, ratio = compute_hand_balance(alg)
+        self.assertEqual(right, 1)
+        self.assertEqual(left, 1)
+        self.assertEqual(both, 2)
+        self.assertEqual(ratio, 1.0)  # Only R and L are compared
 
     def test_with_pauses(self) -> None:
         """Test hand balance calculation ignores pauses."""
@@ -1377,62 +1386,62 @@ class TestComputeRegripCount(unittest.TestCase):
         self.assertEqual(regrips, 1)  # R' to L2 is still R to L opposite
 
 
-class TestComputeFingertrickDifficulty(unittest.TestCase):
-    """Test fingertrick difficulty computation (0-1 scale)."""
+class TestComputeFingertrickComfort(unittest.TestCase):
+    """Test fingertrick comfort computation (0-1 scale, higher = better)."""
 
     def test_empty_algorithm(self) -> None:
-        """Test fingertrick difficulty for empty algorithm."""
+        """Test fingertrick comfort for empty algorithm."""
         alg = Algorithm.parse_moves('')
-        difficulty = compute_fingertrick_difficulty(alg)
-        self.assertEqual(difficulty, 0.0)
+        comfort = compute_fingertrick_comfort(alg)
+        self.assertEqual(comfort, 1.0)
 
     def test_all_pause_algorithm(self) -> None:
-        """Test difficulty for non-empty algorithm with only pauses."""
+        """Test comfort for non-empty algorithm with only pauses."""
         alg = Algorithm([Move('.')])
-        self.assertEqual(compute_fingertrick_difficulty(alg), 0.0)
+        self.assertEqual(compute_fingertrick_comfort(alg), 1.0)
 
     def test_easy_moves(self) -> None:
-        """Test algorithm with easy moves has low difficulty."""
+        """Test algorithm with easy moves has high comfort."""
         alg = Algorithm.parse_moves('R U')
-        difficulty = compute_fingertrick_difficulty(alg)
-        # R=0.95, U=0.98, avg=0.965, difficulty=0.035
-        self.assertAlmostEqual(difficulty, 0.035)
+        comfort = compute_fingertrick_comfort(alg)
+        # R=0.95, U=0.98, avg=0.965
+        self.assertAlmostEqual(comfort, 0.965)
 
     def test_difficult_moves(self) -> None:
-        """Test algorithm with difficult moves has high difficulty."""
+        """Test algorithm with difficult moves has low comfort."""
         alg = Algorithm.parse_moves('S2 E2')
-        difficulty = compute_fingertrick_difficulty(alg)
-        # S2=0.35, E2=0.30, avg=0.325, difficulty=0.675
-        self.assertAlmostEqual(difficulty, 0.675)
+        comfort = compute_fingertrick_comfort(alg)
+        # S2=0.35, E2=0.30, avg=0.325
+        self.assertAlmostEqual(comfort, 0.325)
 
-    def test_mixed_difficulty(self) -> None:
-        """Test algorithm with mixed difficulty moves."""
+    def test_mixed_comfort(self) -> None:
+        """Test algorithm with mixed comfort moves."""
         alg = Algorithm.parse_moves('R M')
-        difficulty = compute_fingertrick_difficulty(alg)
-        # R=0.95, M=0.42, avg=0.685, difficulty=0.315
-        self.assertAlmostEqual(difficulty, 0.315)
+        comfort = compute_fingertrick_comfort(alg)
+        # R=0.95, M=0.42, avg=0.685
+        self.assertAlmostEqual(comfort, 0.685)
 
     def test_rotation_move_weight(self) -> None:
         """Test that rotation moves use ergonomic weights."""
         alg = Algorithm([Move('x')])
-        difficulty = compute_fingertrick_difficulty(alg)
-        # x=0.28, difficulty=0.72
-        self.assertAlmostEqual(difficulty, 0.72)
+        comfort = compute_fingertrick_comfort(alg)
+        # x weighs 0.28 in MOVE_DATA
+        self.assertAlmostEqual(comfort, 0.28)
 
     def test_with_pauses(self) -> None:
-        """Test fingertrick difficulty calculation ignores pauses."""
+        """Test fingertrick comfort calculation ignores pauses."""
         alg = Algorithm.parse_moves('R . U')
-        difficulty = compute_fingertrick_difficulty(alg)
-        # R=0.95, U=0.98, avg=0.965, difficulty=0.035
-        self.assertAlmostEqual(difficulty, 0.035)
+        comfort = compute_fingertrick_comfort(alg)
+        # R=0.95, U=0.98, avg=0.965
+        self.assertAlmostEqual(comfort, 0.965)
 
     def test_hand_dominance_param(self) -> None:
-        """Test that hand dominance affects difficulty."""
+        """Test that hand dominance affects comfort."""
         alg = Algorithm.parse_moves('B B B B')
-        right_diff = compute_fingertrick_difficulty(alg, HandDominance.RIGHT)
-        left_diff = compute_fingertrick_difficulty(alg, HandDominance.LEFT)
-        # B moves (left-hand, weight=0.6) should be easier for left-handed
-        self.assertGreater(right_diff, left_diff)
+        right_comfort = compute_fingertrick_comfort(alg, HandDominance.RIGHT)
+        left_comfort = compute_fingertrick_comfort(alg, HandDominance.LEFT)
+        # B moves (left-hand) should be more comfortable for left-handed
+        self.assertLess(right_comfort, left_comfort)
 
 
 class TestComputeMoveExecutionTime(unittest.TestCase):
@@ -1643,11 +1652,11 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 0)
         self.assertEqual(result.left_hand_moves, 0)
         self.assertEqual(result.both_hand_moves, 0)
-        self.assertEqual(result.hand_balance_ratio, 0.5)
+        self.assertEqual(result.hand_balance_ratio, 1.0)
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.awkward_moves, 0)
         self.assertEqual(result.estimated_execution_time, 0.0)
-        self.assertEqual(result.fingertrick_difficulty, 0.0)
+        self.assertEqual(result.fingertrick_comfort, 1.0)
         self.assertEqual(result.thumb_moves, 0)
         self.assertEqual(result.index_finger_moves, 0)
         self.assertEqual(result.middle_finger_moves, 0)
@@ -1688,7 +1697,7 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 3)  # R, U, R'
         self.assertEqual(result.left_hand_moves, 1)   # U'
         self.assertEqual(result.both_hand_moves, 0)
-        self.assertAlmostEqual(result.hand_balance_ratio, 0.25)  # min(3,1)/4
+        self.assertAlmostEqual(result.hand_balance_ratio, 0.5)  # 2*min(3,1)/4
         self.assertEqual(result.regrip_count, 0)  # All adjacent transitions
         self.assertEqual(result.thumb_moves, 2)  # R, R'
         self.assertEqual(result.index_finger_moves, 2)  # U, U'
@@ -1711,7 +1720,7 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 1)  # U
         self.assertEqual(result.left_hand_moves, 3)   # L', U', L
         self.assertEqual(result.both_hand_moves, 0)
-        self.assertAlmostEqual(result.hand_balance_ratio, 0.25)  # min(1,3)/4
+        self.assertAlmostEqual(result.hand_balance_ratio, 0.5)  # 2*min(1,3)/4
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.thumb_moves, 2)  # L', L
         self.assertEqual(result.index_finger_moves, 2)  # U', U
@@ -1726,7 +1735,7 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 4)  # R, U, R', U
         self.assertEqual(result.left_hand_moves, 4)   # U', L', U', L
         self.assertEqual(result.both_hand_moves, 0)
-        self.assertEqual(result.hand_balance_ratio, 0.5)  # Perfect balance
+        self.assertEqual(result.hand_balance_ratio, 1.0)  # Perfect balance
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.thumb_moves, 4)  # R, R', L', L
         self.assertEqual(result.index_finger_moves, 4)  # All U moves
@@ -1741,8 +1750,8 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 2)  # E2, S2
         self.assertEqual(result.left_hand_moves, 1)   # M2
         self.assertEqual(result.both_hand_moves, 0)
-        # 1 left, 2 right → min(1,2)/(1+2) = 1/3
-        self.assertAlmostEqual(result.hand_balance_ratio, 1 / 3)
+        # 1 left, 2 right → 2*min(1,2)/(1+2) = 2/3
+        self.assertAlmostEqual(result.hand_balance_ratio, 2 / 3)
         # No rotation moves, no opposite-face transitions
         self.assertEqual(result.regrip_count, 0)
         self.assertEqual(result.thumb_moves, 0)
@@ -1778,12 +1787,12 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.right_hand_moves, 10)
         self.assertEqual(result.left_hand_moves, 3)   # F', U', U'
         self.assertEqual(result.both_hand_moves, 0)
-        # 10 right, 3 left → min(10,3)/(10+3) = 3/13
-        self.assertAlmostEqual(result.hand_balance_ratio, 3 / 13)
+        # 10 right, 3 left → 2*min(10,3)/(10+3) = 6/13
+        self.assertAlmostEqual(result.hand_balance_ratio, 6 / 13)
 
         # Check for specific expected values
         self.assertGreater(result.estimated_execution_time, 0)
-        self.assertGreater(result.fingertrick_difficulty, 0)
+        self.assertLess(result.fingertrick_comfort, 1.0)
         expected_ratings = ['Excellent', 'Good', 'Fair', 'Poor', 'Very Poor']
         self.assertIn(result.ergonomic_rating, expected_ratings)
 
@@ -1801,7 +1810,7 @@ class TestComputeErgonomics(unittest.TestCase):
         self.assertEqual(result.total_moves, 4)
         self.assertEqual(result.right_hand_moves, 2)  # R, F
         self.assertEqual(result.left_hand_moves, 2)  # L, B
-        self.assertEqual(result.hand_balance_ratio, 0.5)  # Perfect balance
+        self.assertEqual(result.hand_balance_ratio, 1.0)  # Perfect balance
         # R->L opposite (regrip), F->B opposite (regrip)
         self.assertEqual(result.regrip_count, 2)
         # B=0.52 is below AWKWARD_THRESHOLD=0.6; R, L, F are not
@@ -1851,7 +1860,7 @@ class TestComputeErgonomics(unittest.TestCase):
         # Test float fields
         self.assertIsInstance(result.hand_balance_ratio, float)
         self.assertIsInstance(result.estimated_execution_time, float)
-        self.assertIsInstance(result.fingertrick_difficulty, float)
+        self.assertIsInstance(result.fingertrick_comfort, float)
 
         # Test string field
         self.assertIsInstance(result.ergonomic_rating, str)

@@ -1735,7 +1735,7 @@ class AlgorithmErgonomicsTestCase(unittest.TestCase):
         left = algo.compute_ergonomics(HandDominance.LEFT)
 
         self.assertNotEqual(
-            right.fingertrick_difficulty, left.fingertrick_difficulty,
+            right.fingertrick_comfort, left.fingertrick_comfort,
         )
 
 

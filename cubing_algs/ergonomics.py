@@ -2,7 +2,7 @@
 Ergonomics analysis tools for Rubik's cube algorithms.
 
 This module provides functions to analyze the ergonomic properties
-of algorithms, including hand balance, fingertrick difficulty,
+of algorithms, including hand balance, fingertrick comfort,
 regrip requirements, trigger pattern detection, and overall
 execution comfort.
 """
@@ -45,7 +45,47 @@ class FingerAssignment(Enum):
 
 
 class ErgonomicsData(NamedTuple):
-    """Container for ergonomics computation results."""
+    """
+    Container for ergonomics computation results.
+
+    All normalized metrics share the same scale: 0.0 to 1.0,
+    higher is better.
+
+    Attributes:
+        total_moves: Number of non-pause moves.
+        right_hand_moves: Moves executed by the right hand.
+        left_hand_moves: Moves executed by the left hand.
+        both_hand_moves: Moves executable by either hand; excluded
+            from hand_balance_ratio.
+        hand_balance_ratio: 2 * min(right, left) / (right + left),
+            0.0 (one-handed) to 1.0 (perfectly balanced).
+        regrip_count: Estimated number of regrips (count, lower is
+            better).
+        awkward_moves: Moves with an ergonomic weight below
+            AWKWARD_THRESHOLD (count, lower is better).
+        estimated_execution_time: Estimated execution time in seconds.
+        fingertrick_comfort: Average ergonomic move weight, 0.0
+            (awkward) to 1.0 (comfortable).
+        thumb_moves: Moves assigned to the thumb.
+        index_finger_moves: Moves assigned to the index finger.
+        middle_finger_moves: Moves assigned to the middle finger.
+        ring_finger_moves: Moves assigned to the ring finger.
+        pinky_finger_moves: Moves assigned to the pinky finger.
+        mixed_finger_moves: Moves without a single-finger assignment.
+        ergonomic_rating: Qualitative rating derived from
+            ergonomic_score (Excellent to Very Poor).
+        ergonomic_score: Overall weighted score, 0.0 to 1.0.
+        flow_score: Transition smoothness, 0.0 to 1.0.
+        estimated_tps: Derived turns per second
+            (total_moves / estimated_execution_time).
+        difficulty_classification: Beginner, Intermediate, Advanced
+            or Expert, derived from the final score.
+        trigger_count: Number of detected trigger patterns.
+        trigger_coverage: Number of moves covered by triggers.
+        detected_patterns: Names of the detected trigger patterns.
+        suggestions: Improvement suggestions.
+
+    """
 
     total_moves: int
 
@@ -61,7 +101,7 @@ class ErgonomicsData(NamedTuple):
 
     # Execution metrics
     estimated_execution_time: float
-    fingertrick_difficulty: float
+    fingertrick_comfort: float
 
     # Move type distribution
     thumb_moves: int
@@ -644,7 +684,6 @@ def calculate_ergonomic_score(
         return 1.0
 
     avg_move_score = sum(move_weights) / len(move_weights)
-    hand_balance = inputs.balance_ratio * 2  # Convert 0-0.5 range to 0-1
     regrip_score = max(
         0.0, 1.0 - (inputs.regrip_count / len(move_weights)),
     )
@@ -656,7 +695,7 @@ def calculate_ergonomic_score(
             avg_move_score * SCORE_WEIGHT_MOVES
             + inputs.flow * SCORE_WEIGHT_FLOW
             + inputs.trigger_score * SCORE_WEIGHT_TRIGGERS
-            + hand_balance * SCORE_WEIGHT_BALANCE
+            + inputs.balance_ratio * SCORE_WEIGHT_BALANCE
             + regrip_score * SCORE_WEIGHT_REGRIPS,
         ),
     )
@@ -731,7 +770,7 @@ def suggest_ergonomic_improvements(
             'Consider reducing cube rotations to minimize regrips',
         )
 
-    if balance_ratio * 2 < BALANCE_THRESHOLD:
+    if balance_ratio < BALANCE_THRESHOLD:
         suggestions.append('Try to balance moves between both hands')
 
     if flow < FLOW_THRESHOLD:
@@ -786,13 +825,14 @@ def compute_hand_balance(moves: 'Algorithm') -> tuple[int, int, int, float]:
         else:
             both_count += 1
 
-    # Calculate balance ratio
-    # (0.5 is perfect balance, closer to 0 or 1 is imbalanced)
+    # Balance ratio: 0.0 (one-handed) to 1.0 (perfectly balanced).
+    # Ambidextrous moves are excluded: only clearly handed moves are
+    # compared (decision D3); the three counters stay exposed.
     total_handed = right_count + left_count
     if total_handed == 0:
-        balance_ratio = 0.5
+        balance_ratio = 1.0
     else:
-        balance_ratio = min(right_count, left_count) / total_handed
+        balance_ratio = 2 * min(right_count, left_count) / total_handed
 
     return right_count, left_count, both_count, balance_ratio
 
@@ -888,26 +928,26 @@ def compute_regrip_count(moves: 'Algorithm') -> int:
     return regrip_count
 
 
-def compute_fingertrick_difficulty(
+def compute_fingertrick_comfort(
     moves: 'Algorithm',
     hand_dominance: HandDominance = HandDominance.RIGHT,
 ) -> float:
     """
-    Calculate overall fingertrick difficulty score.
+    Calculate overall fingertrick comfort score.
 
-    Based on ergonomic weights where higher difficulty means harder
-    execution (inverted from weight scale).
+    Average of the ergonomic move weights: higher means more
+    comfortable execution.
 
     Args:
         moves: 'Algorithm' to analyze.
         hand_dominance: The hand dominance preference.
 
     Returns:
-        Difficulty score from 0.0 (easiest) to 1.0 (hardest).
+        Comfort score from 0.0 (most awkward) to 1.0 (most comfortable).
 
     """
     if not moves:
-        return 0.0
+        return 1.0
 
     total_weight = 0.0
     move_count = 0
@@ -921,10 +961,9 @@ def compute_fingertrick_difficulty(
         move_count += 1
 
     if move_count == 0:
-        return 0.0
+        return 1.0
 
-    avg_weight = total_weight / move_count
-    return 1.0 - avg_weight
+    return total_weight / move_count
 
 
 def compute_move_execution_time(
@@ -1045,11 +1084,11 @@ def compute_ergonomics(  # noqa: PLR0914
             right_hand_moves=0,
             left_hand_moves=0,
             both_hand_moves=0,
-            hand_balance_ratio=0.5,
+            hand_balance_ratio=1.0,
             regrip_count=0,
             awkward_moves=0,
             estimated_execution_time=0.0,
-            fingertrick_difficulty=0.0,
+            fingertrick_comfort=1.0,
             thumb_moves=0,
             index_finger_moves=0,
             middle_finger_moves=0,
@@ -1079,7 +1118,7 @@ def compute_ergonomics(  # noqa: PLR0914
 
     # Calculate difficulty metrics
     regrip_count = compute_regrip_count(algorithm)
-    fingertrick_difficulty = compute_fingertrick_difficulty(
+    fingertrick_comfort = compute_fingertrick_comfort(
         algorithm,
         hand_dominance,
     )
@@ -1148,7 +1187,7 @@ def compute_ergonomics(  # noqa: PLR0914
         regrip_count=regrip_count,
         awkward_moves=awkward_moves,
         estimated_execution_time=execution_time,
-        fingertrick_difficulty=fingertrick_difficulty,
+        fingertrick_comfort=fingertrick_comfort,
         thumb_moves=thumb,
         index_finger_moves=index,
         middle_finger_moves=middle,
