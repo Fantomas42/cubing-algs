@@ -153,7 +153,7 @@ def build_demo(image_size: int, rotation: str, term_timer_url: str) -> str:
                 mode=mode,
                 image_size=image_size,
                 rotation=rotation,
-                layout='cube',
+                layout='mirror',
             )
 
             render_alg = quote_plus(f'z2 { setup }')

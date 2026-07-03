@@ -52,3 +52,12 @@ STRIP_TAPER = 0.05
 
 # Lightness multiplier applied to dimmed (hidden) stickers
 DIM_LUMINANCE_FACTOR = 0.55
+
+# Mirror effects
+MIRROR_OFFSET = 1.3
+MIRROR_ALPHA = 0.8
+
+# Allowed ghost panel overflow beyond the frame, as a fraction of the
+# half image size. Enlarges the whole scene at the cost of slightly
+# cropping the outermost panel corners.
+MIRROR_FIT_TOLERANCE = 0.05

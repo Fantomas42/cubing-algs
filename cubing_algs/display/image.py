@@ -20,6 +20,9 @@ from cubing_algs.display.constants import DIM_LUMINANCE_FACTOR
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.constants import IMAGE_SIZE
 from cubing_algs.display.constants import MIN_DISTANCE
+from cubing_algs.display.constants import MIRROR_ALPHA
+from cubing_algs.display.constants import MIRROR_FIT_TOLERANCE
+from cubing_algs.display.constants import MIRROR_OFFSET
 from cubing_algs.display.constants import ROTATION
 from cubing_algs.display.constants import STICKER_GAP
 from cubing_algs.display.constants import STRIP_DEPTH
@@ -212,8 +215,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         )
 
         parsed_arrows = self.parse_arrows(arrows)
+        final_layout = layout or mode_layout
 
-        if (layout or mode_layout) == 'top':
+        if final_layout == 'top':
             return self.render_top(
                 image_size or IMAGE_SIZE,
                 cube.state,
@@ -228,6 +232,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             rotation or ROTATION,
             distance or DISTANCE,
             parsed_arrows,
+            mirror=final_layout == 'mirror',
         )
 
     def render_cube(  # noqa: PLR0913, PLR0914, PLR0917
@@ -240,9 +245,16 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             arrows: (
                 list[tuple[Facelet, int, Facelet, int, str]] | None
             ) = None,
+            *,
+            mirror: bool = False,
     ) -> str:
         """
         Build a 3D SVG cube.
+
+        When ``mirror`` is true, the 3 hidden faces are prepended as
+        semi-transparent ghost panels offset outward along their 3D
+        normals. Hidden faces respect the mask the same way visible
+        faces do.
 
         Args:
             image_size: Output image dimension in pixels (width and height).
@@ -254,7 +266,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             arrows: Pre-parsed arrow tuples ``(from_face, from_idx,
                     to_face, to_idx, color)``. An empty ``color`` falls
                     back to the palette arrow color. ``None`` means no
-                    arrows.
+                    arrows. Only visible-face arrows render; hidden-face
+                    arrows are silently skipped.
+            mirror: Whether to render hidden faces as ghost panels.
 
         Returns:
             Complete SVG document as a string.
@@ -263,57 +277,120 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         distance = max(distance, MIN_DISTANCE + 0.01)
 
         rotations = self.parse_rotation(rotation)
-        visible = self.compute_visible_faces(rotations, distance)
+        visible, mirrored = self.compute_faces(
+            rotations, distance, hidden=mirror,
+        )
 
         margin = image_size * 0.002
-        max_extent = math.sqrt(
-            3 * distance ** 2 / (distance ** 2 - 3),
-        )
+        if mirror:
+            # Ghost panels extend beyond the cube's bounding sphere by
+            # MIRROR_OFFSET, so fit the scale to the actual projected
+            # corners. A projected planar quad is bounded by its
+            # corners, so this fit is exact for any rotation. The
+            # tolerance lets the outermost panel corners overflow the
+            # frame slightly, enlarging the whole scene.
+            max_extent = max(
+                max(abs(x), abs(y))
+                for _, corners_2d, _ in visible + mirrored
+                for x, y in corners_2d
+            ) / (1 + MIRROR_FIT_TOLERANCE)
+        else:
+            max_extent = math.sqrt(
+                3 * distance ** 2 / (distance ** 2 - 3),
+            )
         scale = (image_size - 2 * margin) / (2 * max_extent)
         cx, cy = image_size / 2, image_size / 2
 
         cr, cg, cb, ca = hex_to_rgba(self.palette['cube_color'])
         body_fill = f'rgba({cr},{cg},{cb},{ca:.2f})'
 
-        # Draw each visible face back-to-front: the face body polygon
-        # first, then its stickers on top. Per-face body polygons cover
-        # exactly the projected face area, so near edge-on faces do not
-        # leave gaps that would show through a larger silhouette fill.
-        face_groups: list[str] = []
-        for face_name, corners_2d, face_state_idx in visible:
-            svg_corners = [
-                self.point_to_svg_coords(c, cx, cy, scale)
-                for c in corners_2d
-            ]
-            face_start = face_state_idx * self.face_size
-            face_stickers = self.build_face_stickers(
-                svg_corners,
-                state[face_start:face_start + self.face_size],
-                mask[face_start:face_start + self.face_size],
-            )
-            body = self.build_polygon(svg_corners, body_fill)
-            face_groups.append(
-                f'<g class="face-{ face_name }">\n'
-                f'{ body }\n{ "\n".join(face_stickers) }\n</g>',
-            )
+        # Ghost panels skip the cube body color entirely: their sticker
+        # gaps stay transparent instead of showing the plastic color,
+        # so they read as translucent projections rather than cube parts.
+        passes: list[tuple[list[FaceData], str, str]] = [
+            (mirrored, f' opacity="{ MIRROR_ALPHA }"', 'none'),
+            (visible, '', body_fill),
+        ]
 
-        if arrows:
-            visible_by_face: dict[Facelet, list[Point2D]] = {
-                face_name: [
+        # Draw each face back-to-front: ghost panels first, then for
+        # each face its body polygon first and its stickers on top.
+        # Per-face body polygons cover exactly the projected face area,
+        # so near edge-on faces do not leave gaps that would show
+        # through a larger silhouette fill.
+        face_groups: list[str] = []
+        visible_corners: dict[Facelet, list[Point2D]] = {}
+
+        for faces, opacity, fill in passes:
+            for face_name, corners_2d, face_state_idx in faces:
+                svg_corners = [
                     self.point_to_svg_coords(c, cx, cy, scale)
                     for c in corners_2d
                 ]
-                for face_name, corners_2d, _ in visible
-            }
+                if not opacity:
+                    visible_corners[face_name] = svg_corners
+                face_start = face_state_idx * self.face_size
+                face_stickers = self.build_face_stickers(
+                    svg_corners,
+                    state[face_start:face_start + self.face_size],
+                    mask[face_start:face_start + self.face_size],
+                )
+                body = self.build_polygon(svg_corners, fill)
+                face_groups.append(
+                    f'<g class="face-{ face_name }"{ opacity }>\n'
+                    f'{ body }\n{ "\n".join(face_stickers) }\n</g>',
+                )
+
+        if arrows:
             arrow_group = self.build_arrows_group(
                 arrows,
-                visible_by_face,
+                visible_corners,
                 image_size,
             )
             if arrow_group:
                 face_groups.append(arrow_group)
 
         return self.assemble_svg(image_size, face_groups)
+
+    def render_mirror(  # noqa: PLR0913
+            self,
+            image_size: int,
+            state: CubeFacelets,
+            mask: CubeDisplayMask,
+            *,
+            rotation: str = '',
+            distance: float = 0.0,
+            arrows: (
+                list[tuple[Facelet, int, Facelet, int, str]] | None
+            ) = None,
+    ) -> str:
+        """
+        Build a 3D SVG cube with hidden faces shown as ghost panels.
+
+        Convenience wrapper around :meth:`render_cube` with
+        ``mirror=True``.
+
+        Args:
+            image_size: Output image dimension in pixels (width and height).
+            state: Complete cube state string representing all facelets.
+            mask: Mask to filter which facelets are displayed.
+            rotation: Camera rotation string (e.g. 'y45x-34').
+            distance: Camera distance from the cube center.
+            arrows: Pre-parsed arrow tuples. Only visible-face arrows
+                    render; hidden-face arrows are silently skipped.
+
+        Returns:
+            Complete SVG document as a string.
+
+        """
+        return self.render_cube(
+            image_size,
+            state,
+            mask,
+            rotation,
+            distance,
+            arrows,
+            mirror=True,
+        )
 
     def render_top(  # noqa: PLR0914
             self,
@@ -555,7 +632,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         Args:
             color_key: Face letter identifying the facelet color in the palette.
             mask_char: Mask character; '0' darkens the color (dimmed),
-                       '2' uses the masked color, '1' uses the normal color.
+                       '1' uses the normal color, '2' the masked color,
+                       '3' the cube body color, '4' the oriented color.
 
         Returns:
             SVG fill color string.
@@ -816,37 +894,17 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             Four corner points [TL, TR, BR, BL] of the sticker.
 
         """
-        t0_col = col / self.cube_size
-        t1_col = (col + 1) / self.cube_size
-        t0_row = row / self.cube_size
-        t1_row = (row + 1) / self.cube_size
-
+        n = self.cube_size
         # Gap is per-cell: divide by n since the face is an nxn grid
-        gap = STICKER_GAP / self.cube_size
-        t0_col += gap
-        t1_col -= gap
-        t0_row += gap
-        t1_row -= gap
+        gap = STICKER_GAP / n
 
-        top_edge_0 = self.lerp_2d(
-            svg_corners[0], svg_corners[1], t0_col,
+        return self.bilinear_quad(
+            svg_corners,
+            col / n + gap,
+            (col + 1) / n - gap,
+            row / n + gap,
+            (row + 1) / n - gap,
         )
-        top_edge_1 = self.lerp_2d(
-            svg_corners[0], svg_corners[1], t1_col,
-        )
-        bot_edge_0 = self.lerp_2d(
-            svg_corners[3], svg_corners[2], t0_col,
-        )
-        bot_edge_1 = self.lerp_2d(
-            svg_corners[3], svg_corners[2], t1_col,
-        )
-
-        return [
-            self.lerp_2d(top_edge_0, bot_edge_0, t0_row),
-            self.lerp_2d(top_edge_1, bot_edge_1, t0_row),
-            self.lerp_2d(top_edge_1, bot_edge_1, t1_row),
-            self.lerp_2d(top_edge_0, bot_edge_0, t1_row),
-        ]
 
     def build_top_sticker_points(
             self,
@@ -868,30 +926,13 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         gap = STICKER_GAP / n
         inner_gap = gap * 2 / 3
 
-        t0_col = col / n + (gap if col == 0 else inner_gap)
-        t1_col = (col + 1) / n - (gap if col == n - 1 else inner_gap)
-        t0_row = row / n + (gap if row == 0 else inner_gap)
-        t1_row = (row + 1) / n - (gap if row == n - 1 else inner_gap)
-
-        top_edge_0 = self.lerp_2d(
-            svg_corners[0], svg_corners[1], t0_col,
+        return self.bilinear_quad(
+            svg_corners,
+            col / n + (gap if col == 0 else inner_gap),
+            (col + 1) / n - (gap if col == n - 1 else inner_gap),
+            row / n + (gap if row == 0 else inner_gap),
+            (row + 1) / n - (gap if row == n - 1 else inner_gap),
         )
-        top_edge_1 = self.lerp_2d(
-            svg_corners[0], svg_corners[1], t1_col,
-        )
-        bot_edge_0 = self.lerp_2d(
-            svg_corners[3], svg_corners[2], t0_col,
-        )
-        bot_edge_1 = self.lerp_2d(
-            svg_corners[3], svg_corners[2], t1_col,
-        )
-
-        return [
-            self.lerp_2d(top_edge_0, bot_edge_0, t0_row),
-            self.lerp_2d(top_edge_1, bot_edge_1, t0_row),
-            self.lerp_2d(top_edge_1, bot_edge_1, t1_row),
-            self.lerp_2d(top_edge_0, bot_edge_0, t1_row),
-        ]
 
     def build_strip_group(  # noqa: PLR0913, PLR0917
             self,
@@ -955,38 +996,85 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             Four corner points of the subdivided sticker.
 
         """
-        if horizontal:
-            gap = gap_frac / count
-            inner_gap = gap * 2 / 3
-            t0 = idx / count + (gap if idx == 0 else inner_gap)
-            t1 = (idx + 1) / count - (gap if idx == count - 1 else inner_gap)
-            top0 = self.lerp_2d(corners[0], corners[1], t0)
-            top1 = self.lerp_2d(corners[0], corners[1], t1)
-            bot0 = self.lerp_2d(corners[3], corners[2], t0)
-            bot1 = self.lerp_2d(corners[3], corners[2], t1)
-
-            return [
-                self.lerp_2d(top0, bot0, gap_frac),
-                self.lerp_2d(top1, bot1, gap_frac),
-                self.lerp_2d(top1, bot1, 1 - gap_frac),
-                self.lerp_2d(top0, bot0, 1 - gap_frac),
-            ]
-
         gap = gap_frac / count
         inner_gap = gap * 2 / 3
         t0 = idx / count + (gap if idx == 0 else inner_gap)
         t1 = (idx + 1) / count - (gap if idx == count - 1 else inner_gap)
-        left0 = self.lerp_2d(corners[0], corners[3], t0)
-        left1 = self.lerp_2d(corners[0], corners[3], t1)
-        right0 = self.lerp_2d(corners[1], corners[2], t0)
-        right1 = self.lerp_2d(corners[1], corners[2], t1)
 
-        return [
-            self.lerp_2d(left0, right0, gap_frac),
-            self.lerp_2d(left0, right0, 1 - gap_frac),
-            self.lerp_2d(left1, right1, 1 - gap_frac),
-            self.lerp_2d(left1, right1, gap_frac),
+        if horizontal:
+            return self.bilinear_quad(
+                corners, t0, t1, gap_frac, 1 - gap_frac,
+            )
+
+        return self.bilinear_quad(
+            corners, gap_frac, 1 - gap_frac, t0, t1,
+        )
+
+    def compute_faces(
+            self,
+            rotations: list[tuple[str, int]],
+            distance: float,
+            *,
+            hidden: bool = False,
+    ) -> tuple[list[FaceData], list[FaceData]]:
+        """
+        Compute projected faces in a single pass over vertices and normals.
+
+        Visible faces (rotated normal z > VISIBILITY_EPSILON) are always
+        computed. When ``hidden`` is true, the remaining faces are also
+        computed as mirror panels: their vertices are translated by
+        MIRROR_OFFSET * rotated_normal before projection, displacing
+        them outward in camera space.
+
+        Args:
+            rotations: List of (axis, degrees) rotation pairs.
+            distance: Camera distance for perspective projection.
+            hidden: Whether to also compute hidden faces as mirror panels.
+
+        Returns:
+            Tuple of (visible, mirror) lists of
+            (face_name, corner_2d_points, face_state_index), each sorted
+            back-to-front by average z-depth. The mirror list is empty
+            when ``hidden`` is false.
+
+        """
+        rotated = [
+            self.rotate_point(v, rotations) for v in CUBE_VERTICES
         ]
+
+        visible: list[tuple[Facelet, list[Point2D], int, float]] = []
+        mirror: list[tuple[Facelet, list[Point2D], int, float]] = []
+
+        for name, normal, indices, state_idx in FACE_DEFS:
+            rn = self.rotate_point(normal, rotations)
+
+            if rn[2] > VISIBILITY_EPSILON:
+                corners_3d = [rotated[i] for i in indices]
+                target = visible
+            elif hidden:
+                corners_3d = [
+                    (
+                        rotated[i][0] + MIRROR_OFFSET * rn[0],
+                        rotated[i][1] + MIRROR_OFFSET * rn[1],
+                        rotated[i][2] + MIRROR_OFFSET * rn[2],
+                    )
+                    for i in indices
+                ]
+                target = mirror
+            else:
+                continue
+
+            corners_2d = [self.project(c, distance) for c in corners_3d]
+            avg_z = sum(c[2] for c in corners_3d) / 4
+            target.append((name, corners_2d, state_idx, avg_z))
+
+        visible.sort(key=operator.itemgetter(3))
+        mirror.sort(key=operator.itemgetter(3))
+
+        return (
+            [(name, corners, idx) for name, corners, idx, _ in visible],
+            [(name, corners, idx) for name, corners, idx, _ in mirror],
+        )
 
     def compute_visible_faces(
             self,
@@ -1005,32 +1093,26 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             sorted back-to-front by average z-depth.
 
         """
-        rotated = [
-            self.rotate_point(v, rotations) for v in CUBE_VERTICES
-        ]
+        return self.compute_faces(rotations, distance)[0]
 
-        visible: list[tuple[Facelet, list[Point2D], int, float]] = []
+    def compute_mirror_faces(
+            self,
+            rotations: list[tuple[str, int]],
+            distance: float,
+    ) -> list[FaceData]:
+        """
+        Compute hidden faces with a 3D offset along their normals.
 
-        for name, normal, indices, state_idx in FACE_DEFS:
-            rn = self.rotate_point(normal, rotations)
+        Args:
+            rotations: List of (axis, degrees) rotation pairs.
+            distance: Camera distance for perspective projection.
 
-            if rn[2] > VISIBILITY_EPSILON:
-                corners_3d = [rotated[i] for i in indices]
-                corners_2d = [
-                    self.project(c, distance)
-                    for c in corners_3d
-                ]
-                avg_z = sum(c[2] for c in corners_3d) / 4
-                visible.append(
-                    (name, corners_2d, state_idx, avg_z),
-                )
+        Returns:
+            List of (face_name, corner_2d_points, face_state_index)
+            sorted back-to-front by average z-depth.
 
-        visible.sort(key=operator.itemgetter(3))
-
-        return [
-            (name, corners, idx)
-            for name, corners, idx, _ in visible
-        ]
+        """
+        return self.compute_faces(rotations, distance, hidden=True)[1]
 
     @staticmethod
     def rotate_point(
@@ -1125,6 +1207,39 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
             (u_right + depth, u_top + taper),
             (u_right + depth, u_bottom - taper),
             (u_right - overlap, u_bottom),
+        ]
+
+    @staticmethod
+    def bilinear_quad(
+            corners: list[Point2D],
+            t0_col: float,
+            t1_col: float,
+            t0_row: float,
+            t1_row: float,
+    ) -> list[Point2D]:
+        """
+        Interpolate an inner quad within a quadrilateral.
+
+        Column parameters run along the top (corners[0]-corners[1]) and
+        bottom (corners[3]-corners[2]) edges; row parameters interpolate
+        between those edges.
+
+        Returns:
+            Four corner points [TL, TR, BR, BL] of the inner quad.
+
+        """
+        lerp = ImageDisplay.lerp_2d
+
+        top_0 = lerp(corners[0], corners[1], t0_col)
+        top_1 = lerp(corners[0], corners[1], t1_col)
+        bot_0 = lerp(corners[3], corners[2], t0_col)
+        bot_1 = lerp(corners[3], corners[2], t1_col)
+
+        return [
+            lerp(top_0, bot_0, t0_row),
+            lerp(top_1, bot_1, t0_row),
+            lerp(top_1, bot_1, t1_row),
+            lerp(top_0, bot_0, t1_row),
         ]
 
     @staticmethod
