@@ -265,6 +265,11 @@ class GetStickerFillTestCase(unittest.TestCase):
         result = self.display.get_sticker_fill('U', '3')
         self.assertEqual(result, self.display.palette['cube_color'])
 
+    def test_mask_4_returns_oriented_color(self) -> None:
+        """mask_char '4' (oriented) returns the palette oriented color."""
+        result = self.display.get_sticker_fill('U', '4')
+        self.assertEqual(result, self.display.palette['oriented'])
+
 
 class AssembleSvgTestCase(unittest.TestCase):
     """Tests for SVG assembly."""

@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from cubing_algs.constants import FACE_NUMBER
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display.constants import EMOJIS
 from cubing_algs.display.vcube import VCubeDisplay
 from cubing_algs.display.vcube import color_support
 from cubing_algs.vcube import VCube
@@ -58,6 +59,22 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
             result = printer.display_facelet('X')  # Invalid facelet
             expected = 'm X \x1b[0;0m'
             self.assertIn(expected, result)
+
+    @patch.dict(os.environ, {'TERM': 'xterm-256color'})
+    def test_display_facelet_oriented_with_colors(self) -> None:
+        """Test display_facelet with mask='4' (oriented) in color mode."""
+        with patch('cubing_algs.display.vcube.USE_COLORS', True):  # noqa: FBT003
+            printer = VCubeDisplay(self.cube)
+            result = printer.display_facelet('U', '4')
+            # Oriented facelet uses the oriented color and a blank glyph
+            self.assertIn(printer.palette['oriented'], result)
+            self.assertIn('   ', result)
+
+    def test_display_facelet_oriented_emoji(self) -> None:
+        """Test display_facelet with mask='4' (oriented) in emoji mode."""
+        printer = VCubeDisplay(self.cube, facelet_type='emoji')
+        result = printer.display_facelet('U', '4')
+        self.assertEqual(result, EMOJIS['oriented'])
 
     @patch.dict(os.environ, {'TERM': 'xterm-256color'})
     def test_display_facelet_with_effect(self) -> None:
@@ -1488,6 +1505,18 @@ class TestColorSupport(unittest.TestCase):
     @patch.dict(os.environ, {'TERM': 'screen-256color'}, clear=True)
     def test_color_support_with_term_screen_256color(self) -> None:
         """Test color_support returns True when TERM='screen-256color'."""
+        result = color_support()
+        self.assertTrue(result)
+
+    @patch.dict(os.environ, {'WT_SESSION': 'some-guid'}, clear=True)
+    def test_color_support_with_wt_session(self) -> None:
+        """Test color_support returns True when WT_SESSION is set."""
+        result = color_support()
+        self.assertTrue(result)
+
+    @patch.dict(os.environ, {'ANSICON': '1'}, clear=True)
+    def test_color_support_with_ansicon(self) -> None:
+        """Test color_support returns True when ANSICON is set."""
         result = color_support()
         self.assertTrue(result)
 

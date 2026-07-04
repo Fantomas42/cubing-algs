@@ -866,7 +866,7 @@ def compute_finger_distribution(
             ring_count += 1
         elif finger == FingerAssignment.PINKY:
             pinky_count += 1
-        elif finger == FingerAssignment.MIXED:
+        else:  # FingerAssignment.MIXED
             none_count += 1
 
     return (
