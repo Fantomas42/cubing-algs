@@ -188,19 +188,19 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
 
-    def test_display_f2l_cll(self) -> None:
-        """Test display f2l+cll."""
+    def test_display_cll(self) -> None:
+        """Test display cll."""
         self.cube.rotate("z2 R U R' U' z2")
 
-        result = self.printer.display(mode='f2l+cll')
+        result = self.printer.display(mode='cll')
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
 
-    def test_display_f2l_ell(self) -> None:
-        """Test display f2l+ell."""
+    def test_display_ell(self) -> None:
+        """Test display ell."""
         self.cube.rotate("z2 R U R' U' z2")
 
-        result = self.printer.display(mode='f2l+ell')
+        result = self.printer.display(mode='ell')
         lines = result.split('\n')
         self.assertEqual(len(lines), 10)
 

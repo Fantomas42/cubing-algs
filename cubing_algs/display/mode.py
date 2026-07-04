@@ -7,17 +7,17 @@ from cubing_algs.annotations import POVDisplayMask
 from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.display.masks import AF2L_MASK
+from cubing_algs.display.masks import CLL_MASK
 from cubing_algs.display.masks import CMLL_MASK
 from cubing_algs.display.masks import CROSS_BOTTOM_MASK
 from cubing_algs.display.masks import CROSS_TOP_MASK
 from cubing_algs.display.masks import DIMMED_MASK
+from cubing_algs.display.masks import ELL_MASK
 from cubing_algs.display.masks import EO_CROSS_MASK
 from cubing_algs.display.masks import EO_EDGE_MASK
 from cubing_algs.display.masks import EO_LINE_MASK
 from cubing_algs.display.masks import EO_MASK
 from cubing_algs.display.masks import EO_SLICE_MASK
-from cubing_algs.display.masks import F2L_CLL_MASK
-from cubing_algs.display.masks import F2L_ELL_MASK
 from cubing_algs.display.masks import F2L_MASK
 from cubing_algs.display.masks import HIDDEN_MASK
 from cubing_algs.display.masks import L6EO_MASK
@@ -37,14 +37,14 @@ MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'll':           (LL_MASK,           'top', ''),                          # noqa: E241
     'oll':          (OLL_MASK,          'top', ''),                          # noqa: E241
     'pll':          (PLL_MASK,          'top', ''),                          # noqa: E241
+    'cll':          (CLL_MASK,          'top', ''),                          # noqa: E241
+    'ell':          (ELL_MASK,          'top', ''),                          # noqa: E241
     'cross-top':    (CROSS_TOP_MASK,    '',    'cross_top_orientation'),     # noqa: E241
     'cross-bottom': (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'cross':        (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'f2l':          (F2L_MASK,          '',    'f2l_orientation'),           # noqa: E241
     'af2l':         (AF2L_MASK,         '',    'f2l_orientation'),           # noqa: E241
-    'f2l+cll':      (F2L_CLL_MASK,      '',    'f2l_orientation'),           # noqa: E241
-    'f2l+ell':      (F2L_ELL_MASK,      '',    'f2l_orientation'),           # noqa: E241
-    'cmll':         (CMLL_MASK,         'top', ''),                          # noqa: E241
+    'cmll':         (CMLL_MASK,         '',    ''),                          # noqa: E241
     'lse':          (LSE_MASK,          '',    ''),                          # noqa: E241
     'l6eo':         (L6EO_MASK,         '',    ''),                          # noqa: E241
     'l10p':         (L10P_MASK,         '',    ''),                          # noqa: E241

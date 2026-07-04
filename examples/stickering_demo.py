@@ -34,14 +34,14 @@ DEMOS: list[tuple[str, list[tuple[str, str, str]]]] = [
     ('F2L', [
         ('f2l', "R2' u R2 u' R2'", 'F2L'),
         ('af2l', "R2' u R2 u' R2'", 'F2L'),
-        ('f2l+cll', "R U R' U' R U R' U R U' R'", 'CLS'),
-        ('f2l+ell', "M U' M' U2 M U' M'", 'ELL'),
     ]),
     ('Last Layer', [
         ('ll', "R' F R F2' U F R U R' F' U' F", 'LL'),
         ('oll', "r U R' U R U2 r'", 'OLL'),
         ('pll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL'),
-    ]),
+        ('cll', "R U2 R' U' R U' R'", 'CLL'),
+        ('ell', "M U' M' U2 M U' M'", 'ELL'),
+    ]),    
     ('Edge Orientation', [
         ('eo', "B U B' D F R' L D'", 'EO'),
         ('eo-cross', "B U B' D F R' L D'", 'EOcross'),
