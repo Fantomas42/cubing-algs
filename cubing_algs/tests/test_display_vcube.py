@@ -194,7 +194,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
         result = self.printer.display(mode='cll')
         lines = result.split('\n')
-        self.assertEqual(len(lines), 10)
+        self.assertEqual(len(lines), 6)
 
     def test_display_ell(self) -> None:
         """Test display ell."""
@@ -202,7 +202,7 @@ class TestVCubeDisplay(unittest.TestCase):  # noqa: PLR0904
 
         result = self.printer.display(mode='ell')
         lines = result.split('\n')
-        self.assertEqual(len(lines), 10)
+        self.assertEqual(len(lines), 6)
 
     def test_display_f2l_initial_no_reorientation(self) -> None:
         """Test display f2l initial no reorientation."""

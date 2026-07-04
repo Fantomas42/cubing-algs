@@ -45,7 +45,7 @@ DEMOS: list[tuple[str, list[tuple[str, str, str]]]] = [
         ('pll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL'),
         ('cll', "R U2 R' U' R U' R'", 'CLL'),
         ('ell', "M U' M' U2 M U' M'", 'ELL'),
-    ]),    
+    ]),
     ('Edge Orientation', [
         ('eo', "B U B' D F R' L D'", 'EO'),
         ('eo-cross', "B U B' D F R' L D'", 'EOcross'),
