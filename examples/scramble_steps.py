@@ -120,8 +120,8 @@ STEP_INFO: dict[str, tuple[str, str]] = {
     'EJLS': ('Edge Just Last Slot (DFR disoriented)', 'f2l'),
     'EJF2L': ('Edge Just F2L', 'f2l'),
     'TTLL': ('Two-Twist Last Layer (DFR + U corners)', 'f2l'),
-    'WV': ("Winter Variation (after R U R')", 'f2l+ll'),
-    'SV': ("Summer Variation (after R U' R')", 'f2l+ll'),
+    'WV': ("Winter Variation (after R U R')", 'll'),
+    'SV': ("Summer Variation (after R U' R')", 'll'),
     'VLS': ("Valk Last Slot (after R U' R')", 'f2l'),
     'VHLS': ('Valk-Harris Last Slot', 'f2l'),
     # Roux method

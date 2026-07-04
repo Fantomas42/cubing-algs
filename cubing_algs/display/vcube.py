@@ -123,8 +123,7 @@ class VCubeDisplay(ModeDisplay):
             mode: Solving-stage preset.
                 Sets mask, orientation, and layout together.
                 Supported values: ``'oll'``, ``'pll'``, ``'ll'``,
-                ``'cross'``, ``'f2l'``, ``'af2l'``, ``'f2l+ll'``,
-                ``'f2l+cll'``, ``'f2l+ell'``.
+                ``'cross'``, ``'f2l'``, ``'af2l'``, etc...
             layout: Face arrangement for the output.
                 One of ``'cube'`` (cross net, default),
                 ``'top'`` (U face with one row of each adjacent face),
