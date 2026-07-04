@@ -493,13 +493,13 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          d  d  f \n'
-            '          d  d  L \n'
-            '          d  d  L \n'
-            ' r  f  f  l  l  U  B  B  d  r  b  b \n'
-            ' F  F  F  L  L  d  r  B  B  R  R  R \n'
-            ' F  F  F  L  L  l  d  B  B  R  R  R \n'
-            '          U  U  b \n'
+            '                  \n'
+            '                L \n'
+            '                L \n'
+            '                U  B  B             \n'
+            ' F  F  F  L  L        B  B  R  R  R \n'
+            ' F  F  F  L  L        B  B  R  R  R \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -512,13 +512,13 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          d  d  r \n'
-            '          d  d  r \n'
-            '          l  F  F \n'
-            ' b  b  d  f  R  R  U  d  d  b  l  l \n'
-            ' B  B  B  R  R  d  f  F  F  L  L  L \n'
-            ' B  B  B  R  R  d  f  F  F  L  L  L \n'
-            '          U  U  r \n'
+            '                  \n'
+            '                  \n'
+            '             F  F \n'
+            '             R  R  U                \n'
+            ' B  B  B  R  R        F  F  L  L  L \n'
+            ' B  B  B  R  R        F  F  L  L  L \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -531,10 +531,10 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          f  d  f \n'
-            '          d  d  d \n'
-            '          l  d  d \n'
-            ' d  r  b  d  l  b  r  b  d  r  f  l \n'
+            '                  \n'
+            '                  \n'
+            '                  \n'
+            '                                    \n'
             ' L  L  L  B  B  B  R  R  R  F  F  F \n'
             ' L  L  L  B  B  R  U  R  R  F  F  F \n'
             '          U  U  B \n'
@@ -550,13 +550,13 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          d  d  d \n'
-            '          d  d  d \n'
-            '          d  d  L \n'
-            ' r  r  r  f  f  F  U  l  f  l  b  b \n'
+            '                  \n'
+            '                  \n'
+            '                L \n'
+            '                F  U                \n'
             ' R  R  R  F  F  F  L  L  L  B  B  B \n'
-            ' R  R  R  F  F  l  d  L  L  B  B  B \n'
-            '          U  U  b \n'
+            ' R  R  R  F  F        L  L  B  B  B \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -569,13 +569,13 @@ class VCubeShowF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          l  d  l \n'
-            '          d  d  d \n'
-            '          d  d  U \n'
-            ' f  b  b  r  r  L  F  f  b  d  l  d \n'
+            '                  \n'
+            '                  \n'
+            '                U \n'
+            '                L  F                \n'
             ' R  R  R  F  F  F  L  L  L  B  B  B \n'
-            ' R  R  R  F  F  f  r  L  L  B  B  B \n'
-            '          U  U  d \n'
+            ' R  R  R  F  F        L  L  B  B  B \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -593,13 +593,13 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
-            '             R  R \n'
-            '                R \n'
-            '                  \n'
-            '                      B  U  F  F    \n'
-            ' B  B        R        F  F  L  L  L \n'
-            ' B  B        R  B  R  F  F  L  L  L \n'
-            '             U  U \n'
+            '          b  R  R \n'
+            '          d  d  R \n'
+            '          d  d  f \n'
+            ' l  r  r  f  b  l  d  B  U  F  F  d \n'
+            ' B  B  l  d  R  d  f  F  F  L  L  L \n'
+            ' B  B  d  r  R  B  R  F  F  L  L  L \n'
+            '          b  U  U \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -612,15 +612,15 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
-            '                  \n'
-            '                  \n'
-            '          L  L    \n'
-            '       U  B  B                      \n'
-            '    F  F  L  L  F  R  B  B  R  R    \n'
-            '    F  F  L  L  F  U  B  B  R  R    \n'
+            '          d  d  f \n'
+            '          d  d  r \n'
+            '          L  L  r \n'
+            ' l  l  U  B  B  d  b  d  d  r  f  f \n'
+            ' b  F  F  L  L  F  R  B  B  R  R  d \n'
+            ' b  F  F  L  L  F  U  B  B  R  R  d \n'
             '          U  U  R \n'
             '          U  U  U \n'
-            '             U  U '
+            '          l  U  U '
         )
         self.assertEqual(grid, expected)
 
@@ -631,13 +631,13 @@ class VCubeShowAF2LTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='af2l')
 
         expected = (
-            '                  \n'
-            '          L       \n'
-            '          L  L    \n'
-            '    F  F  U  B                      \n'
-            ' F  F        L        B  B  R  R  R \n'
-            ' F  F  B  U  L        B  B  R  R  R \n'
-            '          L  U    \n'
+            '          l  d  b \n'
+            '          L  d  d \n'
+            '          L  L  l \n'
+            ' f  F  F  U  B  b  d  l  r  d  f  d \n'
+            ' F  F  d  b  L  r  d  B  B  R  R  R \n'
+            ' F  F  B  U  L  r  d  B  B  R  R  R \n'
+            '          L  U  f \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -655,13 +655,13 @@ class VCubeShowF2LOrientedTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          d  d  d \n'
-            '          f  d  d \n'
-            '          f  l  U \n'
-            ' l  d  d  r  d  L  F  b  b  r  r  f \n'
+            '                  \n'
+            '                  \n'
+            '                U \n'
+            '                L  F                \n'
             ' R  R  R  F  F  F  L  L  L  B  B  B \n'
-            ' R  R  R  F  F  d  b  L  L  B  B  B \n'
-            '          U  U  l \n'
+            ' R  R  R  F  F        L  L  B  B  B \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -674,13 +674,13 @@ class VCubeShowF2LOrientedTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          d  d  d \n'
-            '          r  d  d \n'
-            '          r  f  U \n'
-            ' f  d  d  b  d  F  R  l  l  b  b  r \n'
+            '                  \n'
+            '                  \n'
+            '                U \n'
+            '                F  R                \n'
             ' B  B  B  R  R  R  F  F  F  L  L  L \n'
-            ' B  B  B  R  R  d  l  F  F  L  L  L \n'
-            '          U  U  f \n'
+            ' B  B  B  R  R        F  F  L  L  L \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -693,13 +693,13 @@ class VCubeShowF2LOrientedTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          d  d  d \n'
-            '          b  d  d \n'
-            '          b  r  U \n'
-            ' r  d  d  l  d  R  B  f  f  l  l  b \n'
+            '                  \n'
+            '                  \n'
+            '                U \n'
+            '                R  B                \n'
             ' L  L  L  B  B  B  R  R  R  F  F  F \n'
-            ' L  L  L  B  B  d  f  R  R  F  F  F \n'
-            '          U  U  r \n'
+            ' L  L  L  B  B        R  R  F  F  F \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
@@ -712,13 +712,13 @@ class VCubeShowF2LOrientedTestCase(VCubeShowMixin, unittest.TestCase):
         grid = self.show_grid(cube, mode='f2l')
 
         expected = (
-            '          d  d  d \n'
-            '          l  d  d \n'
-            '          l  b  U \n'
-            ' b  d  d  f  d  B  L  r  r  f  f  l \n'
+            '                  \n'
+            '                  \n'
+            '                U \n'
+            '                B  L                \n'
             ' F  F  F  L  L  L  B  B  B  R  R  R \n'
-            ' F  F  F  L  L  d  r  B  B  R  R  R \n'
-            '          U  U  b \n'
+            ' F  F  F  L  L        B  B  R  R  R \n'
+            '          U  U    \n'
             '          U  U  U \n'
             '          U  U  U '
         )
