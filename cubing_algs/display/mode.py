@@ -18,6 +18,10 @@ from cubing_algs.display.masks import EO_EDGE_MASK
 from cubing_algs.display.masks import EO_LINE_MASK
 from cubing_algs.display.masks import EO_MASK
 from cubing_algs.display.masks import EO_SLICE_MASK
+from cubing_algs.display.masks import F2L_BL_MASK
+from cubing_algs.display.masks import F2L_BR_MASK
+from cubing_algs.display.masks import F2L_FL_MASK
+from cubing_algs.display.masks import F2L_FR_MASK
 from cubing_algs.display.masks import F2L_MASK
 from cubing_algs.display.masks import HIDDEN_MASK
 from cubing_algs.display.masks import L6EO_MASK
@@ -44,6 +48,10 @@ MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'cross':        (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'f2l':          (F2L_MASK,          '',    'f2l_orientation'),           # noqa: E241
     'af2l':         (AF2L_MASK,         '',    'f2l_orientation'),           # noqa: E241
+    'f2l-fr':       (F2L_FR_MASK,       '',    ''),                          # noqa: E241
+    'f2l-fl':       (F2L_FL_MASK,       '',    ''),                          # noqa: E241
+    'f2l-br':       (F2L_BR_MASK,       '',    ''),                          # noqa: E241
+    'f2l-bl':       (F2L_BL_MASK,       '',    ''),                          # noqa: E241
     'cmll':         (CMLL_MASK,         '',    ''),                          # noqa: E241
     'lse':          (LSE_MASK,          '',    ''),                          # noqa: E241
     'l6eo':         (L6EO_MASK,         '',    ''),                          # noqa: E241

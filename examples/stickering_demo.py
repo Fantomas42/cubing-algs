@@ -33,7 +33,11 @@ DEMOS: list[tuple[str, list[tuple[str, str, str]]]] = [
     ]),
     ('F2L', [
         ('f2l', "R2' u R2 u' R2'", 'F2L'),
-        ('af2l', "R2' u R2 u' R2'", 'F2L'),
+        ('af2l', "R2' u R2 u' R2'", '(no direct eq)'),
+        ('f2l-fr', "U R U' R'", '(no direct eq)'),
+        ('f2l-fl', "F' L F L'", '(no direct eq)'),
+        ('f2l-br', "U B U' B'", '(no direct eq)') ,
+        ('f2l-bl', "U L U' L'", '(no direct eq)'),
     ]),
     ('Last Layer', [
         ('ll', "R' F R F2' U F R U R' F' U' F", 'LL'),
