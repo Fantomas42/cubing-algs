@@ -27,18 +27,6 @@ RENDER_STYLE_ALG = "B' U' B2 U' B2 U F2 U' B2 L2 U R2 U2 R' F2 U2 B U' R2 F D2"
 # grouped by demo section for layout control in the HTML gallery.
 # (group title, [(mode, algorithm, cubing.js counterpart), ...])
 DEMOS: list[tuple[str, list[tuple[str, str, str]]]] = [
-    ('Render Styles', [
-        ('visible', RENDER_STYLE_ALG, '(render style)'),
-        ('dimmed', RENDER_STYLE_ALG, '(render style)'),
-        ('masked', RENDER_STYLE_ALG, '(render style)'),
-        ('hidden', RENDER_STYLE_ALG, '(render style)'),
-        ('oriented', RENDER_STYLE_ALG, '(render style)'),
-    ]),
-    ('Last Layer', [
-        ('oll', "r U R' U R U2 r'", 'OLL'),
-        ('pll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL'),
-        ('ll', "R' F R F2' U F R U R' F' U' F", 'LL'),
-    ]),
     ('Cross', [
         ('cross-top', "y2 (y' R)5 D", '(no direct eq)'),
         ('cross-bottom', "(y' R)5 D", 'Cross'),
@@ -46,9 +34,13 @@ DEMOS: list[tuple[str, list[tuple[str, str, str]]]] = [
     ('F2L', [
         ('f2l', "R2' u R2 u' R2'", 'F2L'),
         ('af2l', "R2' u R2 u' R2'", 'F2L'),
-        ('f2l+ll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL on LL'),
         ('f2l+cll', "R U R' U' R U R' U R U' R'", 'CLS'),
         ('f2l+ell', "M U' M' U2 M U' M'", 'ELL'),
+    ]),
+    ('Last Layer', [
+        ('ll', "R' F R F2' U F R U R' F' U' F", 'LL'),
+        ('oll', "r U R' U R U2 r'", 'OLL'),
+        ('pll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL'),
     ]),
     ('Edge Orientation', [
         ('eo', "B U B' D F R' L D'", 'EO'),
@@ -62,6 +54,13 @@ DEMOS: list[tuple[str, list[tuple[str, str, str]]]] = [
         ('lse', "U M2' U' M2'", 'L6E'),
         ('l6eo', "U M2' U' M2'", 'L6EO'),
         ('l10p', "U M2' U' M2'", 'L10P'),
+    ]),
+    ('Render Styles', [
+        ('visible', RENDER_STYLE_ALG, '(render style)'),
+        ('dimmed', RENDER_STYLE_ALG, '(render style)'),
+        ('masked', RENDER_STYLE_ALG, '(render style)'),
+        ('hidden', RENDER_STYLE_ALG, '(render style)'),
+        ('oriented', RENDER_STYLE_ALG, '(render style)'),
     ]),
 ]
 

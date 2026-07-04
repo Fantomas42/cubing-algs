@@ -18,12 +18,11 @@ from cubing_algs.display.masks import EO_MASK
 from cubing_algs.display.masks import EO_SLICE_MASK
 from cubing_algs.display.masks import F2L_CLL_MASK
 from cubing_algs.display.masks import F2L_ELL_MASK
-from cubing_algs.display.masks import F2L_LL_MASK
 from cubing_algs.display.masks import F2L_MASK
 from cubing_algs.display.masks import HIDDEN_MASK
-from cubing_algs.display.masks import L3_MASK
 from cubing_algs.display.masks import L6EO_MASK
 from cubing_algs.display.masks import L10P_MASK
+from cubing_algs.display.masks import LL_MASK
 from cubing_algs.display.masks import LSE_MASK
 from cubing_algs.display.masks import MASKED_MASK
 from cubing_algs.display.masks import OLL_MASK
@@ -35,15 +34,14 @@ if TYPE_CHECKING:
     from cubing_algs.vcube import VCube
 
 MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
+    'll':           (LL_MASK,           'top', ''),                          # noqa: E241
     'oll':          (OLL_MASK,          'top', ''),                          # noqa: E241
     'pll':          (PLL_MASK,          'top', ''),                          # noqa: E241
-    'll':           (L3_MASK,           'top', ''),                          # noqa: E241
     'cross-top':    (CROSS_TOP_MASK,    '',    'cross_top_orientation'),     # noqa: E241
     'cross-bottom': (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'cross':        (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'f2l':          (F2L_MASK,          '',    'f2l_orientation'),           # noqa: E241
     'af2l':         (AF2L_MASK,         '',    'f2l_orientation'),           # noqa: E241
-    'f2l+ll':       (F2L_LL_MASK,       '',    'f2l_orientation'),           # noqa: E241
     'f2l+cll':      (F2L_CLL_MASK,      '',    'f2l_orientation'),           # noqa: E241
     'f2l+ell':      (F2L_ELL_MASK,      '',    'f2l_orientation'),           # noqa: E241
     'cmll':         (CMLL_MASK,         'top', ''),                          # noqa: E241
