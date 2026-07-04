@@ -129,8 +129,8 @@ def compute_length_score(stm: int) -> float:
     """
     Compute length sub-score using sigmoid curve.
 
-    Centered at HTM=12, steepness 0.35.
-    HTM 4 → ~0.9, HTM 12 → ~0.5, HTM 20 → ~0.1.
+    Centered at STM=12, steepness 0.35.
+    STM 4 → ~0.9, STM 12 → ~0.5, STM 20 → ~0.1.
 
     Args:
         stm: Slice Turn Metric count.
@@ -176,7 +176,7 @@ def compute_chunk_score(
 
     # Variety penalty: more distinct triggers = harder
     variety_penalty = max(0, distinct_triggers - 1) * CHUNK_VARIETY_PENALTY
-    return max(0.0, base - variety_penalty)
+    return min(1.0, max(0.0, base - variety_penalty))
 
 
 def compute_structure_score(
@@ -480,7 +480,7 @@ def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
     trigger_count = ergo.trigger_count
     trigger_coverage = ergo.trigger_coverage
     distinct_triggers = len(set(ergo.detected_patterns))
-    effective_chunks = trigger_count + (stm - trigger_coverage)
+    effective_chunks = max(0, trigger_count + (stm - trigger_coverage))
     chunk_score = compute_chunk_score(effective_chunks, distinct_triggers)
 
     # --- Structure score ---

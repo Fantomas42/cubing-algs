@@ -89,6 +89,11 @@ class ChunkScoreTestCase(unittest.TestCase):
         score = compute_chunk_score(20, 5)
         self.assertGreaterEqual(score, 0.0)
 
+    def test_negative_chunks_capped_at_1(self) -> None:
+        """Defensive: a negative chunk count must not break the 0-1 range."""
+        score = compute_chunk_score(-2, 1)
+        self.assertLessEqual(score, 1.0)
+
 
 class StructureScoreTestCase(unittest.TestCase):
     """Tests for compute_structure_score."""
