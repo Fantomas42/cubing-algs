@@ -126,7 +126,7 @@ CLL_MASK: POVDisplayMask = (
 )
 
 ELL_MASK: POVDisplayMask = (
-    '212111212'
+    '212121212'
     '212000000'
     '212000000'
     '000000000'
