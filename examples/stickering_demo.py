@@ -23,50 +23,53 @@ from cubing_algs.vcube import VCube
 # Generic scramble for whole-cube render styles (no stage-specific mask).
 RENDER_STYLE_ALG = "B' U' B2 U' B2 U F2 U' B2 L2 U R2 U2 R' F2 U2 B U' R2 F D2"
 
-# Per-mode illustrative algorithm and the cubing.js stickering it echoes,
+# Per-mode illustrative algorithm, the cubing.js stickering it echoes, and
+# the speedsolving.com wiki page defining the case (empty if none applies),
 # grouped by demo section for layout control in the HTML gallery.
-# (group title, [(mode, algorithm, cubing.js counterpart), ...])
-DEMOS: list[tuple[str, list[tuple[str, str, str]]]] = [
+# (group title, [(mode, algorithm, cubing.js counterpart, wiki title), ...])
+DEMOS: list[tuple[str, list[tuple[str, str, str, str]]]] = [
     ('Cross', [
-        ('cross-top', "y2 (y' R)5 D", '(no direct eq)'),
-        ('cross-bottom', "(y' R)5 D", 'Cross'),
+        ('cross-top', "y2 (y' R)5 D", '(no direct eq)', 'Cross'),
+        ('cross-bottom', "(y' R)5 D", 'Cross', 'Cross'),
     ]),
     ('F2L', [
-        ('f2l', "R2' u R2 u' R2'", 'F2L'),
-        ('af2l', "R2' u R2 u' R2'", '(no direct eq)'),
-        ('f2l-fr', "U R U' R'", '(no direct eq)'),
-        ('f2l-fl', "F' L F L'", '(no direct eq)'),
-        ('f2l-br', "U B U' B'", '(no direct eq)') ,
-        ('f2l-bl', "U L U' L'", '(no direct eq)'),
+        ('f2l', "R2' u R2 u' R2'", 'F2L', 'F2L'),
+        ('af2l', "R2' u R2 u' R2'", '(no direct eq)', 'Advanced_F2L'),
+        ('f2l-fr', "U R U' R'", '(no direct eq)', 'F2L'),
+        ('f2l-fl', "F' L F L'", '(no direct eq)', 'F2L'),
+        ('f2l-br', "U B U' B'", '(no direct eq)', 'F2L'),
+        ('f2l-bl', "U L U' L'", '(no direct eq)', 'F2L'),
     ]),
     ('Last Layer', [
-        ('ll', "R' F R F2' U F R U R' F' U' F", 'LL'),
-        ('oll', "r U R' U R U2 r'", 'OLL'),
-        ('pll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL'),
-        ('cll', "R U2 R' U' R U' R'", 'CLL'),
-        ('ell', "M U' M' U2 M U' M'", 'ELL'),
+        ('ll', "R' F R F2' U F R U R' F' U' F", 'LL', 'Last_Layer'),
+        ('oll', "r U R' U R U2 r'", 'OLL', 'OLL'),
+        ('pll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL', 'PLL'),
+        ('cll', "R U2 R' U' R U' R'", 'CLL', 'CLL'),
+        ('ell', "M U' M' U2 M U' M'", 'ELL', 'ELL'),
     ]),
     ('Edge Orientation', [
-        ('eo', "B U B' D F R' L D'", 'EO'),
-        ('eo-cross', "B U B' D F R' L D'", 'EOcross'),
-        ('eo-line', "B U B' D F R' L D'", 'EOline'),
-        ('eo-slice', "B U B' D F R' L D'", '(no cubing.js eq)'),
-        ('eo-edge', "B U B' D F R' L D'", '(no cubing.js eq)'),
+        ('eo', "B U B' D F R' L D'", 'EO', 'EO'),
+        ('eo-cross', "B U B' D F R' L D'", 'EOcross', 'EOCross'),
+        ('eo-line', "B U B' D F R' L D'", 'EOline', 'EOLine'),
+        ('eo-slice', "B U B' D F R' L D'", '(no cubing.js eq)', ''),
+        ('eo-edge', "B U B' D F R' L D'", '(no cubing.js eq)', ''),
     ]),
     ('Roux', [
-        ('cmll', "F R U R' U' F'", 'CMLL'),
-        ('lse', "U M2' U' M2'", 'L6E'),
-        ('l6eo', "U M2' U' M2'", 'L6EO'),
-        ('l10p', "U M2' U' M2'", 'L10P'),
+        ('cmll', "F R U R' U' F'", 'CMLL', 'CMLL'),
+        ('lse', "U M2' U' M2'", 'L6E', 'LSE'),
+        ('l6eo', "U M2' U' M2'", 'L6EO', 'LSE'),
+        ('l10p', "U M2' U' M2'", 'L10P', 'L10P'),
     ]),
     ('Render Styles', [
-        ('visible', RENDER_STYLE_ALG, '(render style)'),
-        ('dimmed', RENDER_STYLE_ALG, '(render style)'),
-        ('masked', RENDER_STYLE_ALG, '(render style)'),
-        ('hidden', RENDER_STYLE_ALG, '(render style)'),
-        ('oriented', RENDER_STYLE_ALG, '(render style)'),
+        ('visible', RENDER_STYLE_ALG, '(render style)', ''),
+        ('dimmed', RENDER_STYLE_ALG, '(render style)', ''),
+        ('masked', RENDER_STYLE_ALG, '(render style)', ''),
+        ('hidden', RENDER_STYLE_ALG, '(render style)', ''),
+        ('oriented', RENDER_STYLE_ALG, '(render style)', ''),
     ]),
 ]
+
+WIKI_BASE_URL = 'https://www.speedsolving.com/wiki/index.php'
 
 
 PAGE_TEMPLATE = """\
@@ -99,9 +102,10 @@ h1 {{ margin-top: 0; }}
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
 .algo.expanded {{ white-space: normal; overflow: visible;
                  text-overflow: clip; word-break: break-word; }}
-.tt-link {{ display: inline-block; margin-top: .5rem; font-size: .85rem;
-           color: #0a58ca; text-decoration: none; }}
-.tt-link:hover {{ text-decoration: underline; }}
+.tt-link, .wiki-link {{ display: inline-block; margin-top: .5rem;
+           font-size: .85rem; color: #0a58ca; text-decoration: none; }}
+.tt-link:hover, .wiki-link:hover {{ text-decoration: underline; }}
+.links {{ display: flex; flex-direction: column; }}
 </style>
 </head>
 <body>
@@ -141,7 +145,7 @@ def build_demo(image_size: int, rotation: str, term_timer_url: str) -> str:
     for title, demos in DEMOS:
         cases: list[str] = []
 
-        for mode, alg, counterpart in demos:
+        for mode, alg, counterpart, wiki_title in demos:
             if mode not in known_modes:
                 print(f'Skipping unknown mode: { mode }')
                 continue
@@ -165,6 +169,15 @@ def build_demo(image_size: int, rotation: str, term_timer_url: str) -> str:
                 f'?algorithm={ render_alg }&amp;m={ mode }&amp;o=UF'
             )
 
+            wiki_link = ''
+            if wiki_title:
+                wiki_url = f'{ WIKI_BASE_URL }?title={ quote_plus(wiki_title) }'
+                wiki_link = (
+                    f'<a class="wiki-link" href="{ wiki_url }" '
+                    'target="_blank" rel="noopener">'
+                    f'{ wiki_title } definition ↗</a>'
+                )
+
             cases.append(
                 '<div class="case">'
                 f'<h3>{ mode }</h3>'
@@ -173,8 +186,11 @@ def build_demo(image_size: int, rotation: str, term_timer_url: str) -> str:
                 '<pre class="algo" '
                 'onclick="this.classList.toggle(\'expanded\')">'
                 f'{ alg }</pre>'
+                '<div class="links">'
                 f'<a class="tt-link" href="{ link }" '
                 'target="_blank" rel="noopener">debug in term-timer ↗</a>'
+                f'{ wiki_link }'
+                '</div>'
                 '</div>',
             )
 
