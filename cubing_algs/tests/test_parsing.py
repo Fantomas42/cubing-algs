@@ -152,6 +152,33 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
             expect,
         )
 
+    def test_parse_tuple(self) -> None:
+        """Test parse tuple of moves."""
+        moves = (Move('R2'), Move('L2'))
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_generator(self) -> None:
+        """Test parse generator of moves."""
+        moves = (Move(m) for m in ('R2', 'L2'))
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_mixed_iterable(self) -> None:
+        """Test parse tuple mixing Move and str."""
+        moves = (Move('R2'), 'L2')
+        expect = ['R2', 'L2']
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
     def test_parse_moves_invalid(self) -> None:
         """Test parse moves invalid."""
         moves = 'R2 T2'
@@ -204,6 +231,15 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
             expect,
         )
 
+    def test_parse_moves_move_valid_checked(self) -> None:
+        """Test parse moves valid Move with input checking."""
+        moves = Move('R2')
+        expect = ['R2']
+        self.assertEqual(
+            parse_moves(moves, trust_input=False),
+            expect,
+        )
+
     def test_parse_moves_move_invalid(self) -> None:
         """Test parse moves invalid Move."""
         moves = Move('T2')
@@ -213,6 +249,32 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
             parse_moves,
             moves,
             trust_input=False,
+        )
+
+    def test_parse_moves_move_invalid_trusted(self) -> None:
+        """Test parse moves invalid Move with trusted input."""
+        moves = Move('T2')
+        expect = ['T2']
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
+        )
+
+    def test_parse_moves_iterable_move_invalid(self) -> None:
+        """Test parse moves iterable mixing valid and invalid Moves."""
+        moves = (Move('R2'), Move('T2'))
+
+        self.assertRaises(
+            InvalidMoveError,
+            parse_moves,
+            moves,
+            trust_input=False,
+        )
+
+        expect = ['R2', 'T2']
+        self.assertEqual(
+            parse_moves(moves),
+            expect,
         )
 
     def test_parse_moves_conjugate(self) -> None:

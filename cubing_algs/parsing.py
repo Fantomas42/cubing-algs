@@ -200,10 +200,10 @@ def parse_moves(
     if isinstance(raw_moves, Move) and raw_moves.is_valid:
         return Algorithm([raw_moves])
 
-    if isinstance(raw_moves, list):
-        raw_moves_str = ''.join(str(m) for m in raw_moves)
+    if isinstance(raw_moves, str):
+        raw_moves_str = raw_moves
     else:
-        raw_moves_str = str(raw_moves)
+        raw_moves_str = ''.join(str(m) for m in raw_moves)
 
     raw_moves_str = clean_multiline_and_comments(raw_moves_str)
 
