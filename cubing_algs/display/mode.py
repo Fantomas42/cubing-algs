@@ -8,16 +8,22 @@ from cubing_algs.constants import ADJACENT_FACES
 from cubing_algs.constants import OPPOSITE_FACES
 from cubing_algs.display.masks import AF2L_MASK
 from cubing_algs.display.masks import CLL_MASK
+from cubing_algs.display.masks import CLS_MASK
 from cubing_algs.display.masks import CMLL_MASK
+from cubing_algs.display.masks import COLL_MASK
+from cubing_algs.display.masks import CPLL_MASK
 from cubing_algs.display.masks import CROSS_BOTTOM_MASK
 from cubing_algs.display.masks import CROSS_TOP_MASK
 from cubing_algs.display.masks import DIMMED_MASK
 from cubing_algs.display.masks import ELL_MASK
+from cubing_algs.display.masks import ELS_MASK
 from cubing_algs.display.masks import EO_CROSS_MASK
 from cubing_algs.display.masks import EO_EDGE_MASK
 from cubing_algs.display.masks import EO_LINE_MASK
 from cubing_algs.display.masks import EO_MASK
 from cubing_algs.display.masks import EO_SLICE_MASK
+from cubing_algs.display.masks import EOLL_MASK
+from cubing_algs.display.masks import EPLL_MASK
 from cubing_algs.display.masks import F2L_BL_MASK
 from cubing_algs.display.masks import F2L_BR_MASK
 from cubing_algs.display.masks import F2L_FL_MASK
@@ -27,12 +33,18 @@ from cubing_algs.display.masks import HIDDEN_MASK
 from cubing_algs.display.masks import L6EO_MASK
 from cubing_algs.display.masks import L10P_MASK
 from cubing_algs.display.masks import LL_MASK
+from cubing_algs.display.masks import LS_MASK
+from cubing_algs.display.masks import LS_OCLL_MASK
+from cubing_algs.display.masks import LS_OLL_MASK
 from cubing_algs.display.masks import LSE_MASK
 from cubing_algs.display.masks import MASKED_MASK
+from cubing_algs.display.masks import OCLL_MASK
 from cubing_algs.display.masks import OLL_MASK
 from cubing_algs.display.masks import ORIENTED_MASK
 from cubing_algs.display.masks import PLL_MASK
 from cubing_algs.display.masks import VISIBLE_MASK
+from cubing_algs.display.masks import ZBLL_MASK
+from cubing_algs.display.masks import ZBLS_MASK
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube
@@ -40,9 +52,24 @@ if TYPE_CHECKING:
 MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'll':           (LL_MASK,           'top', ''),                          # noqa: E241
     'oll':          (OLL_MASK,          'top', ''),                          # noqa: E241
+    'ocll':         (OCLL_MASK,         'top', ''),                          # noqa: E241
     'pll':          (PLL_MASK,          'top', ''),                          # noqa: E241
+    'cpll':         (CPLL_MASK,         'top', ''),                          # noqa: E241
+    'epll':         (EPLL_MASK,         'top', ''),                          # noqa: E241
+    'zbll':         (ZBLL_MASK,         'top', ''),                          # noqa: E241
     'cll':          (CLL_MASK,          'top', ''),                          # noqa: E241
+    'coll':         (COLL_MASK,         'top', ''),                          # noqa: E241
     'ell':          (ELL_MASK,          'top', ''),                          # noqa: E241
+    'eoll':         (EOLL_MASK,         'top', ''),                          # noqa: E241
+    'ls':           (LS_MASK,           '',    ''),                          # noqa: E241
+    'ls-oll':       (LS_OLL_MASK,       '',    ''),                          # noqa: E241
+    'ls-ocll':      (LS_OCLL_MASK,      '',    ''),                          # noqa: E241
+    'els':          (ELS_MASK,          '',    ''),                          # noqa: E241
+    'zbls':         (ZBLS_MASK,         '',    ''),                          # noqa: E241
+    # vls / wvls show the same pieces as ls-oll / ls-ocll, so share the mask
+    'vls':          (LS_OLL_MASK,       '',    ''),                          # noqa: E241
+    'wvls':         (LS_OCLL_MASK,      '',    ''),                          # noqa: E241
+    'cls':          (CLS_MASK,          '',    ''),                          # noqa: E241
     'cross-top':    (CROSS_TOP_MASK,    '',    'cross_top_orientation'),     # noqa: E241
     'cross-bottom': (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241
     'cross':        (CROSS_BOTTOM_MASK, '',    'cross_bottom_orientation'),  # noqa: E241

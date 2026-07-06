@@ -44,8 +44,31 @@ DEMOS: list[tuple[str, list[tuple[str, str, str, str]]]] = [
         ('ll', "R' F R F2' U F R U R' F' U' F", 'LL', 'Last_Layer'),
         ('oll', "r U R' U R U2 r'", 'OLL', 'OLL'),
         ('pll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'PLL', 'PLL'),
+        (
+            'zbll', "R' F R U' R' U' R U R' F' R U R' U' R' F R F' R",
+            'ZBLL', 'ZBLL',
+        ),
+    ]),
+    ('Corners Last Layer', [
         ('cll', "R U2 R' U' R U' R'", 'CLL', 'CLL'),
+        ('ocll', "R U R' U R U2 R'", 'OCLL', 'OCLL'),
+        ('coll', "L R' U' R U L' U2 R' U2 R", 'COLL', 'COLL'),
+        ('cpll', "R U R' U' R' F R2 U' R' U' R U R' F'", 'CPLL', 'CPLL'),
+    ]),
+    ('Edges Last Layer', [
         ('ell', "M U' M' U2 M U' M'", 'ELL', 'ELL'),
+        ('eoll', "F R U R' U' F'", 'EOLL', 'EOLL'),
+        ('epll', "R2 U R U R' U' R' U' R' U R'", 'EPLL', 'EPLL'),
+    ]),
+    ('Last Slot + Last Layer', [
+        ('ls', "U' R U' R' U R U R'", 'LS', ''),
+        ('ls-oll', "U' R U' R' U R U R'", 'LSOLL', ''),
+        ('ls-ocll', "U' R U' R' U R U R'", 'LSOCLL', ''),
+        ('els', "U' R U' R' U R U R'", 'ELS', ''),
+        ('zbls', "U' R U' R' U R U R'", 'ZBLS', 'ZBLS'),
+        ('vls', "U' R U' R' U R U R'", 'VLS', 'VLS'),
+        ('wvls', "U' R U' R' U R U R'", 'WVLS', 'Winter_Variation'),
+        ('cls', "U' R U' R' U R U R'", 'CLS', ''),
     ]),
     ('Edge Orientation', [
         ('eo', "B U B' D F R' L D'", 'EO', 'EO'),
