@@ -99,7 +99,7 @@ STEP_INFO: dict[str, tuple[str, str]] = {
     'OLLCP': ('OLL + Corner Permutation', 'cpll'),
     'COLL': ('Corner OLL (corners oriented+permuted)', 'coll'),
     'ZBLL': ('Zborowski-Bruchem LL (corners oriented, all permuted)', 'zbll'),
-    '2GLL': ('2-Gen Last Layer (phase edges only)', 'oll'),
+    '2GLL': ('2-Gen Last Layer (phase edges only)', 'zbll'),
     'OCLL': ('Orient Corners Last Layer (corner orientation only)', 'ocll'),
     'ELL': ('Edge Last Layer (edge orientation + permutation)', 'ell'),
     'EPLL': ('Edge Permutation Last Layer (edges permuted only)', 'pll'),

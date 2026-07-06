@@ -103,6 +103,23 @@ class TestGenerateStepState(unittest.TestCase):
         # Just check valid permutation
         self.assertEqual(set(cp), set(SOLVED_CP))
 
+    def test_2gll_applies_auf(self) -> None:
+        """Test that 2GLL states include an AUF offset on corners."""
+        rng = Random(42)
+        has_auf_offset = False
+
+        for _ in range(20):
+            cp, _co, _ep, eo = generate_step_state('2GLL', rng)
+
+            # Edges stay oriented in 2GLL
+            self.assertEqual(eo, SOLVED_EO)
+
+            # AUF should sometimes offset the corner permutation
+            if cp != SOLVED_CP:
+                has_auf_offset = True
+
+        self.assertTrue(has_auf_offset)
+
     def test_deterministic_with_seed(self) -> None:
         """Test that same seed produces same result."""
         cp1, co1, ep1, eo1 = generate_step_state('PLL', Random(42))

@@ -150,9 +150,9 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
 
     # 2GLL - specific pattern with phase edges permutation only
     elif step == '2GLL':
-        cp, co, ep, eo = apply_auf((cp, co, ep, eo), rng)
         cp, co, ep, eo = random_permutation([], U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
+        cp, co, ep, eo = apply_auf((cp, co, ep, eo), rng)
 
     # ELL - edge orientation and permutation on U layer
     elif step == 'ELL':
