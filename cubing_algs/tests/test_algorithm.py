@@ -622,28 +622,35 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.assertEqual(
             algo.min_cube_size,
-            6,
+            4,
         )
 
         algo = parse_moves("B' R2 U 2-3Fw2")
 
         self.assertEqual(
             algo.min_cube_size,
-            6,
+            4,
+        )
+
+        algo = parse_moves("B' R2 U 3F2")
+
+        self.assertEqual(
+            algo.min_cube_size,
+            4,
         )
 
         algo = parse_moves("B' R2 U 4Fw2")
 
         self.assertEqual(
             algo.min_cube_size,
-            8,
+            5,
         )
 
         algo = parse_moves("B' R2 U 2-4Fw2")
 
         self.assertEqual(
             algo.min_cube_size,
-            8,
+            5,
         )
 
     def test_is_standard(self) -> None:

@@ -422,7 +422,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
 
                 max_layers = max(m.layers)
                 if max_layers > 1:
-                    cube = (max_layers + 1) * 2
+                    cube = max_layers + 2
 
                 min_cube = max(cube, min_cube)
 
