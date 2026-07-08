@@ -233,6 +233,10 @@ def transform_adjacent_position(
     """
     Transform adjacent destination face position to original face position.
 
+    Note:
+        Raises KeyError if either face name is invalid, or if
+        destination_face_name is not adjacent to original_face_name.
+
     Args:
         original_face_name: The original face identifier (U/R/F/D/L/B).
         destination_face_name: The destination face identifier.
@@ -254,6 +258,9 @@ def transform_adjacent_position(
 def transform_opposite_position(face_name: Facelet, face_position: int) -> int:
     """
     Transform opposite destination face position to original face position.
+
+    Note:
+        Raises KeyError if face_name is invalid.
 
     Args:
         face_name: The original face identifier (U/R/F/D/L/B).

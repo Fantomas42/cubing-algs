@@ -13,10 +13,18 @@ from cubing_algs.annotations import RegexPattern
 
 DEFAULT_CUBE_SIZE = 3
 
+# Safety cap on the number of passes optimize/size/wide transforms will
+# run before giving up on reaching a fixed point.
 MAX_ITERATIONS = 50
 
+# Default maximum time difference (Move.timed units) between
+# consecutive moves for them to be considered for reslicing
+# (e.g. "L' R" -> "M x") when the algorithm carries timing data.
 RESLICE_THRESHOLD = 50
 
+# Default maximum time difference (Move.timed units) between
+# consecutive moves for them to be considered for rewiding
+# (e.g. "L x" -> "r") when the algorithm carries timing data.
 REWIDE_THRESHOLD = 50
 
 DOUBLE_CHAR = '2'
@@ -326,10 +334,18 @@ UNWIDE_SLICE_MOVES.update(
 )
 
 
+# Matches one full move token: optional layer number(s), the base move
+# letter, optional 'w' (wide), optional '2' or ''' modifier, optional
+# '@<time>' suffix. Also matches a standalone pause '.' with an optional
+# '@<time>' suffix. The negative lookahead `(?!-)` avoids swallowing a
+# trailing '-' that belongs to the next move's layer number.
 MOVE_SPLIT: RegexPattern = re.compile(
     r"([\d-]*[LlRrUuDdFfBbMSExyz][w]?[2']?(?!-)(?:@\d+)?|\.(?:@\d+)?)",
 )
 
+# Matches one layer specifier: optional layer number(s) followed by
+# either a lowercase wide-move letter (e.g. 'r') or an uppercase basic
+# move letter with an optional 'w' (e.g. 'R', 'Rw').
 LAYER_SPLIT: RegexPattern = re.compile(r'(([\d-]*)([lrudfb]|[LRUDFB][w]?))')
 
 SYMMETRY_M = {
@@ -498,7 +514,11 @@ FACE_EDGES_INDEX = {1, 3, 5, 7}
 
 FACE_CORNERS_INDEX = {0, 2, 6, 8}
 
-# QTM distance calculation constants
+# QTM distance calculation constants.
+# NOTE: the two constants below both hold the "diametrically opposite
+# position on a face" pairs, so their values coincide. They are kept
+# separate since they are used in distinct semantic contexts in
+# impacts.py (same-face vs opposite-face distance calculations).
 QTM_SAME_FACE_OPPOSITE_PAIRS = {
     (0, 8), (8, 0),  # Top-left corner <-> Bottom-right corner
     (2, 6), (6, 2),  # Top-right corner <-> Bottom-left corner

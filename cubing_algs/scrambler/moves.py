@@ -1,4 +1,11 @@
-"""Moves utils for cubing_algs.scrambler."""
+"""
+Move set generation and random move selection for cube scrambling.
+
+Provides `build_cube_move_set` to generate the moves valid for a given
+cube size, `build_valid_next_moves` to precompute which moves may
+follow each other (avoiding repeated or opposite-face moves), and
+`random_moves` to generate a random scramble from a move set.
+"""
 import math
 import string
 from collections import defaultdict
@@ -52,6 +59,10 @@ def build_cube_move_set(cube_size: int, *,
             odd_cube = bool(cube_size % 2)
             even_cube = not odd_cube
 
+            # WCA 4x4x4 scrambles only use wide moves on half of the outer
+            # faces (U/R/F for right-handed) since a wide move on the
+            # opposite face is redundant with a wide move on this one
+            # followed by a whole-cube rotation.
             if cube_size > 4 or face not in exclude_odd_faces:
                 moves.extend(
                     [

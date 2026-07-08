@@ -165,17 +165,17 @@ class Case:  # noqa: PLR0904
 
     @cached_property
     def optimal_cycles(self) -> int:
-        """Optimal number of cycles to solve the case."""
+        """Optimal number of cycles to solve the case, or 0 if not available."""
         return self.data.get('optimal_cycles', 0)
 
     @cached_property
     def optimal_htm(self) -> int:
-        """Optimal solution length in Half Turn Metric."""
+        """Optimal HTM solution length, or 0 if not available."""
         return self.data.get('optimal_htm', 0)
 
     @cached_property
     def optimal_stm(self) -> int:
-        """Optimal solution length in Slice Turn Metric."""
+        """Optimal STM solution length, or 0 if not available."""
         return self.data.get('optimal_stm', 0)
 
     @cached_property
@@ -212,7 +212,7 @@ class Case:  # noqa: PLR0904
     @cached_property
     def badmephisto(self) -> BadmephistoData | None:
         """
-        BadMephisto informations.
+        BadMephisto information.
 
         http://badmephisto.com/
         """
@@ -233,7 +233,7 @@ class Case:  # noqa: PLR0904
     @cached_property
     def logiqx(self) -> list[LogiqxAlgorithm] | None:
         """
-        Logiqx informations.
+        Logiqx information.
 
         https://logiqx.github.io/cubing-algs/html/
         """
@@ -242,7 +242,7 @@ class Case:  # noqa: PLR0904
     @cached_property
     def sarah_pll_skips(self) -> dict[str, str] | None:
         """
-        Sarah's cubing site informations.
+        Sarah's cubing site information.
 
         https://sarah.cubing.net/3x3x3/pll-skip-cases
         """

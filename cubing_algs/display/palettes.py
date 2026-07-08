@@ -706,20 +706,30 @@ PALETTES: dict[str, PaletteConfig] = {
     },
 }
 
+# Default font color used when a palette does not define its own.
 DEFAULT_FONT = '#080808'
 
+# Default cube body color for the SVG/image renderer.
 DEFAULT_CUBE_COLOR = '#111111'
 
+# Default background color for masked (hidden) facelets.
 DEFAULT_MASKED_BACKGROUND = '#444444'
 
+# Default background color for facelets shown as adjacent context.
 DEFAULT_ADJACENT_BACKGROUND = '#00004E'
 
+# Default background color for facelets highlighted as oriented.
 DEFAULT_ORIENTED_BACKGROUND = '#40E0D0'
 
+# Default foreground color used against DEFAULT_HIDDEN_ANSI-style
+# backgrounds for readability.
 DEFAULT_HIDDEN_FOREGROUND = '#DADADA'
 
+# Default color for display arrows (piece movement indicators).
 DEFAULT_ARROW_COLOR = '#000000'
 
+# Default ANSI sequence for hidden facelets, used when a palette does
+# not define its own 'hidden_ansi'.
 DEFAULT_HIDDEN_ANSI = build_ansi_color('#303030', DEFAULT_HIDDEN_FOREGROUND)
 
 

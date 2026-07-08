@@ -578,7 +578,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             face: The face letter (e.g., 'U', 'F', 'R').
 
         Returns:
-            A string of 9 characters representing the facelets on that face.
+            A string of face_size characters representing the facelets
+            on that face.
 
         """
         index = FACE_INDEXES[face]
@@ -611,7 +612,8 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             face: The center color to search for.
 
         Returns:
-            A string of 9 characters representing the facelets on that face.
+            A string of face_size characters representing the facelets
+            on that face.
 
         """
         index = self.get_face_index(face)

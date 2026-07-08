@@ -73,7 +73,7 @@ def shuffle_in_place(
         rng: Random,
 ) -> bool:
     """
-    Fischer-Yates shuffle for pieces at specified indices.
+    Fisher-Yates shuffle for pieces at specified indices.
 
     Shuffles both permutation and orientation arrays in place.
 
@@ -154,7 +154,7 @@ def random_permutation(
     ep = SOLVED_EP.copy()
     eo = SOLVED_EO.copy()
 
-    # Use _shuffle_in_place for Fischer-Yates shuffle
+    # Use shuffle_in_place for Fisher-Yates shuffle
     # Note: co/eo are all zeros, so shuffling them has no effect
     corners_even = shuffle_in_place(cp, co, corners, rng)
     edges_even = shuffle_in_place(ep, eo, edges, rng)
@@ -754,7 +754,10 @@ def scramble_with_piece_constraints(  # noqa: PLR0913, PLR0914, PLR0917
         all_edges_set - set(solve_edges_list) - set(buffer_edges_list),
     )
 
-    # Scramble non-solved pieces
+    # Scramble non-solved pieces. Uses derange_pieces rather than a plain
+    # random permutation: for a "scramble" spec, pieces landing back in
+    # their solved position defeats the purpose, so no fixed point is
+    # intentional here (this is a derangement, not a uniform shuffle).
     if scramble_corners or scramble_edges:
         cp, co, ep, eo = derange_pieces(
             cp, co, ep, eo,

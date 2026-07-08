@@ -325,7 +325,11 @@ def scramble_step(
     return cubies_to_scramble(cubies)
 
 
-# OCLL case corner orientations (U corner indices: URF=0, UFL=1, ULB=2, UBR=3)
+# OCLL case corner orientations. Keys are U_CORNERS indices
+# (URF=0, UFL=1, ULB=2, UBR=3); values are the corner orientation (co)
+# to set for that corner (0, 1, or 2). Corners not present in a case's
+# dict are left oriented (co=0). Values are hardcoded to satisfy the
+# corner orientation sum constraint (divisible by 3).
 OCLL_CASES: Final[dict[str, dict[int, int]]] = {
     'T':  {2: 1, 3: 2},
     'U':  {2: 2, 3: 1},

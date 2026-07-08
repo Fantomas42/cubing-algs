@@ -92,8 +92,11 @@ def global_light_position_factor(facelet_index: int, cube_size: int) -> float:
     return max(min(pos / 12, 1.0), 0)
 
 
-def get_position_factor(facelet_index: int, cube_size: int,
-                        **kw: Unpack[EffectParams]) -> float:
+def get_position_factor(
+        facelet_index: int,
+        cube_size: int,
+        **kw: Unpack[EffectParams],
+) -> float:
     """
     Calculate position factor for effect application
     based on mode and facelet location.
@@ -198,7 +201,9 @@ def rgb_to_hls(rgb: RGB) -> tuple[float, float, float]:
 
 
 def hls_to_rgb(
-        hue: float, lit: float, sat: float,
+        hue: float,
+        lit: float,
+        sat: float,
 ) -> RGB:
     """
     Convert colorsys HLS (0.0-1.0) to 0-255 RGB tuple.
@@ -221,7 +226,8 @@ def hls_to_rgb(
 def shine(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -259,7 +265,8 @@ def shine(
 def neon(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -298,7 +305,8 @@ def neon(
 def chrome(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -344,7 +352,8 @@ def chrome(
 def gold(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -382,7 +391,8 @@ def gold(
 def silver(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -420,7 +430,8 @@ def silver(
 def copper(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -456,7 +467,8 @@ def copper(
 def diamond(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -500,7 +512,8 @@ def diamond(
 def rainbow(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -551,7 +564,8 @@ def rainbow(
 def matte(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -561,8 +575,8 @@ def matte(
     Args:
         background_rgb: Background RGB color tuple.
         foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
         **kw: Effect parameters including reduction.
 
     Returns:
@@ -584,7 +598,8 @@ def matte(
 def glossy(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -619,7 +634,8 @@ def glossy(
 def frosted(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -654,7 +670,8 @@ def frosted(
 def checkerboard(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -691,7 +708,8 @@ def checkerboard(
 def stripes(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -736,7 +754,8 @@ def stripes(
 def spiral(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -781,7 +800,8 @@ def spiral(
 def plasma(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -823,7 +843,8 @@ def plasma(
 def holographic(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -861,7 +882,8 @@ def holographic(
 def dim(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -870,8 +892,8 @@ def dim(
     Args:
         background_rgb: Background RGB color tuple.
         foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
         **kw: Effect parameters including factor.
 
     Returns:
@@ -893,7 +915,8 @@ def dim(
 def brighten(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -902,8 +925,8 @@ def brighten(
     Args:
         background_rgb: Background RGB color tuple.
         foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
         **kw: Effect parameters including factor.
 
     Returns:
@@ -924,7 +947,8 @@ def brighten(
 def contrast(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -933,8 +957,8 @@ def contrast(
     Args:
         background_rgb: Background RGB color tuple.
         foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
         **kw: Effect parameters including factor.
 
     Returns:
@@ -956,7 +980,8 @@ def contrast(
 def face_visible(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -988,7 +1013,8 @@ def face_visible(
 def vintage(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -997,8 +1023,8 @@ def vintage(
     Args:
         background_rgb: Background RGB color tuple.
         foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
         **kw: Effect parameters including sepia and desaturation.
 
     Returns:
@@ -1027,7 +1053,8 @@ def vintage(
 def contrast_font(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1041,8 +1068,8 @@ def contrast_font(
     Args:
         background_rgb: Background RGB color tuple.
         foreground_rgb: Foreground RGB color tuple.
-        facelet_index: Index of the facelet in the cube's state.
-        cube_size: Size of the cube (3 for 3x3x3).
+        _facelet_index: Unused facelet index parameter.
+        _cube_size: Unused cube size parameter.
         **kw: Effect parameters. factor sets minimum contrast ratio
               (default 4.5 for WCAG AA).
 
@@ -1090,7 +1117,8 @@ def contrast_font(
 def hidden_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **_kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1113,7 +1141,8 @@ def hidden_font(
 def b_w_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **_kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1141,7 +1170,8 @@ def b_w_font(
 def complement_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **_kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1165,7 +1195,8 @@ def complement_font(
 def shade_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1208,7 +1239,8 @@ def shade_font(
 def set_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1238,7 +1270,8 @@ def set_font(
 def hue_shift_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1266,7 +1299,8 @@ def hue_shift_font(
 def warm_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1299,7 +1333,8 @@ def warm_font(
 def cool_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1332,7 +1367,8 @@ def cool_font(
 def invert_luma_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **_kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1356,7 +1392,8 @@ def invert_luma_font(
 def grayscale_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **_kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1381,7 +1418,8 @@ def grayscale_font(
 def pastel_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1411,7 +1449,8 @@ def pastel_font(
 def vivid_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1437,7 +1476,8 @@ def vivid_font(
 def gradient_font(
         background_rgb: RGB,
         _foreground_rgb: RGB,
-        facelet_index: int, cube_size: int,
+        facelet_index: int,
+        cube_size: int,
         **kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """
@@ -1472,7 +1512,8 @@ def gradient_font(
 def noop(
         background_rgb: RGB,
         foreground_rgb: RGB,
-        _facelet_index: int, _cube_size: int,
+        _facelet_index: int,
+        _cube_size: int,
         **_kw: Unpack[EffectParams],
 ) -> tuple[RGB, RGB]:
     """

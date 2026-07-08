@@ -1,4 +1,16 @@
-"""Parsing and expansion functions for commutator and conjugate notation."""
+"""
+Parsing and expansion functions for commutator and conjugate notation.
+
+Commutator [A, B] = A B A' B'
+Conjugate [A: B] = A B A'
+
+Examples:
+    >>> expand_commutators_and_conjugates('[R, U]')
+    "R U R' U'"
+    >>> expand_commutators_and_conjugates('[R: U]')
+    "R U R'"
+
+"""
 from cubing_algs.exceptions import InvalidBracketError
 from cubing_algs.exceptions import InvalidOperatorError
 from cubing_algs.transform.invert import invert_moves
@@ -89,6 +101,10 @@ def expand_commutators_and_conjugates(moves: str) -> str:
 
     Commutator [A, B] = A B A' B'
     Conjugate [A: B] = A B A'
+
+    When both `:` and `,` appear at the same bracket level (e.g.
+    `[A: B, C]`), `:` takes precedence and the expression is parsed as
+    a conjugate of `A` and `B, C`.
 
     Args:
         moves: A string containing move sequences with commutator and/or

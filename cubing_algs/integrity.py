@@ -329,6 +329,8 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If corner colors are invalid.
 
         """
+        # co is unused here but kept for API consistency with the other
+        # check_* methods and to validate its length against cp via zip.
         for i, (corner_pos, _corner_ori) in enumerate(zip(cp, co, strict=True)):
             corner_facelets = [
                 self._state[facelet]
@@ -407,6 +409,8 @@ class VCubeIntegrityChecker:
             InvalidCubeStateError: If edge colors are invalid.
 
         """
+        # eo is unused here but kept for API consistency with the other
+        # check_* methods and to validate its length against ep via zip.
         for i, (edge_pos, _edge_ori) in enumerate(zip(ep, eo, strict=True)):
             edge_facelets = [
                 self._state[facelet]
@@ -483,7 +487,7 @@ class VCubeIntegrityChecker:
             raise InvalidFaceError(msg)
 
         if len(faces) > 2:
-            msg = f'Too much faces ({ len(faces) })'
+            msg = f'Too many faces ({ len(faces) })'
             raise InvalidFaceError(msg)
 
         top_face = faces[0]

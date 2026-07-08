@@ -194,6 +194,9 @@ def compute_structure_score(
     Args:
         coverage_ratio: Fraction of moves covered by structures (0-1).
         compression_ratio: Compression ratio from structure analysis.
+            Typically 0.0 (no compression) to close to 1.0 (highly
+            compressible); negative values (notation expansion) are
+            clamped to 0 contribution.
         has_structure: Whether any structure was detected.
 
     Returns:
@@ -218,7 +221,10 @@ def find_repeated_subsequences(
     """
     Count repeated n-gram subsequences in a move list.
 
-    Uses sliding window to find repeated patterns of length min_len to max_len.
+    Uses sliding window to find repeated patterns of length min_len to
+    max_len. Matches are counted per window position, so overlapping
+    occurrences of the same n-gram (e.g. "R U" in ['R','U','R','U']) are
+    all counted rather than deduplicated.
 
     Args:
         moves: List of move strings.

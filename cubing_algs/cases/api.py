@@ -29,6 +29,12 @@ def get_collection(name: str) -> CaseCollection:
     - Full format: 'CFOP/OLL', 'CFOP/PLL'
     - Short format: 'OLL', 'PLL' (method prefix optional)
 
+    If multiple methods share the same step name (e.g. a future
+    'CFOP/OLL' and 'ORTEGA/OLL'), the short format returns whichever
+    collection is encountered first in dictionary iteration order
+    (insertion order), which is undefined from the caller's perspective.
+    Use the full 'METHOD/STEP' format to disambiguate.
+
     Args:
         name: Collection name (e.g., 'OLL', 'CFOP/OLL', 'PLL')
 

@@ -1,4 +1,4 @@
-"""Generate solved state for different cube size."""
+"""Generate solved states for different cube sizes."""
 from cubing_algs.annotations import CubeCubiesOriented
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
