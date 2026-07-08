@@ -176,7 +176,7 @@ def random_permutation(
 
 
 def random_orientation(
-        pieces: Orientation,
+        pieces: Permutation,
         piece_count: int,
         modulus: int,
         rng: Random,

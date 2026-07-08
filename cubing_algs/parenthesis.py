@@ -8,6 +8,7 @@ This module handles expansion of:
 """
 import re
 from re import Match
+from typing import Literal
 
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.transform.invert import invert_moves
@@ -16,6 +17,8 @@ from cubing_algs.transform.invert import invert_moves
 MULT_INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)(\d+)'")
 MULT_PATTERN: RegexPattern = re.compile(r'\(([^()]*)\)(\d+)')
 INV_PATTERN: RegexPattern = re.compile(r"\(([^()]*)\)'")
+
+type ModifierType = Literal['mult_inv', 'mult', 'inv']
 
 
 def apply_multiplier(content: str, multiplier: int) -> str:
@@ -48,7 +51,7 @@ def apply_inversion(old_moves: str) -> str:
 
 def find_innermost_parenthesis_with_modifier(
     text: str,
-) -> tuple[int, int, str, Match[str]] | None:
+) -> tuple[int, int, ModifierType, Match[str]] | None:
     """
     Find the innermost parenthesis that has a modifier
     (multiplier or inversion).

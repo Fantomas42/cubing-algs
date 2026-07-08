@@ -420,6 +420,12 @@ class AlgorithmTestCase(unittest.TestCase):  # noqa: PLR0904
 
         self.check_contains_moves(algo)
 
+    def test_setitem_int_with_invalid_type(self) -> None:
+        """Test setitem at an index with a non-move value raises."""
+        algo = parse_moves('R2 U F')
+        with self.assertRaises(InvalidMoveError):
+            algo[1] = ['B']
+
     def test_delitem(self) -> None:
         """Test delitem."""
         algo = parse_moves('R2 U')

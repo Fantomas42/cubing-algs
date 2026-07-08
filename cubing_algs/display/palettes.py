@@ -1,10 +1,26 @@
 """Color palette management and conversion utilities for cube visualization."""
+from typing import NotRequired
 from typing import TypedDict
 
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.exceptions import PaletteAlreadyExistsError
 
 LOADED_PALETTES: dict[str, dict[str, str]] = {}
+
+
+class FaceColorConfig(TypedDict):
+    """
+    Per-face color configuration.
+
+    A face background is always required; the font colors used in the
+    normal, masked, and adjacent display states are optional and fall
+    back to palette-level defaults.
+    """
+
+    background: str
+    font: NotRequired[str]
+    font_masked: NotRequired[str]
+    font_adjacent: NotRequired[str]
 
 
 class PaletteConfig(TypedDict, total=False):
@@ -15,7 +31,7 @@ class PaletteConfig(TypedDict, total=False):
     font settings, and various background states used in different contexts.
     """
 
-    faces: tuple[str | dict[str, str], ...]
+    faces: tuple[str | FaceColorConfig, ...]
     font: str
     cube_color: str
     masked_background: str
@@ -734,7 +750,7 @@ DEFAULT_HIDDEN_ANSI = build_ansi_color('#303030', DEFAULT_HIDDEN_FOREGROUND)
 
 
 def build_ansi_palette(  # noqa: PLR0913, PLR0917
-        faces: tuple[str | dict[str, str], ...],
+        faces: tuple[str | FaceColorConfig, ...],
         font: str = DEFAULT_FONT,
         cube_color: str = DEFAULT_CUBE_COLOR,  # noqa: ARG001
         masked_background: str = DEFAULT_MASKED_BACKGROUND,

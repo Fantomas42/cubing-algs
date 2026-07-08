@@ -8,6 +8,7 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Self
+from typing import SupportsIndex
 
 from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import CubeOrientation
@@ -161,14 +162,26 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         result.extend(self.parse_moves(other))
         return result
 
-    def __setitem__(self, i, item) -> None:  # type: ignore[no-untyped-def] # noqa: ANN001
-        """Set a move at a specific index in the algorithm."""
+    def __setitem__(
+            self,
+            i: SupportsIndex | slice,
+            item: Move | str | Iterable[Move | str],
+    ) -> None:
+        """
+        Set a move at a specific index in the algorithm.
+
+        Raises:
+            InvalidMoveError: If a single-index assignment is given a value
+                that is not a Move or move string.
+
+        """
         if isinstance(i, slice):
             self.data[i] = self.parse_moves(item)
-        elif isinstance(item, Move):
-            self.data[i] = item
-        else:
+        elif isinstance(item, Move | str):
             self.data[i] = self.parse_move(item)
+        else:
+            msg = f'{ item } is an invalid move'
+            raise InvalidMoveError(msg)
 
     def __str__(self) -> str:
         """

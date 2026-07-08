@@ -15,6 +15,8 @@ Performance improvements:
 - cubies_to_facelets: ~1.1x faster than original
 - With caching: Up to 190x faster for repeated operations
 """
+from typing import TypedDict
+
 from cubing_algs.annotations import CornerOrientation
 from cubing_algs.annotations import CornerPermutation
 from cubing_algs.annotations import CubeCubiesOriented
@@ -78,6 +80,15 @@ def build_face_lookup_table() -> dict[str, int]:
 
     """
     return {face: idx for idx, face in enumerate(FACES)}
+
+
+class CacheInfo(TypedDict):
+    """Statistics describing the conversion cache state."""
+
+    facelets_cached: int
+    cubies_cached: int
+    max_size: int
+    enabled: bool
 
 
 CORNER_LOOKUP = build_corner_lookup_table()
@@ -399,7 +410,7 @@ def enable_cache() -> None:
     CACHE.enable()
 
 
-def get_cache_info() -> dict[str, int]:
+def get_cache_info() -> CacheInfo:
     """
     Get information about the current cache state.
 

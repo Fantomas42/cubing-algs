@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from cubing_algs.display.palettes import LOADED_PALETTES
 from cubing_algs.display.palettes import PALETTES
+from cubing_algs.display.palettes import FaceColorConfig
 from cubing_algs.display.palettes import PaletteConfig
 from cubing_algs.display.palettes import background_hex_to_ansi
 from cubing_algs.display.palettes import build_ansi_color
@@ -150,7 +151,7 @@ class TestBuildAnsiPalette(unittest.TestCase):
     def test_build_ansi_palette_with_face_overrides(self) -> None:
         """Test building palette with per-face font color overrides."""
         # Mix simple hex values with extended face configurations
-        faces_config = (
+        faces_config: tuple[str | FaceColorConfig, ...] = (
             '#FFFFFF',
             {
                 'background': '#FF0000',
@@ -293,7 +294,7 @@ class TestPaletteConstants(unittest.TestCase):
 class TestRegisterPalette(unittest.TestCase):
     """Test palette registration functionality."""
 
-    SIMPLE_FACES: tuple[str | dict[str, str], ...] = (
+    SIMPLE_FACES: tuple[str | FaceColorConfig, ...] = (
         '#FFFFFF', '#FF0000', '#00FF00',
         '#FFFF00', '#FF8700', '#0000FF',
     )
@@ -378,7 +379,7 @@ class TestRegisterPalette(unittest.TestCase):
 
     def test_register_palette_with_minimal_config(self) -> None:
         """Test registering a palette with only faces defined."""
-        faces: tuple[str | dict[str, str], ...] = (
+        faces: tuple[str | FaceColorConfig, ...] = (
             '#AAA', '#BBB', '#CCC', '#DDD', '#EEE', '#FFF',
         )
         register_palette('minimal_test', PaletteConfig(faces=faces))
@@ -390,7 +391,7 @@ class TestRegisterPalette(unittest.TestCase):
 
     def test_register_palette_with_dict_faces(self) -> None:
         """Test registering a palette with dictionary face configurations."""
-        faces: tuple[str | dict[str, str], ...] = (
+        faces: tuple[str | FaceColorConfig, ...] = (
             {
                 'background': '#FFFFFF',
                 'font': '#000000',

@@ -181,7 +181,7 @@ class Case:  # noqa: PLR0904
     @cached_property
     def probability(self) -> float:
         """Probability of encountering this case."""
-        return self.data.get('probability', 0)
+        return self.data.get('probability', 0.0)
 
     @cached_property
     def probability_label(self) -> str:
