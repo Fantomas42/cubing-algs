@@ -123,6 +123,28 @@ class TransformCommandTestCase(CliTestCase):
         self.assertIn('invert', err)
 
 
+class CompressCommandTestCase(CliTestCase):
+    """Tests for the compress subcommand."""
+
+    def test_compress_commutator(self) -> None:
+        """Compress rewrites a commutator in bracket notation."""
+        code, out, _err = self.run_cli('compress', "R U R' U'")
+        self.assertEqual(code, 0)
+        self.assertEqual(out, '[R, U]\n')
+
+    def test_compress_conjugate(self) -> None:
+        """Compress rewrites a conjugate wrapping a commutator."""
+        code, out, _err = self.run_cli('compress', "F R U R' U' F'")
+        self.assertEqual(code, 0)
+        self.assertEqual(out, '[F: [R, U]]\n')
+
+    def test_compress_invalid_moves_fails(self) -> None:
+        """Compress fails with an error message on invalid input."""
+        code, _out, err = self.run_cli('compress', 'R T')
+        self.assertEqual(code, 1)
+        self.assertIn('Error:', err)
+
+
 class CasesCommandTestCase(CliTestCase):
     """Tests for the cases subcommand."""
 

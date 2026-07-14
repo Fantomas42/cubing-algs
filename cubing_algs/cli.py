@@ -8,6 +8,7 @@ Exposes the most common library operations as subcommands of
 - ``metrics``: compute algorithm metrics (HTM, QTM, STM, ...)
 - ``apply``: apply an algorithm on a virtual cube and display it
 - ``transform``: apply named transforms to an algorithm
+- ``compress``: rewrite an algorithm in commutator/conjugate notation
 - ``cases``: list case collections or the cases of a collection
 - ``case``: show the details of a single case
 - ``info``: export the complete analysis of an algorithm as JSON
@@ -26,6 +27,7 @@ from cubing_algs.cases import list_collections
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.exceptions import CubingAlgsError
 from cubing_algs.parsing import parse_moves
+from cubing_algs.structure import compress
 from cubing_algs.transform.auf import remove_auf_moves
 from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.size import compress_moves
@@ -148,6 +150,22 @@ def run_transform(args: argparse.Namespace) -> int:
         *[TRANSFORMS[name] for name in args.names],
     )
     output(str(result))
+    return 0
+
+
+def run_compress(args: argparse.Namespace) -> int:
+    """
+    Rewrite an algorithm using commutator and conjugate notation.
+
+    Detects conjugate [A: B] and commutator [A, B] patterns and prints the
+    compressed bracket notation illustrating the algorithm's structure.
+
+    Returns:
+        Process exit code.
+
+    """
+    algo = parse_moves(args.moves, trust_input=False)
+    output(compress(algo))
     return 0
 
 
@@ -300,6 +318,13 @@ def build_parser() -> argparse.ArgumentParser:
         help=f'Transforms to chain: { ", ".join(sorted(TRANSFORMS)) }',
     )
     transform_parser.set_defaults(handler=run_transform)
+
+    compress_parser = subparsers.add_parser(
+        'compress',
+        help='Rewrite an algorithm in commutator/conjugate notation',
+    )
+    compress_parser.add_argument('moves', help='Algorithm to compress')
+    compress_parser.set_defaults(handler=run_compress)
 
     cases_parser = subparsers.add_parser(
         'cases',
