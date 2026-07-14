@@ -10,8 +10,10 @@ Exposes the most common library operations as subcommands of
 - ``transform``: apply named transforms to an algorithm
 - ``cases``: list case collections or the cases of a collection
 - ``case``: show the details of a single case
+- ``info``: export the complete analysis of an algorithm as JSON
 """
 import argparse
+import json
 import logging
 import sys
 from collections.abc import Callable
@@ -21,6 +23,7 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.cases import get_case
 from cubing_algs.cases import get_collection
 from cubing_algs.cases import list_collections
+from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.exceptions import CubingAlgsError
 from cubing_algs.parsing import parse_moves
 from cubing_algs.transform.auf import remove_auf_moves
@@ -37,6 +40,16 @@ TRANSFORMS: dict[str, Callable[[Algorithm], Algorithm]] = {
     'mirror': symmetry_m_moves,
     'remove-auf': remove_auf_moves,
 }
+
+# Nested analysis blocks of Algorithm.to_dict(); the overview scalars
+# surrounding them are always emitted as the algorithm identity header.
+INFO_SECTIONS: tuple[str, ...] = (
+    'metrics',
+    'ergonomics',
+    'structure',
+    'memory',
+    'impacts',
+)
 
 
 def output(text: str) -> None:
@@ -179,6 +192,45 @@ def run_case(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_info(args: argparse.Namespace) -> int:
+    """
+    Export the complete analysis of an algorithm as JSON.
+
+    The output is the full ``Algorithm.to_dict()`` payload. When one or
+    more sections are requested, only those analysis blocks are kept while
+    the overview scalars are always emitted as the identity header.
+
+    Returns:
+        Process exit code.
+
+    """
+    algo = parse_moves(args.moves, trust_input=False)
+    data = algo.to_dict(args.size)
+
+    if args.section:
+        requested = [
+            name.strip()
+            for name in args.section.split(',')
+            if name.strip()
+        ]
+        unknown = [name for name in requested if name not in INFO_SECTIONS]
+        if unknown:
+            available = ', '.join(INFO_SECTIONS)
+            sys.stderr.write(
+                f'Error: unknown section(s): { ", ".join(unknown) }. '
+                f'Available: { available }\n',
+            )
+            return 1
+        data = {
+            key: value
+            for key, value in data.items()
+            if key not in INFO_SECTIONS or key in requested
+        }
+
+    output(json.dumps(data, indent=2))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """
     Build the command line argument parser.
@@ -268,6 +320,28 @@ def build_parser() -> argparse.ArgumentParser:
     case_parser.add_argument('collection', help='Collection name, e.g. OLL')
     case_parser.add_argument('name', help='Case name or code, e.g. 27')
     case_parser.set_defaults(handler=run_case)
+
+    info_parser = subparsers.add_parser(
+        'info',
+        help='Export the complete analysis of an algorithm as JSON',
+    )
+    info_parser.add_argument('moves', help='Algorithm to analyze')
+    info_parser.add_argument(
+        '-s', '--size',
+        type=int,
+        default=DEFAULT_CUBE_SIZE,
+        help=f'Cube size (default: { DEFAULT_CUBE_SIZE })',
+    )
+    info_parser.add_argument(
+        '--section',
+        default='',
+        help=(
+            'Comma-separated analysis sections to keep '
+            f'({ ", ".join(INFO_SECTIONS) }); '
+            'overview fields are always present'
+        ),
+    )
+    info_parser.set_defaults(handler=run_info)
 
     return parser
 

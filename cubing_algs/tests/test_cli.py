@@ -1,5 +1,6 @@
 """Tests for the command line interface."""
 import io
+import json
 import logging
 import unittest
 from contextlib import redirect_stderr
@@ -164,5 +165,58 @@ class CaseCommandTestCase(CliTestCase):
         self.assertIn('Error:', err)
 
 
-if __name__ == '__main__':
-    unittest.main()
+class InfoCommandTestCase(CliTestCase):
+    """Tests for the info subcommand."""
+
+    def test_info_outputs_full_analysis(self) -> None:
+        """Info outputs the complete to_dict payload as JSON."""
+        code, out, _err = self.run_cli('info', "R U R' U'")
+        self.assertEqual(code, 0)
+        data = json.loads(out)
+        self.assertEqual(data['moves'], "R U R' U'")
+        for section in (
+                'metrics', 'ergonomics', 'structure', 'memory', 'impacts',
+        ):
+            self.assertIn(section, data)
+
+    def test_info_section_keeps_overview_and_requested(self) -> None:
+        """Info with a section drops other analysis blocks."""
+        code, out, _err = self.run_cli(
+            'info', "R U R' U'", '--section', 'metrics',
+        )
+        self.assertEqual(code, 0)
+        data = json.loads(out)
+        self.assertIn('moves', data)
+        self.assertIn('metrics', data)
+        self.assertNotIn('ergonomics', data)
+        self.assertNotIn('impacts', data)
+
+    def test_info_multiple_sections(self) -> None:
+        """Info accepts a comma-separated list of sections."""
+        code, out, _err = self.run_cli(
+            'info', "R U R' U'", '--section', 'metrics,memory',
+        )
+        self.assertEqual(code, 0)
+        data = json.loads(out)
+        self.assertIn('metrics', data)
+        self.assertIn('memory', data)
+        self.assertNotIn('structure', data)
+
+    def test_info_size_reaches_impacts(self) -> None:
+        """Info forwards the cube size to the impacts computation."""
+        code, out, _err = self.run_cli('info', 'Rw U', '--size', '4')
+        self.assertEqual(code, 0)
+        data = json.loads(out)
+        self.assertIn('impacts', data)
+
+    def test_info_unknown_section_fails(self) -> None:
+        """Info fails on an unknown section name."""
+        code, _out, err = self.run_cli('info', "R U R' U'", '--section', 'foo')
+        self.assertEqual(code, 1)
+        self.assertIn('unknown section(s): foo', err)
+
+    def test_info_invalid_moves_fails(self) -> None:
+        """Info fails with an error message on invalid input."""
+        code, _out, err = self.run_cli('info', 'R T')
+        self.assertEqual(code, 1)
+        self.assertIn('Error:', err)
