@@ -1,6 +1,7 @@
 """Display a text resume of an algorithm based on its to_dict() data."""
 # ruff: noqa: T201
 import argparse
+import json
 from typing import Any
 
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
@@ -345,10 +346,14 @@ def print_impacts(impacts: dict[str, Any]) -> None:
             print(f'  {bullet} {colorize(pattern, FG_WHITE + BOLD)}')
 
 
-def resume(algorithm: str, size: int) -> None:
-    """Print a text resume of an algorithm."""
+def resume(algorithm: str, size: int, *, as_json: bool = False) -> None:
+    """Print a text resume of an algorithm, or its raw data as JSON."""
     algo = parse_moves(algorithm)
     data = algo.to_dict(size)
+
+    if as_json:
+        print(json.dumps(data, indent=2))
+        return
 
     print()
     print_overview(data, size)
@@ -380,9 +385,14 @@ def main() -> None:
         default=DEFAULT_CUBE_SIZE,
         help=f'Cube size (default: {DEFAULT_CUBE_SIZE})',
     )
+    parser.add_argument(
+        '-j', '--json',
+        action='store_true',
+        help='Output the raw resume data as JSON instead of text',
+    )
     args = parser.parse_args()
 
-    resume(args.algorithm, args.size)
+    resume(args.algorithm, args.size, as_json=args.json)
 
 
 if __name__ == '__main__':
