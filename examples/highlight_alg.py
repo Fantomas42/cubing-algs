@@ -4,10 +4,14 @@ import argparse
 import re
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.constants import MOVE_SPLIT
+from cubing_algs.ergonomics import find_trigger_patterns
+from cubing_algs.parsing import parse_moves
 from cubing_algs.structure import Structure
 from cubing_algs.structure import compute_structure
-from cubing_algs.triggers import TRIGGER_PATTERNS
-from cubing_algs.triggers import TriggerPattern
+from cubing_algs.transform.pause import unpause_moves
+from cubing_algs.transform.sign import unsign_moves
+from cubing_algs.triggers import TriggerMatch
 
 RESET = '\x1b[0m'
 BOLD = '\x1b[1m'
@@ -18,6 +22,12 @@ FG_WHITE = '\x1b[38;5;255m'
 
 OP_COMMA = '\x1b[38;5;111m'   # light blue  — commutator separator
 OP_COLON = '\x1b[38;5;210m'   # light salmon — conjugate separator
+
+STRUCTURE_COLORS = {
+    'commutator': '\x1b[38;5;203m',  # salmon red
+    'conjugate': '\x1b[38;5;75m',    # steel blue
+}
+
 BRACKET_COLORS = [
     '\x1b[38;5;226m',  # depth 0 — bright yellow
     '\x1b[38;5;213m',  # depth 1 — light magenta
@@ -25,100 +35,96 @@ BRACKET_COLORS = [
     '\x1b[38;5;155m',  # depth 3 — light green
 ]
 
-_TRIGGER_PALETTE = [
-    '\x1b[38;5;196m',  # bright red
-    '\x1b[38;5;208m',  # orange
-    '\x1b[38;5;226m',  # bright yellow
-    '\x1b[38;5;118m',  # bright green
-    '\x1b[38;5;51m',   # cyan
-    '\x1b[38;5;39m',   # dodger blue
-    '\x1b[38;5;129m',  # violet
-    '\x1b[38;5;201m',  # hot pink
-    '\x1b[38;5;214m',  # amber
-    '\x1b[38;5;154m',  # yellow-green
-    '\x1b[38;5;45m',   # sky blue
-    '\x1b[38;5;165m',  # orchid
-    '\x1b[38;5;82m',   # chartreuse
-    '\x1b[38;5;207m',  # pink
-    '\x1b[38;5;93m',   # blue-violet
-    '\x1b[38;5;48m',   # spring green
-]
-TRIGGER_COLORS: dict[str, str] = {
-    p.name: _TRIGGER_PALETTE[i % len(_TRIGGER_PALETTE)]
-    for i, p in enumerate(TRIGGER_PATTERNS)
+# One stable color per trigger category, so that adding a pattern to
+# TRIGGER_PATTERNS never shifts the colors of the existing ones.
+CATEGORY_COLORS = {
+    'basic': '\x1b[38;5;118m',     # bright green
+    'compound': '\x1b[38;5;39m',   # dodger blue
+    'OLL': '\x1b[38;5;208m',       # orange
+    'advanced': '\x1b[38;5;201m',  # hot pink
+    'setup': '\x1b[38;5;226m',     # bright yellow
+    'wide': '\x1b[38;5;51m',       # cyan
 }
+CATEGORY_FALLBACK = '\x1b[38;5;196m'  # bright red
+
+# Move tokens as tokenized by the library, plus the punctuation used by
+# the compressed structure notation.
+STRUCTURE_TOKEN_RE = re.compile(r'[\[\],:]|' + MOVE_SPLIT.pattern)
+PUNCTUATION = frozenset('[],:')
 
 
-def parse_move_strings(moves_str: str) -> list[str]:
+def normalize(algorithm_str: str) -> Algorithm:
     """
-    Return individual move strings parsed from a move sequence.
+    Return the parsed algorithm in the notation used for trigger matching.
+
+    Pauses are dropped and SiGN moves are converted to standard notation,
+    so that move indices line up with those of find_trigger_patterns.
 
     Returns:
-        List of move strings.
+        Normalized algorithm.
 
     """
-    return [str(m) for m in Algorithm.parse_moves(moves_str)]
+    return parse_moves(algorithm_str).transform(unpause_moves, unsign_moves)
 
 
-def build_pattern_variants() -> list[tuple[TriggerPattern, list[str]]]:
+def match_triggers(moves: list[str]) -> dict[int, TriggerMatch]:
     """
-    Return all (pattern, move-list) pairs including variations, longest first.
+    Detect triggers in a sequence of normalized move strings.
 
     Returns:
-        Sorted list of (pattern, moves) pairs.
+        Mapping from start index to the trigger match starting there.
 
     """
-    entries: list[tuple[TriggerPattern, list[str]]] = []
-    for pattern in TRIGGER_PATTERNS:
-        entries.append((pattern, parse_move_strings(pattern.moves)))
-        entries.extend(
-            (pattern, parse_move_strings(variation.moves))
-            for variation in pattern.variations
-        )
-    entries.sort(key=lambda x: len(x[1]), reverse=True)
-    return entries
+    if not moves:
+        return {}
+
+    matches = find_trigger_patterns(parse_moves(' '.join(moves)))
+    return {match.start_index: match for match in matches}
 
 
-def find_matches(
-    moves: list[str],
-    pattern_variants: list[tuple[TriggerPattern, list[str]]],
-) -> dict[int, tuple[int, TriggerPattern]]:
+def match_token_runs(tokens: list[str]) -> dict[int, TriggerMatch]:
     """
-    Find non-overlapping trigger matches using greedy longest-first matching.
+    Detect triggers in each run of move tokens separated by punctuation.
+
+    Triggers never span a bracket or a separator, so each run is matched
+    on its own and its results are shifted back to token indices.
 
     Returns:
-        Mapping from start index to (exclusive end index, pattern).
+        Mapping from start token index to the trigger match starting there.
 
     """
-    n = len(moves)
-    matched: dict[int, tuple[int, TriggerPattern]] = {}
-    i = 0
-    while i < n:
-        for pattern, pmoves in pattern_variants:
-            plen = len(pmoves)
-            if i + plen <= n and moves[i : i + plen] == pmoves:
-                matched[i] = (i + plen, pattern)
-                i += plen
-                break
+    matches: dict[int, TriggerMatch] = {}
+    run: list[str] = []
+    run_start = 0
+
+    for index, token in enumerate([*tokens, ',']):
+        if token in PUNCTUATION:
+            matches.update({
+                run_start + start: match
+                for start, match in match_triggers(run).items()
+            })
+            run = []
+            run_start = index + 1
         else:
-            i += 1
-    return matched
+            run.append(token)
+
+    return matches
 
 
-def trigger_color(pattern: TriggerPattern) -> str:
+def trigger_color(match: TriggerMatch) -> str:
     """
-    Return the ANSI color for a trigger pattern.
+    Return the ANSI color of a matched trigger, keyed by its category.
 
     Returns:
         ANSI escape code string.
 
     """
-    return TRIGGER_COLORS.get(pattern.name, _TRIGGER_PALETTE[0])
+    return CATEGORY_COLORS.get(match.pattern.category, CATEGORY_FALLBACK)
 
 
-def render_algorithm(
+def render_moves(
     moves: list[str],
-    matches: dict[int, tuple[int, TriggerPattern]],
+    matches: dict[int, TriggerMatch],
 ) -> str:
     """
     Build a colorized string of the algorithm with triggers highlighted.
@@ -130,45 +136,38 @@ def render_algorithm(
     parts: list[str] = []
     i = 0
     while i < len(moves):
-        if i in matches:
-            end, pattern = matches[i]
-            color = trigger_color(pattern)
-            segment = ' '.join(moves[i:end])
-            parts.append(f'{color}{BOLD}{segment}{RESET}')
-            i = end
+        match = matches.get(i)
+        if match:
+            segment = ' '.join(moves[i : i + match.length])
+            parts.append(f'{trigger_color(match)}{BOLD}{segment}{RESET}')
+            i += match.length
         else:
             parts.append(f'{FG_WHITE}{moves[i]}{RESET}')
             i += 1
     return ' '.join(parts)
 
 
-def render_legend(
-    matches: dict[int, tuple[int, TriggerPattern]],
-) -> None:
+def render_legend(matches: dict[int, TriggerMatch]) -> None:
     """Print a legend of detected triggers with their categories."""
-    seen: dict[str, TriggerPattern] = {}
-    for _, (_, pattern) in sorted(matches.items()):
-        if pattern.name not in seen:
-            seen[pattern.name] = pattern
+    seen: dict[tuple[str, str], TriggerMatch] = {}
+    for _, match in sorted(matches.items()):
+        kind = match.variation.kind.value if match.variation else ''
+        seen.setdefault((match.pattern.name, kind), match)
 
     if not seen:
         return
 
     print(f'\n{FG_GREY}Triggers:{RESET}')
-    for name, pattern in seen.items():
-        color = trigger_color(pattern)
-        label = f'{color}{BOLD}{name}{RESET}'
+    for (name, kind), match in seen.items():
+        pattern = match.pattern
+        label = f'{trigger_color(match)}{BOLD}{name}{RESET}'
         category = f'{FG_GREY}[{pattern.category}]{RESET}'
-        moves_display = f'{DIM}{pattern.moves}{RESET}'
-        print(f'  {label} {category}  {moves_display}')
+        moves_display = f'{DIM}{match.matched_moves}{RESET}'
+        variation = f' {FG_GREY}({kind}){RESET}' if kind else ''
+        print(f'  {label} {category}  {moves_display}{variation}')
 
 
-# Matches individual punctuation characters or move tokens (e.g. R, U2, Rw')
-_STRUCTURE_TOKEN_RE = re.compile(r"[\[\],:]|[A-Za-z][A-Za-z0-9]*'*")
-_PUNCT = frozenset('[],:')
-
-
-def _color_punct(tok: str, depth: int) -> tuple[str, int]:
+def color_punctuation(punct: str, depth: int) -> tuple[str, int]:
     """
     Return (colored_string, new_depth) for a punctuation token.
 
@@ -177,59 +176,57 @@ def _color_punct(tok: str, depth: int) -> tuple[str, int]:
 
     """
     bracket_color = BRACKET_COLORS[depth % len(BRACKET_COLORS)]
-    if tok == '[':
-        return f'{bracket_color}{tok}{RESET}', depth + 1
-    if tok == ']':
+    if punct == '[':
+        return f'{bracket_color}{punct}{RESET}', depth + 1
+    if punct == ']':
         new_depth = depth - 1
         color = BRACKET_COLORS[new_depth % len(BRACKET_COLORS)]
-        return f'{color}{tok}{RESET}', new_depth
-    if tok == ',':
-        return f'{OP_COMMA}{tok}{RESET}', depth
-    return f'{OP_COLON}{tok}{RESET}', depth  # ':'
+        return f'{color}{punct}{RESET}', new_depth
+    if punct == ',':
+        return f'{OP_COMMA}{punct}{RESET}', depth
+    return f'{OP_COLON}{punct}{RESET}', depth  # ':'
 
 
-def render_structure_notation(
-    compressed: str,
-    pattern_variants: list[tuple[TriggerPattern, list[str]]],
-) -> str:
+def render_structure_notation(compressed: str) -> str:
     """
     Return the compressed structure notation with trigger sequences colorized.
 
     Brackets are colored by nesting depth; `,` is light blue (commutator)
-    and `:` is light salmon (conjugate); move tokens are checked against
-    trigger patterns and colored when they match.
+    and `:` is light salmon (conjugate); move tokens are colored by the
+    category of the trigger they belong to.
 
     Returns:
         ANSI-colored compressed notation string.
 
     """
-    toks = _STRUCTURE_TOKEN_RE.findall(compressed)
+    tokens = [
+        token.group(0)
+        for token in STRUCTURE_TOKEN_RE.finditer(compressed)
+    ]
+    matches = match_token_runs(tokens)
 
     # Build (raw_tokens, colored_str) segments
     segments: list[tuple[list[str], str]] = []
     depth = 0
     i = 0
-    while i < len(toks):
-        tok = toks[i]
-        if tok in _PUNCT:
-            colored, depth = _color_punct(tok, depth)
-            segments.append(([tok], colored))
+    while i < len(tokens):
+        token = tokens[i]
+        if token in PUNCTUATION:
+            colored, depth = color_punctuation(token, depth)
+            segments.append(([token], colored))
             i += 1
             continue
 
-        matched = False
-        for pattern, pmoves in pattern_variants:
-            plen = len(pmoves)
-            if toks[i:i + plen] == pmoves:
-                color = trigger_color(pattern)
-                segment = ' '.join(pmoves)
-                segments.append((pmoves, f'{color}{BOLD}{segment}{RESET}'))
-                i += plen
-                matched = True
-                break
-
-        if not matched:
-            segments.append(([tok], f'{FG_WHITE}{tok}{RESET}'))
+        match = matches.get(i)
+        if match:
+            matched = tokens[i : i + match.length]
+            segment = ' '.join(matched)
+            segments.append(
+                (matched, f'{trigger_color(match)}{BOLD}{segment}{RESET}'),
+            )
+            i += match.length
+        else:
+            segments.append(([token], f'{FG_WHITE}{token}{RESET}'))
             i += 1
 
     # Reconstruct spacing: no space after `[`, no space before `]`/`,`/`:`
@@ -248,9 +245,7 @@ def render_structure_notation(
     return ''.join(result)
 
 
-def render_structure_line(
-    structures: list[Structure],
-) -> str:
+def render_structure_line(structures: list[Structure]) -> str:
     """
     Return a one-line summary of the detected top-level structures.
 
@@ -261,34 +256,29 @@ def render_structure_line(
     if not structures:
         return f'{FG_GREY}none{RESET}'
     parts: list[str] = []
-    for s in structures:
-        cls = s.classification or s.type
-        color = '\x1b[38;5;203m' if s.type == 'commutator' else '\x1b[38;5;75m'
-        parts.append(f'{color}{BOLD}{cls}{RESET}')
+    for structure in structures:
+        classification = structure.classification or structure.type
+        color = STRUCTURE_COLORS.get(structure.type, FG_WHITE)
+        parts.append(f'{color}{BOLD}{classification}{RESET}')
     return f'{FG_GREY},{RESET} '.join(parts)
 
 
 def show_highlighted(algorithm_str: str) -> None:
     """Parse and display an algorithm with trigger patterns highlighted."""
-    algo = Algorithm.parse_moves(algorithm_str)
-    moves = [str(m) for m in algo]
+    algo = normalize(algorithm_str)
+    moves = [str(move) for move in algo]
 
-    pattern_variants = build_pattern_variants()
-    matches = find_matches(moves, pattern_variants)
-
-    rendered = render_algorithm(moves, matches)
-    trigger_count = len(matches)
-    covered = sum(end - start for start, (end, _) in matches.items())
+    matches = match_triggers(moves)
+    covered = sum(match.length for match in matches.values())
 
     structure_data = compute_structure(algo)
-    rendered_structure = render_structure_notation(
-        structure_data.compressed, pattern_variants,
-    )
+    rendered = render_moves(moves, matches)
+    rendered_structure = render_structure_notation(structure_data.compressed)
     structure_summary = render_structure_line(structure_data.structures)
 
     print(f'{FG_GREY}Algorithm:{RESET} {FG_WHITE}{BOLD}{algorithm_str}{RESET}')
     print(f'{FG_GREY}Moves:    {RESET} {len(moves)}')
-    print(f'{FG_GREY}Triggers: {RESET} {trigger_count}')
+    print(f'{FG_GREY}Triggers: {RESET} {len(matches)}')
     print(f'{FG_GREY}Coverage: {RESET} {covered}/{len(moves)} moves')
     print(f'{FG_GREY}Structure:{RESET} {structure_summary}')
     print()
@@ -309,7 +299,7 @@ def main() -> None:
         epilog=(
             'Examples:\n'
             "  python highlight_alg.py \"R U R' U'\"\n"
-            "  python highlight_alg.py \"R U R' U' R' F R2 ...\""
+            "  python highlight_alg.py \"R U R' U' R' F R F'\""
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
