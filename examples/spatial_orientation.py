@@ -2,7 +2,6 @@
 Demonstrate preservation of the cube spatial orientation
 when serializing/deserializing facelets to cubies.
 """
-# ruff: noqa: T201
 from cubing_algs.vcube import VCube
 
 cube = VCube()

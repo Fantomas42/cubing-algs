@@ -1,5 +1,4 @@
 """Demonstrate AF2L (Advanced F2L) visualization with special cases."""
-# ruff: noqa: T201
 from cubing_algs.vcube import VCube
 
 c = VCube()

@@ -1,5 +1,4 @@
 """Demonstrate various color palettes for cube visualization."""
-# ruff: noqa: T201
 import argparse
 
 from cubing_algs.annotations import CubeFacelets

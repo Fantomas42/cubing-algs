@@ -1,5 +1,4 @@
 """Demonstrate emoji facelet display mode for cube visualization."""
-# ruff: noqa: T201
 from cubing_algs.annotations import CubeFacelets
 from cubing_algs.annotations import CubeMask
 from cubing_algs.display.masks import F2L_MASK

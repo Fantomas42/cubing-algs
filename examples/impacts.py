@@ -1,5 +1,4 @@
 """Demonstrate comprehensive algorithm impact analysis."""
-# ruff: noqa: T201
 import sys
 from typing import TYPE_CHECKING
 

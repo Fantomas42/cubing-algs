@@ -1,4 +1,3 @@
-# ruff: noqa: T201
 """
 Example usage of scramble_x_cross() function.
 

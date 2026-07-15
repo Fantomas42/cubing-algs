@@ -1,5 +1,4 @@
 """Demonstrate cube visualization for different cube sizes."""
-# ruff: noqa: T201
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
 

@@ -1,5 +1,4 @@
 """Compare the evolution of piece types across different cube sizes."""
-# ruff: noqa: T201
 import argparse
 from collections import Counter
 

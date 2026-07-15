@@ -1,5 +1,4 @@
 """Demonstrate F2L visualization with different cube orientations."""
-# ruff: noqa: T201
 import argparse
 
 from cubing_algs.algorithm import Algorithm

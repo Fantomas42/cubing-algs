@@ -1,5 +1,4 @@
 """Demonstrate cross visualization mode for CFOP method."""
-# ruff: noqa: T201
 from cubing_algs.vcube import VCube
 
 c = VCube()

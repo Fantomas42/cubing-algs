@@ -1,5 +1,4 @@
 """Compare classify_pattern() results across multiple algorithms."""
-# ruff: noqa: T201
 import sys
 from typing import NamedTuple
 

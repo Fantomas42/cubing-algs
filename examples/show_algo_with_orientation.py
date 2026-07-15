@@ -1,5 +1,4 @@
 """Demonstrate algorithm visualization with different display options."""
-# ruff: noqa: T201
 import argparse
 
 from cubing_algs.parsing import parse_moves

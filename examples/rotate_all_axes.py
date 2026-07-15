@@ -1,5 +1,4 @@
 """Generate an HTML file showing the cube rotating on X, Y, and Z axes."""
-# ruff: noqa: T201
 import argparse
 import time
 from pathlib import Path

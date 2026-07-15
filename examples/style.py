@@ -1,5 +1,4 @@
 """Demonstrate all available letter styles for cube display."""
-# ruff: noqa: T201
 import argparse
 
 from cubing_algs.display.styles import STYLES

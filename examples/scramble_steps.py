@@ -1,4 +1,3 @@
-# ruff: noqa: T201
 """
 Example usage of step-based scramble generation functions.
 

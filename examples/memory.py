@@ -1,5 +1,4 @@
 """Demonstrate comprehensive algorithm memorability analysis."""
-# ruff: noqa: T201
 from cubing_algs.algorithm import Algorithm
 
 RESET = '\x1b[0m'

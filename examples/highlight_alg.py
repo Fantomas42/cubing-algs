@@ -1,5 +1,4 @@
 """Display an algorithm with highlighted trigger patterns."""
-# ruff: noqa: T201
 import argparse
 import re
 

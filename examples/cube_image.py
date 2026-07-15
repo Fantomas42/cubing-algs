@@ -3,7 +3,6 @@ Generate an SVG image of the cube.
 
 Supports configurable rotation and algorithm.
 """
-# ruff: noqa: T201
 import argparse
 from pathlib import Path
 

@@ -1,5 +1,4 @@
 """Demonstrate various cube masks for highlighting specific pieces."""
-# ruff: noqa: T201
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.masks import CORNERS_MASK
 from cubing_algs.masks import CROSS_BOTTOM_MASK

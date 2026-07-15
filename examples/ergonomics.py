@@ -1,5 +1,4 @@
 """Demonstrate comprehensive algorithm ergonomics analysis."""
-# ruff: noqa: T201
 import sys
 
 from cubing_algs.algorithm import Algorithm

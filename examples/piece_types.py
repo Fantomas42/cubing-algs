@@ -1,5 +1,4 @@
 """Demonstrate facelet piece types for different cube sizes."""
-# ruff: noqa: T201
 import argparse
 from collections import Counter
 from typing import TYPE_CHECKING

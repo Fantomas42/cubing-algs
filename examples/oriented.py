@@ -1,5 +1,4 @@
 """Demonstrate cube visualization with different spatial orientations."""
-# ruff: noqa: T201
 from cubing_algs.masks import CENTERS_MASK
 from cubing_algs.vcube import VCube
 

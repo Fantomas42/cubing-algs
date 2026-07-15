@@ -10,7 +10,6 @@ compare renders and complete or correct the masks/modes.
 Algorithms are borrowed from cubing.js' ``stickering-demo-algs.ts`` whenever a
 cubing_algs mode maps onto one of its stickerings, so matching cases line up.
 """
-# ruff: noqa: T201
 import argparse
 from pathlib import Path
 from urllib.parse import quote_plus
