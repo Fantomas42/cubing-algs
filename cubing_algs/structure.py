@@ -719,6 +719,12 @@ def detect_structures(
         List of detected structures, sorted by position
 
     """
+    # Move equality includes timestamps, which would keep the inverse
+    # lookups from ever matching. The guard keeps the recursive calls,
+    # which are already untimed, allocation-free.
+    if algo.has_times:
+        algo = untime_algorithm(algo)
+
     # Use heuristics if parameters not provided
     algo_len = len(algo)
     if max_setup_len is None:
@@ -1188,7 +1194,23 @@ def compute_structure_stats(structures: list[Structure]) -> StructureStats:  # n
     )
 
 
-def compute_structure(
+def untime_algorithm(algo: 'Algorithm') -> 'Algorithm':
+    """
+    Return the algorithm with the timing information removed.
+
+    Args:
+        algo: The algorithm to strip.
+
+    Returns:
+        The same algorithm without timestamps.
+
+    """
+    from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
+
+    return algo.transform(untime_moves)
+
+
+def compute_structure(  # noqa: PLR0914
     algo: 'Algorithm',
     max_setup_len: int | None = None,
     min_score: float | None = None,
@@ -1206,6 +1228,9 @@ def compute_structure(
     Detection thresholds are automatically determined based on algorithm
     length if not explicitly provided.
 
+    Timing is dropped first: move equality includes timestamps, which
+    would keep the inverse-sequence lookups from ever matching.
+
     Args:
         algo: The algorithm to analyze
         max_setup_len: Maximum setup sequence length (auto-calculated)
@@ -1215,6 +1240,8 @@ def compute_structure(
         StructureData with all calculated structure metrics.
 
     """
+    algo = untime_algorithm(algo)
+
     original_str = str(algo)
     structures = detect_structures(algo, max_setup_len, min_score)
 

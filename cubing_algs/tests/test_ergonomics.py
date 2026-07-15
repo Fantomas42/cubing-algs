@@ -38,6 +38,7 @@ from cubing_algs.ergonomics import normalize_algorithm_string
 from cubing_algs.ergonomics import suggest_ergonomic_improvements
 from cubing_algs.ergonomics import trigger_speed_factor
 from cubing_algs.move import Move
+from cubing_algs.transform.timing import time_moves
 from cubing_algs.triggers import TRIGGER_PATTERNS
 from cubing_algs.triggers import TriggerMatch
 from cubing_algs.triggers import VariationKind
@@ -169,6 +170,35 @@ class TestGetMoveKey(unittest.TestCase):
         layered_move = Move('2-4Rw')
         key = get_move_key(layered_move)
         self.assertEqual(key, 'Rw')
+
+    def test_timed_moves(self) -> None:
+        """Test that timing information is stripped from the key."""
+        self.assertEqual(get_move_key(Move('R@150')), 'R')
+        self.assertEqual(get_move_key(Move("R'@150")), "R'")
+        self.assertEqual(get_move_key(Move('R2@150')), 'R2')
+
+    def test_timed_moves_of_every_kind(self) -> None:
+        """Test that timing is stripped for wide, slice, SiGN and layered."""
+        self.assertEqual(get_move_key(Move('Rw@150')), 'Rw')
+        self.assertEqual(get_move_key(Move('M@150')), 'M')
+        self.assertEqual(get_move_key(Move('r@150')), 'Rw')
+        self.assertEqual(get_move_key(Move('2-4Rw@150')), 'Rw')
+
+    def test_timed_rotations_and_pauses(self) -> None:
+        """Test that timing is stripped on the early-return move kinds."""
+        self.assertEqual(get_move_key(Move('y@150')), 'y')
+        self.assertEqual(get_move_key(Move('.@1200')), '.')
+
+    def test_timed_move_keys_are_known_to_move_data(self) -> None:
+        """
+        Test that timed moves resolve to real MOVE_DATA entries.
+
+        An unknown key silently falls back to DEFAULT_MOVE_PROPERTIES,
+        which marks the move ambidextrous and awkward.
+        """
+        for notation in ['R@150', 'Rw@150', 'M@150', 'y@150', 'r@150']:
+            with self.subTest(notation=notation):
+                self.assertIn(get_move_key(Move(notation)), MOVE_DATA)
 
 
 class TestGetMoveErgonomicWeight(unittest.TestCase):
@@ -530,6 +560,26 @@ class TestNormalizeAlgorithmString(unittest.TestCase):
         alg = Algorithm.parse_moves('R . U .')
         self.assertEqual(normalize_algorithm_string(alg), 'R U')
 
+    def test_timing_removed(self) -> None:
+        """Test that timing information is removed from the moves."""
+        alg = Algorithm.parse_moves("R@0 U@150 R'@300 U'@450")
+        self.assertEqual(normalize_algorithm_string(alg), "R U R' U'")
+
+    def test_timing_removed_with_pauses_and_sign(self) -> None:
+        """Test that timing is removed alongside the other normalizations."""
+        alg = Algorithm.parse_moves("r@0 .@1200 U@150 R'@300")
+        self.assertEqual(normalize_algorithm_string(alg), "Rw U R'")
+
+    def test_normalization_preserves_move_count(self) -> None:
+        """
+        Test that normalization stays 1:1 on the pause-free sequence.
+
+        Trigger indices refer to this sequence: a normalization that
+        adds or drops a move silently breaks trigger/time alignment.
+        """
+        alg = Algorithm.parse_moves('R@0 U@150 r@300 2-4Rw@450 y@600')
+        self.assertEqual(len(normalize_algorithm_string(alg).split()), 5)
+
 
 class TestFindTriggerPatterns(unittest.TestCase):
     """Test the find_trigger_patterns function."""
@@ -552,6 +602,26 @@ class TestFindTriggerPatterns(unittest.TestCase):
         alg = Algorithm.parse_moves('M E S')
         matches = find_trigger_patterns(alg)
         self.assertEqual(len(matches), 0)
+
+    def test_sexy_move_detected_in_timed_notation(self) -> None:
+        """Test that timing does not prevent trigger detection."""
+        alg = Algorithm.parse_moves("R@0 U@150 R'@300 U'@450")
+        matches = find_trigger_patterns(alg)
+        pattern_names = [m.pattern.name for m in matches]
+        self.assertIn('Sexy Move', pattern_names)
+
+    def test_timed_matches_align_with_untimed_ones(self) -> None:
+        """Test that timing changes neither the matches nor their indices."""
+        moves = "R U R' U' R' F R F'"
+        untimed = find_trigger_patterns(Algorithm.parse_moves(moves))
+        timed = find_trigger_patterns(
+            Algorithm.parse_moves(moves).transform(time_moves(150)),
+        )
+
+        self.assertEqual(
+            [(m.pattern.name, m.start_index, m.end_index) for m in timed],
+            [(m.pattern.name, m.start_index, m.end_index) for m in untimed],
+        )
 
     def test_compound_trigger(self) -> None:
         """Test that compound triggers are detected over basic ones."""
@@ -1990,6 +2060,27 @@ class TestComputeErgonomics(unittest.TestCase):
         # Both should complete without error
         self.assertIsInstance(result_right, ErgonomicsData)
         self.assertIsInstance(result_left, ErgonomicsData)
+
+    def test_timing_does_not_change_any_metric(self) -> None:
+        """
+        Test that timing an algorithm leaves every metric untouched.
+
+        Timestamps carry no ergonomic meaning: the temporal model is
+        derived from move weights, never from the recorded times.
+        """
+        alg = Algorithm.parse_moves("R U R' U' R' F R F'")
+        timed = alg.transform(time_moves(150))
+
+        self.assertEqual(compute_ergonomics(timed), compute_ergonomics(alg))
+
+    def test_timed_moves_are_not_awkward(self) -> None:
+        """Test that timed moves keep their hand and finger assignments."""
+        alg = Algorithm.parse_moves("R@0 U@150 R'@300 U'@450")
+        result = compute_ergonomics(alg)
+
+        self.assertEqual(result.awkward_moves, 0)
+        self.assertEqual(result.both_hand_moves, 0)
+        self.assertGreater(result.right_hand_moves, 0)
 
     def test_new_fields_populated_for_nonempty(self) -> None:
         """Test that new advanced fields are populated for non-empty algs."""

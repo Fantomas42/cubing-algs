@@ -449,8 +449,9 @@ def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
         MemoryData containing all calculated memorability metrics.
 
     """
-    # Filter out pauses
-    non_pause_moves = [m for m in algorithm if not m.is_pause]
+    # Filter out pauses and drop timing, which would make every move
+    # string unique and hide the repetitions
+    non_pause_moves = [m.untimed for m in algorithm if not m.is_pause]
     move_count = len(non_pause_moves)
 
     if move_count == 0:

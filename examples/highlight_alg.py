@@ -10,6 +10,7 @@ from cubing_algs.structure import Structure
 from cubing_algs.structure import compute_structure
 from cubing_algs.transform.pause import unpause_moves
 from cubing_algs.transform.sign import unsign_moves
+from cubing_algs.transform.timing import untime_moves
 from cubing_algs.triggers import TriggerMatch
 
 RESET = '\x1b[0m'
@@ -56,14 +57,17 @@ def normalize(algorithm_str: str) -> Algorithm:
     """
     Return the parsed algorithm in the notation used for trigger matching.
 
-    Pauses are dropped and SiGN moves are converted to standard notation,
-    so that move indices line up with those of find_trigger_patterns.
+    Pauses are dropped, timing is stripped and SiGN moves are converted
+    to standard notation, so that move indices line up with those of
+    find_trigger_patterns.
 
     Returns:
         Normalized algorithm.
 
     """
-    return parse_moves(algorithm_str).transform(unpause_moves, unsign_moves)
+    return parse_moves(algorithm_str).transform(
+        unpause_moves, unsign_moves, untime_moves,
+    )
 
 
 def match_triggers(moves: list[str]) -> dict[int, TriggerMatch]:
@@ -328,6 +332,10 @@ def main() -> None:
         "R' U2 R U2 R' F R U R' U' R' F' R2",
         "F R U R' U' R U R' U' R U R' U' F'",
         'M2 U M2 U2 M2 U M2',
+        # Notations normalized before highlighting
+        "r U r' U' r' F r F'",  # SiGN
+        "R U R' . U' R' F R F'",  # pause
+        "R@0 U@150 R'@300 U'@450 R'@600 F@750 R@900 F'@1050",  # timed
     ]
 
     for alg in algorithms:

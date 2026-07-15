@@ -274,7 +274,7 @@ def get_move_key(move: Move) -> str:
     """
     Get the standardized key for move lookup.
 
-    Handles SiGN notation and layered moves by converting them
+    Handles timing, SiGN notation and layered moves by converting them
     to their base equivalents.
 
     Args:
@@ -284,6 +284,9 @@ def get_move_key(move: Move) -> str:
         Standardized string key for move lookup.
 
     """
+    # Timing carries no ergonomic meaning and is absent from MOVE_DATA
+    move = move.untimed
+
     if move.is_pause or move.is_rotation_move:
         return str(move)
 
@@ -443,7 +446,9 @@ def normalize_algorithm_string(algorithm: 'Algorithm') -> str:
     """
     Convert algorithm to normalized string for pattern matching.
 
-    Pauses are removed and moves are converted to standard notation.
+    Pauses are removed, timing is dropped and moves are converted to
+    standard notation. Every step is 1:1 on the pause-free sequence,
+    which trigger indices refer to.
 
     Returns:
         Space-separated string of non-pause moves in standard notation.
@@ -451,8 +456,15 @@ def normalize_algorithm_string(algorithm: 'Algorithm') -> str:
     """
     from cubing_algs.transform.pause import unpause_moves  # noqa: PLC0415
     from cubing_algs.transform.sign import unsign_moves  # noqa: PLC0415
+    from cubing_algs.transform.timing import untime_moves  # noqa: PLC0415
 
-    return str(algorithm.transform(unpause_moves, unsign_moves))
+    return str(
+        algorithm.transform(
+            unpause_moves,
+            unsign_moves,
+            untime_moves,
+        ),
+    )
 
 
 @cache

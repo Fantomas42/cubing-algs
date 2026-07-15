@@ -16,6 +16,7 @@ from cubing_algs.memory import compute_structure_score
 from cubing_algs.memory import compute_unfamiliar_percent
 from cubing_algs.memory import find_repeated_subsequences
 from cubing_algs.memory import get_memory_rating
+from cubing_algs.transform.timing import time_moves
 
 
 class LengthScoreTestCase(unittest.TestCase):
@@ -336,6 +337,33 @@ class ComputeMemoryIntegrationTestCase(unittest.TestCase):
         mem = algo.memory
         self.assertGreater(mem.memory_score, 0.55)
         self.assertIn(mem.memory_rating, ('Trivial', 'Easy'))
+
+    def test_timing_does_not_change_memory_analysis(self) -> None:
+        """
+        Test that timing an algorithm leaves every metric untouched.
+
+        Algorithms carrying repetitions are the discriminating ones:
+        repetition counting compares move strings, and a timestamp makes
+        every move string unique.
+        """
+        for moves in [
+            "R U R' U' R' F R F'",
+            'M2 U M2 U2 M2 U M2',
+            "R U R' U' R' F R2 U' R' U' R U R' F'",
+            "R U R' U R U2 R'",
+        ]:
+            with self.subTest(moves=moves):
+                algo = Algorithm.parse_moves(moves)
+                timed = algo.transform(time_moves(150))
+
+                self.assertEqual(compute_memory(timed), compute_memory(algo))
+
+    def test_timed_moves_keep_their_repetitions(self) -> None:
+        """Test that repeated patterns are still found on timed moves."""
+        algo = Algorithm.parse_moves('M2 U M2 U2 M2 U M2')
+        timed = algo.transform(time_moves(150))
+
+        self.assertGreater(compute_memory(timed).repeated_patterns, 0)
 
     def test_t_perm(self) -> None:
         """T-Perm → Moderate."""

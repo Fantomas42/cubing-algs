@@ -21,6 +21,7 @@ from cubing_algs.structure import detect_structures
 from cubing_algs.structure import inverse_sequence
 from cubing_algs.structure import is_inverse_at
 from cubing_algs.structure import score_structure
+from cubing_algs.transform.timing import time_moves
 
 
 class SimpleConjugatesTestCase(unittest.TestCase):
@@ -416,6 +417,49 @@ class ComputeStructureTestCase(unittest.TestCase):
         self.assertEqual(struct.original_length, 4)
         self.assertGreaterEqual(struct.total_structures, 1)
         self.assertGreaterEqual(struct.commutator_count, 1)
+
+    def test_detect_structures_timed(self) -> None:
+        """
+        Test that detect_structures is safe when called directly.
+
+        It is public API: compute_structure is not the only entry point.
+        """
+        algo = Algorithm.parse_moves("R U R' U'")
+        timed = algo.transform(time_moves(150))
+
+        self.assertEqual(
+            len(detect_structures(timed, None, None)),
+            len(detect_structures(algo, None, None)),
+        )
+
+    def test_compute_structure_timed(self) -> None:
+        """Test that timed moves do not prevent structure detection."""
+        algo = Algorithm.parse_moves("R@0 U@150 R'@300 U'@450")
+        struct = compute_structure(algo, min_score=0)
+
+        self.assertGreaterEqual(struct.total_structures, 1)
+        self.assertGreaterEqual(struct.commutator_count, 1)
+
+    def test_timing_does_not_change_structure_analysis(self) -> None:
+        """
+        Test that timing an algorithm leaves the analysis untouched.
+
+        Move equality includes timestamps, so the inverse-sequence
+        lookups behind structure detection silently find nothing on
+        timed algorithms unless timing is dropped first.
+        """
+        algo = Algorithm.parse_moves("R U R' U' R' F R F'")
+        timed = algo.transform(time_moves(150))
+
+        self.assertEqual(compute_structure(timed), compute_structure(algo))
+
+    def test_compute_structure_timed_reports_untimed_original(self) -> None:
+        """Test that the reported original notation drops the timing."""
+        algo = Algorithm.parse_moves("R@0 U@150 R'@300 U'@450")
+        struct = compute_structure(algo, min_score=0)
+
+        self.assertEqual(struct.original, "R U R' U'")
+        self.assertEqual(struct.original_length, 4)
 
     def test_compute_structure_empty(self) -> None:
         """Test compute structure empty."""
