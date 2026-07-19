@@ -107,6 +107,7 @@ exclude = [
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
 reportMissingImports = true
+reportMissingTypeStubs = false
 
 [tool.pytest]
 addopts = ["--cov=cubing_algs"]

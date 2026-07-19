@@ -477,8 +477,8 @@ def scramble_x_cross(  # noqa: PLR0914
         raise InvalidSlotSpecError(msg)
 
     # Scramble keeping the cross and preserved F2L slot(s)
-    corners = []
-    edges = []
+    corners: list[str] = []
+    edges: list[str] = []
 
     for edge, corner in F2L_EDGE_CORNERS.items():
         if edge not in slots:
@@ -542,8 +542,8 @@ def scramble_f2l(
         )
         raise InvalidSlotSpecError(msg)
 
-    corners = []
-    edges = []
+    corners: list[str] = []
+    edges: list[str] = []
 
     for edge, corner in F2L_EDGE_CORNERS.items():
         if edge in slots:

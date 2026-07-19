@@ -378,10 +378,10 @@ def regroup_moves(
         (most frequent first), excluding rotations and pauses.
 
     """
-    pauses = []
-    rotations = []
-    outer_moves = []
-    inner_moves = []
+    pauses: list[Move] = []
+    rotations: list[Move] = []
+    outer_moves: list[Move] = []
+    inner_moves: list[Move] = []
     count: defaultdict[str, int] = defaultdict(int)
 
     for move in moves:

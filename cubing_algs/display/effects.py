@@ -19,6 +19,8 @@ FACE_POSITIONS = {
 
 type RGB = tuple[int, int, int]
 
+type EffectFunction = Callable[[RGB, RGB, int, int], tuple[RGB, RGB]]
+
 
 class EffectParams(TypedDict, total=False):
     """Parameters for visual effects on cube facelets."""
@@ -43,17 +45,7 @@ class EffectParams(TypedDict, total=False):
 class EffectConfig(TypedDict, total=False):
     """Configuration for a visual effect, including function and parameters."""
 
-    function: Callable[
-        [
-            RGB,
-            RGB,
-            int, int,
-        ],
-        tuple[
-            RGB,
-            RGB,
-        ],
-    ]
+    function: EffectFunction
     parameters: dict[str, float | int | str | bool]
 
 # Positioning
@@ -1898,10 +1890,7 @@ def load_single_effect(
         effect_name: str,
         custom_params: dict[str, float | int | str | bool],
         palette_name: str,
-) -> Callable[
-    [RGB, RGB, int, int],
-    tuple[RGB, RGB],
-] | None:
+) -> EffectFunction | None:
     """
     Load and configure a single effect function with its parameters.
 
@@ -1967,10 +1956,7 @@ def load_single_effect(
 def load_effect(
         effect_name: str | None,
         palette_name: str,
-) -> Callable[
-    [RGB, RGB, int, int],
-    tuple[RGB, RGB],
-] | None:
+) -> EffectFunction | None:
     """
     Load and configure effect function(s) with parameters.
     Supports chaining multiple effects using pipe separator.
@@ -1994,7 +1980,7 @@ def load_effect(
 
     effect_parts = [part.strip() for part in effect_name.split('|')]
 
-    effects = []
+    effects: list[EffectFunction] = []
     for part in effect_parts:
         name, custom_params = parse_effect_name(part)
         effect_func = load_single_effect(name, custom_params, palette_name)

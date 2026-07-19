@@ -13,10 +13,12 @@ from typing import cast
 from cubing_algs.annotations import CornerOrientation
 from cubing_algs.annotations import CornerPermutation
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.annotations import CubeMask
 from cubing_algs.annotations import EdgeOrientation
 from cubing_algs.annotations import EdgePermutation
 from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import FaceletPieceType
+from cubing_algs.annotations import FaceMask
 from cubing_algs.constants import CORNER_FACELET_MAP
 from cubing_algs.constants import D_CORNERS
 from cubing_algs.constants import D_EDGES
@@ -149,7 +151,7 @@ class ImpactData(NamedTuple):
 
     # Facelet analysis (visual/spatial impact)
     facelets_state: CubeFacelets
-    facelets_transformation_mask: str
+    facelets_transformation_mask: CubeMask
     facelets_fixed_count: int
     facelets_mobilized_count: int
     facelets_scrambled_percent: float
@@ -183,7 +185,10 @@ class ImpactData(NamedTuple):
     cubies_patterns: PatternClassification | None
 
 
-def compute_face_impact(impact_mask: str, cube: 'VCube') -> dict[Facelet, int]:
+def compute_face_impact(
+        impact_mask: CubeMask,
+        cube: 'VCube',
+) -> dict[Facelet, int]:
     """
     Calculate face impact from impact mask.
 
@@ -703,7 +708,7 @@ def compute_face_to_face_matrix(
     return matrix
 
 
-def detect_symmetry(mask: str, cube: 'VCube') -> dict[str, bool]:
+def detect_symmetry(mask: CubeMask, cube: 'VCube') -> dict[str, bool]:
     """
     Detect symmetry patterns in the transformation mask.
 
@@ -719,7 +724,7 @@ def detect_symmetry(mask: str, cube: 'VCube') -> dict[str, bool]:
 
     """
     # Extract face masks
-    faces = []
+    faces: list[FaceMask] = []
     for i in range(FACE_NUMBER):
         start = i * cube.face_size
         end = start + cube.face_size

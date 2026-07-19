@@ -39,7 +39,7 @@ def build_cube_move_set(cube_size: int, *,
         List of move notation strings for the specified cube size.
 
     """
-    moves = []
+    moves: list[str] = []
 
     exclude_odd_faces = EXCLUDE_ODD_FACES_RH
     if not right_handed:

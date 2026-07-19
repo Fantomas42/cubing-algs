@@ -45,7 +45,7 @@ def build_corner_lookup_table() -> dict[tuple[int, int], int]:
         Dictionary mapping (color1, color2) tuples to corner piece indices.
 
     """
-    lookup = {}
+    lookup: dict[tuple[int, int], int] = {}
     for j in SOLVED_CP:
         col1 = CORNER_FACELET_MAP[j][1] // 9
         col2 = CORNER_FACELET_MAP[j][2] // 9
@@ -62,7 +62,7 @@ def build_edge_lookup_table() -> dict[tuple[int, int], tuple[int, int]]:
         orientation) tuples.
 
     """
-    lookup = {}
+    lookup: dict[tuple[int, int], tuple[int, int]] = {}
     for j in SOLVED_EP:
         col1 = EDGE_FACELET_MAP[j][0] // 9
         col2 = EDGE_FACELET_MAP[j][1] // 9

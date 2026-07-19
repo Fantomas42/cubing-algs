@@ -85,11 +85,11 @@ def find_permutation_cycles(permutation: Permutation) -> list[list[int]]:
 
     """
     visited = [False] * len(permutation)
-    cycles = []
+    cycles: list[list[int]] = []
 
     for i in range(len(permutation)):
         if not visited[i] and permutation[i] != i:
-            cycle = []
+            cycle: list[int] = []
             current = i
             while not visited[current]:
                 visited[current] = True
