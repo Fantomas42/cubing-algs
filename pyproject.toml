@@ -98,6 +98,16 @@ disable_error_code = ["import-untyped"]
 exclude = ["poc"]
 python_version = 3.12
 
+[tool.pyright]
+include = ["cubing_algs"]
+exclude = [
+    "cubing_algs/tests",
+    "cubing_algs/poc",
+]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+reportMissingImports = true
+
 [tool.pytest]
 addopts = ["--cov=cubing_algs"]
 
