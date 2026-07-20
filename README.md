@@ -1,5 +1,12 @@
 # Cubing Algs
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-dark.png">
+    <img src="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-light.png" alt="cubing-algs — Rubik's cube algorithm manipulation, analysis &amp; simulation" width="600">
+  </picture>
+</p>
+
 Python module providing comprehensive tools for Rubik's cube algorithm manipulation, analysis, and simulation.
 
 ## Installation
