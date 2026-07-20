@@ -35,13 +35,13 @@ def color_support() -> bool:
        Is the terminal support colors.
 
     """
-    if os.environ.get('COLORTERM', '') in {'truecolor', '24bit'}:
+    if os.getenv('COLORTERM', '') in {'truecolor', '24bit'}:
         return True
-    if '256color' in os.environ.get('TERM', ''):
+    if '256color' in os.getenv('TERM', ''):
         return True
-    if os.environ.get('WT_SESSION') or os.environ.get('ANSICON'):
+    if os.getenv('WT_SESSION') or os.getenv('ANSICON'):
         return True
-    return os.environ.get('TERM_PROGRAM') in {'vscode', 'Hyper'}
+    return os.getenv('TERM_PROGRAM') in {'vscode', 'Hyper'}
 
 
 USE_COLORS = color_support()
