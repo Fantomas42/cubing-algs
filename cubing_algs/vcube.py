@@ -98,7 +98,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         """Get the current state of the cube as a facelet string."""
         return self._state
 
-    @cached_property
+    @property
     def has_fixed_centers(self) -> bool:
         """Check if the cube has fixed centers."""
         return bool(self.size % 2)

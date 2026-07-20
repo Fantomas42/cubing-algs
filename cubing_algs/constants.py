@@ -9,6 +9,7 @@ transformations, and visual display.
 import re
 
 from cubing_algs.annotations import CubeOrientation
+from cubing_algs.annotations import Facelet
 from cubing_algs.annotations import RegexPattern
 
 DEFAULT_CUBE_SIZE = 3
@@ -399,11 +400,11 @@ ADJACENT_FACES = {
     'B': ('U', 'R', 'D', 'L'),
 }
 
-FACE_ORDER = ('U', 'R', 'F', 'D', 'L', 'B')
+FACE_ORDER: tuple[Facelet, ...] = ('U', 'R', 'F', 'D', 'L', 'B')
 
 FACE_NUMBER = len(FACE_ORDER)
 
-FACE_INDEXES = {
+FACE_INDEXES: dict[str, int] = {
     face: i
     for i, face in enumerate(FACE_ORDER)
 }

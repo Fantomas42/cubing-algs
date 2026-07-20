@@ -1,5 +1,6 @@
 """Type definitions for the cubing-algs library."""
 import re
+from typing import Annotated
 from typing import Literal
 
 # Facelet, Mask and DisplayCode
@@ -41,20 +42,20 @@ type Permutation = list[int]
 type Orientation = list[int]
 
 # Cube facelets
-type CubeFacelets = str[Facelet]
-type FaceFacelets = str[Facelet]
+type CubeFacelets = Annotated[str, Facelet]
+type FaceFacelets = Annotated[str, Facelet]
 
 # Cube orientation (1 or 2 characters)
-type CubeOrientation = str[Facelet]
+type CubeOrientation = Annotated[str, Facelet]
 
 # Binary mask (string of '0' and '1')
-type POVMask = str[Mask]
-type CubeMask = str[Mask]
-type FaceMask = str[Mask]
+type POVMask = Annotated[str, Mask]
+type CubeMask = Annotated[str, Mask]
+type FaceMask = Annotated[str, Mask]
 
 # Display mask
-type POVDisplayMask = str[DisplayCode]
-type CubeDisplayMask = str[DisplayCode]
+type POVDisplayMask = Annotated[str, DisplayCode]
+type CubeDisplayMask = Annotated[str, DisplayCode]
 
 # Cube cubies tuple (cp, co, ep, eo) - without spatial orientation
 type CubeCubies = tuple[

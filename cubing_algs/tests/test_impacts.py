@@ -2895,7 +2895,7 @@ class TestComputeFaceToFaceMatrix(unittest.TestCase):
             self.assertIn(face, matrix)
             for target_face in FACE_ORDER:
                 self.assertEqual(
-                    matrix[cast('Facelet', face)][cast('Facelet', target_face)],
+                    matrix[face][target_face],
                     0,
                 )
 
@@ -2934,9 +2934,9 @@ class TestComputeFaceToFaceMatrix(unittest.TestCase):
         self.assertEqual(len(matrix), 6)
         for face in FACE_ORDER:
             self.assertIn(face, matrix)
-            self.assertEqual(len(matrix[cast('Facelet', face)]), 6)
+            self.assertEqual(len(matrix[face]), 6)
             for target_face in FACE_ORDER:
-                self.assertIn(target_face, matrix[cast('Facelet', face)])
+                self.assertIn(target_face, matrix[face])
 
 
 class TestDetectSymmetry(unittest.TestCase):

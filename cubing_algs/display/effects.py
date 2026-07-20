@@ -3,6 +3,7 @@ import colorsys
 import math
 import re
 from collections.abc import Callable
+from typing import Required
 from typing import TypedDict
 from typing import Unpack
 
@@ -45,7 +46,7 @@ class EffectParams(TypedDict, total=False):
 class EffectConfig(TypedDict, total=False):
     """Configuration for a visual effect, including function and parameters."""
 
-    function: EffectFunction
+    function: Required[EffectFunction]
     parameters: dict[str, float | int | str | bool]
 
 # Positioning

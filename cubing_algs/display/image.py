@@ -129,7 +129,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         config = PALETTES.get(self.palette_name, PALETTES['default'])
         faces = config['faces']
 
-        palette = {
+        # Heterogeneous keys on purpose: face letters plus 'masked',
+        # 'oriented', 'cube_color' and 'arrow', so str keys is the right type.
+        palette: dict[str, str] = {
             face: (
                 entry['background']
                 if isinstance(entry, dict)

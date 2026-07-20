@@ -8,7 +8,6 @@ and statistical analysis of the algorithm's effect on the cube.
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 from typing import NamedTuple
-from typing import cast
 
 from cubing_algs.annotations import CornerOrientation
 from cubing_algs.annotations import CornerPermutation
@@ -206,7 +205,7 @@ def compute_face_impact(
         start_idx = i * cube.face_size
         end_idx = start_idx + cube.face_size
         face_mask = impact_mask[start_idx:end_idx]
-        face_impact[cast('Facelet', face_name)] = face_mask.count('1')
+        face_impact[face_name] = face_mask.count('1')
 
     return face_impact
 
@@ -224,7 +223,7 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
 
     """
     face_index = position // cube.face_size
-    face_name = cast('Facelet', FACE_ORDER[face_index])
+    face_name = FACE_ORDER[face_index]
     position_in_face = position % cube.face_size
     row = position_in_face // cube.size
     col = position_in_face % cube.size
@@ -695,14 +694,13 @@ def compute_face_to_face_matrix(
 
     """
     matrix: dict[Facelet, dict[Facelet, int]] = {
-        cast('Facelet', face):
-        cast('dict[Facelet, int]', dict.fromkeys(FACE_ORDER, 0))
+        face: dict.fromkeys(FACE_ORDER, 0)
         for face in FACE_ORDER
     }
 
     for orig_pos, final_pos in permutations.items():
-        orig_face = cast('Facelet', FACE_ORDER[orig_pos // cube.face_size])
-        final_face = cast('Facelet', FACE_ORDER[final_pos // cube.face_size])
+        orig_face = FACE_ORDER[orig_pos // cube.face_size]
+        final_face = FACE_ORDER[final_pos // cube.face_size]
         matrix[orig_face][final_face] += 1
 
     return matrix

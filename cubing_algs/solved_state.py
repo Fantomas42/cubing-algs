@@ -8,7 +8,7 @@ from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_SO
 
-PRINTABLE_CACHE = ''
+printable_cache = ''
 
 
 def build_printable_chars(count: int) -> str:
@@ -55,13 +55,13 @@ def get_unique_facelets(size: int = DEFAULT_CUBE_SIZE) -> CubeFacelets:
         ""!"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUV"
 
     """
-    global PRINTABLE_CACHE  # noqa: PLW0603
+    global printable_cache  # noqa: PLW0603
     total = size * size * len(FACE_ORDER)
 
-    if len(PRINTABLE_CACHE) < total:
-        PRINTABLE_CACHE = build_printable_chars(total)
+    if len(printable_cache) < total:
+        printable_cache = build_printable_chars(total)
 
-    return PRINTABLE_CACHE[:total]
+    return printable_cache[:total]
 
 
 def get_solved_facelets(size: int = DEFAULT_CUBE_SIZE) -> CubeFacelets:

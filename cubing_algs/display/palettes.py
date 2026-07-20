@@ -1,5 +1,6 @@
 """Color palette management and conversion utilities for cube visualization."""
 from typing import NotRequired
+from typing import Required
 from typing import TypedDict
 
 from cubing_algs.constants import FACE_ORDER
@@ -31,7 +32,7 @@ class PaletteConfig(TypedDict, total=False):
     font settings, and various background states used in different contexts.
     """
 
-    faces: tuple[str | FaceColorConfig, ...]
+    faces: Required[tuple[str | FaceColorConfig, ...]]
     font: str
     cube_color: str
     masked_background: str

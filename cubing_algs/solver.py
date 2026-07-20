@@ -1,5 +1,13 @@
 """Solve utilities for cubing_algs."""
-from kociemba import solve
+from typing import TYPE_CHECKING
+
+# Kociemba ships without type stubs, so declare the boundary signature here.
+if TYPE_CHECKING:
+    def solve(cubestring: str, patternstring: str) -> str:
+        """Solve a cube from one facelet state to another (Kociemba)."""
+        ...
+else:
+    from kociemba import solve
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CubeCubies
