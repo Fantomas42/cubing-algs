@@ -6,6 +6,7 @@ from collections.abc import Callable
 from typing import Required
 from typing import TypedDict
 from typing import Unpack
+from typing import cast
 
 from cubing_algs.exceptions import EffectAlreadyExistsError
 
@@ -1923,7 +1924,12 @@ def load_single_effect(
     if palette_name in effect_config:
         palette_override = effect_config.get(palette_name)
         if isinstance(palette_override, dict):
-            effect_parameters.update(palette_override)
+            effect_parameters.update(
+                cast(
+                    'dict[str, float | int | str | bool]',
+                    palette_override,
+                ),
+            )
 
     effect_parameters.update(custom_params)
 
