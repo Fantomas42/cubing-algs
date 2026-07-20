@@ -5,15 +5,24 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cubing-algs"
 dynamic = ["version"]
-description = "Python module providing tools manipulating cubing algorithms."
+description = "Comprehensive tools for Rubik's cube algorithm manipulation, analysis, and simulation."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
-keywords = ["rubick", "cube", "speedcubing", "solve", "algorithm"]
+keywords = ["rubik", "cube", "speedcubing", "solve", "algorithm"]
 authors = [{name = "Fantomas42", email = "fantomas42@gmail.com"}]
 classifiers = [
-  "Programming Language :: Python"
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Games/Entertainment :: Puzzle Games",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
 ]
 dependencies = [
     "kociemba==1.2.1",
