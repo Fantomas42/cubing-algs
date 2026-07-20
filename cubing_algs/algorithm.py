@@ -650,16 +650,15 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         """
         from cubing_algs.vcube import VCube  # noqa: PLC0415
 
-        def flatten(obj: object) -> object:
+        def flatten(obj: Any) -> Any:  # noqa: ANN401
             if isinstance(obj, VCube | Algorithm | Move):
                 return obj.state if isinstance(obj, VCube) else str(obj)
-            if isinstance(obj, tuple) and hasattr(obj, '_asdict'):
-                named: dict[str, object] = obj._asdict()
-                return {k: flatten(v) for k, v in named.items()}
-            if isinstance(obj, list | tuple):
-                return [flatten(v) for v in obj]
-            if isinstance(obj, dict):
+            if hasattr(obj, '_asdict'):  # NamedTuple
+                return {k: flatten(v) for k, v in obj._asdict().items()}
+            if hasattr(obj, 'items'):  # mapping
                 return {k: flatten(v) for k, v in obj.items()}
+            if type(obj) in {list, tuple}:
+                return [flatten(v) for v in obj]
             return obj
 
         return {
