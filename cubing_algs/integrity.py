@@ -6,6 +6,9 @@ to ensure they represent valid, solvable cube configurations.
 Checks include permutation validity, orientation constraints,
 color combinations, and mathematical consistency.
 """
+from abc import ABC
+from abc import abstractmethod
+
 from cubing_algs.annotations import CornerOrientation
 from cubing_algs.annotations import CornerPermutation
 from cubing_algs.annotations import CubeFacelets
@@ -142,13 +145,14 @@ def is_valid_orientation(
     )
 
 
-class VCubeIntegrityChecker:
+class VCubeIntegrityChecker(ABC):
     """
     Check integrity of VCube.
 
-    This is a mixin class that expects the following from subclasses:
+    This is an abstract mixin class that expects the following from subclasses:
     - size, face_size, face_number, _state attributes
     - face_center_colors property
+    - has_fixed_centers property
     """
 
     size: int
@@ -158,22 +162,22 @@ class VCubeIntegrityChecker:
     _state: CubeFacelets
 
     @property
+    @abstractmethod
     def face_center_colors(self) -> tuple[str, ...]:
         """
         Return the center facelet characters for each face.
 
         Must be implemented by subclass.
         """
-        raise NotImplementedError
 
     @property
+    @abstractmethod
     def has_fixed_centers(self) -> bool:
         """
         Check if the cube has fixed centers.
 
         Must be implemented by subclass.
         """
-        raise NotImplementedError
 
     def check_integrity(self) -> bool:
         """

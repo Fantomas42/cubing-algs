@@ -585,8 +585,8 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
             initial,
         )
 
-    def test_face_center_colors_not_implemented(self) -> None:
-        """Test that face_center_colors raises NotImplementedError."""
+    def test_incomplete_subclass_cannot_be_instantiated(self) -> None:
+        """Test that a subclass missing the contract stays abstract."""
         class IncompleteVCube(VCubeIntegrityChecker):
             """Incomplete implementation for testing."""
 
@@ -595,13 +595,8 @@ class VCubeCheckIntegrityTestCase(unittest.TestCase):  # noqa: PLR0904
             face_number = 6
             _state = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB'
 
-        incomplete_cube = IncompleteVCube()
-
-        with self.assertRaises(NotImplementedError):
-            _ = incomplete_cube.face_center_colors
-
-        with self.assertRaises(NotImplementedError):
-            _ = incomplete_cube.has_fixed_centers
+        with self.assertRaises(TypeError):
+            IncompleteVCube()  # type: ignore[abstract]
 
     def test_invalid_length_no_check(self) -> None:
         """Test invalid length no check."""
