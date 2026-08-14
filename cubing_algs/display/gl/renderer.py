@@ -16,12 +16,13 @@ from typing import Self
 from typing import cast
 
 from cubing_algs.display.gl.camera import OrbitCamera
-from cubing_algs.display.gl.constants import AMBIENT_LIGHT
 from cubing_algs.display.gl.constants import BACKGROUND_COLOR
-from cubing_algs.display.gl.constants import LIGHT_DIRECTION
+from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import RENDER_SAMPLES
 from cubing_algs.display.gl.constants import RENDER_SIZE
+from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import create_standalone_context
+from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import VERTEX_ATTRIBUTES
 from cubing_algs.display.gl.geometry import VERTEX_FORMAT
 from cubing_algs.display.gl.geometry import CubeGeometry
@@ -30,6 +31,8 @@ from cubing_algs.display.gl.scene import INSTANCE_FORMAT
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.shaders import FRAGMENT_SHADER
+from cubing_algs.display.gl.shaders import SHADOW_FRAGMENT_SHADER
+from cubing_algs.display.gl.shaders import SHADOW_VERTEX_SHADER
 from cubing_algs.display.gl.shaders import VERTEX_SHADER
 from cubing_algs.display.gl.transforms import Vec3
 
@@ -42,6 +45,14 @@ INDEX_SIZE = 4
 # Number of channels read back from a framebuffer: RGBA, the alpha
 # channel keeping the background transparent.
 COLOR_CHANNELS = 4
+
+# Height of the ground plane the contact shadow is laid on: the very
+# bottom of the cube, which spans [-1, 1] whatever its size.
+SHADOW_GROUND = -CUBE_EXTENT
+
+# Corners of the ground quad, drawn as a triangle strip out of the
+# vertex index alone, without any buffer to bind.
+SHADOW_VERTICES = 4
 
 
 def uniform(program: 'moderngl.Program', name: str) -> 'moderngl.Uniform':
@@ -126,7 +137,33 @@ class Renderer:
             vertex_array=vertex_array,
         )
 
-    def draw(self, scene: Scene, camera: OrbitCamera) -> None:
+    def write_look(self, look: Look) -> None:
+        """
+        Hand the look of the cube over to the fragment shader.
+
+        Args:
+            look: How the light falls on the cube.
+
+        """
+        uniform(self.program, 'light_direction').value = Vec3(
+            *look.light_direction,
+        ).normalized()
+
+        for name in (
+                'ambient', 'gamma',
+                'groove_occlusion', 'groove_falloff',
+                'rim_strength', 'rim_power',
+                'specular_strength', 'specular_power',
+                'sticker_grain',
+        ):
+            uniform(self.program, name).value = getattr(look, name)
+
+    def draw(
+            self,
+            scene: Scene,
+            camera: OrbitCamera,
+            look: Look = DEFAULT_LOOK,
+    ) -> None:
         """
         Draw a scene into the framebuffer currently in use.
 
@@ -137,6 +174,7 @@ class Renderer:
         Args:
             scene: The cube to draw.
             camera: The camera looking at it.
+            look: How the light falls on the cube.
 
         """
         import moderngl
@@ -146,13 +184,13 @@ class Renderer:
         uniform(self.program, 'view_projection').write(
             camera.view_projection().pack(),
         )
+        uniform(self.program, 'camera_position').value = camera.position
         uniform(self.program, 'plastic_color').value = scene.plastic
-        uniform(self.program, 'light_direction').value = Vec3(
-            *LIGHT_DIRECTION,
-        ).normalized()
-        uniform(self.program, 'ambient').value = AMBIENT_LIGHT
+        uniform(self.program, 'cubie_half').value = scene.geometry.half
 
-        self.context.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+        self.write_look(look)
+
+        self.context.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
 
         self.vertex_array.render(instances=len(scene.instances))
 
@@ -162,6 +200,78 @@ class Renderer:
         self.instance_buffer.release()
         self.index_buffer.release()
         self.vertex_buffer.release()
+        self.program.release()
+
+
+@dataclass(slots=True)
+class ShadowPlane:
+    """
+    The contact shadow of the cube, laid on the ground before it.
+
+    A single quad, built by its own vertex shader out of the index of
+    each corner: it owns a program and nothing else, no buffer at all.
+    """
+
+    context: 'moderngl.Context'
+    program: 'moderngl.Program'
+    vertex_array: 'moderngl.VertexArray'
+
+    @classmethod
+    def create(cls, context: 'moderngl.Context') -> Self:
+        """
+        Build the shadow plane.
+
+        Args:
+            context: The context owning the program.
+
+        Returns:
+            A shadow plane ready to be drawn.
+
+        """
+        program = context.program(
+            vertex_shader=SHADOW_VERTEX_SHADER,
+            fragment_shader=SHADOW_FRAGMENT_SHADER,
+        )
+
+        return cls(
+            context=context,
+            program=program,
+            vertex_array=context.vertex_array(program, []),
+        )
+
+    def draw(self, camera: OrbitCamera, look: Look = DEFAULT_LOOK) -> None:
+        """
+        Lay the shadow on the ground.
+
+        Drawn first, without any depth test: the cube is opaque and
+        covers whatever part of the shadow it stands on.
+
+        Args:
+            camera: The camera looking at the cube.
+            look: How dark and how soft the shadow is.
+
+        """
+        import moderngl
+
+        uniform(self.program, 'view_projection').write(
+            camera.view_projection().pack(),
+        )
+        uniform(self.program, 'ground').value = SHADOW_GROUND
+        uniform(self.program, 'extent').value = look.shadow_extent
+        uniform(self.program, 'opacity').value = look.shadow_opacity
+        uniform(self.program, 'inner').value = look.shadow_inner
+        uniform(self.program, 'softness').value = look.shadow_softness
+
+        self.context.enable_only(moderngl.BLEND)
+
+        self.vertex_array.render(
+            moderngl.TRIANGLE_STRIP,
+            vertices=SHADOW_VERTICES,
+        )
+
+    def release(self) -> None:
+        """Give every GPU resource of the shadow back."""
+        self.vertex_array.release()
         self.program.release()
 
 
@@ -253,12 +363,48 @@ class OffscreenTarget:
         self.resolved.release()
 
 
+def draw_scene(
+        context: 'moderngl.Context',
+        scene: Scene,
+        camera: OrbitCamera,
+        look: Look = DEFAULT_LOOK,
+) -> None:
+    """
+    Draw a whole frame into the framebuffer currently in use.
+
+    The shadow first, on a ground the cube then hides most of, and the
+    cube over it. Every resource is built and given back here, which is
+    fine for a single image and would not be for an animation.
+
+    Args:
+        context: The context to draw with.
+        scene: The cube to draw.
+        camera: The camera looking at it.
+        look: How the light falls on the cube.
+
+    """
+    if look.shadow_opacity:
+        shadow = ShadowPlane.create(context)
+
+        try:
+            shadow.draw(camera, look)
+        finally:
+            shadow.release()
+
+    renderer = Renderer.create(context, scene.geometry)
+
+    try:
+        renderer.draw(scene, camera, look)
+    finally:
+        renderer.release()
+
+
 def render_scene(
         scene: Scene,
         camera: OrbitCamera,
         *,
         image_size: int = RENDER_SIZE,
-        samples: int = RENDER_SAMPLES,
+        look: Look = DEFAULT_LOOK,
         context: 'moderngl.Context | None' = None,
 ) -> bytes:
     """
@@ -268,8 +414,7 @@ def render_scene(
         scene: The cube to draw.
         camera: The camera looking at it.
         image_size: Width and height of the image, in pixels.
-        samples: Samples of the multisampled framebuffer, zero to render
-            without antialiasing.
+        look: How the light falls on the cube, antialiasing included.
         context: A context to draw with. A headless one is created, and
             released, when left out.
 
@@ -280,17 +425,18 @@ def render_scene(
     owned = context is None
     used = context or create_standalone_context()
 
-    size = (image_size, image_size)
-    target = OffscreenTarget.create(used, size, samples)
-    renderer = Renderer.create(used, scene.geometry)
+    target = OffscreenTarget.create(
+        used,
+        (image_size, image_size),
+        look.samples,
+    )
 
     try:
         target.use()
-        renderer.draw(scene, camera)
+        draw_scene(used, scene, camera, look)
 
         return target.read()
     finally:
-        renderer.release()
         target.release()
 
         if owned:

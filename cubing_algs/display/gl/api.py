@@ -9,7 +9,9 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.display.gl.camera import OrbitCamera
+from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import RENDER_SIZE
+from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.encode import encode_png
 from cubing_algs.display.gl.renderer import render_scene
 from cubing_algs.display.gl.scene import build_scene
@@ -27,6 +29,7 @@ def render(  # noqa: PLR0913
         palette: str = '',
         mode: str = '',
         mask: CubeDisplayMask = '',
+        look: Look = DEFAULT_LOOK,
 ) -> bytes:
     """
     Render a cube on the GPU, without any window.
@@ -47,6 +50,8 @@ def render(  # noqa: PLR0913
             such as ``oll`` or ``f2l``.
         mask: Display mask, one code per facelet. Overrides the mask the
             mode would have set.
+        look: How the light falls on the cube, antialiasing included.
+            The library default one unless a variant is being tried out.
 
     Returns:
         The bytes of a PNG image, its background left transparent.
@@ -56,6 +61,7 @@ def render(  # noqa: PLR0913
         build_scene(cube, palette, mode=mode, mask=mask),
         OrbitCamera.from_rotation(rotation, distance),
         image_size=image_size,
+        look=look,
     )
 
     return encode_png(pixels, (image_size, image_size))

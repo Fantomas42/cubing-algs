@@ -6,6 +6,7 @@ can be created, as on a machine without any GPU driver.
 """
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import ClassVar
@@ -13,8 +14,8 @@ from typing import ClassVar
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.gl import render
 from cubing_algs.display.gl.camera import OrbitCamera
-from cubing_algs.display.gl.constants import AMBIENT_LIGHT
-from cubing_algs.display.gl.constants import LIGHT_DIRECTION
+from cubing_algs.display.gl.constants import DEFAULT_LOOK
+from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.context import describe
@@ -23,6 +24,7 @@ from cubing_algs.display.gl.encode import PNG_SIGNATURE
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.renderer import COLOR_CHANNELS
+from cubing_algs.display.gl.renderer import SHADOW_GROUND
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.renderer import render_scene
@@ -44,6 +46,19 @@ COLOR_TOLERANCE = 2
 # Center cubie of each face visible at the default framing, by index in
 # FACE_ORDER.
 VISIBLE_CENTERS = ((0, (1, 2, 1)), (1, (2, 1, 1)), (2, (1, 1, 2)))
+
+# A look stripped of everything the light does beyond telling the faces
+# apart, so that the color of a facelet can be predicted exactly. What
+# each of those knobs does is checked one by one further down.
+FLAT_LOOK = Look(
+    ambient=0.72,
+    gamma=1.0,
+    groove_occlusion=0.0,
+    rim_strength=0.0,
+    specular_strength=0.0,
+    sticker_grain=0.0,
+    shadow_opacity=0.0,
+)
 
 
 def probe_gpu() -> bool:
@@ -96,6 +111,9 @@ def shaded(color: tuple[float, float, float], normal: Vec3) -> tuple[int, ...]:
     """
     Compute the color a face of the given orientation is drawn with.
 
+    Only holds under ``FLAT_LOOK``, where nothing but the ambient and
+    the diffuse terms is left.
+
     Args:
         color: The color of the sticker, as the palette gives it.
         normal: The direction the sticker faces, in world coordinates.
@@ -104,10 +122,43 @@ def shaded(color: tuple[float, float, float], normal: Vec3) -> tuple[int, ...]:
         The three channels of the shaded color, as bytes.
 
     """
-    light = max(normal.dot(Vec3(*LIGHT_DIRECTION).normalized()), 0.0)
-    factor = AMBIENT_LIGHT + (1 - AMBIENT_LIGHT) * light
+    light = max(normal.dot(Vec3(*FLAT_LOOK.light_direction).normalized()), 0.0)
+    factor = FLAT_LOOK.ambient + (1 - FLAT_LOOK.ambient) * light
 
     return tuple(round(channel * factor * 255) for channel in color)
+
+
+def facelet_pixel(
+        pixels: bytes,
+        face: int,
+        position: tuple[int, int, int],
+) -> tuple[int, ...]:
+    """
+    Read the pixel the center of a facelet is projected onto.
+
+    Args:
+        pixels: The framebuffer, bottom row first.
+        face: Index of the face, in the order of ``FACE_ORDER``.
+        position: Grid indices of the cubie showing the facelet.
+
+    Returns:
+        The four channels of the pixel.
+
+    """
+    geometry = build_cube_geometry(3)
+    center = next(
+        cubie.center
+        for cubie in geometry.cubies
+        if (cubie.x, cubie.y, cubie.z) == position
+    )
+
+    return pixel_at(
+        pixels,
+        IMAGE_SIZE,
+        OrbitCamera.from_rotation().view_projection().transform_point(
+            center + FACE_BASES[face].normal.scaled(geometry.half),
+        ),
+    )
 
 
 @requires_gpu
@@ -125,6 +176,7 @@ class TestRenderScene(unittest.TestCase):
             build_scene(VCube()),
             OrbitCamera.from_rotation(),
             image_size=IMAGE_SIZE,
+            look=FLAT_LOOK,
             context=cls.context,
         )
 
@@ -166,30 +218,14 @@ class TestRenderScene(unittest.TestCase):
         This is the whole point of the backend: the color of the palette
         must end up on the pixels the camera projects the facelet onto.
         """
-        camera = OrbitCamera.from_rotation()
-        projection = camera.view_projection()
-        geometry = build_cube_geometry(3)
         palette = ImageDisplay(VCube()).palette
 
         for face, position in VISIBLE_CENTERS:
             with self.subTest(face=FACE_ORDER[face]):
-                normal = FACE_BASES[face].normal
-                center = next(
-                    cubie.center
-                    for cubie in geometry.cubies
-                    if (cubie.x, cubie.y, cubie.z) == position
-                )
-
-                pixel = pixel_at(
-                    self.pixels,
-                    IMAGE_SIZE,
-                    projection.transform_point(
-                        center + normal.scaled(geometry.half),
-                    ),
-                )
+                pixel = facelet_pixel(self.pixels, face, position)
                 expected = shaded(
                     build_color(palette[FACE_ORDER[face]]),
-                    normal,
+                    FACE_BASES[face].normal,
                 )
 
                 self.assertEqual(pixel[3], 255)
@@ -207,7 +243,7 @@ class TestRenderScene(unittest.TestCase):
             build_scene(VCube()),
             OrbitCamera.from_rotation(),
             image_size=IMAGE_SIZE,
-            samples=0,
+            look=replace(FLAT_LOOK, samples=0),
             context=self.context,
         )
 
@@ -245,25 +281,16 @@ class TestRenderScene(unittest.TestCase):
             build_scene(VCube(), mask=mask),
             OrbitCamera.from_rotation(),
             image_size=IMAGE_SIZE,
+            look=FLAT_LOOK,
             context=self.context,
-        )
-
-        geometry = build_cube_geometry(3)
-        center = next(
-            cubie.center
-            for cubie in geometry.cubies
-            if cubie[:3] == (1, 2, 1)
-        )
-        point = OrbitCamera.from_rotation().view_projection().transform_point(
-            center + FACE_BASES[0].normal.scaled(geometry.half),
         )
 
         expected = shaded(
             build_color(ImageDisplay(VCube()).palette['U']),
             FACE_BASES[0].normal,
         )
-        drilled = pixel_at(pixels, IMAGE_SIZE, point)
-        intact = pixel_at(self.pixels, IMAGE_SIZE, point)
+        drilled = facelet_pixel(pixels, 0, (1, 2, 1))
+        intact = facelet_pixel(self.pixels, 0, (1, 2, 1))
 
         for channel, value in enumerate(expected):
             with self.subTest(channel=channel):
@@ -291,9 +318,170 @@ class TestRenderScene(unittest.TestCase):
                 build_scene(cube),
                 OrbitCamera.from_rotation(),
                 image_size=IMAGE_SIZE,
+                look=FLAT_LOOK,
                 context=self.context,
             ),
             self.pixels,
+        )
+
+
+@requires_gpu
+class TestLook(unittest.TestCase):
+    """
+    Tests for the knobs shaping how the light falls on the cube.
+
+    Each one is turned on alone, over the flat look of the other tests,
+    and checked on the pixels it is meant to change: a look is a matter
+    of taste, but every one of its knobs must do what it says.
+    """
+
+    context: ClassVar['moderngl.Context']
+    flat: ClassVar[bytes]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Render the flat reference the variants are compared to."""
+        cls.context = create_standalone_context()
+        cls.flat = cls.render(FLAT_LOOK)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Give the context back."""
+        cls.context.release()
+
+    @classmethod
+    def render(cls, look: Look) -> bytes:
+        """
+        Render the solved cube under a look.
+
+        Args:
+            look: How the light falls on the cube.
+
+        Returns:
+            The rows of RGBA pixels, bottom row first.
+
+        """
+        return render_scene(
+            build_scene(VCube()),
+            OrbitCamera.from_rotation(),
+            image_size=IMAGE_SIZE,
+            look=look,
+            context=cls.context,
+        )
+
+    def test_grooves_darken_the_border_of_a_sticker(self) -> None:
+        """
+        Test that the occlusion sinks the edges of a piece into shadow.
+
+        The center of a facelet lies as far from any groove as a point
+        can, so it must come out untouched while the corner of the very
+        same sticker darkens.
+        """
+        pixels = self.render(replace(FLAT_LOOK, groove_occlusion=0.55))
+
+        middle = facelet_pixel(pixels, 0, (1, 2, 1))
+        reference = facelet_pixel(self.flat, 0, (1, 2, 1))
+
+        for channel in range(3):
+            with self.subTest(channel=channel):
+                self.assertAlmostEqual(
+                    middle[channel],
+                    reference[channel],
+                    delta=COLOR_TOLERANCE,
+                )
+
+        geometry = build_cube_geometry(3)
+        cubie = next(
+            piece for piece in geometry.cubies
+            if (piece.x, piece.y, piece.z) == (1, 2, 1)
+        )
+        basis = FACE_BASES[0]
+        corner = OrbitCamera.from_rotation().view_projection().transform_point(
+            cubie.center
+            + basis.normal.scaled(geometry.half)
+            + basis.right.scaled(geometry.half * 0.75)
+            + basis.up.scaled(geometry.half * 0.75),
+        )
+
+        self.assertLess(
+            sum(pixel_at(pixels, IMAGE_SIZE, corner)[:3]),
+            sum(pixel_at(self.flat, IMAGE_SIZE, corner)[:3]),
+        )
+
+    def test_the_rim_light_brightens_the_silhouette(self) -> None:
+        """Test that the rim light lifts the faces grazed by the eye."""
+        pixels = self.render(replace(FLAT_LOOK, rim_strength=0.5))
+
+        self.assertGreater(
+            sum(facelet_pixel(pixels, 1, (2, 1, 1))[:3]),
+            sum(facelet_pixel(self.flat, 1, (2, 1, 1))[:3]),
+        )
+
+    def test_the_specular_lifts_the_lit_faces(self) -> None:
+        """Test that the highlight shows on the face facing the light."""
+        pixels = self.render(
+            replace(FLAT_LOOK, specular_strength=0.5, specular_power=1.0),
+        )
+
+        self.assertGreater(
+            sum(facelet_pixel(pixels, 0, (1, 2, 1))[:3]),
+            sum(facelet_pixel(self.flat, 0, (1, 2, 1))[:3]),
+        )
+
+    def test_the_grain_breaks_the_flatness_of_a_sticker(self) -> None:
+        """
+        Test that the grain scatters the pixels of a single facelet.
+
+        A flat sticker holds one and only one color; a grained one holds
+        several, and the same ones from one render to the next.
+        """
+        look = replace(FLAT_LOOK, sticker_grain=0.2)
+        pixels = self.render(look)
+
+        self.assertNotEqual(
+            facelet_pixel(pixels, 0, (1, 2, 1)),
+            facelet_pixel(self.flat, 0, (1, 2, 1)),
+        )
+        self.assertEqual(pixels, self.render(look))
+
+    def test_a_gamma_of_one_shades_the_color_as_it_comes(self) -> None:
+        """Test that the neutral gamma really is a no-op."""
+        self.assertEqual(self.render(replace(FLAT_LOOK, gamma=1.0)), self.flat)
+
+    def test_shading_in_linear_space_changes_the_midtones(self) -> None:
+        """Test that the gamma reaches the shading."""
+        self.assertNotEqual(
+            self.render(replace(FLAT_LOOK, gamma=2.2)),
+            self.flat,
+        )
+
+    def test_the_shadow_falls_beside_the_cube(self) -> None:
+        """
+        Test that the contact shadow darkens the ground, and only it.
+
+        A point of the ground plane just outside the cube must gain some
+        opacity, while the corners of the image stay empty.
+        """
+        pixels = self.render(replace(FLAT_LOOK, shadow_opacity=0.5))
+
+        beside = OrbitCamera.from_rotation().view_projection().transform_point(
+            Vec3(0.0, SHADOW_GROUND, 1.4),
+        )
+
+        self.assertEqual(pixel_at(self.flat, IMAGE_SIZE, beside)[3], 0)
+        self.assertGreater(pixel_at(pixels, IMAGE_SIZE, beside)[3], 0)
+        self.assertEqual(pixels[3], 0)
+
+    def test_the_default_look_is_the_one_a_render_gets(self) -> None:
+        """Test that a render left alone is shaded by the default look."""
+        self.assertEqual(
+            self.render(DEFAULT_LOOK),
+            render_scene(
+                build_scene(VCube()),
+                OrbitCamera.from_rotation(),
+                image_size=IMAGE_SIZE,
+                context=self.context,
+            ),
         )
 
 
