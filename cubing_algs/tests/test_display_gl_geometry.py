@@ -1,4 +1,5 @@
 """Tests for the geometry of the GPU rendering backend."""
+import math
 import struct
 import unittest
 from collections import Counter
@@ -13,6 +14,7 @@ from cubing_algs.display.gl.geometry import AXIS_NUMBER
 from cubing_algs.display.gl.geometry import BODY_FACE
 from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import FACE_BASES
+from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Mesh
 from cubing_algs.display.gl.geometry import Polygon
 from cubing_algs.display.gl.geometry import Vertex
@@ -617,6 +619,69 @@ class TestCubeGeometry(unittest.TestCase):
                     len(geometry.mesh.vertices),
                     VERTEX_COUNT,
                 )
+
+
+class TestCubeGeometryRadius(unittest.TestCase):
+    """Tests for the sphere a whole cube fits in."""
+
+    @staticmethod
+    def farthest(geometry: CubeGeometry) -> float:
+        """
+        Measure the exact radius, by walking every vertex of every cubie.
+
+        Returns:
+            The distance of the farthest point of the cube to the origin.
+
+        """
+        return max(
+            (cubie.center + vertex.position).length()
+            for cubie in geometry.cubies
+            for vertex in geometry.mesh.vertices
+        )
+
+    def test_holds_the_whole_cube(self) -> None:
+        """Test that no point of the cube lies outside the sphere."""
+        for size in SIZES:
+            with self.subTest(size=size):
+                geometry = build_cube_geometry(size)
+
+                self.assertGreaterEqual(
+                    geometry.radius,
+                    self.farthest(geometry),
+                )
+
+    def test_holds_it_tightly(self) -> None:
+        """Test that the bound stays within a tenth of a percent."""
+        for size in SIZES:
+            with self.subTest(size=size):
+                geometry = build_cube_geometry(size)
+
+                self.assertLess(
+                    geometry.radius / self.farthest(geometry),
+                    1.001,
+                )
+
+    def test_stays_inside_the_bounding_box(self) -> None:
+        """Test that a cube never reaches the corners of its box."""
+        for size in SIZES:
+            with self.subTest(size=size):
+                self.assertLess(
+                    build_cube_geometry(size).radius,
+                    math.sqrt(3) * CUBE_EXTENT,
+                )
+
+    def test_grows_with_the_size(self) -> None:
+        """
+        Test that a bigger cube fills its box better.
+
+        The gap and the chamfer both shrink with the cubie they are a
+        fraction of, so the corners of a 7x7x7 reach much closer to the
+        corners of the box than those of a 2x2x2. This is exactly what
+        the framing has to make up for.
+        """
+        radii = [build_cube_geometry(size).radius for size in SIZES]
+
+        self.assertEqual(radii, sorted(radii))
 
 
 class TestInvalidSize(unittest.TestCase):

@@ -36,7 +36,10 @@ def render(  # noqa: PLR0913
 
     The framing is the one of the SVG backend: same rotation string,
     same distance, same palette, same modes and masks, so that both
-    renderings of a cube can be compared side by side.
+    renderings of a cube can be compared side by side. It is fitted to
+    the sphere the cube actually fills, which the gap and the chamfer
+    make slightly smaller than the box it is laid out in: every size
+    comes out at the same apparent size, whatever the cube.
 
     Args:
         cube: The cube to draw.
@@ -57,9 +60,13 @@ def render(  # noqa: PLR0913
         The bytes of a PNG image, its background left transparent.
 
     """
+    scene = build_scene(cube, palette, mode=mode, mask=mask)
+
     pixels = render_scene(
-        build_scene(cube, palette, mode=mode, mask=mask),
-        OrbitCamera.from_rotation(rotation, distance),
+        scene,
+        OrbitCamera.from_rotation(
+            rotation, distance, scene.geometry.radius,
+        ),
         image_size=image_size,
         look=look,
     )

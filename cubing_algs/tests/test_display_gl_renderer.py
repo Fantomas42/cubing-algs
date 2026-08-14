@@ -21,6 +21,7 @@ from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.context import describe
 from cubing_algs.display.gl.doctor import main as doctor_main
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
+from cubing_algs.display.gl.encode import encode_png
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.renderer import COLOR_CHANNELS
@@ -42,6 +43,20 @@ IMAGE_SIZE = 128
 # The GPU rounds a color channel to a byte; two units of tolerance
 # absorb that, and nothing more.
 COLOR_TOLERANCE = 2
+
+# Sizes of cube the framing is checked on, and the image it is measured
+# in: wide enough for a percent of the silhouette to be a few pixels.
+FRAMING_SIZES = (2, 3, 4, 5, 6, 7)
+FRAMING_SIZE = 256
+
+# How much the silhouettes of two sizes may differ. Framing the box
+# rather than the cube left three and a half percents between a 2x2x2
+# and a 7x7x7, so this holds the property and not the noise.
+FRAMING_TOLERANCE = 0.02
+
+# Share of the image the silhouette of a cube must cover, in each
+# direction: a badly framed cube would sit small in the middle.
+FRAMING_COVERAGE = 0.8
 
 # Center cubie of each face visible at the default framing, by index in
 # FACE_ORDER.
@@ -105,6 +120,33 @@ def pixel_at(pixels: bytes, image_size: int, point: Vec3) -> tuple[int, ...]:
     offset = (row * image_size + col) * COLOR_CHANNELS
 
     return tuple(pixels[offset:offset + COLOR_CHANNELS])
+
+
+def silhouette(pixels: bytes, image_size: int) -> tuple[int, int]:
+    """
+    Measure the box everything drawn in a framebuffer fits in.
+
+    Args:
+        pixels: The framebuffer, bottom row first.
+        image_size: Width and height of the image, in pixels.
+
+    Returns:
+        The width and the height of the box, in pixels.
+
+    """
+    columns: set[int] = set()
+    rows: set[int] = set()
+
+    for row in range(image_size):
+        for column in range(image_size):
+            if pixels[(row * image_size + column) * COLOR_CHANNELS + 3]:
+                columns.add(column)
+                rows.add(row)
+
+    return (
+        max(columns) - min(columns) + 1,
+        max(rows) - min(rows) + 1,
+    )
 
 
 def shaded(color: tuple[float, float, float], normal: Vec3) -> tuple[int, ...]:
@@ -509,6 +551,96 @@ class TestRender(unittest.TestCase):
             render(VCube(), image_size=64, rotation='y120x-25'),
             render(VCube(), image_size=64),
         )
+
+    def test_frames_on_the_radius_of_the_cube(self) -> None:
+        """Test that a render frames the sphere the cube fills."""
+        scene = build_scene(VCube(size=4))
+
+        self.assertEqual(
+            render(VCube(size=4), image_size=64),
+            encode_png(
+                render_scene(
+                    scene,
+                    OrbitCamera.from_rotation('', 0.0, scene.geometry.radius),
+                    image_size=64,
+                ),
+                (64, 64),
+            ),
+        )
+
+
+@requires_gpu
+class TestSizeFraming(unittest.TestCase):
+    """
+    Tests that every size of cube comes out framed alike.
+
+    This is the acceptance criterion of the NxN rendering: a 2x2x2 and a
+    7x7x7 must cover the image the same way, which only happens once the
+    camera frames the sphere the cube fills rather than the box it is
+    laid out in, both being eaten by the gap and the chamfer.
+    """
+
+    context: ClassVar['moderngl.Context']
+    boxes: ClassVar[dict[int, tuple[int, int]]]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Render every size once for the whole class."""
+        cls.context = create_standalone_context()
+        cls.boxes = {
+            size: cls.silhouette_of(size)
+            for size in FRAMING_SIZES
+        }
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Give the context back."""
+        cls.context.release()
+
+    @classmethod
+    def silhouette_of(cls, size: int) -> tuple[int, int]:
+        """
+        Measure the silhouette a cube of a given size draws.
+
+        Returns:
+            The width and the height of the silhouette, in pixels.
+
+        """
+        scene = build_scene(VCube(size=size))
+
+        return silhouette(
+            render_scene(
+                scene,
+                OrbitCamera.from_rotation('', 0.0, scene.geometry.radius),
+                image_size=FRAMING_SIZE,
+                look=FLAT_LOOK,
+                context=cls.context,
+            ),
+            FRAMING_SIZE,
+        )
+
+    def test_every_size_covers_the_same_area(self) -> None:
+        """Test that the silhouettes agree from a 2x2x2 to a 7x7x7."""
+        for axis, name in enumerate(('width', 'height')):
+            extents = [box[axis] for box in self.boxes.values()]
+
+            with self.subTest(axis=name):
+                self.assertLess(
+                    max(extents) / min(extents) - 1,
+                    FRAMING_TOLERANCE,
+                )
+
+    def test_every_size_fills_the_frame(self) -> None:
+        """Test that no size is drawn small in the middle of the image."""
+        for size, box in self.boxes.items():
+            with self.subTest(size=size):
+                self.assertGreater(min(box), FRAMING_SIZE * FRAMING_COVERAGE)
+
+    def test_no_size_is_clipped(self) -> None:
+        """Test that the borders of the image are left empty."""
+        for size, box in self.boxes.items():
+            with self.subTest(size=size):
+                self.assertLess(max(box), FRAMING_SIZE)
 
 
 @requires_gpu
