@@ -233,6 +233,54 @@ class TestRenderScene(unittest.TestCase):
 
         renderer.release()
 
+    def test_a_hidden_piece_digs_a_hole(self) -> None:
+        """
+        Test that a hidden cubie is really gone from the image.
+
+        The up center is dropped, and the camera sees through where it
+        stood: the plastic of the pieces lining the inside of the cube.
+        """
+        mask = '1' * 4 + '3' + '1' * 49
+        pixels = render_scene(
+            build_scene(VCube(), mask=mask),
+            OrbitCamera.from_rotation(),
+            image_size=IMAGE_SIZE,
+            context=self.context,
+        )
+
+        geometry = build_cube_geometry(3)
+        center = next(
+            cubie.center
+            for cubie in geometry.cubies
+            if cubie[:3] == (1, 2, 1)
+        )
+        point = OrbitCamera.from_rotation().view_projection().transform_point(
+            center + FACE_BASES[0].normal.scaled(geometry.half),
+        )
+
+        expected = shaded(
+            build_color(ImageDisplay(VCube()).palette['U']),
+            FACE_BASES[0].normal,
+        )
+        drilled = pixel_at(pixels, IMAGE_SIZE, point)
+        intact = pixel_at(self.pixels, IMAGE_SIZE, point)
+
+        for channel, value in enumerate(expected):
+            with self.subTest(channel=channel):
+                self.assertAlmostEqual(
+                    intact[channel],
+                    value,
+                    delta=COLOR_TOLERANCE,
+                )
+
+        self.assertGreater(
+            max(
+                abs(drilled[channel] - value)
+                for channel, value in enumerate(expected)
+            ),
+            COLOR_TOLERANCE,
+        )
+
     def test_a_scrambled_cube_differs(self) -> None:
         """Test that the state of the cube reaches the pixels."""
         cube = VCube()

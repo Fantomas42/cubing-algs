@@ -10,6 +10,10 @@ No permutation table lives here. The colors are read straight from the
 facelet string of the cube, through the ``(face, row, column)`` mapping
 that ``display/image.py`` already uses, and the palette is the one of the
 SVG backend, so that both renderings show the same colors.
+
+The masks and the modes follow the same road: ``ModeDisplay`` resolves
+them once, for both backends. Only the hidden code parts ways, a cubie
+nobody may see being dropped from the scene rather than painted over.
 """
 import struct
 from collections.abc import Mapping
@@ -17,7 +21,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import NamedTuple
 
+from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
+from cubing_algs.display.constants import DIM_LUMINANCE_FACTOR
+from cubing_algs.display.effects import hls_to_rgb
+from cubing_algs.display.effects import rgb_to_hls
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Cubie
@@ -37,8 +45,17 @@ type Color = tuple[float, float, float]
 # Number of sides of a cubie, one color each.
 SIDE_NUMBER = len(FACE_BASES)
 
-# Key of the plastic color in the palette of the SVG backend.
+# Keys of the colors a mask asks for, in the palette of the SVG backend.
 PLASTIC_KEY = 'cube_color'
+MASKED_KEY = 'masked'
+ORIENTED_KEY = 'oriented'
+
+# Codes of a display mask, as ``display/masks.py`` writes them. The
+# visible code needs no name: it is what a facelet gets by default.
+MASK_DIMMED = '0'
+MASK_MASKED = '2'
+MASK_HIDDEN = '3'
+MASK_ORIENTED = '4'
 
 # Layout of an instance in the buffer, as moderngl reads it: model
 # matrix, then the six colors as two mat3, three colors per matrix.
@@ -169,6 +186,26 @@ def facelet_index(face: int, cubie: Cubie, size: int) -> int | None:
     return face * size * size + row * size + col
 
 
+def scale_channels(channels: tuple[int, int, int]) -> Color:
+    """
+    Turn three channels running from 0 to 255 into a color of the scene.
+
+    Args:
+        channels: The red, green and blue channels, as bytes.
+
+    Returns:
+        The three channels of the color, from 0 to 1.
+
+    """
+    red, green, blue = channels
+
+    return (
+        red / CHANNEL_MAXIMUM,
+        green / CHANNEL_MAXIMUM,
+        blue / CHANNEL_MAXIMUM,
+    )
+
+
 def build_color(hex_color: str) -> Color:
     """
     Convert a color of a palette into a color of the scene.
@@ -181,12 +218,34 @@ def build_color(hex_color: str) -> Color:
         The three channels of the color, from 0 to 1.
 
     """
-    red, green, blue = hex_to_rgba(hex_color)[:3]
+    return scale_channels(hex_to_rgba(hex_color)[:3])
 
-    return (
-        red / CHANNEL_MAXIMUM,
-        green / CHANNEL_MAXIMUM,
-        blue / CHANNEL_MAXIMUM,
+
+def dim_color(color: Color) -> Color:
+    """
+    Darken a color, the way the SVG backend dims a facelet.
+
+    The very same computation as ``ImageDisplay.get_sticker_fill``, down
+    to the rounding to a byte: a dimmed sticker must come out of both
+    backends with the same color.
+
+    Args:
+        color: The color to darken.
+
+    Returns:
+        The darkened color.
+
+    """
+    red, green, blue = color
+
+    hue, lit, sat = rgb_to_hls((
+        round(red * CHANNEL_MAXIMUM),
+        round(green * CHANNEL_MAXIMUM),
+        round(blue * CHANNEL_MAXIMUM),
+    ))
+
+    return scale_channels(
+        hls_to_rgb(hue, lit * DIM_LUMINANCE_FACTOR, sat),
     )
 
 
@@ -208,9 +267,78 @@ def build_colors(palette: Mapping[str, str]) -> dict[str, Color]:
     }
 
 
+def sticker_color(
+        facelet: str,
+        code: str,
+        colors: Mapping[str, Color],
+) -> Color:
+    """
+    Resolve the color of a sticker, given the code of its mask.
+
+    The five codes of ``display/masks.py``, read exactly as
+    ``ImageDisplay.get_sticker_fill`` reads them. The hidden code lands
+    here only for a cubie some other side of which is still shown:
+    a wholly hidden one never reaches the scene.
+
+    Args:
+        facelet: Face letter of the facelet, naming its color.
+        code: Mask code of the facelet.
+        colors: Colors of the palette, by key.
+
+    Returns:
+        The color the sticker is drawn with.
+
+    """
+    if code == MASK_MASKED:
+        return colors[MASKED_KEY]
+
+    if code == MASK_HIDDEN:
+        return colors[PLASTIC_KEY]
+
+    if code == MASK_ORIENTED:
+        return colors[ORIENTED_KEY]
+
+    if code == MASK_DIMMED:
+        return dim_color(colors[facelet])
+
+    return colors[facelet]
+
+
+def cubie_hidden(
+        cubie: Cubie,
+        mask: CubeDisplayMask,
+        size: int,
+) -> bool:
+    """
+    Tell whether a cubie is to be left out of the scene altogether.
+
+    A piece is dropped when every facelet it shows is hidden, which digs
+    a real hole in the cube, something the SVG backend cannot do and the
+    only place where the two renderings part ways. A piece hidden on one
+    side only keeps its place, that side taking the plastic color.
+
+    Args:
+        cubie: The cubie to look at.
+        mask: Display mask of the cube, one code per facelet.
+        size: Size of the cube.
+
+    Returns:
+        True when the cubie must not be drawn.
+
+    """
+    codes = [
+        mask[index]
+        for face in range(SIDE_NUMBER)
+        if (index := facelet_index(face, cubie, size)) is not None
+    ]
+
+    return bool(codes) and all(code == MASK_HIDDEN for code in codes)
+
+
 def cubie_colors(
         cubie: Cubie,
         state: CubeFacelets,
+        mask: CubeDisplayMask,
         colors: Mapping[str, Color],
         size: int,
 ) -> tuple[Color, ...]:
@@ -224,7 +352,8 @@ def cubie_colors(
     Args:
         cubie: The cubie to color.
         state: Facelet string of the cube.
-        colors: Colors of the palette, by face letter.
+        mask: Display mask of the cube, one code per facelet.
+        colors: Colors of the palette, by key.
         size: Size of the cube.
 
     Returns:
@@ -239,7 +368,7 @@ def cubie_colors(
         sides.append(
             colors[PLASTIC_KEY]
             if index is None
-            else colors[state[index]],
+            else sticker_color(state[index], mask[index], colors),
         )
 
     return tuple(sides)
@@ -307,13 +436,21 @@ def build_scene(
         cube: 'VCube',
         palette_name: str = '',
         geometry: CubeGeometry | None = None,
+        *,
+        mode: str = '',
+        mask: CubeDisplayMask = '',
 ) -> Scene:
     """
     Build the scene drawing a cube.
 
-    The palette is loaded by the SVG backend rather than read again
-    here: both renderings must show the same colors, and the surest way
-    of getting there is to have a single place resolving them.
+    The palette, the mode and the mask are all resolved by the SVG
+    backend rather than read again here: both renderings must show the
+    same cube, and the surest way of getting there is to have a single
+    place resolving them.
+
+    A mode may reorient the cube before it is drawn, as it does in SVG.
+    The layout it carries is dropped: ``top`` is a flat view of the up
+    face, which has no meaning for a backend drawing a solid.
 
     Args:
         cube: The cube to draw.
@@ -321,13 +458,25 @@ def build_scene(
             one.
         geometry: Geometry to place the cubies with, built from the size
             of the cube when left out.
+        mode: Display preset presetting the mask and the orientation,
+            such as ``oll`` or ``f2l``.
+        mask: Display mask, one code per facelet. Overrides the mask the
+            mode would have set.
 
     Returns:
         The scene of the cube.
 
     """
+    display = ImageDisplay(cube, palette_name)
+    mode_mask, _, mode_orientation = display.resolve_mode(mode.lower())
+
+    if mode_orientation:
+        cube = cube.oriented_copy(mode_orientation, full=True)
+
+    codes = display.map_mask(cube, mask or mode_mask)
+
     built = geometry or build_cube_geometry(cube.size)
-    colors = build_colors(ImageDisplay(cube, palette_name).palette)
+    colors = build_colors(display.palette)
     state = cube.state
 
     return Scene(
@@ -336,9 +485,10 @@ def build_scene(
             CubieInstance(
                 cubie=cubie,
                 model=Mat4.translation(cubie.center),
-                colors=cubie_colors(cubie, state, colors, built.size),
+                colors=cubie_colors(cubie, state, codes, colors, built.size),
             )
             for cubie in built.cubies
+            if not cubie_hidden(cubie, codes, built.size)
         ),
         plastic=colors[PLASTIC_KEY],
     )

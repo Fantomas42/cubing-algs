@@ -8,8 +8,11 @@ from cubing_algs.display.gl.geometry import Cubie
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.scene import FACE_LAYOUTS
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
+from cubing_algs.display.gl.scene import MASKED_KEY
+from cubing_algs.display.gl.scene import ORIENTED_KEY
 from cubing_algs.display.gl.scene import PLASTIC_KEY
 from cubing_algs.display.gl.scene import SIDE_NUMBER
+from cubing_algs.display.gl.scene import Color
 from cubing_algs.display.gl.scene import CubieInstance
 from cubing_algs.display.gl.scene import axis_direction
 from cubing_algs.display.gl.scene import build_color
@@ -17,8 +20,12 @@ from cubing_algs.display.gl.scene import build_colors
 from cubing_algs.display.gl.scene import build_face_layout
 from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.scene import cubie_colors
+from cubing_algs.display.gl.scene import cubie_hidden
+from cubing_algs.display.gl.scene import dim_color
 from cubing_algs.display.gl.scene import facelet_index
 from cubing_algs.display.gl.scene import grid_position
+from cubing_algs.display.gl.scene import scale_channels
+from cubing_algs.display.gl.scene import sticker_color
 from cubing_algs.display.gl.transforms import AXIS_X
 from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import AXIS_Z
@@ -26,6 +33,7 @@ from cubing_algs.display.gl.transforms import ORIGIN
 from cubing_algs.display.gl.transforms import Mat4
 from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.image import ImageDisplay
+from cubing_algs.display.mode import MODE_CONFIGS
 from cubing_algs.vcube import VCube
 
 # Center cubie of each face of a 3x3x3, and the facelet it shows.
@@ -45,6 +53,9 @@ CORNER_FACELETS = (
     ('F', 2, 20),
 )
 
+# A mask showing every facelet of a 3x3x3.
+VISIBLE = '1' * 54
+
 
 def cube_of(moves: str = '', size: int = 3) -> VCube:
     """
@@ -60,6 +71,23 @@ def cube_of(moves: str = '', size: int = 3) -> VCube:
         cube.rotate(moves)
 
     return cube
+
+
+def svg_color(fill: str) -> Color:
+    """
+    Read back a fill color of the SVG backend.
+
+    Returns:
+        The color, as the scene expresses it.
+
+    """
+    if fill.startswith('rgb('):
+        channels = fill.removeprefix('rgb(').removesuffix(')').split(',')
+        red, green, blue = (int(channel) for channel in channels)
+
+        return scale_channels((red, green, blue))
+
+    return build_color(fill)
 
 
 class TestAxisDirection(unittest.TestCase):
@@ -234,6 +262,96 @@ class TestColors(unittest.TestCase):
         )
 
 
+class TestDimColor(unittest.TestCase):
+    """Tests for dim_color function."""
+
+    def test_darkens_without_shifting_the_hue(self) -> None:
+        """Test that a dimmed color keeps its hue and loses lightness."""
+        dimmed = dim_color(build_color('#ff0000'))
+
+        self.assertEqual(dimmed[1], dimmed[2])
+        self.assertLess(dimmed[0], 1.0)
+        self.assertGreater(dimmed[0], 0.0)
+
+    def test_black_stays_black(self) -> None:
+        """Test that dimming what has no lightness changes nothing."""
+        self.assertEqual(dim_color((0.0, 0.0, 0.0)), (0.0, 0.0, 0.0))
+
+    def test_matches_the_svg_backend(self) -> None:
+        """Test that both backends dim a facelet to the same color."""
+        display = ImageDisplay(cube_of())
+
+        for face in FACE_ORDER:
+            with self.subTest(face=face):
+                self.assertEqual(
+                    dim_color(build_color(display.palette[face])),
+                    svg_color(display.get_sticker_fill(face, '0')),
+                )
+
+
+class TestStickerColor(unittest.TestCase):
+    """Tests for sticker_color function."""
+
+    def setUp(self) -> None:
+        """Load the colors of the default palette."""
+        self.colors = build_colors(ImageDisplay(cube_of()).palette)
+
+    def test_every_code(self) -> None:
+        """Test that each mask code picks the color it stands for."""
+        cases = (
+            ('1', self.colors['U']),
+            ('0', dim_color(self.colors['U'])),
+            ('2', self.colors[MASKED_KEY]),
+            ('3', self.colors[PLASTIC_KEY]),
+            ('4', self.colors[ORIENTED_KEY]),
+        )
+
+        for code, expected in cases:
+            with self.subTest(code=code):
+                self.assertEqual(
+                    sticker_color('U', code, self.colors),
+                    expected,
+                )
+
+    def test_matches_the_svg_backend(self) -> None:
+        """Test that both backends resolve every code the same way."""
+        display = ImageDisplay(cube_of())
+
+        for face in FACE_ORDER:
+            for code in '01234':
+                with self.subTest(face=face, code=code):
+                    self.assertEqual(
+                        sticker_color(face, code, self.colors),
+                        svg_color(display.get_sticker_fill(face, code)),
+                    )
+
+
+class TestCubieHidden(unittest.TestCase):
+    """Tests for cubie_hidden function."""
+
+    def test_a_shown_cubie_stays(self) -> None:
+        """Test that a cubie of a plain mask is kept."""
+        self.assertFalse(cubie_hidden(Cubie(2, 2, 2, ORIGIN), VISIBLE, 3))
+
+    def test_a_wholly_hidden_cubie_goes(self) -> None:
+        """Test that a cubie hidden on every side is dropped."""
+        self.assertTrue(cubie_hidden(Cubie(2, 2, 2, ORIGIN), '3' * 54, 3))
+
+    def test_a_partly_hidden_cubie_stays(self) -> None:
+        """Test that one hidden sticker does not remove the whole piece."""
+        # Only the up facelet of the up right front corner is hidden.
+        mask = VISIBLE[:8] + '3' + VISIBLE[9:]
+
+        self.assertFalse(cubie_hidden(Cubie(2, 2, 2, ORIGIN), mask, 3))
+
+    def test_the_buried_sides_are_ignored(self) -> None:
+        """Test that a center is judged on the only facelet it shows."""
+        mask = VISIBLE[:4] + '3' + VISIBLE[5:]
+
+        self.assertTrue(cubie_hidden(Cubie(1, 2, 1, ORIGIN), mask, 3))
+        self.assertFalse(cubie_hidden(Cubie(1, 0, 1, ORIGIN), mask, 3))
+
+
 class TestCubieColors(unittest.TestCase):
     """Tests for cubie_colors function."""
 
@@ -245,6 +363,7 @@ class TestCubieColors(unittest.TestCase):
         sides = cubie_colors(
             Cubie(2, 2, 2, ORIGIN),
             cube.state,
+            VISIBLE,
             colors,
             3,
         )
@@ -264,7 +383,7 @@ class TestCubieColors(unittest.TestCase):
         for cubie in build_cube_geometry(3).cubies:
             with self.subTest(cubie=(cubie.x, cubie.y, cubie.z)):
                 self.assertEqual(
-                    len(cubie_colors(cubie, cube.state, colors, 3)),
+                    len(cubie_colors(cubie, cube.state, VISIBLE, colors, 3)),
                     SIDE_NUMBER,
                 )
 
@@ -327,7 +446,9 @@ class TestBuildScene(unittest.TestCase):
             with self.subTest(cubie=instance.cubie):
                 self.assertEqual(
                     instance.colors,
-                    cubie_colors(instance.cubie, cube.state, colors, 3),
+                    cubie_colors(
+                        instance.cubie, cube.state, VISIBLE, colors, 3,
+                    ),
                 )
 
     def test_palette_is_the_one_of_the_svg_backend(self) -> None:
@@ -365,3 +486,139 @@ class TestBuildScene(unittest.TestCase):
 
         self.assertEqual(len(packed), len(scene.instances) * INSTANCE_SIZE)
         self.assertTrue(packed.startswith(scene.instances[0].pack()))
+
+
+class TestBuildSceneMasks(unittest.TestCase):
+    """Tests for the modes and the masks of a scene."""
+
+    def assert_matches_svg(
+            self,
+            cube: VCube,
+            mode: str = '',
+            mask: str = '',
+    ) -> None:
+        """Check a scene facelet by facelet against the SVG backend."""
+        display = ImageDisplay(cube)
+        mode_mask, _, orientation = display.resolve_mode(mode)
+
+        shown = cube
+
+        if orientation:
+            shown = cube.oriented_copy(orientation, full=True)
+
+        codes = display.map_mask(shown, mask or mode_mask)
+        size = cube.size
+
+        for instance in build_scene(cube, mode=mode, mask=mask).instances:
+            for face in range(SIDE_NUMBER):
+                index = facelet_index(face, instance.cubie, size)
+
+                if index is None:
+                    continue
+
+                with self.subTest(cubie=instance.cubie, face=FACE_ORDER[face]):
+                    self.assertEqual(
+                        instance.colors[face],
+                        svg_color(
+                            display.get_sticker_fill(
+                                shown.state[index],
+                                codes[index],
+                            ),
+                        ),
+                    )
+
+    def test_every_mode_shows_what_the_svg_shows(self) -> None:
+        """Test that both backends mask exactly the same pieces."""
+        cube = cube_of("R U R' U' F R U R' U' F'")
+
+        for mode in MODE_CONFIGS:
+            with self.subTest(mode=mode):
+                self.assert_matches_svg(cube, mode)
+
+    def test_an_explicit_mask_is_followed(self) -> None:
+        """Test that a mask given by hand reaches the stickers."""
+        self.assert_matches_svg(cube_of(), mask='0' * 54)
+
+    def test_a_mask_overrides_the_mode(self) -> None:
+        """Test that a mask given by hand wins over the one of a mode."""
+        cube = cube_of()
+
+        self.assertEqual(
+            build_scene(cube, mode='oll', mask='2' * 54).instances,
+            build_scene(cube, mask='2' * 54).instances,
+        )
+
+    def test_an_unknown_mode_shows_the_whole_cube(self) -> None:
+        """Test that a mode nobody knows masks nothing."""
+        cube = cube_of()
+
+        self.assertEqual(
+            build_scene(cube, mode='nope').instances,
+            build_scene(cube).instances,
+        )
+
+    def test_the_mode_is_case_insensitive(self) -> None:
+        """Test that a mode is resolved whatever its case."""
+        cube = cube_of()
+
+        self.assertEqual(
+            build_scene(cube, mode='OLL').instances,
+            build_scene(cube, mode='oll').instances,
+        )
+
+    def test_a_mode_reorients_the_cube(self) -> None:
+        """Test that the orientation of a mode reaches the scene."""
+        cube = cube_of("L U L' U'")
+        orientation = ImageDisplay(cube).resolve_mode('f2l')[2]
+
+        self.assertEqual(orientation, 'UB')
+
+        oriented = cube.oriented_copy(orientation, full=True)
+        colors = build_colors(ImageDisplay(cube).palette)
+        scene = build_scene(cube, mode='f2l')
+
+        center = next(
+            instance
+            for instance in scene.instances
+            if instance.cubie[:3] == (2, 1, 1)
+        )
+
+        self.assertNotEqual(oriented.state[13], cube.state[13])
+        self.assertEqual(center.colors[1], colors[oriented.state[13]])
+
+    def test_a_dimmed_mode_darkens_the_stickers(self) -> None:
+        """Test that the dimmed code comes out darker than the palette."""
+        colors = build_colors(ImageDisplay(cube_of()).palette)
+        scene = build_scene(cube_of(), mode='dimmed')
+
+        for instance in scene.instances:
+            for face in range(SIDE_NUMBER):
+                if facelet_index(face, instance.cubie, 3) is None:
+                    continue
+
+                with self.subTest(cubie=instance.cubie, face=face):
+                    self.assertEqual(
+                        instance.colors[face],
+                        dim_color(colors[FACE_ORDER[face]]),
+                    )
+
+    def test_the_hidden_mode_empties_the_cube(self) -> None:
+        """Test that hiding every piece leaves nothing to draw."""
+        self.assertEqual(build_scene(cube_of(), mode='hidden').instances, ())
+
+    def test_a_hidden_piece_leaves_a_hole(self) -> None:
+        """Test that one hidden piece is the only one dropped."""
+        mask = VISIBLE[:4] + '3' + VISIBLE[5:]
+        scene = build_scene(cube_of(), mask=mask)
+
+        self.assertEqual(len(scene.instances), 25)
+        self.assertNotIn(
+            (1, 2, 1),
+            [instance.cubie[:3] for instance in scene.instances],
+        )
+
+    def test_a_mode_on_a_bigger_cube(self) -> None:
+        """Test that a mode is scaled to the size of the cube."""
+        for size in (2, 5):
+            with self.subTest(size=size):
+                self.assert_matches_svg(cube_of(size=size), 'oll')
