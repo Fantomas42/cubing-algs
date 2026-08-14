@@ -185,14 +185,16 @@ class TestBuildParser(unittest.TestCase):
         options = build_parser().parse_args([])
 
         self.assertTrue(options.out.endswith('gl-doctor.png'))
-        self.assertEqual(options.size, 512)
+        self.assertEqual(options.image_size, 512)
 
     def test_options(self) -> None:
         """Test that destination and size can be chosen."""
-        options = build_parser().parse_args(['--out', 'a.png', '--size', '64'])
+        options = build_parser().parse_args(
+            ['--out', 'a.png', '--image-size', '64'],
+        )
 
         self.assertEqual(options.out, 'a.png')
-        self.assertEqual(options.size, 64)
+        self.assertEqual(options.image_size, 64)
 
 
 class TestMain(DoctorTestCase):

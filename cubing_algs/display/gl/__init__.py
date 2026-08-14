@@ -7,3 +7,6 @@ interactive window.
 
 Nothing here is imported when ``cubing_algs`` is loaded.
 """
+from cubing_algs.display.gl.api import render
+
+__all__ = ['render']

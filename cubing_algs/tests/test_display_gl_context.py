@@ -15,6 +15,17 @@ from cubing_algs.display.gl.context import describe
 from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import has_moderngl
 from cubing_algs.display.gl.context import select_glfw_variant
+from cubing_algs.display.gl.context import try_standalone_backend
+
+requires_moderngl = unittest.skipUnless(
+    has_moderngl(),
+    'moderngl is not installed',
+)
+
+requires_glfw = unittest.skipUnless(
+    has_glfw(),
+    'glfw is not installed',
+)
 
 
 class FakeContext:
@@ -130,6 +141,55 @@ class TestStandaloneFailures(unittest.TestCase):
 
         self.assertIn('default: cannot open', message)
         self.assertIn('libGL.so.1: cannot open', message)
+
+
+@requires_moderngl
+class TestUnknownBackend(unittest.TestCase):
+    """Tests for a standalone backend the driver knows nothing about."""
+
+    def test_failure_is_returned_not_raised(self) -> None:
+        """Test that an unusable backend reports its own name."""
+        context, failure = try_standalone_backend('nowhere', 330)
+
+        self.assertIsNone(context)
+        self.assertIn('nowhere', failure)
+
+
+@requires_glfw
+class TestWindowFailures(unittest.TestCase):
+    """Tests for the failures of the windowing library."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Choose the glfw variant before anything imports the library.
+
+        pyGLFW reads its variant once, when it is imported, and patching
+        one of its functions imports it. Leaving that to chance would
+        load the Wayland variant on a Wayland session, and every later
+        test needing a windowed context would fail.
+        """
+        select_glfw_variant()
+
+    def test_glfw_cannot_start(self) -> None:
+        """Test that a glfw refusing to start is reported."""
+        with mock.patch('glfw.init', return_value=False), \
+                self.assertRaises(GLContextError) as context:
+            create_window((64, 64))
+
+        self.assertIn('could not be initialized', str(context.exception))
+
+    def test_window_cannot_be_created(self) -> None:
+        """Test that a refused window shuts glfw down again."""
+        with mock.patch('glfw.init', return_value=True), \
+                mock.patch('glfw.window_hint'), \
+                mock.patch('glfw.create_window', return_value=None), \
+                mock.patch('glfw.terminate') as terminate, \
+                self.assertRaises(GLContextError) as context:
+            create_window((64, 64))
+
+        self.assertIn('could not create', str(context.exception))
+        terminate.assert_called_once_with()
 
 
 class TestSelectGlfwVariant(unittest.TestCase):

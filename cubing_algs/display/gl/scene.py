@@ -1,0 +1,344 @@
+"""
+Scene of the GPU rendering backend.
+
+Turns a ``VCube`` into what a renderer needs to draw it: one instance per
+visible cubie, each carrying its model matrix and the six colors of its
+sides. Pure Python, and backend agnostic: nothing here knows about
+OpenGL, the very same scene could be rasterized in SVG.
+
+No permutation table lives here. The colors are read straight from the
+facelet string of the cube, through the ``(face, row, column)`` mapping
+that ``display/image.py`` already uses, and the palette is the one of the
+SVG backend, so that both renderings show the same colors.
+"""
+import struct
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+from typing import NamedTuple
+
+from cubing_algs.annotations import CubeFacelets
+from cubing_algs.display.gl.geometry import FACE_BASES
+from cubing_algs.display.gl.geometry import CubeGeometry
+from cubing_algs.display.gl.geometry import Cubie
+from cubing_algs.display.gl.geometry import FaceBasis
+from cubing_algs.display.gl.geometry import build_cube_geometry
+from cubing_algs.display.gl.transforms import Mat4
+from cubing_algs.display.gl.transforms import Vec3
+from cubing_algs.display.image import ImageDisplay
+from cubing_algs.display.palettes import hex_to_rgba
+
+if TYPE_CHECKING:  # pragma: no cover
+    from cubing_algs.vcube import VCube
+
+# A color of the scene, as three channels running from 0 to 1.
+type Color = tuple[float, float, float]
+
+# Number of sides of a cubie, one color each.
+SIDE_NUMBER = len(FACE_BASES)
+
+# Key of the plastic color in the palette of the SVG backend.
+PLASTIC_KEY = 'cube_color'
+
+# Layout of an instance in the buffer, as moderngl reads it: model
+# matrix, then the six colors as two mat3, three colors per matrix.
+# GLSL 3.30 forbids an array of vertex inputs; a matrix is the portable
+# way to hand several vectors over in one attribute.
+INSTANCE_FORMAT = '16f 9f 9f/i'
+INSTANCE_ATTRIBUTES = ('in_model', 'in_colors_low', 'in_colors_high')
+INSTANCE_PACKING = f'<{ SIDE_NUMBER * 3 }f'
+
+# Size of one instance in the buffer: a model matrix and the colors.
+INSTANCE_SIZE = struct.calcsize('<16f') + struct.calcsize(INSTANCE_PACKING)
+
+CHANNEL_MAXIMUM = 255.0
+
+
+class FaceLayout(NamedTuple):
+    """
+    Where the facelets of one face sit on the grid of cubies.
+
+    A face is read row after row, from its top left corner as seen from
+    outside. ``axis`` is the axis the face is orthogonal to and ``sign``
+    which end of it the face sits on; the other four fields tell which
+    grid axis a row and a column run along, and in which direction.
+    """
+
+    axis: int
+    sign: int
+    row_axis: int
+    row_sign: int
+    col_axis: int
+    col_sign: int
+
+
+def axis_direction(vector: Vec3) -> tuple[int, int]:
+    """
+    Name the axis a vector runs along, and the way it points.
+
+    Args:
+        vector: A vector parallel to one of the three axes.
+
+    Returns:
+        The index of the axis, and 1 or -1 for its direction.
+
+    Raises:
+        ValueError: When the vector is parallel to no axis.
+
+    """
+    for axis, value in enumerate(vector):
+        if value:
+            return axis, 1 if value > 0 else -1
+
+    msg = f'Vector { vector } runs along no axis'
+    raise ValueError(msg)
+
+
+def build_face_layout(basis: FaceBasis) -> FaceLayout:
+    """
+    Read the layout of a face out of the frame of its stickers.
+
+    The frame already says everything: its normal names the side of the
+    cube the face lies on, its ``right`` the way a column runs, and the
+    opposite of its ``up`` the way a row runs, rows being counted from
+    the top of the face down.
+
+    Args:
+        basis: Orientation of the face, as the geometry defines it.
+
+    Returns:
+        The layout of the face on the grid of cubies.
+
+    """
+    axis, sign = axis_direction(basis.normal)
+    row_axis, row_sign = axis_direction(-basis.up)
+    col_axis, col_sign = axis_direction(basis.right)
+
+    return FaceLayout(axis, sign, row_axis, row_sign, col_axis, col_sign)
+
+
+# The six faces, in the order of FACE_ORDER: U, R, F, D, L, B.
+FACE_LAYOUTS: tuple[FaceLayout, ...] = tuple(
+    build_face_layout(basis)
+    for basis in FACE_BASES
+)
+
+
+def grid_position(index: int, sign: int, size: int) -> int:
+    """
+    Read a grid index along an axis running one way or the other.
+
+    Args:
+        index: Index of the cubie on the grid axis.
+        sign: Direction the row or the column runs along that axis.
+        size: Size of the cube.
+
+    Returns:
+        The row or column number of the facelet.
+
+    """
+    if sign > 0:
+        return index
+
+    return size - 1 - index
+
+
+def facelet_index(face: int, cubie: Cubie, size: int) -> int | None:
+    """
+    Locate the facelet shown by one side of a cubie.
+
+    Args:
+        face: Index of the side, in the order of ``FACE_ORDER``.
+        cubie: The cubie the side belongs to.
+        size: Size of the cube.
+
+    Returns:
+        The position of the facelet in the state string, or None when
+        that side of the cubie is buried inside the cube.
+
+    """
+    layout = FACE_LAYOUTS[face]
+    grid = (cubie.x, cubie.y, cubie.z)
+
+    if grid[layout.axis] != (size - 1 if layout.sign > 0 else 0):
+        return None
+
+    row = grid_position(grid[layout.row_axis], layout.row_sign, size)
+    col = grid_position(grid[layout.col_axis], layout.col_sign, size)
+
+    return face * size * size + row * size + col
+
+
+def build_color(hex_color: str) -> Color:
+    """
+    Convert a color of a palette into a color of the scene.
+
+    Args:
+        hex_color: The color, as ``#rrggbb`` or ``#rrggbbaa``. The alpha
+            channel is dropped: the cube is opaque.
+
+    Returns:
+        The three channels of the color, from 0 to 1.
+
+    """
+    red, green, blue = hex_to_rgba(hex_color)[:3]
+
+    return (
+        red / CHANNEL_MAXIMUM,
+        green / CHANNEL_MAXIMUM,
+        blue / CHANNEL_MAXIMUM,
+    )
+
+
+def build_colors(palette: Mapping[str, str]) -> dict[str, Color]:
+    """
+    Convert a whole palette into colors of the scene.
+
+    Args:
+        palette: Face letters and named colors of a palette, as hex
+            strings.
+
+    Returns:
+        The same mapping, as colors of the scene.
+
+    """
+    return {
+        key: build_color(value)
+        for key, value in palette.items()
+    }
+
+
+def cubie_colors(
+        cubie: Cubie,
+        state: CubeFacelets,
+        colors: Mapping[str, Color],
+        size: int,
+) -> tuple[Color, ...]:
+    """
+    Pick the colors of the six sides of a cubie.
+
+    A side buried inside the cube takes the color of the plastic: the
+    mesh carries its six stickers whatever happens, and this is what
+    makes the ones nobody can see disappear.
+
+    Args:
+        cubie: The cubie to color.
+        state: Facelet string of the cube.
+        colors: Colors of the palette, by face letter.
+        size: Size of the cube.
+
+    Returns:
+        The six colors, in the order of ``FACE_ORDER``.
+
+    """
+    sides: list[Color] = []
+
+    for face in range(SIDE_NUMBER):
+        index = facelet_index(face, cubie, size)
+
+        sides.append(
+            colors[PLASTIC_KEY]
+            if index is None
+            else colors[state[index]],
+        )
+
+    return tuple(sides)
+
+
+@dataclass(frozen=True, slots=True)
+class CubieInstance:
+    """One cubie of the scene: where it stands, and how it is colored."""
+
+    cubie: Cubie
+    model: Mat4
+    colors: tuple[Color, ...]
+
+    def pack(self) -> bytes:
+        """
+        Serialize the instance for an instance buffer.
+
+        Returns:
+            The instance, laid out as ``INSTANCE_FORMAT`` describes it.
+
+        """
+        return self.model.pack() + struct.pack(
+            INSTANCE_PACKING,
+            *(channel for color in self.colors for channel in color),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class Scene:
+    """
+    A cube ready to be drawn: a shared mesh, and the cubies placing it.
+
+    Everything a backend needs is here, and nothing else: the geometry
+    holds the mesh uploaded once, the instances hold what changes from
+    one cubie, one state or one mask to the next.
+    """
+
+    geometry: CubeGeometry
+    instances: tuple[CubieInstance, ...]
+    plastic: Color
+
+    @property
+    def size(self) -> int:
+        """
+        Tell the size of the cube of the scene.
+
+        Returns:
+            The size of the cube.
+
+        """
+        return self.geometry.size
+
+    def pack_instances(self) -> bytes:
+        """
+        Serialize every instance for an instance buffer.
+
+        Returns:
+            The instances, one after the other.
+
+        """
+        return b''.join(instance.pack() for instance in self.instances)
+
+
+def build_scene(
+        cube: 'VCube',
+        palette_name: str = '',
+        geometry: CubeGeometry | None = None,
+) -> Scene:
+    """
+    Build the scene drawing a cube.
+
+    The palette is loaded by the SVG backend rather than read again
+    here: both renderings must show the same colors, and the surest way
+    of getting there is to have a single place resolving them.
+
+    Args:
+        cube: The cube to draw.
+        palette_name: Name of the color palette. Empty for the default
+            one.
+        geometry: Geometry to place the cubies with, built from the size
+            of the cube when left out.
+
+    Returns:
+        The scene of the cube.
+
+    """
+    built = geometry or build_cube_geometry(cube.size)
+    colors = build_colors(ImageDisplay(cube, palette_name).palette)
+    state = cube.state
+
+    return Scene(
+        geometry=built,
+        instances=tuple(
+            CubieInstance(
+                cubie=cubie,
+                model=Mat4.translation(cubie.center),
+                colors=cubie_colors(cubie, state, colors, built.size),
+            )
+            for cubie in built.cubies
+        ),
+        plastic=colors[PLASTIC_KEY],
+    )

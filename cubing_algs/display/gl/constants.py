@@ -26,9 +26,44 @@ GLFW_VARIANT_FALLBACK = 'x11'
 # Default square size, in pixels, of an offscreen render.
 RENDER_SIZE = 512
 
+# Samples of the multisampled framebuffer an offscreen render draws to.
+# Zero renders without any antialiasing.
+RENDER_SAMPLES = 4
+
+# Color the framebuffer is cleared with, the alpha channel included:
+# fully transparent, as the SVG backend leaves its background empty.
+BACKGROUND_COLOR: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
+
+# Direction the light shines from, in world coordinates, normalized by
+# the renderer. Above, slightly to the right and to the front, which
+# lights the three faces the default framing shows.
+LIGHT_DIRECTION = (0.35, 0.85, 0.45)
+
+# Share of the lighting a face gets whatever its orientation. Kept high
+# on purpose: a sticker must keep the color of its palette, the diffuse
+# part being only there to tell the three visible faces apart.
+AMBIENT_LIGHT = 0.72
+
 # Radius of the bounding sphere of the cube, whose body spans
 # [-1, 1] on each axis whatever its size, as in display/image.py.
 BOUNDING_RADIUS = math.sqrt(3)
+
+# Shape of a cubie, as fractions of its own half extent, so that a cube
+# keeps the same proportions whatever its size.
+
+# Space left between two neighbouring cubies, which is what draws the
+# black grooves running across the cube.
+CUBIE_GAP = 0.04
+
+# Width of the chamfer cutting the edges and the corners of a cubie.
+CUBIE_BEVEL = 0.12
+
+# Inset of a sticker from the border of the beveled face it sits on.
+STICKER_MARGIN = 0.08
+
+# How far a sticker floats above the plastic: enough to win the depth
+# test at any distance, too little to show on the silhouette.
+STICKER_LIFT = 0.01
 
 # Clipping planes of the camera, wide enough for any framing of a cube
 # without wasting depth precision.

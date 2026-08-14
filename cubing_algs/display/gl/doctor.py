@@ -210,7 +210,7 @@ def build_parser() -> argparse.ArgumentParser:
         help=f'where to write the gradient PNG (default: { DOCTOR_OUTPUT })',
     )
     parser.add_argument(
-        '--size',
+        '--image-size',
         type=int,
         default=RENDER_SIZE,
         help=f'size in pixels of the gradient (default: { RENDER_SIZE })',
@@ -237,8 +237,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     check_dependencies()
 
-    standalone = check_standalone(options.out, options.size)
-    window = check_window(options.size)
+    standalone = check_standalone(options.out, options.image_size)
+    window = check_window(options.image_size)
 
     if not standalone:
         output(
