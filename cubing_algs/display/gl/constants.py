@@ -1,4 +1,5 @@
 """Constants of the GPU rendering backend."""
+import math
 
 # Minimum OpenGL version required by the shaders, as a version code
 # (3.3 core). Chosen because it is the lowest version supporting
@@ -24,6 +25,24 @@ GLFW_VARIANT_FALLBACK = 'x11'
 
 # Default square size, in pixels, of an offscreen render.
 RENDER_SIZE = 512
+
+# Radius of the bounding sphere of the cube, whose body spans
+# [-1, 1] on each axis whatever its size, as in display/image.py.
+BOUNDING_RADIUS = math.sqrt(3)
+
+# Clipping planes of the camera, wide enough for any framing of a cube
+# without wasting depth precision.
+CAMERA_NEAR = 0.1
+CAMERA_FAR = 100.0
+
+# How far the camera can be tilted before its up direction becomes
+# parallel to its line of sight, which no view matrix survives.
+PITCH_LIMIT = math.radians(89.9)
+
+# Bounds of the orbit distance, from just outside the cube to a view
+# where it is a speck.
+CAMERA_MIN_DISTANCE = 2.5
+CAMERA_MAX_DISTANCE = 40.0
 
 # Default title of the interactive window.
 WINDOW_TITLE = 'cubing-algs'
