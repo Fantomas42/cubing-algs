@@ -24,6 +24,7 @@ from cubing_algs.display.gl.scene import cubie_hidden
 from cubing_algs.display.gl.scene import dim_color
 from cubing_algs.display.gl.scene import facelet_index
 from cubing_algs.display.gl.scene import grid_position
+from cubing_algs.display.gl.scene import resolve_display
 from cubing_algs.display.gl.scene import scale_channels
 from cubing_algs.display.gl.scene import sticker_color
 from cubing_algs.display.gl.transforms import AXIS_X
@@ -622,3 +623,40 @@ class TestBuildSceneMasks(unittest.TestCase):
         for size in (2, 5):
             with self.subTest(size=size):
                 self.assert_matches_svg(cube_of(size=size), 'oll')
+
+
+class TestResolveDisplay(unittest.TestCase):
+    """Tests for the settling of a display mode."""
+
+    def test_no_mode_leaves_everything_alone(self) -> None:
+        """Test that a plain cube is neither turned nor masked."""
+        cube = cube_of("R U R' U'")
+        shown, mask = resolve_display(cube)
+
+        self.assertIs(shown, cube)
+        self.assertEqual(mask, '')
+
+    def test_a_mode_hands_its_mask_over(self) -> None:
+        """Test that the mask of a mode comes out unreplayed."""
+        cube = cube_of()
+        _, mask = resolve_display(cube, mode='oll')
+
+        self.assertEqual(mask, ImageDisplay(cube).resolve_mode('oll')[0])
+
+    def test_a_mode_reorients_the_cube(self) -> None:
+        """Test that a mode may hand back another cube than it was given."""
+        cube = cube_of("L U L' U'")
+        shown, _ = resolve_display(cube, mode='f2l')
+
+        self.assertIsNot(shown, cube)
+        self.assertEqual(
+            shown.state,
+            cube.oriented_copy('UB', full=True).state,
+        )
+
+    def test_a_mask_wins_over_the_mode(self) -> None:
+        """Test that a mask given by hand replaces the one of the mode."""
+        self.assertEqual(
+            resolve_display(cube_of(), mode='oll', mask=VISIBLE)[1],
+            VISIBLE,
+        )

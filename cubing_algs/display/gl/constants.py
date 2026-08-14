@@ -32,6 +32,18 @@ RENDER_SIZE = 512
 # the silhouette stops showing at the sizes a cube is rendered at.
 RENDER_SAMPLES = 8
 
+# How long a single move of an animation lasts, in seconds. Fast enough
+# to read as a turn rather than as a slideshow, slow enough to follow.
+MOVE_DURATION = 0.28
+
+# Frames rendered per second of animation. Twenty five is where a GIF
+# stops flickering without doubling the weight of the file.
+FRAME_RATE = 25.0
+
+# How many times an animation plays: zero loops forever, as a GIF of an
+# algorithm is meant to.
+ANIMATION_LOOP = 0
+
 # Color the framebuffer is cleared with, the alpha channel included:
 # fully transparent, as the SVG backend leaves its background empty.
 BACKGROUND_COLOR: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
@@ -165,4 +177,10 @@ MODERNGL_MISSING = (
 
 GLFW_MISSING = (
     f'The interactive viewer requires glfw.\n{ OPENGL_EXTRA_INSTALL }'
+)
+
+# Pillow belongs to no extra: it only encodes the GIF of an animation,
+# and its absence costs a series of PNG frames rather than a failure.
+PILLOW_MISSING = (
+    'Encoding a GIF requires Pillow.\nInstall it with: pip install Pillow'
 )

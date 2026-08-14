@@ -10,6 +10,7 @@ framebuffer of a window and into an offscreen one, which is the whole
 point of the backend. moderngl is imported lazily, as everywhere else in
 this sub-module.
 """
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import Self
@@ -363,40 +364,131 @@ class OffscreenTarget:
         self.resolved.release()
 
 
-def draw_scene(
-        context: 'moderngl.Context',
-        scene: Scene,
-        camera: OrbitCamera,
-        look: Look = DEFAULT_LOOK,
-) -> None:
+@dataclass(slots=True)
+class ScenePainter:
     """
-    Draw a whole frame into the framebuffer currently in use.
+    Everything drawing a cube takes, held between two frames.
 
-    The shadow first, on a ground the cube then hides most of, and the
-    cube over it. Every resource is built and given back here, which is
-    fine for a single image and would not be for an animation.
+    A program, its buffers and the shadow plane: building them is worth
+    several frames of drawing, so an animation builds them once and a
+    single image pays for them once too.
+    """
+
+    renderer: Renderer
+    shadow: ShadowPlane | None
+
+    @classmethod
+    def create(
+            cls,
+            context: 'moderngl.Context',
+            geometry: CubeGeometry,
+            look: Look = DEFAULT_LOOK,
+    ) -> Self:
+        """
+        Build everything a series of frames of one cube needs.
+
+        Args:
+            context: The context owning the programs and the buffers.
+            geometry: The mesh of a cubie and the cubies to place it on.
+            look: How the light falls on the cube. Only whether it casts
+                a shadow at all is read here.
+
+        Returns:
+            A painter ready to draw any scene of that geometry.
+
+        """
+        return cls(
+            renderer=Renderer.create(context, geometry),
+            shadow=ShadowPlane.create(context) if look.shadow_opacity else None,
+        )
+
+    def draw(
+            self,
+            scene: Scene,
+            camera: OrbitCamera,
+            look: Look = DEFAULT_LOOK,
+    ) -> None:
+        """
+        Draw a whole frame into the framebuffer currently in use.
+
+        The shadow first, on a ground the cube then hides most of, and
+        the cube over it.
+
+        Args:
+            scene: The cube to draw.
+            camera: The camera looking at it.
+            look: How the light falls on the cube.
+
+        """
+        if self.shadow is not None:
+            self.shadow.draw(camera, look)
+
+        self.renderer.draw(scene, camera, look)
+
+    def release(self) -> None:
+        """Give every GPU resource of the painter back."""
+        if self.shadow is not None:
+            self.shadow.release()
+
+        self.renderer.release()
+
+
+def render_frames(
+        scenes: Iterable[Scene],
+        camera: OrbitCamera,
+        *,
+        image_size: int = RENDER_SIZE,
+        look: Look = DEFAULT_LOOK,
+        context: 'moderngl.Context | None' = None,
+) -> list[bytes]:
+    """
+    Render a series of scenes offscreen, and read the pixels back.
+
+    Every scene shares one context, one framebuffer and one program: a
+    headless context alone costs more than the whole animation it would
+    otherwise be created for.
 
     Args:
-        context: The context to draw with.
-        scene: The cube to draw.
-        camera: The camera looking at it.
-        look: How the light falls on the cube.
+        scenes: The cubes to draw, all of the same geometry.
+        camera: The camera looking at them.
+        image_size: Width and height of the images, in pixels.
+        look: How the light falls on the cube, antialiasing included.
+        context: A context to draw with. A headless one is created, and
+            released, when left out.
+
+    Returns:
+        One frame per scene, as rows of RGBA pixels, bottom row first.
 
     """
-    if look.shadow_opacity:
-        shadow = ShadowPlane.create(context)
+    ordered = list(scenes)
+    if not ordered:
+        return []
 
-        try:
-            shadow.draw(camera, look)
-        finally:
-            shadow.release()
+    owned = context is None
+    used = context or create_standalone_context()
 
-    renderer = Renderer.create(context, scene.geometry)
+    target = OffscreenTarget.create(
+        used,
+        (image_size, image_size),
+        look.samples,
+    )
+    painter = ScenePainter.create(used, ordered[0].geometry, look)
 
     try:
-        renderer.draw(scene, camera, look)
+        frames: list[bytes] = []
+
+        for scene in ordered:
+            target.use()
+            painter.draw(scene, camera, look)
+            frames.append(target.read())
+
+        return frames
     finally:
-        renderer.release()
+        painter.release()
+        target.release()
+
+        if owned:
+            used.release()
 
 
 def render_scene(
@@ -422,22 +514,10 @@ def render_scene(
         The rows of RGBA pixels, bottom row first.
 
     """
-    owned = context is None
-    used = context or create_standalone_context()
-
-    target = OffscreenTarget.create(
-        used,
-        (image_size, image_size),
-        look.samples,
-    )
-
-    try:
-        target.use()
-        draw_scene(used, scene, camera, look)
-
-        return target.read()
-    finally:
-        target.release()
-
-        if owned:
-            used.release()
+    return render_frames(
+        [scene],
+        camera,
+        image_size=image_size,
+        look=look,
+        context=context,
+    )[0]

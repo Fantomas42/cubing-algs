@@ -432,6 +432,49 @@ class Scene:
         return b''.join(instance.pack() for instance in self.instances)
 
 
+def resolve_display(
+        cube: 'VCube',
+        palette_name: str = '',
+        *,
+        mode: str = '',
+        mask: CubeDisplayMask = '',
+) -> tuple['VCube', CubeDisplayMask]:
+    """
+    Settle what a display mode asks for, before anything is drawn.
+
+    A mode may reorient the cube, as it does in SVG. The layout it
+    carries is dropped: ``top`` is a flat view of the up face, which has
+    no meaning for a backend drawing a solid.
+
+    Split out of ``build_scene()`` because an animation resolves it once
+    and redraws many times: the orientation of a mode is computed from
+    the state of the cube, and would jump around were it read again at
+    every move.
+
+    Args:
+        cube: The cube to draw.
+        palette_name: Name of the color palette. Empty for the default
+            one.
+        mode: Display preset presetting the mask and the orientation,
+            such as ``oll`` or ``f2l``.
+        mask: Display mask, one code per facelet. Overrides the mask the
+            mode would have set.
+
+    Returns:
+        The cube as the mode wants it shown, and the mask to draw it
+        through, still to be replayed by ``map_mask()``.
+
+    """
+    mode_mask, _, orientation = ImageDisplay(
+        cube, palette_name,
+    ).resolve_mode(mode.lower())
+
+    if orientation:
+        cube = cube.oriented_copy(orientation, full=True)
+
+    return cube, mask or mode_mask
+
+
 def build_scene(
         cube: 'VCube',
         palette_name: str = '',
@@ -448,10 +491,6 @@ def build_scene(
     same cube, and the surest way of getting there is to have a single
     place resolving them.
 
-    A mode may reorient the cube before it is drawn, as it does in SVG.
-    The layout it carries is dropped: ``top`` is a flat view of the up
-    face, which has no meaning for a backend drawing a solid.
-
     Args:
         cube: The cube to draw.
         palette_name: Name of the color palette. Empty for the default
@@ -467,13 +506,12 @@ def build_scene(
         The scene of the cube.
 
     """
+    cube, resolved = resolve_display(
+        cube, palette_name, mode=mode, mask=mask,
+    )
+
     display = ImageDisplay(cube, palette_name)
-    mode_mask, _, mode_orientation = display.resolve_mode(mode.lower())
-
-    if mode_orientation:
-        cube = cube.oriented_copy(mode_orientation, full=True)
-
-    codes = display.map_mask(cube, mask or mode_mask)
+    codes = display.map_mask(cube, resolved)
 
     built = geometry or build_cube_geometry(cube.size)
     colors = build_colors(display.palette)

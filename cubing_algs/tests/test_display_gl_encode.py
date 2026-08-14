@@ -1,14 +1,72 @@
 """Tests for the image encoding of the GPU rendering backend."""
+import io
 import struct
 import tempfile
 import unittest
 import zlib
 from pathlib import Path
+from typing import TYPE_CHECKING
+from typing import cast
+from unittest import mock
 
+from cubing_algs.display.gl.encode import GIF_TRANSPARENT_INDEX
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
+from cubing_algs.display.gl.encode import encode_gif
 from cubing_algs.display.gl.encode import encode_png
+from cubing_algs.display.gl.encode import has_pillow
 from cubing_algs.display.gl.encode import png_chunk
+from cubing_algs.display.gl.encode import write_frames
+from cubing_algs.display.gl.encode import write_gif
 from cubing_algs.display.gl.encode import write_png
+
+if TYPE_CHECKING:  # pragma: no cover
+    from PIL import Image
+
+GIF_SIGNATURE = b'GIF89a'
+
+# Two tiny frames, a red square and a blue one, the last column of
+# each left fully transparent.
+FRAME_SIZE = (2, 2)
+RED_FRAME = (b'\xff\x00\x00\xff' + b'\x00\x00\x00\x00') * 2
+BLUE_FRAME = (b'\x00\x00\xff\xff' + b'\x00\x00\x00\x00') * 2
+
+requires_pillow = unittest.skipUnless(
+    has_pillow(),
+    'Pillow is not installed',
+)
+
+
+def frames_of(data: bytes) -> list['Image.Image']:
+    """
+    Split an animated GIF into its frames.
+
+    Returns:
+        The frames of the animation, in order.
+
+    """
+    from PIL import Image
+    from PIL import ImageSequence
+
+    with Image.open(io.BytesIO(data)) as animation:
+        return [
+            frame.copy()
+            for frame in ImageSequence.Iterator(animation)
+        ]
+
+
+def pixel_of(
+        frame: 'Image.Image',
+        mode: str,
+        point: tuple[int, int],
+) -> tuple[int, ...]:
+    """
+    Read one pixel of a frame, converted to a given mode.
+
+    Returns:
+        The channels of the pixel.
+
+    """
+    return cast('tuple[int, ...]', frame.convert(mode).getpixel(point))
 
 
 def read_chunks(data: bytes) -> dict[bytes, bytes]:
@@ -157,3 +215,147 @@ class TestWritePng(unittest.TestCase):
             written = write_png(destination, b'\x00' * 16, (2, 2))
 
             self.assertTrue(written.exists())
+
+
+class TestWriteFrames(unittest.TestCase):
+    """Tests for the fallback writing an animation as PNG frames."""
+
+    def test_one_file_per_frame(self) -> None:
+        """Test that every frame lands on disk under its own name."""
+        with tempfile.TemporaryDirectory() as directory:
+            written = write_frames(
+                Path(directory) / 'anim.gif',
+                [RED_FRAME, BLUE_FRAME],
+                FRAME_SIZE,
+            )
+
+            self.assertEqual(
+                [path.name for path in written],
+                ['anim_0000.png', 'anim_0001.png'],
+            )
+            self.assertTrue(all(path.exists() for path in written))
+
+    def test_the_frames_are_png(self) -> None:
+        """Test that a frame is a plain PNG anybody can read."""
+        with tempfile.TemporaryDirectory() as directory:
+            written = write_frames(
+                Path(directory) / 'anim.gif',
+                [RED_FRAME],
+                FRAME_SIZE,
+            )
+
+            self.assertEqual(
+                written[0].read_bytes()[:8],
+                PNG_SIGNATURE,
+            )
+
+    def test_no_frame_writes_nothing(self) -> None:
+        """Test that an empty animation leaves the folder alone."""
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertEqual(
+                write_frames(Path(directory) / 'anim.gif', [], FRAME_SIZE),
+                [],
+            )
+
+
+@requires_pillow
+class TestEncodeGif(unittest.TestCase):
+    """Tests for the GIF encoding of an animation."""
+
+    def test_signature(self) -> None:
+        """Test that the file starts with the GIF signature."""
+        data = encode_gif(
+            [RED_FRAME, BLUE_FRAME], FRAME_SIZE, frame_rate=25.0,
+        )
+
+        self.assertEqual(data[:6], GIF_SIGNATURE)
+
+    def test_holds_every_frame(self) -> None:
+        """Test that the animation keeps all of its frames."""
+        data = encode_gif(
+            [RED_FRAME, BLUE_FRAME, RED_FRAME], FRAME_SIZE, frame_rate=25.0,
+        )
+
+        self.assertEqual(len(frames_of(data)), 3)
+
+    def test_the_frame_rate_sets_the_delay(self) -> None:
+        """Test that the duration of a frame follows the frame rate."""
+        data = encode_gif([RED_FRAME], FRAME_SIZE, frame_rate=10.0)
+
+        self.assertEqual(frames_of(data)[0].info['duration'], 100)
+
+    def test_the_colors_of_the_frames_survive(self) -> None:
+        """Test that a frame keeps the colors it was given."""
+        first, second = frames_of(
+            encode_gif([RED_FRAME, BLUE_FRAME], FRAME_SIZE, frame_rate=25.0),
+        )
+
+        self.assertEqual(pixel_of(first, 'RGB', (0, 0)), (255, 0, 0))
+        self.assertEqual(pixel_of(second, 'RGB', (0, 0)), (0, 0, 255))
+
+    def test_the_background_stays_transparent(self) -> None:
+        """Test that an empty pixel is not painted at all."""
+        frame = frames_of(
+            encode_gif([RED_FRAME], FRAME_SIZE, frame_rate=25.0),
+        )[0]
+
+        # Pillow shrinks a palette that holds a handful of colors, and
+        # moves the transparent index along with it.
+        self.assertIn('transparency', frame.info)
+        self.assertLessEqual(frame.info['transparency'], GIF_TRANSPARENT_INDEX)
+        self.assertEqual(pixel_of(frame, 'RGBA', (1, 0))[3], 0)
+
+    def test_rows_are_flipped_by_default(self) -> None:
+        """Test that a framebuffer read comes out the right way up."""
+        pixels = b'\x00\x00\xff\xff' * 2 + b'\xff\x00\x00\xff' * 2
+
+        flipped = frames_of(
+            encode_gif([pixels], FRAME_SIZE, frame_rate=25.0),
+        )[0]
+        kept = frames_of(
+            encode_gif([pixels], FRAME_SIZE, frame_rate=25.0, flip=False),
+        )[0]
+
+        self.assertEqual(pixel_of(flipped, 'RGB', (0, 0)), (255, 0, 0))
+        self.assertEqual(pixel_of(kept, 'RGB', (0, 0)), (0, 0, 255))
+
+    def test_no_frame_is_rejected(self) -> None:
+        """Test that an empty animation cannot be encoded."""
+        with self.assertRaises(ValueError) as context:
+            encode_gif([], FRAME_SIZE, frame_rate=25.0)
+
+        self.assertIn('one frame', str(context.exception))
+
+
+@requires_pillow
+class TestWriteGif(unittest.TestCase):
+    """Tests for write_gif function."""
+
+    def test_writes_file(self) -> None:
+        """Test that the encoded animation lands on disk."""
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'out.gif'
+            written = write_gif(
+                destination, [RED_FRAME, BLUE_FRAME], FRAME_SIZE,
+                frame_rate=25.0,
+            )
+
+            self.assertEqual(written, destination)
+            self.assertEqual(destination.read_bytes()[:6], GIF_SIGNATURE)
+
+
+class TestPillowMissing(unittest.TestCase):
+    """Tests for what happens when Pillow is nowhere to be found."""
+
+    def test_encoding_a_gif_names_the_missing_dependency(self) -> None:
+        """Test that the error tells what to install."""
+        with (
+                mock.patch(
+                    'cubing_algs.display.gl.encode.has_pillow',
+                    return_value=False,
+                ),
+                self.assertRaises(ImportError) as context,
+        ):
+            encode_gif([RED_FRAME], FRAME_SIZE, frame_rate=25.0)
+
+        self.assertIn('Pillow', str(context.exception))

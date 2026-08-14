@@ -10,9 +10,12 @@ from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import ClassVar
+from unittest import mock
 
 from cubing_algs.constants import FACE_ORDER
+from cubing_algs.display.gl import animate
 from cubing_algs.display.gl import render
+from cubing_algs.display.gl.animation import Animation
 from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import Look
@@ -22,12 +25,14 @@ from cubing_algs.display.gl.context import describe
 from cubing_algs.display.gl.doctor import main as doctor_main
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
 from cubing_algs.display.gl.encode import encode_png
+from cubing_algs.display.gl.encode import has_pillow
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.renderer import COLOR_CHANNELS
 from cubing_algs.display.gl.renderer import SHADOW_GROUND
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
+from cubing_algs.display.gl.renderer import render_frames
 from cubing_algs.display.gl.renderer import render_scene
 from cubing_algs.display.gl.scene import build_color
 from cubing_algs.display.gl.scene import build_scene
@@ -567,6 +572,182 @@ class TestRender(unittest.TestCase):
                 (64, 64),
             ),
         )
+
+
+@requires_gpu
+class TestRenderFrames(unittest.TestCase):
+    """Tests for the rendering of a whole series of scenes."""
+
+    context: ClassVar['moderngl.Context']
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Create the context shared by the whole class."""
+        cls.context = create_standalone_context()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Give the context back."""
+        cls.context.release()
+
+    def test_one_frame_per_scene(self) -> None:
+        """Test that every scene handed over comes back as pixels."""
+        animation = Animation(VCube(), "R U'", duration=0.5)
+        frames = render_frames(
+            animation.play(4.0),
+            OrbitCamera.from_rotation(),
+            image_size=32,
+            look=FLAT_LOOK,
+            context=self.context,
+        )
+
+        self.assertEqual(len(frames), 5)
+
+        for frame in frames:
+            self.assertEqual(len(frame), 32 * 32 * COLOR_CHANNELS)
+
+    def test_nothing_to_draw_draws_nothing(self) -> None:
+        """Test that an empty series creates no context at all."""
+        self.assertEqual(
+            render_frames([], OrbitCamera.from_rotation()),
+            [],
+        )
+
+    def test_a_single_scene_matches_a_plain_render(self) -> None:
+        """Test that the two entry points agree pixel for pixel."""
+        scene = build_scene(VCube())
+        camera = OrbitCamera.from_rotation()
+
+        self.assertEqual(
+            render_frames(
+                [scene], camera,
+                image_size=32, look=FLAT_LOOK, context=self.context,
+            ),
+            [
+                render_scene(
+                    scene, camera,
+                    image_size=32, look=FLAT_LOOK, context=self.context,
+                ),
+            ],
+        )
+
+    def test_the_frames_of_a_turn_differ(self) -> None:
+        """Test that a move really moves something on screen."""
+        animation = Animation(VCube(), 'R', duration=1.0)
+        frames = render_frames(
+            animation.play(4.0),
+            OrbitCamera.from_rotation(),
+            image_size=32,
+            look=FLAT_LOOK,
+            context=self.context,
+        )
+
+        self.assertEqual(len(set(frames)), len(frames))
+
+    def test_a_frame_is_not_painted_over_the_last_one(self) -> None:
+        """Test that the framebuffer is cleared between two frames."""
+        solved = build_scene(VCube())
+        turned = build_scene(VCube(), mask='3' * 54)
+
+        first, second = render_frames(
+            [turned, solved], OrbitCamera.from_rotation(),
+            image_size=32, look=FLAT_LOOK, context=self.context,
+        )
+        alone, = render_frames(
+            [solved], OrbitCamera.from_rotation(),
+            image_size=32, look=FLAT_LOOK, context=self.context,
+        )
+
+        self.assertNotEqual(first, second)
+        self.assertEqual(second, alone)
+
+
+@requires_gpu
+class TestAnimate(unittest.TestCase):
+    """Tests for the public animation API."""
+
+    def test_a_gif_comes_out(self) -> None:
+        """Test that an algorithm is written as a single animation."""
+        if not has_pillow():
+            self.skipTest('Pillow is not installed')
+
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'out.gif'
+            written = animate(
+                VCube(), "R U'", destination,
+                image_size=32, duration=0.2, frame_rate=10.0,
+            )
+
+            self.assertEqual(written, [destination])
+            self.assertTrue(destination.read_bytes().startswith(b'GIF89a'))
+
+    def test_frames_come_out_without_pillow(self) -> None:
+        """Test that a missing Pillow costs frames, not a failure."""
+        with (
+                tempfile.TemporaryDirectory() as directory,
+                mock.patch(
+                    'cubing_algs.display.gl.api.has_pillow',
+                    return_value=False,
+                ),
+        ):
+            written = animate(
+                VCube(), 'R', Path(directory) / 'out.gif',
+                image_size=32, duration=0.2, frame_rate=10.0,
+            )
+
+            self.assertEqual(len(written), 3)
+            self.assertTrue(
+                all(
+                    path.read_bytes().startswith(PNG_SIGNATURE)
+                    for path in written
+                ),
+            )
+
+    def test_the_mode_reaches_the_animation(self) -> None:
+        """Test that a mode changes what an animation shows."""
+        with (
+                tempfile.TemporaryDirectory() as directory,
+                mock.patch(
+                    'cubing_algs.display.gl.api.has_pillow',
+                    return_value=False,
+                ),
+        ):
+            plain = animate(
+                VCube(), 'R', Path(directory) / 'plain.gif',
+                image_size=32, duration=0.2, frame_rate=10.0,
+            )
+            masked = animate(
+                VCube(), 'R', Path(directory) / 'masked.gif',
+                image_size=32, duration=0.2, frame_rate=10.0, mode='oll',
+            )
+
+            self.assertNotEqual(
+                plain[0].read_bytes(),
+                masked[0].read_bytes(),
+            )
+
+    def test_the_final_frame_is_the_final_state(self) -> None:
+        """Test that an animation ends on the render of the cube it lands on."""
+        with (
+                tempfile.TemporaryDirectory() as directory,
+                mock.patch(
+                    'cubing_algs.display.gl.api.has_pillow',
+                    return_value=False,
+                ),
+        ):
+            written = animate(
+                VCube(), "R U'", Path(directory) / 'out.gif',
+                image_size=32, duration=0.2, frame_rate=10.0,
+                look=FLAT_LOOK,
+            )
+
+            landed = VCube()
+            landed.rotate("R U'")
+
+            self.assertEqual(
+                written[-1].read_bytes(),
+                render(landed, image_size=32, look=FLAT_LOOK),
+            )
 
 
 @requires_gpu
