@@ -1,7 +1,7 @@
 """
 Interactive viewer of the GPU rendering backend.
 
-A window, an event loop, and the very same painter an offscreen render
+A window, an event loop, and the very same renderer an offscreen render
 uses: nothing is drawn here that ``render()`` would not draw, the cube
 simply keeps moving. The mouse orbits the camera, the wheel zooms, and
 the letters of the notation turn the cube, one animated move at a time.
@@ -32,6 +32,7 @@ from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.camera import fit_aspect
 from cubing_algs.display.gl.camera import fit_fov
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
+from cubing_algs.display.gl.constants import FPS_INTERVAL
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.constants import ORBIT_SENSITIVITY
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
@@ -50,7 +51,7 @@ from cubing_algs.display.gl.encode import write_png
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.renderer import OffscreenTarget
-from cubing_algs.display.gl.renderer import ScenePainter
+from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.scene import resolve_display
@@ -112,6 +113,24 @@ def key_notation(
     return f"{ base }'" if prime else base
 
 
+def fps_title(frames: int, elapsed: float, title: str = WINDOW_TITLE) -> str:
+    """
+    Write the frame rate of a window in its own title.
+
+    Args:
+        frames: Frames drawn over the period.
+        elapsed: How long that period lasted, in seconds.
+        title: Title of the window, kept ahead of the rate.
+
+    Returns:
+        The title to give the window.
+
+    """
+    rate = frames / elapsed
+
+    return f'{ title } — {rate:.0f} fps'
+
+
 def screenshot_path() -> Path:
     """
     Build the name of the next screenshot.
@@ -142,8 +161,11 @@ class Stage:
 
     window: GLFWWindow
     context: 'moderngl.Context'
-    painter: ScenePainter
+    renderer: Renderer
     size: tuple[int, int]
+    title: str = WINDOW_TITLE
+    frames: int = 0
+    clock: float = 0.0
 
     @classmethod
     def open(
@@ -159,8 +181,9 @@ class Stage:
         Args:
             size: Width and height of the window, in pixels.
             geometry: The mesh of a cubie and the cubies to place it on.
-            look: How the light falls on the cube, antialiasing
-                included: a window framebuffer is multisampled too.
+            look: How the light falls on the cube. Only its antialiasing
+                is read here, a window framebuffer being multisampled
+                too; the rest reaches the shader when a frame is drawn.
             title: Title of the window.
 
         Returns:
@@ -173,8 +196,9 @@ class Stage:
         return cls(
             window=window,
             context=context,
-            painter=ScenePainter.create(context, geometry, look),
+            renderer=Renderer.create(context, geometry),
             size=size,
+            title=title,
         )
 
     def use(
@@ -199,9 +223,37 @@ class Stage:
         self.context.viewport = (0, 0, *self.size)
         screen.clear(color=background)
 
+    def count_frame(self, now: float) -> None:
+        """
+        Count a drawn frame, and show the rate it holds once a second.
+
+        The rate goes to the title of the window: telling a slowdown
+        from a steady sixty is all that is asked of it, and drawing a
+        text in the scene would take a font and a program of its own.
+
+        Args:
+            now: The moment the frame was drawn, in seconds.
+
+        """
+        import glfw
+
+        self.frames += 1
+        elapsed = now - self.clock
+
+        if elapsed < FPS_INTERVAL:
+            return
+
+        glfw.set_window_title(
+            self.window,
+            fps_title(self.frames, elapsed, self.title),
+        )
+
+        self.frames = 0
+        self.clock = now
+
     def close(self) -> None:
         """Give the window and every GPU resource of the stage back."""
-        self.painter.release()
+        self.renderer.release()
         self.context.release()
         destroy_window(self.window)
 
@@ -231,6 +283,7 @@ class Viewer:
     window_size: tuple[int, int] = VIEWER_SIZE
     look: Look = DEFAULT_LOOK
     duration: float = MOVE_DURATION
+    show_fps: bool = False
 
     geometry: CubeGeometry = field(init=False)
     camera: OrbitCamera = field(init=False)
@@ -415,7 +468,7 @@ class Viewer:
 
         try:
             target.use()
-            stage.painter.draw(self.scene, self.camera, self.look)
+            stage.renderer.draw(self.scene, self.camera, self.look)
 
             written = write_png(
                 path or screenshot_path(), target.read(), stage.size,
@@ -569,6 +622,7 @@ class Viewer:
 
         self.resize(glfw.get_framebuffer_size(stage.window))
         self.clock = glfw.get_time()
+        stage.clock = self.clock
 
         return stage
 
@@ -585,7 +639,7 @@ class Viewer:
         stage = self.require_stage()
 
         stage.use()
-        stage.painter.draw(self.scene, self.camera, self.look)
+        stage.renderer.draw(self.scene, self.camera, self.look)
 
     def tick(self) -> None:
         """
@@ -607,6 +661,9 @@ class Viewer:
 
         glfw.swap_buffers(stage.window)
         glfw.poll_events()
+
+        if self.show_fps:
+            stage.count_frame(now)
 
     def run(self) -> None:
         """

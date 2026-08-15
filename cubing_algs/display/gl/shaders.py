@@ -1,13 +1,10 @@
 """
 GLSL sources of the GPU rendering backend.
 
-One program draws the whole cube: every cubie shares the same mesh and
-comes as an instance carrying its model matrix and the six colors of its
-sides. A vertex knows which side it belongs to, so the shader only has
-to index the colors of its instance.
-
-A second, buffer-less program lays the contact shadow of the cube on the
-ground before it is drawn.
+One program draws the whole cube, and it is the only one: every cubie
+shares the same mesh and comes as an instance carrying its model matrix
+and the six colors of its sides. A vertex knows which side it belongs
+to, so the shader only has to index the colors of its instance.
 
 The look is entirely driven by uniforms, so that two variants can be
 compared within a single run: every one of them comes from a ``Look``.
@@ -163,55 +160,4 @@ void main()
 
     f_color = vec4(pow(max(lit, 0.0), vec3(1.0 / gamma)), 1.0);
 }}
-"""
-
-SHADOW_VERTEX_SHADER = GLSL_VERSION + """
-
-uniform mat4 view_projection;
-uniform float extent;
-uniform float ground;
-
-out vec2 v_ground;
-
-void main()
-{
-    // The quad is built from the index of its vertex, four corners of a
-    // triangle strip: a ground plane is not worth a vertex buffer.
-    vec2 corner = 2.0 * vec2(
-        float(gl_VertexID & 1),
-        float((gl_VertexID >> 1) & 1)
-    ) - 1.0;
-
-    v_ground = corner * extent;
-
-    gl_Position = view_projection * vec4(v_ground.x, ground, v_ground.y, 1.0);
-}
-"""
-
-SHADOW_FRAGMENT_SHADER = GLSL_VERSION + """
-
-uniform float opacity;
-uniform float inner;
-uniform float softness;
-
-in vec2 v_ground;
-
-out vec4 f_color;
-
-void main()
-{
-    // Distance to a rounded square, which is the footprint a cube casts
-    // on the ground, negative inside it.
-    vec2 corner = abs(v_ground) - vec2(inner);
-    float spread = length(max(corner, 0.0))
-        + min(max(corner.x, corner.y), 0.0);
-
-    float alpha = opacity * (1.0 - smoothstep(0.0, softness, spread));
-
-    if (alpha <= 0.0) {
-        discard;
-    }
-
-    f_color = vec4(0.0, 0.0, 0.0, alpha);
-}
 """

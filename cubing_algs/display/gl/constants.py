@@ -139,17 +139,6 @@ class Look:
     # screen, so it does not crawl when the cube turns.
     sticker_grain: float = 0.03
 
-    # Contact shadow cast on the ground plane: how dark it is at the
-    # foot of the cube, how far its solid core reaches, and over what
-    # distance it fades out. A null opacity draws no shadow at all.
-    shadow_opacity: float = 0.40
-    shadow_inner: float = 1.05
-    shadow_softness: float = 0.70
-
-    # Half extent of the ground quad, wide enough to hold the whole
-    # fade whatever the framing.
-    shadow_extent: float = 2.5
-
     # Samples of the multisampled framebuffer a render draws to, clamped
     # to what the context supports. Zero renders without antialiasing.
     samples: int = RENDER_SAMPLES
@@ -179,9 +168,18 @@ WINDOW_TITLE = 'cubing-algs'
 VIEWER_SIZE = (720, 720)
 
 # Color the window is cleared with. Opaque, unlike an offscreen render:
-# a window has no alpha channel to hand back, and the contact shadow
-# needs something to fall on to be seen at all.
-VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.16, 0.17, 0.19, 1.0)
+# a window has no alpha channel to hand back. A mid grey, which is the
+# background the look was judged on: the rim light detaching the
+# silhouette and the grain of a sticker need something to read against,
+# and the black plastic melts into anything darker.
+VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.50, 0.50, 0.52, 1.0)
+
+# How long the frame rate is averaged over before being shown, in
+# seconds: short enough to follow a slowdown, long enough not to
+# flicker. It is shown in the title of the window rather than in the
+# scene, drawing text taking a font, an atlas and a second program,
+# which is exactly what this backend exists to do without.
+FPS_INTERVAL = 1.0
 
 # How far the camera turns for one pixel of mouse drag, in radians.
 ORBIT_SENSITIVITY = 0.008

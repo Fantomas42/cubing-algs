@@ -10,10 +10,10 @@ import math
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any
 from unittest import mock
 
 from cubing_algs.display.constants import DISTANCE
+from cubing_algs.display.gl.constants import FPS_INTERVAL
 from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
 from cubing_algs.display.gl.constants import WINDOW_TITLE
@@ -26,8 +26,10 @@ from cubing_algs.display.gl.context import destroy_window
 from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import select_glfw_variant
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
+from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
+from cubing_algs.display.gl.viewer import fps_title
 from cubing_algs.display.gl.viewer import key_notation
 from cubing_algs.display.gl.viewer import screenshot_path
 from cubing_algs.vcube import VCube
@@ -160,6 +162,22 @@ class TestKeyNotation(unittest.TestCase):
     def test_unknown_key_code(self) -> None:
         """Test that the key glfw could not name is turned into nothing."""
         self.assertEqual(key_notation(-1), '')
+
+
+class TestFpsTitle(unittest.TestCase):
+    """Tests for the fps_title function."""
+
+    def test_rate_is_the_average_of_the_period(self) -> None:
+        """Test that the rate is counted over the whole period."""
+        self.assertEqual(fps_title(120, 2.0), f'{ WINDOW_TITLE } — 60 fps')
+
+    def test_rate_is_rounded(self) -> None:
+        """Test that a frame rate is shown whole."""
+        self.assertEqual(fps_title(59, 1.02), f'{ WINDOW_TITLE } — 58 fps')
+
+    def test_title_is_kept_ahead(self) -> None:
+        """Test that the window keeps being named after what it shows."""
+        self.assertEqual(fps_title(30, 1.0, 'cube'), 'cube — 30 fps')
 
 
 class TestScreenshotPath(unittest.TestCase):
@@ -496,6 +514,50 @@ class TestViewerWindow(unittest.TestCase):
 
         self.assertIsNone(self.viewer.animation)
 
+    def test_tick_counts_no_frame_by_default(self) -> None:
+        """Test that a viewer left alone keeps the title of its window."""
+        stage = self.viewer.open()
+
+        self.viewer.tick()
+
+        self.assertEqual(stage.frames, 0)
+
+    def test_tick_counts_a_frame_when_asked(self) -> None:
+        """Test that a frame is counted once the rate is asked for."""
+        self.viewer.show_fps = True
+        stage = self.viewer.open()
+
+        self.viewer.tick()
+
+        self.assertEqual(stage.frames, 1)
+
+    def test_frame_counter_holds_its_rate_for_a_second(self) -> None:
+        """Test that the title is not rewritten on every frame."""
+        stage = self.viewer.open()
+        stage.frames = 0
+        stage.clock = 0.0
+
+        with mock.patch('glfw.set_window_title') as written:
+            stage.count_frame(FPS_INTERVAL / 2)
+
+        self.assertEqual(stage.frames, 1)
+        written.assert_not_called()
+
+    def test_frame_counter_writes_the_rate_in_the_title(self) -> None:
+        """Test that a whole period of frames reaches the title."""
+        stage = self.viewer.open()
+        stage.frames = 59
+        stage.clock = 0.0
+
+        with mock.patch('glfw.set_window_title') as written:
+            stage.count_frame(FPS_INTERVAL)
+
+        written.assert_called_once_with(
+            stage.window, f'{ WINDOW_TITLE } — 60 fps',
+        )
+        self.assertEqual(stage.frames, 0)
+        self.assertEqual(stage.clock, FPS_INTERVAL)
+
     def test_run_until_the_window_closes(self) -> None:
         """Test that the loop draws until the window is closed."""
         with mock.patch(
@@ -590,11 +652,14 @@ class TestViewerWindow(unittest.TestCase):
 
         self.assertEqual(stage.size, (64, 32))
 
-    def test_stage_holds_the_look_of_the_viewer(self) -> None:
+    def test_stage_holds_the_geometry_of_the_viewer(self) -> None:
         """Test that a stage is built for the geometry it draws."""
-        stage = Stage.open(WINDOW_SIZE, self.viewer.geometry, WINDOW_LOOK)
-        painter: Any = stage.painter
+        geometry = self.viewer.geometry
+        stage = Stage.open(WINDOW_SIZE, geometry, WINDOW_LOOK)
 
-        self.assertIsNotNone(painter.shadow)
+        self.assertEqual(
+            stage.renderer.instance_buffer.size,
+            len(geometry.cubies) * INSTANCE_SIZE,
+        )
 
         stage.close()

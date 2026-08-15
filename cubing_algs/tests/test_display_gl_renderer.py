@@ -26,10 +26,10 @@ from cubing_algs.display.gl.doctor import main as doctor_main
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
 from cubing_algs.display.gl.encode import encode_png
 from cubing_algs.display.gl.encode import has_pillow
+from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.renderer import COLOR_CHANNELS
-from cubing_algs.display.gl.renderer import SHADOW_GROUND
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.renderer import render_frames
@@ -77,7 +77,6 @@ FLAT_LOOK = Look(
     rim_strength=0.0,
     specular_strength=0.0,
     sticker_grain=0.0,
-    shadow_opacity=0.0,
 )
 
 
@@ -251,6 +250,21 @@ class TestRenderScene(unittest.TestCase):
         for offset in corners:
             with self.subTest(offset=offset):
                 self.assertEqual(self.pixels[offset + 3], 0)
+
+    def test_nothing_is_drawn_on_the_ground(self) -> None:
+        """
+        Test that the cube stands on nothing at all.
+
+        A contact shadow used to be laid on a ground plane at the foot
+        of the cube, which read wrong as soon as the camera went below
+        the horizon. Nothing is drawn there any more, so the point of
+        that plane just in front of the cube must stay empty.
+        """
+        ground = OrbitCamera.from_rotation().view_projection().transform_point(
+            Vec3(0.0, -CUBE_EXTENT, 1.4),
+        )
+
+        self.assertEqual(pixel_at(self.pixels, IMAGE_SIZE, ground)[3], 0)
 
     def test_the_cube_is_drawn(self) -> None:
         """Test that the middle of the image is covered by the cube."""
@@ -501,23 +515,6 @@ class TestLook(unittest.TestCase):
             self.render(replace(FLAT_LOOK, gamma=2.2)),
             self.flat,
         )
-
-    def test_the_shadow_falls_beside_the_cube(self) -> None:
-        """
-        Test that the contact shadow darkens the ground, and only it.
-
-        A point of the ground plane just outside the cube must gain some
-        opacity, while the corners of the image stay empty.
-        """
-        pixels = self.render(replace(FLAT_LOOK, shadow_opacity=0.5))
-
-        beside = OrbitCamera.from_rotation().view_projection().transform_point(
-            Vec3(0.0, SHADOW_GROUND, 1.4),
-        )
-
-        self.assertEqual(pixel_at(self.flat, IMAGE_SIZE, beside)[3], 0)
-        self.assertGreater(pixel_at(pixels, IMAGE_SIZE, beside)[3], 0)
-        self.assertEqual(pixels[3], 0)
 
     def test_the_default_look_is_the_one_a_render_gets(self) -> None:
         """Test that a render left alone is shaded by the default look."""

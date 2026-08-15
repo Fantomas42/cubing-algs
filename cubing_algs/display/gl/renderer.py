@@ -23,7 +23,6 @@ from cubing_algs.display.gl.constants import RENDER_SAMPLES
 from cubing_algs.display.gl.constants import RENDER_SIZE
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import create_standalone_context
-from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import VERTEX_ATTRIBUTES
 from cubing_algs.display.gl.geometry import VERTEX_FORMAT
 from cubing_algs.display.gl.geometry import CubeGeometry
@@ -32,8 +31,6 @@ from cubing_algs.display.gl.scene import INSTANCE_FORMAT
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.shaders import FRAGMENT_SHADER
-from cubing_algs.display.gl.shaders import SHADOW_FRAGMENT_SHADER
-from cubing_algs.display.gl.shaders import SHADOW_VERTEX_SHADER
 from cubing_algs.display.gl.shaders import VERTEX_SHADER
 from cubing_algs.display.gl.transforms import Vec3
 
@@ -46,14 +43,6 @@ INDEX_SIZE = 4
 # Number of channels read back from a framebuffer: RGBA, the alpha
 # channel keeping the background transparent.
 COLOR_CHANNELS = 4
-
-# Height of the ground plane the contact shadow is laid on: the very
-# bottom of the cube, which spans [-1, 1] whatever its size.
-SHADOW_GROUND = -CUBE_EXTENT
-
-# Corners of the ground quad, drawn as a triangle strip out of the
-# vertex index alone, without any buffer to bind.
-SHADOW_VERTICES = 4
 
 
 def uniform(program: 'moderngl.Program', name: str) -> 'moderngl.Uniform':
@@ -205,78 +194,6 @@ class Renderer:
 
 
 @dataclass(slots=True)
-class ShadowPlane:
-    """
-    The contact shadow of the cube, laid on the ground before it.
-
-    A single quad, built by its own vertex shader out of the index of
-    each corner: it owns a program and nothing else, no buffer at all.
-    """
-
-    context: 'moderngl.Context'
-    program: 'moderngl.Program'
-    vertex_array: 'moderngl.VertexArray'
-
-    @classmethod
-    def create(cls, context: 'moderngl.Context') -> Self:
-        """
-        Build the shadow plane.
-
-        Args:
-            context: The context owning the program.
-
-        Returns:
-            A shadow plane ready to be drawn.
-
-        """
-        program = context.program(
-            vertex_shader=SHADOW_VERTEX_SHADER,
-            fragment_shader=SHADOW_FRAGMENT_SHADER,
-        )
-
-        return cls(
-            context=context,
-            program=program,
-            vertex_array=context.vertex_array(program, []),
-        )
-
-    def draw(self, camera: OrbitCamera, look: Look = DEFAULT_LOOK) -> None:
-        """
-        Lay the shadow on the ground.
-
-        Drawn first, without any depth test: the cube is opaque and
-        covers whatever part of the shadow it stands on.
-
-        Args:
-            camera: The camera looking at the cube.
-            look: How dark and how soft the shadow is.
-
-        """
-        import moderngl
-
-        uniform(self.program, 'view_projection').write(
-            camera.view_projection().pack(),
-        )
-        uniform(self.program, 'ground').value = SHADOW_GROUND
-        uniform(self.program, 'extent').value = look.shadow_extent
-        uniform(self.program, 'opacity').value = look.shadow_opacity
-        uniform(self.program, 'inner').value = look.shadow_inner
-        uniform(self.program, 'softness').value = look.shadow_softness
-
-        self.context.enable_only(moderngl.BLEND)
-
-        self.vertex_array.render(
-            moderngl.TRIANGLE_STRIP,
-            vertices=SHADOW_VERTICES,
-        )
-
-    def release(self) -> None:
-        """Give every GPU resource of the shadow back."""
-        self.vertex_array.release()
-        self.program.release()
-
-
-@dataclass(slots=True)
 class OffscreenTarget:
     """
     A framebuffer rendered to without any window.
@@ -364,75 +281,6 @@ class OffscreenTarget:
         self.resolved.release()
 
 
-@dataclass(slots=True)
-class ScenePainter:
-    """
-    Everything drawing a cube takes, held between two frames.
-
-    A program, its buffers and the shadow plane: building them is worth
-    several frames of drawing, so an animation builds them once and a
-    single image pays for them once too.
-    """
-
-    renderer: Renderer
-    shadow: ShadowPlane | None
-
-    @classmethod
-    def create(
-            cls,
-            context: 'moderngl.Context',
-            geometry: CubeGeometry,
-            look: Look = DEFAULT_LOOK,
-    ) -> Self:
-        """
-        Build everything a series of frames of one cube needs.
-
-        Args:
-            context: The context owning the programs and the buffers.
-            geometry: The mesh of a cubie and the cubies to place it on.
-            look: How the light falls on the cube. Only whether it casts
-                a shadow at all is read here.
-
-        Returns:
-            A painter ready to draw any scene of that geometry.
-
-        """
-        return cls(
-            renderer=Renderer.create(context, geometry),
-            shadow=ShadowPlane.create(context) if look.shadow_opacity else None,
-        )
-
-    def draw(
-            self,
-            scene: Scene,
-            camera: OrbitCamera,
-            look: Look = DEFAULT_LOOK,
-    ) -> None:
-        """
-        Draw a whole frame into the framebuffer currently in use.
-
-        The shadow first, on a ground the cube then hides most of, and
-        the cube over it.
-
-        Args:
-            scene: The cube to draw.
-            camera: The camera looking at it.
-            look: How the light falls on the cube.
-
-        """
-        if self.shadow is not None:
-            self.shadow.draw(camera, look)
-
-        self.renderer.draw(scene, camera, look)
-
-    def release(self) -> None:
-        """Give every GPU resource of the painter back."""
-        if self.shadow is not None:
-            self.shadow.release()
-
-        self.renderer.release()
-
-
 def render_frames(
         scenes: Iterable[Scene],
         camera: OrbitCamera,
@@ -472,19 +320,19 @@ def render_frames(
         (image_size, image_size),
         look.samples,
     )
-    painter = ScenePainter.create(used, ordered[0].geometry, look)
+    renderer = Renderer.create(used, ordered[0].geometry)
 
     try:
         frames: list[bytes] = []
 
         for scene in ordered:
             target.use()
-            painter.draw(scene, camera, look)
+            renderer.draw(scene, camera, look)
             frames.append(target.read())
 
         return frames
     finally:
-        painter.release()
+        renderer.release()
         target.release()
 
         if owned:
