@@ -28,6 +28,7 @@ from cubing_algs.display.gl.context import destroy_window
 from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import select_glfw_variant
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
+from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.transforms import AXIS_Y
@@ -462,6 +463,18 @@ class TestViewerInput(unittest.TestCase):
 
         self.assertEqual(self.viewer.cube.state, VCube().state)
 
+    def test_key_toggles_the_axes(self) -> None:
+        """Test that F2 shows the axes, and hides them again."""
+        import glfw
+
+        self.viewer.on_key(None, glfw.KEY_F2, 0, glfw.PRESS, 0)
+
+        self.assertTrue(self.viewer.show_axes)
+
+        self.viewer.on_key(None, glfw.KEY_F2, 0, glfw.PRESS, 0)
+
+        self.assertFalse(self.viewer.show_axes)
+
     def test_drag_orbits_the_camera(self) -> None:
         """Test that dragging the mouse turns the cube the way it goes."""
         self.viewer.dragging = True
@@ -647,6 +660,63 @@ class TestViewerWindow(HiddenViewerTestCase):
         )
         self.assertEqual(stage.frames, 0)
         self.assertEqual(stage.clock, FPS_INTERVAL)
+
+    def test_key_asks_for_the_frame_rate(self) -> None:
+        """Test that F3 counts frames from the moment it is pressed."""
+        import glfw
+
+        stage = self.viewer.open()
+        stage.frames = 42
+        self.viewer.clock = 12.0
+
+        with mock.patch('glfw.set_window_title') as written:
+            self.viewer.on_key(None, glfw.KEY_F3, 0, glfw.PRESS, 0)
+
+        self.assertTrue(self.viewer.show_fps)
+        written.assert_called_once_with(stage.window, WINDOW_TITLE)
+        self.assertEqual(stage.frames, 0)
+        self.assertEqual(stage.clock, 12.0)
+
+    def test_key_takes_the_frame_rate_out_of_the_title(self) -> None:
+        """Test that F3 pressed again leaves the plain title behind."""
+        import glfw
+
+        self.viewer.show_fps = True
+        stage = self.viewer.open()
+        stage.count_frame(stage.clock + FPS_INTERVAL)
+
+        with mock.patch('glfw.set_window_title') as written:
+            self.viewer.on_key(None, glfw.KEY_F3, 0, glfw.PRESS, 0)
+
+        self.assertFalse(self.viewer.show_fps)
+        written.assert_called_once_with(stage.window, WINDOW_TITLE)
+
+    def test_axes_are_drawn_only_when_asked(self) -> None:
+        """Test that the axes reach a frame once they are turned on."""
+        self.viewer.open()
+
+        with mock.patch.object(AxesRenderer, 'draw') as drawn:
+            self.viewer.draw()
+
+            drawn.assert_not_called()
+
+            self.viewer.show_axes = True
+            self.viewer.draw()
+
+        drawn.assert_called_once_with(self.viewer.camera, IDENTITY)
+
+    def test_screenshot_holds_the_axes(self) -> None:
+        """Test that a capture shows the axes the window shows."""
+        self.viewer.show_axes = True
+        self.viewer.open()
+
+        with (
+                TemporaryDirectory() as folder,
+                mock.patch.object(AxesRenderer, 'draw') as drawn,
+        ):
+            self.viewer.screenshot(Path(folder) / 'axes.png')
+
+        drawn.assert_called_once_with(self.viewer.camera, IDENTITY)
 
     def test_run_until_the_window_closes(self) -> None:
         """Test that the loop draws until the window is closed."""

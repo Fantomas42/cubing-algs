@@ -31,6 +31,7 @@ from cubing_algs.display.gl.animation import Animation
 from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.camera import fit_aspect
 from cubing_algs.display.gl.camera import fit_fov
+from cubing_algs.display.gl.constants import AXES_REACH
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import FPS_INTERVAL
 from cubing_algs.display.gl.constants import MOVE_DURATION
@@ -50,6 +51,7 @@ from cubing_algs.display.gl.context import destroy_window
 from cubing_algs.display.gl.encode import write_png
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import build_cube_geometry
+from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import Scene
@@ -194,6 +196,7 @@ class Stage:
     window: GLFWWindow
     context: 'moderngl.Context'
     renderer: Renderer
+    axes: AxesRenderer
     size: tuple[int, int]
     title: str = WINDOW_TITLE
     frames: int = 0
@@ -229,6 +232,9 @@ class Stage:
             window=window,
             context=context,
             renderer=Renderer.create(context, geometry),
+            axes=AxesRenderer.create(
+                context, geometry.radius * AXES_REACH,
+            ),
             size=size,
             title=title,
         )
@@ -283,8 +289,28 @@ class Stage:
         self.frames = 0
         self.clock = now
 
+    def reset_title(self, now: float) -> None:
+        """
+        Put the plain title back, and start counting frames afresh.
+
+        Called whenever the rate is turned on or off: turned on, the
+        first period starts now instead of covering all the time the
+        counter spent asleep; turned off, the last rate leaves the title.
+
+        Args:
+            now: The moment the new period starts, in seconds.
+
+        """
+        import glfw
+
+        glfw.set_window_title(self.window, self.title)
+
+        self.frames = 0
+        self.clock = now
+
     def close(self) -> None:
         """Give the window and every GPU resource of the stage back."""
+        self.axes.release()
         self.renderer.release()
         self.context.release()
         destroy_window(self.window)
@@ -321,6 +347,7 @@ class Viewer:
     look: Look = DEFAULT_LOOK
     duration: float = MOVE_DURATION
     show_fps: bool = False
+    show_axes: bool = False
     orientation: Quat | OrientationTracker | None = None
 
     geometry: CubeGeometry = field(init=False)
@@ -489,7 +516,9 @@ class Viewer:
         Drawn again into an offscreen framebuffer rather than read back
         from the window: a multisampled framebuffer cannot be read from
         directly, and the background comes out transparent this way, as
-        it does in every other image of the backend.
+        it does in every other image of the backend. What the window
+        shows is what the image holds, the axes included when they are
+        on.
 
         Args:
             path: Where to write the image. A stamped name in the
@@ -500,6 +529,7 @@ class Viewer:
 
         """
         stage = self.require_stage()
+        orientation = resolve_orientation(self.orientation)
         target = OffscreenTarget.create(
             stage.context, stage.size, self.look.samples,
         )
@@ -507,9 +537,11 @@ class Viewer:
         try:
             target.use()
             stage.renderer.draw(
-                self.scene, self.camera, self.look,
-                resolve_orientation(self.orientation),
+                self.scene, self.camera, self.look, orientation,
             )
+
+            if self.show_axes:
+                stage.axes.draw(self.camera, orientation)
 
             written = write_png(
                 path or screenshot_path(), target.read(), stage.size,
@@ -551,6 +583,11 @@ class Viewer:
             self.reset_camera()
         elif key == glfw.KEY_BACKSPACE:
             self.reset_cube()
+        elif key == glfw.KEY_F2:
+            self.show_axes = not self.show_axes
+        elif key == glfw.KEY_F3:
+            self.show_fps = not self.show_fps
+            self.require_stage().reset_title(self.clock)
         elif key == glfw.KEY_F12:
             self.screenshot()
         else:
@@ -682,12 +719,13 @@ class Viewer:
     def draw(self) -> None:
         """Draw the current scene into the window."""
         stage = self.require_stage()
+        orientation = resolve_orientation(self.orientation)
 
         stage.use()
-        stage.renderer.draw(
-            self.scene, self.camera, self.look,
-            resolve_orientation(self.orientation),
-        )
+        stage.renderer.draw(self.scene, self.camera, self.look, orientation)
+
+        if self.show_axes:
+            stage.axes.draw(self.camera, orientation)
 
     def tick(self) -> None:
         """

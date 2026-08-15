@@ -181,6 +181,26 @@ VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.50, 0.50, 0.52, 1.0)
 # which is exactly what this backend exists to do without.
 FPS_INTERVAL = 1.0
 
+# Colors of the three axes of the grid, in the conventional order: X
+# red, Y green, Z blue. Nothing labels them, drawing text taking a font,
+# an atlas and a program of its own, so the color is the name.
+AXES_COLORS: tuple[tuple[float, float, float], ...] = (
+    (1.0, 0.0, 0.0),
+    (0.0, 1.0, 0.0),
+    (0.0, 0.0, 1.0),
+)
+
+# How far an axis reaches from the center of the cube, as a fraction of
+# the sphere the cube fits in. Leaving the surface of a cube is not
+# enough to be seen: in perspective an axis keeps running over the
+# silhouette long after it has come out of it, and a red line over the
+# red stickers of a face reads as nothing at all. A fifth past the
+# bounding sphere is where the three of them clear the cube at the
+# default framing, at the price of a tip the border of the window may cut
+# on the flattest views, which costs a few pixels of a line and no
+# information at all.
+AXES_REACH = 1.2
+
 # How far the camera turns for one pixel of mouse drag, in radians.
 ORBIT_SENSITIVITY = 0.008
 
@@ -202,6 +222,8 @@ cubing-algs viewer
   alt              widen a face turn, as in Rw
   space            frame the cube again
   backspace        put the cube back as it was
+  F2               show the X/Y/Z axes, red green blue
+  F3               show the frame rate
   F12              write a screenshot
   escape, Q        close the window\
 """

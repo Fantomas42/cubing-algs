@@ -20,6 +20,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import NamedTuple
 
+from cubing_algs.display.gl.constants import AXES_COLORS
 from cubing_algs.display.gl.constants import CUBIE_BEVEL
 from cubing_algs.display.gl.constants import CUBIE_GAP
 from cubing_algs.display.gl.constants import STICKER_LIFT
@@ -38,6 +39,9 @@ CUBE_EXTENT = 1.0
 AXIS_NUMBER = 3
 SIGNS = (-1.0, 1.0)
 
+# The three axes of the grid, in the order their colors are given in.
+AXES = (AXIS_X, AXIS_Y, AXIS_Z)
+
 # Corners of a quad, in the tangent frame of its plane, wound counter
 # clockwise when seen from outside.
 QUAD_CORNERS = ((-1.0, -1.0), (1.0, -1.0), (1.0, 1.0), (-1.0, 1.0))
@@ -51,6 +55,11 @@ BODY_FACE = -1
 VERTEX_FORMAT = '3f 3f 1i'
 VERTEX_ATTRIBUTES = ('in_position', 'in_normal', 'in_face')
 VERTEX_PACKING = '<6fi'
+
+# Layout of a vertex of the axes, as moderngl reads it: position, color.
+AXES_VERTEX_FORMAT = '3f 3f'
+AXES_VERTEX_ATTRIBUTES = ('in_position', 'in_color')
+AXES_VERTEX_PACKING = '<6f'
 
 
 class FaceBasis(NamedTuple):
@@ -625,4 +634,28 @@ def build_cube_geometry(size: int) -> CubeGeometry:
         half=half,
         mesh=build_cubie_mesh(half),
         cubies=build_cubies(size),
+    )
+
+
+def pack_axes(length: float) -> bytes:
+    """
+    Serialize the three axes of the grid, as segments of a line buffer.
+
+    One segment per axis, from the center of the cube outwards, each
+    carrying the color naming it: X red from L to R, Y green from D to U,
+    Z blue from B to F, which is the frame the moves are turned in.
+
+    Args:
+        length: How far a segment reaches from the center, in world
+            units.
+
+    Returns:
+        The six vertices, laid out as ``AXES_VERTEX_FORMAT`` describes
+        them.
+
+    """
+    return b''.join(
+        struct.pack(AXES_VERTEX_PACKING, *point, *color)
+        for axis, color in zip(AXES, AXES_COLORS, strict=True)
+        for point in (ORIGIN, axis.scaled(length))
     )

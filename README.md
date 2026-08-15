@@ -734,6 +734,8 @@ X Y Z            turn the whole cube
 alt              widen a face turn, as in Rw
 space            frame the cube again
 backspace        put the cube back as it was
+F2               show the X/Y/Z axes, red green blue
+F3               show the frame rate
 F12              write a screenshot
 escape, Q        close the window
 ```

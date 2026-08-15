@@ -1,10 +1,14 @@
 """
 GLSL sources of the GPU rendering backend.
 
-One program draws the whole cube, and it is the only one: every cubie
-shares the same mesh and comes as an instance carrying its model matrix
-and the six colors of its sides. A vertex knows which side it belongs
-to, so the shader only has to index the colors of its instance.
+One program draws the whole cube: every cubie shares the same mesh and
+comes as an instance carrying its model matrix and the six colors of its
+sides. A vertex knows which side it belongs to, so the shader only has to
+index the colors of its instance.
+
+A second, much smaller program draws the three axes of the grid, which
+the viewer shows on demand. It exists apart because the program of the
+cube is instanced, lit and scaleless: nothing in it can draw a segment.
 
 The look is entirely driven by uniforms, so that two variants can be
 compared within a single run: every one of them comes from a ``Look``.
@@ -166,4 +170,39 @@ void main()
 
     f_color = vec4(pow(max(lit, 0.0), vec3(1.0 / gamma)), 1.0);
 }}
+"""
+
+# The second, and only other, program of the backend: the three axes of
+# the grid, drawn as segments when the viewer is asked for them. It takes
+# no light at all, an axis being a marker and not a solid, and it shares
+# the ``world`` uniform of the cube so that the axes follow whatever
+# holds it.
+AXES_VERTEX_SHADER = GLSL_VERSION + """
+
+uniform mat4 view_projection;
+uniform mat4 world;
+
+in vec3 in_position;
+in vec3 in_color;
+
+out vec3 v_color;
+
+void main()
+{
+    v_color = in_color;
+
+    gl_Position = view_projection * world * vec4(in_position, 1.0);
+}
+"""
+
+AXES_FRAGMENT_SHADER = GLSL_VERSION + """
+
+in vec3 v_color;
+
+out vec4 f_color;
+
+void main()
+{
+    f_color = vec4(v_color, 1.0);
+}
 """

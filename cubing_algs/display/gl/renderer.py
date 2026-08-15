@@ -23,13 +23,18 @@ from cubing_algs.display.gl.constants import RENDER_SAMPLES
 from cubing_algs.display.gl.constants import RENDER_SIZE
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import create_standalone_context
+from cubing_algs.display.gl.geometry import AXES_VERTEX_ATTRIBUTES
+from cubing_algs.display.gl.geometry import AXES_VERTEX_FORMAT
 from cubing_algs.display.gl.geometry import VERTEX_ATTRIBUTES
 from cubing_algs.display.gl.geometry import VERTEX_FORMAT
 from cubing_algs.display.gl.geometry import CubeGeometry
+from cubing_algs.display.gl.geometry import pack_axes
 from cubing_algs.display.gl.scene import INSTANCE_ATTRIBUTES
 from cubing_algs.display.gl.scene import INSTANCE_FORMAT
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.scene import Scene
+from cubing_algs.display.gl.shaders import AXES_FRAGMENT_SHADER
+from cubing_algs.display.gl.shaders import AXES_VERTEX_SHADER
 from cubing_algs.display.gl.shaders import FRAGMENT_SHADER
 from cubing_algs.display.gl.shaders import VERTEX_SHADER
 from cubing_algs.display.gl.transforms import IDENTITY
@@ -196,6 +201,94 @@ class Renderer:
         self.vertex_array.release()
         self.instance_buffer.release()
         self.index_buffer.release()
+        self.vertex_buffer.release()
+        self.program.release()
+
+
+@dataclass(slots=True)
+class AxesRenderer:
+    """
+    The three axes of the grid, drawn as colored segments.
+
+    A marker rather than a solid: no light, no instance, no depth of its
+    own. Bound to the length it was built with, hence to a cube size,
+    exactly as a ``Renderer`` is bound to a geometry.
+    """
+
+    context: 'moderngl.Context'
+    program: 'moderngl.Program'
+    vertex_buffer: 'moderngl.Buffer'
+    vertex_array: 'moderngl.VertexArray'
+
+    @classmethod
+    def create(cls, context: 'moderngl.Context', length: float) -> Self:
+        """
+        Build the renderer of the axes.
+
+        Args:
+            context: The context owning the buffer and the program.
+            length: How far an axis reaches from the center of the cube,
+                in world units.
+
+        Returns:
+            A renderer ready to draw the axes.
+
+        """
+        program = context.program(
+            vertex_shader=AXES_VERTEX_SHADER,
+            fragment_shader=AXES_FRAGMENT_SHADER,
+        )
+
+        vertex_buffer = context.buffer(pack_axes(length))
+
+        return cls(
+            context=context,
+            program=program,
+            vertex_buffer=vertex_buffer,
+            vertex_array=context.vertex_array(
+                program,
+                [
+                    (
+                        vertex_buffer,
+                        AXES_VERTEX_FORMAT,
+                        *AXES_VERTEX_ATTRIBUTES,
+                    ),
+                ],
+            ),
+        )
+
+    def draw(
+            self,
+            camera: OrbitCamera,
+            orientation: Quat = IDENTITY,
+    ) -> None:
+        """
+        Draw the axes into the framebuffer currently in use.
+
+        The depth test is kept on, so that the half of an axis running
+        inside the cube stays hidden by it: that is what tells which way
+        an axis points rather than merely where it lies.
+
+        Args:
+            camera: The camera looking at them.
+            orientation: How the whole cube is held, the axes being the
+                ones of the cube and not the ones of the world.
+
+        """
+        import moderngl
+
+        uniform(self.program, 'view_projection').write(
+            camera.view_projection().pack(),
+        )
+        uniform(self.program, 'world').write(orientation.to_matrix().pack())
+
+        self.context.enable_only(moderngl.DEPTH_TEST)
+
+        self.vertex_array.render(moderngl.LINES)
+
+    def release(self) -> None:
+        """Give every GPU resource of the renderer back."""
+        self.vertex_array.release()
         self.vertex_buffer.release()
         self.program.release()
 

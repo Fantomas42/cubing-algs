@@ -18,6 +18,8 @@ from cubing_algs.display.gl import animate
 from cubing_algs.display.gl import render
 from cubing_algs.display.gl.animation import Animation
 from cubing_algs.display.gl.camera import OrbitCamera
+from cubing_algs.display.gl.constants import AXES_COLORS
+from cubing_algs.display.gl.constants import AXES_REACH
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
@@ -27,10 +29,12 @@ from cubing_algs.display.gl.doctor import main as doctor_main
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
 from cubing_algs.display.gl.encode import encode_png
 from cubing_algs.display.gl.encode import has_pillow
+from cubing_algs.display.gl.geometry import AXES
 from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.renderer import COLOR_CHANNELS
+from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.renderer import render_frames
@@ -48,6 +52,15 @@ if TYPE_CHECKING:  # pragma: no cover
     import moderngl
 
 IMAGE_SIZE = 128
+
+# The camera every render of this module looks through.
+CAMERA = OrbitCamera.from_rotation()
+
+# Where an axis is looked at, as a share of its length: well past the
+# face it comes out of for the first one, deep inside the cube for the
+# second, which the depth test must hide.
+AXIS_TIP = 0.9
+AXIS_INSIDE = 0.3
 
 # The GPU rounds a color channel to a byte; two units of tolerance
 # absorb that, and nothing more.
@@ -506,6 +519,114 @@ class TestOrientedRender(unittest.TestCase):
             self.render_held(Quat.from_axis_angle(AXIS_Y, 2 * math.pi)),
             self.render_held(IDENTITY),
         )
+
+
+@requires_gpu
+class TestAxesRender(unittest.TestCase):
+    """
+    Tests for the three axes the viewer draws on demand.
+
+    Nothing names them but their color, so the color reaching the pixels
+    of an axis is the whole contract: red on X, green on Y, blue on Z.
+    """
+
+    context: ClassVar['moderngl.Context']
+    pixels: ClassVar[bytes]
+    length: ClassVar[float]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Draw a solved cube and its axes once for the whole class."""
+        cls.context = create_standalone_context()
+
+        scene = build_scene(VCube())
+        cls.length = scene.geometry.radius * AXES_REACH
+
+        target = OffscreenTarget.create(
+            cls.context, (IMAGE_SIZE, IMAGE_SIZE), 0,
+        )
+        renderer = Renderer.create(cls.context, scene.geometry)
+        axes = AxesRenderer.create(cls.context, cls.length)
+
+        try:
+            target.use()
+            renderer.draw(scene, CAMERA, FLAT_LOOK)
+            axes.draw(CAMERA)
+
+            cls.pixels = target.read()
+        finally:
+            axes.release()
+            renderer.release()
+            target.release()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Give the context back."""
+        cls.context.release()
+
+    def colors_around(self, point: Vec3) -> set[tuple[int, ...]]:
+        """
+        Read the colors drawn around a point of an axis.
+
+        A segment is one pixel wide, and which pixel of the two it
+        straddles a rasterizer keeps is its own business: the
+        neighbourhood is looked at rather than the single pixel the
+        projection lands on.
+
+        Args:
+            point: The point of the axis, in world coordinates.
+
+        Returns:
+            The colors of the pixels around it, alpha included.
+
+        """
+        landing = CAMERA.view_projection().transform_point(point)
+
+        return {
+            pixel_at(
+                self.pixels,
+                IMAGE_SIZE,
+                Vec3(
+                    landing.x + column * 2 / IMAGE_SIZE,
+                    landing.y + row * 2 / IMAGE_SIZE,
+                    landing.z,
+                ),
+            )
+            for row in (-1, 0, 1)
+            for column in (-1, 0, 1)
+        }
+
+    def test_every_axis_carries_its_own_color(self) -> None:
+        """Test that an axis is drawn where the camera projects it."""
+        for index, axis in enumerate(AXES):
+            with self.subTest(axis=index):
+                color = tuple(
+                    round(channel * 255) for channel in AXES_COLORS[index]
+                )
+
+                self.assertIn(
+                    (*color, 255),
+                    self.colors_around(axis.scaled(self.length * AXIS_TIP)),
+                )
+
+    def test_an_axis_stays_behind_the_cube(self) -> None:
+        """
+        Test that the half of an axis inside the cube stays hidden.
+
+        The depth test is what tells which way an axis points: drawn on
+        top of everything, the three of them would cross the cube and
+        say nothing about the side they come out of.
+        """
+        for index, axis in enumerate(AXES):
+            with self.subTest(axis=index):
+                color = tuple(
+                    round(channel * 255) for channel in AXES_COLORS[index]
+                )
+
+                self.assertNotIn(
+                    (*color, 255),
+                    self.colors_around(axis.scaled(self.length * AXIS_INSIDE)),
+                )
 
 
 @requires_gpu

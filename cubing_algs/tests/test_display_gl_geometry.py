@@ -6,10 +6,12 @@ from collections import Counter
 
 from cubing_algs.constants import FACE_INDEXES
 from cubing_algs.constants import FACE_NUMBER
+from cubing_algs.display.gl.constants import AXES_COLORS
 from cubing_algs.display.gl.constants import CUBIE_BEVEL
 from cubing_algs.display.gl.constants import CUBIE_GAP
 from cubing_algs.display.gl.constants import STICKER_LIFT
 from cubing_algs.display.gl.constants import STICKER_MARGIN
+from cubing_algs.display.gl.geometry import AXES_VERTEX_PACKING
 from cubing_algs.display.gl.geometry import AXIS_NUMBER
 from cubing_algs.display.gl.geometry import BODY_FACE
 from cubing_algs.display.gl.geometry import CUBE_EXTENT
@@ -32,6 +34,7 @@ from cubing_algs.display.gl.geometry import face_square
 from cubing_algs.display.gl.geometry import is_surface
 from cubing_algs.display.gl.geometry import oriented
 from cubing_algs.display.gl.geometry import other_axes
+from cubing_algs.display.gl.geometry import pack_axes
 from cubing_algs.display.gl.geometry import sticker_polygons
 from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.image import FACE_DEFS
@@ -49,7 +52,31 @@ TRIANGLE_COUNT = 56
 VERTEX_SIZE = 28
 INDEX_SIZE = 4
 
+# What the axes are made of: one segment per axis, two vertices each,
+# and six floats per vertex.
+AXES_VERTEX_COUNT = 6
+AXES_VERTEX_SIZE = 24
+
 SIZES = (1, 2, 3, 4, 5, 6, 7)
+
+
+def axes_vertices(length: float) -> list[tuple[float, ...]]:
+    """
+    Read the vertices of the axes back from their buffer.
+
+    Args:
+        length: How far a segment reaches from the center.
+
+    Returns:
+        The position and the color of each vertex, in order.
+
+    """
+    packed = pack_axes(length)
+
+    return [
+        struct.unpack_from(AXES_VERTEX_PACKING, packed, offset)
+        for offset in range(0, len(packed), AXES_VERTEX_SIZE)
+    ]
 
 
 def triangles(mesh: Mesh) -> list[tuple[Vertex, Vertex, Vertex]]:
@@ -682,6 +709,34 @@ class TestCubeGeometryRadius(unittest.TestCase):
         radii = [build_cube_geometry(size).radius for size in SIZES]
 
         self.assertEqual(radii, sorted(radii))
+
+
+class TestPackAxes(unittest.TestCase):
+    """Tests for the line buffer of the three axes."""
+
+    def test_one_segment_per_axis(self) -> None:
+        """Test that the buffer holds two vertices per axis."""
+        self.assertEqual(len(axes_vertices(1.0)), AXES_VERTEX_COUNT)
+
+    def test_every_segment_starts_at_the_center(self) -> None:
+        """Test that an axis is drawn from the center of the cube."""
+        for index, vertex in enumerate(axes_vertices(2.0)[::2]):
+            with self.subTest(axis=index):
+                self.assertEqual(vertex[:3], (0.0, 0.0, 0.0))
+
+    def test_every_segment_reaches_the_length(self) -> None:
+        """Test that an axis reaches as far as it is asked to."""
+        self.assertEqual(
+            [vertex[:3] for vertex in axes_vertices(2.0)[1::2]],
+            [(2.0, 0.0, 0.0), (0.0, 2.0, 0.0), (0.0, 0.0, 2.0)],
+        )
+
+    def test_colors_name_the_axes(self) -> None:
+        """Test that both ends of an axis carry the color naming it."""
+        self.assertEqual(
+            [vertex[3:] for vertex in axes_vertices(1.0)],
+            [color for color in AXES_COLORS for _ in range(2)],
+        )
 
 
 class TestInvalidSize(unittest.TestCase):

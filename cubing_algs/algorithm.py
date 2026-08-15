@@ -698,6 +698,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             rotation: str = '',
             distance: float = 0.0,
             show_fps: bool = False,
+            show_axes: bool = False,
             impact_mask: bool = True,
     ) -> 'VCube':
         """
@@ -720,6 +721,9 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
                       pairs (e.g., 'y45x-34').
             distance: Camera distance from the cube center.
             show_fps: Show the frame rate in the title of the window.
+                F3 turns it on and off once the window is open.
+            show_axes: Show the three axes of the grid, X red, Y green
+                and Z blue. F2 turns them on and off.
             impact_mask: If True, highlight facelets moved by the algorithm.
 
         Returns:
@@ -740,6 +744,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             rotation=rotation,
             distance=distance,
             show_fps=show_fps,
+            show_axes=show_axes,
         )
 
         return cube

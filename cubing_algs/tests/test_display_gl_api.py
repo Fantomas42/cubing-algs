@@ -233,6 +233,7 @@ class VCubeViewTestCase(unittest.TestCase):
                 distance=20.0,
                 window_size=(320, 240),
                 show_fps=True,
+                show_axes=True,
             )
 
         viewer = viewer_of(run)
@@ -243,6 +244,7 @@ class VCubeViewTestCase(unittest.TestCase):
         self.assertEqual(viewer.distance, 20.0)
         self.assertEqual(viewer.window_size, (320, 240))
         self.assertTrue(viewer.show_fps)
+        self.assertTrue(viewer.show_axes)
 
     def test_the_window_opens_at_its_default_size(self) -> None:
         """No size asked for leaves the default one alone."""
@@ -381,6 +383,7 @@ class AlgorithmViewTestCase(unittest.TestCase):
                 distance=20.0,
                 window_size=(320, 240),
                 show_fps=True,
+                show_axes=True,
                 impact_mask=False,
             )
 
@@ -392,3 +395,4 @@ class AlgorithmViewTestCase(unittest.TestCase):
         self.assertEqual(viewer.distance, 20.0)
         self.assertEqual(viewer.window_size, (320, 240))
         self.assertTrue(viewer.show_fps)
+        self.assertTrue(viewer.show_axes)
