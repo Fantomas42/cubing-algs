@@ -4,6 +4,7 @@ import unittest
 
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.gl.camera import OrbitCamera
+from cubing_algs.display.gl.camera import fit_aspect
 from cubing_algs.display.gl.camera import fit_fov
 from cubing_algs.display.gl.camera import parse_rotation
 from cubing_algs.display.gl.constants import BOUNDING_RADIUS
@@ -67,6 +68,50 @@ class TestFitFov(unittest.TestCase):
         """Test that a camera on the surface of the scene is refused."""
         with self.assertRaises(ValueError):
             fit_fov(2.0, 2.0)
+
+
+class TestFitAspect(unittest.TestCase):
+    """Tests for the fit_aspect function."""
+
+    def test_square_viewport_is_untouched(self) -> None:
+        """Test that a square viewport keeps its field of view."""
+        self.assertEqual(fit_aspect(1.0, 1.0), 1.0)
+
+    def test_landscape_viewport_is_untouched(self) -> None:
+        """Test that a wide viewport keeps its field of view."""
+        self.assertEqual(fit_aspect(1.0, 1.6), 1.0)
+
+    def test_portrait_viewport_widens(self) -> None:
+        """Test that a tall viewport gets a wider field of view."""
+        self.assertGreater(fit_aspect(1.0, 0.5), 1.0)
+
+    def test_portrait_viewport_holds_the_scene(self) -> None:
+        """
+        Test that what a square viewport framed still fits sideways.
+
+        The horizontal half angle of the widened field of view is the
+        half angle the square viewport had: the scene touches the
+        borders of a portrait window left and right instead of top and
+        bottom, and nothing of it is cut.
+        """
+        fov = fit_fov(BOUNDING_RADIUS, DISTANCE)
+
+        for aspect in (0.25, 0.5, 0.75):
+            with self.subTest(aspect=aspect):
+                widened = fit_aspect(fov, aspect)
+
+                self.assertAlmostEqual(
+                    math.tan(widened / 2) * aspect,
+                    math.tan(fov / 2),
+                    places=PLACES,
+                )
+
+    def test_camera_frames_a_portrait_viewport(self) -> None:
+        """Test that a camera built for a tall viewport widens too."""
+        square = OrbitCamera.from_rotation(aspect=1.0)
+        portrait = OrbitCamera.from_rotation(aspect=0.5)
+
+        self.assertGreater(portrait.fov, square.fov)
 
 
 class TestParseRotation(unittest.TestCase):

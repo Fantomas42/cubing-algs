@@ -1,13 +1,16 @@
 """Tests for the context creation of the GPU rendering backend."""
+import importlib
 import os
 import unittest
 from typing import Any
 from typing import ClassVar
 from unittest import mock
 
+from cubing_algs.display.gl import context
 from cubing_algs.display.gl.constants import GLFW_VARIANT_ENVIRONMENT
 from cubing_algs.display.gl.constants import GLFW_VARIANT_FALLBACK
 from cubing_algs.display.gl.context import GLContextError
+from cubing_algs.display.gl.context import check_glfw_platform
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.context import create_window
 from cubing_algs.display.gl.context import create_window_context
@@ -179,9 +182,47 @@ class TestWindowFailures(unittest.TestCase):
 
         self.assertIn('could not be initialized', str(context.exception))
 
+    def test_platform_moderngl_can_attach_to(self) -> None:
+        """Test that a platform holding a readable context goes through."""
+        import glfw
+
+        with mock.patch(
+                'glfw.get_platform',
+                return_value=glfw.PLATFORM_X11,
+        ) as platform:
+            # Raising nothing is the whole answer of the check.
+            check_glfw_platform()
+
+        self.assertEqual(platform.call_count, 1)
+
+    def test_wayland_platform_is_refused(self) -> None:
+        """Test that a glfw locked on Wayland says so, and gives up."""
+        import glfw
+
+        with mock.patch('glfw.init', return_value=True), \
+                mock.patch(
+                    'glfw.get_platform',
+                    return_value=glfw.PLATFORM_WAYLAND,
+                ), \
+                mock.patch('glfw.terminate') as terminate, \
+                self.assertRaises(GLContextError) as context:
+            create_window((64, 64))
+
+        message = str(context.exception)
+
+        self.assertIn('Wayland', message)
+        self.assertIn(GLFW_VARIANT_ENVIRONMENT, message)
+        terminate.assert_called_once_with()
+
     def test_window_cannot_be_created(self) -> None:
         """Test that a refused window shuts glfw down again."""
+        import glfw
+
         with mock.patch('glfw.init', return_value=True), \
+                mock.patch(
+                    'glfw.get_platform',
+                    return_value=glfw.PLATFORM_X11,
+                ), \
                 mock.patch('glfw.window_hint'), \
                 mock.patch('glfw.create_window', return_value=None), \
                 mock.patch('glfw.terminate') as terminate, \
@@ -220,6 +261,26 @@ class TestSelectGlfwVariant(unittest.TestCase):
             self.assertEqual(
                 os.environ[GLFW_VARIANT_ENVIRONMENT],
                 'wayland',
+            )
+
+    def test_importing_the_backend_chooses_the_variant(self) -> None:
+        """
+        Test that importing the backend settles the variant by itself.
+
+        Every module of the backend imports this one, so choosing the
+        variant here is what keeps an ``import glfw`` of a viewer, of a
+        test or of a caller from locking the Wayland one in first. A
+        viewer importing glfw a single line before create_window() had
+        its say held a context nobody could attach to.
+        """
+        environment = {'WAYLAND_DISPLAY': 'wayland-0'}
+
+        with mock.patch.dict(os.environ, environment, clear=True):
+            importlib.reload(context)
+
+            self.assertEqual(
+                os.environ[GLFW_VARIANT_ENVIRONMENT],
+                GLFW_VARIANT_FALLBACK,
             )
 
     def test_without_wayland_nothing_is_set(self) -> None:

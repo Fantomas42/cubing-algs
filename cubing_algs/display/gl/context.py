@@ -17,6 +17,7 @@ from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
 from cubing_algs.display.gl.constants import GLFW_MISSING
 from cubing_algs.display.gl.constants import GLFW_VARIANT_ENVIRONMENT
 from cubing_algs.display.gl.constants import GLFW_VARIANT_FALLBACK
+from cubing_algs.display.gl.constants import GLFW_WAYLAND_LOCKED
 from cubing_algs.display.gl.constants import MODERNGL_MISSING
 from cubing_algs.display.gl.constants import STANDALONE_BACKENDS
 from cubing_algs.display.gl.constants import WINDOW_LIBRARIES
@@ -136,11 +137,44 @@ def select_glfw_variant() -> None:
         )
 
 
+# Chosen as this module is imported, and not only when a window is
+# asked for: every module of the backend imports this one, so the
+# variant is settled before any of them can reach an ``import glfw``,
+# whichever one runs first. Leaving it to create_window() alone made a
+# viewer importing glfw one line too early hold an unusable context.
+select_glfw_variant()
+
+
+def check_glfw_platform() -> None:
+    """
+    Refuse a glfw whose platform no context could ever be read from.
+
+    glfw must have been initialized beforehand. moderngl only knows how
+    to attach to a context through GLX or WGL, so a Wayland platform
+    would give a perfectly working window holding a context nobody can
+    talk to, and a puzzling error a few lines further down.
+
+    Raises:
+        GLContextError: On a Wayland platform, glfw being shut down
+            again first.
+
+    """
+    import glfw
+
+    if glfw.get_platform() != glfw.PLATFORM_WAYLAND:
+        return
+
+    glfw.terminate()
+
+    raise GLContextError(GLFW_WAYLAND_LOCKED)
+
+
 def create_window(
         size: tuple[int, int],
         title: str = WINDOW_TITLE,
         *,
         visible: bool = True,
+        samples: int = 0,
         require: int = GL_VERSION_REQUIRED,
 ) -> GLFWWindow:
     """
@@ -154,14 +188,17 @@ def create_window(
         size: Width and height of the window, in pixels.
         title: Title of the window.
         visible: Whether the window is shown on screen.
+        samples: Samples of the multisampled window framebuffer. Zero
+            draws without any antialiasing.
         require: Minimum OpenGL version code, such as 330.
 
     Returns:
         The glfw window handle, made current.
 
     Raises:
-        GLContextError: If glfw is missing, cannot start, or cannot
-            provide the requested OpenGL version.
+        GLContextError: If glfw is missing, cannot start, runs on a
+            platform moderngl cannot attach to, or cannot provide the
+            requested OpenGL version.
 
     """
     if not has_glfw():
@@ -175,6 +212,8 @@ def create_window(
         msg = 'glfw could not be initialized: no display server?'
         raise GLContextError(msg)
 
+    check_glfw_platform()
+
     width, height = size
 
     glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, require // 100)
@@ -182,6 +221,7 @@ def create_window(
     glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
     glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
     glfw.window_hint(glfw.VISIBLE, glfw.TRUE if visible else glfw.FALSE)
+    glfw.window_hint(glfw.SAMPLES, samples)
 
     window = glfw.create_window(width, height, title, None, None)
     if not window:

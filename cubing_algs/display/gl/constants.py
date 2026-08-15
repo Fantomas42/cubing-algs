@@ -24,6 +24,18 @@ WINDOW_LIBRARIES: tuple[str | None, ...] = (None, 'libGL.so.1')
 GLFW_VARIANT_ENVIRONMENT = 'PYGLFW_LIBRARY_VARIANT'
 GLFW_VARIANT_FALLBACK = 'x11'
 
+# pyGLFW reads that variant once, when it is first imported. A caller
+# importing glfw before the backend had a say locks the Wayland one in,
+# and every window then holds a context nobody can attach to. Saying so
+# plainly is the whole cure: nothing can be done about it afterwards.
+GLFW_WAYLAND_LOCKED = (
+    'glfw is running on Wayland, which moderngl cannot attach to.\n'
+    'pyGLFW chooses its variant when it is first imported, and something '
+    'imported it before cubing_algs could ask for the X11 one.\n'
+    f'Set { GLFW_VARIANT_ENVIRONMENT }={ GLFW_VARIANT_FALLBACK } in the '
+    'environment, or import cubing_algs.display.gl before glfw.'
+)
+
 # Default square size, in pixels, of an offscreen render.
 RENDER_SIZE = 512
 
@@ -162,6 +174,39 @@ CAMERA_MAX_DISTANCE = 40.0
 
 # Default title of the interactive window.
 WINDOW_TITLE = 'cubing-algs'
+
+# Default width and height of the interactive window, in pixels.
+VIEWER_SIZE = (720, 720)
+
+# Color the window is cleared with. Opaque, unlike an offscreen render:
+# a window has no alpha channel to hand back, and the contact shadow
+# needs something to fall on to be seen at all.
+VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.16, 0.17, 0.19, 1.0)
+
+# How far the camera turns for one pixel of mouse drag, in radians.
+ORBIT_SENSITIVITY = 0.008
+
+# What one notch of the wheel multiplies the distance to the cube by.
+ZOOM_STEP = 0.9
+
+# Name of a screenshot, stamped with the moment it was taken so that
+# two of them never overwrite one another.
+SCREENSHOT_NAME = 'cubing-algs-%Y%m%d-%H%M%S.png'
+
+# The shortcuts of the viewer, shown when its window opens.
+VIEWER_HELP = """\
+cubing-algs viewer
+  drag             orbit the cube
+  wheel            zoom in and out
+  R U F L D B      turn a face, shift primes it, ctrl doubles it
+  M E S            turn a slice
+  X Y Z            turn the whole cube
+  alt              widen a face turn, as in Rw
+  space            frame the cube again
+  backspace        put the cube back as it was
+  F12              write a screenshot
+  escape, Q        close the window\
+"""
 
 # Name of the extra shipping moderngl and glfw together, and the error
 # messages shown when either is missing: one extra, so the same cure.

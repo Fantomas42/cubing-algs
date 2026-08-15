@@ -56,6 +56,30 @@ def fit_fov(radius: float, distance: float) -> float:
     return 2 * math.asin(radius / distance)
 
 
+def fit_aspect(fov: float, aspect: float) -> float:
+    """
+    Widen a field of view so that a narrow viewport still frames it all.
+
+    A field of view is vertical, so a viewport taller than it is wide
+    holds less of the scene sideways than upwards: the cube would then
+    be cut on both sides. Widening the vertical angle by exactly what
+    the width lacks puts it back inside, and leaves any viewport at
+    least as wide as it is tall untouched.
+
+    Args:
+        fov: The vertical field of view framing the scene, in radians.
+        aspect: Width over height ratio of the viewport.
+
+    Returns:
+        The vertical field of view to use, in radians.
+
+    """
+    if aspect >= 1.0:
+        return fov
+
+    return 2 * math.atan(math.tan(fov / 2) / aspect)
+
+
 def parse_rotation(rotation: str) -> tuple[float, float, float]:
     """
     Read a rotation string as the angles of an orbit camera.
@@ -142,7 +166,7 @@ class OrbitCamera:
             pitch=pitch,
             roll=roll,
             distance=distance,
-            fov=fit_fov(radius, distance),
+            fov=fit_aspect(fit_fov(radius, distance), aspect),
             aspect=aspect,
         )
 

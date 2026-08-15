@@ -9,5 +9,6 @@ Nothing here is imported when ``cubing_algs`` is loaded.
 """
 from cubing_algs.display.gl.api import animate
 from cubing_algs.display.gl.api import render
+from cubing_algs.display.gl.viewer import Viewer
 
-__all__ = ['animate', 'render']
+__all__ = ['Viewer', 'animate', 'render']
