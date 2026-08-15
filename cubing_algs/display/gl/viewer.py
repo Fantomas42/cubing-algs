@@ -55,6 +55,9 @@ from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.scene import resolve_display
+from cubing_algs.display.gl.transforms import IDENTITY
+from cubing_algs.display.gl.transforms import OrientationTracker
+from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.exceptions import InvalidMoveError
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -129,6 +132,35 @@ def fps_title(frames: int, elapsed: float, title: str = WINDOW_TITLE) -> str:
     rate = frames / elapsed
 
     return f'{ title } — {rate:.0f} fps'
+
+
+def resolve_orientation(
+        source: Quat | OrientationTracker | None,
+) -> Quat:
+    """
+    Read how the cube is held, whoever is holding it.
+
+    A tracker is read rather than copied, so that whatever feeds it —
+    the thread of a bluetooth cube, a replay — only has to hand it over
+    once, and every frame then draws the last quaternion it received. A
+    quaternion given directly is taken as it comes.
+
+    Args:
+        source: The tracker following a sensor, a quaternion of its own,
+            or nothing when no one outside is holding the cube.
+
+    Returns:
+        The rotation to draw the whole cube with, the identity when
+        nothing outside is holding it.
+
+    """
+    if source is None:
+        return IDENTITY
+
+    if isinstance(source, OrientationTracker):
+        return source.orientation
+
+    return source
 
 
 def screenshot_path() -> Path:
@@ -272,6 +304,11 @@ class Viewer:
 
     Nothing is opened until ``run()`` is called, and everything it opens
     is given back when it returns, however it returns.
+
+    ``orientation`` is where something outside takes the cube in hand: a
+    quaternion, or an ``OrientationTracker`` fed by a bluetooth sensor,
+    the tracker then being read anew on every frame. The camera keeps
+    orbiting on top of it, and the light stays where it is.
     """
 
     cube: 'VCube'
@@ -284,6 +321,7 @@ class Viewer:
     look: Look = DEFAULT_LOOK
     duration: float = MOVE_DURATION
     show_fps: bool = False
+    orientation: Quat | OrientationTracker | None = None
 
     geometry: CubeGeometry = field(init=False)
     camera: OrbitCamera = field(init=False)
@@ -468,7 +506,10 @@ class Viewer:
 
         try:
             target.use()
-            stage.renderer.draw(self.scene, self.camera, self.look)
+            stage.renderer.draw(
+                self.scene, self.camera, self.look,
+                resolve_orientation(self.orientation),
+            )
 
             written = write_png(
                 path or screenshot_path(), target.read(), stage.size,
@@ -639,7 +680,10 @@ class Viewer:
         stage = self.require_stage()
 
         stage.use()
-        stage.renderer.draw(self.scene, self.camera, self.look)
+        stage.renderer.draw(
+            self.scene, self.camera, self.look,
+            resolve_orientation(self.orientation),
+        )
 
     def tick(self) -> None:
         """

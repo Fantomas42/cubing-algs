@@ -26,11 +26,17 @@ from cubing_algs.display.gl.context import destroy_window
 from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import select_glfw_variant
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
+from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
+from cubing_algs.display.gl.transforms import AXIS_Y
+from cubing_algs.display.gl.transforms import IDENTITY
+from cubing_algs.display.gl.transforms import OrientationTracker
+from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
 from cubing_algs.display.gl.viewer import fps_title
 from cubing_algs.display.gl.viewer import key_notation
+from cubing_algs.display.gl.viewer import resolve_orientation
 from cubing_algs.display.gl.viewer import screenshot_path
 from cubing_algs.vcube import VCube
 
@@ -178,6 +184,32 @@ class TestFpsTitle(unittest.TestCase):
     def test_title_is_kept_ahead(self) -> None:
         """Test that the window keeps being named after what it shows."""
         self.assertEqual(fps_title(30, 1.0, 'cube'), 'cube — 30 fps')
+
+
+class TestResolveOrientation(unittest.TestCase):
+    """Tests for the resolve_orientation function."""
+
+    def test_nothing_holds_the_cube(self) -> None:
+        """Test that a viewer left alone draws the cube where it is."""
+        self.assertEqual(resolve_orientation(None), IDENTITY)
+
+    def test_a_quaternion_is_taken_as_it_comes(self) -> None:
+        """Test that an orientation given directly is the one drawn."""
+        quarter = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+
+        self.assertEqual(resolve_orientation(quarter), quarter)
+
+    def test_a_tracker_is_read_at_every_call(self) -> None:
+        """Test that a tracker is followed, and not read once."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+
+        self.assertEqual(resolve_orientation(tracker), IDENTITY)
+
+        quarter = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+        tracker.update(*quarter)
+
+        self.assertEqual(resolve_orientation(tracker), quarter)
 
 
 class TestScreenshotPath(unittest.TestCase):
@@ -459,8 +491,8 @@ class TestViewerInput(unittest.TestCase):
 
 
 @requires_window
-class TestViewerWindow(unittest.TestCase):
-    """Tests for a viewer holding a real, hidden, window."""
+class HiddenViewerTestCase(unittest.TestCase):
+    """A viewer whose window is opened for real, but never shown."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -486,6 +518,48 @@ class TestViewerWindow(unittest.TestCase):
         """Close whatever the test left open."""
         self.viewer.close()
         self.hidden.stop()
+
+
+class TestViewerHeldFromOutside(HiddenViewerTestCase):
+    """Tests for a viewer drawing a cube something outside is holding."""
+
+    def test_draw_hands_the_external_orientation_over(self) -> None:
+        """Test that a frame is drawn with the cube held as it is."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+        tracker.update(*Quat.from_axis_angle(AXIS_Y, math.pi / 2))
+
+        self.viewer.orientation = tracker
+        self.viewer.open()
+
+        with mock.patch.object(Renderer, 'draw') as drawn:
+            self.viewer.draw()
+
+        drawn.assert_called_once_with(
+            self.viewer.scene,
+            self.viewer.camera,
+            self.viewer.look,
+            tracker.orientation,
+        )
+
+    def test_screenshot_holds_the_external_orientation(self) -> None:
+        """Test that a capture shows the cube as the window does."""
+        quarter = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+
+        self.viewer.orientation = quarter
+        self.viewer.open()
+
+        with (
+                TemporaryDirectory() as folder,
+                mock.patch.object(Renderer, 'draw') as drawn,
+        ):
+            self.viewer.screenshot(Path(folder) / 'held.png')
+
+        self.assertEqual(drawn.call_args.args[3], quarter)
+
+
+class TestViewerWindow(HiddenViewerTestCase):
+    """Tests for a viewer holding a real, hidden, window."""
 
     def test_open_and_close(self) -> None:
         """Test that a viewer gives its window back."""

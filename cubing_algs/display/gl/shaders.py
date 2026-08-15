@@ -27,6 +27,7 @@ GLSL_COLOR_SPLIT = 3
 VERTEX_SHADER = GLSL_VERSION + f"""
 
 uniform mat4 view_projection;
+uniform mat4 world;
 uniform vec3 plastic_color;
 uniform float cubie_half;
 
@@ -57,19 +58,24 @@ void main()
     v_color = color;
     v_face = in_face;
 
+    // Where the cubie stands, and where the whole cube stands: the
+    // second one is the identity unless something outside holds the
+    // cube, a bluetooth sensor reporting how it is being turned.
+    mat4 model = world * in_model;
+
     // The model matrix is a rotation and a translation, never a scale,
     // so it transforms a normal as it transforms a direction.
-    v_normal = mat3(in_model) * in_normal;
+    v_normal = mat3(model) * in_normal;
 
     // Where the fragment stands inside its own cubie, from -1 to 1 on
     // each axis: this is what tells how deep in a groove it sits, and
     // it follows the piece when the piece turns.
     v_local = in_position / cubie_half;
 
-    vec4 world = in_model * vec4(in_position, 1.0);
-    v_world = world.xyz;
+    vec4 position = model * vec4(in_position, 1.0);
+    v_world = position.xyz;
 
-    gl_Position = view_projection * world;
+    gl_Position = view_projection * position;
 }}
 """
 

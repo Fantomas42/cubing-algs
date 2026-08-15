@@ -4,6 +4,7 @@ Tests for the renderer of the GPU rendering backend.
 Every test here needs a real OpenGL context, and is skipped when none
 can be created, as on a machine without any GPU driver.
 """
+import math
 import tempfile
 import unittest
 from dataclasses import replace
@@ -36,6 +37,9 @@ from cubing_algs.display.gl.renderer import render_frames
 from cubing_algs.display.gl.renderer import render_scene
 from cubing_algs.display.gl.scene import build_color
 from cubing_algs.display.gl.scene import build_scene
+from cubing_algs.display.gl.transforms import AXIS_Y
+from cubing_algs.display.gl.transforms import IDENTITY
+from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.image import ImageDisplay
 from cubing_algs.vcube import VCube
@@ -383,6 +387,124 @@ class TestRenderScene(unittest.TestCase):
                 context=self.context,
             ),
             self.pixels,
+        )
+
+
+@requires_gpu
+class TestOrientedRender(unittest.TestCase):
+    """
+    Tests for the orientation an outside hand holds the cube with.
+
+    The cube turns, the light does not: a lamp stays where it is when a
+    cube is turned under it, so a face brought around must come out with
+    the shade of the place it arrives at, not with the one it left.
+    """
+
+    context: ClassVar['moderngl.Context']
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Build the context every render of the class shares."""
+        cls.context = create_standalone_context()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Give the context back."""
+        cls.context.release()
+
+    def render_held(self, orientation: Quat) -> bytes:
+        """
+        Render a solved cube held in a given orientation.
+
+        Args:
+            orientation: How the whole cube is turned.
+
+        Returns:
+            The rows of RGBA pixels, bottom row first.
+
+        """
+        scene = build_scene(VCube())
+        target = OffscreenTarget.create(
+            self.context, (IMAGE_SIZE, IMAGE_SIZE), FLAT_LOOK.samples,
+        )
+        renderer = Renderer.create(self.context, scene.geometry)
+
+        try:
+            target.use()
+            renderer.draw(
+                scene, OrbitCamera.from_rotation(), FLAT_LOOK, orientation,
+            )
+
+            return target.read()
+        finally:
+            renderer.release()
+            target.release()
+
+    def assert_facelet(
+            self,
+            pixels: bytes,
+            landing: tuple[int, tuple[int, int, int]],
+            face: str,
+    ) -> None:
+        """
+        Assert which facelet is drawn where a face center is projected.
+
+        Args:
+            pixels: The framebuffer to read.
+            landing: Face index and cubie of the place looked at.
+            face: Name of the face whose color must have landed there.
+
+        """
+        index, position = landing
+        expected = shaded(
+            build_color(ImageDisplay(VCube()).palette[face]),
+            FACE_BASES[index].normal,
+        )
+        pixel = facelet_pixel(pixels, index, position)
+
+        for channel, value in enumerate(expected):
+            with self.subTest(channel=channel):
+                self.assertAlmostEqual(
+                    pixel[channel],
+                    value,
+                    delta=COLOR_TOLERANCE,
+                )
+
+    def test_the_identity_holds_nothing(self) -> None:
+        """Test that a cube nobody holds is drawn where it stands."""
+        self.assertEqual(
+            self.render_held(IDENTITY),
+            render_scene(
+                build_scene(VCube()),
+                OrbitCamera.from_rotation(),
+                image_size=IMAGE_SIZE,
+                look=FLAT_LOOK,
+                context=self.context,
+            ),
+        )
+
+    def test_a_quarter_turn_brings_the_front_face_around(self) -> None:
+        """
+        Test that turning the cube moves the faces, and only them.
+
+        A quarter turn around Y takes the front face to where the right
+        one stood, and the left one to the front. Both must come out
+        shaded for where they arrive, which is what tells a normal
+        turned along with the cube from one left behind.
+        """
+        pixels = self.render_held(Quat.from_axis_angle(AXIS_Y, math.pi / 2))
+
+        with self.subTest(landing='right'):
+            self.assert_facelet(pixels, VISIBLE_CENTERS[1], 'F')
+
+        with self.subTest(landing='front'):
+            self.assert_facelet(pixels, VISIBLE_CENTERS[2], 'L')
+
+    def test_a_full_turn_comes_back(self) -> None:
+        """Test that a cube turned all the way round is drawn as it was."""
+        self.assertEqual(
+            self.render_held(Quat.from_axis_angle(AXIS_Y, 2 * math.pi)),
+            self.render_held(IDENTITY),
         )
 
 

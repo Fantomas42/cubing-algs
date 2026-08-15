@@ -32,6 +32,8 @@ from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.shaders import FRAGMENT_SHADER
 from cubing_algs.display.gl.shaders import VERTEX_SHADER
+from cubing_algs.display.gl.transforms import IDENTITY
+from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.transforms import Vec3
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -153,6 +155,7 @@ class Renderer:
             scene: Scene,
             camera: OrbitCamera,
             look: Look = DEFAULT_LOOK,
+            orientation: Quat = IDENTITY,
     ) -> None:
         """
         Draw a scene into the framebuffer currently in use.
@@ -165,6 +168,9 @@ class Renderer:
             scene: The cube to draw.
             camera: The camera looking at it.
             look: How the light falls on the cube.
+            orientation: How the whole cube is held, on top of what the
+                scene already places. The light stays where it is, as a
+                lamp does when a cube turns under it.
 
         """
         import moderngl
@@ -174,6 +180,7 @@ class Renderer:
         uniform(self.program, 'view_projection').write(
             camera.view_projection().pack(),
         )
+        uniform(self.program, 'world').write(orientation.to_matrix().pack())
         uniform(self.program, 'camera_position').value = camera.position
         uniform(self.program, 'plastic_color').value = scene.plastic
         uniform(self.program, 'cubie_half').value = scene.geometry.half
