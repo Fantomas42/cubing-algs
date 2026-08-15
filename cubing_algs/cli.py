@@ -366,6 +366,7 @@ def run_case(args: argparse.Namespace) -> int:
     output(f'Optimal:     htm={ case.optimal_htm } '
            f'stm={ case.optimal_stm } '
            f'cycles={ case.optimal_cycles }')
+    output(f'Main:        { case.main_algorithm }')
     output('Algorithms:')
     for algo in case.algorithms:
         output(f'  { algo }')

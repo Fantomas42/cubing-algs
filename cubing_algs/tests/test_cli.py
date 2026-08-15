@@ -9,6 +9,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
 
+from cubing_algs.cases import get_case
 from cubing_algs.cli import main
 from cubing_algs.cli import window_size
 from cubing_algs.vcube import VCube
@@ -372,6 +373,15 @@ class CaseCommandTestCase(CliTestCase):
         self.assertIn('Probability:', out)
         self.assertIn('Algorithms:', out)
         self.assertIn("R U R' U R U2 R'", out)
+
+    def test_case_shows_the_main_algorithm(self) -> None:
+        """Case shows the main algorithm, the one the drawn case expects."""
+        case = get_case('OLL', '27')
+
+        code, out, _err = self.run_cli('case', 'OLL', '27')
+
+        self.assertEqual(code, 0)
+        self.assertIn(f'Main:        { case.main_algorithm }', out)
 
     def test_case_invalid_name_fails(self) -> None:
         """Case fails on an invalid case name."""
