@@ -5,8 +5,17 @@ import logging
 import unittest
 from contextlib import redirect_stderr
 from contextlib import redirect_stdout
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest import mock
 
 from cubing_algs.cli import main
+from cubing_algs.cli import window_size
+from cubing_algs.vcube import VCube
+
+# Main algorithm of the OLL 27 case, which is not the first of the
+# alternatives the case also lists.
+MAIN_OLL_27 = "L' U2 L U L' U L"
 
 
 class CliTestCase(unittest.TestCase):
@@ -97,6 +106,190 @@ class ApplyCommandTestCase(CliTestCase):
         self.assertEqual(code, 0)
         self.assertIn('Solved:   yes', out)
 
+    def test_apply_render_writes_a_png(self) -> None:
+        """Apply with --render writes the image instead of the net."""
+        with mock.patch.object(
+                VCube, 'render', autospec=True, return_value=b'PNG',
+        ) as rendered, TemporaryDirectory() as directory:
+            path = Path(directory) / 'cube.png'
+            code, out, _err = self.run_cli(
+                'apply', "R U R' U'",
+                '--mode', 'oll', '--render', str(path),
+                '--image-size', '128', '--rotation', 'y90', '--distance', '20',
+            )
+
+        self.assertEqual(code, 0)
+        self.assertIn(f'Rendered: { path }', out)
+        self.assertEqual(
+            rendered.call_args.kwargs,
+            {
+                'mode': 'oll',
+                'orientation': '',
+                'mask': '',
+                'palette': '',
+                'image_size': 128,
+                'rotation': 'y90',
+                'distance': 20.0,
+            },
+        )
+
+    def test_apply_render_replaces_the_terminal_net(self) -> None:
+        """The cube goes to the file, not to the terminal, and once."""
+        with mock.patch.object(
+                VCube, 'render', autospec=True, return_value=b'PNG',
+        ), TemporaryDirectory() as directory:
+            path = Path(directory) / 'cube.png'
+            _code, out, _err = self.run_cli(
+                'apply', "R U R' U'", '--render', str(path), '--state',
+            )
+
+        self.assertEqual(out.count('\n'), 3)
+        self.assertIn('Facelets: ', out)
+
+    def test_apply_view_opens_a_window(self) -> None:
+        """Apply with --view hands the cube over to the viewer."""
+        with mock.patch.object(VCube, 'view', autospec=True) as viewed:
+            code, out, _err = self.run_cli(
+                'apply', "R U R' U'", '--view', '--image-size', '320',
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(out, '')
+        self.assertEqual(viewed.call_args.kwargs['window_size'], (320, 320))
+
+    def test_apply_view_opens_at_the_default_size(self) -> None:
+        """No size asked for leaves the one of the viewer alone."""
+        with mock.patch.object(VCube, 'view', autospec=True) as viewed:
+            self.run_cli('apply', "R U R' U'", '--view')
+
+        self.assertIsNone(viewed.call_args.kwargs['window_size'])
+
+    def test_apply_render_wins_over_view(self) -> None:
+        """A file is written rather than a window opened."""
+        with (
+                mock.patch.object(
+                    VCube, 'render', autospec=True, return_value=b'PNG',
+                ),
+                mock.patch.object(VCube, 'view', autospec=True) as viewed,
+                TemporaryDirectory() as directory,
+        ):
+            self.run_cli(
+                'apply', "R U R' U'", '--view',
+                '--render', str(Path(directory) / 'cube.png'),
+            )
+
+        viewed.assert_not_called()
+
+
+class AnimateCommandTestCase(CliTestCase):
+    """Tests for the animate subcommand."""
+
+    def test_animate_writes_an_animation(self) -> None:
+        """Animate plays the algorithm and says where it landed."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[Path('sexy.gif')],
+        ) as animated:
+            code, out, _err = self.run_cli(
+                'animate', "R U R' U'", '--out', 'sexy.gif',
+            )
+
+        self.assertEqual(code, 0)
+        self.assertIn('Animated: sexy.gif', out)
+        self.assertEqual(str(animated.call_args.args[1]), "R U R' U'")
+        self.assertEqual(animated.call_args.args[2], 'sexy.gif')
+
+    def test_animate_sums_up_a_series_of_frames(self) -> None:
+        """Without Pillow, the frames are counted rather than listed."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[
+                    Path('sexy-000.png'),
+                    Path('sexy-001.png'),
+                    Path('sexy-002.png'),
+                ],
+        ):
+            _code, out, _err = self.run_cli(
+                'animate', "R U R' U'", '--out', 'sexy.gif',
+            )
+
+        self.assertEqual(
+            out,
+            'Animated: 3 frames, sexy-000.png to sexy-002.png\n',
+        )
+
+    def test_animate_display_options_reach_the_backend(self) -> None:
+        """Every display option given lands on the animation."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[Path('sexy.gif')],
+        ) as animated:
+            code, _out, _err = self.run_cli(
+                'animate', "R U R' U'", '--out', 'sexy.gif',
+                '--mode', 'pll', '--orientation', 'DF',
+                '--mask', '1' * 54, '--palette', 'neon',
+                '--image-size', '128', '--rotation', 'y90', '--distance', '20',
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            animated.call_args.kwargs,
+            {
+                'mode': 'pll',
+                'orientation': 'DF',
+                'mask': '1' * 54,
+                'palette': 'neon',
+                'image_size': 128,
+                'rotation': 'y90',
+                'distance': 20.0,
+            },
+        )
+
+    def test_animate_setup_reaches_the_cube(self) -> None:
+        """The setup is played before the algorithm is animated."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[Path('sexy.gif')],
+        ) as animated:
+            self.run_cli(
+                'animate', "R U R' U'", '--out', 'sexy.gif',
+                '--setup', "F R U'",
+            )
+
+        cube = VCube()
+        cube.rotate("F R U'")
+
+        self.assertEqual(animated.call_args.args[0].state, cube.state)
+
+    def test_animate_size_builds_the_right_cube(self) -> None:
+        """A cube of the size asked for is the one being animated."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[Path('nxn.gif')],
+        ) as animated:
+            code, _out, _err = self.run_cli(
+                'animate', "Rw U 3Rw' M2 x", '--out', 'nxn.gif', '--size', '5',
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(animated.call_args.args[0].size, 5)
+
+    def test_animate_invalid_moves_fails(self) -> None:
+        """Animate fails with an error message on invalid input."""
+        code, _out, err = self.run_cli(
+            'animate', 'R T', '--out', 'nope.gif',
+        )
+        self.assertEqual(code, 1)
+        self.assertIn('Error:', err)
+
+    def test_animate_invalid_size_fails(self) -> None:
+        """Animate fails on a cube size no cube can have."""
+        code, _out, err = self.run_cli(
+            'animate', "R U R' U'", '--out', 'nope.gif', '--size', '0',
+        )
+        self.assertEqual(code, 1)
+        self.assertIn('Error:', err)
+
 
 class TransformCommandTestCase(CliTestCase):
     """Tests for the transform subcommand."""
@@ -185,6 +378,88 @@ class CaseCommandTestCase(CliTestCase):
         code, _out, err = self.run_cli('case', 'OLL', 'NOPE')
         self.assertEqual(code, 1)
         self.assertIn('Error:', err)
+
+    def test_case_render_draws_the_case_itself(self) -> None:
+        """The cube drawn is the one the main algorithm solves."""
+        with mock.patch.object(
+                VCube, 'render', autospec=True, return_value=b'PNG',
+        ) as rendered, TemporaryDirectory() as directory:
+            path = Path(directory) / 'oll27.png'
+            code, out, _err = self.run_cli(
+                'case', 'OLL', '27', '--render', str(path),
+                '--image-size', '128',
+            )
+
+        self.assertEqual(code, 0)
+        self.assertIn(f'Rendered: { path }', out)
+        self.assertFalse(rendered.call_args.args[0].is_solved)
+        self.assertEqual(rendered.call_args.kwargs['mode'], 'oll')
+        self.assertEqual(rendered.call_args.kwargs['image_size'], 128)
+
+    def test_case_render_sets_the_cube_up_to_the_case(self) -> None:
+        """The main algorithm played from there solves the cube."""
+        with mock.patch.object(
+                VCube, 'render', autospec=True, return_value=b'PNG',
+        ) as rendered, TemporaryDirectory() as directory:
+            self.run_cli(
+                'case', 'OLL', '27',
+                '--render', str(Path(directory) / 'oll27.png'),
+            )
+
+        cube = rendered.call_args.args[0]
+        self.assertFalse(cube.is_solved)
+
+        cube.rotate(MAIN_OLL_27)
+        self.assertTrue(cube.is_solved)
+
+    def test_case_animate_plays_the_solution(self) -> None:
+        """Animating a case plays its main algorithm from the case."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[Path('oll27.gif')],
+        ) as animated:
+            code, out, _err = self.run_cli(
+                'case', 'OLL', '27', '--animate', 'oll27.gif',
+            )
+
+        self.assertEqual(code, 0)
+        self.assertIn('Animated: oll27.gif', out)
+        self.assertEqual(str(animated.call_args.args[1]), MAIN_OLL_27)
+        self.assertEqual(animated.call_args.args[2], 'oll27.gif')
+        self.assertEqual(animated.call_args.kwargs['mode'], 'oll')
+
+    def test_case_view_opens_a_window(self) -> None:
+        """Viewing a case hands the case cube over to the viewer."""
+        with mock.patch.object(VCube, 'view', autospec=True) as viewed:
+            code, _out, _err = self.run_cli('case', 'PLL', 'Ua', '--view')
+
+        self.assertEqual(code, 0)
+        self.assertEqual(viewed.call_args.kwargs['mode'], 'pll')
+
+    def test_case_without_gpu_options_draws_nothing(self) -> None:
+        """The details alone never reach the GPU backend."""
+        with (
+                mock.patch.object(VCube, 'render', autospec=True) as rendered,
+                mock.patch.object(VCube, 'view', autospec=True) as viewed,
+                mock.patch.object(VCube, 'animate', autospec=True) as animated,
+        ):
+            self.run_cli('case', 'OLL', '27')
+
+        rendered.assert_not_called()
+        viewed.assert_not_called()
+        animated.assert_not_called()
+
+
+class WindowSizeTestCase(unittest.TestCase):
+    """Tests for the window size a pixel count asks for."""
+
+    def test_a_size_is_squared(self) -> None:
+        """A pixel count opens a square window."""
+        self.assertEqual(window_size(320), (320, 320))
+
+    def test_no_size_leaves_the_default_one(self) -> None:
+        """No pixel count leaves the default size of the viewer alone."""
+        self.assertIsNone(window_size(0))
 
 
 class InfoCommandTestCase(CliTestCase):

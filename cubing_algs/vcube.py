@@ -1,5 +1,7 @@
 """Virtual cube implementation for simulating moves and tracking state."""
+from collections.abc import Iterable
 from functools import cached_property
+from pathlib import Path
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.annotations import CornerOrientation
@@ -568,6 +570,176 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             rotation=rotation,
             distance=distance,
             arrows=arrows,
+        )
+
+    def render(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            orientation: CubeOrientation = '',
+            mask: CubeDisplayMask = '',
+            palette: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0.0,
+    ) -> bytes:
+        """
+        Render the cube as a PNG image, on the GPU and without a window.
+
+        The framing, the palette, the modes and the masks are the ones
+        of ``image()``: the same cube comes out the same way in both
+        backends, lit like a solid rather than drawn flat.
+
+        Requires the ``opengl`` extra.
+
+        Args:
+            mode: Display preset that sets the mask and the orientation
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            orientation: Cube orientation string for reorienting the cube
+                         before rendering.
+            mask: Mask to filter which facelets are displayed.
+            palette: Color palette name for sticker colors.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string, composed of axis-angle
+                      pairs (e.g., 'y45x-34').
+            distance: Camera distance from the cube center.
+
+        Returns:
+            The bytes of a PNG image, its background left transparent.
+
+        """
+        from cubing_algs.display.gl import render  # noqa: PLC0415
+        from cubing_algs.display.gl.constants import (  # noqa: PLC0415
+            RENDER_SIZE,
+        )
+
+        return render(
+            self.oriented_copy(orientation, full=True)
+            if orientation else self,
+            image_size=image_size or RENDER_SIZE,
+            rotation=rotation,
+            distance=distance,
+            palette=palette,
+            mode=mode,
+            mask=mask,
+        )
+
+    def view(  # noqa: PLR0913
+            self,
+            *,
+            mode: str = '',
+            orientation: CubeOrientation = '',
+            mask: CubeDisplayMask = '',
+            palette: str = '',
+            window_size: tuple[int, int] | None = None,
+            rotation: str = '',
+            distance: float = 0.0,
+            show_fps: bool = False,
+    ) -> None:
+        """
+        Open a window showing the cube, and turn it around until it closes.
+
+        The mouse orbits the cube, the wheel zooms, and the letters of
+        the notation turn it one animated move at a time. The cube of
+        the viewer is a copy: nothing done in the window reaches this
+        one.
+
+        Everything the window is not given here — a look of its own, an
+        external orientation from a bluetooth sensor, the duration of a
+        move — is reached by building a
+        ``cubing_algs.display.gl.Viewer`` directly.
+
+        Requires the ``opengl`` extra.
+
+        Args:
+            mode: Display preset that sets the mask and the orientation
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            orientation: Cube orientation string for reorienting the cube
+                         before showing it.
+            mask: Mask to filter which facelets are displayed.
+            palette: Color palette name for sticker colors.
+            window_size: Width and height of the window, in pixels.
+            rotation: Camera rotation string, composed of axis-angle
+                      pairs (e.g., 'y45x-34').
+            distance: Camera distance from the cube center.
+            show_fps: Show the frame rate in the title of the window.
+
+        """
+        from cubing_algs.display.gl import Viewer  # noqa: PLC0415
+        from cubing_algs.display.gl.constants import (  # noqa: PLC0415
+            VIEWER_SIZE,
+        )
+
+        Viewer(
+            self.oriented_copy(orientation, full=True)
+            if orientation else self,
+            palette=palette,
+            mode=mode,
+            mask=mask,
+            rotation=rotation,
+            distance=distance,
+            window_size=window_size or VIEWER_SIZE,
+            show_fps=show_fps,
+        ).run()
+
+    def animate(  # noqa: PLR0913
+            self,
+            moves: Iterable[Move | str] | Move | str,
+            path: str | Path,
+            *,
+            mode: str = '',
+            orientation: CubeOrientation = '',
+            mask: CubeDisplayMask = '',
+            palette: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0.0,
+    ) -> list[Path]:
+        """
+        Play an algorithm on the cube and write it as an animation.
+
+        The cube is left untouched: an animation starts from the state
+        it is in and plays the moves on a copy of it.
+
+        A GIF is written when Pillow is around; without it the frames
+        are written as numbered PNG files instead.
+
+        Requires the ``opengl`` extra.
+
+        Args:
+            moves: The algorithm to play.
+            path: Where the animation is written.
+            mode: Display preset that sets the mask and the orientation
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            orientation: Cube orientation string for reorienting the cube
+                         before playing the algorithm.
+            mask: Mask to filter which facelets are displayed.
+            palette: Color palette name for sticker colors.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string, composed of axis-angle
+                      pairs (e.g., 'y45x-34').
+            distance: Camera distance from the cube center.
+
+        Returns:
+            The paths written to: the GIF alone, or one per frame.
+
+        """
+        from cubing_algs.display.gl import animate  # noqa: PLC0415
+        from cubing_algs.display.gl.constants import (  # noqa: PLC0415
+            RENDER_SIZE,
+        )
+
+        return animate(
+            self.oriented_copy(orientation, full=True)
+            if orientation else self,
+            moves,
+            path,
+            image_size=image_size or RENDER_SIZE,
+            rotation=rotation,
+            distance=distance,
+            palette=palette,
+            mode=mode,
+            mask=mask,
         )
 
     def get_face(self, face: str) -> FaceFacelets:

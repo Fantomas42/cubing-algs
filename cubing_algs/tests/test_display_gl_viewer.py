@@ -7,6 +7,7 @@ the split between ``Viewer`` and ``Stage`` buys. The few tests that do
 open a window open it hidden, and are skipped where none can be.
 """
 import math
+import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -15,6 +16,7 @@ from unittest import mock
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.gl.constants import FPS_INTERVAL
 from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
+from cubing_algs.display.gl.constants import GLFW_MISSING
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
 from cubing_algs.display.gl.constants import WINDOW_TITLE
 from cubing_algs.display.gl.constants import Look
@@ -335,6 +337,20 @@ class TestViewer(unittest.TestCase):
         self.viewer.close()
 
         self.assertIsNone(self.viewer.stage)
+
+    def test_opening_without_glfw_names_the_extra(self) -> None:
+        """Test that a missing glfw is reported rather than stumbled upon."""
+        with (
+                mock.patch.dict(sys.modules, {'glfw': None}),
+                mock.patch(
+                    'cubing_algs.display.gl.context.has_glfw',
+                    return_value=False,
+                ),
+                self.assertRaises(GLContextError) as context,
+        ):
+            self.viewer.run()
+
+        self.assertEqual(str(context.exception), GLFW_MISSING)
 
 
 class TestViewerFraming(unittest.TestCase):

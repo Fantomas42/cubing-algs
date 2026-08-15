@@ -7,11 +7,16 @@ Exposes the most common library operations as subcommands of
 - ``parse``: validate and normalize an algorithm
 - ``metrics``: compute algorithm metrics (HTM, QTM, STM, ...)
 - ``apply``: apply an algorithm on a virtual cube and display it
+- ``animate``: write an algorithm playing on a cube as a GIF
 - ``transform``: apply named transforms to an algorithm
 - ``compress``: rewrite an algorithm in commutator/conjugate notation
 - ``cases``: list case collections or the cases of a collection
 - ``case``: show the details of a single case
 - ``info``: export the complete analysis of an algorithm as JSON
+
+``apply`` and ``case`` also draw on the GPU rendering backend, which the
+``opengl`` extra ships: ``--view`` opens an interactive window, and
+``--render`` writes a PNG. Both say so plainly when the extra is missing.
 """
 import argparse
 import json
@@ -19,6 +24,7 @@ import logging
 import sys
 from collections.abc import Callable
 from collections.abc import Sequence
+from pathlib import Path
 
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.cases import get_case
@@ -57,6 +63,122 @@ INFO_SECTIONS: tuple[str, ...] = (
 def output(text: str) -> None:
     """Write a line to standard output."""
     sys.stdout.write(text + '\n')
+
+
+def window_size(image_size: int) -> tuple[int, int] | None:
+    """
+    Read the size a window is asked to open at.
+
+    Args:
+        image_size: Pixels asked for on the command line, zero for the
+            default size of the viewer.
+
+    Returns:
+        The width and height of the window, or None to leave the
+        default one alone.
+
+    """
+    if not image_size:
+        return None
+
+    return (image_size, image_size)
+
+
+def view_cube(
+        cube: VCube,
+        args: argparse.Namespace,
+        mode: str = '',
+) -> None:
+    """
+    Open an interactive window on a cube.
+
+    Args:
+        cube: The cube to show.
+        args: The parsed command line, holding the display options.
+        mode: Display preset, such as ``oll`` or ``f2l``.
+
+    """
+    cube.view(
+        mode=mode,
+        orientation=args.orientation,
+        mask=args.mask,
+        palette=args.palette,
+        window_size=window_size(args.image_size),
+        rotation=args.rotation,
+        distance=args.distance,
+    )
+
+
+def render_cube(
+        cube: VCube,
+        args: argparse.Namespace,
+        mode: str = '',
+) -> None:
+    """
+    Write a PNG of a cube where the command line asks for it.
+
+    Args:
+        cube: The cube to draw.
+        args: The parsed command line, holding the target and the
+            display options.
+        mode: Display preset, such as ``oll`` or ``f2l``.
+
+    """
+    path = Path(args.render)
+    path.write_bytes(
+        cube.render(
+            mode=mode,
+            orientation=args.orientation,
+            mask=args.mask,
+            palette=args.palette,
+            image_size=args.image_size,
+            rotation=args.rotation,
+            distance=args.distance,
+        ),
+    )
+
+    output(f'Rendered: { path }')
+
+
+def animate_cube(
+        cube: VCube,
+        moves: Algorithm,
+        path: str,
+        args: argparse.Namespace,
+        mode: str = '',
+) -> None:
+    """
+    Write an algorithm playing on a cube where the command line says.
+
+    Args:
+        cube: The cube to play the algorithm on.
+        moves: The algorithm to play.
+        path: Where the animation is written.
+        args: The parsed command line, holding the display options.
+        mode: Display preset, such as ``oll`` or ``f2l``.
+
+    """
+    written = cube.animate(
+        moves, path,
+        mode=mode,
+        orientation=args.orientation,
+        mask=args.mask,
+        palette=args.palette,
+        image_size=args.image_size,
+        rotation=args.rotation,
+        distance=args.distance,
+    )
+
+    if len(written) == 1:
+        output(f'Animated: { written[0] }')
+        return
+
+    # Without Pillow around, a whole series of frames comes out rather
+    # than a GIF: naming every one of them would bury the point.
+    output(
+        f'Animated: { len(written) } frames, '
+        f'{ written[0] } to { written[-1] }',
+    )
 
 
 def run_parse(args: argparse.Namespace) -> int:
@@ -101,6 +223,9 @@ def run_apply(args: argparse.Namespace) -> int:
     """
     Apply an algorithm on a solved cube and display the result.
 
+    The cube goes to the terminal, unless ``--render`` or ``--view``
+    asks the GPU backend for it instead.
+
     Returns:
         Process exit code.
 
@@ -112,18 +237,50 @@ def run_apply(args: argparse.Namespace) -> int:
 
     cube.rotate(parse_moves(args.moves, trust_input=False))
 
-    sys.stdout.write(
-        cube.display(
-            mode=args.mode,
-            orientation=args.orientation,
-            mask=args.mask,
-            palette=args.palette,
-        ),
-    )
+    if args.render:
+        render_cube(cube, args, args.mode)
+    elif args.view:
+        view_cube(cube, args, args.mode)
+    else:
+        sys.stdout.write(
+            cube.display(
+                mode=args.mode,
+                orientation=args.orientation,
+                mask=args.mask,
+                palette=args.palette,
+            ),
+        )
 
     if args.state:
         output(f'Facelets: { cube.state }')
         output(f'Solved:   { "yes" if cube.is_solved else "no" }')
+
+    return 0
+
+
+def run_animate(args: argparse.Namespace) -> int:
+    """
+    Write an algorithm playing on a cube as an animation.
+
+    A GIF is written when Pillow is around, a numbered PNG frame per
+    image otherwise.
+
+    Returns:
+        Process exit code.
+
+    """
+    cube = VCube(size=args.size)
+
+    if args.setup:
+        cube.rotate(parse_moves(args.setup, trust_input=False))
+
+    animate_cube(
+        cube,
+        parse_moves(args.moves, trust_input=False),
+        args.out,
+        args,
+        args.mode,
+    )
 
     return 0
 
@@ -193,6 +350,11 @@ def run_case(args: argparse.Namespace) -> int:
     """
     Show the details of a single case.
 
+    A case is drawn on a cube set up to it, which is the main algorithm
+    played backwards, under the display mode of the step it belongs to.
+    ``--animate`` then plays the main algorithm from there, which is the
+    case being solved.
+
     Returns:
         Process exit code.
 
@@ -207,6 +369,19 @@ def run_case(args: argparse.Namespace) -> int:
     output('Algorithms:')
     for algo in case.algorithms:
         output(f'  { algo }')
+
+    if args.render or args.animate or args.view:
+        cube = VCube()
+        cube.rotate(case.main_algorithm.transform(invert_moves))
+        mode = case.step.lower()
+
+        if args.render:
+            render_cube(cube, args, mode)
+        if args.animate:
+            animate_cube(cube, case.main_algorithm, args.animate, args, mode)
+        if args.view:
+            view_cube(cube, args, mode)
+
     return 0
 
 
@@ -247,6 +422,77 @@ def run_info(args: argparse.Namespace) -> int:
 
     output(json.dumps(data, indent=2))
     return 0
+
+
+def add_framing_arguments(parser: argparse.ArgumentParser) -> None:
+    """
+    Add the options framing a GPU rendering to a subcommand.
+
+    ``--image-size`` counts pixels, where ``--size`` counts the cubies
+    of an edge: the two never mean the same thing anywhere in the CLI.
+
+    Args:
+        parser: The subcommand parser to add them to.
+
+    """
+    parser.add_argument(
+        '--image-size',
+        type=int,
+        default=0,
+        metavar='PIXELS',
+        help='Width and height of the image, or of the window',
+    )
+    parser.add_argument(
+        '--rotation',
+        default='',
+        help="Camera rotation string, e.g. 'y45x-34'",
+    )
+    parser.add_argument(
+        '--distance',
+        type=float,
+        default=0.0,
+        help='Camera distance from the cube center',
+    )
+
+
+def add_gl_arguments(
+        parser: argparse.ArgumentParser,
+        *,
+        animate: bool = False,
+) -> None:
+    """
+    Add the GPU rendering options to a subcommand.
+
+    The backend they reach lives in the ``opengl`` extra, which nothing
+    else in the CLI needs: without it, these options are the only ones
+    to fail, and they say what to install.
+
+    Args:
+        parser: The subcommand parser to add them to.
+        animate: Whether the subcommand can also write an animation.
+
+    """
+    parser.add_argument(
+        '--view',
+        action='store_true',
+        help='Open an interactive 3D window on the cube',
+    )
+    parser.add_argument(
+        '--render',
+        default='',
+        metavar='PATH',
+        help='Write a 3D rendering of the cube as a PNG file',
+    )
+
+    if animate:
+        parser.add_argument(
+            '--animate',
+            default='',
+            metavar='PATH',
+            help='Write the algorithm playing on the cube as a GIF',
+        )
+
+    add_framing_arguments(parser)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -304,7 +550,45 @@ def build_parser() -> argparse.ArgumentParser:
         action='store_true',
         help='Also print the facelets string and solved status',
     )
+    add_gl_arguments(apply_parser)
     apply_parser.set_defaults(handler=run_apply)
+
+    animate_parser = subparsers.add_parser(
+        'animate',
+        help='Write an algorithm playing on a cube as a GIF',
+    )
+    animate_parser.add_argument('moves', help='Algorithm to play')
+    animate_parser.add_argument(
+        '--out',
+        required=True,
+        metavar='PATH',
+        help='Where the animation is written',
+    )
+    animate_parser.add_argument(
+        '--setup',
+        default='',
+        help='Moves applied before the algorithm is played',
+    )
+    animate_parser.add_argument(
+        '-s', '--size',
+        type=int,
+        default=DEFAULT_CUBE_SIZE,
+        help=f'Cube size (default: { DEFAULT_CUBE_SIZE })',
+    )
+    animate_parser.add_argument(
+        '--mode',
+        default='',
+        help='Display mode, e.g. oll, pll, f2l',
+    )
+    animate_parser.add_argument(
+        '--orientation',
+        default='',
+        help='Display orientation, e.g. DF',
+    )
+    animate_parser.add_argument('--mask', default='', help='Display mask')
+    animate_parser.add_argument('--palette', default='', help='Color palette')
+    add_framing_arguments(animate_parser)
+    animate_parser.set_defaults(handler=run_animate)
 
     transform_parser = subparsers.add_parser(
         'transform',
@@ -344,7 +628,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     case_parser.add_argument('collection', help='Collection name, e.g. OLL')
     case_parser.add_argument('name', help='Case name or code, e.g. 27')
-    case_parser.set_defaults(handler=run_case)
+    add_gl_arguments(case_parser, animate=True)
+    # A case is drawn under the mode of its own step, and through no
+    # mask nor palette of its own: the display options the GPU helpers
+    # read are therefore all left at their default here.
+    case_parser.set_defaults(
+        handler=run_case,
+        orientation='',
+        mask='',
+        palette='',
+    )
 
     info_parser = subparsers.add_parser(
         'info',

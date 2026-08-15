@@ -274,14 +274,23 @@ class TestSelectGlfwVariant(unittest.TestCase):
         its say held a context nobody could attach to.
         """
         environment = {'WAYLAND_DISPLAY': 'wayland-0'}
+        original_error = context.GLContextError
 
-        with mock.patch.dict(os.environ, environment, clear=True):
+        try:
+            with mock.patch.dict(os.environ, environment, clear=True):
+                importlib.reload(context)
+
+                self.assertEqual(
+                    os.environ[GLFW_VARIANT_ENVIRONMENT],
+                    GLFW_VARIANT_FALLBACK,
+                )
+        finally:
+            # Reloading builds a new GLContextError class, while every
+            # module importing it by name still holds the first one:
+            # what the module raises would no longer be what the rest of
+            # the suite catches. The module goes back as it was found.
             importlib.reload(context)
-
-            self.assertEqual(
-                os.environ[GLFW_VARIANT_ENVIRONMENT],
-                GLFW_VARIANT_FALLBACK,
-            )
+            context.GLContextError = original_error  # type: ignore[misc]
 
     def test_without_wayland_nothing_is_set(self) -> None:
         """Test that an X11 session is left untouched."""

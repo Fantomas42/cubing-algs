@@ -14,6 +14,9 @@ Python module providing comprehensive tools for Rubik's cube algorithm manipulat
 
 ```bash
 pip install cubing-algs
+
+# With the GPU rendering backend: PNG, GIF and interactive window
+pip install cubing-algs[opengl]
 ```
 
 ## Features
@@ -23,6 +26,7 @@ pip install cubing-algs
 - **Powerful Transformations**: Invert, rotate, compress, and compose algorithms with a clean pipeline API
 - **Virtual Cube Simulation**: Full 3x3x3 cube state tracking with orientation support
 - **Advanced Notation**: Commutators `[A, B]`, conjugates `[A: B]`, wide moves, slice moves, rotations
+- **Rendering**: ASCII/ANSI nets in the terminal, SVG images, and optional GPU rendering to PNG, GIF or an interactive window
 - **Pattern Library**: 70+ classic cube patterns (Superflip, Checkerboard, etc.)
 - **Scramble Generation**: Smart scrambles for 2x2x2 through 7x7x7+ cubes
 - **Big Cube Support**: Multi-layer notation for larger cubes
@@ -671,6 +675,110 @@ html = f'<html><body>{cube.image()}</body></html>'
 with open('cube.html', 'w') as f:
     f.write(html)
 ```
+
+## GPU Rendering
+
+Beside the SVG backend, cubes can be drawn in 3D on the GPU: a PNG without any
+screen, an animated GIF of an algorithm, or an interactive window. It ships in
+the `opengl` extra, and nothing of it is imported until it is used:
+
+```bash
+pip install cubing-algs[opengl]
+```
+
+The framing, the palettes, the display modes and the masks are the ones of
+`.image()`: the same cube comes out the same way in both backends, lit as a
+solid rather than drawn flat. Cubes of any size are supported, from 2x2x2 up.
+
+```python
+from cubing_algs import VCube
+from cubing_algs.parsing import parse_moves
+
+cube = VCube()
+cube.rotate("R U R' U'")
+
+# A PNG, headless: no display server, no window
+png = cube.render(image_size=512, mode='oll')
+with open('cube.png', 'wb') as f:
+    f.write(png)
+
+# An animated GIF of an algorithm being played
+cube.animate("R U R' U'", 'sexy.gif')
+
+# An interactive window
+cube.view()
+```
+
+`Algorithm` offers the same three, applying itself to a cube first, exactly as
+`.image()` and `.show()` do:
+
+```python
+algo = parse_moves("R U R2 U' R' U' R U R'")
+
+algo.render()                 # PNG of the state it leads to
+algo.animate('pll.gif')       # GIF of it playing on a solved cube
+algo.view(5)                  # window, on a 5x5x5 this time
+```
+
+A GIF needs Pillow; without it, the animation comes out as numbered PNG frames
+the encoder of your choice can assemble.
+
+### Viewer Shortcuts
+
+```
+drag             orbit the cube
+wheel            zoom in and out
+R U F L D B      turn a face, shift primes it, ctrl doubles it
+M E S            turn a slice
+X Y Z            turn the whole cube
+alt              widen a face turn, as in Rw
+space            frame the cube again
+backspace        put the cube back as it was
+F12              write a screenshot
+escape, Q        close the window
+```
+
+For what `.view()` does not expose — a lighting of its own, the duration of a
+move, or an orientation pushed from outside — build the viewer directly. It is
+a dataclass, and its state can be reached while it runs:
+
+```python
+from cubing_algs.display.gl import SENSOR_BASIS, OrientationTracker, Viewer
+
+tracker = OrientationTracker(basis=SENSOR_BASIS)
+viewer = Viewer(cube, mode='f2l', show_fps=True, orientation=tracker)
+
+tracker.update(w, x, y, z)    # raw quaternion of a bluetooth cube
+viewer.push("R U R'")         # queue moves to be played
+viewer.run()
+```
+
+### Command Line
+
+```bash
+# Write a PNG of a cube, or of a case
+python -m cubing_algs apply "R U R' U'" --mode=oll --render cube.png --image-size 512
+python -m cubing_algs case OLL 27 --render oll27.png
+
+# Animate an algorithm, on any cube size
+python -m cubing_algs animate "R U R' U'" --out sexy.gif
+python -m cubing_algs animate "Rw U 3Rw' M2 x" --size 5 --out nxn.gif
+python -m cubing_algs case OLL 27 --animate oll27.gif   # the case being solved
+
+# Open an interactive window
+python -m cubing_algs apply "R U R' U'" --mode=oll --view
+```
+
+`--image-size` counts pixels, where `--size` counts the cubies of an edge.
+
+### Diagnosing the Backend
+
+```bash
+python -m cubing_algs.display.gl.doctor
+```
+
+Reports the contexts that can be created on this machine, what they support,
+and writes a gradient PNG proving the pipeline works end to end.
 
 ## Move Object
 

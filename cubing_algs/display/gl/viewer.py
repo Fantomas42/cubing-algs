@@ -649,10 +649,14 @@ class Viewer:
             The stage the viewer draws into.
 
         """
-        import glfw
-
+        # The window is opened before glfw is reached for, and not
+        # after: create_window() is the one place naming the extra a
+        # missing glfw asks for, and an import raising first would
+        # replace that with a bare ModuleNotFoundError.
         stage = Stage.open(self.window_size, self.geometry, self.look)
         self.stage = stage
+
+        import glfw
 
         glfw.swap_interval(1)
         glfw.set_key_callback(stage.window, self.on_key)
@@ -716,9 +720,10 @@ class Viewer:
         The window is given back however the loop ends, an interruption
         from the keyboard included.
         """
+        stage = self.open()
+
         import glfw
 
-        stage = self.open()
         output(VIEWER_HELP)
 
         try:

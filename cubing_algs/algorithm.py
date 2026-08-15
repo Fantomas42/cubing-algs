@@ -5,6 +5,7 @@ sequences of cube moves.
 from collections import UserList
 from collections.abc import Callable
 from collections.abc import Iterable
+from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Self
@@ -624,6 +625,184 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
         return cube.image(
             mode=mode,
             layout=layout,
+            orientation=orientation,
+            mask=moved_facelets_mask,
+            palette=palette,
+            image_size=image_size,
+            rotation=rotation,
+            distance=distance,
+        )
+
+    def render(  # noqa: PLR0913
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            mode: str = '',
+            orientation: CubeOrientation = '',
+            palette: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0.0,
+            impact_mask: bool = True,
+    ) -> bytes:
+        """
+        Render the algorithm's effect on a cube as a PNG image.
+
+        Creates a VCube, applies this algorithm to it, and renders the
+        result on the GPU with a mask showing which facelets the
+        algorithm affects. The picture is the one ``image()`` draws,
+        lit as a solid rather than flat.
+
+        Requires the ``opengl`` extra.
+
+        Args:
+            size: Size of the cube (default 3).
+            mode: Display preset that sets the mask and the orientation
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            orientation: Cube orientation string for reorienting the cube
+                         before rendering.
+            palette: Color palette name for sticker colors.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string, composed of axis-angle
+                      pairs (e.g., 'y45x-34').
+            distance: Camera distance from the cube center.
+            impact_mask: If True, highlight facelets moved by the algorithm.
+
+        Returns:
+            The bytes of a PNG image, its background left transparent.
+
+        """
+        cube, moved_facelets_mask = self.get_cube_and_impact_mask(
+            size=size,
+            impact_mask=impact_mask,
+        )
+
+        return cube.render(
+            mode=mode,
+            orientation=orientation,
+            mask=moved_facelets_mask,
+            palette=palette,
+            image_size=image_size,
+            rotation=rotation,
+            distance=distance,
+        )
+
+    def view(  # noqa: PLR0913
+            self,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            mode: str = '',
+            orientation: CubeOrientation = '',
+            palette: str = '',
+            window_size: tuple[int, int] | None = None,
+            rotation: str = '',
+            distance: float = 0.0,
+            show_fps: bool = False,
+            impact_mask: bool = True,
+    ) -> 'VCube':
+        """
+        Open a window on the cube the algorithm leads to.
+
+        Creates a VCube, applies this algorithm to it, and shows the
+        result in an interactive window, masked as ``show()`` masks it.
+
+        Requires the ``opengl`` extra.
+
+        Args:
+            size: Size of the cube (default 3).
+            mode: Display preset that sets the mask and the orientation
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            orientation: Cube orientation string for reorienting the cube
+                         before showing it.
+            palette: Color palette name for sticker colors.
+            window_size: Width and height of the window, in pixels.
+            rotation: Camera rotation string, composed of axis-angle
+                      pairs (e.g., 'y45x-34').
+            distance: Camera distance from the cube center.
+            show_fps: Show the frame rate in the title of the window.
+            impact_mask: If True, highlight facelets moved by the algorithm.
+
+        Returns:
+            A VCube object with the algorithm applied.
+
+        """
+        cube, moved_facelets_mask = self.get_cube_and_impact_mask(
+            size=size,
+            impact_mask=impact_mask,
+        )
+
+        cube.view(
+            mode=mode,
+            orientation=orientation,
+            mask=moved_facelets_mask,
+            palette=palette,
+            window_size=window_size,
+            rotation=rotation,
+            distance=distance,
+            show_fps=show_fps,
+        )
+
+        return cube
+
+    def animate(  # noqa: PLR0913
+            self,
+            path: str | Path,
+            size: int = DEFAULT_CUBE_SIZE,
+            *,
+            mode: str = '',
+            orientation: CubeOrientation = '',
+            palette: str = '',
+            image_size: int = 0,
+            rotation: str = '',
+            distance: float = 0.0,
+            impact_mask: bool = False,
+    ) -> list[Path]:
+        """
+        Write the algorithm playing on a solved cube as an animation.
+
+        Unlike ``image()`` and ``render()``, which draw the state the
+        algorithm leads to, this plays it: the cube starts solved and
+        every move turns its layers in turn.
+
+        The impact mask is off by default here, for the same reason:
+        dimming everything the algorithm leaves alone tells a still
+        picture apart, but hides most of a cube one is watching turn.
+
+        Requires the ``opengl`` extra.
+
+        Args:
+            path: Where the animation is written.
+            size: Size of the cube (default 3).
+            mode: Display preset that sets the mask and the orientation
+                  together (e.g., 'oll', 'pll', 'cross', 'f2l').
+            orientation: Cube orientation string for reorienting the cube
+                         before playing the algorithm.
+            palette: Color palette name for sticker colors.
+            image_size: Output image dimension in pixels (width and height).
+            rotation: Camera rotation string, composed of axis-angle
+                      pairs (e.g., 'y45x-34').
+            distance: Camera distance from the cube center.
+            impact_mask: If True, highlight facelets moved by the algorithm.
+
+        Returns:
+            The paths written to: the GIF alone, or one per frame.
+
+        """
+        from cubing_algs.vcube import VCube  # noqa: PLC0415
+
+        self.validate_cube_size(size)
+
+        moved_facelets_mask: CubeMask = ''
+
+        if impact_mask:
+            _cube, moved_facelets_mask = self.get_cube_and_impact_mask(
+                size=size,
+            )
+
+        return VCube(size=size).animate(
+            self,
+            path,
+            mode=mode,
             orientation=orientation,
             mask=moved_facelets_mask,
             palette=palette,

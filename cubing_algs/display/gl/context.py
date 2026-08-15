@@ -22,6 +22,7 @@ from cubing_algs.display.gl.constants import MODERNGL_MISSING
 from cubing_algs.display.gl.constants import STANDALONE_BACKENDS
 from cubing_algs.display.gl.constants import WINDOW_LIBRARIES
 from cubing_algs.display.gl.constants import WINDOW_TITLE
+from cubing_algs.exceptions import CubingAlgsError
 
 if TYPE_CHECKING:  # pragma: no cover
     import moderngl
@@ -30,8 +31,14 @@ if TYPE_CHECKING:  # pragma: no cover
 type GLFWWindow = Any
 
 
-class GLContextError(RuntimeError):
-    """Raised when no usable OpenGL context can be created."""
+class GLContextError(CubingAlgsError):
+    """
+    Raised when no usable OpenGL context can be created.
+
+    A library error like any other, so that a caller catching
+    ``CubingAlgsError`` — the CLI among them — reports a missing extra
+    or a locked Wayland session as plainly as an invalid move.
+    """
 
 
 def has_moderngl() -> bool:
