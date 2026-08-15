@@ -99,6 +99,18 @@ class ApplyCommandTestCase(CliTestCase):
         )
         self.assertIn('Solved:   no', out)
 
+    def test_apply_size_builds_a_bigger_cube(self) -> None:
+        """Apply with --size runs the algorithm on an NxN cube."""
+        code, out, _err = self.run_cli(
+            'apply', "Rw U Rw' U'", '--size', '5', '--state',
+        )
+        expected = VCube(size=5)
+        expected.rotate("Rw U Rw' U'")
+
+        self.assertEqual(code, 0)
+        self.assertIn(f'Facelets: { expected.state }', out)
+        self.assertIn('Solved:   no', out)
+
     def test_apply_setup_then_inverse_is_solved(self) -> None:
         """Apply reports a solved cube when moves cancel the setup."""
         code, out, _err = self.run_cli(

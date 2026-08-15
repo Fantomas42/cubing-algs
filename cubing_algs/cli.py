@@ -230,7 +230,7 @@ def run_apply(args: argparse.Namespace) -> int:
         Process exit code.
 
     """
-    cube = VCube()
+    cube = VCube(size=args.size)
 
     if args.setup:
         cube.rotate(parse_moves(args.setup, trust_input=False))
@@ -496,6 +496,46 @@ def add_gl_arguments(
     add_framing_arguments(parser)
 
 
+def add_apply_arguments(parser: argparse.ArgumentParser) -> None:
+    """
+    Add the options of the apply subcommand to its parser.
+
+    Args:
+        parser: The subcommand parser to add them to.
+
+    """
+    parser.add_argument('moves', help='Algorithm to apply')
+    parser.add_argument(
+        '--setup',
+        default='',
+        help='Moves applied before the algorithm',
+    )
+    parser.add_argument(
+        '-s', '--size',
+        type=int,
+        default=DEFAULT_CUBE_SIZE,
+        help=f'Cube size (default: { DEFAULT_CUBE_SIZE })',
+    )
+    parser.add_argument(
+        '--mode',
+        default='',
+        help='Display mode, e.g. oll, pll, f2l',
+    )
+    parser.add_argument(
+        '--orientation',
+        default='',
+        help='Display orientation, e.g. DF',
+    )
+    parser.add_argument('--mask', default='', help='Display mask')
+    parser.add_argument('--palette', default='', help='Color palette')
+    parser.add_argument(
+        '--state',
+        action='store_true',
+        help='Also print the facelets string and solved status',
+    )
+    add_gl_arguments(parser)
+
+
 def build_parser() -> argparse.ArgumentParser:
     """
     Build the command line argument parser.
@@ -528,30 +568,7 @@ def build_parser() -> argparse.ArgumentParser:
         'apply',
         help='Apply an algorithm on a solved cube and display it',
     )
-    apply_parser.add_argument('moves', help='Algorithm to apply')
-    apply_parser.add_argument(
-        '--setup',
-        default='',
-        help='Moves applied before the algorithm',
-    )
-    apply_parser.add_argument(
-        '--mode',
-        default='',
-        help='Display mode, e.g. oll, pll, f2l',
-    )
-    apply_parser.add_argument(
-        '--orientation',
-        default='',
-        help='Display orientation, e.g. DF',
-    )
-    apply_parser.add_argument('--mask', default='', help='Display mask')
-    apply_parser.add_argument('--palette', default='', help='Color palette')
-    apply_parser.add_argument(
-        '--state',
-        action='store_true',
-        help='Also print the facelets string and solved status',
-    )
-    add_gl_arguments(apply_parser)
+    add_apply_arguments(apply_parser)
     apply_parser.set_defaults(handler=run_apply)
 
     animate_parser = subparsers.add_parser(
