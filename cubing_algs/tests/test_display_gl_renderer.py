@@ -20,6 +20,7 @@ from cubing_algs.display.gl.animation import Animation
 from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.constants import AXES_COLORS
 from cubing_algs.display.gl.constants import AXES_REACH
+from cubing_algs.display.gl.constants import CORE_COLOR
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
@@ -33,6 +34,7 @@ from cubing_algs.display.gl.geometry import AXES
 from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
+from cubing_algs.display.gl.geometry import core_radius
 from cubing_algs.display.gl.renderer import COLOR_CHANNELS
 from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import OffscreenTarget
@@ -43,6 +45,7 @@ from cubing_algs.display.gl.scene import build_color
 from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import IDENTITY
+from cubing_algs.display.gl.transforms import ORIGIN
 from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.image import ImageDisplay
@@ -351,8 +354,9 @@ class TestRenderScene(unittest.TestCase):
         """
         Test that a hidden cubie is really gone from the image.
 
-        The up center is dropped, and the camera sees through where it
-        stood: the plastic of the pieces lining the inside of the cube.
+        The up center is dropped, and the camera sees into the shaft it
+        leaves: the plastic walls of its neighbours, and the ball core at
+        the bottom of them.
         """
         mask = '1' * 4 + '3' + '1' * 49
         pixels = render_scene(
@@ -385,6 +389,89 @@ class TestRenderScene(unittest.TestCase):
             ),
             COLOR_TOLERANCE,
         )
+
+    def test_a_hidden_piece_shows_the_core(self) -> None:
+        """
+        Test that a hole dug by the mask opens onto the ball core.
+
+        The top of the core sits inside the shaft the up center leaves,
+        high enough for the camera to catch it over the wall, and it is
+        the only thing that can be seen there.
+        """
+        pixels = render_scene(
+            build_scene(VCube(), mask='1' * 4 + '3' + '1' * 49),
+            CAMERA,
+            image_size=IMAGE_SIZE,
+            look=FLAT_LOOK,
+            context=self.context,
+        )
+
+        summit = pixel_at(
+            pixels,
+            IMAGE_SIZE,
+            CAMERA.view_projection().transform_point(
+                AXIS_Y.scaled(core_radius(3)),
+            ),
+        )
+
+        for channel, value in enumerate(shaded(CORE_COLOR, AXIS_Y)):
+            with self.subTest(channel=channel):
+                self.assertAlmostEqual(
+                    summit[channel],
+                    value,
+                    delta=COLOR_TOLERANCE,
+                )
+
+    def test_the_core_hides_under_the_pieces(self) -> None:
+        """
+        Test that the ball core shows nowhere on an intact cube.
+
+        It is the inside of the cube: sunk into the plastic of the outer
+        layer, it must stay behind it as long as every piece is there.
+        """
+        rendered = {
+            tuple(self.pixels[offset:offset + COLOR_CHANNELS - 1])
+            for offset in range(0, len(self.pixels), COLOR_CHANNELS)
+        }
+
+        self.assertNotIn(shaded(CORE_COLOR, AXIS_Y), rendered)
+
+    def test_the_hidden_mode_leaves_the_core_alone(self) -> None:
+        """
+        Test that a cube with no piece left is still a cube.
+
+        Every facelet masked drops every cubie, and what stays is the
+        inside: a sphere, framed as the cube it sits in was.
+        """
+        pixels = render_scene(
+            build_scene(VCube(), mode='hidden'),
+            CAMERA,
+            image_size=IMAGE_SIZE,
+            look=FLAT_LOOK,
+            context=self.context,
+        )
+
+        middle = pixel_at(
+            pixels,
+            IMAGE_SIZE,
+            CAMERA.view_projection().transform_point(ORIGIN),
+        )
+
+        for channel, value in enumerate(
+                shaded(CORE_COLOR, CAMERA.position.normalized()),
+        ):
+            with self.subTest(channel=channel):
+                self.assertAlmostEqual(
+                    middle[channel],
+                    value,
+                    delta=COLOR_TOLERANCE,
+                )
+
+        width, height = silhouette(pixels, IMAGE_SIZE)
+        cube_width, cube_height = silhouette(self.pixels, IMAGE_SIZE)
+
+        self.assertLess(width, cube_width)
+        self.assertLess(height, cube_height)
 
     def test_a_scrambled_cube_differs(self) -> None:
         """Test that the state of the cube reaches the pixels."""

@@ -14,6 +14,7 @@ from cubing_algs.display.gl.constants import STICKER_MARGIN
 from cubing_algs.display.gl.geometry import AXES_VERTEX_PACKING
 from cubing_algs.display.gl.geometry import AXIS_NUMBER
 from cubing_algs.display.gl.geometry import BODY_FACE
+from cubing_algs.display.gl.geometry import CORE_VERTEX_PACKING
 from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import CubeGeometry
@@ -21,11 +22,13 @@ from cubing_algs.display.gl.geometry import Mesh
 from cubing_algs.display.gl.geometry import Polygon
 from cubing_algs.display.gl.geometry import Vertex
 from cubing_algs.display.gl.geometry import body_polygons
+from cubing_algs.display.gl.geometry import build_core_mesh
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.geometry import build_cubie_mesh
 from cubing_algs.display.gl.geometry import build_cubies
 from cubing_algs.display.gl.geometry import build_mesh
 from cubing_algs.display.gl.geometry import build_point
+from cubing_algs.display.gl.geometry import core_radius
 from cubing_algs.display.gl.geometry import corner_triangle
 from cubing_algs.display.gl.geometry import cubie_center
 from cubing_algs.display.gl.geometry import cubie_half
@@ -35,12 +38,17 @@ from cubing_algs.display.gl.geometry import is_surface
 from cubing_algs.display.gl.geometry import oriented
 from cubing_algs.display.gl.geometry import other_axes
 from cubing_algs.display.gl.geometry import pack_axes
+from cubing_algs.display.gl.geometry import pack_core
 from cubing_algs.display.gl.geometry import sticker_polygons
 from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.image import FACE_DEFS
 from cubing_algs.exceptions import InvalidCubeSizeError
 
 PLACES = 9
+
+# What is left of a coordinate once it has been through a buffer, where
+# it travels as a single precision float.
+SINGLE_PLACES = 6
 
 # What a beveled cubie is made of: six faces, twelve edges, eight
 # corners for the plastic, plus one sticker per face.
@@ -56,6 +64,14 @@ INDEX_SIZE = 4
 # and six floats per vertex.
 AXES_VERTEX_COUNT = 6
 AXES_VERTEX_SIZE = 24
+
+# How finely the ball core is cut in the tests: coarse enough to read a
+# failure, fine enough to have poles, a seam and plain cells.
+CORE_TEST_RINGS = 4
+CORE_TEST_SEGMENTS = 6
+
+# Six floats per vertex of the core: its position and its normal.
+CORE_VERTEX_SIZE = 24
 
 SIZES = (1, 2, 3, 4, 5, 6, 7)
 
@@ -709,6 +725,207 @@ class TestCubeGeometryRadius(unittest.TestCase):
         radii = [build_cube_geometry(size).radius for size in SIZES]
 
         self.assertEqual(radii, sorted(radii))
+
+
+class TestCoreRadius(unittest.TestCase):
+    """Tests for the size of the ball core."""
+
+    def test_reaches_past_the_cavity(self) -> None:
+        """
+        Test that the core comes out of the hollow of the cube.
+
+        The cavity left by the outer layer is what a hole dug by the mask
+        opens onto: a core flush with it would sit at the very bottom of
+        that shaft, where its own wall hides it.
+        """
+        for size in SIZES:
+            with self.subTest(size=size):
+                cavity = CUBE_EXTENT - CUBE_EXTENT / size - cubie_half(size)
+
+                self.assertGreater(core_radius(size), cavity)
+
+    def test_stays_under_the_surface(self) -> None:
+        """
+        Test that the core never comes out of the cube.
+
+        It sinks into the pieces, and must stop inside their plastic: a
+        core reaching the skin would draw on the silhouette.
+        """
+        for size in SIZES:
+            with self.subTest(size=size):
+                surface = CUBE_EXTENT - CUBE_EXTENT / size + cubie_half(size)
+
+                self.assertLess(core_radius(size), surface)
+
+    def test_sinks_the_same_share_of_every_layer(self) -> None:
+        """
+        Test that the core keeps its proportions whatever the size.
+
+        The bulge is a fraction of the half extent of a cubie, so the
+        core buries itself in the same share of the outer layer from a
+        2x2x2 to a 7x7x7.
+        """
+        shares = {
+            round(
+                (core_radius(size) - (
+                    CUBE_EXTENT - CUBE_EXTENT / size - cubie_half(size)
+                )) / (2 * cubie_half(size)),
+                PLACES,
+            )
+            for size in SIZES
+        }
+
+        self.assertEqual(len(shares), 1)
+
+    def test_grows_with_the_size(self) -> None:
+        """Test that a bigger cube leaves room for a bigger core."""
+        radii = [core_radius(size) for size in SIZES]
+
+        self.assertEqual(radii, sorted(radii))
+
+    def test_rejects_a_null_or_negative_size(self) -> None:
+        """Test that a core needs a cube to sit in."""
+        for size in (0, -1):
+            with (
+                    self.subTest(size=size),
+                    self.assertRaises(InvalidCubeSizeError),
+            ):
+                core_radius(size)
+
+
+class TestCoreMesh(unittest.TestCase):
+    """Tests for the sphere of the ball core."""
+
+    def setUp(self) -> None:
+        """Build the mesh every test of the class reads."""
+        self.radius = 0.75
+        self.mesh = build_core_mesh(
+            self.radius,
+            rings=CORE_TEST_RINGS,
+            segments=CORE_TEST_SEGMENTS,
+        )
+
+    def test_counts_its_triangles(self) -> None:
+        """
+        Test that the grid is cut as a sphere is.
+
+        Two triangles per cell, but a single one against each pole, where
+        two corners of the cell are the same point.
+        """
+        self.assertEqual(
+            self.mesh.triangle_count,
+            CORE_TEST_SEGMENTS * (2 * CORE_TEST_RINGS - 2),
+        )
+
+    def test_every_vertex_sits_on_the_sphere(self) -> None:
+        """Test that the mesh is a sphere of the radius it was given."""
+        for index, vertex in enumerate(self.mesh.vertices):
+            with self.subTest(vertex=index):
+                self.assertAlmostEqual(
+                    vertex.position.length(), self.radius, PLACES,
+                )
+
+    def test_normals_are_the_directions_of_their_vertices(self) -> None:
+        """
+        Test that the core is shaded as a smooth sphere.
+
+        The one mesh of the backend whose normals are not those of its
+        polygons: on a sphere centered on the origin, the smooth normal
+        of a vertex is the direction of the vertex itself.
+        """
+        for index, vertex in enumerate(self.mesh.vertices):
+            with self.subTest(vertex=index):
+                self.assertAlmostEqual(vertex.normal.length(), 1.0, PLACES)
+                self.assertAlmostEqual(
+                    vertex.normal.dot(vertex.position), self.radius, PLACES,
+                )
+
+    def test_belongs_to_no_face(self) -> None:
+        """Test that the core takes no sticker color."""
+        self.assertEqual(
+            {vertex.face for vertex in self.mesh.vertices},
+            {BODY_FACE},
+        )
+
+    def test_faces_outward(self) -> None:
+        """Test that no triangle of the core is culled from outside."""
+        for index, (first, second, third) in enumerate(triangles(self.mesh)):
+            with self.subTest(triangle=index):
+                winding = (second.position - first.position).cross(
+                    third.position - first.position,
+                )
+
+                centroid = first.position + second.position + third.position
+
+                self.assertGreater(winding.dot(centroid), 0.0)
+
+    def test_is_watertight(self) -> None:
+        """
+        Test that the sphere has no hole: every edge is shared twice.
+
+        The poles and the seam where the meridians wrap around are where
+        this breaks: the sine of pi is not zero in floating point, so a
+        pole computed rather than placed lands a hair away from the axis,
+        differently for every cell around it.
+        """
+        edges: Counter[frozenset[tuple[float, ...]]] = Counter()
+
+        for first, second, third in triangles(self.mesh):
+            corners = [tuple(vertex.position) for vertex in (
+                first, second, third,
+            )]
+
+            for index, corner in enumerate(corners):
+                edges[frozenset((corner, corners[(index + 1) % 3]))] += 1
+
+        self.assertEqual(set(edges.values()), {2})
+
+    def test_scales_with_its_radius(self) -> None:
+        """Test that a smaller core is the same sphere, scaled down."""
+        small = build_core_mesh(
+            self.radius / 3,
+            rings=CORE_TEST_RINGS,
+            segments=CORE_TEST_SEGMENTS,
+        )
+
+        self.assertEqual(small.indices, self.mesh.indices)
+
+        for index, (tight, wide) in enumerate(
+                zip(small.vertices, self.mesh.vertices, strict=True),
+        ):
+            with self.subTest(vertex=index):
+                self.assertAlmostEqual(
+                    (tight.position.scaled(3) - wide.position).length(),
+                    0.0,
+                    PLACES,
+                )
+
+
+class TestPackCore(unittest.TestCase):
+    """Tests for the vertex buffer of the ball core."""
+
+    def test_holds_every_vertex(self) -> None:
+        """Test that the buffer covers the whole mesh."""
+        mesh = build_core_mesh(1.0, rings=CORE_TEST_RINGS, segments=3)
+
+        self.assertEqual(
+            len(pack_core(mesh)),
+            len(mesh.vertices) * CORE_VERTEX_SIZE,
+        )
+
+    def test_carries_position_and_normal(self) -> None:
+        """Test that a vertex travels without its face index."""
+        mesh = build_core_mesh(1.0, rings=CORE_TEST_RINGS, segments=3)
+        packed = pack_core(mesh)
+
+        for index, vertex in enumerate(mesh.vertices):
+            read = struct.unpack_from(
+                CORE_VERTEX_PACKING, packed, index * CORE_VERTEX_SIZE,
+            )
+
+            for channel, value in enumerate((*vertex.position, *vertex.normal)):
+                with self.subTest(vertex=index, channel=channel):
+                    self.assertAlmostEqual(read[channel], value, SINGLE_PLACES)
 
 
 class TestPackAxes(unittest.TestCase):

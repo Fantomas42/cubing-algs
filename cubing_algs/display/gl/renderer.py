@@ -3,7 +3,9 @@ Renderer of the GPU rendering backend.
 
 Consumes a ``Scene`` and a camera, produces pixels. The mesh of a cubie
 is uploaded once, the cubies come as instances, and the whole cube is
-drawn in a single instanced call whatever its size.
+drawn in a single instanced call whatever its size. The ball core comes
+first, in a call of its own: it is the inside of the cube, hidden by the
+pieces until a hole is dug in them.
 
 Nothing here creates a context: the very same renderer draws into the
 framebuffer of a window and into an offscreen one, which is the whole
@@ -18,6 +20,7 @@ from typing import cast
 
 from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.constants import BACKGROUND_COLOR
+from cubing_algs.display.gl.constants import CORE_COLOR
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import RENDER_SAMPLES
 from cubing_algs.display.gl.constants import RENDER_SIZE
@@ -25,16 +28,23 @@ from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.geometry import AXES_VERTEX_ATTRIBUTES
 from cubing_algs.display.gl.geometry import AXES_VERTEX_FORMAT
+from cubing_algs.display.gl.geometry import CORE_VERTEX_ATTRIBUTES
+from cubing_algs.display.gl.geometry import CORE_VERTEX_FORMAT
 from cubing_algs.display.gl.geometry import VERTEX_ATTRIBUTES
 from cubing_algs.display.gl.geometry import VERTEX_FORMAT
 from cubing_algs.display.gl.geometry import CubeGeometry
+from cubing_algs.display.gl.geometry import build_core_mesh
+from cubing_algs.display.gl.geometry import core_radius
 from cubing_algs.display.gl.geometry import pack_axes
+from cubing_algs.display.gl.geometry import pack_core
 from cubing_algs.display.gl.scene import INSTANCE_ATTRIBUTES
 from cubing_algs.display.gl.scene import INSTANCE_FORMAT
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.shaders import AXES_FRAGMENT_SHADER
 from cubing_algs.display.gl.shaders import AXES_VERTEX_SHADER
+from cubing_algs.display.gl.shaders import CORE_FRAGMENT_SHADER
+from cubing_algs.display.gl.shaders import CORE_VERTEX_SHADER
 from cubing_algs.display.gl.shaders import FRAGMENT_SHADER
 from cubing_algs.display.gl.shaders import VERTEX_SHADER
 from cubing_algs.display.gl.transforms import IDENTITY
@@ -68,6 +78,110 @@ def uniform(program: 'moderngl.Program', name: str) -> 'moderngl.Uniform':
 
 
 @dataclass(slots=True)
+class CoreRenderer:
+    """
+    The ball core, the sphere filling the middle of the cube.
+
+    Owned by the ``Renderer`` of the cube rather than held next to it,
+    as the axes are: the inside of a cube is not an option one turns on,
+    so it must reach every path drawing the cube, the offscreen ones
+    included.
+
+    Bound to the radius it was built with, hence to a cube size, exactly
+    as a ``Renderer`` is bound to a geometry.
+    """
+
+    context: 'moderngl.Context'
+    program: 'moderngl.Program'
+    vertex_buffer: 'moderngl.Buffer'
+    index_buffer: 'moderngl.Buffer'
+    vertex_array: 'moderngl.VertexArray'
+
+    @classmethod
+    def create(cls, context: 'moderngl.Context', radius: float) -> Self:
+        """
+        Build the renderer of a ball core.
+
+        Args:
+            context: The context owning the buffers and the program.
+            radius: Radius of the core, as ``core_radius`` sizes it.
+
+        Returns:
+            A renderer ready to draw the core.
+
+        """
+        mesh = build_core_mesh(radius)
+
+        program = context.program(
+            vertex_shader=CORE_VERTEX_SHADER,
+            fragment_shader=CORE_FRAGMENT_SHADER,
+        )
+
+        vertex_buffer = context.buffer(pack_core(mesh))
+        index_buffer = context.buffer(mesh.pack_indices())
+
+        return cls(
+            context=context,
+            program=program,
+            vertex_buffer=vertex_buffer,
+            index_buffer=index_buffer,
+            vertex_array=context.vertex_array(
+                program,
+                [
+                    (
+                        vertex_buffer,
+                        CORE_VERTEX_FORMAT,
+                        *CORE_VERTEX_ATTRIBUTES,
+                    ),
+                ],
+                index_buffer,
+                index_element_size=INDEX_SIZE,
+            ),
+        )
+
+    def draw(
+            self,
+            camera: OrbitCamera,
+            look: Look = DEFAULT_LOOK,
+            orientation: Quat = IDENTITY,
+    ) -> None:
+        """
+        Draw the core into the framebuffer currently in use.
+
+        Args:
+            camera: The camera looking at the cube.
+            look: How the light falls on it, the core taking its ambient
+                and its gamma from the very same one.
+            orientation: How the whole cube is held, which the core
+                follows as the piece of it that it is.
+
+        """
+        import moderngl
+
+        uniform(self.program, 'view_projection').write(
+            camera.view_projection().pack(),
+        )
+        uniform(self.program, 'world').write(orientation.to_matrix().pack())
+        uniform(self.program, 'core_color').value = CORE_COLOR
+        uniform(self.program, 'light_direction').value = Vec3(
+            *look.light_direction,
+        ).normalized()
+        uniform(self.program, 'ambient').value = look.ambient
+        uniform(self.program, 'gamma').value = look.gamma
+
+        self.context.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+
+        self.vertex_array.render()
+
+    def release(self) -> None:
+        """Give every GPU resource of the core back."""
+        self.vertex_array.release()
+        self.index_buffer.release()
+        self.vertex_buffer.release()
+        self.program.release()
+
+
+@dataclass(slots=True)
 class Renderer:
     """
     The GPU side of a cube: one program, one mesh, one instance buffer.
@@ -83,6 +197,7 @@ class Renderer:
     index_buffer: 'moderngl.Buffer'
     instance_buffer: 'moderngl.Buffer'
     vertex_array: 'moderngl.VertexArray'
+    core: CoreRenderer
 
     @classmethod
     def create(
@@ -132,6 +247,7 @@ class Renderer:
             index_buffer=index_buffer,
             instance_buffer=instance_buffer,
             vertex_array=vertex_array,
+            core=CoreRenderer.create(context, core_radius(geometry.size)),
         )
 
     def write_look(self, look: Look) -> None:
@@ -180,6 +296,8 @@ class Renderer:
         """
         import moderngl
 
+        self.core.draw(camera, look, orientation)
+
         self.instance_buffer.write(scene.pack_instances())
 
         uniform(self.program, 'view_projection').write(
@@ -198,6 +316,8 @@ class Renderer:
 
     def release(self) -> None:
         """Give every GPU resource of the renderer back."""
+        self.core.release()
+
         self.vertex_array.release()
         self.instance_buffer.release()
         self.index_buffer.release()

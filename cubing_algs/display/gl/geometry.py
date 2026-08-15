@@ -13,7 +13,12 @@ A cubie is a chamfered cube: six square faces, twelve quads cutting its
 edges, eight triangles cutting its corners, plus six sticker quads
 floating just above the faces. The stickers carry the index of their
 face in ``FACE_ORDER``; the plastic carries ``BODY_FACE``.
+
+The ball core lives here too: a sphere filling the middle of the cube,
+which the outer pieces hide until a hole is dug in them or a groove is
+looked straight down.
 """
+import math
 import struct
 from collections.abc import Iterable
 from collections.abc import Sequence
@@ -21,6 +26,9 @@ from dataclasses import dataclass
 from typing import NamedTuple
 
 from cubing_algs.display.gl.constants import AXES_COLORS
+from cubing_algs.display.gl.constants import CORE_BULGE
+from cubing_algs.display.gl.constants import CORE_RINGS
+from cubing_algs.display.gl.constants import CORE_SEGMENTS
 from cubing_algs.display.gl.constants import CUBIE_BEVEL
 from cubing_algs.display.gl.constants import CUBIE_GAP
 from cubing_algs.display.gl.constants import STICKER_LIFT
@@ -60,6 +68,13 @@ VERTEX_PACKING = '<6fi'
 AXES_VERTEX_FORMAT = '3f 3f'
 AXES_VERTEX_ATTRIBUTES = ('in_position', 'in_color')
 AXES_VERTEX_PACKING = '<6f'
+
+# Layout of a vertex of the ball core: position, normal. It belongs to no
+# face and takes no sticker color, so the face index of a cubie vertex
+# would travel for nothing.
+CORE_VERTEX_FORMAT = '3f 3f'
+CORE_VERTEX_ATTRIBUTES = ('in_position', 'in_normal')
+CORE_VERTEX_PACKING = '<6f'
 
 
 class FaceBasis(NamedTuple):
@@ -634,6 +649,177 @@ def build_cube_geometry(size: int) -> CubeGeometry:
         half=half,
         mesh=build_cubie_mesh(half),
         cubies=build_cubies(size),
+    )
+
+
+def core_radius(size: int) -> float:
+    """
+    Size the ball core of a cube of a given size.
+
+    The outer layer leaves a cavity around the center of the cube, and
+    the core fills it, swollen by ``CORE_BULGE`` so that it sinks into
+    the pieces themselves: flush with the cavity it would sit at the very
+    bottom of any hole dug by the mask, where the wall of the hole hides
+    it. The bulge being a fraction of the half extent of a cubie, the
+    core sinks into the same share of the outer layer whatever the size
+    of the cube.
+
+    A 1x1x1 gets one too, buried inside its single piece, where nothing
+    can ever see it.
+
+    Args:
+        size: Size of the cube.
+
+    Returns:
+        The radius of the core, in world units, always strictly positive
+        and always short of the surface of the cube.
+
+    """
+    half = cubie_half(size)
+    cavity = CUBE_EXTENT - CUBE_EXTENT / size - half
+
+    return cavity + CORE_BULGE * half
+
+
+def core_point(
+        radius: float,
+        ring: int,
+        segment: int,
+        rings: int,
+        segments: int,
+) -> Vec3:
+    """
+    Place one vertex of the ball core on its sphere.
+
+    Both poles are placed by hand rather than by the formula: the sine of
+    pi is not zero in floating point, so the bottom one would land a
+    fraction away from the axis, differently for every meridian, and stop
+    being a single point. The meridians wrap around for the same reason,
+    the last one having to be the first one and not a hair away from it.
+
+    Args:
+        radius: Radius of the sphere.
+        ring: Index of the parallel, from the top pole to the bottom one.
+        segment: Index of the meridian, around the Y axis.
+        rings: How many parallels the sphere is cut in.
+        segments: How many meridians the sphere is cut in.
+
+    Returns:
+        The point of the sphere, in world coordinates.
+
+    """
+    if ring == 0:
+        return Vec3(0.0, radius, 0.0)
+
+    if ring == rings:
+        return Vec3(0.0, -radius, 0.0)
+
+    polar = math.pi * ring / rings
+    azimuth = 2 * math.pi * (segment % segments) / segments
+    around = radius * math.sin(polar)
+
+    return Vec3(
+        around * math.cos(azimuth),
+        radius * math.cos(polar),
+        around * math.sin(azimuth),
+    )
+
+
+def core_polygons(radius: float, rings: int, segments: int) -> list[Polygon]:
+    """
+    Cut the sphere of the ball core into polygons.
+
+    One quad per cell of the parallel and meridian grid, but a triangle
+    against each pole, where the two corners sitting on it are the same
+    point.
+
+    Args:
+        radius: Radius of the sphere, which ``core_radius`` keeps
+            strictly positive: a sphere of no radius has no polygon, and
+            no winding either.
+        rings: How many parallels the sphere is cut in.
+        segments: How many meridians the sphere is cut in.
+
+    Returns:
+        The polygons of the sphere, wound outward.
+
+    """
+    polygons: list[Polygon] = []
+
+    for ring in range(rings):
+        for segment in range(segments):
+            corners = tuple(
+                core_point(radius, *cell, rings, segments)
+                for cell in (
+                    (ring, segment),
+                    (ring, segment + 1),
+                    (ring + 1, segment + 1),
+                    (ring + 1, segment),
+                )
+            )
+
+            polygons.append(
+                oriented(
+                    tuple(
+                        point for index, point in enumerate(corners)
+                        if point != corners[index - 1]
+                    ),
+                    BODY_FACE,
+                ),
+            )
+
+    return polygons
+
+
+def build_core_mesh(
+        radius: float,
+        *,
+        rings: int = CORE_RINGS,
+        segments: int = CORE_SEGMENTS,
+) -> Mesh:
+    """
+    Build the mesh of the ball core, centered on the origin.
+
+    The one mesh of the backend whose normals are not those of its
+    polygons: a sphere is meant to look round, and a faceted one seen
+    from a hole reads as a defect rather than as a parti pris. On a
+    sphere centered on the origin the smooth normal is the direction of
+    the vertex itself.
+
+    Args:
+        radius: Radius of the sphere.
+        rings: How many parallels the sphere is cut in.
+        segments: How many meridians the sphere is cut in.
+
+    Returns:
+        The mesh of the ball core.
+
+    """
+    mesh = build_mesh(core_polygons(radius, rings, segments))
+
+    return Mesh(
+        tuple(
+            Vertex(vertex.position, vertex.position.normalized(), vertex.face)
+            for vertex in mesh.vertices
+        ),
+        mesh.indices,
+    )
+
+
+def pack_core(mesh: Mesh) -> bytes:
+    """
+    Serialize the ball core for a vertex buffer.
+
+    Args:
+        mesh: The mesh of the core.
+
+    Returns:
+        The vertices, laid out as ``CORE_VERTEX_FORMAT`` describes them.
+
+    """
+    return b''.join(
+        struct.pack(CORE_VERTEX_PACKING, *vertex.position, *vertex.normal)
+        for vertex in mesh.vertices
     )
 
 

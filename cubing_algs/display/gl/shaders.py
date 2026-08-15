@@ -6,9 +6,12 @@ comes as an instance carrying its model matrix and the six colors of its
 sides. A vertex knows which side it belongs to, so the shader only has to
 index the colors of its instance.
 
-A second, much smaller program draws the three axes of the grid, which
-the viewer shows on demand. It exists apart because the program of the
-cube is instanced, lit and scaleless: nothing in it can draw a segment.
+A second program draws the ball core, the sphere filling the middle of
+the cube. A third, much smaller one draws the three axes of the grid,
+which the viewer shows on demand. Both exist apart because the program of
+the cube is instanced, lit against the local frame of a cubie and
+scaleless: nothing in it can draw a segment, and its groove occlusion
+reads the position of a fragment inside a box.
 
 The look is entirely driven by uniforms, so that two variants can be
 compared within a single run: every one of them comes from a ``Look``.
@@ -172,7 +175,52 @@ void main()
 }}
 """
 
-# The second, and only other, program of the backend: the three axes of
+# The second program of the backend: the ball core, the inside of the
+# cube. It shades with the same ambient and diffuse terms as the cube, so
+# a single light lights them both, but with none of what belongs to a
+# piece: no groove occlusion, whose local frame is that of a box, no rim,
+# no gloss, no grain. A core is a matte solid seen through a hole.
+CORE_VERTEX_SHADER = GLSL_VERSION + """
+
+uniform mat4 view_projection;
+uniform mat4 world;
+
+in vec3 in_position;
+in vec3 in_normal;
+
+out vec3 v_normal;
+
+void main()
+{
+    v_normal = mat3(world) * in_normal;
+
+    gl_Position = view_projection * world * vec4(in_position, 1.0);
+}
+"""
+
+CORE_FRAGMENT_SHADER = GLSL_VERSION + """
+
+uniform vec3 light_direction;
+uniform vec3 core_color;
+uniform float ambient;
+uniform float gamma;
+
+in vec3 v_normal;
+
+out vec4 f_color;
+
+void main()
+{
+    float diffuse = max(dot(normalize(v_normal), light_direction), 0.0);
+
+    vec3 lit = pow(core_color, vec3(gamma))
+        * (ambient + (1.0 - ambient) * diffuse);
+
+    f_color = vec4(pow(max(lit, 0.0), vec3(1.0 / gamma)), 1.0);
+}
+"""
+
+# The third, and last, program of the backend: the three axes of
 # the grid, drawn as segments when the viewer is asked for them. It takes
 # no light at all, an axis being a marker and not a solid, and it shares
 # the ``world`` uniform of the cube so that the axes follow whatever

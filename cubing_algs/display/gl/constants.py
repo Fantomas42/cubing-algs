@@ -81,6 +81,27 @@ STICKER_MARGIN = 0.08
 # test at any distance, too little to show on the silhouette.
 STICKER_LIFT = 0.01
 
+# How far the ball core swells past the cavity the outer layer leaves
+# around it, as a fraction of the half extent of a cubie. Sinking it into
+# the pieces is what makes it show at all: a hole dug by the mask is a
+# square shaft as deep as a piece is thick, and seen from the default
+# framing its own wall hides whatever sits at the bottom. Three quarters
+# of the way up the shaft, which is what this fraction buys, is where the
+# core starts reading as the inside of the cube.
+CORE_BULGE = 1.3
+
+# Parallels and meridians of the ball core. Its normals are interpolated,
+# so this only decides how round its silhouette is, and it is only ever
+# seen through a hole or a groove.
+CORE_RINGS = 16
+CORE_SEGMENTS = 32
+
+# Color of the ball core. Not a palette entry: the SVG backend has no
+# inside to draw, and one value is enough for a piece nothing else is
+# compared to. Blue green, which no palette gives a sticker, so a hole
+# reads as the inside of the cube rather than as another piece.
+CORE_COLOR: tuple[float, float, float] = (0.18, 0.62, 0.62)
+
 
 @dataclass(frozen=True, slots=True)
 class Look:
