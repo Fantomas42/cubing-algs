@@ -27,11 +27,14 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from cubing_algs.algorithm import Algorithm
+from cubing_algs.annotations import CubeOrientation
 from cubing_algs.cases import get_case
 from cubing_algs.cases import get_collection
 from cubing_algs.cases import list_collections
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
 from cubing_algs.exceptions import CubingAlgsError
+from cubing_algs.exceptions import InvalidOrientationError
 from cubing_algs.parsing import parse_moves
 from cubing_algs.structure import compress
 from cubing_algs.transform.auf import remove_auf_moves
@@ -84,6 +87,37 @@ def window_size(image_size: int) -> tuple[int, int] | None:
     return (image_size, image_size)
 
 
+def hold_cube(cube: VCube, orientation: CubeOrientation) -> None:
+    """
+    Turn a cube the way it is held, before anything is played on it.
+
+    An orientation says how the cube is held while the algorithm is
+    played, not how the result is looked at: its rotations therefore
+    come first, so that ``R`` turns the face on the right of whoever
+    holds it. The backends are then handed an already turned cube, and
+    no orientation of their own.
+
+    Args:
+        cube: The cube to turn, in place.
+        orientation: The top and front faces, e.g. ``DF``.
+
+    Raises:
+        InvalidOrientationError: If the orientation is not one of the 24.
+
+    """
+    if not orientation:
+        return
+
+    try:
+        moves = ORIENTATION_FACE_MOVES[orientation]
+    except KeyError as error:
+        msg = f'Invalid orientation "{ orientation }"'
+        raise InvalidOrientationError(msg) from error
+
+    if moves:
+        cube.rotate(parse_moves(moves))
+
+
 def view_cube(
         cube: VCube,
         args: argparse.Namespace,
@@ -93,14 +127,13 @@ def view_cube(
     Open an interactive window on a cube.
 
     Args:
-        cube: The cube to show.
+        cube: The cube to show, already turned the way it is held.
         args: The parsed command line, holding the display options.
         mode: Display preset, such as ``oll`` or ``f2l``.
 
     """
     cube.view(
         mode=mode,
-        orientation=args.orientation,
         mask=args.mask,
         palette=args.palette,
         window_size=window_size(args.image_size),
@@ -118,7 +151,7 @@ def render_cube(
     Write a PNG of a cube where the command line asks for it.
 
     Args:
-        cube: The cube to draw.
+        cube: The cube to draw, already turned the way it is held.
         args: The parsed command line, holding the target and the
             display options.
         mode: Display preset, such as ``oll`` or ``f2l``.
@@ -128,7 +161,6 @@ def render_cube(
     path.write_bytes(
         cube.render(
             mode=mode,
-            orientation=args.orientation,
             mask=args.mask,
             palette=args.palette,
             image_size=args.image_size,
@@ -151,7 +183,8 @@ def animate_cube(
     Write an algorithm playing on a cube where the command line says.
 
     Args:
-        cube: The cube to play the algorithm on.
+        cube: The cube to play the algorithm on, already turned the way
+            it is held.
         moves: The algorithm to play.
         path: Where the animation is written.
         args: The parsed command line, holding the display options.
@@ -161,7 +194,6 @@ def animate_cube(
     written = cube.animate(
         moves, path,
         mode=mode,
-        orientation=args.orientation,
         mask=args.mask,
         palette=args.palette,
         image_size=args.image_size,
@@ -224,13 +256,17 @@ def run_apply(args: argparse.Namespace) -> int:
     Apply an algorithm on a solved cube and display the result.
 
     The cube goes to the terminal, unless ``--render`` or ``--view``
-    asks the GPU backend for it instead.
+    asks the GPU backend for it instead. It is first turned the way
+    ``--orientation`` says it is held, so that both the setup and the
+    algorithm are played from there.
 
     Returns:
         Process exit code.
 
     """
     cube = VCube(size=args.size)
+
+    hold_cube(cube, args.orientation)
 
     if args.setup:
         cube.rotate(parse_moves(args.setup, trust_input=False))
@@ -245,7 +281,6 @@ def run_apply(args: argparse.Namespace) -> int:
         sys.stdout.write(
             cube.display(
                 mode=args.mode,
-                orientation=args.orientation,
                 mask=args.mask,
                 palette=args.palette,
             ),
@@ -263,13 +298,17 @@ def run_animate(args: argparse.Namespace) -> int:
     Write an algorithm playing on a cube as an animation.
 
     A GIF is written when Pillow is around, a numbered PNG frame per
-    image otherwise.
+    image otherwise. The cube is first turned the way ``--orientation``
+    says it is held, so that both the setup and the algorithm are
+    played from there.
 
     Returns:
         Process exit code.
 
     """
     cube = VCube(size=args.size)
+
+    hold_cube(cube, args.orientation)
 
     if args.setup:
         cube.rotate(parse_moves(args.setup, trust_input=False))
@@ -353,7 +392,9 @@ def run_case(args: argparse.Namespace) -> int:
     A case is drawn on a cube set up to it, which is the main algorithm
     played backwards, under the display mode of the step it belongs to.
     ``--animate`` then plays the main algorithm from there, which is the
-    case being solved.
+    case being solved. The cube is first turned the way
+    ``--orientation`` says it is held, so that the case is set up, and
+    solved back, from there.
 
     Returns:
         Process exit code.
@@ -373,6 +414,9 @@ def run_case(args: argparse.Namespace) -> int:
 
     if args.render or args.animate or args.view:
         cube = VCube()
+
+        hold_cube(cube, args.orientation)
+
         cube.rotate(case.main_algorithm.transform(invert_moves))
         mode = case.step.lower()
 
@@ -423,6 +467,21 @@ def run_info(args: argparse.Namespace) -> int:
 
     output(json.dumps(data, indent=2))
     return 0
+
+
+def add_orientation_argument(parser: argparse.ArgumentParser) -> None:
+    """
+    Add the orientation a cube is held in to a subcommand.
+
+    Args:
+        parser: The subcommand parser to add it to.
+
+    """
+    parser.add_argument(
+        '--orientation',
+        default='',
+        help='Orientation the cube is held in, e.g. DF',
+    )
 
 
 def add_framing_arguments(parser: argparse.ArgumentParser) -> None:
@@ -521,11 +580,7 @@ def add_apply_arguments(parser: argparse.ArgumentParser) -> None:
         default='',
         help='Display mode, e.g. oll, pll, f2l',
     )
-    parser.add_argument(
-        '--orientation',
-        default='',
-        help='Display orientation, e.g. DF',
-    )
+    add_orientation_argument(parser)
     parser.add_argument('--mask', default='', help='Display mask')
     parser.add_argument('--palette', default='', help='Color palette')
     parser.add_argument(
@@ -598,11 +653,7 @@ def build_parser() -> argparse.ArgumentParser:
         default='',
         help='Display mode, e.g. oll, pll, f2l',
     )
-    animate_parser.add_argument(
-        '--orientation',
-        default='',
-        help='Display orientation, e.g. DF',
-    )
+    add_orientation_argument(animate_parser)
     animate_parser.add_argument('--mask', default='', help='Display mask')
     animate_parser.add_argument('--palette', default='', help='Color palette')
     add_framing_arguments(animate_parser)
@@ -646,13 +697,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     case_parser.add_argument('collection', help='Collection name, e.g. OLL')
     case_parser.add_argument('name', help='Case name or code, e.g. 27')
+    add_orientation_argument(case_parser)
     add_gl_arguments(case_parser, animate=True)
     # A case is drawn under the mode of its own step, and through no
-    # mask nor palette of its own: the display options the GPU helpers
-    # read are therefore all left at their default here.
+    # mask nor palette of its own: those two display options the GPU
+    # helpers read are therefore left at their default here.
     case_parser.set_defaults(
         handler=run_case,
-        orientation='',
         mask='',
         palette='',
     )

@@ -12,6 +12,8 @@ from unittest import mock
 from cubing_algs.cases import get_case
 from cubing_algs.cli import main
 from cubing_algs.cli import window_size
+from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.invert import invert_moves
 from cubing_algs.vcube import VCube
 
 # Main algorithm of the OLL 27 case, which is not the first of the
@@ -137,7 +139,6 @@ class ApplyCommandTestCase(CliTestCase):
             rendered.call_args.kwargs,
             {
                 'mode': 'oll',
-                'orientation': '',
                 'mask': '',
                 'palette': '',
                 'image_size': 128,
@@ -176,6 +177,80 @@ class ApplyCommandTestCase(CliTestCase):
             self.run_cli('apply', "R U R' U'", '--view')
 
         self.assertIsNone(viewed.call_args.kwargs['window_size'])
+
+    def test_apply_orientation_is_held_before_the_algorithm(self) -> None:
+        """The orientation is how the cube is held, so it comes first."""
+        code, out, _err = self.run_cli(
+            'apply', "R U R' U'", '--orientation', 'DF', '--state',
+        )
+
+        expected = VCube()
+        expected.rotate('z2')
+        expected.rotate("R U R' U'")
+
+        self.assertEqual(code, 0)
+        self.assertIn(f'Facelets: { expected.state }', out)
+
+    def test_apply_orientation_holds_the_setup_too(self) -> None:
+        """The setup is played in the orientation as well."""
+        code, out, _err = self.run_cli(
+            'apply', "U R U' R'", '--setup', "R U R' U'",
+            '--orientation', 'RF', '--state',
+        )
+
+        expected = VCube()
+        expected.rotate("z'")
+        expected.rotate("R U R' U'")
+        expected.rotate("U R U' R'")
+
+        self.assertEqual(code, 0)
+        self.assertIn(f'Facelets: { expected.state }', out)
+        self.assertIn('Solved:   yes', out)
+
+    def test_apply_orientation_reaches_the_render_as_a_turned_cube(
+            self,
+    ) -> None:
+        """The backend is handed the turned cube, not the orientation."""
+        with mock.patch.object(
+                VCube, 'render', autospec=True, return_value=b'PNG',
+        ) as rendered, TemporaryDirectory() as directory:
+            code, _out, _err = self.run_cli(
+                'apply', "R U R' U'", '--orientation', 'DF',
+                '--render', str(Path(directory) / 'cube.png'),
+            )
+
+        expected = VCube()
+        expected.rotate('z2')
+        expected.rotate("R U R' U'")
+
+        self.assertEqual(code, 0)
+        self.assertEqual(rendered.call_args.args[0].state, expected.state)
+        self.assertNotIn('orientation', rendered.call_args.kwargs)
+
+    def test_apply_orientation_reaches_the_viewer_as_a_turned_cube(
+            self,
+    ) -> None:
+        """The viewer opens on the turned cube, not on the orientation."""
+        with mock.patch.object(VCube, 'view', autospec=True) as viewed:
+            code, _out, _err = self.run_cli(
+                'apply', "R U R' U'", '--orientation', 'DF', '--view',
+            )
+
+        expected = VCube()
+        expected.rotate('z2')
+        expected.rotate("R U R' U'")
+
+        self.assertEqual(code, 0)
+        self.assertEqual(viewed.call_args.args[0].state, expected.state)
+        self.assertNotIn('orientation', viewed.call_args.kwargs)
+
+    def test_apply_invalid_orientation_fails(self) -> None:
+        """Apply fails with an error message on an unknown orientation."""
+        code, _out, err = self.run_cli(
+            'apply', "R U R' U'", '--orientation', 'UU',
+        )
+        self.assertEqual(code, 1)
+        self.assertIn('Error:', err)
 
     def test_apply_render_wins_over_view(self) -> None:
         """A file is written rather than a window opened."""
@@ -249,7 +324,6 @@ class AnimateCommandTestCase(CliTestCase):
             animated.call_args.kwargs,
             {
                 'mode': 'pll',
-                'orientation': 'DF',
                 'mask': '1' * 54,
                 'palette': 'neon',
                 'image_size': 128,
@@ -273,6 +347,32 @@ class AnimateCommandTestCase(CliTestCase):
         cube.rotate("F R U'")
 
         self.assertEqual(animated.call_args.args[0].state, cube.state)
+
+    def test_animate_orientation_turns_the_cube_before_the_setup(self) -> None:
+        """The cube is turned first, then the setup is played on it."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[Path('sexy.gif')],
+        ) as animated:
+            self.run_cli(
+                'animate', "R U R' U'", '--out', 'sexy.gif',
+                '--setup', "F R U'", '--orientation', 'DF',
+            )
+
+        expected = VCube()
+        expected.rotate('z2')
+        expected.rotate("F R U'")
+
+        self.assertEqual(animated.call_args.args[0].state, expected.state)
+
+    def test_animate_invalid_orientation_fails(self) -> None:
+        """Animate fails with an error message on an unknown orientation."""
+        code, _out, err = self.run_cli(
+            'animate', "R U R' U'", '--out', 'nope.gif',
+            '--orientation', 'UU',
+        )
+        self.assertEqual(code, 1)
+        self.assertIn('Error:', err)
 
     def test_animate_size_builds_the_right_cube(self) -> None:
         """A cube of the size asked for is the one being animated."""
@@ -457,6 +557,52 @@ class CaseCommandTestCase(CliTestCase):
 
         self.assertEqual(code, 0)
         self.assertEqual(viewed.call_args.kwargs['mode'], 'pll')
+
+    def test_case_orientation_sets_the_case_up_from_there(self) -> None:
+        """The cube is turned first, then set up to the case on it."""
+        with mock.patch.object(
+                VCube, 'render', autospec=True, return_value=b'PNG',
+        ) as rendered, TemporaryDirectory() as directory:
+            code, _out, _err = self.run_cli(
+                'case', 'OLL', '27', '--orientation', 'DF',
+                '--render', str(Path(directory) / 'oll27.png'),
+            )
+
+        expected = VCube()
+        expected.rotate('z2')
+        expected.rotate(parse_moves(MAIN_OLL_27).transform(invert_moves))
+
+        self.assertEqual(code, 0)
+        self.assertEqual(rendered.call_args.args[0].state, expected.state)
+        self.assertNotIn('orientation', rendered.call_args.kwargs)
+
+    def test_case_orientation_still_solves_the_case(self) -> None:
+        """The main algorithm played from there solves the turned cube."""
+        with mock.patch.object(
+                VCube, 'animate', autospec=True,
+                return_value=[Path('oll27.gif')],
+        ) as animated:
+            self.run_cli(
+                'case', 'OLL', '27', '--orientation', 'RF',
+                '--animate', 'oll27.gif',
+            )
+
+        cube = animated.call_args.args[0]
+        self.assertFalse(cube.is_solved)
+
+        cube.rotate(MAIN_OLL_27)
+        self.assertTrue(cube.is_solved)
+
+    def test_case_invalid_orientation_fails(self) -> None:
+        """Case fails with an error message on an unknown orientation."""
+        with TemporaryDirectory() as directory:
+            code, _out, err = self.run_cli(
+                'case', 'OLL', '27', '--orientation', 'UU',
+                '--render', str(Path(directory) / 'oll27.png'),
+            )
+
+        self.assertEqual(code, 1)
+        self.assertIn('Error:', err)
 
     def test_case_without_gpu_options_draws_nothing(self) -> None:
         """The details alone never reach the GPU backend."""
