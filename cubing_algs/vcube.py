@@ -608,6 +608,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             The bytes of a PNG image, its background left transparent.
 
         """
+        from cubing_algs.display.gl import Presentation  # noqa: PLC0415
         from cubing_algs.display.gl import render  # noqa: PLC0415
         from cubing_algs.display.gl.constants import (  # noqa: PLC0415
             RENDER_SIZE,
@@ -616,12 +617,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         return render(
             self.oriented_copy(orientation, full=True)
             if orientation else self,
-            image_size=image_size or RENDER_SIZE,
-            rotation=rotation,
-            distance=distance,
-            palette=palette,
-            mode=mode,
-            mask=mask,
+            Presentation(
+                palette=palette,
+                mode=mode,
+                mask=mask,
+                rotation=rotation,
+                distance=distance,
+                image_size=image_size or RENDER_SIZE,
+            ),
         )
 
     def view(  # noqa: PLR0913
@@ -729,6 +732,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             The paths written to: the GIF alone, or one per frame.
 
         """
+        from cubing_algs.display.gl import Presentation  # noqa: PLC0415
         from cubing_algs.display.gl import animate  # noqa: PLC0415
         from cubing_algs.display.gl.constants import (  # noqa: PLC0415
             RENDER_SIZE,
@@ -739,12 +743,14 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             if orientation else self,
             moves,
             path,
-            image_size=image_size or RENDER_SIZE,
-            rotation=rotation,
-            distance=distance,
-            palette=palette,
-            mode=mode,
-            mask=mask,
+            Presentation(
+                palette=palette,
+                mode=mode,
+                mask=mask,
+                rotation=rotation,
+                distance=distance,
+                image_size=image_size or RENDER_SIZE,
+            ),
         )
 
     def get_face(self, face: str) -> FaceFacelets:

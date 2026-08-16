@@ -14,6 +14,7 @@ from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import Cubie
+from cubing_algs.display.gl.presentation import Presentation
 from cubing_algs.display.gl.scene import SIDE_NUMBER
 from cubing_algs.display.gl.scene import CubieInstance
 from cubing_algs.display.gl.scene import Scene
@@ -475,7 +476,7 @@ class TestAnimation(unittest.TestCase):
 
     def test_a_mode_is_resolved_once_and_for_all(self) -> None:
         """Test that the orientation of a mode does not jump between moves."""
-        animation = Animation(VCube(), "U R U' R'", mode='f2l')
+        animation = Animation(VCube(), "U R U' R'", Presentation(mode='f2l'))
         scenes = list(animation.play())
 
         self.assertEqual(
@@ -486,7 +487,7 @@ class TestAnimation(unittest.TestCase):
     def test_a_mode_dims_the_pieces_it_is_not_about(self) -> None:
         """Test that a mode reaches an animation as it reaches a render."""
         plain = Animation(VCube(), 'R')
-        masked = Animation(VCube(), 'R', mode='oll')
+        masked = Animation(VCube(), 'R', Presentation(mode='oll'))
 
         self.assertEqual(
             [instance.colors for instance in masked.scene.instances],
@@ -504,7 +505,9 @@ class TestAnimation(unittest.TestCase):
 
     def test_a_mask_drops_the_cubies_nobody_may_see(self) -> None:
         """Test that a hidden piece is left out of every frame."""
-        animation = Animation(VCube(), 'R', mask='3' * 9 + '1' * 45)
+        animation = Animation(
+            VCube(), 'R', Presentation(mask='3' * 9 + '1' * 45),
+        )
 
         self.assertLess(
             len(animation.scene.instances),
@@ -513,7 +516,9 @@ class TestAnimation(unittest.TestCase):
 
     def test_a_mask_overrides_the_one_of_the_mode(self) -> None:
         """Test that a mask given by hand wins over the preset."""
-        animation = Animation(VCube(), 'R', mode='oll', mask='1' * 54)
+        animation = Animation(
+            VCube(), 'R', Presentation(mode='oll', mask='1' * 54),
+        )
 
         self.assertEqual(
             [instance.colors for instance in animation.scene.instances],

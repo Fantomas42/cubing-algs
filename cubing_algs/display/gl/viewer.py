@@ -51,6 +51,7 @@ from cubing_algs.display.gl.context import destroy_window
 from cubing_algs.display.gl.encode import write_png
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import build_cube_geometry
+from cubing_algs.display.gl.presentation import Presentation
 from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
@@ -458,7 +459,8 @@ class Viewer:
         if self.animation is None and self.pending:
             self.animation = Animation(
                 self.cube, self.pending.popleft(),
-                palette=self.palette, mask=self.mask, duration=self.duration,
+                Presentation(palette=self.palette, mask=self.mask),
+                duration=self.duration,
             )
 
         if self.animation is not None:

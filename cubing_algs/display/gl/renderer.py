@@ -23,7 +23,6 @@ from cubing_algs.display.gl.constants import BACKGROUND_COLOR
 from cubing_algs.display.gl.constants import CORE_COLOR
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import RENDER_SAMPLES
-from cubing_algs.display.gl.constants import RENDER_SIZE
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.geometry import AXES_VERTEX_ATTRIBUTES
@@ -37,6 +36,8 @@ from cubing_algs.display.gl.geometry import build_core_mesh
 from cubing_algs.display.gl.geometry import core_radius
 from cubing_algs.display.gl.geometry import pack_axes
 from cubing_algs.display.gl.geometry import pack_core
+from cubing_algs.display.gl.presentation import DEFAULT_PRESENTATION
+from cubing_algs.display.gl.presentation import Presentation
 from cubing_algs.display.gl.scene import INSTANCE_ATTRIBUTES
 from cubing_algs.display.gl.scene import INSTANCE_FORMAT
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
@@ -504,9 +505,8 @@ class OffscreenTarget:
 def render_frames(
         scenes: Iterable[Scene],
         camera: OrbitCamera,
+        presentation: Presentation = DEFAULT_PRESENTATION,
         *,
-        image_size: int = RENDER_SIZE,
-        look: Look = DEFAULT_LOOK,
         context: 'moderngl.Context | None' = None,
 ) -> list[bytes]:
     """
@@ -519,8 +519,9 @@ def render_frames(
     Args:
         scenes: The cubes to draw, all of the same geometry.
         camera: The camera looking at them.
-        image_size: Width and height of the images, in pixels.
-        look: How the light falls on the cube, antialiasing included.
+        presentation: The picture to make. Only the image size, the look
+            and the orientation are read here: the palette, the mode and
+            the mask were spent building the scenes.
         context: A context to draw with. A headless one is created, and
             released, when left out.
 
@@ -535,11 +536,9 @@ def render_frames(
     owned = context is None
     used = context or create_standalone_context()
 
-    target = OffscreenTarget.create(
-        used,
-        (image_size, image_size),
-        look.samples,
-    )
+    look = presentation.look
+
+    target = OffscreenTarget.create(used, presentation.size, look.samples)
     renderer = Renderer.create(used, ordered[0].geometry)
 
     try:
@@ -547,7 +546,7 @@ def render_frames(
 
         for scene in ordered:
             target.use()
-            renderer.draw(scene, camera, look)
+            renderer.draw(scene, camera, look, presentation.orientation)
             frames.append(target.read())
 
         return frames
@@ -562,9 +561,8 @@ def render_frames(
 def render_scene(
         scene: Scene,
         camera: OrbitCamera,
+        presentation: Presentation = DEFAULT_PRESENTATION,
         *,
-        image_size: int = RENDER_SIZE,
-        look: Look = DEFAULT_LOOK,
         context: 'moderngl.Context | None' = None,
 ) -> bytes:
     """
@@ -573,8 +571,8 @@ def render_scene(
     Args:
         scene: The cube to draw.
         camera: The camera looking at it.
-        image_size: Width and height of the image, in pixels.
-        look: How the light falls on the cube, antialiasing included.
+        presentation: The picture to make, of which the image size, the
+            look and the orientation are read.
         context: A context to draw with. A headless one is created, and
             released, when left out.
 
@@ -585,7 +583,6 @@ def render_scene(
     return render_frames(
         [scene],
         camera,
-        image_size=image_size,
-        look=look,
+        presentation,
         context=context,
     )[0]

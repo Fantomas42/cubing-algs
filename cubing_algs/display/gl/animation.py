@@ -22,7 +22,6 @@ from dataclasses import dataclass
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.constants import INNER_MOVES
 from cubing_algs.display.gl.constants import FRAME_RATE
 from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
@@ -30,6 +29,8 @@ from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Cubie
 from cubing_algs.display.gl.geometry import build_cube_geometry
+from cubing_algs.display.gl.presentation import DEFAULT_PRESENTATION
+from cubing_algs.display.gl.presentation import Presentation
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.scene import resolve_display
@@ -252,14 +253,12 @@ class Animation:
     over, so the state of the cube and what is on screen never disagree.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
             self,
             cube: 'VCube',
             moves: Iterable[Move | str] | Move | str,
+            presentation: Presentation = DEFAULT_PRESENTATION,
             *,
-            palette: str = '',
-            mode: str = '',
-            mask: CubeDisplayMask = '',
             duration: float = MOVE_DURATION,
     ) -> None:
         """
@@ -273,12 +272,9 @@ class Animation:
         Args:
             cube: The cube to play the algorithm on, left untouched.
             moves: The algorithm to play.
-            palette: Name of the color palette. Empty for the default
-                one.
-            mode: Display preset presetting the mask and the
-                orientation, such as ``oll`` or ``f2l``.
-            mask: Display mask, one code per facelet. Overrides the mask
-                the mode would have set.
+            presentation: The picture to make, of which the palette, the
+                mode and the mask are read: an animation builds scenes,
+                and knows nothing of how they are framed or drawn.
             duration: How long a single quarter turn lasts, in seconds.
                 A half turn is given ``HALF_TURN_FACTOR`` times that.
 
@@ -291,10 +287,13 @@ class Animation:
             raise ValueError(msg)
 
         self.cube, self.mask = resolve_display(
-            cube.copy(full=True), palette, mode=mode, mask=mask,
+            cube.copy(full=True),
+            presentation.palette,
+            mode=presentation.mode,
+            mask=presentation.mask,
         )
 
-        self.palette = palette
+        self.presentation = presentation
         self.duration = duration
         self.moves: tuple[Move, ...] = tuple(parse_moves(moves))
         self.geometry: CubeGeometry = build_cube_geometry(self.cube.size)
@@ -314,7 +313,7 @@ class Animation:
         """
         return build_scene(
             self.cube,
-            self.palette,
+            self.presentation.palette,
             self.geometry,
             mask=self.mask,
         )

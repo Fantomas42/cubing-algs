@@ -35,6 +35,8 @@ from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.geometry import core_radius
+from cubing_algs.display.gl.presentation import Playback
+from cubing_algs.display.gl.presentation import Presentation
 from cubing_algs.display.gl.renderer import COLOR_CHANNELS
 from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import OffscreenTarget
@@ -98,6 +100,16 @@ FLAT_LOOK = Look(
     specular_strength=0.0,
     sticker_grain=0.0,
 )
+
+# The picture most renders of this module are made through: that flat
+# look, at the size the pixel probes are written for.
+FLAT = Presentation(image_size=IMAGE_SIZE, look=FLAT_LOOK)
+
+# Smaller pictures, for the tests comparing whole images rather than
+# reading a pixel of them, and the pace their animations run at.
+SMALL = Presentation(image_size=64)
+TINY = Presentation(image_size=32, look=FLAT_LOOK)
+QUICK = Playback(frame_rate=10.0, duration=0.2)
 
 
 def probe_gpu() -> bool:
@@ -241,8 +253,7 @@ class TestRenderScene(unittest.TestCase):
         cls.pixels = render_scene(
             build_scene(VCube()),
             OrbitCamera.from_rotation(),
-            image_size=IMAGE_SIZE,
-            look=FLAT_LOOK,
+            FLAT,
             context=cls.context,
         )
 
@@ -323,8 +334,7 @@ class TestRenderScene(unittest.TestCase):
         pixels = render_scene(
             build_scene(VCube()),
             OrbitCamera.from_rotation(),
-            image_size=IMAGE_SIZE,
-            look=replace(FLAT_LOOK, samples=0),
+            replace(FLAT, look=replace(FLAT_LOOK, samples=0)),
             context=self.context,
         )
 
@@ -362,8 +372,7 @@ class TestRenderScene(unittest.TestCase):
         pixels = render_scene(
             build_scene(VCube(), mask=mask),
             OrbitCamera.from_rotation(),
-            image_size=IMAGE_SIZE,
-            look=FLAT_LOOK,
+            FLAT,
             context=self.context,
         )
 
@@ -401,8 +410,7 @@ class TestRenderScene(unittest.TestCase):
         pixels = render_scene(
             build_scene(VCube(), mask='1' * 4 + '3' + '1' * 49),
             CAMERA,
-            image_size=IMAGE_SIZE,
-            look=FLAT_LOOK,
+            FLAT,
             context=self.context,
         )
 
@@ -446,8 +454,7 @@ class TestRenderScene(unittest.TestCase):
         pixels = render_scene(
             build_scene(VCube(), mode='hidden'),
             CAMERA,
-            image_size=IMAGE_SIZE,
-            look=FLAT_LOOK,
+            FLAT,
             context=self.context,
         )
 
@@ -482,8 +489,7 @@ class TestRenderScene(unittest.TestCase):
             render_scene(
                 build_scene(cube),
                 OrbitCamera.from_rotation(),
-                image_size=IMAGE_SIZE,
-                look=FLAT_LOOK,
+                FLAT,
                 context=self.context,
             ),
             self.pixels,
@@ -577,8 +583,30 @@ class TestOrientedRender(unittest.TestCase):
             render_scene(
                 build_scene(VCube()),
                 OrbitCamera.from_rotation(),
-                image_size=IMAGE_SIZE,
-                look=FLAT_LOOK,
+                FLAT,
+                context=self.context,
+            ),
+        )
+
+    def test_a_presentation_carries_the_orientation_to_the_draw_call(
+            self,
+    ) -> None:
+        """
+        Test that an offscreen render holds the cube as a hand would.
+
+        The orientation used to stop at ``Renderer.draw()``: nothing
+        above it could ask for a PNG of the cube as a sensor holds it.
+        The picture must now come out pixel for pixel identical to the
+        one drawing it by hand.
+        """
+        held = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+
+        self.assertEqual(
+            self.render_held(held),
+            render_scene(
+                build_scene(VCube()),
+                OrbitCamera.from_rotation(),
+                replace(FLAT, orientation=held),
                 context=self.context,
             ),
         )
@@ -755,8 +783,7 @@ class TestLook(unittest.TestCase):
         return render_scene(
             build_scene(VCube()),
             OrbitCamera.from_rotation(),
-            image_size=IMAGE_SIZE,
-            look=look,
+            replace(FLAT, look=look),
             context=cls.context,
         )
 
@@ -853,7 +880,7 @@ class TestLook(unittest.TestCase):
             render_scene(
                 build_scene(VCube()),
                 OrbitCamera.from_rotation(),
-                image_size=IMAGE_SIZE,
+                Presentation(image_size=IMAGE_SIZE),
                 context=self.context,
             ),
         )
@@ -865,7 +892,7 @@ class TestRender(unittest.TestCase):
 
     def test_a_png_comes_out(self) -> None:
         """Test that a cube is rendered as a PNG of the asked size."""
-        data = render(VCube(), image_size=64)
+        data = render(VCube(), SMALL)
 
         self.assertTrue(data.startswith(PNG_SIGNATURE))
         self.assertEqual(data[16:24], (64).to_bytes(4) + (64).to_bytes(4))
@@ -873,15 +900,24 @@ class TestRender(unittest.TestCase):
     def test_palette_changes_the_image(self) -> None:
         """Test that the palette reaches the rendering."""
         self.assertNotEqual(
-            render(VCube(), image_size=64, palette='pastel'),
-            render(VCube(), image_size=64),
+            render(VCube(), Presentation(image_size=64, palette='pastel')),
+            render(VCube(), SMALL),
         )
 
     def test_rotation_changes_the_image(self) -> None:
         """Test that the framing reaches the rendering."""
         self.assertNotEqual(
-            render(VCube(), image_size=64, rotation='y120x-25'),
-            render(VCube(), image_size=64),
+            render(VCube(), Presentation(image_size=64, rotation='y120x-25')),
+            render(VCube(), SMALL),
+        )
+
+    def test_an_orientation_reaches_the_png(self) -> None:
+        """Test that the way a cube is held changes the image written."""
+        held = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+
+        self.assertNotEqual(
+            render(VCube(), replace(SMALL, orientation=held)),
+            render(VCube(), SMALL),
         )
 
     def test_frames_on_the_radius_of_the_cube(self) -> None:
@@ -889,12 +925,12 @@ class TestRender(unittest.TestCase):
         scene = build_scene(VCube(size=4))
 
         self.assertEqual(
-            render(VCube(size=4), image_size=64),
+            render(VCube(size=4), SMALL),
             encode_png(
                 render_scene(
                     scene,
                     OrbitCamera.from_rotation('', 0.0, scene.geometry.radius),
-                    image_size=64,
+                    SMALL,
                 ),
                 (64, 64),
             ),
@@ -923,8 +959,7 @@ class TestRenderFrames(unittest.TestCase):
         frames = render_frames(
             animation.play(4.0),
             OrbitCamera.from_rotation(),
-            image_size=32,
-            look=FLAT_LOOK,
+            TINY,
             context=self.context,
         )
 
@@ -947,13 +982,11 @@ class TestRenderFrames(unittest.TestCase):
 
         self.assertEqual(
             render_frames(
-                [scene], camera,
-                image_size=32, look=FLAT_LOOK, context=self.context,
+                [scene], camera, TINY, context=self.context,
             ),
             [
                 render_scene(
-                    scene, camera,
-                    image_size=32, look=FLAT_LOOK, context=self.context,
+                    scene, camera, TINY, context=self.context,
                 ),
             ],
         )
@@ -964,8 +997,7 @@ class TestRenderFrames(unittest.TestCase):
         frames = render_frames(
             animation.play(4.0),
             OrbitCamera.from_rotation(),
-            image_size=32,
-            look=FLAT_LOOK,
+            TINY,
             context=self.context,
         )
 
@@ -977,12 +1009,12 @@ class TestRenderFrames(unittest.TestCase):
         turned = build_scene(VCube(), mask='3' * 54)
 
         first, second = render_frames(
-            [turned, solved], OrbitCamera.from_rotation(),
-            image_size=32, look=FLAT_LOOK, context=self.context,
+            [turned, solved], OrbitCamera.from_rotation(), TINY,
+            context=self.context,
         )
         alone, = render_frames(
-            [solved], OrbitCamera.from_rotation(),
-            image_size=32, look=FLAT_LOOK, context=self.context,
+            [solved], OrbitCamera.from_rotation(), TINY,
+            context=self.context,
         )
 
         self.assertNotEqual(first, second)
@@ -1002,7 +1034,7 @@ class TestAnimate(unittest.TestCase):
             destination = Path(directory) / 'out.gif'
             written = animate(
                 VCube(), "R U'", destination,
-                image_size=32, duration=0.2, frame_rate=10.0,
+                Presentation(image_size=32), QUICK,
             )
 
             self.assertEqual(written, [destination])
@@ -1019,7 +1051,7 @@ class TestAnimate(unittest.TestCase):
         ):
             written = animate(
                 VCube(), 'R', Path(directory) / 'out.gif',
-                image_size=32, duration=0.2, frame_rate=10.0,
+                Presentation(image_size=32), QUICK,
             )
 
             self.assertEqual(len(written), 3)
@@ -1041,16 +1073,41 @@ class TestAnimate(unittest.TestCase):
         ):
             plain = animate(
                 VCube(), 'R', Path(directory) / 'plain.gif',
-                image_size=32, duration=0.2, frame_rate=10.0,
+                Presentation(image_size=32), QUICK,
             )
             masked = animate(
                 VCube(), 'R', Path(directory) / 'masked.gif',
-                image_size=32, duration=0.2, frame_rate=10.0, mode='oll',
+                Presentation(image_size=32, mode='oll'), QUICK,
             )
 
             self.assertNotEqual(
                 plain[0].read_bytes(),
                 masked[0].read_bytes(),
+            )
+
+    def test_the_orientation_reaches_the_animation(self) -> None:
+        """Test that an animation plays on the cube as it is held."""
+        held = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+
+        with (
+                tempfile.TemporaryDirectory() as directory,
+                mock.patch(
+                    'cubing_algs.display.gl.api.has_pillow',
+                    return_value=False,
+                ),
+        ):
+            plain = animate(
+                VCube(), 'R', Path(directory) / 'plain.gif',
+                Presentation(image_size=32), QUICK,
+            )
+            turned = animate(
+                VCube(), 'R', Path(directory) / 'turned.gif',
+                Presentation(image_size=32, orientation=held), QUICK,
+            )
+
+            self.assertNotEqual(
+                plain[0].read_bytes(),
+                turned[0].read_bytes(),
             )
 
     def test_the_final_frame_is_the_final_state(self) -> None:
@@ -1064,8 +1121,7 @@ class TestAnimate(unittest.TestCase):
         ):
             written = animate(
                 VCube(), "R U'", Path(directory) / 'out.gif',
-                image_size=32, duration=0.2, frame_rate=10.0,
-                look=FLAT_LOOK,
+                Presentation(image_size=32, look=FLAT_LOOK), QUICK,
             )
 
             landed = VCube()
@@ -1073,7 +1129,7 @@ class TestAnimate(unittest.TestCase):
 
             self.assertEqual(
                 written[-1].read_bytes(),
-                render(landed, image_size=32, look=FLAT_LOOK),
+                render(landed, Presentation(image_size=32, look=FLAT_LOOK)),
             )
 
 
@@ -1120,8 +1176,7 @@ class TestSizeFraming(unittest.TestCase):
             render_scene(
                 scene,
                 OrbitCamera.from_rotation('', 0.0, scene.geometry.radius),
-                image_size=FRAMING_SIZE,
-                look=FLAT_LOOK,
+                Presentation(image_size=FRAMING_SIZE, look=FLAT_LOOK),
                 context=cls.context,
             ),
             FRAMING_SIZE,

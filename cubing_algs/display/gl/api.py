@@ -9,19 +9,15 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.display.gl.animation import Animation
-from cubing_algs.display.gl.camera import OrbitCamera
-from cubing_algs.display.gl.constants import ANIMATION_LOOP
-from cubing_algs.display.gl.constants import DEFAULT_LOOK
-from cubing_algs.display.gl.constants import FRAME_RATE
-from cubing_algs.display.gl.constants import MOVE_DURATION
-from cubing_algs.display.gl.constants import RENDER_SIZE
-from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.encode import encode_png
 from cubing_algs.display.gl.encode import has_pillow
 from cubing_algs.display.gl.encode import write_frames
 from cubing_algs.display.gl.encode import write_gif
+from cubing_algs.display.gl.presentation import DEFAULT_PLAYBACK
+from cubing_algs.display.gl.presentation import DEFAULT_PRESENTATION
+from cubing_algs.display.gl.presentation import Playback
+from cubing_algs.display.gl.presentation import Presentation
 from cubing_algs.display.gl.renderer import render_frames
 from cubing_algs.display.gl.renderer import render_scene
 from cubing_algs.display.gl.scene import build_scene
@@ -31,16 +27,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from cubing_algs.vcube import VCube
 
 
-def render(  # noqa: PLR0913
+def render(
         cube: 'VCube',
-        *,
-        image_size: int = RENDER_SIZE,
-        rotation: str = '',
-        distance: float = 0.0,
-        palette: str = '',
-        mode: str = '',
-        mask: CubeDisplayMask = '',
-        look: Look = DEFAULT_LOOK,
+        presentation: Presentation = DEFAULT_PRESENTATION,
 ) -> bytes:
     """
     Render a cube on the GPU, without any window.
@@ -54,52 +43,36 @@ def render(  # noqa: PLR0913
 
     Args:
         cube: The cube to draw.
-        image_size: Width and height of the image, in pixels.
-        rotation: Camera rotation string, such as ``y45x-34``. Empty for
-            the library default.
-        distance: Distance from the camera to the cube. Zero for the
-            library default.
-        palette: Name of the color palette. Empty for the default one.
-        mode: Display preset presetting the mask and the orientation,
-            such as ``oll`` or ``f2l``.
-        mask: Display mask, one code per facelet. Overrides the mask the
-            mode would have set.
-        look: How the light falls on the cube, antialiasing included.
-            The library default one unless a variant is being tried out.
+        presentation: How the picture is made: framing, palette, mode,
+            mask, image size, look, and the way the cube is held. The
+            library default picture when left out.
 
     Returns:
         The bytes of a PNG image, its background left transparent.
 
     """
-    scene = build_scene(cube, palette, mode=mode, mask=mask)
+    scene = build_scene(
+        cube,
+        presentation.palette,
+        mode=presentation.mode,
+        mask=presentation.mask,
+    )
 
     pixels = render_scene(
         scene,
-        OrbitCamera.from_rotation(
-            rotation, distance, scene.geometry.radius,
-        ),
-        image_size=image_size,
-        look=look,
+        presentation.camera(scene.geometry.radius),
+        presentation,
     )
 
-    return encode_png(pixels, (image_size, image_size))
+    return encode_png(pixels, presentation.size)
 
 
-def animate(  # noqa: PLR0913
+def animate(
         cube: 'VCube',
         moves: Iterable[Move | str] | Move | str,
         path: str | Path,
-        *,
-        image_size: int = RENDER_SIZE,
-        rotation: str = '',
-        distance: float = 0.0,
-        palette: str = '',
-        mode: str = '',
-        mask: CubeDisplayMask = '',
-        look: Look = DEFAULT_LOOK,
-        frame_rate: float = FRAME_RATE,
-        duration: float = MOVE_DURATION,
-        loop: int = ANIMATION_LOOP,
+        presentation: Presentation = DEFAULT_PRESENTATION,
+        playback: Playback = DEFAULT_PLAYBACK,
 ) -> list[Path]:
     """
     Play an algorithm on a cube and write it as an animation.
@@ -118,43 +91,34 @@ def animate(  # noqa: PLR0913
         cube: The cube to play the algorithm on.
         moves: The algorithm to play.
         path: Where the animation is written.
-        image_size: Width and height of the images, in pixels.
-        rotation: Camera rotation string, such as ``y45x-34``. Empty for
-            the library default.
-        distance: Distance from the camera to the cube. Zero for the
-            library default.
-        palette: Name of the color palette. Empty for the default one.
-        mode: Display preset presetting the mask and the orientation,
-            such as ``oll`` or ``f2l``.
-        mask: Display mask, one code per facelet. Overrides the mask the
-            mode would have set.
-        look: How the light falls on the cube, antialiasing included.
-        frame_rate: Frames per second the animation plays at.
-        duration: How long a single quarter turn lasts, in seconds. A
-            half turn is given ``HALF_TURN_FACTOR`` times that.
-        loop: How many times the animation plays, zero looping forever.
+        presentation: How each frame is made: framing, palette, mode,
+            mask, image size, look, and the way the cube is held.
+        playback: How the animation runs: frame rate, how long a move
+            lasts, and how many times it plays.
 
     Returns:
         The paths written to: the GIF alone, or one per frame.
 
     """
     animation = Animation(
-        cube, moves,
-        palette=palette, mode=mode, mask=mask, duration=duration,
+        cube, moves, presentation, duration=playback.duration,
     )
 
     frames = render_frames(
-        animation.play(frame_rate),
-        OrbitCamera.from_rotation(
-            rotation, distance, animation.geometry.radius,
-        ),
-        image_size=image_size,
-        look=look,
+        animation.play(playback.frame_rate),
+        presentation.camera(animation.geometry.radius),
+        presentation,
     )
 
-    size = (image_size, image_size)
-
     if not has_pillow():
-        return write_frames(path, frames, size)
+        return write_frames(path, frames, presentation.size)
 
-    return [write_gif(path, frames, size, frame_rate=frame_rate, loop=loop)]
+    return [
+        write_gif(
+            path,
+            frames,
+            presentation.size,
+            frame_rate=playback.frame_rate,
+            loop=playback.loop,
+        ),
+    ]
