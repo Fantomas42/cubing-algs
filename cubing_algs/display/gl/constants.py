@@ -251,18 +251,20 @@ SCREENSHOT_NAME = 'cubing-algs-%Y%m%d-%H%M%S.png'
 # The shortcuts of the viewer, shown when its window opens.
 VIEWER_HELP = """\
 cubing-algs viewer
-  drag             orbit the cube
-  wheel            zoom in and out
-  R U F L D B      turn a face, shift primes it, ctrl doubles it
-  M E S            turn a slice
-  X Y Z            turn the whole cube
-  alt              widen a face turn, as in Rw
-  space            frame the cube again
-  backspace        put the cube back as it was
-  F2               show the X/Y/Z axes, red green blue
-  F3               show the frame rate
-  F12              write a screenshot
-  escape, Q        close the window\
+  Drag             Orbit the cube
+  Wheel            Zoom in and out
+  R U F L D B      Turn a face
+  M E S            Turn a slice
+  X Y Z            Turn the whole cube
+  Shift            Primes a face turn as in R'
+  Ctrl             Doubles a face turn as in R2
+  Alt              Widen a face turn, as in Rw
+  Space            Frame the cube again
+  Backspace        Put the cube back as it was
+  F2               Show the X/Y/Z axes, red green blue
+  F3               Show the frame rate
+  F12              Write a screenshot
+  Esc, Q           Close the window\
 """
 
 # Name of the extra shipping moderngl and glfw together, and the error
