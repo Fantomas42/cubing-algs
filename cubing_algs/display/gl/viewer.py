@@ -1,19 +1,20 @@
 """
 Interactive viewer of the GPU rendering backend.
 
-A window, an event loop, and the very same renderer an offscreen render
-uses: nothing is drawn here that ``render()`` would not draw, the cube
-simply keeps moving. The mouse orbits the camera, the wheel zooms, and
-the letters of the notation turn the cube, one animated move at a time.
+A cube, a camera, a queue of moves, and the very same renderer an
+offscreen render uses: nothing is drawn here that ``render()`` would not
+draw, the cube simply keeps moving.
 
-This is the only layer of the backend owning a loop, and it is kept as
-thin as it can be: the state machine of the animation, the framing of
-the camera and the building of a scene all live below, where they are
-tested without any GPU. What is left here is the plumbing of the events,
-and the state a viewer keeps from one frame to the next.
+**This module owns no window and no loop.** It names neither glfw nor
+any toolkit: a ``Viewer`` is driven by a *host* — the glfw one lives in
+``host.py``, a Qt widget or anything else is written the same way — which
+opens a context, hands it over as a ``Stage``, and calls ``frame()``,
+``press()``, ``drag()`` and ``scroll()`` from its own loop. That is what
+lets the very same viewer be embedded in an application that already has
+an event loop of its own.
 
-glfw and moderngl are imported lazily, as everywhere else in this
-sub-module: nothing is pulled in until a window is asked for.
+``Viewer.run()`` is the convenience of the library, and the only line
+here reaching for the glfw host.
 """
 import sys
 import tempfile
@@ -33,21 +34,14 @@ from cubing_algs.display.gl.camera import fit_aspect
 from cubing_algs.display.gl.camera import fit_fov
 from cubing_algs.display.gl.constants import AXES_REACH
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
-from cubing_algs.display.gl.constants import FPS_INTERVAL
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.constants import ORBIT_SENSITIVITY
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
 from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
-from cubing_algs.display.gl.constants import VIEWER_HELP
 from cubing_algs.display.gl.constants import VIEWER_SIZE
-from cubing_algs.display.gl.constants import WINDOW_TITLE
 from cubing_algs.display.gl.constants import ZOOM_STEP
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
-from cubing_algs.display.gl.context import GLFWWindow
-from cubing_algs.display.gl.context import create_window
-from cubing_algs.display.gl.context import create_window_context
-from cubing_algs.display.gl.context import destroy_window
 from cubing_algs.display.gl.encode import write_png
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import build_cube_geometry
@@ -68,18 +62,18 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from cubing_algs.vcube import VCube
 
-# Keys turning a face of the cube, and the ones turning a middle slice.
-# glfw numbers a letter key after its uppercase ASCII code, so a key is
-# already the notation of the move it plays, and no table maps the two.
+# Letters turning a face of the cube, and the ones turning a middle
+# slice. A host hands over the letter of the key that was pressed, which
+# is already the notation of the move: no table maps the two.
 FACE_KEYS = frozenset('RUFLDB')
 SLICE_KEYS = frozenset('MES')
 
-# Keys turning the whole cube, whose notation is lowercase.
+# Letters turning the whole cube, whose notation is lowercase.
 ROTATION_KEYS = {'X': 'x', 'Y': 'y', 'Z': 'z'}
 
 
 def key_notation(
-        key: int,
+        letter: str,
         *,
         prime: bool = False,
         double: bool = False,
@@ -89,7 +83,7 @@ def key_notation(
     Read the move a key stands for, modifiers included.
 
     Args:
-        key: The glfw code of the key.
+        letter: The uppercase letter of the key, empty for none.
         prime: Whether the move is turned the other way.
         double: Whether the move is a half turn. Wins over ``prime``.
         wide: Whether a face turn takes the layer behind it along.
@@ -99,11 +93,6 @@ def key_notation(
         The notation of the move, empty when the key plays none.
 
     """
-    if key < 0:
-        return ''
-
-    letter = chr(key)
-
     if letter in ROTATION_KEYS:
         base = ROTATION_KEYS[letter]
     elif letter in SLICE_KEYS:
@@ -117,24 +106,6 @@ def key_notation(
         return f'{ base }2'
 
     return f"{ base }'" if prime else base
-
-
-def fps_title(frames: int, elapsed: float, title: str = WINDOW_TITLE) -> str:
-    """
-    Write the frame rate of a window in its own title.
-
-    Args:
-        frames: Frames drawn over the period.
-        elapsed: How long that period lasted, in seconds.
-        title: Title of the window, kept ahead of the rate.
-
-    Returns:
-        The title to give the window.
-
-    """
-    rate = frames / elapsed
-
-    return f'{ title } — {rate:.0f} fps'
 
 
 def resolve_orientation(
@@ -186,141 +157,104 @@ def output(text: str) -> None:
 @dataclass(slots=True)
 class Stage:
     """
-    The window a viewer draws into, and what it owns on the GPU.
+    The GPU side of a viewer: a context, and what draws into it.
 
     Held apart from the viewer so that the cube, the camera and the
-    animation all exist before any window does, and outlive it: only
-    this handful of fields needs a display server, which is what keeps
-    the rest of the viewer testable without one.
+    animation all exist before any context does, and outlive it — which
+    is what keeps the rest of the viewer testable without a GPU.
+
+    It knows nothing of windows. Whoever opened the context owns it and
+    gives it back; the stage only ever releases what it built itself.
+    ``target`` is the framebuffer a frame lands in: the screen when left
+    out, and the widget one under a toolkit rendering into an FBO of its
+    own, ``QOpenGLWidget`` among them.
     """
 
-    window: GLFWWindow
     context: 'moderngl.Context'
     renderer: Renderer
     axes: AxesRenderer
     size: tuple[int, int]
-    title: str = WINDOW_TITLE
-    frames: int = 0
-    clock: float = 0.0
+    target: 'moderngl.Framebuffer | None' = None
+    background: tuple[float, float, float, float] = VIEWER_BACKGROUND
 
     @classmethod
-    def open(
+    def attach(
             cls,
-            size: tuple[int, int],
+            context: 'moderngl.Context',
             geometry: CubeGeometry,
-            look: Look = DEFAULT_LOOK,
-            title: str = WINDOW_TITLE,
+            size: tuple[int, int],
+            target: 'moderngl.Framebuffer | None' = None,
     ) -> Self:
         """
-        Open a window and build everything drawing into it takes.
+        Build everything drawing takes, on a context somebody else owns.
+
+        The context must have been made current beforehand.
 
         Args:
-            size: Width and height of the window, in pixels.
+            context: The context to draw with.
             geometry: The mesh of a cubie and the cubies to place it on.
-            look: How the light falls on the cube. Only its antialiasing
-                is read here, a window framebuffer being multisampled
-                too; the rest reaches the shader when a frame is drawn.
-            title: Title of the window.
+            size: Width and height of the drawing surface, in pixels.
+            target: The framebuffer to draw into. The screen of the
+                context when left out.
 
         Returns:
             A stage ready to be drawn into.
 
         """
-        window = create_window(size, title, samples=look.samples)
-        context = create_window_context()
-
         return cls(
-            window=window,
             context=context,
             renderer=Renderer.create(context, geometry),
-            axes=AxesRenderer.create(
-                context, geometry.radius * AXES_REACH,
-            ),
+            axes=AxesRenderer.create(context, geometry.radius * AXES_REACH),
             size=size,
-            title=title,
+            target=target,
         )
 
-    def use(
-            self,
-            background: tuple[float, float, float, float] = VIEWER_BACKGROUND,
-    ) -> None:
+    @property
+    def framebuffer(self) -> 'moderngl.Framebuffer':
         """
-        Make the window framebuffer current and clear it.
+        Tell where a frame lands.
+
+        Returns:
+            The framebuffer given at attach time, the screen of the
+            context when none was.
+
+        """
+        if self.target is None:
+            return self.context.screen
+
+        return self.target
+
+    def use(self) -> None:
+        """
+        Make the drawing surface current and clear it.
 
         The viewport is set on every frame rather than on resize alone:
         moderngl reads the size of the screen framebuffer once, when the
         context is created, and would otherwise draw into the window the
         user opened rather than into the one they are looking at.
-
-        Args:
-            background: Color the framebuffer is cleared with.
-
         """
-        screen = self.context.screen
+        framebuffer = self.framebuffer
 
-        screen.use()
+        framebuffer.use()
         self.context.viewport = (0, 0, *self.size)
-        screen.clear(color=background)
-
-    def count_frame(self, now: float) -> None:
-        """
-        Count a drawn frame, and show the rate it holds once a second.
-
-        The rate goes to the title of the window: telling a slowdown
-        from a steady sixty is all that is asked of it, and drawing a
-        text in the scene would take a font and a program of its own.
-
-        Args:
-            now: The moment the frame was drawn, in seconds.
-
-        """
-        import glfw
-
-        self.frames += 1
-        elapsed = now - self.clock
-
-        if elapsed < FPS_INTERVAL:
-            return
-
-        glfw.set_window_title(
-            self.window,
-            fps_title(self.frames, elapsed, self.title),
-        )
-
-        self.frames = 0
-        self.clock = now
-
-    def reset_title(self, now: float) -> None:
-        """
-        Put the plain title back, and start counting frames afresh.
-
-        Called whenever the rate is turned on or off: turned on, the
-        first period starts now instead of covering all the time the
-        counter spent asleep; turned off, the last rate leaves the title.
-
-        Args:
-            now: The moment the new period starts, in seconds.
-
-        """
-        import glfw
-
-        glfw.set_window_title(self.window, self.title)
-
-        self.frames = 0
-        self.clock = now
+        framebuffer.clear(color=self.background)
 
     def close(self) -> None:
-        """Give the window and every GPU resource of the stage back."""
+        """
+        Give back what the stage built on the GPU.
+
+        The context is left alone: it belongs to whoever created it, and
+        an embedded viewer must not take a toolkit's context down with
+        it.
+        """
         self.axes.release()
         self.renderer.release()
-        self.context.release()
-        destroy_window(self.window)
 
 
 @dataclass(slots=True)
 class Viewer:
     """
-    A cube in a window, turning under the mouse and the keyboard.
+    A cube turning under the mouse and the keyboard, in any host.
 
     Built with the options of ``render()``, so that what a window shows
     and what a PNG holds are the same picture: same palette, same mode,
@@ -329,8 +263,10 @@ class Viewer:
     and reading that orientation again after every move would make the
     cube jump around.
 
-    Nothing is opened until ``run()`` is called, and everything it opens
-    is given back when it returns, however it returns.
+    The viewer owns no window and no loop. A host attaches a ``Stage``
+    to it, then calls ``frame()`` once per frame and hands the input
+    over through ``press()``, ``drag()``, ``scroll()`` and ``resize()``.
+    ``run()`` is the shortcut opening a glfw window of its own.
 
     ``orientation`` is where something outside takes the cube in hand: a
     quaternion, or an ``OrientationTracker`` fed by a bluetooth sensor,
@@ -358,9 +294,6 @@ class Viewer:
     stage: Stage | None = field(init=False, default=None)
     animation: Animation | None = field(init=False, default=None)
     pending: deque[str] = field(init=False, default_factory=deque[str])
-    dragging: bool = field(init=False, default=False)
-    cursor: tuple[float, float] = field(init=False, default=(0.0, 0.0))
-    clock: float = field(init=False, default=0.0)
 
     def __post_init__(self) -> None:
         """Settle what is drawn, and how it is framed, once and for all."""
@@ -403,13 +336,13 @@ class Viewer:
 
     def require_stage(self) -> Stage:
         """
-        Hand the open window over.
+        Hand the stage being drawn into over.
 
         Returns:
             The stage the viewer draws into.
 
         Raises:
-            GLContextError: When no window is open.
+            GLContextError: When no stage is attached.
 
         """
         if self.stage is None:
@@ -417,6 +350,34 @@ class Viewer:
             raise GLContextError(msg)
 
         return self.stage
+
+    def attach(self, stage: Stage) -> None:
+        """
+        Draw into the stage a host has just opened.
+
+        Args:
+            stage: The context and the renderers to draw with. Its size
+                is taken as the one of the drawing surface, so a host
+                reporting a framebuffer larger than the window it asked
+                for frames the cube on what it truly has.
+
+        """
+        self.stage = stage
+        self.resize(stage.size)
+
+    def detach(self) -> None:
+        """
+        Give the stage back, if one is attached.
+
+        What the stage built on the GPU is released; the context is not,
+        a host having every right to keep drawing something else with
+        it.
+        """
+        if self.stage is None:
+            return
+
+        self.stage.close()
+        self.stage = None
 
     def push(self, notation: str) -> bool:
         """
@@ -444,6 +405,62 @@ class Viewer:
         self.pending.append(notation)
 
         return True
+
+    def press(
+            self,
+            letter: str,
+            *,
+            prime: bool = False,
+            double: bool = False,
+            wide: bool = False,
+    ) -> bool:
+        """
+        Queue the move a key stands for.
+
+        The vocabulary a host speaks: a letter and three modifiers, none
+        of which belongs to any toolkit.
+
+        Args:
+            letter: The uppercase letter of the key, empty for none.
+            prime: Whether the move is turned the other way.
+            double: Whether the move is a half turn.
+            wide: Whether a face turn takes the layer behind it along.
+
+        Returns:
+            True when the key played a move.
+
+        """
+        return self.push(
+            key_notation(letter, prime=prime, double=double, wide=wide),
+        )
+
+    def drag(self, delta_x: float, delta_y: float) -> None:
+        """
+        Orbit the camera along a movement of the mouse.
+
+        The cube turns the way the mouse goes: dragging to the right
+        brings the left face in, dragging down brings the top in.
+
+        Args:
+            delta_x: Pixels the cursor moved to the right.
+            delta_y: Pixels the cursor moved down.
+
+        """
+        self.camera.orbit(
+            -delta_x * ORBIT_SENSITIVITY,
+            delta_y * ORBIT_SENSITIVITY,
+        )
+
+    def scroll(self, notches: float) -> None:
+        """
+        Move the camera closer to the cube, or further away.
+
+        Args:
+            notches: Notches the wheel was turned by, forward being
+                positive.
+
+        """
+        self.camera.zoom(ZOOM_STEP ** notches)
 
     def advance(self, delta: float) -> Scene:
         """
@@ -488,7 +505,7 @@ class Viewer:
 
     def resize(self, size: tuple[int, int]) -> None:
         """
-        Take the window to a new size.
+        Take the drawing surface to a new size.
 
         The field of view is fitted again rather than kept: a window
         taller than it is wide would cut the cube on both sides. It is
@@ -511,9 +528,37 @@ class Viewer:
         self.camera.aspect = width / height
         self.camera.fov = fit_aspect(self.framing_fov, self.camera.aspect)
 
+    def draw(self) -> None:
+        """Draw the current scene into the stage."""
+        stage = self.require_stage()
+        orientation = resolve_orientation(self.orientation)
+
+        stage.use()
+        stage.renderer.draw(self.scene, self.camera, self.look, orientation)
+
+        if self.show_axes:
+            stage.axes.draw(self.camera, orientation)
+
+    def frame(self, delta: float) -> None:
+        """
+        Play one frame: let time pass, and draw what it leads to.
+
+        Neither swapping the buffers nor reading the events happens
+        here: both belong to whoever owns the loop, and a toolkit does
+        them on its own.
+
+        Args:
+            delta: Seconds gone by since the last frame. Measured by the
+                host rather than assumed, so an animation lasts as long
+                as it should whatever frame rate the machine holds.
+
+        """
+        self.advance(delta)
+        self.draw()
+
     def screenshot(self, path: str | Path = '') -> Path:
         """
-        Write what the window shows to a PNG file.
+        Write what the viewer shows to a PNG file.
 
         Drawn again into an offscreen framebuffer rather than read back
         from the window: a multisampled framebuffer cannot be read from
@@ -555,219 +600,14 @@ class Viewer:
 
         return written
 
-    def on_key(
-            self,
-            window: GLFWWindow,
-            key: int,
-            _scancode: int,
-            action: int,
-            mods: int,
-    ) -> None:
-        """
-        React to a key being pressed, or held down.
-
-        Args:
-            window: The window the key was pressed in.
-            key: The glfw code of the key.
-            _scancode: Platform specific code of the key, unused.
-            action: Whether the key was pressed, released or repeated.
-            mods: The modifier keys held down with it.
-
-        """
-        import glfw
-
-        if action == glfw.RELEASE:
-            return
-
-        if key in {glfw.KEY_ESCAPE, glfw.KEY_Q}:
-            glfw.set_window_should_close(window, glfw.TRUE)
-        elif key == glfw.KEY_SPACE:
-            self.reset_camera()
-        elif key == glfw.KEY_BACKSPACE:
-            self.reset_cube()
-        elif key == glfw.KEY_F2:
-            self.show_axes = not self.show_axes
-        elif key == glfw.KEY_F3:
-            self.show_fps = not self.show_fps
-            self.require_stage().reset_title(self.clock)
-        elif key == glfw.KEY_F12:
-            self.screenshot()
-        else:
-            self.push(
-                key_notation(
-                    key,
-                    prime=bool(mods & glfw.MOD_SHIFT),
-                    double=bool(mods & glfw.MOD_CONTROL),
-                    wide=bool(mods & glfw.MOD_ALT),
-                ),
-            )
-
-    def on_mouse_button(
-            self,
-            window: GLFWWindow,
-            button: int,
-            action: int,
-            _mods: int,
-    ) -> None:
-        """
-        Start or stop dragging the cube around.
-
-        Args:
-            window: The window the button was pressed in.
-            button: The glfw code of the button.
-            action: Whether the button was pressed or released.
-            _mods: The modifier keys held down with it, unused.
-
-        """
-        import glfw
-
-        if button != glfw.MOUSE_BUTTON_LEFT:
-            return
-
-        self.dragging = action == glfw.PRESS
-        self.cursor = glfw.get_cursor_pos(window)
-
-    def on_cursor(self, _window: GLFWWindow, x: float, y: float) -> None:
-        """
-        Follow the mouse, and orbit the camera while it is dragged.
-
-        The cube turns the way the mouse goes: dragging to the right
-        brings the left face in, dragging down brings the top in.
-
-        Args:
-            _window: The window the mouse moved over, unused.
-            x: Where the cursor stands, in pixels from the left.
-            y: Where the cursor stands, in pixels from the top.
-
-        """
-        previous_x, previous_y = self.cursor
-        self.cursor = (x, y)
-
-        if not self.dragging:
-            return
-
-        self.camera.orbit(
-            (previous_x - x) * ORBIT_SENSITIVITY,
-            (y - previous_y) * ORBIT_SENSITIVITY,
-        )
-
-    def on_scroll(self, _window: GLFWWindow, _x: float, y: float) -> None:
-        """
-        Move the camera closer to the cube, or further away.
-
-        Args:
-            _window: The window the wheel was turned over, unused.
-            _x: Horizontal scrolling, unused.
-            y: Notches the wheel was turned by, forward being positive.
-
-        """
-        self.camera.zoom(ZOOM_STEP ** y)
-
-    def on_resize(
-            self,
-            _window: GLFWWindow,
-            width: int,
-            height: int,
-    ) -> None:
-        """
-        Follow the window as it is resized.
-
-        Args:
-            _window: The window that was resized, unused.
-            width: New width of its framebuffer, in pixels.
-            height: New height of its framebuffer, in pixels.
-
-        """
-        self.resize((width, height))
-
-    def open(self) -> Stage:
-        """
-        Open the window and listen to what happens in it.
-
-        Returns:
-            The stage the viewer draws into.
-
-        """
-        # The window is opened before glfw is reached for, and not
-        # after: create_window() is the one place naming the extra a
-        # missing glfw asks for, and an import raising first would
-        # replace that with a bare ModuleNotFoundError.
-        stage = Stage.open(self.window_size, self.geometry, self.look)
-        self.stage = stage
-
-        import glfw
-
-        glfw.swap_interval(1)
-        glfw.set_key_callback(stage.window, self.on_key)
-        glfw.set_mouse_button_callback(stage.window, self.on_mouse_button)
-        glfw.set_cursor_pos_callback(stage.window, self.on_cursor)
-        glfw.set_scroll_callback(stage.window, self.on_scroll)
-        glfw.set_framebuffer_size_callback(stage.window, self.on_resize)
-
-        self.resize(glfw.get_framebuffer_size(stage.window))
-        self.clock = glfw.get_time()
-        stage.clock = self.clock
-
-        return stage
-
-    def close(self) -> None:
-        """Close the window, if one is open, and forget about it."""
-        if self.stage is None:
-            return
-
-        self.stage.close()
-        self.stage = None
-
-    def draw(self) -> None:
-        """Draw the current scene into the window."""
-        stage = self.require_stage()
-        orientation = resolve_orientation(self.orientation)
-
-        stage.use()
-        stage.renderer.draw(self.scene, self.camera, self.look, orientation)
-
-        if self.show_axes:
-            stage.axes.draw(self.camera, orientation)
-
-    def tick(self) -> None:
-        """
-        Play one frame: let time pass, draw it, and read the events.
-
-        The elapsed time is measured rather than assumed, so an
-        animation lasts as long as it should whatever the frame rate the
-        machine holds.
-        """
-        import glfw
-
-        stage = self.require_stage()
-
-        now = glfw.get_time()
-        self.advance(now - self.clock)
-        self.clock = now
-
-        self.draw()
-
-        glfw.swap_buffers(stage.window)
-        glfw.poll_events()
-
-        if self.show_fps:
-            stage.count_frame(now)
-
     def run(self) -> None:
         """
-        Open the window and draw the cube until it is closed.
+        Open a glfw window of its own and draw the cube until it closes.
 
-        The window is given back however the loop ends, an interruption
-        from the keyboard included.
+        The convenience of the library, and the one place here knowing a
+        host exists. An application owning its event loop attaches a
+        stage and calls ``frame()`` instead.
         """
-        stage = self.open()
+        from cubing_algs.display.gl.host import GlfwHost
 
-        import glfw
-
-        output(VIEWER_HELP)
-
-        try:
-            while not glfw.window_should_close(stage.window):
-                self.tick()
-        finally:
-            self.close()
+        GlfwHost(self).run()

@@ -1,33 +1,30 @@
 """
 Tests for the interactive viewer of the GPU rendering backend.
 
-Most of what a viewer does needs neither a window nor a GPU: the cube,
-the camera and the queue of moves are plain Python, and that is what
-the split between ``Viewer`` and ``Stage`` buys. The few tests that do
-open a window open it hidden, and are skipped where none can be.
+Not one test here names glfw, and that is the point: a viewer holds a
+cube, a camera and a queue of moves, and answers a neutral vocabulary of
+input. What needs a GPU is drawn through a ``Stage`` attached to a
+**headless** context — exactly what an embedded host hands over — so the
+whole viewer is exercised without opening a window at all.
+
+The glfw host has its own file, ``test_display_gl_host.py``.
 """
 import math
-import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
+from typing import ClassVar
 from unittest import mock
 
 from cubing_algs.display.constants import DISTANCE
-from cubing_algs.display.gl.constants import FPS_INTERVAL
-from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
-from cubing_algs.display.gl.constants import GLFW_MISSING
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
-from cubing_algs.display.gl.constants import WINDOW_TITLE
+from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
-from cubing_algs.display.gl.context import GLFWWindow
-from cubing_algs.display.gl.context import create_window
-from cubing_algs.display.gl.context import create_window_context
-from cubing_algs.display.gl.context import destroy_window
-from cubing_algs.display.gl.context import has_glfw
-from cubing_algs.display.gl.context import select_glfw_variant
+from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
+from cubing_algs.display.gl.renderer import COLOR_CHANNELS
 from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
@@ -37,81 +34,50 @@ from cubing_algs.display.gl.transforms import OrientationTracker
 from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
-from cubing_algs.display.gl.viewer import fps_title
 from cubing_algs.display.gl.viewer import key_notation
 from cubing_algs.display.gl.viewer import resolve_orientation
 from cubing_algs.display.gl.viewer import screenshot_path
 from cubing_algs.vcube import VCube
 
+if TYPE_CHECKING:  # pragma: no cover
+    import moderngl
+
 SCRAMBLE = "R U R' U' F' L F R"
 
 WINDOW_SIZE = (128, 128)
 
-# A window is drawn into for real, so the shortest antialiasing that
+# A stage is drawn into for real, so the shortest antialiasing that
 # still exercises the multisampled path is enough here.
 WINDOW_LOOK = Look(samples=2)
 
+# The GPU rounds a color channel to a byte; two units of tolerance
+# absorb that, and nothing more.
+COLOR_TOLERANCE = 2
 
-def hidden_window(
-        size: tuple[int, int],
-        title: str = WINDOW_TITLE,
-        *,
-        samples: int = 0,
-        require: int = GL_VERSION_REQUIRED,
-) -> GLFWWindow:
+
+def probe_gpu() -> bool:
     """
-    Create the window of a viewer, without showing it.
-
-    Args:
-        size: Width and height of the window, in pixels.
-        title: Title of the window.
-        samples: Samples of its multisampled framebuffer.
-        require: Minimum OpenGL version code.
+    Tell whether this machine can create an OpenGL context.
 
     Returns:
-        The glfw window handle, made current and left hidden.
+        True when the drawing tests can run.
 
     """
-    return create_window(
-        size, title, visible=False, samples=samples, require=require,
-    )
-
-
-def probe_window() -> bool:
-    """
-    Tell whether this machine can open a window holding a context.
-
-    Returns:
-        True when the viewer tests can run.
-
-    """
-    if not has_glfw():  # pragma: no cover
-        return False
-
-    select_glfw_variant()
-
     try:
-        window = hidden_window(WINDOW_SIZE)
-        context = create_window_context()
+        context = create_standalone_context()
     except GLContextError:  # pragma: no cover
         return False
 
     context.release()
-    destroy_window(window)
 
     return True
 
 
-WINDOW_AVAILABLE = probe_window()
+GPU_AVAILABLE = probe_gpu()
 
-requires_window = unittest.skipUnless(
-    WINDOW_AVAILABLE,
-    'no OpenGL window available on this machine',
-)
-
-requires_glfw = unittest.skipUnless(
-    has_glfw(),
-    'glfw is not installed',
+requires_gpu = unittest.skipUnless(
+    GPU_AVAILABLE,
+    'no OpenGL context available on this machine',
 )
 
 
@@ -120,73 +86,57 @@ class TestKeyNotation(unittest.TestCase):
 
     def test_face_key(self) -> None:
         """Test that a letter key turns the face it names."""
-        self.assertEqual(key_notation(ord('R')), 'R')
+        self.assertEqual(key_notation('R'), 'R')
 
     def test_prime(self) -> None:
         """Test that shift turns a face the other way."""
-        self.assertEqual(key_notation(ord('U'), prime=True), "U'")
+        self.assertEqual(key_notation('U', prime=True), "U'")
 
     def test_double(self) -> None:
         """Test that ctrl turns a face twice."""
-        self.assertEqual(key_notation(ord('F'), double=True), 'F2')
+        self.assertEqual(key_notation('F', double=True), 'F2')
 
     def test_double_wins_over_prime(self) -> None:
         """Test that a half turn has no direction to be primed in."""
         self.assertEqual(
-            key_notation(ord('B'), prime=True, double=True),
+            key_notation('B', prime=True, double=True),
             'B2',
         )
 
     def test_wide_face(self) -> None:
         """Test that alt takes the layer behind a face along."""
-        self.assertEqual(key_notation(ord('L'), wide=True), 'Lw')
+        self.assertEqual(key_notation('L', wide=True), 'Lw')
 
     def test_wide_prime_face(self) -> None:
         """Test that a wide move is primed like any other."""
         self.assertEqual(
-            key_notation(ord('D'), prime=True, wide=True),
+            key_notation('D', prime=True, wide=True),
             "Dw'",
         )
 
     def test_slice_key(self) -> None:
         """Test that a slice key turns the middle layer."""
-        self.assertEqual(key_notation(ord('M')), 'M')
+        self.assertEqual(key_notation('M'), 'M')
 
     def test_slice_is_never_wide(self) -> None:
         """Test that widening a slice means nothing, and does nothing."""
-        self.assertEqual(key_notation(ord('S'), wide=True), 'S')
+        self.assertEqual(key_notation('S', wide=True), 'S')
 
     def test_rotation_key(self) -> None:
         """Test that a rotation key turns the whole cube, in lowercase."""
-        self.assertEqual(key_notation(ord('Y')), 'y')
+        self.assertEqual(key_notation('Y'), 'y')
 
     def test_rotation_is_never_wide(self) -> None:
         """Test that widening a rotation means nothing, and does nothing."""
-        self.assertEqual(key_notation(ord('X'), wide=True, prime=True), "x'")
+        self.assertEqual(key_notation('X', wide=True, prime=True), "x'")
 
     def test_unknown_key(self) -> None:
         """Test that a key playing no move is turned into nothing."""
-        self.assertEqual(key_notation(ord('K')), '')
+        self.assertEqual(key_notation('K'), '')
 
-    def test_unknown_key_code(self) -> None:
-        """Test that the key glfw could not name is turned into nothing."""
-        self.assertEqual(key_notation(-1), '')
-
-
-class TestFpsTitle(unittest.TestCase):
-    """Tests for the fps_title function."""
-
-    def test_rate_is_the_average_of_the_period(self) -> None:
-        """Test that the rate is counted over the whole period."""
-        self.assertEqual(fps_title(120, 2.0), f'{ WINDOW_TITLE } — 60 fps')
-
-    def test_rate_is_rounded(self) -> None:
-        """Test that a frame rate is shown whole."""
-        self.assertEqual(fps_title(59, 1.02), f'{ WINDOW_TITLE } — 58 fps')
-
-    def test_title_is_kept_ahead(self) -> None:
-        """Test that the window keeps being named after what it shows."""
-        self.assertEqual(fps_title(30, 1.0, 'cube'), 'cube — 30 fps')
+    def test_no_key_at_all(self) -> None:
+        """Test that a key the host could not name plays nothing."""
+        self.assertEqual(key_notation(''), '')
 
 
 class TestResolveOrientation(unittest.TestCase):
@@ -323,35 +273,21 @@ class TestViewer(unittest.TestCase):
         self.assertEqual(len(self.viewer.pending), 0)
         self.assertIsNone(self.viewer.animation)
 
-    def test_drawing_without_a_window(self) -> None:
-        """Test that a closed viewer says so rather than crashing."""
+    def test_drawing_without_a_stage(self) -> None:
+        """Test that a viewer nobody attached says so rather than crashing."""
         with self.assertRaises(GLContextError):
             self.viewer.draw()
 
-    def test_screenshot_without_a_window(self) -> None:
-        """Test that a closed viewer has nothing to capture."""
+    def test_screenshot_without_a_stage(self) -> None:
+        """Test that a viewer nobody attached has nothing to capture."""
         with self.assertRaises(GLContextError):
             self.viewer.screenshot()
 
-    def test_closing_a_closed_viewer(self) -> None:
-        """Test that closing a viewer twice is harmless."""
-        self.viewer.close()
+    def test_detaching_a_detached_viewer(self) -> None:
+        """Test that giving a stage back twice is harmless."""
+        self.viewer.detach()
 
         self.assertIsNone(self.viewer.stage)
-
-    def test_opening_without_glfw_names_the_extra(self) -> None:
-        """Test that a missing glfw is reported rather than stumbled upon."""
-        with (
-                mock.patch.dict(sys.modules, {'glfw': None}),
-                mock.patch(
-                    'cubing_algs.display.gl.context.has_glfw',
-                    return_value=False,
-                ),
-                self.assertRaises(GLContextError) as context,
-        ):
-            self.viewer.run()
-
-        self.assertEqual(str(context.exception), GLFW_MISSING)
 
 
 class TestViewerFraming(unittest.TestCase):
@@ -407,293 +343,266 @@ class TestViewerFraming(unittest.TestCase):
         self.assertEqual(self.viewer.camera.aspect, 1.0)
 
 
-@requires_glfw
 class TestViewerInput(unittest.TestCase):
-    """Tests for the events a viewer answers, without any window."""
+    """
+    Tests for the neutral vocabulary a host speaks to a viewer.
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        """Choose the glfw variant before anything imports the library."""
-        select_glfw_variant()
+    A letter and three modifiers, a movement in pixels, a number of
+    notches: nothing here belongs to any toolkit, which is what lets a
+    second host be written without touching the viewer.
+    """
 
     def setUp(self) -> None:
         """Build a viewer on a solved cube."""
         self.viewer = Viewer(VCube(), window_size=WINDOW_SIZE)
 
-    def test_key_plays_a_move(self) -> None:
-        """Test that a letter key queues the move it names."""
-        import glfw
-
-        self.viewer.on_key(None, ord('R'), 0, glfw.PRESS, glfw.MOD_SHIFT)
-
+    def test_press_plays_a_move(self) -> None:
+        """Test that a letter queues the move it names."""
+        self.assertTrue(self.viewer.press('R', prime=True))
         self.assertEqual(list(self.viewer.pending), ["R'"])
 
-    def test_held_key_repeats_the_move(self) -> None:
-        """Test that holding a key down keeps the cube turning."""
-        import glfw
-
-        self.viewer.on_key(None, ord('U'), 0, glfw.REPEAT, 0)
-
-        self.assertEqual(list(self.viewer.pending), ['U'])
-
-    def test_released_key_plays_nothing(self) -> None:
-        """Test that letting a key go plays no second move."""
-        import glfw
-
-        self.viewer.on_key(None, ord('U'), 0, glfw.RELEASE, 0)
-
+    def test_press_a_key_playing_nothing(self) -> None:
+        """Test that a letter naming no move queues none."""
+        self.assertFalse(self.viewer.press('K'))
         self.assertEqual(len(self.viewer.pending), 0)
 
-    def test_key_frames_the_cube_again(self) -> None:
-        """Test that space puts the camera back where it started."""
-        import glfw
+    def test_press_a_wide_move(self) -> None:
+        """Test that the modifiers reach the notation."""
+        self.viewer.press('L', double=True, wide=True)
 
-        self.viewer.camera.orbit(1.0, 0.0)
-        self.viewer.on_key(None, glfw.KEY_SPACE, 0, glfw.PRESS, 0)
-
-        self.assertAlmostEqual(self.viewer.camera.yaw, math.radians(45))
-
-    def test_key_resets_the_cube(self) -> None:
-        """Test that backspace puts the cube back as it was."""
-        import glfw
-
-        self.viewer.push('R')
-        self.viewer.advance(self.viewer.duration)
-        self.viewer.on_key(None, glfw.KEY_BACKSPACE, 0, glfw.PRESS, 0)
-
-        self.assertEqual(self.viewer.cube.state, VCube().state)
-
-    def test_key_toggles_the_axes(self) -> None:
-        """Test that F2 shows the axes, and hides them again."""
-        import glfw
-
-        self.viewer.on_key(None, glfw.KEY_F2, 0, glfw.PRESS, 0)
-
-        self.assertTrue(self.viewer.show_axes)
-
-        self.viewer.on_key(None, glfw.KEY_F2, 0, glfw.PRESS, 0)
-
-        self.assertFalse(self.viewer.show_axes)
+        self.assertEqual(list(self.viewer.pending), ['Lw2'])
 
     def test_drag_orbits_the_camera(self) -> None:
         """Test that dragging the mouse turns the cube the way it goes."""
-        self.viewer.dragging = True
-        self.viewer.cursor = (100.0, 100.0)
-
         yaw, pitch = self.viewer.camera.yaw, self.viewer.camera.pitch
-        self.viewer.on_cursor(None, 150.0, 120.0)
+
+        self.viewer.drag(50.0, 20.0)
 
         self.assertLess(self.viewer.camera.yaw, yaw)
         self.assertGreater(self.viewer.camera.pitch, pitch)
-        self.assertEqual(self.viewer.cursor, (150.0, 120.0))
 
-    def test_moving_without_dragging(self) -> None:
-        """Test that a mouse nobody holds down moves nothing."""
+    def test_drag_the_other_way(self) -> None:
+        """Test that dragging back takes the camera back."""
         yaw = self.viewer.camera.yaw
 
-        self.viewer.on_cursor(None, 150.0, 120.0)
+        self.viewer.drag(-50.0, 0.0)
 
-        self.assertEqual(self.viewer.camera.yaw, yaw)
-        self.assertEqual(self.viewer.cursor, (150.0, 120.0))
+        self.assertGreater(self.viewer.camera.yaw, yaw)
 
-    def test_wheel_zooms_in(self) -> None:
+    def test_scroll_zooms_in(self) -> None:
         """Test that scrolling forward brings the camera closer."""
         distance = self.viewer.camera.distance
 
-        self.viewer.on_scroll(None, 0.0, 2.0)
+        self.viewer.scroll(2.0)
 
         self.assertLess(self.viewer.camera.distance, distance)
 
-    def test_wheel_zooms_out(self) -> None:
+    def test_scroll_zooms_out(self) -> None:
         """Test that scrolling backwards takes the camera away."""
         distance = self.viewer.camera.distance
 
-        self.viewer.on_scroll(None, 0.0, -2.0)
+        self.viewer.scroll(-2.0)
 
         self.assertGreater(self.viewer.camera.distance, distance)
 
-    def test_resize_event(self) -> None:
-        """Test that a resized window reaches the camera."""
-        self.viewer.on_resize(None, 800, 400)
 
-        self.assertEqual(self.viewer.camera.aspect, 2.0)
+@requires_gpu
+class AttachedViewerTestCase(unittest.TestCase):
+    """
+    A viewer drawing into a stage built on a headless context.
 
+    No window is opened: the context is standalone and the frames land
+    in a framebuffer of the test. This is the very path an embedded host
+    takes — a ``QOpenGLWidget`` hands over its own FBO the same way — so
+    running the viewer here is what proves it needs no window.
+    """
 
-@requires_window
-class HiddenViewerTestCase(unittest.TestCase):
-    """A viewer whose window is opened for real, but never shown."""
+    context: ClassVar['moderngl.Context']
 
     @classmethod
     def setUpClass(cls) -> None:
-        """Choose the glfw variant before anything imports the library."""
-        select_glfw_variant()
+        """Create the headless context every test of the class draws in."""
+        cls.context = create_standalone_context()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Give the headless context back."""
+        cls.context.release()
 
     def setUp(self) -> None:
-        """Open a hidden viewer on a scrambled cube."""
+        """Build a viewer on a scrambled cube, and a target for it."""
         cube = VCube()
         cube.rotate(SCRAMBLE)
 
         self.viewer = Viewer(
             cube, window_size=WINDOW_SIZE, look=WINDOW_LOOK,
         )
-
-        self.hidden = mock.patch(
-            'cubing_algs.display.gl.viewer.create_window',
-            hidden_window,
+        self.target = self.context.simple_framebuffer(
+            WINDOW_SIZE, COLOR_CHANNELS,
         )
-        self.hidden.start()
 
     def tearDown(self) -> None:
-        """Close whatever the test left open."""
-        self.viewer.close()
-        self.hidden.stop()
+        """Give back whatever the test attached."""
+        self.viewer.detach()
+        self.target.release()
+
+    def attach(self) -> Stage:
+        """
+        Hand a stage over to the viewer, as a host would.
+
+        Returns:
+            The stage the viewer now draws into.
+
+        """
+        stage = Stage.attach(
+            self.context, self.viewer.geometry, WINDOW_SIZE, self.target,
+        )
+        self.viewer.attach(stage)
+
+        return stage
+
+    def corner(self) -> tuple[int, ...]:
+        """
+        Read the pixel of the target no cube can reach.
+
+        Returns:
+            The four channels of the bottom left pixel.
+
+        """
+        pixels = self.target.read(components=COLOR_CHANNELS)
+
+        return tuple(pixels[:COLOR_CHANNELS])
 
 
-class TestViewerHeldFromOutside(HiddenViewerTestCase):
-    """Tests for a viewer drawing a cube something outside is holding."""
+class TestStage(AttachedViewerTestCase):
+    """Tests for the GPU side a host hands to a viewer."""
 
-    def test_draw_hands_the_external_orientation_over(self) -> None:
-        """Test that a frame is drawn with the cube held as it is."""
-        tracker = OrientationTracker()
-        tracker.update(*Quat.identity())
-        tracker.update(*Quat.from_axis_angle(AXIS_Y, math.pi / 2))
+    def test_stage_holds_the_geometry_of_the_viewer(self) -> None:
+        """Test that a stage is built for the geometry it draws."""
+        geometry = self.viewer.geometry
+        stage = self.attach()
 
-        self.viewer.orientation = tracker
-        self.viewer.open()
-
-        with mock.patch.object(Renderer, 'draw') as drawn:
-            self.viewer.draw()
-
-        drawn.assert_called_once_with(
-            self.viewer.scene,
-            self.viewer.camera,
-            self.viewer.look,
-            tracker.orientation,
+        self.assertEqual(
+            stage.renderer.instance_buffer.size,
+            len(geometry.cubies) * INSTANCE_SIZE,
         )
 
-    def test_screenshot_holds_the_external_orientation(self) -> None:
-        """Test that a capture shows the cube as the window does."""
-        quarter = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+    def test_a_stage_draws_into_the_target_it_was_given(self) -> None:
+        """Test that a host framebuffer is the one a frame lands in."""
+        stage = self.attach()
 
-        self.viewer.orientation = quarter
-        self.viewer.open()
+        self.assertIs(stage.framebuffer, self.target)
 
-        with (
-                TemporaryDirectory() as folder,
-                mock.patch.object(Renderer, 'draw') as drawn,
-        ):
-            self.viewer.screenshot(Path(folder) / 'held.png')
+    def test_a_stage_without_a_target_draws_on_the_screen(self) -> None:
+        """Test that a plain window needs no framebuffer of its own."""
+        stage = Stage.attach(
+            self.context, self.viewer.geometry, WINDOW_SIZE,
+        )
 
-        self.assertEqual(drawn.call_args.args[3], quarter)
+        try:
+            self.assertIs(stage.framebuffer, self.context.screen)
+        finally:
+            stage.close()
 
-
-class TestViewerWindow(HiddenViewerTestCase):
-    """Tests for a viewer holding a real, hidden, window."""
-
-    def test_open_and_close(self) -> None:
-        """Test that a viewer gives its window back."""
-        stage = self.viewer.open()
-
-        self.assertIs(self.viewer.stage, stage)
-        self.assertEqual(stage.size, WINDOW_SIZE)
-
-        self.viewer.close()
-
-        self.assertIsNone(self.viewer.stage)
-
-    def test_draw(self) -> None:
-        """Test that a frame reaches the window framebuffer."""
-        self.viewer.open()
+    def test_background_is_the_one_of_the_viewer(self) -> None:
+        """Test that what the cube does not cover is the opaque grey."""
+        self.attach()
 
         self.viewer.draw()
 
-    def test_tick_lets_time_pass(self) -> None:
-        """Test that a frame plays the move under way."""
-        self.viewer.open()
-        self.viewer.push('R')
-        self.viewer.clock -= self.viewer.duration
+        for channel, expected in zip(
+                self.corner(), VIEWER_BACKGROUND, strict=True,
+        ):
+            self.assertAlmostEqual(
+                channel, round(expected * 255), delta=COLOR_TOLERANCE,
+            )
 
-        self.viewer.tick()
+    def test_background_is_a_field_a_host_may_change(self) -> None:
+        """Test that an embedded stage lets the desktop through."""
+        stage = self.attach()
+        stage.background = (0.0, 0.0, 0.0, 0.0)
+
+        self.viewer.draw()
+
+        self.assertEqual(self.corner(), (0, 0, 0, 0))
+
+    def test_closing_a_stage_leaves_the_context_alone(self) -> None:
+        """Test that a stage never takes a host context down with it."""
+        stage = Stage.attach(
+            self.context, self.viewer.geometry, WINDOW_SIZE, self.target,
+        )
+
+        stage.close()
+
+        # A released context builds nothing; this one still answers, as
+        # a toolkit going on drawing with it needs it to.
+        survivor = self.context.simple_framebuffer((4, 4), COLOR_CHANNELS)
+
+        self.assertEqual(survivor.size, (4, 4))
+
+        survivor.release()
+
+    def test_detach_gives_the_stage_back(self) -> None:
+        """Test that a viewer forgets the stage it was handed."""
+        self.attach()
+
+        self.viewer.detach()
+
+        self.assertIsNone(self.viewer.stage)
+
+    def test_attach_frames_on_the_size_of_the_stage(self) -> None:
+        """Test that the surface truly given is the one framed on."""
+        stage = Stage.attach(
+            self.context, self.viewer.geometry, (256, 128), self.target,
+        )
+
+        self.viewer.attach(stage)
+
+        self.assertEqual(self.viewer.camera.aspect, 2.0)
+
+
+class TestViewerDrawing(AttachedViewerTestCase):
+    """Tests for a viewer drawing frames into a stage."""
+
+    def test_draw(self) -> None:
+        """Test that a frame reaches the framebuffer of the stage."""
+        self.attach()
+
+        self.viewer.draw()
+
+    def test_frame_lets_time_pass(self) -> None:
+        """Test that a frame plays the move under way."""
+        self.attach()
+        self.viewer.push('R')
+
+        self.viewer.frame(self.viewer.duration)
 
         self.assertIsNone(self.viewer.animation)
 
-    def test_tick_counts_no_frame_by_default(self) -> None:
-        """Test that a viewer left alone keeps the title of its window."""
-        stage = self.viewer.open()
+    def test_frame_draws_what_time_led_to(self) -> None:
+        """Test that a frame is the scene the elapsed time built."""
+        self.attach()
+        self.viewer.push('R')
 
-        self.viewer.tick()
+        self.viewer.frame(self.viewer.duration / 2)
 
-        self.assertEqual(stage.frames, 0)
+        self.assertIsNotNone(self.viewer.animation)
 
-    def test_tick_counts_a_frame_when_asked(self) -> None:
-        """Test that a frame is counted once the rate is asked for."""
-        self.viewer.show_fps = True
-        stage = self.viewer.open()
+    def test_screenshot(self) -> None:
+        """Test that a screenshot is a PNG of what the viewer shows."""
+        self.attach()
 
-        self.viewer.tick()
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'shot.png'
 
-        self.assertEqual(stage.frames, 1)
-
-    def test_frame_counter_holds_its_rate_for_a_second(self) -> None:
-        """Test that the title is not rewritten on every frame."""
-        stage = self.viewer.open()
-        stage.frames = 0
-        stage.clock = 0.0
-
-        with mock.patch('glfw.set_window_title') as written:
-            stage.count_frame(FPS_INTERVAL / 2)
-
-        self.assertEqual(stage.frames, 1)
-        written.assert_not_called()
-
-    def test_frame_counter_writes_the_rate_in_the_title(self) -> None:
-        """Test that a whole period of frames reaches the title."""
-        stage = self.viewer.open()
-        stage.frames = 59
-        stage.clock = 0.0
-
-        with mock.patch('glfw.set_window_title') as written:
-            stage.count_frame(FPS_INTERVAL)
-
-        written.assert_called_once_with(
-            stage.window, f'{ WINDOW_TITLE } — 60 fps',
-        )
-        self.assertEqual(stage.frames, 0)
-        self.assertEqual(stage.clock, FPS_INTERVAL)
-
-    def test_key_asks_for_the_frame_rate(self) -> None:
-        """Test that F3 counts frames from the moment it is pressed."""
-        import glfw
-
-        stage = self.viewer.open()
-        stage.frames = 42
-        self.viewer.clock = 12.0
-
-        with mock.patch('glfw.set_window_title') as written:
-            self.viewer.on_key(None, glfw.KEY_F3, 0, glfw.PRESS, 0)
-
-        self.assertTrue(self.viewer.show_fps)
-        written.assert_called_once_with(stage.window, WINDOW_TITLE)
-        self.assertEqual(stage.frames, 0)
-        self.assertEqual(stage.clock, 12.0)
-
-    def test_key_takes_the_frame_rate_out_of_the_title(self) -> None:
-        """Test that F3 pressed again leaves the plain title behind."""
-        import glfw
-
-        self.viewer.show_fps = True
-        stage = self.viewer.open()
-        stage.count_frame(stage.clock + FPS_INTERVAL)
-
-        with mock.patch('glfw.set_window_title') as written:
-            self.viewer.on_key(None, glfw.KEY_F3, 0, glfw.PRESS, 0)
-
-        self.assertFalse(self.viewer.show_fps)
-        written.assert_called_once_with(stage.window, WINDOW_TITLE)
+            self.assertEqual(self.viewer.screenshot(path), path)
+            self.assertTrue(
+                path.read_bytes().startswith(PNG_SIGNATURE),
+            )
 
     def test_axes_are_drawn_only_when_asked(self) -> None:
         """Test that the axes reach a frame once they are turned on."""
-        self.viewer.open()
+        self.attach()
 
         with mock.patch.object(AxesRenderer, 'draw') as drawn:
             self.viewer.draw()
@@ -706,9 +615,9 @@ class TestViewerWindow(HiddenViewerTestCase):
         drawn.assert_called_once_with(self.viewer.camera, IDENTITY)
 
     def test_screenshot_holds_the_axes(self) -> None:
-        """Test that a capture shows the axes the window shows."""
+        """Test that a capture shows the axes the viewer shows."""
         self.viewer.show_axes = True
-        self.viewer.open()
+        self.attach()
 
         with (
                 TemporaryDirectory() as folder,
@@ -718,108 +627,40 @@ class TestViewerWindow(HiddenViewerTestCase):
 
         drawn.assert_called_once_with(self.viewer.camera, IDENTITY)
 
-    def test_run_until_the_window_closes(self) -> None:
-        """Test that the loop draws until the window is closed."""
-        with mock.patch(
-                'glfw.window_should_close',
-                side_effect=[False, True],
-        ) as should_close:
-            self.viewer.run()
 
-        self.assertEqual(should_close.call_count, 2)
-        self.assertIsNone(self.viewer.stage)
+class TestViewerHeldFromOutside(AttachedViewerTestCase):
+    """Tests for a viewer drawing a cube something outside is holding."""
 
-    def test_run_gives_the_window_back_on_failure(self) -> None:
-        """Test that a loop brought down closes its window anyway."""
-        with mock.patch(
-                'glfw.window_should_close',
-                side_effect=RuntimeError('boom'),
-        ), self.assertRaises(RuntimeError):
-            self.viewer.run()
+    def test_draw_hands_the_external_orientation_over(self) -> None:
+        """Test that a frame is drawn with the cube held as it is."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+        tracker.update(*Quat.from_axis_angle(AXIS_Y, math.pi / 2))
 
-        self.assertIsNone(self.viewer.stage)
+        self.viewer.orientation = tracker
+        self.attach()
 
-    def test_escape_closes_the_window(self) -> None:
-        """Test that escape asks the loop to stop."""
-        import glfw
+        with mock.patch.object(Renderer, 'draw') as drawn:
+            self.viewer.draw()
 
-        stage = self.viewer.open()
-        self.viewer.on_key(stage.window, glfw.KEY_ESCAPE, 0, glfw.PRESS, 0)
-
-        self.assertTrue(glfw.window_should_close(stage.window))
-
-    def test_mouse_button_starts_a_drag(self) -> None:
-        """Test that holding the left button down starts an orbit."""
-        import glfw
-
-        stage = self.viewer.open()
-
-        self.viewer.on_mouse_button(
-            stage.window, glfw.MOUSE_BUTTON_LEFT, glfw.PRESS, 0,
-        )
-        self.assertTrue(self.viewer.dragging)
-
-        self.viewer.on_mouse_button(
-            stage.window, glfw.MOUSE_BUTTON_LEFT, glfw.RELEASE, 0,
-        )
-        self.assertFalse(self.viewer.dragging)
-
-    def test_other_mouse_button_does_nothing(self) -> None:
-        """Test that only the left button drags the cube around."""
-        import glfw
-
-        stage = self.viewer.open()
-
-        self.viewer.on_mouse_button(
-            stage.window, glfw.MOUSE_BUTTON_RIGHT, glfw.PRESS, 0,
+        drawn.assert_called_once_with(
+            self.viewer.scene,
+            self.viewer.camera,
+            self.viewer.look,
+            tracker.orientation,
         )
 
-        self.assertFalse(self.viewer.dragging)
+    def test_screenshot_holds_the_external_orientation(self) -> None:
+        """Test that a capture shows the cube as the viewer does."""
+        quarter = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
 
-    def test_screenshot(self) -> None:
-        """Test that a screenshot is a PNG of the window."""
-        self.viewer.open()
+        self.viewer.orientation = quarter
+        self.attach()
 
-        with TemporaryDirectory() as directory:
-            path = Path(directory) / 'shot.png'
+        with (
+                TemporaryDirectory() as folder,
+                mock.patch.object(Renderer, 'draw') as drawn,
+        ):
+            self.viewer.screenshot(Path(folder) / 'held.png')
 
-            self.assertEqual(self.viewer.screenshot(path), path)
-            self.assertTrue(
-                path.read_bytes().startswith(PNG_SIGNATURE),
-            )
-
-    def test_screenshot_key(self) -> None:
-        """Test that F12 writes a screenshot of its own."""
-        import glfw
-
-        stage = self.viewer.open()
-
-        with mock.patch(
-                'cubing_algs.display.gl.viewer.screenshot_path',
-        ) as destination, TemporaryDirectory() as directory:
-            path = Path(directory) / 'shot.png'
-            destination.return_value = path
-
-            self.viewer.on_key(stage.window, glfw.KEY_F12, 0, glfw.PRESS, 0)
-
-            self.assertTrue(path.exists())
-
-    def test_resize_reaches_the_stage(self) -> None:
-        """Test that the window and the framebuffer keep the same size."""
-        stage = self.viewer.open()
-
-        self.viewer.resize((64, 32))
-
-        self.assertEqual(stage.size, (64, 32))
-
-    def test_stage_holds_the_geometry_of_the_viewer(self) -> None:
-        """Test that a stage is built for the geometry it draws."""
-        geometry = self.viewer.geometry
-        stage = Stage.open(WINDOW_SIZE, geometry, WINDOW_LOOK)
-
-        self.assertEqual(
-            stage.renderer.instance_buffer.size,
-            len(geometry.cubies) * INSTANCE_SIZE,
-        )
-
-        stage.close()
+        self.assertEqual(drawn.call_args.args[3], quarter)
