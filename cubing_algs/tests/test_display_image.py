@@ -252,8 +252,18 @@ class GetStickerFillTestCase(unittest.TestCase):
     def test_mask_0_returns_dimmed_face_color(self) -> None:
         """mask_char '0' (hidden) returns a darkened face color."""
         result = self.display.get_sticker_fill('U', '0')
-        self.assertRegex(result, r'^rgb\(\d+,\d+,\d+\)$')
+        self.assertRegex(result, r'^#[0-9a-f]{6}$')
         self.assertNotEqual(result, self.display.palette['U'])
+
+    def test_every_mask_returns_a_hexadecimal_fill(self) -> None:
+        """Every mask code answers in the notation the palette uses."""
+        for mask_char in '01234':
+            with self.subTest(mask_char=mask_char):
+                self.assertTrue(
+                    self.display.get_sticker_fill('U', mask_char).startswith(
+                        '#',
+                    ),
+                )
 
     def test_mask_2_returns_masked_color(self) -> None:
         """mask_char '2' (masked) returns the palette masked color."""

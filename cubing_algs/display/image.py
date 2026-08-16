@@ -38,6 +38,7 @@ from cubing_algs.display.palettes import DEFAULT_ORIENTED_BACKGROUND
 from cubing_algs.display.palettes import PALETTES
 from cubing_algs.display.palettes import hex_to_rgb
 from cubing_algs.display.palettes import hex_to_rgba
+from cubing_algs.display.palettes import rgb_to_hex
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube
@@ -638,7 +639,9 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
                        '3' the cube body color, '4' the oriented color.
 
         Returns:
-            SVG fill color string.
+            SVG fill color string, always hexadecimal: the dimmed color
+            is computed rather than read, but it is written like every
+            other entry of the palette.
 
         """
         if mask_char == '2':
@@ -654,8 +657,8 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
 
         if mask_char == '0':
             hue, lit, sat = rgb_to_hls(hex_to_rgb(fill))
-            r, g, b = hls_to_rgb(hue, lit * DIM_LUMINANCE_FACTOR, sat)
-            return f'rgb({r},{g},{b})'
+
+            return rgb_to_hex(hls_to_rgb(hue, lit * DIM_LUMINANCE_FACTOR, sat))
 
         return fill
 

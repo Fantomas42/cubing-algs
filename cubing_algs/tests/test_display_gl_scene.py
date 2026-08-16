@@ -12,7 +12,6 @@ from cubing_algs.display.gl.scene import MASKED_KEY
 from cubing_algs.display.gl.scene import ORIENTED_KEY
 from cubing_algs.display.gl.scene import PLASTIC_KEY
 from cubing_algs.display.gl.scene import SIDE_NUMBER
-from cubing_algs.display.gl.scene import Color
 from cubing_algs.display.gl.scene import CubieInstance
 from cubing_algs.display.gl.scene import axis_direction
 from cubing_algs.display.gl.scene import build_color
@@ -25,7 +24,6 @@ from cubing_algs.display.gl.scene import dim_color
 from cubing_algs.display.gl.scene import facelet_index
 from cubing_algs.display.gl.scene import grid_position
 from cubing_algs.display.gl.scene import resolve_display
-from cubing_algs.display.gl.scene import scale_channels
 from cubing_algs.display.gl.scene import sticker_color
 from cubing_algs.display.gl.transforms import AXIS_X
 from cubing_algs.display.gl.transforms import AXIS_Y
@@ -72,23 +70,6 @@ def cube_of(moves: str = '', size: int = 3) -> VCube:
         cube.rotate(moves)
 
     return cube
-
-
-def svg_color(fill: str) -> Color:
-    """
-    Read back a fill color of the SVG backend.
-
-    Returns:
-        The color, as the scene expresses it.
-
-    """
-    if fill.startswith('rgb('):
-        channels = fill.removeprefix('rgb(').removesuffix(')').split(',')
-        red, green, blue = (int(channel) for channel in channels)
-
-        return scale_channels((red, green, blue))
-
-    return build_color(fill)
 
 
 class TestAxisDirection(unittest.TestCase):
@@ -286,7 +267,7 @@ class TestDimColor(unittest.TestCase):
             with self.subTest(face=face):
                 self.assertEqual(
                     dim_color(build_color(display.palette[face])),
-                    svg_color(display.get_sticker_fill(face, '0')),
+                    build_color(display.get_sticker_fill(face, '0')),
                 )
 
 
@@ -323,7 +304,7 @@ class TestStickerColor(unittest.TestCase):
                 with self.subTest(face=face, code=code):
                     self.assertEqual(
                         sticker_color(face, code, self.colors),
-                        svg_color(display.get_sticker_fill(face, code)),
+                        build_color(display.get_sticker_fill(face, code)),
                     )
 
 
@@ -520,7 +501,7 @@ class TestBuildSceneMasks(unittest.TestCase):
                 with self.subTest(cubie=instance.cubie, face=FACE_ORDER[face]):
                     self.assertEqual(
                         instance.colors[face],
-                        svg_color(
+                        build_color(
                             display.get_sticker_fill(
                                 shown.state[index],
                                 codes[index],
