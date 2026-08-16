@@ -273,10 +273,11 @@ def run_apply(args: argparse.Namespace) -> int:
 
     cube.rotate(parse_moves(args.moves, trust_input=False))
 
-    if args.render:
-        render_cube(cube, args, args.mode)
-    elif args.view:
-        view_cube(cube, args, args.mode)
+    if args.render or args.view:
+        if args.render:
+            render_cube(cube, args, args.mode)
+        if args.view:
+            view_cube(cube, args, args.mode)
     else:
         sys.stdout.write(
             cube.display(
