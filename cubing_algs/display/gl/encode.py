@@ -17,8 +17,9 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cubing_algs.display.gl.constants import ANIMATION_LOOP
 from cubing_algs.display.gl.constants import PILLOW_MISSING
+from cubing_algs.display.gl.presentation import DEFAULT_PLAYBACK
+from cubing_algs.display.gl.presentation import Playback
 
 if TYPE_CHECKING:  # pragma: no cover
     from PIL import Image
@@ -286,18 +287,21 @@ def encode_gif(
         frames: Sequence[bytes],
         size: tuple[int, int],
         *,
-        frame_rate: float,
-        loop: int = ANIMATION_LOOP,
+        playback: Playback = DEFAULT_PLAYBACK,
         flip: bool = True,
 ) -> bytes:
     """
     Encode a series of raw frames into an animated GIF.
 
+    A GIF holds a duration per image, so holding the state the animation
+    starts from and the one it ends on costs no frame at all: the two of
+    them are simply shown longer than the rest.
+
     Args:
         frames: The frames, each one rows of RGBA pixels.
         size: Width and height of the images, in pixels.
-        frame_rate: Frames per second the animation plays at.
-        loop: How many times the animation plays, zero looping forever.
+        playback: How the animation runs: frame rate, how long the first
+            and the last frame are held, and how many times it plays.
         flip: Reverse the row order of every frame.
 
     Returns:
@@ -326,8 +330,11 @@ def encode_gif(
         format='GIF',
         save_all=True,
         append_images=images[1:],
-        duration=round(MILLISECONDS / frame_rate),
-        loop=loop,
+        duration=[
+            round(seconds * MILLISECONDS)
+            for seconds in playback.durations(len(images))
+        ],
+        loop=playback.loop,
         disposal=GIF_DISPOSAL_BACKGROUND,
         transparency=GIF_TRANSPARENT_INDEX,
     )
@@ -340,8 +347,7 @@ def write_gif(
         frames: Sequence[bytes],
         size: tuple[int, int],
         *,
-        frame_rate: float,
-        loop: int = ANIMATION_LOOP,
+        playback: Playback = DEFAULT_PLAYBACK,
 ) -> Path:
     """
     Encode a series of raw frames and write them as an animated GIF.
@@ -353,8 +359,8 @@ def write_gif(
         path: Destination of the file.
         frames: The frames, each one rows of RGBA pixels.
         size: Width and height of the images, in pixels.
-        frame_rate: Frames per second the animation plays at.
-        loop: How many times the animation plays, zero looping forever.
+        playback: How the animation runs: frame rate, how long the first
+            and the last frame are held, and how many times it plays.
 
     Returns:
         The path the animation was written to.
@@ -362,7 +368,7 @@ def write_gif(
     """
     destination = Path(path)
     destination.write_bytes(
-        encode_gif(frames, size, frame_rate=frame_rate, loop=loop),
+        encode_gif(frames, size, playback=playback),
     )
 
     return destination

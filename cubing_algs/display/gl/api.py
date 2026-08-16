@@ -85,7 +85,10 @@ def animate(
 
     A GIF is written when Pillow is around. It is not required: without
     it the frames are written as numbered PNG files instead, which any
-    encoder can assemble.
+    encoder can assemble. A series of frames carries no timing, so the
+    pace of the playback, the holds on the first and the last frame
+    included, only reaches the GIF: what a PNG frame lasts is for the
+    encoder assembling them to say.
 
     Args:
         cube: The cube to play the algorithm on.
@@ -94,7 +97,8 @@ def animate(
         presentation: How each frame is made: framing, palette, mode,
             mask, image size, look, and the way the cube is held.
         playback: How the animation runs: frame rate, how long a move
-            lasts, and how many times it plays.
+            lasts, how long the states it starts from and ends on are
+            held, and how many times it plays.
 
     Returns:
         The paths written to: the GIF alone, or one per frame.
@@ -114,11 +118,5 @@ def animate(
         return write_frames(path, frames, presentation.size)
 
     return [
-        write_gif(
-            path,
-            frames,
-            presentation.size,
-            frame_rate=playback.frame_rate,
-            loop=playback.loop,
-        ),
+        write_gif(path, frames, presentation.size, playback=playback),
     ]

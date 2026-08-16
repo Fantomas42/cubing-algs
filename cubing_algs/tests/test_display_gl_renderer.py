@@ -1040,6 +1040,32 @@ class TestAnimate(unittest.TestCase):
             self.assertEqual(written, [destination])
             self.assertTrue(destination.read_bytes().startswith(b'GIF89a'))
 
+    def test_the_gif_holds_the_states_it_starts_and_ends_on(self) -> None:
+        """Test that the two resting states are given time to be read."""
+        if not has_pillow():
+            self.skipTest('Pillow is not installed')
+
+        from PIL import Image
+        from PIL import ImageSequence
+
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'out.gif'
+            animate(
+                VCube(), "R U'", destination,
+                Presentation(image_size=32),
+                replace(QUICK, hold_start=0.8, hold_end=1.2),
+            )
+
+            with Image.open(destination) as animation:
+                delays = [
+                    frame.info['duration']
+                    for frame in ImageSequence.Iterator(animation)
+                ]
+
+        self.assertEqual(delays[0], 800)
+        self.assertEqual(delays[-1], 1200)
+        self.assertEqual(set(delays[1:-1]), {100})
+
     def test_frames_come_out_without_pillow(self) -> None:
         """Test that a missing Pillow costs frames, not a failure."""
         with (

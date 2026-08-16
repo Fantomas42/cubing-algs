@@ -8,6 +8,8 @@ from cubing_algs.display.gl.constants import ANIMATION_LOOP
 from cubing_algs.display.gl.constants import BOUNDING_RADIUS
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import FRAME_RATE
+from cubing_algs.display.gl.constants import HOLD_END
+from cubing_algs.display.gl.constants import HOLD_START
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.constants import RENDER_SIZE
 from cubing_algs.display.gl.constants import Look
@@ -114,6 +116,8 @@ class TestPlayback(unittest.TestCase):
         self.assertEqual(playback.frame_rate, FRAME_RATE)
         self.assertEqual(playback.duration, MOVE_DURATION)
         self.assertEqual(playback.loop, ANIMATION_LOOP)
+        self.assertEqual(playback.hold_start, HOLD_START)
+        self.assertEqual(playback.hold_end, HOLD_END)
 
     def test_the_shared_default_is_the_empty_one(self) -> None:
         """Test that the module constant is the plain playback."""
@@ -123,6 +127,35 @@ class TestPlayback(unittest.TestCase):
         """Test that nothing changes a playback under its caller."""
         with self.assertRaises(AttributeError):
             DEFAULT_PLAYBACK.loop = 3  # type: ignore[misc]
+
+
+class TestPlaybackDurations(unittest.TestCase):
+    """Tests for how long each frame of an animation is shown."""
+
+    def test_both_ends_are_held(self) -> None:
+        """Test that the states an animation starts and ends on last."""
+        playback = Playback(frame_rate=25.0, hold_start=0.8, hold_end=1.2)
+
+        self.assertEqual(
+            playback.durations(4),
+            [0.8, 0.04, 0.04, 1.2],
+        )
+
+    def test_a_single_frame_is_held_as_the_end(self) -> None:
+        """Test that a state reached by no move takes the last hold."""
+        playback = Playback(frame_rate=25.0, hold_start=0.8, hold_end=1.2)
+
+        self.assertEqual(playback.durations(1), [1.2])
+
+    def test_no_frame_lasts_nothing(self) -> None:
+        """Test that an empty animation has nothing to show."""
+        self.assertEqual(Playback().durations(0), [])
+
+    def test_a_hold_shorter_than_a_frame_is_ignored(self) -> None:
+        """Test that a null hold plays the animation straight through."""
+        playback = Playback(frame_rate=25.0, hold_start=0.0, hold_end=0.01)
+
+        self.assertEqual(playback.durations(3), [0.04, 0.04, 0.04])
 
 
 class TestPresentationLook(unittest.TestCase):

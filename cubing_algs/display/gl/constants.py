@@ -64,6 +64,14 @@ FRAME_RATE = 25.0
 # algorithm is meant to.
 ANIMATION_LOOP = 0
 
+# How long the state an animation starts from and the one it ends on are
+# held, in seconds. An animation shows each of them for a single frame,
+# forty milliseconds at twenty five images per second: the two states
+# carrying the information, the case to recognize and what the algorithm
+# leads to, then go by without ever being seen.
+HOLD_START = 1.0
+HOLD_END = 1.0
+
 # Color the framebuffer is cleared with, the alpha channel included:
 # fully transparent, as the SVG backend leaves its background empty.
 BACKGROUND_COLOR: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)

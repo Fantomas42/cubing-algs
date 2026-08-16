@@ -18,6 +18,7 @@ from cubing_algs.display.gl.encode import png_chunk
 from cubing_algs.display.gl.encode import write_frames
 from cubing_algs.display.gl.encode import write_gif
 from cubing_algs.display.gl.encode import write_png
+from cubing_algs.display.gl.presentation import Playback
 
 if TYPE_CHECKING:  # pragma: no cover
     from PIL import Image
@@ -29,6 +30,10 @@ GIF_SIGNATURE = b'GIF89a'
 FRAME_SIZE = (2, 2)
 RED_FRAME = (b'\xff\x00\x00\xff' + b'\x00\x00\x00\x00') * 2
 BLUE_FRAME = (b'\x00\x00\xff\xff' + b'\x00\x00\x00\x00') * 2
+
+# An animation holding neither of its ends, so that every frame lasts
+# what the frame rate alone says.
+PLAIN = Playback(frame_rate=25.0, hold_start=0.0, hold_end=0.0)
 
 requires_pillow = unittest.skipUnless(
     has_pillow(),
@@ -265,7 +270,7 @@ class TestEncodeGif(unittest.TestCase):
     def test_signature(self) -> None:
         """Test that the file starts with the GIF signature."""
         data = encode_gif(
-            [RED_FRAME, BLUE_FRAME], FRAME_SIZE, frame_rate=25.0,
+            [RED_FRAME, BLUE_FRAME], FRAME_SIZE, playback=PLAIN,
         )
 
         self.assertEqual(data[:6], GIF_SIGNATURE)
@@ -273,21 +278,40 @@ class TestEncodeGif(unittest.TestCase):
     def test_holds_every_frame(self) -> None:
         """Test that the animation keeps all of its frames."""
         data = encode_gif(
-            [RED_FRAME, BLUE_FRAME, RED_FRAME], FRAME_SIZE, frame_rate=25.0,
+            [RED_FRAME, BLUE_FRAME, RED_FRAME], FRAME_SIZE, playback=PLAIN,
         )
 
         self.assertEqual(len(frames_of(data)), 3)
 
     def test_the_frame_rate_sets_the_delay(self) -> None:
         """Test that the duration of a frame follows the frame rate."""
-        data = encode_gif([RED_FRAME], FRAME_SIZE, frame_rate=10.0)
+        data = encode_gif(
+            [RED_FRAME],
+            FRAME_SIZE,
+            playback=Playback(frame_rate=10.0, hold_start=0.0, hold_end=0.0),
+        )
 
         self.assertEqual(frames_of(data)[0].info['duration'], 100)
+
+    def test_both_ends_are_held(self) -> None:
+        """Test that the first and the last frame are shown longer."""
+        data = encode_gif(
+            [RED_FRAME, BLUE_FRAME, RED_FRAME],
+            FRAME_SIZE,
+            playback=Playback(
+                frame_rate=25.0, hold_start=0.8, hold_end=1.2,
+            ),
+        )
+
+        self.assertEqual(
+            [frame.info['duration'] for frame in frames_of(data)],
+            [800, 40, 1200],
+        )
 
     def test_the_colors_of_the_frames_survive(self) -> None:
         """Test that a frame keeps the colors it was given."""
         first, second = frames_of(
-            encode_gif([RED_FRAME, BLUE_FRAME], FRAME_SIZE, frame_rate=25.0),
+            encode_gif([RED_FRAME, BLUE_FRAME], FRAME_SIZE, playback=PLAIN),
         )
 
         self.assertEqual(pixel_of(first, 'RGB', (0, 0)), (255, 0, 0))
@@ -296,7 +320,7 @@ class TestEncodeGif(unittest.TestCase):
     def test_the_background_stays_transparent(self) -> None:
         """Test that an empty pixel is not painted at all."""
         frame = frames_of(
-            encode_gif([RED_FRAME], FRAME_SIZE, frame_rate=25.0),
+            encode_gif([RED_FRAME], FRAME_SIZE, playback=PLAIN),
         )[0]
 
         # Pillow shrinks a palette that holds a handful of colors, and
@@ -310,10 +334,10 @@ class TestEncodeGif(unittest.TestCase):
         pixels = b'\x00\x00\xff\xff' * 2 + b'\xff\x00\x00\xff' * 2
 
         flipped = frames_of(
-            encode_gif([pixels], FRAME_SIZE, frame_rate=25.0),
+            encode_gif([pixels], FRAME_SIZE, playback=PLAIN),
         )[0]
         kept = frames_of(
-            encode_gif([pixels], FRAME_SIZE, frame_rate=25.0, flip=False),
+            encode_gif([pixels], FRAME_SIZE, playback=PLAIN, flip=False),
         )[0]
 
         self.assertEqual(pixel_of(flipped, 'RGB', (0, 0)), (255, 0, 0))
@@ -322,7 +346,7 @@ class TestEncodeGif(unittest.TestCase):
     def test_no_frame_is_rejected(self) -> None:
         """Test that an empty animation cannot be encoded."""
         with self.assertRaises(ValueError) as context:
-            encode_gif([], FRAME_SIZE, frame_rate=25.0)
+            encode_gif([], FRAME_SIZE, playback=PLAIN)
 
         self.assertIn('one frame', str(context.exception))
 
@@ -337,7 +361,7 @@ class TestWriteGif(unittest.TestCase):
             destination = Path(directory) / 'out.gif'
             written = write_gif(
                 destination, [RED_FRAME, BLUE_FRAME], FRAME_SIZE,
-                frame_rate=25.0,
+                playback=PLAIN,
             )
 
             self.assertEqual(written, destination)
@@ -356,6 +380,6 @@ class TestPillowMissing(unittest.TestCase):
                 ),
                 self.assertRaises(ImportError) as context,
         ):
-            encode_gif([RED_FRAME], FRAME_SIZE, frame_rate=25.0)
+            encode_gif([RED_FRAME], FRAME_SIZE, playback=PLAIN)
 
         self.assertIn('Pillow', str(context.exception))

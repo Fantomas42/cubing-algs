@@ -25,6 +25,8 @@ from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.constants import ANIMATION_LOOP
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import FRAME_RATE
+from cubing_algs.display.gl.constants import HOLD_END
+from cubing_algs.display.gl.constants import HOLD_START
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.constants import RENDER_SIZE
 from cubing_algs.display.gl.constants import Look
@@ -91,11 +93,50 @@ class Playback:
     Kept apart from ``Presentation``: a frame rate and a loop count say
     nothing about what a frame looks like, and a still image has no use
     for either.
+
+    The two holds are the pace of an animation as well: what a looping
+    GIF gives the eye to read the state it starts from and the one it
+    ends on. They reach the file it is written to, which knows a duration
+    per image, and not the series of PNG frames an animation falls back
+    to, which carries no timing at all.
     """
 
     frame_rate: float = FRAME_RATE
     duration: float = MOVE_DURATION
     loop: int = ANIMATION_LOOP
+    hold_start: float = HOLD_START
+    hold_end: float = HOLD_END
+
+    def durations(self, frames: int) -> list[float]:
+        """
+        Tell how long every frame of an animation is shown.
+
+        Every frame lasts what the frame rate says, save the first and
+        the last one, which are held long enough to be read. A hold
+        shorter than a frame falls back to the plain pace, so a null one
+        simply plays the animation through.
+
+        A single frame is both the first and the last, and takes
+        ``hold_end``: an animation of no move at all is a state reached
+        rather than a state departed from.
+
+        Args:
+            frames: How many frames the animation is made of.
+
+        Returns:
+            The time each frame is shown for, in seconds, in order.
+
+        """
+        step = 1.0 / self.frame_rate
+        schedule = [step] * frames
+
+        if not schedule:
+            return schedule
+
+        schedule[0] = max(step, self.hold_start)
+        schedule[-1] = max(step, self.hold_end)
+
+        return schedule
 
 
 # The picture the library draws when it is asked for nothing in
