@@ -130,7 +130,8 @@ def animate(  # noqa: PLR0913
             mode would have set.
         look: How the light falls on the cube, antialiasing included.
         frame_rate: Frames per second the animation plays at.
-        duration: How long a single move lasts, in seconds.
+        duration: How long a single quarter turn lasts, in seconds. A
+            half turn is given ``HALF_TURN_FACTOR`` times that.
         loop: How many times the animation plays, zero looping forever.
 
     Returns:

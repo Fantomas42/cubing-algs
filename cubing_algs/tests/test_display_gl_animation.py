@@ -10,6 +10,7 @@ from cubing_algs.display.gl.animation import build_turn
 from cubing_algs.display.gl.animation import ease
 from cubing_algs.display.gl.animation import turn_coordinates
 from cubing_algs.display.gl.animation import turned_scene
+from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import Cubie
@@ -200,6 +201,30 @@ class TestTurns(unittest.TestCase):
 
         self.assertTrue(turn.carries(Cubie(2, 0, 1, Vec3(0.0, 0.0, 0.0))))
         self.assertFalse(turn.carries(Cubie(1, 2, 2, Vec3(0.0, 0.0, 0.0))))
+
+
+class TestTurnDuration(unittest.TestCase):
+    """Tests for the beat a turn is given, quarter turn or half turn."""
+
+    def test_a_quarter_turn_lasts_the_plain_beat(self) -> None:
+        """Test that a quarter turn is given the duration it is handed."""
+        self.assertEqual(turn_of('R', 3).duration(1.0), 1.0)
+
+    def test_turning_the_other_way_changes_nothing(self) -> None:
+        """Test that the beat is read on the angle, not on its sign."""
+        self.assertEqual(turn_of("R'", 3).duration(1.0), 1.0)
+
+    def test_a_half_turn_lasts_longer(self) -> None:
+        """Test that a half turn is given more time than a quarter one."""
+        self.assertEqual(turn_of('R2', 3).duration(1.0), HALF_TURN_FACTOR)
+
+    def test_a_half_slice_lasts_longer(self) -> None:
+        """Test that the beat follows the angle, whatever the notation."""
+        self.assertEqual(turn_of('M2', 3).duration(1.0), HALF_TURN_FACTOR)
+
+    def test_a_half_rotation_lasts_longer(self) -> None:
+        """Test that a whole cube turning twice takes the longer beat."""
+        self.assertEqual(turn_of('z2', 3).duration(1.0), HALF_TURN_FACTOR)
 
 
 class TestEase(unittest.TestCase):
@@ -506,6 +531,45 @@ class TestAnimation(unittest.TestCase):
 
         for scene in animation.play():
             self.assertIs(scene.geometry, animation.geometry)
+
+
+class TestAnimationBeat(unittest.TestCase):
+    """Tests for the time an animation gives each of its moves."""
+
+    def test_a_half_turn_is_given_a_longer_beat(self) -> None:
+        """Test that a half turn does not land on the beat of a quarter."""
+        animation = Animation(VCube(), 'U2', duration=0.1)
+
+        animation.advance(0.1)
+        self.assertFalse(animation.finished)
+        self.assertTrue(animation.cube.is_solved)
+
+        animation.advance(0.1 * (HALF_TURN_FACTOR - 1.0))
+        self.assertTrue(animation.finished)
+
+    def test_a_half_turn_leaves_the_next_move_its_own_beat(self) -> None:
+        """Test that every move of an algorithm is timed on its own angle."""
+        animation = Animation(VCube(), 'U2 R', duration=0.1)
+
+        animation.advance(0.1 * HALF_TURN_FACTOR)
+        self.assertEqual(animation.index, 1)
+        self.assertFalse(animation.finished)
+
+        animation.advance(0.1)
+        self.assertTrue(animation.finished)
+
+    def test_the_beat_of_a_finished_animation_is_the_plain_one(self) -> None:
+        """Test that nothing left to turn falls back on the given duration."""
+        animation = Animation(VCube(), '')
+
+        self.assertEqual(animation.step, MOVE_DURATION)
+
+    def test_a_half_turn_takes_more_frames_than_a_quarter(self) -> None:
+        """Test that the longer beat reaches the frames a GIF is made of."""
+        quarter = len(list(Animation(VCube(), 'U', duration=0.5).play(20.0)))
+        half = len(list(Animation(VCube(), 'U2', duration=0.5).play(20.0)))
+
+        self.assertGreater(half, quarter)
 
     def test_a_turn_is_the_only_thing_moving(self) -> None:
         """Test that the cubies away from the move stand perfectly still."""

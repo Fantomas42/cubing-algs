@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING
 from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.constants import INNER_MOVES
 from cubing_algs.display.gl.constants import FRAME_RATE
+from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Cubie
@@ -100,6 +101,27 @@ class Turn:
 
         """
         return (cubie.x, cubie.y, cubie.z)[self.axis] in self.coordinates
+
+    def duration(self, base: float) -> float:
+        """
+        Tell how long the turn should be given to happen.
+
+        A half turn covers twice the angle of a quarter one, so the same
+        beat makes it go twice as fast. It gets a longer one instead,
+        read on the angle rather than on the notation: ``M2`` and ``z2``
+        are half turns as much as ``R2`` is.
+
+        Args:
+            base: How long a quarter turn lasts, in seconds.
+
+        Returns:
+            How long this turn lasts, in seconds.
+
+        """
+        if abs(self.angle) > QUARTER_TURN:
+            return base * HALF_TURN_FACTOR
+
+        return base
 
     def matrix(self, progress: float) -> Mat4:
         """
@@ -257,7 +279,8 @@ class Animation:
                 orientation, such as ``oll`` or ``f2l``.
             mask: Display mask, one code per facelet. Overrides the mask
                 the mode would have set.
-            duration: How long a single move lasts, in seconds.
+            duration: How long a single quarter turn lasts, in seconds.
+                A half turn is given ``HALF_TURN_FACTOR`` times that.
 
         Raises:
             ValueError: When a move is given no time to happen.
@@ -330,6 +353,21 @@ class Animation:
         return self.turn is None
 
     @property
+    def step(self) -> float:
+        """
+        Tell how long the move under way is given to happen.
+
+        Returns:
+            The beat of the current turn, in seconds, which a half turn
+            stretches. The plain duration once nothing is turning.
+
+        """
+        if self.turn is None:
+            return self.duration
+
+        return self.turn.duration(self.duration)
+
+    @property
     def scene(self) -> Scene:
         """
         Build the scene to draw at the current moment.
@@ -345,7 +383,7 @@ class Animation:
         return turned_scene(
             self.resting,
             self.turn,
-            ease(self.elapsed / self.duration),
+            ease(self.elapsed / self.step),
         )
 
     def land(self) -> None:
@@ -383,8 +421,8 @@ class Animation:
         """
         self.elapsed += max(delta, 0.0)
 
-        while self.turn is not None and self.elapsed >= self.duration:
-            self.elapsed -= self.duration
+        while self.turn is not None and self.elapsed >= self.step:
+            self.elapsed -= self.step
             self.land()
 
         return self.scene

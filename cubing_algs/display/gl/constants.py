@@ -44,9 +44,17 @@ RENDER_SIZE = 512
 # the silhouette stops showing at the sizes a cube is rendered at.
 RENDER_SAMPLES = 8
 
-# How long a single move of an animation lasts, in seconds. Fast enough
-# to read as a turn rather than as a slideshow, slow enough to follow.
+# How long a single quarter turn of an animation lasts, in seconds. Fast
+# enough to read as a turn rather than as a slideshow, slow enough to
+# follow.
 MOVE_DURATION = 0.28
+
+# What a half turn multiplies that duration by. Given the same beat as a
+# quarter turn it covers twice the angle, hence goes twice as fast, which
+# reads as a jolt in the middle of an algorithm. Doubling the beat is the
+# other extreme: a hand does not take twice as long to flick a face round
+# twice. This sits between the two, nearer the hand.
+HALF_TURN_FACTOR = 1.4
 
 # Frames rendered per second of animation. Twenty five is where a GIF
 # stops flickering without doubling the weight of the file.
