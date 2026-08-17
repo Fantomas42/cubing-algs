@@ -252,21 +252,28 @@ class ApplyCommandTestCase(CliTestCase):
         self.assertEqual(code, 1)
         self.assertIn('Error:', err)
 
-    def test_apply_render_wins_over_view(self) -> None:
-        """A file is written rather than a window opened."""
+    def test_apply_render_and_view_are_both_honoured(self) -> None:
+        """A file is written and a window opened, as case does too."""
         with (
                 mock.patch.object(
                     VCube, 'render', autospec=True, return_value=b'PNG',
-                ),
+                ) as rendered,
                 mock.patch.object(VCube, 'view', autospec=True) as viewed,
                 TemporaryDirectory() as directory,
         ):
-            self.run_cli(
-                'apply', "R U R' U'", '--view',
-                '--render', str(Path(directory) / 'cube.png'),
+            path = Path(directory) / 'cube.png'
+            code, out, _err = self.run_cli(
+                'apply', "R U R' U'", '--view', '--render', str(path),
             )
 
-        viewed.assert_not_called()
+        self.assertEqual(code, 0)
+        self.assertIn(f'Rendered: { path }', out)
+        self.assertEqual(rendered.call_count, 1)
+        self.assertEqual(viewed.call_count, 1)
+        self.assertEqual(
+            viewed.call_args.args[0].state,
+            rendered.call_args.args[0].state,
+        )
 
 
 class AnimateCommandTestCase(CliTestCase):

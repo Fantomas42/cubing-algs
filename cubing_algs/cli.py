@@ -121,7 +121,6 @@ def hold_cube(cube: VCube, orientation: CubeOrientation) -> None:
 def view_cube(
         cube: VCube,
         args: argparse.Namespace,
-        mode: str = '',
 ) -> None:
     """
     Open an interactive window on a cube.
@@ -129,11 +128,10 @@ def view_cube(
     Args:
         cube: The cube to show, already turned the way it is held.
         args: The parsed command line, holding the display options.
-        mode: Display preset, such as ``oll`` or ``f2l``.
 
     """
     cube.view(
-        mode=mode,
+        mode=args.mode,
         mask=args.mask,
         palette=args.palette,
         window_size=window_size(args.image_size),
@@ -145,7 +143,6 @@ def view_cube(
 def render_cube(
         cube: VCube,
         args: argparse.Namespace,
-        mode: str = '',
 ) -> None:
     """
     Write a PNG of a cube where the command line asks for it.
@@ -154,13 +151,12 @@ def render_cube(
         cube: The cube to draw, already turned the way it is held.
         args: The parsed command line, holding the target and the
             display options.
-        mode: Display preset, such as ``oll`` or ``f2l``.
 
     """
     path = Path(args.render)
     path.write_bytes(
         cube.render(
-            mode=mode,
+            mode=args.mode,
             mask=args.mask,
             palette=args.palette,
             image_size=args.image_size,
@@ -177,7 +173,6 @@ def animate_cube(
         moves: Algorithm,
         path: str,
         args: argparse.Namespace,
-        mode: str = '',
 ) -> None:
     """
     Write an algorithm playing on a cube where the command line says.
@@ -186,14 +181,14 @@ def animate_cube(
         cube: The cube to play the algorithm on, already turned the way
             it is held.
         moves: The algorithm to play.
-        path: Where the animation is written.
+        path: Where the animation is written, ``--out`` or ``--animate``
+            depending on the subcommand.
         args: The parsed command line, holding the display options.
-        mode: Display preset, such as ``oll`` or ``f2l``.
 
     """
     written = cube.animate(
         moves, path,
-        mode=mode,
+        mode=args.mode,
         mask=args.mask,
         palette=args.palette,
         image_size=args.image_size,
@@ -275,9 +270,9 @@ def run_apply(args: argparse.Namespace) -> int:
 
     if args.render or args.view:
         if args.render:
-            render_cube(cube, args, args.mode)
+            render_cube(cube, args)
         if args.view:
-            view_cube(cube, args, args.mode)
+            view_cube(cube, args)
     else:
         sys.stdout.write(
             cube.display(
@@ -319,7 +314,6 @@ def run_animate(args: argparse.Namespace) -> int:
         parse_moves(args.moves, trust_input=False),
         args.out,
         args,
-        args.mode,
     )
 
     return 0
@@ -419,14 +413,17 @@ def run_case(args: argparse.Namespace) -> int:
         hold_cube(cube, args.orientation)
 
         cube.rotate(case.main_algorithm.transform(invert_moves))
-        mode = case.step.lower()
+
+        # A case carries no display mode of its own on the command line:
+        # it is drawn under the mode of the step it belongs to.
+        args.mode = case.step.lower()
 
         if args.render:
-            render_cube(cube, args, mode)
+            render_cube(cube, args)
         if args.animate:
-            animate_cube(cube, case.main_algorithm, args.animate, args, mode)
+            animate_cube(cube, case.main_algorithm, args.animate, args)
         if args.view:
-            view_cube(cube, args, mode)
+            view_cube(cube, args)
 
     return 0
 
@@ -700,11 +697,12 @@ def build_parser() -> argparse.ArgumentParser:
     case_parser.add_argument('name', help='Case name or code, e.g. 27')
     add_orientation_argument(case_parser)
     add_gl_arguments(case_parser, animate=True)
-    # A case is drawn under the mode of its own step, and through no
-    # mask nor palette of its own: those two display options the GPU
-    # helpers read are therefore left at their default here.
+    # A case is drawn under the mode of its own step, which run_case
+    # fills in, and through no mask nor palette of its own: the display
+    # options the GPU helpers read are therefore defaulted here.
     case_parser.set_defaults(
         handler=run_case,
+        mode='',
         mask='',
         palette='',
     )
