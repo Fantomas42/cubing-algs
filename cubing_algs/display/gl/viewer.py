@@ -528,16 +528,44 @@ class Viewer:
         self.camera.aspect = width / height
         self.camera.fov = fit_aspect(self.framing_fov, self.camera.aspect)
 
-    def draw(self) -> None:
-        """Draw the current scene into the stage."""
+    def draw(
+            self,
+            scene: Scene | None = None,
+            look: Look | None = None,
+            camera: OrbitCamera | None = None,
+    ) -> None:
+        """
+        Draw a picture into the stage, the one the viewer holds by default.
+
+        The three overrides are the door of an effect: a host layering
+        something on the cube describes the frame it wants and draws it,
+        instead of writing into the viewer and putting it back
+        afterwards. Nothing is kept, the next frame starting from the
+        fields again — which is what keeps effects from compounding, and
+        above all from leaking into the camera the mouse writes to too.
+
+        Args:
+            scene: The cube to draw, where its pieces stand and what
+                color they take. The current scene when left out.
+            look: How the light falls on it, an ambiance being all a
+                ``Look`` should be asked for. The viewer's when left out.
+            camera: Where the cube is looked at from. The camera of the
+                viewer when left out, and a ``replace()`` of it moves
+                nothing the mouse relies on.
+
+        """
         stage = self.require_stage()
         orientation = resolve_orientation(self.orientation)
 
+        scene = self.scene if scene is None else scene
+        look = self.look if look is None else look
+        camera = self.camera if camera is None else camera
+
         stage.use()
-        stage.renderer.draw(self.scene, self.camera, self.look, orientation)
+        stage.renderer.draw(scene, camera, look, orientation)
 
         if self.show_axes:
-            stage.axes.draw(self.camera, orientation)
+            stage.axes.draw(camera, orientation)
 
     def frame(self, delta: float) -> None:
         """

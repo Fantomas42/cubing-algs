@@ -341,6 +341,24 @@ class Animation:
         return None
 
     @property
+    def move(self) -> Move | None:
+        """
+        Name the move being turned right now.
+
+        What ``turn`` is in angles, this is in notation, and it is what
+        an outside caller showing the move under way reads: the index the
+        state machine walks with is none of its business.
+
+        Returns:
+            The move under way, None once the algorithm is over.
+
+        """
+        if self.turn is None:
+            return None
+
+        return self.moves[self.index]
+
+    @property
     def finished(self) -> bool:
         """
         Tell whether every move has been played.

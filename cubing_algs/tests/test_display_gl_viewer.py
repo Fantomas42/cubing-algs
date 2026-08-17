@@ -11,6 +11,7 @@ The glfw host has its own file, ``test_display_gl_host.py``.
 """
 import math
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
@@ -626,6 +627,74 @@ class TestViewerDrawing(AttachedViewerTestCase):
             self.viewer.screenshot(Path(folder) / 'axes.png')
 
         drawn.assert_called_once_with(self.viewer.camera, IDENTITY)
+
+
+class TestViewerDrawnThroughEffects(AttachedViewerTestCase):
+    """Tests for the frame a host layering effects asks for."""
+
+    def test_a_frame_is_drawn_with_what_it_is_given(self) -> None:
+        """Test that the three overrides are what reaches the renderer."""
+        self.attach()
+
+        scene = replace(self.viewer.scene, instances=())
+        look = replace(self.viewer.look, ambient=0.1)
+        camera = replace(self.viewer.camera, distance=42.0)
+
+        with mock.patch.object(Renderer, 'draw') as drawn:
+            self.viewer.draw(scene=scene, look=look, camera=camera)
+
+        drawn.assert_called_once_with(scene, camera, look, IDENTITY)
+
+    def test_a_frame_of_its_own_leaves_the_viewer_alone(self) -> None:
+        """
+        Test that an effect never lands in the state of the viewer.
+
+        The camera is what this is really about: the mouse writes to it
+        too, so an effect leaking into it would drag the cube away one
+        frame at a time.
+        """
+        self.attach()
+
+        scene, look, camera = (
+            self.viewer.scene, self.viewer.look, self.viewer.camera,
+        )
+        distance = camera.distance
+
+        self.viewer.draw(
+            scene=replace(scene, instances=()),
+            look=replace(look, ambient=0.1),
+            camera=replace(camera, distance=distance * 2),
+        )
+
+        self.assertIs(self.viewer.scene, scene)
+        self.assertIs(self.viewer.look, look)
+        self.assertIs(self.viewer.camera, camera)
+        self.assertEqual(camera.distance, distance)
+
+    def test_what_is_left_out_comes_from_the_viewer(self) -> None:
+        """Test that a partial override draws the rest as it stands."""
+        self.attach()
+
+        look = replace(self.viewer.look, ambient=0.1)
+
+        with mock.patch.object(Renderer, 'draw') as drawn:
+            self.viewer.draw(look=look)
+
+        drawn.assert_called_once_with(
+            self.viewer.scene, self.viewer.camera, look, IDENTITY,
+        )
+
+    def test_the_axes_follow_the_camera_they_are_drawn_with(self) -> None:
+        """Test that an effect moving the camera moves the axes too."""
+        self.viewer.show_axes = True
+        self.attach()
+
+        camera = replace(self.viewer.camera, distance=42.0)
+
+        with mock.patch.object(AxesRenderer, 'draw') as drawn:
+            self.viewer.draw(camera=camera)
+
+        drawn.assert_called_once_with(camera, IDENTITY)
 
 
 class TestViewerHeldFromOutside(AttachedViewerTestCase):

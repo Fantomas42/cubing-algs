@@ -74,7 +74,7 @@ def fps_title(frames: int, elapsed: float, title: str = WINDOW_TITLE) -> str:
     return f'{ title } — {rate:.0f} fps'
 
 
-@dataclass(slots=True)
+@dataclass
 class GlfwHost:
     """
     A window, an event loop, and a viewer drawing into it.
@@ -87,6 +87,18 @@ class GlfwHost:
     Nothing is opened until ``run()`` — or ``open()`` — is called, and
     everything it opened is given back when it returns, however it
     returns.
+
+    **Written to be subclassed**, which is the one reason it carries no
+    ``slots=True`` where the rest of the backend does: a plain
+    ``@dataclass`` subclass of a slotted dataclass generates an
+    ``__init__`` of its own and leaves every inherited ``init=False``
+    default unset, and a ``slots=True`` one rebuilds the class under its
+    methods, breaking every zero-argument ``super()`` in them. A host is
+    built once per process, so the memory a slot saves buys nothing that
+    the extension point costs.
+
+    A consumer layering effects on the cube overrides ``frame()``, and
+    inherits the loop, the timing and the counter untouched.
     """
 
     viewer: Viewer
@@ -96,6 +108,7 @@ class GlfwHost:
     context: 'moderngl.Context | None' = field(init=False, default=None)
     frames: int = field(init=False, default=0)
     clock: float = field(init=False, default=0.0)
+    period: float = field(init=False, default=0.0)
     dragging: bool = field(init=False, default=False)
     cursor: tuple[float, float] = field(init=False, default=(0.0, 0.0))
 
@@ -134,7 +147,7 @@ class GlfwHost:
         glfw.set_scroll_callback(self.window, self.on_scroll)
         glfw.set_framebuffer_size_callback(self.window, self.on_resize)
 
-        self.clock = glfw.get_time()
+        self.clock = self.period = glfw.get_time()
 
         return stage
 
@@ -166,6 +179,11 @@ class GlfwHost:
         from a steady sixty is all that is asked of it, and drawing a
         text in the scene would take a font and a program of its own.
 
+        The period is measured on ``period`` and never on ``clock``: the
+        latter is the moment the last frame was drawn, which ``tick()``
+        moves forward on every single frame, and a rate averaged over
+        that would always be averaged over nothing.
+
         Args:
             now: The moment the frame was drawn, in seconds.
 
@@ -173,7 +191,7 @@ class GlfwHost:
         import glfw
 
         self.frames += 1
-        elapsed = now - self.clock
+        elapsed = now - self.period
 
         if elapsed < FPS_INTERVAL:
             return
@@ -184,7 +202,7 @@ class GlfwHost:
         )
 
         self.frames = 0
-        self.clock = now
+        self.period = now
 
     def reset_title(self, now: float) -> None:
         """
@@ -203,7 +221,7 @@ class GlfwHost:
         glfw.set_window_title(self.window, self.title)
 
         self.frames = 0
-        self.clock = now
+        self.period = now
 
     def on_key(
             self,
@@ -328,6 +346,22 @@ class GlfwHost:
         """
         self.viewer.resize((width, height))
 
+    def frame(self, delta: float) -> None:
+        """
+        Draw one frame, and nothing of the window around it.
+
+        The seam of the host, and the one method a consumer layering
+        effects on the cube writes again: everything a window takes —
+        the timing, the swap, the events, the counter — stays in
+        ``tick()``, so an effect never has to copy a loop to slip
+        between ``advance()`` and ``draw()``.
+
+        Args:
+            delta: Seconds gone by since the last frame.
+
+        """
+        self.viewer.frame(delta)
+
     def tick(self) -> None:
         """
         Play one frame: let time pass, draw it, and read the events.
@@ -339,7 +373,7 @@ class GlfwHost:
         import glfw
 
         now = glfw.get_time()
-        self.viewer.frame(now - self.clock)
+        self.frame(now - self.clock)
         self.clock = now
 
         glfw.swap_buffers(self.window)

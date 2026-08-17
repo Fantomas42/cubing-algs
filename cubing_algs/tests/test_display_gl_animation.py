@@ -415,6 +415,29 @@ class TestAnimation(unittest.TestCase):
             build_scene(VCube(), geometry=animation.geometry).instances,
         )
 
+    def test_the_move_under_way_is_named(self) -> None:
+        """Test that the move being turned is readable from outside."""
+        animation = Animation(VCube(), "R U'", duration=0.1)
+
+        self.assertEqual(str(animation.move), 'R')
+
+        animation.advance(0.15)
+
+        self.assertEqual(str(animation.move), "U'")
+
+    def test_a_finished_animation_turns_no_move(self) -> None:
+        """Test that nothing is named once every move has landed."""
+        animation = Animation(VCube(), 'R', duration=0.1)
+        animation.advance(0.2)
+
+        self.assertIsNone(animation.move)
+
+    def test_a_pause_is_never_the_move_under_way(self) -> None:
+        """Test that the move named is one that truly turns something."""
+        animation = Animation(VCube(), '. R', duration=0.1)
+
+        self.assertEqual(str(animation.move), 'R')
+
     def test_an_empty_algorithm_is_over_before_it_starts(self) -> None:
         """Test that nothing to play is finished right away."""
         animation = Animation(VCube(), '')

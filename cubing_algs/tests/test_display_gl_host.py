@@ -12,6 +12,7 @@ The windows opened here are opened for real, and never shown.
 import math
 import sys
 import unittest
+from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
@@ -271,6 +272,84 @@ class TestHostWindow(HiddenHostTestCase):
         self.assertEqual(self.viewer.camera.aspect, 2.0)
 
 
+@dataclass
+class CountingHost(GlfwHost):
+    """
+    The host of a consumer, written as one is meant to be written.
+
+    A plain ``@dataclass`` subclass adding a field of its own and
+    overriding the one seam, ``frame()``, exactly as
+    ``gl_effects_demo.py`` does with its effects.
+    """
+
+    drawn: int = 0
+
+    def frame(self, delta: float) -> None:
+        """
+        Count the frame, then let the host draw it.
+
+        Args:
+            delta: Seconds gone by since the last frame.
+
+        """
+        self.drawn += 1
+
+        super().frame(delta)
+
+
+class TestHostExtension(HiddenHostTestCase):
+    """Tests for what subclassing the reference host takes."""
+
+    def setUp(self) -> None:
+        """Build the host of a consumer, beside the plain one."""
+        super().setUp()
+
+        self.consumer = CountingHost(self.viewer)
+
+    def tearDown(self) -> None:
+        """Close the host of the consumer, window patch still in place."""
+        self.consumer.close()
+
+        super().tearDown()
+
+    def test_a_subclass_inherits_the_state_of_a_host(self) -> None:
+        """
+        Test that the fields a host sets itself reach a subclass.
+
+        The regression this holds: a host carrying ``slots=True`` keeps
+        the defaults of its ``init=False`` fields out of the class, so a
+        subclass generating an ``__init__`` of its own left them unset,
+        and the first mouse move read a cursor nobody had written.
+        """
+        host = self.consumer
+
+        self.assertEqual(host.cursor, (0.0, 0.0))
+        self.assertEqual(host.clock, 0.0)
+        self.assertEqual(host.period, 0.0)
+        self.assertFalse(host.dragging)
+        self.assertIsNone(host.window)
+        self.assertEqual(host.drawn, 0)
+
+    def test_a_subclass_keeps_the_events_of_a_host(self) -> None:
+        """Test that a cursor moved over a subclass orbits the cube."""
+        host = self.consumer
+        host.open()
+        yaw = self.viewer.camera.yaw
+
+        host.on_mouse_button(host.window, 0, 1, 0)
+        host.on_cursor(host.window, 24.0, 0.0)
+
+        self.assertEqual(host.cursor, (24.0, 0.0))
+        self.assertNotEqual(self.viewer.camera.yaw, yaw)
+
+    def test_the_seam_replaces_the_drawing_and_nothing_else(self) -> None:
+        """Test that a frame of a subclass is played by the loop as is."""
+        with mock.patch('glfw.window_should_close', side_effect=[False, True]):
+            self.consumer.run()
+
+        self.assertEqual(self.consumer.drawn, 1)
+
+
 class TestHostFrameRate(HiddenHostTestCase):
     """Tests for the frame rate a host writes in its title."""
 
@@ -291,11 +370,39 @@ class TestHostFrameRate(HiddenHostTestCase):
 
         self.assertEqual(self.host.frames, 1)
 
+    def test_ticking_for_a_whole_period_reaches_the_title(self) -> None:
+        """
+        Test that the rate a loop measures truly lands in the title.
+
+        The regression this holds: the delta of a frame and the period
+        the rate is averaged over were read off the same field, so
+        ``tick()`` moved the start of the period to the moment it was
+        measuring from, the elapsed time came out null, and no rate ever
+        reached the title.
+        """
+        self.viewer.show_fps = True
+        self.host.open()
+
+        # A second and a half of frames, at a tenth of a second each, so
+        # that a period is crossed whatever FPS_INTERVAL is set to.
+        beat = FPS_INTERVAL / 10
+        clock = self.host.clock
+        times = [clock + beat * step for step in range(1, 16)]
+
+        with (
+                mock.patch('glfw.get_time', side_effect=times),
+                mock.patch('glfw.set_window_title') as written,
+        ):
+            for _ in times:
+                self.host.tick()
+
+        self.assertEqual(written.call_count, 1)
+
     def test_frame_counter_holds_its_rate_for_a_second(self) -> None:
         """Test that the title is not rewritten on every frame."""
         self.host.open()
         self.host.frames = 0
-        self.host.clock = 0.0
+        self.host.period = 0.0
 
         with mock.patch('glfw.set_window_title') as written:
             self.host.count_frame(FPS_INTERVAL / 2)
@@ -307,7 +414,7 @@ class TestHostFrameRate(HiddenHostTestCase):
         """Test that a whole period of frames reaches the title."""
         self.host.open()
         self.host.frames = 59
-        self.host.clock = 0.0
+        self.host.period = 0.0
 
         with mock.patch('glfw.set_window_title') as written:
             self.host.count_frame(FPS_INTERVAL)
@@ -316,7 +423,7 @@ class TestHostFrameRate(HiddenHostTestCase):
             self.host.window, f'{ WINDOW_TITLE } — 60 fps',
         )
         self.assertEqual(self.host.frames, 0)
-        self.assertEqual(self.host.clock, FPS_INTERVAL)
+        self.assertEqual(self.host.period, FPS_INTERVAL)
 
     def test_key_asks_for_the_frame_rate(self) -> None:
         """Test that F3 counts frames from the moment it is pressed."""
@@ -332,7 +439,7 @@ class TestHostFrameRate(HiddenHostTestCase):
         self.assertTrue(self.viewer.show_fps)
         written.assert_called_once_with(self.host.window, WINDOW_TITLE)
         self.assertEqual(self.host.frames, 0)
-        self.assertEqual(self.host.clock, 12.0)
+        self.assertEqual(self.host.period, 12.0)
 
     def test_key_takes_the_frame_rate_out_of_the_title(self) -> None:
         """Test that F3 pressed again leaves the plain title behind."""
@@ -340,7 +447,7 @@ class TestHostFrameRate(HiddenHostTestCase):
 
         self.viewer.show_fps = True
         self.host.open()
-        self.host.count_frame(self.host.clock + FPS_INTERVAL)
+        self.host.count_frame(self.host.period + FPS_INTERVAL)
 
         with mock.patch('glfw.set_window_title') as written:
             self.host.on_key(None, glfw.KEY_F3, 0, glfw.PRESS, 0)
