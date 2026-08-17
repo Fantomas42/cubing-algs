@@ -30,13 +30,16 @@ if TYPE_CHECKING:  # pragma: no cover
 # A glfw window handle, an opaque pointer we only ever pass around.
 type GLFWWindow = Any
 
+# A glfw monitor handle, opaque in the very same way.
+type GLFWMonitor = Any
+
 
 class GLContextError(CubingAlgsError):
     """
     Raised when no usable OpenGL context can be created.
 
     A library error like any other, so that a caller catching
-    ``CubingAlgsError`` — the CLI among them — reports a missing extra
+    ``CubingAlgsError`` - the CLI among them - reports a missing extra
     or a locked Wayland session as plainly as an invalid move.
     """
 

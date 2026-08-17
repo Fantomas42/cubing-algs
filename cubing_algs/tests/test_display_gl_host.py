@@ -12,6 +12,8 @@ The windows opened here are opened for real, and never shown.
 import math
 import sys
 import unittest
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -44,6 +46,64 @@ WINDOW_SIZE = (128, 128)
 # A window is drawn into for real, so the shortest antialiasing that
 # still exercises the multisampled path is enough here.
 WINDOW_LOOK = Look(samples=2)
+
+# Two screens of a desk, as glfw describes them: the fast one is the
+# primary, and the slow one sits to its left. A screen is opaque to the
+# backend, so a name stands for one as well as a handle does.
+SLOW = 'HDMI-1'
+FAST = 'HDMI-2'
+
+
+@dataclass(frozen=True)
+class FakeSize:
+    """The size of a video mode, as glfw nests it in one."""
+
+    width: int
+    height: int
+
+
+@dataclass(frozen=True)
+class FakeMode:
+    """What a screen answers about itself."""
+
+    size: FakeSize
+    refresh_rate: int
+
+
+SCREENS = {
+    SLOW: ((0, 0), FakeMode(FakeSize(1080, 1920), 60)),
+    FAST: ((1080, 480), FakeMode(FakeSize(3440, 1440), 100)),
+}
+
+
+@contextmanager
+def screens(position: tuple[int, int]) -> Iterator[None]:
+    """
+    Lay the two screens of a desk out, and put a window on them.
+
+    Args:
+        position: Upper left corner of the window, in the coordinates
+            the two screens share.
+
+    Yields:
+        Nothing; glfw answers for that desk while the block runs.
+
+    """
+    with (
+            mock.patch('glfw.get_monitors', return_value=tuple(SCREENS)),
+            mock.patch(
+                'glfw.get_monitor_pos',
+                side_effect=lambda screen: SCREENS[screen][0],
+            ),
+            mock.patch(
+                'glfw.get_video_mode',
+                side_effect=lambda screen: SCREENS[screen][1],
+            ),
+            mock.patch('glfw.get_primary_monitor', return_value=FAST),
+            mock.patch('glfw.get_window_pos', return_value=position),
+            mock.patch('glfw.get_window_size', return_value=(720, 720)),
+    ):
+        yield
 
 
 def hidden_window(
@@ -401,7 +461,7 @@ class TestHostMonitoring(HiddenHostTestCase):
 
         A driver does not block in the swap: it queues the frame and
         makes the next call pay for it, so the wait for the screen used
-        to land in the draw of the frame after — fifteen milliseconds of
+        to land in the draw of the frame after - fifteen milliseconds of
         processor time the processor never spent. Monitoring waits right
         after the swap instead, and only while it is monitoring.
         """
@@ -423,7 +483,7 @@ class TestHostMonitoring(HiddenHostTestCase):
         Test that nothing waits for the GPU once the vsync is off.
 
         There is no wait to move then, and asking for one anyway
-        divided the rate by fifty — which is the very measure F5 is
+        divided the rate by fifty - which is the very measure F5 is
         pressed to take.
         """
         import moderngl
@@ -543,7 +603,7 @@ class TestHostMonitoring(HiddenHostTestCase):
             self.host.on_key(None, glfw.KEY_F4, 0, glfw.PRESS, 0)
 
         report = written.call_args[0][0]
-        self.assertIn(f'{ WINDOW_TITLE } debug —', report)
+        self.assertIn(f'{ WINDOW_TITLE } debug -', report)
         self.assertIn('instances', report)
         self.assertIn('vsync on', report)
 
@@ -607,20 +667,53 @@ class TestScreenRefresh(unittest.TestCase):
 
         glfw.init()
 
-        self.assertGreater(screen_refresh(), 0.0)
+        window = hidden_window(WINDOW_SIZE)
+
+        try:
+            self.assertGreater(screen_refresh(window), 0.0)
+        finally:
+            destroy_window(window)
+
+    def test_a_window_reads_the_screen_it_sits_on(self) -> None:
+        """
+        Test that the budget comes from the screen showing the window.
+
+        The regression this holds: the rate used to be read off the
+        primary screen, so a window opened on the sixty hertz screen of
+        a desk whose primary runs at a hundred was given ten
+        milliseconds a frame instead of sixteen - and every frame it
+        held perfectly read as a frame past its budget.
+        """
+        with screens((200, 300)):
+            self.assertEqual(screen_refresh(object()), 60.0)
+
+    def test_a_window_on_the_other_screen_reads_that_one(self) -> None:
+        """Test that moving the window across the desk changes the rate."""
+        with screens((1600, 800)):
+            self.assertEqual(screen_refresh(object()), 100.0)
+
+    def test_a_window_the_screens_do_not_hold_falls_back(self) -> None:
+        """Test that a window nobody shows is given the primary screen."""
+        with screens((-4000, -4000)):
+            self.assertEqual(screen_refresh(object()), 100.0)
+
+    def test_a_screen_refusing_its_mode_is_skipped(self) -> None:
+        """Test that a screen saying nothing never holds the window."""
+        with (
+                screens((200, 300)),
+                mock.patch('glfw.get_video_mode', return_value=None),
+        ):
+            self.assertEqual(screen_refresh(object()), 0.0)
 
     def test_no_screen_at_all(self) -> None:
         """Test that a machine without a monitor holds no budget."""
-        with mock.patch('glfw.get_primary_monitor', return_value=None):
-            self.assertEqual(screen_refresh(), 0.0)
-
-    def test_a_screen_with_no_video_mode(self) -> None:
-        """Test that a screen refusing its mode holds no budget either."""
         with (
-                mock.patch('glfw.get_primary_monitor', return_value=object()),
-                mock.patch('glfw.get_video_mode', return_value=None),
+                mock.patch('glfw.get_monitors', return_value=()),
+                mock.patch('glfw.get_primary_monitor', return_value=None),
+                mock.patch('glfw.get_window_pos', return_value=(0, 0)),
+                mock.patch('glfw.get_window_size', return_value=(720, 720)),
         ):
-            self.assertEqual(screen_refresh(), 0.0)
+            self.assertEqual(screen_refresh(object()), 0.0)
 
 
 @requires_glfw

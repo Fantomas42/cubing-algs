@@ -819,7 +819,7 @@ class TestViewerMonitoring(AttachedViewerTestCase):
         """Test that a report says which GPU drew the frames."""
         self.attach()
 
-        self.assertIn('—', self.viewer.profile().context)
+        self.assertIn('-', self.viewer.profile().context)
 
     def test_the_axes_are_a_draw_call_of_their_own(self) -> None:
         """Test that showing the axes shows in the draw calls."""

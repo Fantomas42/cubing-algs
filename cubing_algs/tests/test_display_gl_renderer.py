@@ -497,6 +497,88 @@ class TestRenderScene(unittest.TestCase):
 
 
 @requires_gpu
+class TestInstanceUpload(unittest.TestCase):
+    """Tests for what a renderer hands the GPU, and how often."""
+
+    context: ClassVar['moderngl.Context']
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Open one context for the whole class."""
+        cls.context = create_standalone_context()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Give the context back."""
+        cls.context.release()
+
+    def setUp(self) -> None:
+        """Build a renderer and a target to draw a solved cube into."""
+        self.renderer = Renderer.create(self.context, build_cube_geometry(3))
+        self.target = OffscreenTarget.create(
+            self.context, (IMAGE_SIZE, IMAGE_SIZE), samples=0,
+        )
+        self.camera = OrbitCamera.from_rotation()
+        self.scene = build_scene(VCube())
+
+        self.target.use()
+
+    def tearDown(self) -> None:
+        """Give the GPU resources of the test back."""
+        self.renderer.release()
+        self.target.release()
+
+    def test_a_still_scene_is_uploaded_once(self) -> None:
+        """
+        Test that redrawing the same scene rewrites no instance buffer.
+
+        A viewer only rebuilds its scene when a move lands, so a still
+        cube hands the very same one over frame after frame. Packing
+        twenty-six instances in Python and uploading them is the bulk of
+        what such a frame costs on the processor, and none of it buys
+        anything: what is already on the GPU is what is to be drawn.
+        """
+        with mock.patch.object(
+                self.renderer.instance_buffer, 'write',
+        ) as write:
+            for _ in range(10):
+                self.renderer.draw(self.scene, self.camera)
+
+        write.assert_called_once()
+
+    def test_a_scene_that_changed_is_uploaded_again(self) -> None:
+        """Test that a cube whose pieces moved reaches the GPU."""
+        cube = VCube()
+        cube.rotate('R')
+
+        turned = build_scene(cube)
+
+        with mock.patch.object(
+                self.renderer.instance_buffer, 'write',
+        ) as write:
+            self.renderer.draw(self.scene, self.camera)
+            self.renderer.draw(turned, self.camera)
+            self.renderer.draw(self.scene, self.camera)
+
+        self.assertEqual(write.call_count, 3)
+
+    def test_the_pixels_are_the_same_either_way(self) -> None:
+        """
+        Test that a scene drawn twice draws the same picture twice.
+
+        The whole safety of holding an upload back: the second frame
+        must not come out of a stale buffer.
+        """
+        self.renderer.draw(self.scene, self.camera)
+        first = self.target.read()
+
+        self.renderer.draw(self.scene, self.camera)
+        second = self.target.read()
+
+        self.assertEqual(first, second)
+
+
+@requires_gpu
 class TestOrientedRender(unittest.TestCase):
     """
     Tests for the orientation an outside hand holds the cube with.

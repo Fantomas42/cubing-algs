@@ -6,8 +6,8 @@ offscreen render uses: nothing is drawn here that ``render()`` would not
 draw, the cube simply keeps moving.
 
 **This module owns no window and no loop.** It names neither glfw nor
-any toolkit: a ``Viewer`` is driven by a *host* — the glfw one lives in
-``host.py``, a Qt widget or anything else is written the same way — which
+any toolkit: a ``Viewer`` is driven by a *host* - the glfw one lives in
+``host.py``, a Qt widget or anything else is written the same way - which
 opens a context, hands it over as a ``Stage``, and calls ``frame()``,
 ``press()``, ``drag()`` and ``scroll()`` from its own loop. That is what
 lets the very same viewer be embedded in an application that already has
@@ -124,8 +124,8 @@ def resolve_orientation(
     """
     Read how the cube is held, whoever is holding it.
 
-    A tracker is read rather than copied, so that whatever feeds it —
-    the thread of a bluetooth cube, a replay — only has to hand it over
+    A tracker is read rather than copied, so that whatever feeds it -
+    the thread of a bluetooth cube, a replay - only has to hand it over
     once, and every frame then draws the last quaternion it received. A
     quaternion given directly is taken as it comes.
 
@@ -170,7 +170,7 @@ class Stage:
     The GPU side of a viewer: a context, and what draws into it.
 
     Held apart from the viewer so that the cube, the camera and the
-    animation all exist before any context does, and outlive it — which
+    animation all exist before any context does, and outlive it - which
     is what keeps the rest of the viewer testable without a GPU.
 
     It knows nothing of windows. Whoever opened the context owns it and
@@ -570,7 +570,7 @@ class Viewer:
         something on the cube describes the frame it wants and draws it,
         instead of writing into the viewer and putting it back
         afterwards. Nothing is kept, the next frame starting from the
-        fields again — which is what keeps effects from compounding, and
+        fields again - which is what keeps effects from compounding, and
         above all from leaking into the camera the mouse writes to too.
 
         Args:
@@ -632,8 +632,8 @@ class Viewer:
         Tell what a frame has to draw, and what it draws into.
 
         The steady half of a performance report: it only moves when the
-        cube, the window or the mode does. What belongs to a window —
-        the refresh rate of the screen, the vsync — is left to the host
+        cube, the window or the mode does. What belongs to a window -
+        the refresh rate of the screen, the vsync - is left to the host
         to fill in.
 
         Returns:
@@ -651,7 +651,7 @@ class Viewer:
             size=stage.size,
             samples=self.look.samples,
             draw_calls=CUBE_DRAW_CALLS + int(self.show_axes),
-            context=f'{ info["renderer"] } — { info["version"] }',
+            context=f'{ info["renderer"] } - { info["version"] }',
         )
 
     def screenshot(self, path: str | Path = '') -> Path:

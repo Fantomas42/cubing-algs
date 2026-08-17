@@ -4,8 +4,8 @@ The glfw host of the interactive viewer.
 A ``Viewer`` holds a cube, a camera and an animation, and knows how to
 draw one frame; it owns neither a window nor a loop. This module is what
 gives it both under glfw, and it is a module of its own for one reason:
-``viewer.py`` names glfw nowhere, so another host — a ``QOpenGLWidget``,
-a pygame surface, anything already owning an event loop — plugs the very
+``viewer.py`` names glfw nowhere, so another host - a ``QOpenGLWidget``,
+a pygame surface, anything already owning an event loop - plugs the very
 same viewer into it by writing the same handful of methods.
 
 What a host owes a viewer is short: attach a ``Stage`` built on a current
@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.display.gl.constants import VIEWER_HELP
 from cubing_algs.display.gl.constants import WINDOW_TITLE
+from cubing_algs.display.gl.context import GLFWMonitor
 from cubing_algs.display.gl.context import GLFWWindow
 from cubing_algs.display.gl.context import create_window
 from cubing_algs.display.gl.context import create_window_context
@@ -59,13 +60,61 @@ def key_letter(key: int) -> str:
     return chr(key)
 
 
-def screen_refresh() -> float:
+def window_screen(window: GLFWWindow) -> GLFWMonitor:
     """
-    Read how fast the screen the window opens on refreshes.
+    Find the screen a window is shown on.
+
+    glfw names the monitor of a fullscreen window and of no other, so a
+    windowed one is placed by hand: the screens of a desk are laid out
+    side by side in one coordinate space, and the one holding the
+    center of the window is the one showing it.
+
+    Args:
+        window: The window to place.
+
+    Returns:
+        The screen showing the window, the primary one when no screen
+        holds it, and nothing at all when the machine has none.
+
+    """
+    import glfw
+
+    left, top = glfw.get_window_pos(window)
+    width, height = glfw.get_window_size(window)
+
+    x = left + width // 2
+    y = top + height // 2
+
+    for screen in glfw.get_monitors():
+        mode = glfw.get_video_mode(screen)
+
+        if not mode:
+            continue
+
+        origin_x, origin_y = glfw.get_monitor_pos(screen)
+
+        if (origin_x <= x < origin_x + mode.size.width
+                and origin_y <= y < origin_y + mode.size.height):
+            return screen
+
+    return glfw.get_primary_monitor()
+
+
+def screen_refresh(window: GLFWWindow) -> float:
+    """
+    Read how fast the screen showing a window refreshes.
 
     This is the ceiling a vsynced frame rate can never pass, and it is
     therefore the budget a frame is given: on a hundred hertz screen a
     frame has ten milliseconds, whatever a counter shows.
+
+    It is read off the screen the window truly sits on, and not off the
+    primary one: a desk mixing a sixty hertz screen with a hundred
+    hertz one gives a frame two very different budgets, and the window
+    is not always where the primary is.
+
+    Args:
+        window: The window whose screen is to be read.
 
     Returns:
         The refresh rate in hertz, zero when no screen says.
@@ -73,12 +122,12 @@ def screen_refresh() -> float:
     """
     import glfw
 
-    monitor = glfw.get_primary_monitor()
+    screen = window_screen(window)
 
-    if not monitor:
+    if not screen:
         return 0.0
 
-    mode = glfw.get_video_mode(monitor)
+    mode = glfw.get_video_mode(screen)
 
     if not mode:
         return 0.0
@@ -96,7 +145,7 @@ class GlfwHost:
     translation of the keyboard and the mouse into the neutral
     vocabulary the viewer speaks.
 
-    Nothing is opened until ``run()`` — or ``open()`` — is called, and
+    Nothing is opened until ``run()`` - or ``open()`` - is called, and
     everything it opened is given back when it returns, however it
     returns.
 
@@ -154,8 +203,11 @@ class GlfwHost:
 
         # What a frame is given comes from the screen it is shown on: a
         # frame rate held by the vsync says nothing on its own, the
-        # budget it leaves says everything.
-        self.refresh = screen_refresh()
+        # budget it leaves says everything. Read once, on the screen the
+        # window opened on - a window dragged onto another screen keeps
+        # the budget of the first, and it is `drops`, measured on the
+        # pace truly held, that stays right whatever it is dragged onto.
+        self.refresh = screen_refresh(self.window)
         if self.refresh:
             viewer.monitor.budget = 1 / self.refresh
 
@@ -286,8 +338,8 @@ class GlfwHost:
         """
         React to a key being pressed, or held down.
 
-        What belongs to the window is answered here — closing it, the
-        performance in its title, the vsync it waits for — and
+        What belongs to the window is answered here - closing it, the
+        performance in its title, the vsync it waits for - and
         everything else is handed to the viewer in its own vocabulary.
 
         Args:
@@ -407,8 +459,8 @@ class GlfwHost:
         Draw one frame, and nothing of the window around it.
 
         The seam of the host, and the one method a consumer layering
-        effects on the cube writes again: everything a window takes —
-        the timing, the swap, the events, the counter — stays in
+        effects on the cube writes again: everything a window takes -
+        the timing, the swap, the events, the counter - stays in
         ``tick()``, so an effect never has to copy a loop to slip
         between ``advance()`` and ``draw()``.
 
@@ -434,7 +486,7 @@ class GlfwHost:
         **A monitored vsync waits for the GPU right after the swap**,
         and there alone: a driver does not block where one would expect
         it to. Swapping merely queues the frame, and the wait for the
-        screen falls on the next call that fills the queue — the first
+        screen falls on the next call that fills the queue - the first
         draw of the frame after, which came out at fifteen milliseconds
         of "processor time" the processor never spent. One ``finish()``
         puts that wait back where it belongs.
@@ -442,7 +494,7 @@ class GlfwHost:
         It is asked for **only when the vsync is on**, which is the only
         time there is a wait to move: a free running window has nothing
         to wait for, and making it wait all the same divided its rate by
-        fifty — which is the very measure ``F5`` exists to take.
+        fifty - which is the very measure ``F5`` exists to take.
         """
         import glfw
 

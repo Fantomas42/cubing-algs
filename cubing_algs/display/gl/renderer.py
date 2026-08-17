@@ -16,6 +16,7 @@ from collections.abc import Iterable
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from dataclasses import field
 from typing import TYPE_CHECKING
 from typing import Self
 from typing import cast
@@ -205,6 +206,8 @@ class Renderer:
     vertex_array: 'moderngl.VertexArray'
     core: CoreRenderer
 
+    uploaded: Scene | None = field(init=False, default=None)
+
     @classmethod
     def create(
             cls,
@@ -277,6 +280,32 @@ class Renderer:
         ):
             uniform(self.program, name).value = getattr(look, name)
 
+    def write_instances(self, scene: Scene) -> None:
+        """
+        Hand the instances of a scene over, unless they are already there.
+
+        A viewer rebuilds its scene when a move lands and not one frame
+        sooner, so a still cube hands the very same one over frame after
+        frame: packing twenty-six instances in Python and uploading them
+        again buys nothing, and it is the bulk of what such a frame costs
+        on the processor.
+
+        Compared by identity, which is exactly the question being asked
+        - is this the scene already on the GPU? A ``Scene`` is frozen, so
+        the one that was not replaced cannot have changed, and an effect
+        describing a picture of its own through ``replace()`` hands over
+        a new one, which is uploaded as it must be.
+
+        Args:
+            scene: The cube to draw.
+
+        """
+        if scene is self.uploaded:
+            return
+
+        self.instance_buffer.write(scene.pack_instances())
+        self.uploaded = scene
+
     def draw(
             self,
             scene: Scene,
@@ -304,7 +333,7 @@ class Renderer:
 
         self.core.draw(camera, look, orientation)
 
-        self.instance_buffer.write(scene.pack_instances())
+        self.write_instances(scene)
 
         uniform(self.program, 'view_projection').write(
             camera.view_projection().pack(),
@@ -434,8 +463,8 @@ class GpuTimer:
     measure. One query is enough for that, a result being read before
     the next one starts.
 
-    A query is given back by the garbage collector — moderngl exposes no
-    release for it — so a stage simply drops the timer it holds.
+    A query is given back by the garbage collector - moderngl exposes no
+    release for it - so a stage simply drops the timer it holds.
     """
 
     query: 'moderngl.Query'
