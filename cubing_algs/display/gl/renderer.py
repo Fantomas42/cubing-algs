@@ -157,8 +157,9 @@ class CoreRenderer:
 
         Args:
             camera: The camera looking at the cube.
-            look: How the light falls on it, the core taking its ambient
-                and its gamma from the very same one.
+            look: How the light falls on it, the core taking its ambient,
+                its gamma and its light from the very same one, plus the
+                highlight and the rim written for it alone.
             orientation: How the whole cube is held, which the core
                 follows as the piece of it that it is.
 
@@ -170,11 +171,17 @@ class CoreRenderer:
         )
         uniform(self.program, 'world').write(orientation.to_matrix().pack())
         uniform(self.program, 'core_color').value = CORE_COLOR
+        uniform(self.program, 'camera_position').value = camera.position
         uniform(self.program, 'light_direction').value = Vec3(
             *look.light_direction,
         ).normalized()
-        uniform(self.program, 'ambient').value = look.ambient
-        uniform(self.program, 'gamma').value = look.gamma
+
+        for name in (
+                'ambient', 'gamma',
+                'core_specular_strength', 'core_specular_power',
+                'core_rim_strength', 'core_rim_power',
+        ):
+            uniform(self.program, name).value = getattr(look, name)
 
         self.context.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
 

@@ -171,6 +171,21 @@ class Look:
     specular_strength: float = 0.06
     specular_power: float = 32.0
 
+    # The highlight of the ball core, which is not the one of a sticker.
+    # A sticker is a flat printed patch seen next to twenty-five others,
+    # so its gloss must stay a hint; the core is a molded ball seen alone
+    # at the bottom of a hole, and a broad bright spot on it is what
+    # tells a sphere from a disc. Hence knobs of its own, stronger and
+    # wider, rather than the ones of the pieces.
+    core_specular_strength: float = 0.45
+    core_specular_power: float = 18.0
+
+    # Light catching the silhouette of the core, as the rim of the cube
+    # does for a piece: it separates the ball from the wall of the shaft
+    # it is seen through, which is the only place its outline shows.
+    core_rim_strength: float = 0.25
+    core_rim_power: float = 3.0
+
     # Amplitude of the noise breaking the flatness of a sticker, as a
     # fraction of its color. Sticks to the piece rather than to the
     # screen, so it does not crawl when the cube turns.

@@ -98,6 +98,8 @@ FLAT_LOOK = Look(
     groove_occlusion=0.0,
     rim_strength=0.0,
     specular_strength=0.0,
+    core_specular_strength=0.0,
+    core_rim_strength=0.0,
     sticker_grain=0.0,
 )
 
@@ -479,6 +481,60 @@ class TestRenderScene(unittest.TestCase):
 
         self.assertLess(width, cube_width)
         self.assertLess(height, cube_height)
+
+    def test_the_core_takes_a_highlight_of_its_own(self) -> None:
+        """
+        Test that the gloss of the core reaches the core, and nothing else.
+
+        A ball seen at the bottom of a hole reads as a sphere by the
+        light sliding on it, so the highlight is measured where it lands:
+        the point whose normal is the half vector of the light and the
+        eye must come out brighter than the very same point lit by the
+        ambient and the diffuse alone. The pieces take a gloss of their
+        own, so a cube with every piece in place must be untouched by it.
+        """
+        glossy = replace(
+            FLAT_LOOK,
+            core_specular_strength=0.6,
+            core_specular_power=18.0,
+        )
+
+        light = Vec3(*FLAT_LOOK.light_direction).normalized()
+        view = CAMERA.position.normalized()
+        summit = CAMERA.view_projection().transform_point(
+            (light + view).normalized().scaled(core_radius(3)),
+        )
+
+        ball = build_scene(VCube(), mode='hidden')
+
+        matte = pixel_at(
+            render_scene(ball, CAMERA, FLAT, context=self.context),
+            IMAGE_SIZE,
+            summit,
+        )
+        lit = pixel_at(
+            render_scene(
+                ball, CAMERA, replace(FLAT, look=glossy), context=self.context,
+            ),
+            IMAGE_SIZE,
+            summit,
+        )
+
+        self.assertEqual(matte[3], 255)
+
+        for channel in range(COLOR_CHANNELS - 1):
+            with self.subTest(channel=channel):
+                self.assertGreater(lit[channel], matte[channel])
+
+        self.assertEqual(
+            render_scene(
+                build_scene(VCube()),
+                OrbitCamera.from_rotation(),
+                replace(FLAT, look=glossy),
+                context=self.context,
+            ),
+            self.pixels,
+        )
 
     def test_a_scrambled_cube_differs(self) -> None:
         """Test that the state of the cube reaches the pixels."""

@@ -176,10 +176,12 @@ void main()
 """
 
 # The second program of the backend: the ball core, the inside of the
-# cube. It shades with the same ambient and diffuse terms as the cube, so
-# a single light lights them both, but with none of what belongs to a
-# piece: no groove occlusion, whose local frame is that of a box, no rim,
-# no gloss, no grain. A core is a matte solid seen through a hole.
+# cube. It shades with the same ambient, gamma and light as the cube, so
+# a single lamp lights them both, but with none of what belongs to a
+# piece: no groove occlusion, whose local frame is that of a box, and no
+# grain, which sticks to a molded facelet. What it does take, and a piece
+# does not, is a highlight of its own: a polished ball seen alone at the
+# bottom of a hole reads as a sphere by the light sliding on it.
 CORE_VERTEX_SHADER = GLSL_VERSION + """
 
 uniform mat4 view_projection;
@@ -189,32 +191,55 @@ in vec3 in_position;
 in vec3 in_normal;
 
 out vec3 v_normal;
+out vec3 v_world;
 
 void main()
 {
     v_normal = mat3(world) * in_normal;
 
-    gl_Position = view_projection * world * vec4(in_position, 1.0);
+    vec4 position = world * vec4(in_position, 1.0);
+    v_world = position.xyz;
+
+    gl_Position = view_projection * position;
 }
 """
 
 CORE_FRAGMENT_SHADER = GLSL_VERSION + """
 
 uniform vec3 light_direction;
+uniform vec3 camera_position;
 uniform vec3 core_color;
 uniform float ambient;
 uniform float gamma;
+uniform float core_specular_strength;
+uniform float core_specular_power;
+uniform float core_rim_strength;
+uniform float core_rim_power;
 
 in vec3 v_normal;
+in vec3 v_world;
 
 out vec4 f_color;
 
 void main()
 {
-    float diffuse = max(dot(normalize(v_normal), light_direction), 0.0);
+    vec3 normal = normalize(v_normal);
+    vec3 view = normalize(camera_position - v_world);
+    vec3 half_vector = normalize(light_direction + view);
+
+    float diffuse = max(dot(normal, light_direction), 0.0);
+
+    // The highlight is added, not multiplied: it is the lamp seen in the
+    // surface, so it takes the color of the light and not the one of the
+    // plastic underneath. The rim multiplies, as it does on the cube.
+    float gloss = core_specular_strength
+        * pow(max(dot(normal, half_vector), 0.0), core_specular_power);
+
+    float rim = core_rim_strength
+        * pow(1.0 - max(dot(normal, view), 0.0), core_rim_power);
 
     vec3 lit = pow(core_color, vec3(gamma))
-        * (ambient + (1.0 - ambient) * diffuse);
+        * (ambient + (1.0 - ambient) * diffuse + rim) + gloss;
 
     f_color = vec4(pow(max(lit, 0.0), vec3(1.0 / gamma)), 1.0);
 }
