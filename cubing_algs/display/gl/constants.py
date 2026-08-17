@@ -49,6 +49,12 @@ RENDER_SAMPLES = 8
 # follow.
 MOVE_DURATION = 0.28
 
+# Floor of the duration of a turn, in seconds: what a move keeps when
+# the dates it carries would have it shorter still. Below it a turn is
+# no longer read as one, and a burst of moves stamped at the very same
+# moment would flash by.
+MINIMUM_MOVE_DURATION = 0.06
+
 # What a half turn multiplies that duration by. Given the same beat as a
 # quarter turn it covers twice the angle, hence goes twice as fast, which
 # reads as a jolt in the middle of an algorithm. Doubling the beat is the

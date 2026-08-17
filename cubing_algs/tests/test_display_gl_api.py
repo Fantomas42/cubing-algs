@@ -38,6 +38,31 @@ IMAGE_SIZE = 96
 PNG_DIMENSIONS_OFFSET = len(PNG_SIGNATURE) + 8
 
 
+def gif_duration(path: Path) -> int:
+    """
+    Add up how long an animated GIF plays.
+
+    The frames are counted through their delay rather than one by one:
+    Pillow merges the frames a rest holds still and sums their delay,
+    so what a wait weighs is time, not images.
+
+    Args:
+        path: The animation to read.
+
+    Returns:
+        How long the animation lasts, in milliseconds.
+
+    """
+    from PIL import Image
+    from PIL import ImageSequence
+
+    with Image.open(path) as animation:
+        return sum(
+            frame.info['duration']
+            for frame in ImageSequence.Iterator(animation)
+        )
+
+
 def probe_gpu() -> bool:
     """
     Tell whether this machine can create an OpenGL context.
@@ -191,6 +216,22 @@ class VCubeAnimateTestCase(unittest.TestCase):
             )
 
         self.assertEqual(cube.state, state)
+
+    def test_a_timed_algorithm_plays_at_its_own_speed(self) -> None:
+        """A timed algorithm is a solve, pauses of the cuber included."""
+        with TemporaryDirectory() as directory:
+            timed = Path(directory) / 'timed.gif'
+            tight = Path(directory) / 'tight.gif'
+
+            VCube().animate('R@0 U@1200', timed, image_size=IMAGE_SIZE)
+            VCube().animate('R U', tight, image_size=IMAGE_SIZE)
+
+            # The stamps leave 1.2 s between the two moves, of which the
+            # turn of the R takes its beat: the rest is what is left,
+            # and it is what the untimed animation does not hold.
+            self.assertGreater(
+                gif_duration(timed) - gif_duration(tight), 800,
+            )
 
     def test_the_starting_state_reaches_the_animation(self) -> None:
         """The animation starts from the cube it is given."""

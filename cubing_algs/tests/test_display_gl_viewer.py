@@ -57,6 +57,61 @@ WINDOW_LOOK = Look(samples=2)
 COLOR_TOLERANCE = 2
 
 
+def queued(viewer: Viewer) -> list[str]:
+    """
+    Read the notations a viewer has queued, dates left out.
+
+    Args:
+        viewer: The viewer to read the queue of.
+
+    Returns:
+        The notations waiting to be played, in order.
+
+    """
+    return [notation for notation, _arrival in viewer.pending]
+
+
+def play(viewer: Viewer, moves: int = 1) -> None:
+    """
+    Let a viewer play what it was handed, one beat at a time.
+
+    A move starts when it arrives rather than when the frame drawing it
+    begins, so a move pushed just now takes one beat to start turning
+    and one more to land.
+
+    Args:
+        viewer: The viewer to advance.
+        moves: How many moves are waiting to be played.
+
+    """
+    for _frame in range(moves + 1):
+        viewer.advance(viewer.duration)
+
+
+class FakeClock:
+    """
+    A clock a test moves by hand, standing in for ``perf_counter()``.
+
+    A viewer stamps a move with the moment it arrived, so telling what
+    cadence a producer holds means telling what the clock said when it
+    pushed.
+    """
+
+    def __init__(self, now: float = 0.0) -> None:
+        """Start the clock where the test wants it."""
+        self.now = now
+
+    def __call__(self) -> float:
+        """
+        Read the clock.
+
+        Returns:
+            The moment the test has set.
+
+        """
+        return self.now
+
+
 def probe_gpu() -> bool:
     """
     Tell whether this machine can create an OpenGL context.
@@ -191,7 +246,7 @@ class TestViewer(unittest.TestCase):
     def test_the_given_cube_is_left_alone(self) -> None:
         """Test that a viewer plays on a copy of the cube."""
         self.viewer.push('R')
-        self.viewer.advance(self.viewer.duration)
+        play(self.viewer)
 
         self.assertNotEqual(self.viewer.cube.state, self.cube.state)
 
@@ -209,12 +264,16 @@ class TestViewer(unittest.TestCase):
     def test_push_queues_a_move(self) -> None:
         """Test that a move waits its turn."""
         self.assertTrue(self.viewer.push('R'))
-        self.assertEqual(list(self.viewer.pending), ['R'])
+        self.assertEqual(queued(self.viewer), ['R'])
 
     def test_push_nothing(self) -> None:
         """Test that a key playing no move queues nothing."""
         self.assertFalse(self.viewer.push(''))
         self.assertEqual(len(self.viewer.pending), 0)
+
+    def test_push_a_timed_move(self) -> None:
+        """Test that a producer stamping its moves is not turned away."""
+        self.assertTrue(self.viewer.push('R@100'))
 
     def test_push_a_move_the_cube_refuses(self) -> None:
         """Test that a move an even cube cannot take is dropped."""
@@ -229,19 +288,20 @@ class TestViewer(unittest.TestCase):
         expected.rotate('R')
 
         self.viewer.push('R')
-        self.viewer.advance(self.viewer.duration)
+        play(self.viewer)
 
         self.assertEqual(self.viewer.cube.state, expected.state)
-        self.assertIsNone(self.viewer.animation)
+        self.assertTrue(self.viewer.animation.finished)
 
     def test_advance_turns_before_landing(self) -> None:
         """Test that a move under way is drawn part of the way round."""
         resting = self.viewer.scene
 
         self.viewer.push('R')
+        self.viewer.advance(self.viewer.duration)
         turning = self.viewer.advance(self.viewer.duration / 2)
 
-        self.assertIsNotNone(self.viewer.animation)
+        self.assertFalse(self.viewer.animation.finished)
         self.assertNotEqual(turning.instances, resting.instances)
         self.assertEqual(self.viewer.cube.state, self.cube.state)
 
@@ -253,8 +313,7 @@ class TestViewer(unittest.TestCase):
         self.viewer.push('R')
         self.viewer.push("U'")
 
-        for _step in range(2):
-            self.viewer.advance(self.viewer.duration)
+        play(self.viewer, moves=2)
 
         self.assertEqual(self.viewer.cube.state, expected.state)
         self.assertEqual(len(self.viewer.pending), 0)
@@ -263,17 +322,69 @@ class TestViewer(unittest.TestCase):
         """Test that an idle viewer keeps drawing the cube at rest."""
         self.assertIs(self.viewer.advance(1.0), self.viewer.scene)
 
+    def test_advance_plays_a_cube_swapped_from_outside(self) -> None:
+        """Test that a cube put in the viewer by hand is the one played on."""
+        other = VCube()
+        other.rotate('F')
+
+        self.viewer.cube = other
+        self.viewer.push('R')
+        play(self.viewer)
+
+        expected = VCube()
+        expected.rotate('F R')
+
+        self.assertEqual(self.viewer.cube.state, expected.state)
+
+    def test_a_burst_of_moves_never_leaves_the_cube_behind(self) -> None:
+        """Test that hammering the keyboard is caught up with, not queued."""
+        hammered = 'R U F R U F R U F R'
+
+        expected = self.cube.copy()
+        expected.rotate(hammered)
+
+        for notation in hammered.split():
+            self.viewer.push(notation)
+
+        frame = 1.0 / 60.0
+        played = 0.0
+
+        while self.viewer.pending or not self.viewer.animation.finished:
+            self.viewer.advance(frame)
+            played += frame
+
+        self.assertEqual(self.viewer.cube.state, expected.state)
+        self.assertLess(played, 10 * self.viewer.duration)
+
+    def test_the_cadence_is_the_one_the_moves_arrived_at(self) -> None:
+        """Test that a move lasts the gap the producer left behind it."""
+        clock = FakeClock()
+
+        with mock.patch(
+                'cubing_algs.display.gl.viewer.time.perf_counter', clock,
+        ):
+            self.viewer.push('R')
+
+            clock.now = 0.1
+            self.viewer.advance(0.1)
+
+            clock.now = 0.2
+            self.viewer.push('U')
+            self.viewer.advance(0.1)
+
+        self.assertAlmostEqual(self.viewer.animation.step, 0.2)
+
     def test_reset_cube(self) -> None:
         """Test that the cube goes back to the state it was opened on."""
         self.viewer.push('R')
-        self.viewer.advance(self.viewer.duration)
+        play(self.viewer)
         self.viewer.push('U')
 
         self.viewer.reset_cube()
 
         self.assertEqual(self.viewer.cube.state, self.cube.state)
         self.assertEqual(len(self.viewer.pending), 0)
-        self.assertIsNone(self.viewer.animation)
+        self.assertTrue(self.viewer.animation.finished)
 
     def test_drawing_without_a_stage(self) -> None:
         """Test that a viewer nobody attached says so rather than crashing."""
@@ -361,7 +472,7 @@ class TestViewerInput(unittest.TestCase):
     def test_press_plays_a_move(self) -> None:
         """Test that a letter queues the move it names."""
         self.assertTrue(self.viewer.press('R', prime=True))
-        self.assertEqual(list(self.viewer.pending), ["R'"])
+        self.assertEqual(queued(self.viewer), ["R'"])
 
     def test_press_a_key_playing_nothing(self) -> None:
         """Test that a letter naming no move queues none."""
@@ -372,7 +483,7 @@ class TestViewerInput(unittest.TestCase):
         """Test that the modifiers reach the notation."""
         self.viewer.press('L', double=True, wide=True)
 
-        self.assertEqual(list(self.viewer.pending), ['Lw2'])
+        self.assertEqual(queued(self.viewer), ['Lw2'])
 
     def test_drag_orbits_the_camera(self) -> None:
         """Test that dragging the mouse turns the cube the way it goes."""
@@ -578,8 +689,9 @@ class TestViewerDrawing(AttachedViewerTestCase):
         self.viewer.push('R')
 
         self.viewer.frame(self.viewer.duration)
+        self.viewer.frame(self.viewer.duration)
 
-        self.assertIsNone(self.viewer.animation)
+        self.assertTrue(self.viewer.animation.finished)
 
     def test_frame_draws_what_time_led_to(self) -> None:
         """Test that a frame is the scene the elapsed time built."""
@@ -588,7 +700,7 @@ class TestViewerDrawing(AttachedViewerTestCase):
 
         self.viewer.frame(self.viewer.duration / 2)
 
-        self.assertIsNotNone(self.viewer.animation)
+        self.assertFalse(self.viewer.animation.finished)
 
     def test_screenshot(self) -> None:
         """Test that a screenshot is a PNG of what the viewer shows."""

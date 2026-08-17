@@ -422,7 +422,7 @@ class TransparentWindow:
         """
         viewer = self.viewer
 
-        if viewer.animation is None and not viewer.pending:
+        if viewer.animation.finished and not viewer.pending:
             viewer.push(self.moves)
 
     def orbit(self, delta: float) -> None:

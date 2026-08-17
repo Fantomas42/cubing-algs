@@ -56,12 +56,13 @@ from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.scene import Scene
-from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.scene import resolve_display
 from cubing_algs.display.gl.transforms import IDENTITY
 from cubing_algs.display.gl.transforms import OrientationTracker
 from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.exceptions import InvalidMoveError
+from cubing_algs.parsing import parse_moves
+from cubing_algs.transform.timing import untime_moves
 
 if TYPE_CHECKING:  # pragma: no cover
     import moderngl
@@ -313,8 +314,10 @@ class Viewer:
     scene: Scene = field(init=False)
     origin: 'VCube' = field(init=False)
     stage: Stage | None = field(init=False, default=None)
-    animation: Animation | None = field(init=False, default=None)
-    pending: deque[str] = field(init=False, default_factory=deque[str])
+    animation: Animation = field(init=False)
+    pending: deque[tuple[str, float]] = field(
+        init=False, default_factory=deque[tuple[str, float]],
+    )
 
     def __post_init__(self) -> None:
         """Settle what is drawn, and how it is framed, once and for all."""
@@ -325,7 +328,7 @@ class Viewer:
 
         self.origin = self.cube.copy(full=True)
         self.geometry = build_cube_geometry(self.cube.size)
-        self.scene = self.build_scene()
+        self.reload()
 
         width, height = self.window_size
         self.camera = OrbitCamera.from_rotation(
@@ -343,17 +346,24 @@ class Viewer:
         """
         return fit_fov(self.geometry.radius, self.distance or DISTANCE)
 
-    def build_scene(self) -> Scene:
+    def reload(self) -> None:
         """
-        Build the scene of the cube as it stands right now.
+        Start a fresh animation on the cube the viewer now holds.
 
-        Returns:
-            The scene of the current state of the cube.
-
+        One animation is built and kept, rather than one per move: it
+        is the queue every producer pours into, and the only thing that
+        ever turns the cube. The viewer holds the very cube the
+        animation plays on, so what a move lands on is what the viewer
+        shows, with nothing to hand back and forth.
         """
-        return build_scene(
-            self.cube, self.palette, self.geometry, mask=self.mask,
+        self.animation = Animation(
+            self.cube, '',
+            Presentation(palette=self.palette, mask=self.mask),
+            duration=self.duration,
         )
+
+        self.cube = self.animation.cube
+        self.scene = self.animation.resting
 
     def require_stage(self) -> Stage:
         """
@@ -407,6 +417,15 @@ class Viewer:
         A cube refuses what its size makes meaningless, an ``M`` on a
         2x2x2 among others. Such a move is dropped here rather than in
         the middle of the loop, where it would bring the window down.
+        What is played on is a copy of ``origin``: whether a move is
+        valid only depends on the size of the cube, never on its state,
+        and nothing touches ``origin`` after the viewer is built. A
+        producer of its own thread may therefore push, ``deque.append``
+        being atomic.
+
+        The move is validated undressed of its timestamps, and queued
+        dressed: a producer stamping what it sends - a bluetooth cube, a
+        replay - has its cadence read from those very stamps.
 
         Args:
             notation: The move to play, empty for none.
@@ -419,11 +438,13 @@ class Viewer:
             return False
 
         try:
-            self.cube.copy().rotate(notation)
+            self.origin.copy().rotate(
+                parse_moves(notation).transform(untime_moves),
+            )
         except InvalidMoveError:
             return False
 
-        self.pending.append(notation)
+        self.pending.append((notation, time.perf_counter()))
 
         return True
 
@@ -491,6 +512,13 @@ class Viewer:
         processor spends alone: the state machine, the scene it rebuilds
         and the colors it reads all happen here, with the GPU idle.
 
+        The viewer cadences nothing: it hands the moves that arrived
+        over, each with the moment it arrived, and the animation plays
+        them at the cadence those moments describe. An arrival is
+        stamped on the clock of the caller, so it is handed over as the
+        age it has reached on this very frame - the two clocks are never
+        assumed to have the same origin.
+
         Args:
             delta: Seconds gone by since the last call.
 
@@ -500,19 +528,16 @@ class Viewer:
         """
         start = time.perf_counter()
 
-        if self.animation is None and self.pending:
-            self.animation = Animation(
-                self.cube, self.pending.popleft(),
-                Presentation(palette=self.palette, mask=self.mask),
-                duration=self.duration,
-            )
+        if self.cube is not self.animation.cube:
+            self.reload()
 
-        if self.animation is not None:
-            self.scene = self.animation.advance(delta)
+        clock = self.animation.clock + max(delta, 0.0)
 
-            if self.animation.finished:
-                self.cube = self.animation.cube
-                self.animation = None
+        while self.pending:
+            notation, arrival = self.pending.popleft()
+            self.animation.extend(notation, at=clock - (start - arrival))
+
+        self.scene = self.animation.advance(delta)
 
         self.monitor.advance.add(time.perf_counter() - start)
 
@@ -521,9 +546,8 @@ class Viewer:
     def reset_cube(self) -> None:
         """Put the cube back to the state the viewer opened on."""
         self.cube = self.origin.copy(full=True)
-        self.animation = None
         self.pending.clear()
-        self.scene = self.build_scene()
+        self.reload()
 
     def reset_camera(self) -> None:
         """Frame the cube again, as it was framed when the window opened."""

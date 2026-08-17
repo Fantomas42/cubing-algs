@@ -11,6 +11,7 @@ from cubing_algs.display.gl.animation import ease
 from cubing_algs.display.gl.animation import turn_coordinates
 from cubing_algs.display.gl.animation import turned_scene
 from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
+from cubing_algs.display.gl.constants import MINIMUM_MOVE_DURATION
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import Cubie
@@ -580,7 +581,7 @@ class TestAnimationBeat(unittest.TestCase):
         animation = Animation(VCube(), 'U2 R', duration=0.1)
 
         animation.advance(0.1 * HALF_TURN_FACTOR)
-        self.assertEqual(animation.index, 1)
+        self.assertEqual(str(animation.move), 'R')
         self.assertFalse(animation.finished)
 
         animation.advance(0.1)
@@ -612,6 +613,214 @@ class TestAnimationBeat(unittest.TestCase):
         ):
             if not turn.carries(before.cubie):
                 self.assertEqual(before.model.values, after.model.values)
+
+
+class TestAnimationSchedule(unittest.TestCase):
+    """Tests for the duration the dates of the moves give a turn."""
+
+    def setUp(self) -> None:
+        """Take an animation with nothing to play, and two turns."""
+        self.animation = Animation(VCube(), '', duration=0.1)
+        self.quarter = turn_of('R', 3)
+        self.half = turn_of('U2', 3)
+
+    def test_a_move_with_no_date_keeps_the_beat(self) -> None:
+        """Test that an ordinary algorithm is cadenced by nothing else."""
+        self.assertEqual(
+            self.animation.schedule(self.quarter, None, 1.0), 0.1,
+        )
+
+    def test_a_move_with_nothing_behind_it_keeps_the_beat(self) -> None:
+        """Test that the last move of a stream is played at the beat."""
+        self.assertEqual(
+            self.animation.schedule(self.quarter, 0.5, None), 0.1,
+        )
+
+    def test_a_shorter_gap_compresses_the_turn(self) -> None:
+        """Test that a move made fast is played fast."""
+        self.assertAlmostEqual(
+            self.animation.schedule(self.quarter, 0.0, 0.08), 0.08,
+        )
+
+    def test_a_longer_gap_leaves_the_beat_alone(self) -> None:
+        """Test that a slow hand never makes a turn drag: it rests."""
+        self.assertEqual(
+            self.animation.schedule(self.quarter, 0.0, 1.0), 0.1,
+        )
+
+    def test_a_half_turn_is_capped_on_its_own_beat(self) -> None:
+        """Test that the longer beat of a half turn is the one capping it."""
+        self.assertAlmostEqual(
+            self.animation.schedule(self.half, 0.0, 1.0),
+            0.1 * HALF_TURN_FACTOR,
+        )
+
+    def test_two_moves_sharing_a_date_fall_on_the_floor(self) -> None:
+        """Test that a burst stamped all at once still reads as turns."""
+        self.assertEqual(
+            self.animation.schedule(self.quarter, 0.5, 0.5),
+            MINIMUM_MOVE_DURATION,
+        )
+
+
+class TestAnimationRetime(unittest.TestCase):
+    """Tests for the duration of a turn being revised under way."""
+
+    def test_the_angle_does_not_move(self) -> None:
+        """Test that shrinking a turn never makes the layer jump."""
+        animation = Animation(VCube(), 'R', duration=0.2)
+        animation.advance(0.05)
+        turning = animation.scene
+
+        animation.retime(0.12)
+
+        self.assertAlmostEqual(animation.elapsed / animation.step, 0.25)
+        self.assertEqual(animation.scene.instances, turning.instances)
+
+    def test_a_turn_well_under_way_keeps_how_far_it_has_gone(self) -> None:
+        """Test that a turn cut short is not sent back to its start."""
+        animation = Animation(VCube(), 'R', duration=0.2)
+        animation.advance(0.15)
+
+        animation.retime(0.05)
+
+        self.assertEqual(animation.step, 0.05)
+        self.assertAlmostEqual(animation.elapsed / animation.step, 0.75)
+
+
+class TestAnimationCadence(unittest.TestCase):
+    """Tests for a queue of dated moves driving the animation."""
+
+    def test_a_timed_algorithm_lands_on_the_cube(self) -> None:
+        """Test that a timestamp never reaches VCube.rotate()."""
+        animation = Animation(VCube(), 'R@100 U@250', duration=0.1)
+        animation.advance(10.0)
+
+        expected = VCube()
+        expected.rotate('R U')
+
+        self.assertTrue(animation.finished)
+        self.assertEqual(animation.cube.state, expected.state)
+
+    def test_an_algorithm_pushed_whole_carries_a_single_date(self) -> None:
+        """Test that a batch is one entry, hence the nominal beat behind."""
+        animation = Animation(VCube(), '', duration=0.1)
+        animation.extend("R U R' U'", at=0.0)
+
+        self.assertEqual(
+            [date for _move, date in animation.pending],
+            [0.0, None, None, None],
+        )
+
+    def test_a_timed_algorithm_is_anchored_on_its_first_move(self) -> None:
+        """Test that an algorithm starting late does not open on nothing."""
+        animation = Animation(VCube(), '', duration=0.1)
+        animation.extend('R@12400 U@12500')
+
+        self.assertEqual(
+            [date for _move, date in animation.pending],
+            [0.0, 0.1],
+        )
+
+    def test_a_timed_batch_is_anchored_on_its_arrival(self) -> None:
+        """Test that the stamps of a batch are read against when it came."""
+        animation = Animation(VCube(), '', duration=0.1)
+        animation.extend('R@12400 U@12500', at=2.0)
+
+        self.assertEqual(
+            [date for _move, date in animation.pending],
+            [2.0, 2.0 + 0.1],
+        )
+
+    def test_a_move_starts_when_it_arrives(self) -> None:
+        """Test that a move pushed into an idle animation waits for nothing."""
+        animation = Animation(VCube(), '', duration=0.28)
+        animation.advance(0.5)
+
+        animation.extend('R', at=animation.clock)
+        animation.advance(0.1)
+
+        self.assertFalse(animation.finished)
+
+        animation.advance(0.2)
+
+        self.assertTrue(animation.finished)
+
+    def test_the_move_behind_revises_the_one_under_way(self) -> None:
+        """Test that the cadence of a producer reaches the turn playing."""
+        animation = Animation(VCube(), '', duration=0.28)
+        animation.extend('R', at=0.0)
+        animation.advance(0.02)
+
+        self.assertEqual(animation.step, 0.28)
+
+        animation.extend('U', at=0.1)
+
+        self.assertAlmostEqual(animation.step, 0.1)
+        self.assertAlmostEqual(animation.elapsed / animation.step, 0.02 / 0.28)
+
+    def test_a_move_queued_behind_another_is_scheduled_on_it(self) -> None:
+        """Test that a turn started with a successor already waiting."""
+        animation = Animation(VCube(), '', duration=0.2)
+        animation.extend('R', at=0.0)
+        animation.extend('U', at=0.1)
+
+        animation.advance(0.05)
+
+        self.assertAlmostEqual(animation.step, 0.1)
+
+    def test_a_rest_holds_the_very_same_scene(self) -> None:
+        """Test that the cube stands still until the next move is due."""
+        animation = Animation(VCube(), 'R@0 U@1000', duration=0.1)
+        animation.advance(0.2)
+        resting = animation.scene
+
+        animation.advance(0.1)
+
+        self.assertFalse(animation.finished)
+        self.assertIsNone(animation.move)
+        self.assertEqual(animation.scene.instances, resting.instances)
+
+    def test_a_rest_is_played_frame_after_frame(self) -> None:
+        """Test that the wait of a replay reaches the frames of a GIF."""
+        timed = len(
+            list(Animation(VCube(), 'R@0 U@1000', duration=0.1).play(25.0)),
+        )
+        tight = len(
+            list(Animation(VCube(), 'R U', duration=0.1).play(25.0)),
+        )
+
+        self.assertGreater(timed, tight)
+
+    def test_a_timed_algorithm_plays_at_the_cadence_of_its_stamps(
+            self,
+    ) -> None:
+        """Test that the gap between two stamps is what a turn lasts."""
+        animation = Animation(VCube(), 'R@0 U@120 F@240', duration=0.28)
+        animation.advance(0.01)
+
+        self.assertAlmostEqual(animation.step, 0.12)
+
+    def test_without_a_date_the_cadence_is_the_nominal_one(self) -> None:
+        """Test that an ordinary algorithm plays exactly as it always did."""
+        animation = Animation(VCube(), "R U R' U'", duration=0.1)
+
+        for _frame in range(3):
+            animation.advance(0.1)
+
+        self.assertEqual(str(animation.move), "U'")
+        self.assertEqual(animation.step, 0.1)
+
+    def test_a_pause_waiting_for_its_date_is_skipped(self) -> None:
+        """Test that a pause consumes no time, dated or not."""
+        animation = Animation(VCube(), '.@0 R@100', duration=0.1)
+        animation.advance(0.2)
+
+        expected = VCube()
+        expected.rotate('R')
+
+        self.assertTrue(animation.finished)
+        self.assertEqual(animation.cube.state, expected.state)
 
 
 class TestTurnMatrix(unittest.TestCase):

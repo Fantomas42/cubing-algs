@@ -271,11 +271,14 @@ class TestHostWindow(HiddenHostTestCase):
         """Test that a frame plays the move under way."""
         self.host.open()
         self.viewer.push('R')
-        self.host.clock -= self.viewer.duration
 
-        self.host.tick()
+        # A move starts when it arrives, so a first frame sets it
+        # turning and the next one lands it.
+        for _frame in range(2):
+            self.host.clock -= self.viewer.duration
+            self.host.tick()
 
-        self.assertIsNone(self.viewer.animation)
+        self.assertTrue(self.viewer.animation.finished)
 
     def test_run_until_the_window_closes(self) -> None:
         """Test that the loop draws until the window is closed."""
@@ -735,13 +738,24 @@ class TestHostInput(unittest.TestCase):
         self.viewer = Viewer(VCube(), window_size=WINDOW_SIZE)
         self.host = GlfwHost(self.viewer)
 
+    def queued(self) -> list[str]:
+        """
+        Read the notations the viewer has queued.
+
+        Returns:
+            The moves waiting to be played, the moment each of them
+            arrived left out.
+
+        """
+        return [notation for notation, _arrival in self.viewer.pending]
+
     def test_key_plays_a_move(self) -> None:
         """Test that a letter key queues the move it names."""
         import glfw
 
         self.host.on_key(None, ord('R'), 0, glfw.PRESS, glfw.MOD_SHIFT)
 
-        self.assertEqual(list(self.viewer.pending), ["R'"])
+        self.assertEqual(self.queued(), ["R'"])
 
     def test_key_modifiers_reach_the_notation(self) -> None:
         """Test that ctrl doubles a move and alt widens it."""
@@ -751,7 +765,7 @@ class TestHostInput(unittest.TestCase):
             None, ord('L'), 0, glfw.PRESS, glfw.MOD_CONTROL | glfw.MOD_ALT,
         )
 
-        self.assertEqual(list(self.viewer.pending), ['Lw2'])
+        self.assertEqual(self.queued(), ['Lw2'])
 
     def test_held_key_repeats_the_move(self) -> None:
         """Test that holding a key down keeps the cube turning."""
@@ -759,7 +773,7 @@ class TestHostInput(unittest.TestCase):
 
         self.host.on_key(None, ord('U'), 0, glfw.REPEAT, 0)
 
-        self.assertEqual(list(self.viewer.pending), ['U'])
+        self.assertEqual(self.queued(), ['U'])
 
     def test_released_key_plays_nothing(self) -> None:
         """Test that letting a key go plays no second move."""

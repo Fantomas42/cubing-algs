@@ -308,6 +308,24 @@ class TestEncodeGif(unittest.TestCase):
             [800, 40, 1200],
         )
 
+    def test_a_rest_is_folded_into_one_frame_lasting_as_long(self) -> None:
+        """Test that the frames of a cube standing still keep their time."""
+        data = encode_gif(
+            [RED_FRAME, RED_FRAME, RED_FRAME, BLUE_FRAME],
+            FRAME_SIZE,
+            playback=PLAIN,
+        )
+
+        frames = frames_of(data)
+
+        # Pillow merges frames that do not differ and sums their delay,
+        # so a rest weighs one image and lasts every frame of the wait.
+        self.assertEqual(len(frames), 2)
+        self.assertEqual(
+            [frame.info['duration'] for frame in frames],
+            [120, 40],
+        )
+
     def test_the_colors_of_the_frames_survive(self) -> None:
         """Test that a frame keeps the colors it was given."""
         first, second = frames_of(

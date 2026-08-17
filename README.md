@@ -723,6 +723,15 @@ algo.view(5)                  # window, on a 5x5x5 this time
 A GIF needs Pillow; without it, the animation comes out as numbered PNG frames
 the encoder of your choice can assemble.
 
+A **timed algorithm plays at the speed it was made**: each move lasts until the
+next timestamp is due, and the cube stands still through the gaps, so a recorded
+solve keeps its recognition pauses.
+
+```python
+# The animation lasts 1.5 s, the last move waiting its turn
+parse_moves('R@0 U@120 F@240 R@1500').animate('solve.gif')
+```
+
 ### Viewer Shortcuts
 
 ```
@@ -776,6 +785,12 @@ tracker.update(w, x, y, z)    # raw quaternion of a bluetooth cube
 viewer.push("R U R'")         # queue moves to be played
 viewer.run()
 ```
+
+`push()` is safe to call from a producer thread, and dates what it is handed:
+the cube then turns at the cadence of whoever is pushing, a single move behind
+it, rather than at a beat of its own. A producer stamping its moves - `R@100` -
+is honored as well, so a solve is replayed at its true speed whether it is
+pushed live or handed over whole.
 
 ### Command Line
 
