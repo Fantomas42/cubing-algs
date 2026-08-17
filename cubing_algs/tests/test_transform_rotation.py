@@ -856,17 +856,17 @@ class CompressEndingRotationsCyclicTripleTestCase(unittest.TestCase):
     def test_cyclic_order_single(self) -> None:
         """Test cyclic-order triples with all single quarter-turns."""
         cases = [
-            # (x, y, z) family — odd primes
+            # (x, y, z) family - odd primes
             ("R U x y z'", 'R U y'),
             ("R U x y' z", "R U y'"),
             ("R U x' y z", 'R U y'),
             ("R U x' y' z'", "R U y'"),
-            # (y, z, x) family — odd primes
+            # (y, z, x) family - odd primes
             ("R U y z x'", 'R U z'),
             ("R U y z' x", "R U z'"),
             ("R U y' z x", 'R U z'),
             ("R U y' z' x'", "R U z'"),
-            # (z, x, y) family — odd primes
+            # (z, x, y) family - odd primes
             ("R U z x y'", 'R U x'),
             ("R U z x' y", "R U x'"),
             ("R U z' x y", 'R U x'),
@@ -880,17 +880,17 @@ class CompressEndingRotationsCyclicTripleTestCase(unittest.TestCase):
     def test_anti_cyclic_order_single(self) -> None:
         """Test anti-cyclic-order triples with all single quarter-turns."""
         cases = [
-            # (z, y, x) family — even primes
+            # (z, y, x) family - even primes
             ('R U z y x', 'R U y'),
             ("R U z y' x'", "R U y'"),
             ("R U z' y x'", 'R U y'),
             ("R U z' y' x", "R U y'"),
-            # (x, z, y) family — even primes
+            # (x, z, y) family - even primes
             ('R U x z y', 'R U z'),
             ("R U x z' y'", "R U z'"),
             ("R U x' z y'", 'R U z'),
             ("R U x' z' y", "R U z'"),
-            # (y, x, z) family — even primes
+            # (y, x, z) family - even primes
             ('R U y x z', 'R U x'),
             ("R U y x' z'", "R U x'"),
             ("R U y' x z'", 'R U x'),
@@ -983,7 +983,7 @@ class CompressEndingRotationsLongerSequenceTestCase(unittest.TestCase):
 
     def test_six_move_group_identity(self) -> None:
         """
-        Test (xy)^3 = identity — a fundamental S4 relation.
+        Test (xy)^3 = identity - a fundamental S4 relation.
 
         The cube rotation group is isomorphic to S4. One of its
         defining relations is (yx)^3 = identity, meaning six

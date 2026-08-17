@@ -119,7 +119,7 @@ def compute_algorithm_mask(
 
     Problem: when an algorithm contains rotations (e.g. y R),
     comparing unique_facelets with cube_mask.state would mark
-    every facelet as moved — the rotation displaces all of
+    every facelet as moved - the rotation displaces all of
     them.  We only want to highlight facelets moved by the
     face turns (R), not by the rotations (y).
 
@@ -189,7 +189,7 @@ EMPTY_MASK: POVMask = '0' * 54
 #
 # Masks are written from the user's point of view: setting U facelets to '1'
 # means "highlight what I see on top". This is more intuitive than working in
-# solved-cube coordinates and makes masks color-neutral — they describe
+# solved-cube coordinates and makes masks color-neutral - they describe
 # positions, not which color occupies them, so the same mask works regardless
 # of the cube's color scheme or orientation.
 #
@@ -200,7 +200,7 @@ EMPTY_MASK: POVMask = '0' * 54
 # internal coordinates, then rotated through the algorithm moves so the
 # highlighted facelets follow the right stickers.
 #
-# Example: PLL_MASK highlights the top row of all four side faces — the
+# Example: PLL_MASK highlights the top row of all four side faces - the
 # stickers the user sees at the top of F, B, L, R. A PLL algorithm permutes
 # those pieces without rotations. Because the user holds the cube z2, the mask
 # is converted to track the D-adjacent rows internally, correctly following

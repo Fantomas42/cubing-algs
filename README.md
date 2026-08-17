@@ -4,7 +4,7 @@
   <picture>
     <source srcset="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner.svg" type="image/svg+xml">
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-dark.png">
-    <img src="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-light.png" alt="cubing-algs — Rubik's cube algorithm manipulation, analysis &amp; simulation" width="600">
+    <img src="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-light.png" alt="cubing-algs - Rubik's cube algorithm manipulation, analysis &amp; simulation" width="600">
   </picture>
 </p>
 
@@ -742,15 +742,15 @@ F12              write a screenshot
 escape, Q        close the window
 ```
 
-`F3` writes what the rendering costs in the title of the window — frame rate,
-processor time, GPU time — and `F4` prints the whole of it to the terminal:
+`F3` writes what the rendering costs in the title of the window - frame rate,
+processor time, GPU time - and `F4` prints the whole of it to the terminal:
 where a frame goes, what is left of the budget the screen leaves, and what that
 frame had to draw. A frame rate held by the vsync is the refresh rate of the
 screen and nothing else, so `F5` frees the frames from it when the question is
 what the machine truly holds.
 
 ```
-cubing-algs debug — 240 frames over 2.4 s, 0 dropped
+cubing-algs debug - 240 frames over 2.4 s, 0 dropped
   frame      10.02 ms   min   9.81   p95  10.42   max  22.40
   advance     0.41 ms   min   0.30   p95   0.62   max   1.90
   draw        1.32 ms   min   1.10   p95   1.71   max   3.40
@@ -759,11 +759,11 @@ cubing-algs debug — 240 frames over 2.4 s, 0 dropped
   headroom  83%   budget 10.00 ms (100 Hz screen)
   scene     26 instances, 1456 triangles, 2.5 KiB
   target    720x720, 8 samples, 2 draw calls
-  context   Mesa Intel(R) Iris(R) Xe Graphics — 4.6
+  context   Mesa Intel(R) Iris(R) Xe Graphics - 4.6
 ```
 
-For what `.view()` does not expose — a lighting of its own, the duration of a
-move, or an orientation pushed from outside — build the viewer directly. It is
+For what `.view()` does not expose - a lighting of its own, the duration of a
+move, or an orientation pushed from outside - build the viewer directly. It is
 a dataclass, and its state can be reached while it runs:
 
 ```python

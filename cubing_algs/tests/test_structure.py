@@ -1707,7 +1707,7 @@ class NestingDepthGuardTestCase(unittest.TestCase):
     def test_classify_conjugate_respects_max_depth(self) -> None:
         """At max depth, classify_conjugate skips nested detection."""
         setup = Algorithm.parse_moves('F')
-        # Action contains a commutator [R, U] — normally classified 'nested'
+        # Action contains a commutator [R, U] - normally classified 'nested'
         action = Algorithm.parse_moves("R U R' U'")
 
         # At depth 0, should detect nested structure
@@ -1720,7 +1720,7 @@ class NestingDepthGuardTestCase(unittest.TestCase):
 
     def test_classify_conjugate_depth_propagates(self) -> None:
         """Depth propagates through detect_structures → detect_conjugate."""
-        # F [R [U, D] R'] F' — nested conjugate containing a commutator
+        # F [R [U, D] R'] F' - nested conjugate containing a commutator
         algo = Algorithm.parse_moves("F R U D U' D' R' F'")
         # Should detect structures at default depth without error
         structures = detect_structures(algo, min_score=0)

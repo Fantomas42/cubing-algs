@@ -144,7 +144,7 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
     of impacted faces it infers the active F2L slot and returns an orientation
     string.
 
-    NOTE: Behaviour for 3 or 4 impacted faces is under review — the method
+    NOTE: Behaviour for 3 or 4 impacted faces is under review - the method
     overwrites ``saved_facelets`` each iteration, so only the *last* impacted
     face's facelets drive the slot inference when more than two faces are
     affected. Tests for those cases document the current output without
@@ -168,7 +168,7 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         self.assertEqual(display.cube.orientation, 'DF')
 
     # ------------------------------------------------------------------
-    # 2 impacted faces — valid F2L corner slots
+    # 2 impacted faces - valid F2L corner slots
     # ------------------------------------------------------------------
 
     def test_fl_slot(self) -> None:
@@ -189,7 +189,7 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         self.assertEqual(display.f2l_orientation(), 'DB')
 
     # ------------------------------------------------------------------
-    # 1 impacted face — slot inferred from saved_facelets
+    # 1 impacted face - slot inferred from saved_facelets
     # ------------------------------------------------------------------
 
     def test_one_impacted_face_fl_slot(self) -> None:
@@ -204,7 +204,7 @@ class F2LOrientationTestCase(ModeDisplayMixin, unittest.TestCase):
         self.assertEqual(display.cube.orientation, 'DF')
 
     # ------------------------------------------------------------------
-    # y-rotation invariance — same F2L state, different cube orientation
+    # y-rotation invariance - same F2L state, different cube orientation
     # ------------------------------------------------------------------
 
     def test_y_rotation_invariance(self) -> None:

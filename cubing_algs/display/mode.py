@@ -292,7 +292,7 @@ class ModeDisplay:
 
         Masks are authored from the user's point of view (e.g. '1' at U
         positions means "the top face as I see it"). But internally the
-        cube may be oriented differently — if the user holds D on top
+        cube may be oriented differently - if the user holds D on top
         (a z2 from solved), the physical top is the D face, not U.
 
         This method applies the inverse of the cube's orientation to the

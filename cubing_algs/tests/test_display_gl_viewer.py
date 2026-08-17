@@ -4,7 +4,7 @@ Tests for the interactive viewer of the GPU rendering backend.
 Not one test here names glfw, and that is the point: a viewer holds a
 cube, a camera and a queue of moves, and answers a neutral vocabulary of
 input. What needs a GPU is drawn through a ``Stage`` attached to a
-**headless** context — exactly what an embedded host hands over — so the
+**headless** context - exactly what an embedded host hands over - so the
 whole viewer is exercised without opening a window at all.
 
 The glfw host has its own file, ``test_display_gl_host.py``.
@@ -415,7 +415,7 @@ class AttachedViewerTestCase(unittest.TestCase):
 
     No window is opened: the context is standalone and the frames land
     in a framebuffer of the test. This is the very path an embedded host
-    takes — a ``QOpenGLWidget`` hands over its own FBO the same way — so
+    takes - a ``QOpenGLWidget`` hands over its own FBO the same way - so
     running the viewer here is what proves it needs no window.
     """
 

@@ -648,9 +648,9 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
         the viewer is a copy: nothing done in the window reaches this
         one.
 
-        Everything the window is not given here — a look of its own, an
+        Everything the window is not given here - a look of its own, an
         external orientation from a bluetooth sensor, the duration of a
-        move — is reached by building a
+        move - is reached by building a
         ``cubing_algs.display.gl.Viewer`` directly.
 
         Requires the ``opengl`` extra.

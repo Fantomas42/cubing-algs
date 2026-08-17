@@ -6,13 +6,13 @@ rotation (x, y, z, or their primes), ``rotate`` rewrites every move in
 an algorithm so it targets the same physical pieces when viewed from the
 rotated perspective.
 
-Example — offset by y (the cube turns clockwise from above, like U)::
+Example - offset by y (the cube turns clockwise from above, like U)::
 
     After y the cube looks like this:
 
         position:  U    R    F    D    L    B
         stickers:  W    B    R    Y    G    O
-                   (same) ←—— shifted clockwise ——→ (same)
+                   (same) ←-- shifted clockwise --→ (same)
 
     The R face (red) is now in front.  From the y-shifted viewpoint
     the user calls it "F".  Every face that moved gets a new name:
@@ -23,9 +23,9 @@ Example — offset by y (the cube turns clockwise from above, like U)::
                       → F  U  F' U'
 
     The algorithm has been rewritten for someone looking at the cube
-    after a y turn — same physical pieces, different face names.
+    after a y turn - same physical pieces, different face names.
 
-Naming convention — perspective shift, not rotation applied:
+Naming convention - perspective shift, not rotation applied:
 
     ``offset_y_moves``  means "rewrite for a y-shifted viewpoint."
     Internally it applies the *inverse* rotation table (y') to each
@@ -37,12 +37,12 @@ Naming convention — perspective shift, not rotation applied:
 
     The inverse is needed because we are translating into the rotated
     frame: "what does the original R become if the observer has turned
-    by y?" — the R face is now in front, so it becomes F.
+    by y?" - the R face is now in front, so it becomes F.
 
 Relationship with other transform modules:
 
     ``offset`` applies a single, known rotation to every move in an
-    algorithm.  It is a pure remapping — no moves are added or removed.
+    algorithm.  It is a pure remapping - no moves are added or removed.
 
     ``degrip`` scans an algorithm for inline rotation moves, removes
     each one, and uses offset to rewrite the moves that follow.  To

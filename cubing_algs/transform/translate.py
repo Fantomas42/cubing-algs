@@ -39,7 +39,7 @@ def translate_moves(
 
     The problem this solves:
 
-    A Bluetooth cube has no gyroscope — it only has mechanical sensors
+    A Bluetooth cube has no gyroscope - it only has mechanical sensors
     on each face. Those sensors always report moves in the cube's
     absolute frame (UF), no matter how the user holds the cube.
 
@@ -84,7 +84,7 @@ def translate_moves(
         translate_moves(z2):  R U F' D2 L B' R2 U'
                             → L D F' U2 R B' L2 D'
 
-    Both scrambles produce the exact same cube state — the user just
+    Both scrambles produce the exact same cube state - the user just
     reads different face names because they are holding the cube
     upside down.
 
@@ -162,7 +162,7 @@ def translate_pov_moves(old_moves: Algorithm) -> Algorithm:
                         face sensor  gyro  face sensor
 
     Here the user did y (rotated the cube) then continued solving
-    what they see as the R face — but the cube still reports B
+    what they see as the R face - but the cube still reports B
     because its stickers didn't move. This function rewrites the
     face moves after each rotation so the algorithm reads as the
     user intended::

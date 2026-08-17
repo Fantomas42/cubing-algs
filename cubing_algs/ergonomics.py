@@ -157,7 +157,7 @@ MOVE_DATA: dict[str, MoveProperties] = {
     'B': MoveProperties(HD.LEFT, FA.MIDDLE, 0.52),
     "B'": MoveProperties(HD.RIGHT, FA.MIDDLE, 0.55),
     'B2': MoveProperties(HD.AMBIDEXTROUS, FA.MIDDLE, 0.50),
-    # Wide Moves — 2 layers
+    # Wide Moves - 2 layers
     'Rw': MoveProperties(HD.RIGHT, FA.THUMB, 0.85),
     "Rw'": MoveProperties(HD.RIGHT, FA.THUMB, 0.87),
     'Rw2': MoveProperties(HD.RIGHT, FA.THUMB, 0.78),

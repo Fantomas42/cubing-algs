@@ -80,7 +80,7 @@ def degrip(
     A "grip" is a cube rotation (x, y, z) that appears before non-rotation
     moves. Instead of rotating the whole cube and then turning faces, the
     same effect can be achieved by renaming the subsequent face moves to
-    match the new orientation — eliminating the rotation entirely.
+    match the new orientation - eliminating the rotation entirely.
 
     The algorithm scans left-to-right for the first rotation listed in
     ``config``. When found, it applies the inverse offset to every move
