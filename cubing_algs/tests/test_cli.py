@@ -565,6 +565,27 @@ class CaseCommandTestCase(CliTestCase):
         self.assertEqual(code, 0)
         self.assertEqual(viewed.call_args.kwargs['mode'], 'pll')
 
+    def test_case_palette_reaches_the_backend(self) -> None:
+        """A case is drawn with the palette asked for on its own step."""
+        with mock.patch.object(
+                VCube, 'render', autospec=True, return_value=b'PNG',
+        ) as rendered, TemporaryDirectory() as directory:
+            code, _out, _err = self.run_cli(
+                'case', 'OLL', '27', '--palette', 'pastel',
+                '--render', str(Path(directory) / 'oll27.png'),
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(rendered.call_args.kwargs['palette'], 'pastel')
+        self.assertEqual(rendered.call_args.kwargs['mode'], 'oll')
+
+    def test_case_palette_defaults_to_none(self) -> None:
+        """Without the option, no palette of its own is forced."""
+        with mock.patch.object(VCube, 'view', autospec=True) as viewed:
+            self.run_cli('case', 'OLL', '27', '--view')
+
+        self.assertEqual(viewed.call_args.kwargs['palette'], '')
+
     def test_case_orientation_sets_the_case_up_from_there(self) -> None:
         """The cube is turned first, then set up to the case on it."""
         with mock.patch.object(

@@ -118,6 +118,31 @@ def hold_cube(cube: VCube, orientation: CubeOrientation) -> None:
         cube.rotate(parse_moves(moves))
 
 
+def setup_cube(args: argparse.Namespace) -> VCube:
+    """
+    Build the cube a subcommand plays its algorithm on.
+
+    The cube is turned the way ``--orientation`` says it is held before
+    ``--setup`` is played on it, so that the setup is made from there.
+
+    Args:
+        args: The parsed command line, holding the size, the orientation
+            and the setup moves.
+
+    Returns:
+        The cube, held and set up, ready for the algorithm.
+
+    """
+    cube = VCube(size=args.size)
+
+    hold_cube(cube, args.orientation)
+
+    if args.setup:
+        cube.rotate(parse_moves(args.setup, trust_input=False))
+
+    return cube
+
+
 def view_cube(
         cube: VCube,
         args: argparse.Namespace,
@@ -171,7 +196,6 @@ def render_cube(
 def animate_cube(
         cube: VCube,
         moves: Algorithm,
-        path: str,
         args: argparse.Namespace,
 ) -> None:
     """
@@ -181,13 +205,12 @@ def animate_cube(
         cube: The cube to play the algorithm on, already turned the way
             it is held.
         moves: The algorithm to play.
-        path: Where the animation is written, ``--out`` or ``--animate``
-            depending on the subcommand.
-        args: The parsed command line, holding the display options.
+        args: The parsed command line, holding the target and the
+            display options.
 
     """
     written = cube.animate(
-        moves, path,
+        moves, args.animate,
         mode=args.mode,
         mask=args.mask,
         palette=args.palette,
@@ -259,12 +282,7 @@ def run_apply(args: argparse.Namespace) -> int:
         Process exit code.
 
     """
-    cube = VCube(size=args.size)
-
-    hold_cube(cube, args.orientation)
-
-    if args.setup:
-        cube.rotate(parse_moves(args.setup, trust_input=False))
+    cube = setup_cube(args)
 
     cube.rotate(parse_moves(args.moves, trust_input=False))
 
@@ -302,17 +320,9 @@ def run_animate(args: argparse.Namespace) -> int:
         Process exit code.
 
     """
-    cube = VCube(size=args.size)
-
-    hold_cube(cube, args.orientation)
-
-    if args.setup:
-        cube.rotate(parse_moves(args.setup, trust_input=False))
-
     animate_cube(
-        cube,
+        setup_cube(args),
         parse_moves(args.moves, trust_input=False),
-        args.out,
         args,
     )
 
@@ -421,7 +431,7 @@ def run_case(args: argparse.Namespace) -> int:
         if args.render:
             render_cube(cube, args)
         if args.animate:
-            animate_cube(cube, case.main_algorithm, args.animate, args)
+            animate_cube(cube, case.main_algorithm, args)
         if args.view:
             view_cube(cube, args)
 
@@ -480,6 +490,60 @@ def add_orientation_argument(parser: argparse.ArgumentParser) -> None:
         default='',
         help='Orientation the cube is held in, e.g. DF',
     )
+
+
+def add_palette_argument(parser: argparse.ArgumentParser) -> None:
+    """
+    Add the colors a cube is painted with to a subcommand.
+
+    Args:
+        parser: The subcommand parser to add it to.
+
+    """
+    parser.add_argument('--palette', default='', help='Color palette')
+
+
+def add_size_argument(parser: argparse.ArgumentParser) -> None:
+    """
+    Add the number of cubies an edge counts to a subcommand.
+
+    Args:
+        parser: The subcommand parser to add it to.
+
+    """
+    parser.add_argument(
+        '-s', '--size',
+        type=int,
+        default=DEFAULT_CUBE_SIZE,
+        help=f'Cube size (default: { DEFAULT_CUBE_SIZE })',
+    )
+
+
+def add_cube_arguments(parser: argparse.ArgumentParser) -> None:
+    """
+    Add the options describing the cube an algorithm is played on.
+
+    They say which cube is built, how it is held, and how it is looked
+    at, whichever backend ends up drawing it.
+
+    Args:
+        parser: The subcommand parser to add them to.
+
+    """
+    parser.add_argument(
+        '--setup',
+        default='',
+        help='Moves applied before the algorithm',
+    )
+    add_size_argument(parser)
+    parser.add_argument(
+        '--mode',
+        default='',
+        help='Display mode, e.g. oll, pll, f2l',
+    )
+    add_orientation_argument(parser)
+    parser.add_argument('--mask', default='', help='Display mask')
+    add_palette_argument(parser)
 
 
 def add_framing_arguments(parser: argparse.ArgumentParser) -> None:
@@ -562,25 +626,7 @@ def add_apply_arguments(parser: argparse.ArgumentParser) -> None:
 
     """
     parser.add_argument('moves', help='Algorithm to apply')
-    parser.add_argument(
-        '--setup',
-        default='',
-        help='Moves applied before the algorithm',
-    )
-    parser.add_argument(
-        '-s', '--size',
-        type=int,
-        default=DEFAULT_CUBE_SIZE,
-        help=f'Cube size (default: { DEFAULT_CUBE_SIZE })',
-    )
-    parser.add_argument(
-        '--mode',
-        default='',
-        help='Display mode, e.g. oll, pll, f2l',
-    )
-    add_orientation_argument(parser)
-    parser.add_argument('--mask', default='', help='Display mask')
-    parser.add_argument('--palette', default='', help='Color palette')
+    add_cube_arguments(parser)
     parser.add_argument(
         '--state',
         action='store_true',
@@ -629,31 +675,16 @@ def build_parser() -> argparse.ArgumentParser:
         help='Write an algorithm playing on a cube as a GIF',
     )
     animate_parser.add_argument('moves', help='Algorithm to play')
+    # Where an animation lands is spelled --out here and --animate on a
+    # case: one destination, so that animate_cube reads it in one place.
     animate_parser.add_argument(
         '--out',
+        dest='animate',
         required=True,
         metavar='PATH',
         help='Where the animation is written',
     )
-    animate_parser.add_argument(
-        '--setup',
-        default='',
-        help='Moves applied before the algorithm is played',
-    )
-    animate_parser.add_argument(
-        '-s', '--size',
-        type=int,
-        default=DEFAULT_CUBE_SIZE,
-        help=f'Cube size (default: { DEFAULT_CUBE_SIZE })',
-    )
-    animate_parser.add_argument(
-        '--mode',
-        default='',
-        help='Display mode, e.g. oll, pll, f2l',
-    )
-    add_orientation_argument(animate_parser)
-    animate_parser.add_argument('--mask', default='', help='Display mask')
-    animate_parser.add_argument('--palette', default='', help='Color palette')
+    add_cube_arguments(animate_parser)
     add_framing_arguments(animate_parser)
     animate_parser.set_defaults(handler=run_animate)
 
@@ -696,15 +727,15 @@ def build_parser() -> argparse.ArgumentParser:
     case_parser.add_argument('collection', help='Collection name, e.g. OLL')
     case_parser.add_argument('name', help='Case name or code, e.g. 27')
     add_orientation_argument(case_parser)
+    add_palette_argument(case_parser)
     add_gl_arguments(case_parser, animate=True)
     # A case is drawn under the mode of its own step, which run_case
-    # fills in, and through no mask nor palette of its own: the display
+    # fills in, and through no mask of its own: those two display
     # options the GPU helpers read are therefore defaulted here.
     case_parser.set_defaults(
         handler=run_case,
         mode='',
         mask='',
-        palette='',
     )
 
     info_parser = subparsers.add_parser(
@@ -712,12 +743,7 @@ def build_parser() -> argparse.ArgumentParser:
         help='Export the complete analysis of an algorithm as JSON',
     )
     info_parser.add_argument('moves', help='Algorithm to analyze')
-    info_parser.add_argument(
-        '-s', '--size',
-        type=int,
-        default=DEFAULT_CUBE_SIZE,
-        help=f'Cube size (default: { DEFAULT_CUBE_SIZE })',
-    )
+    add_size_argument(info_parser)
     info_parser.add_argument(
         '--section',
         default='',

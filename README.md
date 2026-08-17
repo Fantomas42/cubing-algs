@@ -761,7 +761,7 @@ viewer.run()
 # Write a PNG of a cube, or of a case, on any cube size
 python -m cubing_algs apply "R U R' U'" --mode=oll --render cube.png --image-size 512
 python -m cubing_algs apply "Rw U Rw' U'" --size 5 --render nxn.png
-python -m cubing_algs case OLL 27 --render oll27.png
+python -m cubing_algs case OLL 27 --render oll27.png --palette pastel
 
 # Animate an algorithm, on any cube size
 python -m cubing_algs animate "R U R' U'" --out sexy.gif
