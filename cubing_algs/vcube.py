@@ -637,7 +637,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             window_size: tuple[int, int] | None = None,
             rotation: str = '',
             distance: float = 0.0,
-            show_fps: bool = False,
+            debug: bool = False,
             show_axes: bool = False,
     ) -> None:
         """
@@ -666,8 +666,10 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             rotation: Camera rotation string, composed of axis-angle
                       pairs (e.g., 'y45x-34').
             distance: Camera distance from the cube center.
-            show_fps: Show the frame rate in the title of the window.
-                F3 turns it on and off once the window is open.
+            debug: Monitor the performance of the rendering, and
+                show it in the title of the window. F3 turns it on
+                and off once the window is open, F4 writes a full
+                report, and F5 frees the frames from the vsync.
             show_axes: Show the three axes of the grid, X red, Y green
                 and Z blue. F2 turns them on and off.
 
@@ -686,7 +688,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             rotation=rotation,
             distance=distance,
             window_size=window_size or VIEWER_SIZE,
-            show_fps=show_fps,
+            debug=debug,
             show_axes=show_axes,
         ).run()
 

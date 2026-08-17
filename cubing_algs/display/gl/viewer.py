@@ -20,6 +20,7 @@ import sys
 import tempfile
 import time
 from collections import deque
+from contextlib import nullcontext
 from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
@@ -42,13 +43,18 @@ from cubing_algs.display.gl.constants import VIEWER_SIZE
 from cubing_algs.display.gl.constants import ZOOM_STEP
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
+from cubing_algs.display.gl.context import describe
 from cubing_algs.display.gl.encode import write_png
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import build_cube_geometry
+from cubing_algs.display.gl.metrics import Monitor
+from cubing_algs.display.gl.metrics import RenderProfile
 from cubing_algs.display.gl.presentation import Presentation
 from cubing_algs.display.gl.renderer import AxesRenderer
+from cubing_algs.display.gl.renderer import GpuTimer
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
+from cubing_algs.display.gl.scene import INSTANCE_SIZE
 from cubing_algs.display.gl.scene import Scene
 from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.scene import resolve_display
@@ -70,6 +76,10 @@ SLICE_KEYS = frozenset('MES')
 
 # Letters turning the whole cube, whose notation is lowercase.
 ROTATION_KEYS = {'X': 'x', 'Y': 'y', 'Z': 'z'}
+
+# Draw calls a frame always makes: the ball core, then the cube itself.
+# The axes add one more when they are shown.
+CUBE_DRAW_CALLS = 2
 
 
 def key_notation(
@@ -176,6 +186,7 @@ class Stage:
     size: tuple[int, int]
     target: 'moderngl.Framebuffer | None' = None
     background: tuple[float, float, float, float] = VIEWER_BACKGROUND
+    timer: GpuTimer | None = None
 
     @classmethod
     def attach(
@@ -207,6 +218,7 @@ class Stage:
             axes=AxesRenderer.create(context, geometry.radius * AXES_REACH),
             size=size,
             target=target,
+            timer=GpuTimer.create(context),
         )
 
     @property
@@ -245,8 +257,11 @@ class Stage:
 
         The context is left alone: it belongs to whoever created it, and
         an embedded viewer must not take a toolkit's context down with
-        it.
+        it. The timer is dropped rather than released, moderngl giving a
+        query back to the garbage collector alone.
         """
+        self.timer = None
+
         self.axes.release()
         self.renderer.release()
 
@@ -272,6 +287,11 @@ class Viewer:
     quaternion, or an ``OrientationTracker`` fed by a bluetooth sensor,
     the tracker then being read anew on every frame. The camera keeps
     orbiting on top of it, and the light stays where it is.
+
+    ``debug`` turns the performance monitoring on: what a frame costs is
+    always measured on the processor, two clock readings being nothing
+    next to a frame, but the GPU is only timed when it is asked for, a
+    timer query being the one measure that costs something.
     """
 
     cube: 'VCube'
@@ -283,10 +303,11 @@ class Viewer:
     window_size: tuple[int, int] = VIEWER_SIZE
     look: Look = DEFAULT_LOOK
     duration: float = MOVE_DURATION
-    show_fps: bool = False
+    debug: bool = False
     show_axes: bool = False
     orientation: Quat | OrientationTracker | None = None
 
+    monitor: Monitor = field(init=False, default_factory=Monitor)
     geometry: CubeGeometry = field(init=False)
     camera: OrbitCamera = field(init=False)
     scene: Scene = field(init=False)
@@ -466,6 +487,10 @@ class Viewer:
         """
         Let some time pass, and build the scene it leads to.
 
+        The time it takes is measured, and it is the half of a frame the
+        processor spends alone: the state machine, the scene it rebuilds
+        and the colors it reads all happen here, with the GPU idle.
+
         Args:
             delta: Seconds gone by since the last call.
 
@@ -473,6 +498,8 @@ class Viewer:
             The scene to draw right now.
 
         """
+        start = time.perf_counter()
+
         if self.animation is None and self.pending:
             self.animation = Animation(
                 self.cube, self.pending.popleft(),
@@ -486,6 +513,8 @@ class Viewer:
             if self.animation.finished:
                 self.cube = self.animation.cube
                 self.animation = None
+
+        self.monitor.advance.add(time.perf_counter() - start)
 
         return self.scene
 
@@ -554,6 +583,8 @@ class Viewer:
                 nothing the mouse relies on.
 
         """
+        start = time.perf_counter()
+
         stage = self.require_stage()
         orientation = resolve_orientation(self.orientation)
 
@@ -562,10 +593,22 @@ class Viewer:
         camera = self.camera if camera is None else camera
 
         stage.use()
-        stage.renderer.draw(scene, camera, look, orientation)
 
-        if self.show_axes:
-            stage.axes.draw(camera, orientation)
+        timer = stage.timer if self.debug else None
+
+        with timer.timing() if timer else nullcontext():
+            stage.renderer.draw(scene, camera, look, orientation)
+
+            if self.show_axes:
+                stage.axes.draw(camera, orientation)
+
+        # A timer answers for the frame before this one, which is what
+        # keeps the reading from waiting on the GPU. Nothing is recorded
+        # on the very first frame, no result having come back yet.
+        if timer and timer.elapsed:
+            self.monitor.gpu.add(timer.elapsed)
+
+        self.monitor.draw.add(time.perf_counter() - start)
 
     def frame(self, delta: float) -> None:
         """
@@ -583,6 +626,33 @@ class Viewer:
         """
         self.advance(delta)
         self.draw()
+
+    def profile(self) -> RenderProfile:
+        """
+        Tell what a frame has to draw, and what it draws into.
+
+        The steady half of a performance report: it only moves when the
+        cube, the window or the mode does. What belongs to a window —
+        the refresh rate of the screen, the vsync — is left to the host
+        to fill in.
+
+        Returns:
+            The profile of the picture being drawn.
+
+        """
+        stage = self.require_stage()
+        info = describe(stage.context)
+        instances = len(self.scene.instances)
+
+        return RenderProfile(
+            instances=instances,
+            triangles=instances * self.geometry.mesh.triangle_count,
+            instance_bytes=instances * INSTANCE_SIZE,
+            size=stage.size,
+            samples=self.look.samples,
+            draw_calls=CUBE_DRAW_CALLS + int(self.show_axes),
+            context=f'{ info["renderer"] } — { info["version"] }',
+        )
 
     def screenshot(self, path: str | Path = '') -> Path:
         """

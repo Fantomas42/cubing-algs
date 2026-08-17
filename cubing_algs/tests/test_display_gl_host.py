@@ -17,9 +17,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
 
-from cubing_algs.display.gl.constants import FPS_INTERVAL
+from cubing_algs.display.gl.constants import DEFAULT_BUDGET
 from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
 from cubing_algs.display.gl.constants import GLFW_MISSING
+from cubing_algs.display.gl.constants import MONITOR_INTERVAL
 from cubing_algs.display.gl.constants import WINDOW_TITLE
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
@@ -30,8 +31,9 @@ from cubing_algs.display.gl.context import destroy_window
 from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import select_glfw_variant
 from cubing_algs.display.gl.host import GlfwHost
-from cubing_algs.display.gl.host import fps_title
 from cubing_algs.display.gl.host import key_letter
+from cubing_algs.display.gl.host import screen_refresh
+from cubing_algs.display.gl.metrics import debug_title
 from cubing_algs.display.gl.viewer import Viewer
 from cubing_algs.vcube import VCube
 
@@ -117,22 +119,6 @@ class TestKeyLetter(unittest.TestCase):
     def test_the_key_glfw_could_not_name(self) -> None:
         """Test that the unknown key is turned into no letter at all."""
         self.assertEqual(key_letter(-1), '')
-
-
-class TestFpsTitle(unittest.TestCase):
-    """Tests for the fps_title function."""
-
-    def test_rate_is_the_average_of_the_period(self) -> None:
-        """Test that the rate is counted over the whole period."""
-        self.assertEqual(fps_title(120, 2.0), f'{ WINDOW_TITLE } — 60 fps')
-
-    def test_rate_is_rounded(self) -> None:
-        """Test that a frame rate is shown whole."""
-        self.assertEqual(fps_title(59, 1.02), f'{ WINDOW_TITLE } — 58 fps')
-
-    def test_title_is_kept_ahead(self) -> None:
-        """Test that the window keeps being named after what it shows."""
-        self.assertEqual(fps_title(30, 1.0, 'cube'), 'cube — 30 fps')
 
 
 class TestHostWithoutGlfw(unittest.TestCase):
@@ -325,7 +311,7 @@ class TestHostExtension(HiddenHostTestCase):
 
         self.assertEqual(host.cursor, (0.0, 0.0))
         self.assertEqual(host.clock, 0.0)
-        self.assertEqual(host.period, 0.0)
+        self.assertEqual(host.refresh, 0.0)
         self.assertFalse(host.dragging)
         self.assertIsNone(host.window)
         self.assertEqual(host.drawn, 0)
@@ -350,25 +336,106 @@ class TestHostExtension(HiddenHostTestCase):
         self.assertEqual(self.consumer.drawn, 1)
 
 
-class TestHostFrameRate(HiddenHostTestCase):
-    """Tests for the frame rate a host writes in its title."""
+class TestHostMonitoring(HiddenHostTestCase):
+    """Tests for the performance a host measures and writes in its title."""
 
-    def test_tick_counts_no_frame_by_default(self) -> None:
+    def test_a_window_opens_on_the_budget_of_its_screen(self) -> None:
+        """Test that a frame is given what the screen leaves it."""
+        with mock.patch(
+                'cubing_algs.display.gl.host.screen_refresh',
+                return_value=100.0,
+        ):
+            self.host.open()
+
+        self.assertEqual(self.host.refresh, 100.0)
+        self.assertAlmostEqual(self.viewer.monitor.budget, 0.01)
+
+    def test_a_window_without_a_screen_keeps_the_default_budget(self) -> None:
+        """Test that an unknown refresh rate changes nothing."""
+        with mock.patch(
+                'cubing_algs.display.gl.host.screen_refresh',
+                return_value=0.0,
+        ):
+            self.host.open()
+
+        self.assertEqual(self.viewer.monitor.budget, DEFAULT_BUDGET)
+
+    def test_tick_measures_every_frame(self) -> None:
+        """Test that a frame is measured whether it is watched or not."""
+        self.host.open()
+
+        self.host.tick()
+
+        monitor = self.viewer.monitor
+        self.assertEqual(monitor.frames, 1)
+        self.assertEqual(monitor.frame.count, 1)
+        self.assertEqual(monitor.swap.count, 1)
+        self.assertEqual(monitor.advance.count, 1)
+        self.assertEqual(monitor.draw.count, 1)
+
+    def test_tick_leaves_the_title_alone_by_default(self) -> None:
         """Test that a host left alone keeps the title of its window."""
         self.host.open()
 
-        self.host.tick()
+        with mock.patch('glfw.set_window_title') as written:
+            self.host.tick()
 
-        self.assertEqual(self.host.frames, 0)
+        written.assert_not_called()
 
-    def test_tick_counts_a_frame_when_asked(self) -> None:
-        """Test that a frame is counted once the rate is asked for."""
-        self.viewer.show_fps = True
+    def test_the_gpu_is_only_timed_when_it_is_asked_for(self) -> None:
+        """Test that the one measure that costs is the one turned on."""
         self.host.open()
 
         self.host.tick()
+        self.assertEqual(self.viewer.monitor.gpu.count, 0)
 
-        self.assertEqual(self.host.frames, 1)
+        self.viewer.debug = True
+        self.host.tick()
+        self.host.tick()
+
+        self.assertGreater(self.viewer.monitor.gpu.count, 0)
+
+    def test_monitoring_waits_for_the_gpu_after_the_swap(self) -> None:
+        """
+        Test that the wait for the screen is put where it is measured.
+
+        A driver does not block in the swap: it queues the frame and
+        makes the next call pay for it, so the wait for the screen used
+        to land in the draw of the frame after — fifteen milliseconds of
+        processor time the processor never spent. Monitoring waits right
+        after the swap instead, and only while it is monitoring.
+        """
+        import moderngl
+
+        self.host.open()
+
+        with mock.patch.object(moderngl.Context, 'finish') as finished:
+            self.host.tick()
+            finished.assert_not_called()
+
+            self.viewer.debug = True
+            self.host.tick()
+
+            finished.assert_called_once_with()
+
+    def test_a_free_running_window_is_never_made_to_wait(self) -> None:
+        """
+        Test that nothing waits for the GPU once the vsync is off.
+
+        There is no wait to move then, and asking for one anyway
+        divided the rate by fifty — which is the very measure F5 is
+        pressed to take.
+        """
+        import moderngl
+
+        self.viewer.debug = True
+        self.host.open()
+        self.host.set_vsync(enabled=False)
+
+        with mock.patch.object(moderngl.Context, 'finish') as finished:
+            self.host.tick()
+
+        finished.assert_not_called()
 
     def test_ticking_for_a_whole_period_reaches_the_title(self) -> None:
         """
@@ -380,80 +447,180 @@ class TestHostFrameRate(HiddenHostTestCase):
         measuring from, the elapsed time came out null, and no rate ever
         reached the title.
         """
-        self.viewer.show_fps = True
+        self.viewer.debug = True
         self.host.open()
 
-        # A second and a half of frames, at a tenth of a second each, so
-        # that a period is crossed whatever FPS_INTERVAL is set to.
-        beat = FPS_INTERVAL / 10
+        # A second and a half of frames, so that a period is crossed
+        # once and only once, whatever MONITOR_INTERVAL is set to. Each
+        # tick reads the clock three times: before the frame, before the
+        # swap and after it.
+        beat = MONITOR_INTERVAL / 10
         clock = self.host.clock
-        times = [clock + beat * step for step in range(1, 16)]
+        readings = 3
+        ticks = 5
+        times = [
+            clock + beat * step
+            for step in range(1, ticks * readings + 1)
+        ]
 
         with (
                 mock.patch('glfw.get_time', side_effect=times),
                 mock.patch('glfw.set_window_title') as written,
         ):
-            for _ in times:
+            for _ in range(ticks):
                 self.host.tick()
 
         self.assertEqual(written.call_count, 1)
 
-    def test_frame_counter_holds_its_rate_for_a_second(self) -> None:
+    def test_the_title_holds_its_numbers_for_a_period(self) -> None:
         """Test that the title is not rewritten on every frame."""
         self.host.open()
-        self.host.frames = 0
-        self.host.period = 0.0
+        monitor = self.viewer.monitor
+        monitor.restart(0.0)
 
         with mock.patch('glfw.set_window_title') as written:
-            self.host.count_frame(FPS_INTERVAL / 2)
+            self.host.update_title(MONITOR_INTERVAL / 2)
 
-        self.assertEqual(self.host.frames, 1)
         written.assert_not_called()
 
-    def test_frame_counter_writes_the_rate_in_the_title(self) -> None:
+    def test_the_title_says_what_a_frame_costs(self) -> None:
         """Test that a whole period of frames reaches the title."""
         self.host.open()
-        self.host.frames = 59
-        self.host.period = 0.0
+        monitor = self.viewer.monitor
+        monitor.restart(0.0)
+
+        for _ in range(60):
+            monitor.count_frame(0.01)
+
+        expected = debug_title(monitor, MONITOR_INTERVAL, WINDOW_TITLE)
 
         with mock.patch('glfw.set_window_title') as written:
-            self.host.count_frame(FPS_INTERVAL)
+            self.host.update_title(MONITOR_INTERVAL)
 
-        written.assert_called_once_with(
-            self.host.window, f'{ WINDOW_TITLE } — 60 fps',
-        )
-        self.assertEqual(self.host.frames, 0)
-        self.assertEqual(self.host.period, FPS_INTERVAL)
+        written.assert_called_once_with(self.host.window, expected)
+        self.assertIn('60 fps', expected)
+        self.assertEqual(monitor.frames, 0)
+        self.assertEqual(monitor.period, MONITOR_INTERVAL)
 
-    def test_key_asks_for_the_frame_rate(self) -> None:
+    def test_key_asks_for_the_monitoring(self) -> None:
         """Test that F3 counts frames from the moment it is pressed."""
         import glfw
 
         self.host.open()
-        self.host.frames = 42
+        self.viewer.monitor.frames = 42
         self.host.clock = 12.0
 
         with mock.patch('glfw.set_window_title') as written:
             self.host.on_key(None, glfw.KEY_F3, 0, glfw.PRESS, 0)
 
-        self.assertTrue(self.viewer.show_fps)
+        self.assertTrue(self.viewer.debug)
         written.assert_called_once_with(self.host.window, WINDOW_TITLE)
-        self.assertEqual(self.host.frames, 0)
-        self.assertEqual(self.host.period, 12.0)
+        self.assertEqual(self.viewer.monitor.frames, 0)
+        self.assertEqual(self.viewer.monitor.period, 12.0)
 
-    def test_key_takes_the_frame_rate_out_of_the_title(self) -> None:
+    def test_key_takes_the_monitoring_out_of_the_title(self) -> None:
         """Test that F3 pressed again leaves the plain title behind."""
         import glfw
 
-        self.viewer.show_fps = True
+        self.viewer.debug = True
         self.host.open()
-        self.host.count_frame(self.host.period + FPS_INTERVAL)
+        self.host.update_title(self.host.clock + MONITOR_INTERVAL)
 
         with mock.patch('glfw.set_window_title') as written:
             self.host.on_key(None, glfw.KEY_F3, 0, glfw.PRESS, 0)
 
-        self.assertFalse(self.viewer.show_fps)
+        self.assertFalse(self.viewer.debug)
         written.assert_called_once_with(self.host.window, WINDOW_TITLE)
+
+    def test_key_writes_a_report(self) -> None:
+        """Test that F4 sends everything the monitor knows to stdout."""
+        import glfw
+
+        self.host.open()
+        self.host.tick()
+
+        with mock.patch('sys.stdout.write') as written:
+            self.host.on_key(None, glfw.KEY_F4, 0, glfw.PRESS, 0)
+
+        report = written.call_args[0][0]
+        self.assertIn(f'{ WINDOW_TITLE } debug —', report)
+        self.assertIn('instances', report)
+        self.assertIn('vsync on', report)
+
+    def test_key_frees_the_frames_from_the_screen(self) -> None:
+        """Test that F5 turns the vsync off, then on again."""
+        import glfw
+
+        self.host.open()
+
+        with mock.patch('glfw.swap_interval') as interval:
+            self.host.on_key(None, glfw.KEY_F5, 0, glfw.PRESS, 0)
+
+            self.assertFalse(self.host.vsync)
+            interval.assert_called_once_with(0)
+
+            interval.reset_mock()
+            self.host.on_key(None, glfw.KEY_F5, 0, glfw.PRESS, 0)
+
+            self.assertTrue(self.host.vsync)
+            interval.assert_called_once_with(1)
+
+    def test_a_host_can_open_without_the_vsync(self) -> None:
+        """Test that a host built free running opens free running."""
+        host = GlfwHost(self.viewer, vsync=False)
+
+        with mock.patch('glfw.swap_interval') as interval:
+            host.open()
+
+        try:
+            interval.assert_called_once_with(0)
+        finally:
+            host.close()
+
+    def test_the_profile_carries_what_the_window_knows(self) -> None:
+        """Test that a host completes the profile of its viewer."""
+        with mock.patch(
+                'cubing_algs.display.gl.host.screen_refresh',
+                return_value=100.0,
+        ):
+            self.host.open()
+
+        profile = self.host.profile()
+
+        self.assertEqual(profile.refresh, 100.0)
+        self.assertTrue(profile.vsync)
+        self.assertEqual(profile.size, WINDOW_SIZE)
+
+
+@requires_window
+class TestScreenRefresh(unittest.TestCase):
+    """Tests for the refresh rate a window reads off its screen."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Choose the glfw variant before anything imports the library."""
+        select_glfw_variant()
+
+    def test_a_screen_says_how_fast_it_refreshes(self) -> None:
+        """Test that a real screen answers with a plausible rate."""
+        import glfw
+
+        glfw.init()
+
+        self.assertGreater(screen_refresh(), 0.0)
+
+    def test_no_screen_at_all(self) -> None:
+        """Test that a machine without a monitor holds no budget."""
+        with mock.patch('glfw.get_primary_monitor', return_value=None):
+            self.assertEqual(screen_refresh(), 0.0)
+
+    def test_a_screen_with_no_video_mode(self) -> None:
+        """Test that a screen refusing its mode holds no budget either."""
+        with (
+                mock.patch('glfw.get_primary_monitor', return_value=object()),
+                mock.patch('glfw.get_video_mode', return_value=None),
+        ):
+            self.assertEqual(screen_refresh(), 0.0)
 
 
 @requires_glfw

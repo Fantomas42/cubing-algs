@@ -33,6 +33,7 @@ from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import IDENTITY
 from cubing_algs.display.gl.transforms import OrientationTracker
 from cubing_algs.display.gl.transforms import Quat
+from cubing_algs.display.gl.viewer import CUBE_DRAW_CALLS
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
 from cubing_algs.display.gl.viewer import key_notation
@@ -733,3 +734,106 @@ class TestViewerHeldFromOutside(AttachedViewerTestCase):
             self.viewer.screenshot(Path(folder) / 'held.png')
 
         self.assertEqual(drawn.call_args.args[3], quarter)
+
+
+class TestViewerMonitoring(AttachedViewerTestCase):
+    """Tests for what a viewer measures of its own frames."""
+
+    def test_the_two_halves_of_a_frame_are_always_measured(self) -> None:
+        """Test that a frame is timed whether it is watched or not."""
+        self.attach()
+
+        self.viewer.frame(0.01)
+
+        monitor = self.viewer.monitor
+        self.assertEqual(monitor.advance.count, 1)
+        self.assertEqual(monitor.draw.count, 1)
+        self.assertGreater(monitor.draw.mean, 0.0)
+
+    def test_the_gpu_is_left_alone_until_it_is_asked_for(self) -> None:
+        """Test that the one measure that costs stays off by default."""
+        self.attach()
+
+        self.viewer.draw()
+        self.viewer.draw()
+
+        self.assertEqual(self.viewer.monitor.gpu.count, 0)
+
+    def test_the_gpu_is_timed_one_frame_late(self) -> None:
+        """
+        Test that a timer answers for the frame before the one drawn.
+
+        Reading a query right after the draw would wait on the GPU,
+        which is the very pipeline the timer is there to measure: the
+        first frame therefore records nothing, and the second one
+        carries what the first cost.
+        """
+        self.attach()
+        self.viewer.debug = True
+
+        self.viewer.draw()
+        self.assertEqual(self.viewer.monitor.gpu.count, 0)
+
+        self.viewer.draw()
+
+        self.assertEqual(self.viewer.monitor.gpu.count, 1)
+        self.assertGreater(self.viewer.monitor.gpu.mean, 0.0)
+
+    def test_a_driver_without_a_timer_still_draws(self) -> None:
+        """Test that a missing timer query costs a line, not a frame."""
+        stage = self.attach()
+        stage.timer = None
+        self.viewer.debug = True
+
+        self.viewer.draw()
+
+        self.assertEqual(self.viewer.monitor.gpu.count, 0)
+
+    def test_closing_a_stage_drops_its_timer(self) -> None:
+        """Test that a query goes with the stage that built it."""
+        stage = self.attach()
+
+        self.assertIsNotNone(stage.timer)
+
+        stage.close()
+
+        self.assertIsNone(stage.timer)
+
+    def test_the_profile_counts_what_a_frame_draws(self) -> None:
+        """Test that the profile is read off the scene being drawn."""
+        stage = self.attach()
+
+        profile = self.viewer.profile()
+
+        instances = len(self.viewer.scene.instances)
+        self.assertEqual(profile.instances, instances)
+        self.assertEqual(profile.instance_bytes, instances * INSTANCE_SIZE)
+        self.assertEqual(
+            profile.triangles,
+            instances * self.viewer.geometry.mesh.triangle_count,
+        )
+        self.assertEqual(profile.size, stage.size)
+        self.assertEqual(profile.samples, self.viewer.look.samples)
+
+    def test_the_profile_names_the_context(self) -> None:
+        """Test that a report says which GPU drew the frames."""
+        self.attach()
+
+        self.assertIn('—', self.viewer.profile().context)
+
+    def test_the_axes_are_a_draw_call_of_their_own(self) -> None:
+        """Test that showing the axes shows in the draw calls."""
+        self.attach()
+
+        self.assertEqual(self.viewer.profile().draw_calls, CUBE_DRAW_CALLS)
+
+        self.viewer.show_axes = True
+
+        self.assertEqual(
+            self.viewer.profile().draw_calls, CUBE_DRAW_CALLS + 1,
+        )
+
+    def test_a_profile_needs_a_stage(self) -> None:
+        """Test that nothing is profiled before a host attaches one."""
+        with self.assertRaises(GLContextError):
+            self.viewer.profile()

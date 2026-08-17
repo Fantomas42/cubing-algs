@@ -211,12 +211,26 @@ VIEWER_SIZE = (720, 720)
 # and the black plastic melts into anything darker.
 VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.50, 0.50, 0.52, 1.0)
 
-# How long the frame rate is averaged over before being shown, in
-# seconds: short enough to follow a slowdown, long enough not to
-# flicker. It is shown in the title of the window rather than in the
-# scene, drawing text taking a font, an atlas and a second program,
+# How long the performance of the rendering is averaged over before
+# being shown, in seconds: short enough to follow a slowdown, long enough
+# not to flicker. It is shown in the title of the window rather than in
+# the scene, drawing text taking a font, an atlas and a second program,
 # which is exactly what this backend exists to do without.
-FPS_INTERVAL = 1.0
+MONITOR_INTERVAL = 1.0
+
+# How many frames the sliding window of the monitor keeps, which is what
+# a minimum, an average and a percentile are read on. Two seconds and a
+# half of a hundred hertz screen: long enough for a percentile to mean
+# something, short enough to forget a slowdown once it is over.
+MONITOR_WINDOW = 240
+
+# What a frame has to exceed the budget by to be counted as dropped.
+# Half again is past any jitter of the swap and short of a second frame.
+DROP_FACTOR = 1.5
+
+# How long a frame is given when no screen says how fast it refreshes,
+# in seconds. Sixty hertz, the one rate every machine holds.
+DEFAULT_BUDGET = 1 / 60
 
 # Colors of the three axes of the grid, in the conventional order: X
 # red, Y green, Z blue. Nothing labels them, drawing text taking a font,
@@ -262,7 +276,9 @@ cubing-algs viewer
   Space            Frame the cube again
   Backspace        Put the cube back as it was
   F2               Show the X/Y/Z axes, red green blue
-  F3               Show the frame rate
+  F3               Monitor the rendering performance
+  F4               Print a performance report
+  F5               Turn the vsync on and off
   F12              Write a screenshot
   Esc, Q           Close the window\
 """

@@ -735,9 +735,31 @@ alt              widen a face turn, as in Rw
 space            frame the cube again
 backspace        put the cube back as it was
 F2               show the X/Y/Z axes, red green blue
-F3               show the frame rate
+F3               monitor the rendering performance
+F4               print a performance report
+F5               turn the vsync on and off
 F12              write a screenshot
 escape, Q        close the window
+```
+
+`F3` writes what the rendering costs in the title of the window — frame rate,
+processor time, GPU time — and `F4` prints the whole of it to the terminal:
+where a frame goes, what is left of the budget the screen leaves, and what that
+frame had to draw. A frame rate held by the vsync is the refresh rate of the
+screen and nothing else, so `F5` frees the frames from it when the question is
+what the machine truly holds.
+
+```
+cubing-algs debug — 240 frames over 2.4 s, 0 dropped
+  frame      10.02 ms   min   9.81   p95  10.42   max  22.40
+  advance     0.41 ms   min   0.30   p95   0.62   max   1.90
+  draw        1.32 ms   min   1.10   p95   1.71   max   3.40
+  swap        8.21 ms   min   7.60   p95   8.80   max   9.10   vsync on
+  gpu         0.72 ms   min   0.61   p95   0.94   max   1.60
+  headroom  83%   budget 10.00 ms (100 Hz screen)
+  scene     26 instances, 1456 triangles, 2.5 KiB
+  target    720x720, 8 samples, 2 draw calls
+  context   Mesa Intel(R) Iris(R) Xe Graphics — 4.6
 ```
 
 For what `.view()` does not expose — a lighting of its own, the duration of a
@@ -748,7 +770,7 @@ a dataclass, and its state can be reached while it runs:
 from cubing_algs.display.gl import SENSOR_BASIS, OrientationTracker, Viewer
 
 tracker = OrientationTracker(basis=SENSOR_BASIS)
-viewer = Viewer(cube, mode='f2l', show_fps=True, orientation=tracker)
+viewer = Viewer(cube, mode='f2l', debug=True, orientation=tracker)
 
 tracker.update(w, x, y, z)    # raw quaternion of a bluetooth cube
 viewer.push("R U R'")         # queue moves to be played

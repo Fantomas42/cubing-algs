@@ -17,15 +17,18 @@ place naming the extra a missing glfw asks for.
 """
 from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from cubing_algs.display.gl.constants import FPS_INTERVAL
 from cubing_algs.display.gl.constants import VIEWER_HELP
 from cubing_algs.display.gl.constants import WINDOW_TITLE
 from cubing_algs.display.gl.context import GLFWWindow
 from cubing_algs.display.gl.context import create_window
 from cubing_algs.display.gl.context import create_window_context
 from cubing_algs.display.gl.context import destroy_window
+from cubing_algs.display.gl.metrics import RenderProfile
+from cubing_algs.display.gl.metrics import debug_report
+from cubing_algs.display.gl.metrics import debug_title
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
 from cubing_algs.display.gl.viewer import output
@@ -56,22 +59,31 @@ def key_letter(key: int) -> str:
     return chr(key)
 
 
-def fps_title(frames: int, elapsed: float, title: str = WINDOW_TITLE) -> str:
+def screen_refresh() -> float:
     """
-    Write the frame rate of a window in its own title.
+    Read how fast the screen the window opens on refreshes.
 
-    Args:
-        frames: Frames drawn over the period.
-        elapsed: How long that period lasted, in seconds.
-        title: Title of the window, kept ahead of the rate.
+    This is the ceiling a vsynced frame rate can never pass, and it is
+    therefore the budget a frame is given: on a hundred hertz screen a
+    frame has ten milliseconds, whatever a counter shows.
 
     Returns:
-        The title to give the window.
+        The refresh rate in hertz, zero when no screen says.
 
     """
-    rate = frames / elapsed
+    import glfw
 
-    return f'{ title } — {rate:.0f} fps'
+    monitor = glfw.get_primary_monitor()
+
+    if not monitor:
+        return 0.0
+
+    mode = glfw.get_video_mode(monitor)
+
+    if not mode:
+        return 0.0
+
+    return float(mode.refresh_rate)
 
 
 @dataclass
@@ -80,9 +92,9 @@ class GlfwHost:
     A window, an event loop, and a viewer drawing into it.
 
     Everything glfw of the backend lives here: the window, the timing of
-    the frames, the frame rate in the title, and the translation of the
-    keyboard and the mouse into the neutral vocabulary the viewer
-    speaks.
+    the frames, the performance written in the title, the vsync, and the
+    translation of the keyboard and the mouse into the neutral
+    vocabulary the viewer speaks.
 
     Nothing is opened until ``run()`` — or ``open()`` — is called, and
     everything it opened is given back when it returns, however it
@@ -103,12 +115,12 @@ class GlfwHost:
 
     viewer: Viewer
     title: str = WINDOW_TITLE
+    vsync: bool = True
 
     window: GLFWWindow = field(init=False, default=None)
     context: 'moderngl.Context | None' = field(init=False, default=None)
-    frames: int = field(init=False, default=0)
     clock: float = field(init=False, default=0.0)
-    period: float = field(init=False, default=0.0)
+    refresh: float = field(init=False, default=0.0)
     dragging: bool = field(init=False, default=False)
     cursor: tuple[float, float] = field(init=False, default=(0.0, 0.0))
 
@@ -140,14 +152,22 @@ class GlfwHost:
         stage = Stage.attach(context, viewer.geometry, (width, height))
         viewer.attach(stage)
 
-        glfw.swap_interval(1)
+        # What a frame is given comes from the screen it is shown on: a
+        # frame rate held by the vsync says nothing on its own, the
+        # budget it leaves says everything.
+        self.refresh = screen_refresh()
+        if self.refresh:
+            viewer.monitor.budget = 1 / self.refresh
+
+        self.set_vsync(enabled=self.vsync)
         glfw.set_key_callback(self.window, self.on_key)
         glfw.set_mouse_button_callback(self.window, self.on_mouse_button)
         glfw.set_cursor_pos_callback(self.window, self.on_cursor)
         glfw.set_scroll_callback(self.window, self.on_scroll)
         glfw.set_framebuffer_size_callback(self.window, self.on_resize)
 
-        self.clock = self.period = glfw.get_time()
+        self.clock = glfw.get_time()
+        viewer.monitor.restart(self.clock)
 
         return stage
 
@@ -171,18 +191,53 @@ class GlfwHost:
         destroy_window(self.window)
         self.window = None
 
-    def count_frame(self, now: float) -> None:
+    def set_vsync(self, *, enabled: bool) -> None:
         """
-        Count a drawn frame, and show the rate it holds once a second.
+        Wait for the screen between two frames, or stop waiting for it.
 
-        The rate goes to the title of the window: telling a slowdown
-        from a steady sixty is all that is asked of it, and drawing a
-        text in the scene would take a font and a program of its own.
+        Turning it off is what tells a rendering apart from a screen: a
+        vsynced window draws at the refresh rate whatever the cube
+        costs, and only a free running one shows what the machine truly
+        holds. The processor and GPU times mean the same thing either
+        way.
 
-        The period is measured on ``period`` and never on ``clock``: the
-        latter is the moment the last frame was drawn, which ``tick()``
-        moves forward on every single frame, and a rate averaged over
-        that would always be averaged over nothing.
+        Args:
+            enabled: Whether a frame waits for the next refresh.
+
+        """
+        import glfw
+
+        self.vsync = enabled
+
+        glfw.swap_interval(1 if enabled else 0)
+
+    def profile(self) -> RenderProfile:
+        """
+        Tell what a frame draws, the share of the window included.
+
+        Returns:
+            The profile of the viewer, completed with what only a window
+            knows: the screen it is shown on and the vsync it waits for.
+
+        """
+        return replace(
+            self.viewer.profile(),
+            refresh=self.refresh,
+            vsync=self.vsync,
+        )
+
+    def update_title(self, now: float) -> None:
+        """
+        Show what the frames cost, once a period has gone by.
+
+        The numbers go to the title of the window, drawing text in the
+        scene taking a font and a program of its own. Only three fit
+        there; ``F4`` writes the rest to standard output.
+
+        The period is measured on the monitor and never on ``clock``:
+        the latter is the moment the last frame was drawn, which
+        ``tick()`` moves forward on every single frame, and a rate
+        averaged over that would always be averaged over nothing.
 
         Args:
             now: The moment the frame was drawn, in seconds.
@@ -190,27 +245,25 @@ class GlfwHost:
         """
         import glfw
 
-        self.frames += 1
-        elapsed = now - self.period
+        monitor = self.viewer.monitor
 
-        if elapsed < FPS_INTERVAL:
+        if not monitor.due(now):
             return
 
         glfw.set_window_title(
             self.window,
-            fps_title(self.frames, elapsed, self.title),
+            debug_title(monitor, now, self.title, vsync=self.vsync),
         )
 
-        self.frames = 0
-        self.period = now
+        monitor.restart(now)
 
     def reset_title(self, now: float) -> None:
         """
         Put the plain title back, and start counting frames afresh.
 
-        Called whenever the rate is turned on or off: turned on, the
-        first period starts now instead of covering all the time the
-        counter spent asleep; turned off, the last rate leaves the title.
+        Called whenever the monitor is turned on or off: turned on, the
+        first period starts now instead of covering all the time it
+        spent asleep; turned off, the last numbers leave the title.
 
         Args:
             now: The moment the new period starts, in seconds.
@@ -220,8 +273,7 @@ class GlfwHost:
 
         glfw.set_window_title(self.window, self.title)
 
-        self.frames = 0
-        self.period = now
+        self.viewer.monitor.restart(now)
 
     def on_key(
             self,
@@ -235,8 +287,8 @@ class GlfwHost:
         React to a key being pressed, or held down.
 
         What belongs to the window is answered here — closing it, the
-        frame rate in its title — and everything else is handed to the
-        viewer in its own vocabulary.
+        performance in its title, the vsync it waits for — and
+        everything else is handed to the viewer in its own vocabulary.
 
         Args:
             window: The window the key was pressed in.
@@ -262,8 +314,12 @@ class GlfwHost:
         elif key == glfw.KEY_F2:
             viewer.show_axes = not viewer.show_axes
         elif key == glfw.KEY_F3:
-            viewer.show_fps = not viewer.show_fps
+            viewer.debug = not viewer.debug
             self.reset_title(self.clock)
+        elif key == glfw.KEY_F4:
+            output(debug_report(viewer.monitor, self.profile(), self.title))
+        elif key == glfw.KEY_F5:
+            self.set_vsync(enabled=not self.vsync)
         elif key == glfw.KEY_F12:
             viewer.screenshot()
         else:
@@ -369,6 +425,24 @@ class GlfwHost:
         The elapsed time is measured rather than assumed, so an
         animation lasts as long as it should whatever the frame rate the
         machine holds.
+
+        The work and the swap are timed apart, and that separation is
+        the whole point: under a vsync the swap holds everything a frame
+        does not spend, so it is the one number that says how much room
+        is left.
+
+        **A monitored vsync waits for the GPU right after the swap**,
+        and there alone: a driver does not block where one would expect
+        it to. Swapping merely queues the frame, and the wait for the
+        screen falls on the next call that fills the queue — the first
+        draw of the frame after, which came out at fifteen milliseconds
+        of "processor time" the processor never spent. One ``finish()``
+        puts that wait back where it belongs.
+
+        It is asked for **only when the vsync is on**, which is the only
+        time there is a wait to move: a free running window has nothing
+        to wait for, and making it wait all the same divided its rate by
+        fifty — which is the very measure ``F5`` exists to take.
         """
         import glfw
 
@@ -376,11 +450,22 @@ class GlfwHost:
         self.frame(now - self.clock)
         self.clock = now
 
+        drawn = glfw.get_time()
         glfw.swap_buffers(self.window)
+
+        if self.viewer.debug and self.vsync and self.context is not None:
+            self.context.finish()
+
+        swapped = glfw.get_time()
+
         glfw.poll_events()
 
-        if self.viewer.show_fps:
-            self.count_frame(now)
+        monitor = self.viewer.monitor
+        monitor.swap.add(swapped - drawn)
+        monitor.count_frame(swapped - now)
+
+        if self.viewer.debug:
+            self.update_title(swapped)
 
     def run(self) -> None:
         """

@@ -13,6 +13,8 @@ point of the backend. moderngl is imported lazily, as everywhere else in
 this sub-module.
 """
 from collections.abc import Iterable
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import Self
@@ -61,6 +63,9 @@ INDEX_SIZE = 4
 # Number of channels read back from a framebuffer: RGBA, the alpha
 # channel keeping the background transparent.
 COLOR_CHANNELS = 4
+
+# What a timer query counts in, and what a second holds of them.
+NANOSECONDS = 1_000_000_000
 
 
 def uniform(program: 'moderngl.Program', name: str) -> 'moderngl.Uniform':
@@ -412,6 +417,68 @@ class AxesRenderer:
         self.vertex_array.release()
         self.vertex_buffer.release()
         self.program.release()
+
+
+@dataclass(slots=True)
+class GpuTimer:
+    """
+    How long the GPU truly worked on a frame, read one frame late.
+
+    The one measure a vsync cannot flatter, and the one the processor
+    cannot see: a draw call returns as soon as the commands are queued,
+    long before anything is drawn.
+
+    **The result is read at the start of the next frame**, never right
+    after the draw: asking for it earlier blocks until the GPU is done,
+    which would serialize the very pipeline the timer is there to
+    measure. One query is enough for that, a result being read before
+    the next one starts.
+
+    A query is given back by the garbage collector — moderngl exposes no
+    release for it — so a stage simply drops the timer it holds.
+    """
+
+    query: 'moderngl.Query'
+    running: bool = False
+    elapsed: float = 0.0
+
+    @classmethod
+    def create(cls, context: 'moderngl.Context') -> 'Self | None':
+        """
+        Build a timer on a context, when the driver has one to give.
+
+        Args:
+            context: The context the frames are drawn with.
+
+        Returns:
+            A timer, or nothing at all when timer queries are refused.
+            Losing a line of the report is no reason to bring a window
+            down.
+
+        """
+        import moderngl
+
+        try:
+            return cls(query=context.query(time=True))
+        except moderngl.Error:  # pragma: no cover
+            return None
+
+    @contextmanager
+    def timing(self) -> Iterator[None]:
+        """
+        Time what is drawn inside, and read what the last frame took.
+
+        Yields:
+            Nothing: the frame is drawn by whoever entered.
+
+        """
+        if self.running:
+            self.elapsed = self.query.elapsed / NANOSECONDS
+
+        with self.query:
+            yield
+
+        self.running = True
 
 
 @dataclass(slots=True)
