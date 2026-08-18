@@ -191,6 +191,18 @@ class ApplyCommandTestCase(CliTestCase):
         self.assertEqual(code, 0)
         self.assertIn(f'Facelets: { expected.state }', out)
 
+    def test_apply_orientation_uf_turns_nothing(self) -> None:
+        """UF is how the cube is already held, so nothing is turned."""
+        code, out, _err = self.run_cli(
+            'apply', "R U R' U'", '--orientation', 'UF', '--state',
+        )
+
+        expected = VCube()
+        expected.rotate("R U R' U'")
+
+        self.assertEqual(code, 0)
+        self.assertIn(f'Facelets: { expected.state }', out)
+
     def test_apply_orientation_holds_the_setup_too(self) -> None:
         """The setup is played in the orientation as well."""
         code, out, _err = self.run_cli(
