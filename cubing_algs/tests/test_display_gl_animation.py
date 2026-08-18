@@ -2,6 +2,7 @@
 import math
 import unittest
 
+from cubing_algs.display.gl.animation import MILLISECONDS
 from cubing_algs.display.gl.animation import MOVE_TURNS
 from cubing_algs.display.gl.animation import QUARTER_TURN
 from cubing_algs.display.gl.animation import Animation
@@ -10,9 +11,11 @@ from cubing_algs.display.gl.animation import build_turn
 from cubing_algs.display.gl.animation import ease
 from cubing_algs.display.gl.animation import turn_coordinates
 from cubing_algs.display.gl.animation import turned_scene
+from cubing_algs.display.gl.constants import FRAME_RATE
 from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
 from cubing_algs.display.gl.constants import MINIMUM_MOVE_DURATION
 from cubing_algs.display.gl.constants import MOVE_DURATION
+from cubing_algs.display.gl.constants import PAUSE_DURATION
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import Cubie
 from cubing_algs.display.gl.presentation import Presentation
@@ -446,9 +449,10 @@ class TestAnimation(unittest.TestCase):
         self.assertTrue(animation.finished)
         self.assertEqual(len(list(animation.play())), 1)
 
-    def test_a_pause_is_skipped(self) -> None:
-        """Test that a pause neither turns nor reaches the cube."""
+    def test_a_pause_never_reaches_the_cube(self) -> None:
+        """Test that a pause turns nothing, however long it holds."""
         animation = Animation(VCube(), '. .')
+        animation.advance(3 * PAUSE_DURATION)
 
         self.assertTrue(animation.finished)
         self.assertTrue(animation.cube.is_solved)
@@ -811,16 +815,86 @@ class TestAnimationCadence(unittest.TestCase):
         self.assertEqual(str(animation.move), "U'")
         self.assertEqual(animation.step, 0.1)
 
-    def test_a_pause_waiting_for_its_date_is_skipped(self) -> None:
-        """Test that a pause consumes no time, dated or not."""
+    def test_a_pause_holds_a_dated_move_back(self) -> None:
+        """Test that a move due before the pause is over waits for it."""
         animation = Animation(VCube(), '.@0 R@100', duration=0.1)
         animation.advance(0.2)
 
         expected = VCube()
         expected.rotate('R')
 
+        self.assertFalse(animation.finished)
+        self.assertTrue(animation.cube.is_solved)
+
+        animation.advance(PAUSE_DURATION)
+
         self.assertTrue(animation.finished)
         self.assertEqual(animation.cube.state, expected.state)
+
+
+class TestAnimationPause(unittest.TestCase):
+    """Tests for the time a pause holds the cube still."""
+
+    def test_a_pause_holds_the_cube_still_for_its_beat(self) -> None:
+        """Test that what follows a pause waits a whole pause duration."""
+        animation = Animation(VCube(), '. R', duration=0.1)
+        animation.advance(PAUSE_DURATION / 2)
+
+        self.assertTrue(animation.cube.is_solved)
+        self.assertFalse(animation.finished)
+
+        animation.advance(PAUSE_DURATION)
+
+        self.assertFalse(animation.cube.is_solved)
+
+    def test_a_pause_leaves_the_scene_untouched(self) -> None:
+        """Test that the move waiting behind a pause has not started."""
+        animation = Animation(VCube(), '. R', duration=0.1)
+        animation.advance(PAUSE_DURATION / 2)
+
+        self.assertIs(animation.scene, animation.resting)
+
+    def test_a_pause_closing_an_algorithm_is_not_the_end(self) -> None:
+        """Test that a trailing pause is played rather than dropped."""
+        animation = Animation(VCube(), 'R .', duration=0.1)
+        animation.advance(0.2)
+
+        self.assertFalse(animation.finished)
+
+        animation.advance(PAUSE_DURATION)
+
+        self.assertTrue(animation.finished)
+
+    def test_pauses_add_up(self) -> None:
+        """Test that two pauses hold twice as long as one."""
+        animation = Animation(VCube(), '. . R', duration=0.1)
+        animation.advance(1.5 * PAUSE_DURATION)
+
+        self.assertTrue(animation.cube.is_solved)
+
+        animation.advance(PAUSE_DURATION)
+
+        self.assertFalse(animation.cube.is_solved)
+
+    def test_a_rest_longer_than_a_pause_wins(self) -> None:
+        """Test that a pause never shortens a rest the dates carry."""
+        held = 3 * PAUSE_DURATION
+        stamp = int(held * MILLISECONDS)
+        animation = Animation(VCube(), f'.@0 R@{ stamp }', duration=0.1)
+        animation.advance(2 * PAUSE_DURATION)
+
+        self.assertTrue(animation.cube.is_solved)
+
+        animation.advance(held)
+
+        self.assertFalse(animation.cube.is_solved)
+
+    def test_a_pause_is_drawn_as_a_rest(self) -> None:
+        """Test that the frames of a pause reach a played animation."""
+        without = len(list(Animation(VCube(), 'R', duration=0.1).play()))
+        within = len(list(Animation(VCube(), 'R . R', duration=0.1).play()))
+
+        self.assertGreater(within - without, PAUSE_DURATION * FRAME_RATE)
 
 
 class TestTurnMatrix(unittest.TestCase):

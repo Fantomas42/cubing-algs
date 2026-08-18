@@ -37,6 +37,7 @@ from cubing_algs.display.gl.constants import FRAME_RATE
 from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
 from cubing_algs.display.gl.constants import MINIMUM_MOVE_DURATION
 from cubing_algs.display.gl.constants import MOVE_DURATION
+from cubing_algs.display.gl.constants import PAUSE_DURATION
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Cubie
 from cubing_algs.display.gl.geometry import build_cube_geometry
@@ -318,6 +319,7 @@ class Animation:
         self.presentation = presentation
         self.duration = duration
         self.minimum = MINIMUM_MOVE_DURATION
+        self.pause = PAUSE_DURATION
         self.geometry: CubeGeometry = build_cube_geometry(self.cube.size)
 
         self.pending: deque[tuple[Move, float | None]] = deque()
@@ -482,8 +484,9 @@ class Animation:
 
         A move whose date has not come yet is left where it is: the gap
         in front of it is a rest, nothing turns, and the scene stands
-        still. A pause turns nothing and is not applied to the cube
-        either, so it is simply skipped.
+        still. A pause turns nothing and never reaches the cube, but it
+        says a hesitation: it holds what follows back by its own beat,
+        which a later date of its own overrides.
         """
         while self.pending:
             move, date = self.pending[0]
@@ -492,12 +495,12 @@ class Animation:
                 break
 
             self.pending.popleft()
+            start = self.end if date is None else max(date, self.end)
             turn = build_turn(move, self.cube.size)
 
             if turn is None:
+                self.end = start + self.pause
                 continue
-
-            start = self.end if date is None else max(date, self.end)
 
             self.move = move
             self.date = date
@@ -520,25 +523,35 @@ class Animation:
 
         A rest is not the end: nothing turns, but a move is waiting for
         its date, and the frames of that wait are what a replay is made
-        of.
+        of. A pause closing an algorithm is such a rest, with nothing
+        behind it but the time it holds.
 
         Returns:
             True when the cube has reached its final state.
 
         """
-        return self.turn is None and not self.pending
+        return (
+            self.turn is None
+            and not self.pending
+            and self.clock >= self.end
+        )
 
     @property
     def scene(self) -> Scene:
         """
         Build the scene to draw at the current moment.
 
+        A move waiting behind a pause is loaded before its turn comes,
+        with a negative elapsed time: the very same resting scene is
+        handed back frame after frame, which is what the instance cache
+        of the renderer reads.
+
         Returns:
             The cube, the layers of the move under way turned as far as
             they have gone.
 
         """
-        if self.turn is None:
+        if self.turn is None or self.elapsed <= 0.0:
             return self.resting
 
         return turned_scene(

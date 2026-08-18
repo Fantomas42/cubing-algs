@@ -732,6 +732,9 @@ solve keeps its recognition pauses.
 parse_moves('R@0 U@120 F@240 R@1500').animate('solve.gif')
 ```
 
+A written pause `.` holds the cube still for a second, so a hesitation is seen
+rather than skipped. A timestamp saying a longer rest wins over it.
+
 ### Viewer Shortcuts
 
 ```

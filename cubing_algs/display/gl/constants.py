@@ -55,6 +55,13 @@ MOVE_DURATION = 0.28
 # moment would flash by.
 MINIMUM_MOVE_DURATION = 0.06
 
+# How long a pause holds the cube still, in seconds. A pause says a
+# hesitation, so it is given the time one takes rather than none at all.
+# It is a beat, not a rule: what follows a pause starts at the later of
+# that beat and its own date, so a rest a stream already carries in its
+# timestamps is never shortened by it.
+PAUSE_DURATION = 1.0
+
 # What a half turn multiplies that duration by. Given the same beat as a
 # quarter turn it covers twice the angle, hence goes twice as fast, which
 # reads as a jolt in the middle of an algorithm. Doubling the beat is the
