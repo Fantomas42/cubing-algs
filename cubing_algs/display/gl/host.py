@@ -166,6 +166,12 @@ class GlfwHost:
     title: str = WINDOW_TITLE
     vsync: bool = True
 
+    # What ``run()`` writes when the window opens. A host answering
+    # fewer keys than the viewer does - one showing a cube it is not
+    # the one turning, among others - hands its own list here rather
+    # than reprinting a loop to correct a line of it.
+    shortcuts: str = VIEWER_HELP
+
     window: GLFWWindow = field(init=False, default=None)
     context: 'moderngl.Context | None' = field(init=False, default=None)
     clock: float = field(init=False, default=0.0)
@@ -550,6 +556,10 @@ class GlfwHost:
         """
         Open the window and draw the cube until it is closed.
 
+        The shortcuts written here are the ones the host answers, and
+        not the ones the viewer knows: a host is free to hold back some
+        of them, and ``shortcuts`` is where it says so.
+
         The window is given back however the loop ends, an interruption
         from the keyboard included.
         """
@@ -557,7 +567,7 @@ class GlfwHost:
 
         import glfw
 
-        output(VIEWER_HELP)
+        output(self.shortcuts)
 
         try:
             while not glfw.window_should_close(self.window):

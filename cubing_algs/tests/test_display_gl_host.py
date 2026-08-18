@@ -303,6 +303,20 @@ class TestHostWindow(HiddenHostTestCase):
         self.assertEqual(should_close.call_count, 2)
         self.assertIsNone(self.viewer.stage)
 
+    def test_run_writes_the_shortcuts_of_the_host(self) -> None:
+        """Test that a host holding keys back writes its own list."""
+        self.host.shortcuts = 'nothing but the mouse'
+
+        with mock.patch(
+                'glfw.window_should_close',
+                side_effect=[True],
+        ), mock.patch(
+            'cubing_algs.display.gl.host.output',
+        ) as output:
+            self.host.run()
+
+        output.assert_called_once_with('nothing but the mouse')
+
     def test_run_gives_the_window_back_on_failure(self) -> None:
         """Test that a loop brought down closes its window anyway."""
         with mock.patch(
