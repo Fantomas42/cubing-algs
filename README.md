@@ -738,20 +738,24 @@ rather than skipped. A timestamp saying a longer rest wins over it.
 ### Viewer Shortcuts
 
 ```
-drag             orbit the cube
-wheel            zoom in and out
-R U F L D B      turn a face, shift primes it, ctrl doubles it
-M E S            turn a slice
-X Y Z            turn the whole cube
-alt              widen a face turn, as in Rw
-space            frame the cube again
-backspace        put the cube back as it was
-F2               show the X/Y/Z axes, red green blue
-F3               monitor the rendering performance
-F4               print a performance report
-F5               turn the vsync on and off
-F12              write a screenshot
-escape, Q        close the window
+cubing-algs viewer
+  Drag             Orbit the cube
+  Wheel            Zoom in and out
+  R U F L D B      Turn a face
+  M E S            Turn a slice
+  X Y Z            Turn the whole cube
+  Shift            Primes a face turn as in R'
+  Ctrl             Doubles a face turn as in R2
+  Alt              Widen a face turn, as in Rw
+  Space            Frame the cube again
+  Backspace        Put the cube back as it was
+  Tab              Open the cube up, and put it back together
+  F2               Show the X/Y/Z axes, red green blue
+  F3               Monitor the rendering performance
+  F4               Print a performance report
+  F5               Turn the vsync on and off
+  F12              Write a screenshot
+  Esc, Q           Close the window
 ```
 
 `F3` writes what the rendering costs in the title of the window - frame rate,

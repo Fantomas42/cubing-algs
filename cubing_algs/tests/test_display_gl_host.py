@@ -23,6 +23,7 @@ from cubing_algs.display.gl.constants import DEFAULT_BUDGET
 from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
 from cubing_algs.display.gl.constants import GLFW_MISSING
 from cubing_algs.display.gl.constants import MONITOR_INTERVAL
+from cubing_algs.display.gl.constants import VIEWER_HELP
 from cubing_algs.display.gl.constants import WINDOW_TITLE
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
@@ -167,6 +168,17 @@ requires_glfw = unittest.skipUnless(
     has_glfw(),
     'glfw is not installed',
 )
+
+
+class TestViewerHelp(unittest.TestCase):
+    """Tests for the one place the shortcuts of the viewer are written."""
+
+    README = Path(__file__).parents[2] / 'README.md'
+
+    @unittest.skipUnless(README.exists(), 'the README is not installed')
+    def test_the_readme_quotes_the_shortcuts_verbatim(self) -> None:
+        """Test that the documented shortcuts are the ones a window shows."""
+        self.assertIn(VIEWER_HELP, self.README.read_text())
 
 
 class TestKeyLetter(unittest.TestCase):
@@ -801,6 +813,18 @@ class TestHostInput(unittest.TestCase):
         self.host.on_key(None, glfw.KEY_BACKSPACE, 0, glfw.PRESS, 0)
 
         self.assertEqual(self.viewer.cube.state, VCube().state)
+
+    def test_key_opens_the_cube_up(self) -> None:
+        """Test that TAB explodes the cube, and puts it back together."""
+        import glfw
+
+        self.host.on_key(None, glfw.KEY_TAB, 0, glfw.PRESS, 0)
+
+        self.assertTrue(self.viewer.exploded)
+
+        self.host.on_key(None, glfw.KEY_TAB, 0, glfw.PRESS, 0)
+
+        self.assertFalse(self.viewer.exploded)
 
     def test_key_toggles_the_axes(self) -> None:
         """Test that F2 shows the axes, and hides them again."""

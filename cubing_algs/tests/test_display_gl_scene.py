@@ -1,6 +1,8 @@
 """Tests for the scene of the GPU rendering backend."""
+import math
 import struct
 import unittest
+from dataclasses import replace
 
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.display.gl.geometry import FACE_BASES
@@ -641,3 +643,55 @@ class TestResolveDisplay(unittest.TestCase):
             resolve_display(cube_of(), mode='oll', mask=VISIBLE)[1],
             VISIBLE,
         )
+
+
+class TestSceneExploded(unittest.TestCase):
+    """Tests for Scene.exploded method."""
+
+    def setUp(self) -> None:
+        """Build the scene of a solved cube."""
+        self.scene = build_scene(cube_of())
+
+    def test_a_closed_cube_is_the_very_same_scene(self) -> None:
+        """Test that a null spread hands the scene itself back."""
+        self.assertIs(self.scene.exploded(0.0), self.scene)
+
+    def test_every_piece_flies_away_from_the_center(self) -> None:
+        """Test that a cubie is pushed along its own resting center."""
+        opened = self.scene.exploded(0.5)
+
+        for before, after in zip(
+                self.scene.instances, opened.instances, strict=True,
+        ):
+            self.assertEqual(
+                after.model.transform_point(ORIGIN),
+                before.cubie.center.scaled(1.5),
+            )
+
+    def test_a_piece_keeps_its_colors(self) -> None:
+        """Test that opening the cube repaints nothing."""
+        opened = self.scene.exploded(0.5)
+
+        for before, after in zip(
+                self.scene.instances, opened.instances, strict=True,
+        ):
+            self.assertEqual(after.colors, before.colors)
+            self.assertIs(after.cubie, before.cubie)
+
+    def test_a_turn_carries_the_offset_along(self) -> None:
+        """Test that a turning piece flies where the turn takes it."""
+        turned = Mat4.rotation_y(math.pi / 2)
+        instance = self.scene.instances[0]
+        scene = replace(
+            self.scene,
+            instances=(replace(instance, model=turned @ instance.model),),
+        )
+
+        opened = scene.exploded(0.5)
+
+        for place, expected in zip(
+                opened.instances[0].model.transform_point(ORIGIN),
+                turned.transform_point(instance.cubie.center.scaled(1.5)),
+                strict=True,
+        ):
+            self.assertAlmostEqual(place, expected)

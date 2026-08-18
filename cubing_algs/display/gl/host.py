@@ -359,12 +359,6 @@ class GlfwHost:
 
         if key in {glfw.KEY_ESCAPE, glfw.KEY_Q}:
             glfw.set_window_should_close(window, glfw.TRUE)
-        elif key == glfw.KEY_SPACE:
-            viewer.reset_camera()
-        elif key == glfw.KEY_BACKSPACE:
-            viewer.reset_cube()
-        elif key == glfw.KEY_F2:
-            viewer.show_axes = not viewer.show_axes
         elif key == glfw.KEY_F3:
             viewer.debug = not viewer.debug
             self.reset_title(self.clock)
@@ -372,15 +366,48 @@ class GlfwHost:
             output(debug_report(viewer.monitor, self.profile(), self.title))
         elif key == glfw.KEY_F5:
             self.set_vsync(enabled=not self.vsync)
-        elif key == glfw.KEY_F12:
-            viewer.screenshot()
-        else:
+        elif not self.on_viewer_key(key):
             viewer.press(
                 key_letter(key),
                 prime=bool(mods & glfw.MOD_SHIFT),
                 double=bool(mods & glfw.MOD_CONTROL),
                 wide=bool(mods & glfw.MOD_ALT),
             )
+
+    def on_viewer_key(self, key: int) -> bool:
+        """
+        Answer a key the viewer holds the state of.
+
+        The other half of ``on_key()``: what a window answers itself -
+        closing, the title, the vsync - stays there, and everything
+        reaching no further than the viewer is settled here.
+
+        Args:
+            key: The glfw code of the key.
+
+        Returns:
+            Whether the key was one of them. A key nobody answers here
+            is a move waiting to be read as one.
+
+        """
+        import glfw
+
+        viewer = self.viewer
+
+        if key == glfw.KEY_SPACE:
+            viewer.reset_camera()
+        elif key == glfw.KEY_BACKSPACE:
+            viewer.reset_cube()
+        elif key == glfw.KEY_TAB:
+            viewer.exploded = not viewer.exploded
+        elif key == glfw.KEY_F2:
+            viewer.show_axes = not viewer.show_axes
+        elif key == glfw.KEY_F12:
+            viewer.screenshot()
+        else:
+            return False
+
+        return True
 
     def on_mouse_button(
             self,

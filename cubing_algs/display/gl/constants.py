@@ -286,6 +286,23 @@ ORBIT_SENSITIVITY = 0.008
 # What one notch of the wheel multiplies the distance to the cube by.
 ZOOM_STEP = 0.9
 
+# How far a cubie flies when the cube is opened, as a share of the
+# distance from its center to the one of the cube. The camera does not
+# follow: a cube pushed this far apart leaves the window at the default
+# framing - measured, 0.10 is already all it holds - and the wheel is
+# what a look inside costs.
+EXPLODE_SPREAD = 0.7
+
+# How fast the cube reaches the state it is asked for, per second. An
+# exponential approach, so the same second of elapsed time carries the
+# same share of the distance whatever the frame rate.
+EXPLODE_SPEED = 6.0
+
+# Below this the cube has arrived, and the spread is snapped onto what
+# it aims at: an approach never quite lands, and a cube still moving by
+# a thousandth would rebuild its scene on every frame forever.
+SPREAD_SETTLED = 0.001
+
 # Name of a screenshot, stamped with the moment it was taken so that
 # two of them never overwrite one another.
 SCREENSHOT_NAME = 'cubing-algs-%Y%m%d-%H%M%S.png'
@@ -303,6 +320,7 @@ cubing-algs viewer
   Alt              Widen a face turn, as in Rw
   Space            Frame the cube again
   Backspace        Put the cube back as it was
+  Tab              Open the cube up, and put it back together
   F2               Show the X/Y/Z axes, red green blue
   F3               Monitor the rendering performance
   F4               Print a performance report

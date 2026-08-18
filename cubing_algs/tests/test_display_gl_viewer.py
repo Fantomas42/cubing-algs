@@ -19,6 +19,7 @@ from typing import ClassVar
 from unittest import mock
 
 from cubing_algs.display.constants import DISTANCE
+from cubing_algs.display.gl.constants import EXPLODE_SPREAD
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
 from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
 from cubing_algs.display.gl.constants import Look
@@ -29,10 +30,13 @@ from cubing_algs.display.gl.renderer import COLOR_CHANNELS
 from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import INSTANCE_SIZE
+from cubing_algs.display.gl.scene import Color
 from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import IDENTITY
+from cubing_algs.display.gl.transforms import ORIGIN
 from cubing_algs.display.gl.transforms import OrientationTracker
 from cubing_algs.display.gl.transforms import Quat
+from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.gl.viewer import CUBE_DRAW_CALLS
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
@@ -520,6 +524,173 @@ class TestViewerInput(unittest.TestCase):
 
 
 @requires_gpu
+class TestViewerExplosion(unittest.TestCase):
+    """Tests for the cube a viewer opens up, and puts back together."""
+
+    def setUp(self) -> None:
+        """Build a viewer on a solved cube."""
+        self.viewer = Viewer(VCube(), window_size=WINDOW_SIZE)
+
+    def settle(self) -> None:
+        """Let the cube reach the state it is asked for."""
+        for _frame in range(20):
+            self.viewer.advance(0.1)
+
+    def test_a_new_viewer_is_closed(self) -> None:
+        """Test that a cube opens on nothing but itself."""
+        self.assertFalse(self.viewer.exploded)
+        self.assertEqual(self.viewer.spread, 0.0)
+        self.assertIs(self.viewer.scene, self.viewer.assembled)
+
+    def test_the_cube_travels_rather_than_jumping(self) -> None:
+        """Test that one frame only carries a share of the way."""
+        self.viewer.exploded = True
+        self.viewer.advance(0.05)
+
+        self.assertGreater(self.viewer.spread, 0.0)
+        self.assertLess(self.viewer.spread, EXPLODE_SPREAD)
+
+    def test_an_open_cube_reaches_what_it_is_asked_for(self) -> None:
+        """Test that the opening lands exactly on its target."""
+        self.viewer.exploded = True
+        self.settle()
+
+        self.assertEqual(self.viewer.spread, EXPLODE_SPREAD)
+
+    def test_the_pieces_stand_apart(self) -> None:
+        """Test that an open cube draws its pieces away from the center."""
+        self.viewer.exploded = True
+        self.settle()
+
+        for closed, opened in zip(
+                self.viewer.assembled.instances,
+                self.viewer.scene.instances,
+                strict=True,
+        ):
+            for place, expected in zip(
+                    opened.model.transform_point(ORIGIN),
+                    closed.cubie.center.scaled(1.0 + EXPLODE_SPREAD),
+                    strict=True,
+            ):
+                self.assertAlmostEqual(place, expected)
+
+    def test_the_cube_is_put_back_together(self) -> None:
+        """Test that a closed cube is the scene the animation built."""
+        self.viewer.exploded = True
+        self.settle()
+
+        self.viewer.exploded = False
+        self.settle()
+
+        self.assertEqual(self.viewer.spread, 0.0)
+        self.assertIs(self.viewer.scene, self.viewer.assembled)
+
+    def test_a_settled_cube_is_never_rebuilt(self) -> None:
+        """Test that an open cube standing still hands the same scene back."""
+        self.viewer.exploded = True
+        self.settle()
+
+        scene = self.viewer.scene
+
+        self.assertIs(self.viewer.advance(0.1), scene)
+
+    def test_opening_the_cube_leaves_the_camera_alone(self) -> None:
+        """Test that the camera never stands back as the cube grows."""
+        camera = replace(self.viewer.camera)
+
+        self.viewer.exploded = True
+        self.settle()
+
+        self.assertEqual(self.viewer.camera, camera)
+
+    def test_a_move_lands_on_an_open_cube(self) -> None:
+        """Test that a cube goes on turning while it stands open."""
+        self.viewer.exploded = True
+        self.settle()
+
+        expected = VCube()
+        expected.rotate('R')
+
+        self.viewer.push('R')
+        play(self.viewer)
+
+        self.assertEqual(self.viewer.cube.state, expected.state)
+        self.assertIsNot(self.viewer.scene, self.viewer.assembled)
+
+    def places(self) -> dict[frozenset[Color], Vec3]:
+        """
+        Read where every piece of the cube is drawn right now.
+
+        A piece is named by the colors it carries, which travel with it:
+        the instances are indexed by the cell of the grid they fill, and
+        a move hands a cell over to another piece.
+
+        Returns:
+            The place each piece is drawn at, the mesh being centered on
+            its own origin.
+
+        """
+        return {
+            frozenset(instance.colors):
+                instance.model.transform_point(ORIGIN)
+            for instance in self.viewer.scene.instances
+        }
+
+    def test_a_move_lands_without_a_jump(self) -> None:
+        """
+        Test that an open cube turns as one piece, right to the end.
+
+        A turning layer flies along the place it is heading for rather
+        than along the one it left, so the last frame of a move and the
+        scene rebuilt on the cube it landed on draw a piece at the very
+        same place. Composed the other way round - the offset applied on
+        top of the model matrix rather than into it - a corner of an
+        open 3x3 jumped by 0.95 on that one frame, against 0.18 for the
+        fastest frame of the turn itself.
+        """
+        self.viewer.exploded = True
+        self.settle()
+
+        self.viewer.push('R')
+        self.viewer.advance(0.0)
+
+        before = self.places()
+        steps = []
+
+        while not self.viewer.animation.finished:
+            self.viewer.advance(self.viewer.duration / 12)
+            places = self.places()
+            steps.append(
+                max(
+                    max(
+                        abs(now - was)
+                        for now, was in zip(place, before[piece], strict=True)
+                    )
+                    for piece, place in places.items()
+                ),
+            )
+            before = places
+
+        self.assertLessEqual(steps[-1], max(steps[:-1]))
+
+    def test_a_reset_cube_stays_open(self) -> None:
+        """Test that a fresh animation is built into the open cube."""
+        self.viewer.exploded = True
+        self.settle()
+
+        self.viewer.reset_cube()
+
+        self.assertIsNot(self.viewer.scene, self.viewer.assembled)
+        for place, expected in zip(
+                self.viewer.scene.instances[0].model.transform_point(ORIGIN),
+                self.viewer.assembled.instances[0].cubie.center.scaled(
+                    1.0 + EXPLODE_SPREAD,
+                ),
+                strict=True,
+        ):
+            self.assertAlmostEqual(place, expected)
+
+
 class AttachedViewerTestCase(unittest.TestCase):
     """
     A viewer drawing into a stage built on a headless context.

@@ -16,6 +16,7 @@ an event loop of its own.
 ``Viewer.run()`` is the convenience of the library, and the only line
 here reaching for the glfw host.
 """
+import math
 import sys
 import tempfile
 import time
@@ -35,9 +36,12 @@ from cubing_algs.display.gl.camera import fit_aspect
 from cubing_algs.display.gl.camera import fit_fov
 from cubing_algs.display.gl.constants import AXES_REACH
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
+from cubing_algs.display.gl.constants import EXPLODE_SPEED
+from cubing_algs.display.gl.constants import EXPLODE_SPREAD
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.constants import ORBIT_SENSITIVITY
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
+from cubing_algs.display.gl.constants import SPREAD_SETTLED
 from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
 from cubing_algs.display.gl.constants import VIEWER_SIZE
 from cubing_algs.display.gl.constants import ZOOM_STEP
@@ -146,6 +150,33 @@ def resolve_orientation(
         return source.orientation
 
     return source
+
+
+def settle_spread(spread: float, target: float, delta: float) -> float:
+    """
+    Move the opening of the cube towards what it is asked for.
+
+    An exponential approach rather than a fixed step: the same second of
+    elapsed time carries the same share of the distance, whether it came
+    as one frame or as sixty. It never quite lands, so what is within
+    ``SPREAD_SETTLED`` of the target is snapped onto it - a cube still
+    moving by a thousandth would rebuild its scene forever.
+
+    Args:
+        spread: How far the cube stands open now.
+        target: How far open it is heading.
+        delta: Seconds gone by since the last call.
+
+    Returns:
+        The opening the elapsed time leads to.
+
+    """
+    moved = target + (spread - target) * math.exp(-EXPLODE_SPEED * delta)
+
+    if abs(moved - target) < SPREAD_SETTLED:
+        return target
+
+    return moved
 
 
 def screenshot_path() -> Path:
@@ -289,6 +320,14 @@ class Viewer:
     the tracker then being read anew on every frame. The camera keeps
     orbiting on top of it, and the light stays where it is.
 
+    ``exploded`` opens the cube up, every piece flying away from the
+    center: a host toggles it the way it toggles ``show_axes``, and the
+    cube travels there rather than jumping. The camera stays where it
+    is, so an open cube grows on the screen and reaches past the border
+    of the window - the wheel is what looking inside costs. ``scene``
+    stays the picture of the frame, ``assembled`` the cube as the
+    animation built it, before it was opened.
+
     ``debug`` turns the performance monitoring on: what a frame costs is
     always measured on the processor, two clock readings being nothing
     next to a frame, but the GPU is only timed when it is asked for, a
@@ -307,11 +346,14 @@ class Viewer:
     debug: bool = False
     show_axes: bool = False
     orientation: Quat | OrientationTracker | None = None
+    exploded: bool = False
 
     monitor: Monitor = field(init=False, default_factory=Monitor)
     geometry: CubeGeometry = field(init=False)
     camera: OrbitCamera = field(init=False)
     scene: Scene = field(init=False)
+    assembled: Scene = field(init=False)
+    spread: float = field(init=False, default=0.0)
     origin: 'VCube' = field(init=False)
     stage: Stage | None = field(init=False, default=None)
     animation: Animation = field(init=False)
@@ -363,7 +405,8 @@ class Viewer:
         )
 
         self.cube = self.animation.cube
-        self.scene = self.animation.resting
+        self.assembled = self.animation.resting
+        self.scene = self.assembled.exploded(self.spread)
 
     def require_stage(self) -> Stage:
         """
@@ -519,6 +562,11 @@ class Viewer:
         age it has reached on this very frame - the two clocks are never
         assumed to have the same origin.
 
+        The opening of the cube travels here too, and the scene is only
+        rebuilt when something moved: a cube standing still, open or
+        closed, hands the very same scene over frame after frame, which
+        is what the instance buffer is cached on.
+
         Args:
             delta: Seconds gone by since the last call.
 
@@ -537,7 +585,16 @@ class Viewer:
             notation, arrival = self.pending.popleft()
             self.animation.extend(notation, at=clock - (start - arrival))
 
-        self.scene = self.animation.advance(delta)
+        spread = settle_spread(
+            self.spread, EXPLODE_SPREAD if self.exploded else 0.0, delta,
+        )
+        assembled = self.animation.advance(delta)
+
+        if assembled is not self.assembled or spread != self.spread:
+            self.assembled = assembled
+            self.scene = assembled.exploded(spread)
+
+        self.spread = spread
 
         self.monitor.advance.add(time.perf_counter() - start)
 
