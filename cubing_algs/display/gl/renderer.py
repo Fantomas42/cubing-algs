@@ -23,7 +23,6 @@ from typing import cast
 
 from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.constants import BACKGROUND_COLOR
-from cubing_algs.display.gl.constants import CORE_COLOR
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import RENDER_SAMPLES
 from cubing_algs.display.gl.constants import Look
@@ -159,7 +158,7 @@ class CoreRenderer:
             camera: The camera looking at the cube.
             look: How the light falls on it, the core taking its ambient,
                 its gamma and its light from the very same one, plus the
-                highlight and the rim written for it alone.
+                color, the highlight and the rim written for it alone.
             orientation: How the whole cube is held, which the core
                 follows as the piece of it that it is.
 
@@ -170,7 +169,7 @@ class CoreRenderer:
             camera.view_projection().pack(),
         )
         uniform(self.program, 'world').write(orientation.to_matrix().pack())
-        uniform(self.program, 'core_color').value = CORE_COLOR
+        uniform(self.program, 'core_color').value = look.core_color
         uniform(self.program, 'camera_position').value = camera.position
         uniform(self.program, 'light_direction').value = Vec3(
             *look.light_direction,

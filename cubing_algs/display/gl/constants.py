@@ -184,6 +184,14 @@ class Look:
     specular_strength: float = 0.06
     specular_power: float = 32.0
 
+    # Color of the ball core. Here rather than in a palette, which
+    # paints stickers alone, and here rather than as the constant it
+    # defaults to: a consumer drawing the inside of a cube may have
+    # something to say about it - a core that goes dull when nothing is
+    # driving the cube any more - and ``draw()`` takes a look of its
+    # own for exactly that.
+    core_color: tuple[float, float, float] = CORE_COLOR
+
     # The highlight of the ball core, which is not the one of a sticker.
     # A sticker is a flat printed patch seen next to twenty-five others,
     # so its gloss must stay a hint; the core is a molded ball seen alone
