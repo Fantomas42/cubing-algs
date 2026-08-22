@@ -453,7 +453,7 @@ class Viewer:
         self.stage.close()
         self.stage = None
 
-    def push(self, notation: str) -> bool:
+    def push(self, notation: str, age: float = 0.0) -> bool:
         """
         Queue a move to be played, when the cube can take it.
 
@@ -470,8 +470,26 @@ class Viewer:
         dressed: a producer stamping what it sends - a bluetooth cube, a
         replay - has its cadence read from those very stamps.
 
+        ``age`` is what a producer knows and the viewer cannot: **the
+        move already happened, and it happened that long ago**. A
+        bluetooth cube reports a face once it has stopped turning, and
+        the report travels; by the time it is pushed, the hand is
+        somewhere else entirely. The move is therefore dated back by
+        that much, and the animation starts it where it would already
+        stand rather than from zero - a turn older than its own beat
+        lands on the very frame it arrives on. It is an **age and not a
+        date** on purpose: a producer reading another clock than
+        ``perf_counter`` - a cube counting its own milliseconds, a
+        publisher stamping epoch seconds - can always say how old
+        something is, and never where it sits on a clock it has no
+        origin for.
+
         Args:
             notation: The move to play, empty for none.
+            age: How long ago the move truly happened, in seconds. Zero
+                for a move happening now, which is what a key press is.
+                A negative one is read as zero: nothing is played before
+                it is pushed.
 
         Returns:
             True when the move was queued.
@@ -487,7 +505,7 @@ class Viewer:
         except InvalidMoveError:
             return False
 
-        self.pending.append((notation, time.perf_counter()))
+        self.pending.append((notation, time.perf_counter() - max(age, 0.0)))
 
         return True
 

@@ -407,6 +407,69 @@ class TestViewer(unittest.TestCase):
         self.assertIsNone(self.viewer.stage)
 
 
+class TestViewerAgedMoves(unittest.TestCase):
+    """Tests for a move that is already over when it is pushed."""
+
+    def setUp(self) -> None:
+        """Build a viewer on a scrambled cube."""
+        self.cube = VCube()
+        self.cube.rotate(SCRAMBLE)
+
+        self.viewer = Viewer(self.cube, window_size=WINDOW_SIZE)
+
+    def test_push_an_aged_move_dates_it_back(self) -> None:
+        """Test that a move already over is queued where it happened."""
+        clock = FakeClock(now=1.0)
+
+        with mock.patch(
+                'cubing_algs.display.gl.viewer.time.perf_counter', clock,
+        ):
+            self.viewer.push('R')
+            self.viewer.push('U', age=0.1)
+
+        fresh, aged = (arrival for _, arrival in self.viewer.pending)
+
+        self.assertAlmostEqual(fresh - aged, 0.1)
+
+    def test_push_an_age_never_runs_backwards(self) -> None:
+        """Test that nothing is ever played before it is pushed."""
+        clock = FakeClock(now=1.0)
+
+        with mock.patch(
+                'cubing_algs.display.gl.viewer.time.perf_counter', clock,
+        ):
+            self.viewer.push('R', age=-1.0)
+            self.viewer.push('U')
+
+        first, second = (arrival for _, arrival in self.viewer.pending)
+
+        self.assertAlmostEqual(first, second)
+
+    def test_an_aged_move_starts_the_turn_part_way_through(self) -> None:
+        """
+        Test that a move as old as its beat lands without waiting.
+
+        This is the whole of what an age buys: the turn is started where
+        it would already stand rather than from zero, so a move older
+        than the beat has nothing left to turn at all.
+
+        The animation is let run first, and it has to be: an age dates a
+        move back, and a date landing before the animation existed is
+        held at its origin by ``max(date, end)``. So an age only counts
+        for what the clock of the animation has already run, which is a
+        matter of the frames following a ``reload()`` and of nothing
+        else.
+        """
+        expected = self.cube.copy()
+        expected.rotate('R')
+
+        self.viewer.advance(self.viewer.duration * 4)
+        self.viewer.push('R', age=self.viewer.duration * 2)
+        self.viewer.advance(0.0)
+
+        self.assertEqual(self.viewer.cube.state, expected.state)
+
+
 class TestViewerFraming(unittest.TestCase):
     """Tests for the way a viewer frames the cube in its window."""
 
