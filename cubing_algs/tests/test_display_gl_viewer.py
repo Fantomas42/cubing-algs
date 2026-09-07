@@ -852,7 +852,7 @@ class TestStage(AttachedViewerTestCase):
             stage.close()
 
     def test_background_is_the_one_of_the_viewer(self) -> None:
-        """Test that what the cube does not cover is the opaque grey."""
+        """Test that what the cube does not cover is the opaque ground."""
         self.attach()
 
         self.viewer.draw()

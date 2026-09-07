@@ -241,11 +241,25 @@ WINDOW_TITLE = 'cubing-algs'
 VIEWER_SIZE = (720, 720)
 
 # Color the window is cleared with. Opaque, unlike an offscreen render:
-# a window has no alpha channel to hand back. A mid grey, which is the
-# background the look was judged on: the rim light detaching the
-# silhouette and the grain of a sticker need something to read against,
-# and the black plastic melts into anything darker.
-VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.50, 0.50, 0.52, 1.0)
+# a window has no alpha channel to hand back. A cold slate, and the one
+# color here that is a taste rather than a measurement: a mid grey is
+# the neutral a look is *judged* against, which is not the same as the
+# ground it is best seen on, and a window is left open for the length of
+# a session where an image is looked at once.
+#
+# It costs the silhouette of the plastic, which does melt into anything
+# this dark, and that is measured rather than assumed: the rim light is
+# ``pow(1 - dot(normal, view), rim_power)``, so it reaches the chamfers
+# of the outline alone - a few pixels wide - and raising it to compensate
+# changes nothing an eye can find. What draws a cube against a dark
+# ground is the outer stickers, and they gain from it: a palette reads
+# more saturated here than it ever did on the grey.
+#
+# Never darker than the ball core, which is the one thing a window may be
+# left showing on its own: ``Look.core_color`` is a field precisely so a
+# consumer can dim it while nothing drives the cube, and a ground taken
+# down with it would swallow the only thing left in the window.
+VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.12, 0.13, 0.15, 1.0)
 
 # How long the performance of the rendering is averaged over before
 # being shown, in seconds: short enough to follow a slowdown, long enough

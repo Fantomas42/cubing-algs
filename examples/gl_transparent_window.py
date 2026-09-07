@@ -67,7 +67,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 # The background of a window whose compositor is asked to let the desktop
-# through, against the opaque grey of the viewer.
+# through, against the opaque ground of the viewer.
 TRANSPARENT = (0.0, 0.0, 0.0, 0.0)
 
 WINDOW_TITLE = 'transparent cube'
