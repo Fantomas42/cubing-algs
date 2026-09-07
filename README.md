@@ -783,9 +783,12 @@ move, or an orientation pushed from outside - build the viewer directly. It is
 a dataclass, and its state can be reached while it runs:
 
 ```python
-from cubing_algs.display.gl import SENSOR_BASIS, OrientationTracker, Viewer
+from cubing_algs.display.gl import OrientationTracker, Quat, Viewer
 
-tracker = OrientationTracker(basis=SENSOR_BASIS)
+# This sensor's own axis convention - the driver decoding its raw
+# bytes is the one that knows this value.
+basis = Quat(w=0.7071067811865476, x=-0.7071067811865476, y=0.0, z=0.0)
+tracker = OrientationTracker(basis=basis)
 viewer = Viewer(cube, mode='f2l', debug=True, orientation=tracker)
 
 tracker.update(w, x, y, z)    # raw quaternion of a bluetooth cube

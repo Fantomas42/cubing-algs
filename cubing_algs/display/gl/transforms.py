@@ -418,12 +418,6 @@ class Quat(NamedTuple):
 # anything a caller may leave alone.
 IDENTITY = Quat.identity()
 
-# Basis of a sensor reporting its orientation with Y and Z swapped,
-# which is what the bluetooth cubes met so far do: their raw quaternion
-# reads ``(w, x, z, -y)`` in the frame of the renderer, and rewriting
-# its components that way is exactly a quarter turn around X.
-SENSOR_BASIS = Quat.from_axis_angle(AXIS_X, -math.pi / 2)
-
 
 @dataclass(frozen=True, slots=True)
 class Mat4:

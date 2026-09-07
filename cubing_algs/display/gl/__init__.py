@@ -12,14 +12,12 @@ from cubing_algs.display.gl.api import render
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.presentation import Playback
 from cubing_algs.display.gl.presentation import Presentation
-from cubing_algs.display.gl.transforms import SENSOR_BASIS
 from cubing_algs.display.gl.transforms import OrientationTracker
 from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
 
 __all__ = [
-    'SENSOR_BASIS',
     'Look',
     'OrientationTracker',
     'Playback',

@@ -8,7 +8,6 @@ from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import AXIS_Z
 from cubing_algs.display.gl.transforms import IDENTITY
 from cubing_algs.display.gl.transforms import ORIGIN
-from cubing_algs.display.gl.transforms import SENSOR_BASIS
 from cubing_algs.display.gl.transforms import Euler
 from cubing_algs.display.gl.transforms import Mat4
 from cubing_algs.display.gl.transforms import OrientationTracker
@@ -571,22 +570,16 @@ class TestOrientationTracker(VectorTestCase):
 
         self.assert_quat(orientation, Quat(raw.w, raw.x, raw.z, -raw.y))
 
-    def test_sensor_basis_is_that_quarter_turn(self) -> None:
-        """Test that the shipped basis is the one a sensor asks for."""
-        self.assert_quat(
-            SENSOR_BASIS,
-            Quat.from_axis_angle(AXIS_X, -math.pi / 2),
-        )
-
-    def test_sensor_basis_holds_a_whole_feed(self) -> None:
+    def test_basis_holds_a_whole_feed(self) -> None:
         """
-        Test the shipped basis on a feed, not on a single quaternion.
+        Test a basis on a feed, not on a single quaternion.
 
         A basis conjugating the wrong way, or by the wrong angle, still
         looks right on some quaternions: the swap has to hold for every
         one of them, and around every axis.
         """
-        tracker = OrientationTracker(basis=SENSOR_BASIS)
+        basis = Quat.from_axis_angle(AXIS_X, -math.pi / 2)
+        tracker = OrientationTracker(basis=basis)
         tracker.update(*Quat.identity())
 
         for axis in (AXIS_X, AXIS_Y, AXIS_Z, Vec3(1.0, -2.0, 0.5)):
