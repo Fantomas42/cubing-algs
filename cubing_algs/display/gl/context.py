@@ -179,12 +179,13 @@ def check_glfw_platform() -> None:
     raise GLContextError(GLFW_WAYLAND_LOCKED)
 
 
-def create_window(
+def create_window(  # noqa: PLR0913
         size: tuple[int, int],
         title: str = WINDOW_TITLE,
         *,
         visible: bool = True,
         samples: int = 0,
+        transparent: bool = False,
         require: int = GL_VERSION_REQUIRED,
 ) -> GLFWWindow:
     """
@@ -194,12 +195,25 @@ def create_window(
     destruction. Call create_window_context() right after to get the
     moderngl context bound to it.
 
+    ``transparent`` lays the cube on the desktop, and it is one mode
+    rather than three hints because the three hold together: a window
+    letting the desktop through while keeping its bar would show it
+    through a frame, and one free to drop behind another would be lost
+    the moment it did. What a compositor makes of the request is another
+    matter - it is free to refuse, and ``transparency_granted()`` is
+    what reads its answer back.
+
     Args:
         size: Width and height of the window, in pixels.
         title: Title of the window.
         visible: Whether the window is shown on screen.
         samples: Samples of the multisampled window framebuffer. Zero
-            draws without any antialiasing.
+            draws without any antialiasing. **A transparent visual and a
+            multisampled window are mutually exclusive on some drivers**,
+            which answer such a request by refusing the transparency: a
+            caller wanting both draws into an ``OffscreenTarget``.
+        transparent: Whether the desktop is asked to show through, the
+            window then losing its decoration and floating on top.
         require: Minimum OpenGL version code, such as 330.
 
     Returns:
@@ -233,6 +247,11 @@ def create_window(
     glfw.window_hint(glfw.VISIBLE, glfw.TRUE if visible else glfw.FALSE)
     glfw.window_hint(glfw.SAMPLES, samples)
 
+    if transparent:
+        glfw.window_hint(glfw.TRANSPARENT_FRAMEBUFFER, glfw.TRUE)
+        glfw.window_hint(glfw.DECORATED, glfw.FALSE)
+        glfw.window_hint(glfw.FLOATING, glfw.TRUE)
+
     window = glfw.create_window(width, height, title, None, None)
     if not window:
         glfw.terminate()
@@ -242,6 +261,30 @@ def create_window(
     glfw.make_context_current(window)
 
     return window
+
+
+def transparency_granted(window: GLFWWindow) -> bool:
+    """
+    Read whether the compositor let the desktop through.
+
+    A hint is a request and never a promise: a compositor with no
+    compositing on, or one that simply says no, hands back an ordinary
+    opaque window. Asking it afterwards is the only way to know, and a
+    caller that clears its background to nothing on an opaque window
+    shows whatever the driver happened to leave there.
+
+    Args:
+        window: The handle returned by create_window().
+
+    Returns:
+        True when the framebuffer of the window is truly transparent.
+
+    """
+    import glfw
+
+    return bool(
+        glfw.get_window_attrib(window, glfw.TRANSPARENT_FRAMEBUFFER),
+    )
 
 
 def destroy_window(window: GLFWWindow) -> None:

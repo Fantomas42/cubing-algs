@@ -302,6 +302,21 @@ VIEWER_SIZE = (720, 720)
 # down with it would swallow the only thing left in the window.
 VIEWER_BACKGROUND: tuple[float, float, float, float] = (0.12, 0.13, 0.15, 1.0)
 
+# The background of a window whose compositor is asked to let the desktop
+# through, against the opaque ground above. A cube laid on the desktop is
+# what is left when nothing at all is drawn behind it.
+VIEWER_TRANSPARENT: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
+
+# What is said when a compositor hands back an ordinary window: the hint
+# is a request, and a background cleared to nothing on an opaque window
+# shows whatever the driver happened to leave there. So the ground of the
+# viewer is kept, and the refusal is worth a line - the flag was passed
+# and the window does not look like it.
+TRANSPARENCY_REFUSED = (
+    'The compositor refused a transparent window: '
+    'the cube is drawn on the ground of the viewer'
+)
+
 # How long the performance of the rendering is averaged over before
 # being shown, in seconds: short enough to follow a slowdown, long enough
 # not to flicker. It is shown in the title of the window rather than in
@@ -392,6 +407,7 @@ SCREENSHOT_NAME = 'cubing-algs-%Y%m%d-%H%M%S.png'
 VIEWER_HELP = """\
 cubing-algs viewer
   Drag             Orbit the cube
+  Ctrl Drag        Carry the window across the screen
   Wheel            Zoom in and out
   R U F L D B      Turn a face
   M E S            Turn a slice

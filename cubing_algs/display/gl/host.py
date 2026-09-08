@@ -15,27 +15,34 @@ into ``press()``, ``drag()``, ``scroll()`` and ``resize()``.
 glfw is imported lazily, and never before ``create_window()``, the one
 place naming the extra a missing glfw asks for.
 """
+import logging
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
+from cubing_algs.display.gl.constants import TRANSPARENCY_REFUSED
 from cubing_algs.display.gl.constants import VIEWER_HELP
+from cubing_algs.display.gl.constants import VIEWER_TRANSPARENT
 from cubing_algs.display.gl.constants import WINDOW_TITLE
 from cubing_algs.display.gl.context import GLFWMonitor
 from cubing_algs.display.gl.context import GLFWWindow
 from cubing_algs.display.gl.context import create_window
 from cubing_algs.display.gl.context import create_window_context
 from cubing_algs.display.gl.context import destroy_window
+from cubing_algs.display.gl.context import transparency_granted
 from cubing_algs.display.gl.metrics import RenderProfile
 from cubing_algs.display.gl.metrics import debug_report
 from cubing_algs.display.gl.metrics import debug_title
+from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
 from cubing_algs.display.gl.viewer import output
 
 if TYPE_CHECKING:  # pragma: no cover
     import moderngl
+
+logger = logging.getLogger(__name__)
 
 
 def key_letter(key: int) -> str:
@@ -135,15 +142,18 @@ def screen_refresh(window: GLFWWindow) -> float:
     return float(mode.refresh_rate)
 
 
-@dataclass
+@dataclass  # noqa: PLR0904
 class GlfwHost:
     """
     A window, an event loop, and a viewer drawing into it.
 
     Everything glfw of the backend lives here: the window, the timing of
-    the frames, the performance written in the title, the vsync, and the
-    translation of the keyboard and the mouse into the neutral
-    vocabulary the viewer speaks.
+    the frames, the performance written in the title, the vsync, the
+    transparent visual and the carry it needs, and the translation of
+    the keyboard and the mouse into the neutral vocabulary the viewer
+    speaks. That is what the count of public methods is spent on, and
+    why it is over the limit: this class is the one place naming glfw,
+    and splitting it would be splitting a window in two.
 
     Nothing is opened until ``run()`` - or ``open()`` - is called, and
     everything it opened is given back when it returns, however it
@@ -166,6 +176,20 @@ class GlfwHost:
     title: str = WINDOW_TITLE
     vsync: bool = True
 
+    # A cube laid on the desktop: no background, no decoration, and
+    # floating above everything. It is one mode rather than three
+    # options because the three hold together - a window letting the
+    # desktop through while keeping its bar would show it through a
+    # frame, and one free to drop behind another would be lost. What it
+    # costs is the title: a window without a bar has nowhere to show it.
+    transparent: bool = False
+
+    # What the cube is antialiased by. Turning it off is a way out of
+    # the offscreen detour a transparent window imposes: the cube is
+    # then drawn into the window itself, aliased but with nothing in
+    # between.
+    msaa: bool = True
+
     # What ``run()`` writes when the window opens. A host answering
     # fewer keys than the viewer does - one showing a cube it is not
     # the one turning, among others - hands its own list here rather
@@ -178,6 +202,53 @@ class GlfwHost:
     refresh: float = field(init=False, default=0.0)
     dragging: bool = field(init=False, default=False)
     cursor: tuple[float, float] = field(init=False, default=(0.0, 0.0))
+
+    # Where the cube is drawn when the window itself cannot hold the
+    # samples: it belongs to the transparent mode alone, and stays None
+    # without it.
+    target: OffscreenTarget | None = field(init=False, default=None)
+
+    # What the window is carried by, and where the cursor took hold of
+    # it. A window is free to place itself on every platform a window is
+    # opened on here: a Wayland session is given the X11 variant of
+    # glfw, moderngl having no way to read a context off the other one,
+    # and a platform that stayed Wayland is refused a window long before
+    # the mouse is of any interest.
+    carrying: bool = field(init=False, default=False)
+    anchor: tuple[float, float] = field(init=False, default=(0.0, 0.0))
+
+    @property
+    def offscreen(self) -> bool:
+        """
+        Tell whether the cube is drawn aside and copied to the window.
+
+        Returns:
+            True when the frame goes through a multisampled target,
+            which a transparent visual leaves as the only way to
+            antialias the cube.
+
+        """
+        return self.transparent and self.msaa
+
+    @property
+    def samples(self) -> int:
+        """
+        Tell how many samples the window itself is asked for.
+
+        A transparent visual and a multisampled window are mutually
+        exclusive on this driver - asking for both gets the transparency
+        refused - so a transparent window is asked for none of them and
+        the cube is antialiased offscreen instead. ``msaa`` off asks for
+        no antialiasing at all, in the window as anywhere else.
+
+        Returns:
+            The samples of the look, or none of them.
+
+        """
+        if self.transparent or not self.msaa:
+            return 0
+
+        return self.viewer.look.samples
 
     def open(self) -> Stage:
         """
@@ -194,7 +265,10 @@ class GlfwHost:
         # missing glfw asks for, and an import raising first would
         # replace that with a bare ModuleNotFoundError.
         self.window = create_window(
-            viewer.window_size, self.title, samples=viewer.look.samples,
+            viewer.window_size,
+            self.title,
+            samples=self.samples,
+            transparent=self.transparent,
         )
         context = create_window_context()
         self.context = context
@@ -205,6 +279,7 @@ class GlfwHost:
         # display, and the cube is framed on what there is to draw into.
         width, height = glfw.get_framebuffer_size(self.window)
         stage = Stage.attach(context, viewer.geometry, (width, height))
+        self.clear_ground(stage)
         viewer.attach(stage)
 
         # What a frame is given comes from the screen it is shown on: a
@@ -229,12 +304,85 @@ class GlfwHost:
 
         return stage
 
+    def clear_ground(self, stage: Stage) -> None:
+        """
+        Give the stage the ground this window is cleared to.
+
+        A compositor is free to refuse a transparent visual, and the
+        ground of the viewer is what a refused one falls back on: a
+        background cleared to nothing on an opaque window shows whatever
+        the driver happened to leave there. So the answer is read back
+        rather than assumed, and a refusal is worth a line - the flag
+        was passed and the window will not look like it.
+
+        An opaque window is left with the ground the stage was built
+        with, which is the one every window of the library is cleared
+        to.
+
+        Args:
+            stage: The stage the viewer is about to draw into.
+
+        """
+        if not self.transparent:
+            return
+
+        if transparency_granted(self.window):
+            stage.background = VIEWER_TRANSPARENT
+        else:
+            logger.warning(TRANSPARENCY_REFUSED)
+
+    def refresh_target(self) -> None:
+        """
+        Keep the offscreen target the size of the window it lands in.
+
+        The whole detour, in one field: the stage draws into a
+        multisampled target instead of the window, and ``resolve()``
+        brings it back, alpha and all. A window that can hold its own
+        samples - or is asked for no antialiasing at all - needs none of
+        it, and builds no target.
+        """
+        if not self.offscreen:
+            return
+
+        stage = self.viewer.require_stage()
+
+        if self.target is not None and self.target.size == stage.size:
+            return
+
+        if self.target is not None:
+            self.target.release()
+
+        self.target = OffscreenTarget.create(
+            stage.context, stage.size, self.viewer.look.samples,
+        )
+        stage.target = self.target.framebuffer
+
+    def resolve(self) -> None:
+        """
+        Copy the offscreen frame to the window, samples resolved first.
+
+        Nothing to do when the cube was drawn into the window itself: no
+        target was ever built, and the frame is already where it
+        belongs.
+        """
+        target = self.target
+
+        if target is None:
+            return
+
+        context = self.viewer.require_stage().context
+
+        context.copy_framebuffer(target.resolved, target.framebuffer)
+        context.copy_framebuffer(context.screen, target.resolved)
+
     def close(self) -> None:
         """
         Close the window, if one is open, and forget about it.
 
         The context stands for the pair: ``open()`` sets both or
         neither, so testing it alone leaves no unreachable branch behind.
+        The offscreen target is given back first, while the context it
+        was built on is still alive.
         """
         context = self.context
 
@@ -242,6 +390,10 @@ class GlfwHost:
             return
 
         self.viewer.detach()
+
+        if self.target is not None:
+            self.target.release()
+            self.target = None
 
         context.release()
         self.context = None
@@ -460,21 +612,59 @@ class GlfwHost:
 
         return True
 
+    def carry(self, x: float, y: float) -> None:
+        """
+        Move the window by what the cursor gained on its anchor.
+
+        The cursor is reported inside the window, so moving the window
+        by that gain puts the cursor back on its anchor: the offset is
+        measured afresh at every event, and nothing drifts. Counting the
+        distance from the previous position instead would move the
+        window twice.
+
+        Args:
+            x: Where the cursor stands, in pixels from the left.
+            y: Where the cursor stands, in pixels from the top.
+
+        """
+        import glfw
+
+        anchor_x, anchor_y = self.anchor
+        window_x, window_y = glfw.get_window_pos(self.window)
+
+        glfw.set_window_pos(
+            self.window,
+            int(window_x + x - anchor_x),
+            int(window_y + y - anchor_y),
+        )
+
     def on_mouse_button(
             self,
             window: GLFWWindow,
             button: int,
             action: int,
-            _mods: int,
+            mods: int,
     ) -> None:
         """
-        Start or stop dragging the cube around.
+        Take hold of the window, or of the cube, until the button goes.
+
+        Which button orbits is what no mode may change: the drag is the
+        one gesture a viewer is made of, and a window looking different
+        is no reason to go and find it elsewhere. So the carry a window
+        with no bar needs is Ctrl held down at the moment of the press,
+        and a decorated window answers it too, where it merely doubles
+        the bar it still has - which is what makes the gesture learnable
+        before ``transparent`` is ever passed.
+
+        Ctrl let go halfway through carries the window all the same:
+        glfw says nothing of a modifier changing, and the carry belongs
+        to the button that began it.
 
         Args:
             window: The window the button was pressed in.
             button: The glfw code of the button.
             action: Whether the button was pressed or released.
-            _mods: The modifier keys held down with it, unused.
+            mods: The modifier keys held down with it.
 
         """
         import glfw
@@ -482,12 +672,26 @@ class GlfwHost:
         if button != glfw.MOUSE_BUTTON_LEFT:
             return
 
-        self.dragging = action == glfw.PRESS
         self.cursor = glfw.get_cursor_pos(window)
+
+        if action == glfw.PRESS and mods & glfw.MOD_CONTROL:
+            self.carrying = True
+            self.anchor = self.cursor
+            return
+
+        if self.carrying:
+            self.carrying = False
+            return
+
+        self.dragging = action == glfw.PRESS
 
     def on_cursor(self, _window: GLFWWindow, x: float, y: float) -> None:
         """
-        Follow the mouse, and orbit the camera while it is dragged.
+        Carry the window, or orbit the camera, as the mouse moves.
+
+        Where the cursor stands is written down whatever happens: the
+        orbit reads its next move from there even when the window is the
+        thing that moved.
 
         Args:
             _window: The window the mouse moved over, unused.
@@ -497,6 +701,10 @@ class GlfwHost:
         """
         previous_x, previous_y = self.cursor
         self.cursor = (x, y)
+
+        if self.carrying:
+            self.carry(x, y)
+            return
 
         if not self.dragging:
             return
@@ -577,7 +785,11 @@ class GlfwHost:
         import glfw
 
         now = glfw.get_time()
+
+        self.refresh_target()
         self.frame(now - self.clock)
+        self.resolve()
+
         self.clock = now
 
         drawn = glfw.get_time()

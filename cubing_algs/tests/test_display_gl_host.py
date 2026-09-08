@@ -15,6 +15,7 @@ import unittest
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
@@ -23,7 +24,10 @@ from cubing_algs.display.gl.constants import DEFAULT_BUDGET
 from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
 from cubing_algs.display.gl.constants import GLFW_MISSING
 from cubing_algs.display.gl.constants import MONITOR_INTERVAL
+from cubing_algs.display.gl.constants import TRANSPARENCY_REFUSED
+from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
 from cubing_algs.display.gl.constants import VIEWER_HELP
+from cubing_algs.display.gl.constants import VIEWER_TRANSPARENT
 from cubing_algs.display.gl.constants import WINDOW_TITLE
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
@@ -112,6 +116,7 @@ def hidden_window(
         title: str = WINDOW_TITLE,
         *,
         samples: int = 0,
+        transparent: bool = False,
         require: int = GL_VERSION_REQUIRED,
 ) -> GLFWWindow:
     """
@@ -121,6 +126,7 @@ def hidden_window(
         size: Width and height of the window, in pixels.
         title: Title of the window.
         samples: Samples of its multisampled framebuffer.
+        transparent: Whether the desktop is asked to show through.
         require: Minimum OpenGL version code.
 
     Returns:
@@ -128,7 +134,12 @@ def hidden_window(
 
     """
     return create_window(
-        size, title, visible=False, samples=samples, require=require,
+        size,
+        title,
+        visible=False,
+        samples=samples,
+        transparent=transparent,
+        require=require,
     )
 
 
@@ -941,6 +952,275 @@ class TestHostInput(unittest.TestCase):
         self.host.on_scroll(None, 0.0, -2.0)
 
         self.assertGreater(self.viewer.camera.distance, distance)
+
+
+class TestHostCarry(HiddenHostTestCase):
+    """Tests for carrying the window a Ctrl drag takes hold of."""
+
+    def press(self, mods: int) -> None:
+        """
+        Press the left button with the modifiers held down.
+
+        Args:
+            mods: The modifier keys held at the moment of the press.
+
+        """
+        import glfw
+
+        self.host.on_mouse_button(
+            self.host.window, glfw.MOUSE_BUTTON_LEFT, glfw.PRESS, mods,
+        )
+
+    def test_ctrl_takes_hold_of_the_window(self) -> None:
+        """Test that Ctrl held at the press carries instead of orbiting."""
+        import glfw
+
+        self.host.open()
+
+        self.press(glfw.MOD_CONTROL)
+
+        self.assertTrue(self.host.carrying)
+        self.assertFalse(self.host.dragging)
+
+    def test_a_plain_press_orbits_the_cube(self) -> None:
+        """Test that the drag stays the one gesture the viewer is made of."""
+        self.host.open()
+
+        self.press(0)
+
+        self.assertTrue(self.host.dragging)
+        self.assertFalse(self.host.carrying)
+
+    def test_the_carry_ends_with_the_button(self) -> None:
+        """Test that letting go stops carrying without starting a drag."""
+        import glfw
+
+        self.host.open()
+        self.press(glfw.MOD_CONTROL)
+
+        self.host.on_mouse_button(
+            self.host.window, glfw.MOUSE_BUTTON_LEFT, glfw.RELEASE, 0,
+        )
+
+        self.assertFalse(self.host.carrying)
+        self.assertFalse(self.host.dragging)
+
+    def test_the_window_moves_by_what_the_cursor_gained(self) -> None:
+        """Test that a carried window follows the cursor exactly."""
+        self.host.open()
+        self.host.anchor = (10.0, 20.0)
+
+        with (
+                mock.patch(
+                    'glfw.get_window_pos', return_value=(100, 200),
+                ),
+                mock.patch('glfw.set_window_pos') as placed,
+        ):
+            self.host.carry(30.0, 50.0)
+
+        placed.assert_called_once_with(self.host.window, 120, 230)
+
+    def test_a_carried_window_does_not_orbit(self) -> None:
+        """Test that the cube stands still while the window is carried."""
+        import glfw
+
+        self.host.open()
+        self.press(glfw.MOD_CONTROL)
+
+        camera = replace(self.viewer.camera)
+
+        with mock.patch.object(self.host, 'carry') as carried:
+            self.host.on_cursor(self.host.window, 30.0, 50.0)
+
+        carried.assert_called_once_with(30.0, 50.0)
+        self.assertEqual(self.viewer.camera.yaw, camera.yaw)
+        self.assertEqual(self.viewer.camera.pitch, camera.pitch)
+
+    def test_the_cursor_is_followed_while_the_window_moves(self) -> None:
+        """Test that an orbit started after a carry reads no jump."""
+        import glfw
+
+        self.host.open()
+        self.press(glfw.MOD_CONTROL)
+
+        with mock.patch('glfw.set_window_pos'), mock.patch(
+                'glfw.get_window_pos', return_value=(0, 0),
+        ):
+            self.host.on_cursor(self.host.window, 30.0, 50.0)
+
+        self.assertEqual(self.host.cursor, (30.0, 50.0))
+
+
+class TestHostTransparent(HiddenHostTestCase):
+    """Tests for a window the desktop is asked to show through."""
+
+    def test_an_opaque_window_keeps_the_ground_of_the_viewer(self) -> None:
+        """Test that nothing is asked for, and nothing is changed."""
+        stage = self.host.open()
+
+        self.assertEqual(stage.background, VIEWER_BACKGROUND)
+        self.assertIsNone(self.host.target)
+
+    def test_a_granted_transparency_clears_to_nothing(self) -> None:
+        """Test that the desktop showing through leaves no ground at all."""
+        self.host.transparent = True
+
+        with mock.patch(
+                'cubing_algs.display.gl.host.transparency_granted',
+                return_value=True,
+        ):
+            stage = self.host.open()
+
+        self.assertEqual(stage.background, VIEWER_TRANSPARENT)
+
+    def test_a_refused_transparency_falls_back_on_the_ground(self) -> None:
+        """Test that a compositor saying no leaves an ordinary window."""
+        self.host.transparent = True
+
+        with (
+                mock.patch(
+                    'cubing_algs.display.gl.host.transparency_granted',
+                    return_value=False,
+                ),
+                self.assertLogs(
+                    'cubing_algs.display.gl.host', level='WARNING',
+                ) as logged,
+        ):
+            stage = self.host.open()
+
+        self.assertEqual(stage.background, VIEWER_BACKGROUND)
+        self.assertIn(TRANSPARENCY_REFUSED, logged.output[0])
+
+    def test_a_transparent_window_is_asked_for_no_samples(self) -> None:
+        """Test that the two being exclusive is answered by the offscreen."""
+        self.host.transparent = True
+
+        self.assertEqual(self.host.samples, 0)
+        self.assertTrue(self.host.offscreen)
+
+    def test_an_opaque_window_holds_its_own_samples(self) -> None:
+        """Test that a plain window is antialiased by the window itself."""
+        self.assertEqual(self.host.samples, self.viewer.look.samples)
+        self.assertFalse(self.host.offscreen)
+
+    def test_no_antialiasing_asks_for_none_anywhere(self) -> None:
+        """Test that msaa off gives the offscreen detour up as well."""
+        self.host.transparent = True
+        self.host.msaa = False
+
+        self.assertEqual(self.host.samples, 0)
+        self.assertFalse(self.host.offscreen)
+
+    def test_the_target_is_built_and_kept(self) -> None:
+        """Test that a target the size of the window is built once."""
+        self.host.transparent = True
+
+        with mock.patch(
+                'cubing_algs.display.gl.host.transparency_granted',
+                return_value=True,
+        ):
+            self.host.open()
+
+        self.host.refresh_target()
+        target = self.host.target
+
+        self.assertIsNotNone(target)
+        self.assertEqual(
+            target.size,  # type: ignore[union-attr]
+            self.viewer.require_stage().size,
+        )
+
+        self.host.refresh_target()
+
+        self.assertIs(self.host.target, target)
+
+    def test_the_target_follows_the_window(self) -> None:
+        """Test that a resized window is given a target of its new size."""
+        self.host.transparent = True
+
+        with mock.patch(
+                'cubing_algs.display.gl.host.transparency_granted',
+                return_value=True,
+        ):
+            self.host.open()
+
+        self.host.refresh_target()
+        first = self.host.target
+
+        self.viewer.resize((320, 240))
+        self.host.refresh_target()
+
+        self.assertIsNot(self.host.target, first)
+        self.assertEqual(
+            self.host.target.size,  # type: ignore[union-attr]
+            (320, 240),
+        )
+
+    def test_nothing_is_resolved_without_a_target(self) -> None:
+        """Test that a window drawn into directly has nothing to copy."""
+        self.host.open()
+
+        self.host.resolve()
+
+        self.assertIsNone(self.host.target)
+
+    def test_the_frame_is_copied_to_the_window(self) -> None:
+        """Test that both halves of the resolve reach the context."""
+        self.host.transparent = True
+
+        with mock.patch(
+                'cubing_algs.display.gl.host.transparency_granted',
+                return_value=True,
+        ):
+            self.host.open()
+
+        self.host.refresh_target()
+        target = self.host.target
+        context = self.viewer.require_stage().context
+
+        with mock.patch.object(context, 'copy_framebuffer') as copied:
+            self.host.resolve()
+
+        self.assertEqual(copied.call_count, 2)
+        self.assertEqual(
+            copied.call_args_list[0].args,
+            (target.resolved, target.framebuffer),  # type: ignore[union-attr]
+        )
+        self.assertEqual(
+            copied.call_args_list[1].args,
+            (context.screen, target.resolved),  # type: ignore[union-attr]
+        )
+
+    def test_the_target_is_given_back_with_the_window(self) -> None:
+        """Test that the target is released while the context is alive."""
+        self.host.transparent = True
+
+        with mock.patch(
+                'cubing_algs.display.gl.host.transparency_granted',
+                return_value=True,
+        ):
+            self.host.open()
+
+        self.host.refresh_target()
+
+        self.host.close()
+
+        self.assertIsNone(self.host.target)
+
+    def test_the_loop_takes_the_detour(self) -> None:
+        """Test that the offscreen detour belongs to the loop, not the seam."""
+        self.host.open()
+
+        with (
+                mock.patch.object(self.host, 'refresh_target') as refreshed,
+                mock.patch.object(self.host, 'resolve') as resolved,
+                mock.patch.object(self.host, 'frame') as framed,
+        ):
+            self.host.tick()
+
+        refreshed.assert_called_once_with()
+        resolved.assert_called_once_with()
+        framed.assert_called_once()
 
 
 class TestHostWindowInput(HiddenHostTestCase):

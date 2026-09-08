@@ -740,6 +740,7 @@ rather than skipped. A timestamp saying a longer rest wins over it.
 ```
 cubing-algs viewer
   Drag             Orbit the cube
+  Ctrl Drag        Carry the window across the screen
   Wheel            Zoom in and out
   R U F L D B      Turn a face
   M E S            Turn a slice
@@ -801,6 +802,26 @@ the cube then turns at the cadence of whoever is pushing, a single move behind
 it, rather than at a beat of its own. A producer stamping its moves - `R@100` -
 is honored as well, so a solve is replayed at its true speed whether it is
 pushed live or handed over whole.
+
+The window itself belongs to `GlfwHost`, which `run()` builds behind the
+scenes. Reaching for it directly is how a cube is laid on the desktop - no
+background, no decoration, floating above everything:
+
+```python
+from cubing_algs.display.gl.host import GlfwHost
+
+GlfwHost(viewer, transparent=True).run()
+```
+
+A compositor is free to refuse, and says so in a logged line rather than by
+drawing something unexpected. A transparent visual and a multisampled window
+being mutually exclusive on some drivers, the cube is then antialiased offscreen
+and copied to the window; `msaa=False` draws straight into it instead. A window
+with no decoration has no bar to grab, so `Ctrl` and the left button carry it
+across the screen - a gesture a decorated window answers too.
+
+`examples/gl_transparent_window.py` plays an algorithm in such a window, and is
+written as a subclass overriding `frame()` alone.
 
 ### Command Line
 

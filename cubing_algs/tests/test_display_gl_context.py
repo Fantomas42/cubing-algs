@@ -18,6 +18,7 @@ from cubing_algs.display.gl.context import describe
 from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import has_moderngl
 from cubing_algs.display.gl.context import select_glfw_variant
+from cubing_algs.display.gl.context import transparency_granted
 from cubing_algs.display.gl.context import try_standalone_backend
 
 requires_moderngl = unittest.skipUnless(
@@ -325,3 +326,25 @@ class TestDescribe(unittest.TestCase):
         context.info = {}
 
         self.assertEqual(describe(context)['vendor'], 'unknown')
+
+
+class TestTransparencyGranted(unittest.TestCase):
+    """Tests for reading back what a compositor made of a hint."""
+
+    def test_a_granted_transparency(self) -> None:
+        """Test that a window truly letting the desktop through says so."""
+        with mock.patch.dict(
+                'sys.modules', {'glfw': mock.MagicMock()},
+        ) as modules:
+            modules['glfw'].get_window_attrib.return_value = 1
+
+            self.assertTrue(transparency_granted(object()))
+
+    def test_a_refused_transparency(self) -> None:
+        """Test that an ordinary opaque window says so too."""
+        with mock.patch.dict(
+                'sys.modules', {'glfw': mock.MagicMock()},
+        ) as modules:
+            modules['glfw'].get_window_attrib.return_value = 0
+
+            self.assertFalse(transparency_granted(object()))
