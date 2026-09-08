@@ -325,6 +325,24 @@ EXPLODE_SPEED = 6.0
 # a thousandth would rebuild its scene on every frame forever.
 SPREAD_SETTLED = 0.001
 
+# How fast the displayed orientation catches up with the last one a
+# gyroscope reported, per second. A sensor speaks tens of times a
+# second at best, well under the frame rate of a vsynced window, and
+# reading it straight into the render turns every arrival into a
+# visible snap. The same exponential approach as EXPLODE_SPEED fixes
+# it: the same second of elapsed time closes the same share of the
+# arc, whatever the frame rate, and it is tuned faster than the
+# opening of the cube because a hand turning it is not a slow effect -
+# the point is to erase the stepping the sensor's own rate leaves,
+# not to add a trail of its own.
+ORIENTATION_SETTLE_SPEED = 25.0
+
+# Below this the tracker has arrived, and the orientation is snapped
+# onto what it aims at - measured as one minus the absolute dot
+# product of the two quaternions, which reads as an angle regardless
+# of which side of the double cover either one is written on.
+ORIENTATION_SETTLED = 1e-5
+
 # Name of a screenshot, stamped with the moment it was taken so that
 # two of them never overwrite one another.
 SCREENSHOT_NAME = 'cubing-algs-%Y%m%d-%H%M%S.png'

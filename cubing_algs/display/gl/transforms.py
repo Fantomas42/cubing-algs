@@ -20,6 +20,9 @@ from dataclasses import dataclass
 from typing import NamedTuple
 from typing import Self
 
+from cubing_algs.display.gl.constants import ORIENTATION_SETTLE_SPEED
+from cubing_algs.display.gl.constants import ORIENTATION_SETTLED
+
 # Below this length a vector is considered null and cannot be
 # normalized, and a quaternion falls back to the identity.
 EPSILON = 1e-10
@@ -27,6 +30,12 @@ EPSILON = 1e-10
 # Where the pitch of an Euler extraction is considered locked: the yaw
 # and the roll then act on the same axis and cannot be told apart.
 GIMBAL_LOCK_THRESHOLD = 1.0 - 1e-9
+
+# Above this closeness a great circle arc is too short to divide by its
+# own sine without the division blowing up, and a slerp falls back to a
+# plain lerp: the two agree at that distance to well past float
+# precision.
+SLERP_LINEAR_THRESHOLD = 1.0 - 1e-6
 
 MATRIX_LENGTH = 16
 
@@ -331,6 +340,70 @@ class Quat(NamedTuple):
 
         """
         return Quat(self.w, -self.x, -self.y, -self.z)
+
+    def dot(self, other: 'Quat') -> float:
+        """
+        Compute the dot product of two quaternions.
+
+        Args:
+            other: The quaternion to dot this one with.
+
+        Returns:
+            1.0 for two identical rotations, -1.0 for the same rotation
+            written on the other side of the double cover.
+
+        """
+        return (
+            self.w * other.w + self.x * other.x
+            + self.y * other.y + self.z * other.z
+        )
+
+    def slerp(self, other: 'Quat', t: float) -> 'Quat':
+        """
+        Interpolate along the great circle arc joining two rotations.
+
+        A unit quaternion is a point on a four dimensional sphere, and
+        only an arc traced on that sphere turns at a constant angular
+        speed - averaging the four components directly would cut across
+        the sphere instead, slowing the rotation down towards the
+        middle of the arc. A rotation and its negation are the same
+        rotation (the double cover), so the arc taken is whichever of
+        the two is the shorter one.
+
+        Args:
+            other: The rotation reached at ``t = 1``.
+            t: How far along the arc to land, ``0`` at this rotation.
+
+        Returns:
+            The rotation at ``t``, along the shorter of the two arcs.
+
+        """
+        cos_half = self.dot(other)
+
+        if cos_half < 0.0:
+            other = Quat(-other.w, -other.x, -other.y, -other.z)
+            cos_half = -cos_half
+
+        if cos_half > SLERP_LINEAR_THRESHOLD:
+            return Quat(
+                self.w + (other.w - self.w) * t,
+                self.x + (other.x - self.x) * t,
+                self.y + (other.y - self.y) * t,
+                self.z + (other.z - self.z) * t,
+            ).normalized()
+
+        angle = math.acos(min(1.0, cos_half))
+        sin_angle = math.sin(angle)
+
+        weight_self = math.sin((1.0 - t) * angle) / sin_angle
+        weight_other = math.sin(t * angle) / sin_angle
+
+        return Quat(
+            self.w * weight_self + other.w * weight_other,
+            self.x * weight_self + other.x * weight_other,
+            self.y * weight_self + other.y * weight_other,
+            self.z * weight_self + other.z * weight_other,
+        )
 
     def rotate(self, vector: Vec3) -> Vec3:
         """
@@ -750,8 +823,18 @@ class OrientationTracker:
     to it. The ``basis`` then absorbs the axis convention of the sensor,
     which rarely matches the one of the renderer.
 
+    A sensor speaks far less often than a window draws - tens of times
+    a second at best, against a vsynced frame rate typically several
+    times that - so ``update()`` and the picture drawn are kept apart:
+    it only ever moves ``target``, the raw pose last reported, and
+    ``orientation``, the one a renderer actually reads, is what
+    ``advance()`` slides towards it a little more on every frame. Fed
+    straight through, an arrival would read as a snap the eye catches
+    as jitter; a target it chases smoothly does not.
+
     Nothing here is specific to a brand of cube: a tracker is just the
-    reference quaternion, the basis, and the current orientation.
+    reference quaternion, the basis, the pose last reported and the one
+    on its way there.
     """
 
     def __init__(self, basis: Quat | None = None) -> None:
@@ -766,14 +849,18 @@ class OrientationTracker:
         """
         self.basis = basis or Quat.identity()
         self.reference: Quat | None = None
+        self.target = Quat.identity()
         self.orientation = Quat.identity()
 
     def update(self, w: float, x: float, y: float, z: float) -> Quat:
         """
         Feed a raw quaternion from the sensor.
 
-        The first call only records the reference orientation and leaves
-        the cube where it is.
+        The first call only records the reference orientation and
+        leaves the cube where it is. A later one moves ``target``
+        alone: the picture itself only catches up with it in
+        ``advance()``, called at the cadence of the render loop rather
+        than at the one of the sensor.
 
         Args:
             w: Scalar component of the raw quaternion.
@@ -782,20 +869,51 @@ class OrientationTracker:
             z: Z component of the raw quaternion.
 
         Returns:
-            The orientation to display, in the renderer frame.
+            The pose the sensor just reported, in the renderer frame.
 
         """
         raw = Quat(w, x, y, z).normalized()
 
         if self.reference is None:
             self.reference = raw
-            return self.orientation
+            return self.target
 
         relative = (self.reference.conjugate() * raw).normalized()
 
-        self.orientation = (
+        self.target = (
             self.basis * relative * self.basis.conjugate()
         ).normalized()
+
+        return self.target
+
+    def advance(self, delta: float) -> Quat:
+        """
+        Let the displayed orientation catch up with the last one seen.
+
+        An exponential approach, the very shape ``settle_spread()``
+        gives the opening of the cube: the same second of elapsed time
+        closes the same share of the arc to ``target``, whatever the
+        frame rate, and it is what keeps a sensor reporting far below
+        the frame rate from reading as a staircase of snaps instead of
+        a turn. It never quite lands, so what is within
+        ``ORIENTATION_SETTLED`` of the target is snapped onto it - a
+        cube still sliding by a fraction of a degree would rebuild its
+        scene on every frame forever.
+
+        Args:
+            delta: Seconds gone by since the last call.
+
+        Returns:
+            The orientation to display right now.
+
+        """
+        fraction = 1.0 - math.exp(-ORIENTATION_SETTLE_SPEED * delta)
+        moved = self.orientation.slerp(self.target, fraction)
+
+        if 1.0 - abs(moved.dot(self.target)) < ORIENTATION_SETTLED:
+            moved = self.target
+
+        self.orientation = moved
 
         return self.orientation
 
@@ -807,4 +925,5 @@ class OrientationTracker:
         how a user re-centers a cube that has drifted.
         """
         self.reference = None
+        self.target = Quat.identity()
         self.orientation = Quat.identity()

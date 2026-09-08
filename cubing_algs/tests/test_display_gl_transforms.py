@@ -223,6 +223,78 @@ class TestQuat(VectorTestCase):
         )
 
 
+class TestQuatSlerp(VectorTestCase):
+    """Tests for Quat.dot and Quat.slerp."""
+
+    def test_dot_of_identical_rotations(self) -> None:
+        """Test that a quaternion dotted with itself gives one."""
+        quat = Quat.from_axis_angle(Vec3(1.0, 2.0, 3.0), 1.2)
+
+        self.assertAlmostEqual(quat.dot(quat), 1.0, places=PLACES)
+
+    def test_dot_of_opposite_rotations(self) -> None:
+        """Test that the two writings of a rotation dot to minus one."""
+        quat = Quat.from_axis_angle(Vec3(1.0, 2.0, 3.0), 1.2)
+        opposite = Quat(*(-value for value in quat))
+
+        self.assertAlmostEqual(quat.dot(opposite), -1.0, places=PLACES)
+
+    def test_slerp_at_zero_is_the_start(self) -> None:
+        """Test that a slerp at t = 0 changes nothing."""
+        start = Quat.from_axis_angle(AXIS_Y, 0.3)
+        end = Quat.from_axis_angle(AXIS_Y, 1.5)
+
+        self.assert_quat(start.slerp(end, 0.0), start)
+
+    def test_slerp_at_one_is_the_end(self) -> None:
+        """Test that a slerp at t = 1 lands exactly on the target."""
+        start = Quat.from_axis_angle(AXIS_Y, 0.3)
+        end = Quat.from_axis_angle(AXIS_Y, 1.5)
+
+        self.assert_quat(start.slerp(end, 1.0), end)
+
+    def test_slerp_at_the_midpoint(self) -> None:
+        """Test that halfway between two turns around Y is their average."""
+        start = Quat.from_axis_angle(AXIS_Y, 0.3)
+        end = Quat.from_axis_angle(AXIS_Y, 1.5)
+
+        self.assert_quat(
+            start.slerp(end, 0.5),
+            Quat.from_axis_angle(AXIS_Y, 0.9),
+        )
+
+    def test_slerp_stays_a_unit_quaternion(self) -> None:
+        """Test that an interpolated rotation is never left unnormalized."""
+        start = Quat.from_axis_angle(Vec3(1.0, 0.0, 0.0), 0.1)
+        end = Quat.from_axis_angle(Vec3(0.0, 1.0, 1.0), 2.0)
+
+        for t in (0.0, 0.25, 0.5, 0.75, 1.0):
+            with self.subTest(t=t):
+                self.assertAlmostEqual(
+                    start.slerp(end, t).norm(), 1.0, places=PLACES,
+                )
+
+    def test_slerp_takes_the_shorter_arc(self) -> None:
+        """Test that a slerp never crosses the sphere the long way round."""
+        start = Quat.from_axis_angle(AXIS_Y, 0.1)
+        end = Quat(*(-value for value in Quat.from_axis_angle(AXIS_Y, 0.2)))
+
+        self.assert_quat(
+            start.slerp(end, 0.5),
+            Quat.from_axis_angle(AXIS_Y, 0.15),
+        )
+
+    def test_slerp_of_nearly_identical_rotations(self) -> None:
+        """Test the linear fallback used when the arc is almost null."""
+        start = Quat.from_axis_angle(AXIS_Y, 0.4)
+        end = Quat.from_axis_angle(AXIS_Y, 0.4 + 1e-9)
+
+        midpoint = start.slerp(end, 0.5)
+
+        self.assertAlmostEqual(midpoint.norm(), 1.0, places=PLACES)
+        self.assertLess(1.0 - abs(midpoint.dot(start)), 1e-8)
+
+
 class TestEuler(VectorTestCase):
     """Tests for the Euler class and its extraction."""
 
@@ -592,6 +664,51 @@ class TestOrientationTracker(VectorTestCase):
                         Quat(raw.w, raw.x, raw.z, -raw.y),
                     )
 
+    def test_update_alone_does_not_move_the_orientation(self) -> None:
+        """Test that a raw quaternion only moves the target, not the display."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+
+        tracker.update(*Quat.from_axis_angle(AXIS_Y, math.pi / 2))
+
+        self.assert_quat(tracker.orientation, Quat.identity())
+
+    def test_advance_moves_the_orientation_towards_the_target(self) -> None:
+        """Test that advancing slides the display a little closer."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+        tracker.update(*Quat.from_axis_angle(AXIS_Y, math.pi / 2))
+
+        tracker.advance(0.01)
+
+        self.assertNotEqual(tracker.orientation, Quat.identity())
+        self.assertNotAlmostEqual(
+            tracker.orientation.dot(tracker.target), 1.0, places=PLACES,
+        )
+
+    def test_advance_settles_on_the_target(self) -> None:
+        """Test that enough elapsed time lands exactly on the target."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+        target = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
+        tracker.update(*target)
+
+        tracker.advance(1.0)
+
+        self.assert_quat(tracker.orientation, target)
+
+    def test_advance_with_no_target_change_holds_still(self) -> None:
+        """Test that a settled tracker does not drift on its own."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+        tracker.update(*Quat.from_axis_angle(AXIS_Y, math.pi / 2))
+        tracker.advance(1.0)
+
+        settled = tracker.orientation
+        tracker.advance(0.5)
+
+        self.assert_quat(tracker.orientation, settled)
+
 
 class TestIdentity(VectorTestCase):
     """Tests for the shipped identity rotation."""
@@ -620,6 +737,7 @@ class TestIdentity(VectorTestCase):
 
         self.assertIsNone(tracker.reference)
         self.assert_quat(tracker.orientation, Quat.identity())
+        self.assert_quat(tracker.target, Quat.identity())
 
         orientation = tracker.update(*Quat.from_axis_angle(AXIS_Y, 2.0))
 

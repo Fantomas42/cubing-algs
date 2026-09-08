@@ -222,6 +222,7 @@ class TestResolveOrientation(unittest.TestCase):
 
         quarter = Quat.from_axis_angle(AXIS_Y, math.pi / 2)
         tracker.update(*quarter)
+        tracker.advance(1.0)
 
         self.assertEqual(resolve_orientation(tracker), quarter)
 
@@ -325,6 +326,20 @@ class TestViewer(unittest.TestCase):
     def test_advance_without_anything_to_play(self) -> None:
         """Test that an idle viewer keeps drawing the cube at rest."""
         self.assertIs(self.viewer.advance(1.0), self.viewer.scene)
+
+    def test_advance_drives_an_orientation_tracker(self) -> None:
+        """Test that a tracker set as the orientation is fed the frame time."""
+        tracker = OrientationTracker()
+        tracker.update(*Quat.identity())
+        tracker.update(*Quat.from_axis_angle(AXIS_Y, math.pi / 2))
+        self.viewer.orientation = tracker
+
+        self.viewer.advance(1.0)
+
+        self.assertEqual(
+            tracker.orientation,
+            Quat.from_axis_angle(AXIS_Y, math.pi / 2),
+        )
 
     def test_advance_plays_a_cube_swapped_from_outside(self) -> None:
         """Test that a cube put in the viewer by hand is the one played on."""

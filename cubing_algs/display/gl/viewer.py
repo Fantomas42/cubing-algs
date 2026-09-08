@@ -585,6 +585,11 @@ class Viewer:
         closed, hands the very same scene over frame after frame, which
         is what the instance buffer is cached on.
 
+        A tracker following a sensor is advanced here as well, on the
+        very same clock: it is drawn through ``orientation`` rather
+        than through the scene, but it is a state catching up with
+        time exactly like the rest.
+
         Args:
             delta: Seconds gone by since the last call.
 
@@ -593,6 +598,9 @@ class Viewer:
 
         """
         start = time.perf_counter()
+
+        if isinstance(self.orientation, OrientationTracker):
+            self.orientation.advance(delta)
 
         if self.cube is not self.animation.cube:
             self.reload()
