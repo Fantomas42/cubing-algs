@@ -19,6 +19,8 @@ Colors never do: a sticker keeps the color its palette gives it, exactly
 as in the SVG backend, and the shading only says how the light falls on
 it.
 """
+from cubing_algs.display.gl.constants import CORE_ENV_HIGH_GAIN
+from cubing_algs.display.gl.constants import CORE_ENV_LOW_GAIN
 from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
 
 # The version the shaders are written against, taken from the version
@@ -204,7 +206,7 @@ void main()
 }
 """
 
-CORE_FRAGMENT_SHADER = GLSL_VERSION + """
+CORE_FRAGMENT_SHADER = GLSL_VERSION + f"""
 
 uniform vec3 light_direction;
 uniform vec3 camera_position;
@@ -215,6 +217,7 @@ uniform float core_specular_strength;
 uniform float core_specular_power;
 uniform float core_rim_strength;
 uniform float core_rim_power;
+uniform float core_metalness;
 
 in vec3 v_normal;
 in vec3 v_world;
@@ -222,27 +225,53 @@ in vec3 v_world;
 out vec4 f_color;
 
 void main()
-{
+{{
     vec3 normal = normalize(v_normal);
     vec3 view = normalize(camera_position - v_world);
     vec3 half_vector = normalize(light_direction + view);
+    float grazing = 1.0 - max(dot(normal, view), 0.0);
 
     float diffuse = max(dot(normal, light_direction), 0.0);
 
+    vec3 base = pow(core_color, vec3(gamma));
+
     // The highlight is added, not multiplied: it is the lamp seen in the
-    // surface, so it takes the color of the light and not the one of the
-    // plastic underneath. The rim multiplies, as it does on the cube.
-    float gloss = core_specular_strength
-        * pow(max(dot(normal, half_vector), 0.0), core_specular_power);
+    // surface. On a plastic ball it stays the color of the lamp; a metal
+    // one tints it with the color of the ball, a colored spark being the
+    // one cue that reads as metal before a single reflection is drawn.
+    vec3 gloss = core_specular_strength
+        * pow(max(dot(normal, half_vector), 0.0), core_specular_power)
+        * mix(vec3(1.0), base, core_metalness);
 
-    float rim = core_rim_strength
-        * pow(1.0 - max(dot(normal, view), 0.0), core_rim_power);
+    float rim = core_rim_strength * pow(grazing, core_rim_power);
 
-    vec3 lit = pow(core_color, vec3(gamma))
-        * (ambient + (1.0 - ambient) * diffuse + rim) + gloss;
+    // A metal has no diffuse term to speak of - its color comes entirely
+    // from what it reflects - so the lamp-lit half fades out by exactly
+    // the metalness asked for. At none of it this is the very sum the
+    // plastic ball was always lit by, term for term.
+    vec3 lit = base * (ambient + (1.0 - ambient) * diffuse)
+        * (1.0 - core_metalness) + base * rim + gloss;
+
+    if (core_metalness > 0.0) {{
+        // No texture, no cubemap: a two-tone gradient sampled along the
+        // reflected view direction is the cheapest thing that still
+        // reads as a mirror finish, and Schlick's approximation reads
+        // the reflectance at grazing incidence off the very same color -
+        // the one number a metal's Fresnel term is built on, and brighter
+        // at the silhouette than in the middle is what a curved mirror
+        // looks like regardless of what it reflects.
+        vec3 reflected = reflect(-view, normal);
+        vec3 environment = mix(
+            base * { CORE_ENV_LOW_GAIN }, base * { CORE_ENV_HIGH_GAIN },
+            reflected.y * 0.5 + 0.5
+        );
+        vec3 fresnel = base + (vec3(1.0) - base) * pow(grazing, 5.0);
+
+        lit += environment * fresnel * core_metalness;
+    }}
 
     f_color = vec4(pow(max(lit, 0.0), vec3(1.0 / gamma)), 1.0);
-}
+}}
 """
 
 # The third, and last, program of the backend: the three axes of

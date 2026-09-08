@@ -179,6 +179,7 @@ class CoreRenderer:
                 'ambient', 'gamma',
                 'core_specular_strength', 'core_specular_power',
                 'core_rim_strength', 'core_rim_power',
+                'core_metalness',
         ):
             uniform(self.program, name).value = getattr(look, name)
 

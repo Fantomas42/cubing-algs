@@ -131,6 +131,17 @@ CORE_SEGMENTS = 32
 # reads as the inside of the cube rather than as another piece.
 CORE_COLOR: tuple[float, float, float] = (0.18, 0.62, 0.62)
 
+# Gain of the two-tone gradient the fake environment of a metal core is
+# read off, top and bottom, as a share of the core's own color. A metal
+# with no texture and no cubemap still has to reflect *something*, and a
+# flat color reflected back is indistinguishable from no reflection at
+# all - the gradient is the cheapest thing that still tells the ball it
+# is curved. Built off ``core_color`` itself, low and high, rather than
+# as a color of their own: a consumer changing the core never has to
+# touch a second constant to keep the reflection matching it.
+CORE_ENV_LOW_GAIN = 0.12
+CORE_ENV_HIGH_GAIN = 2.2
+
 
 @dataclass(frozen=True, slots=True)
 class Look:
@@ -206,6 +217,18 @@ class Look:
     # it is seen through, which is the only place its outline shows.
     core_rim_strength: float = 0.25
     core_rim_power: float = 3.0
+
+    # How much of the core is metal rather than plastic, from none of it
+    # to all of it. A metal reflects light in its own color and a
+    # dielectric in the color of the lamp, which is the one number a
+    # metalness workflow is built on: it tints the highlight, fades the
+    # diffuse term out - a metal has no sub-surface term to speak of, its
+    # color coming entirely from what it reflects - and, past zero, turns
+    # on a cheap Fresnel-weighted reflection of a fake environment built
+    # off the ball's own color. Zero reproduces the plastic ball exactly,
+    # term for term, which is why it is the default: nothing here changes
+    # the look of a core nobody has asked to be metal.
+    core_metalness: float = 0.0
 
     # Amplitude of the noise breaking the flatness of a sticker, as a
     # fraction of its color. Sticks to the piece rather than to the

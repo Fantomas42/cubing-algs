@@ -536,6 +536,64 @@ class TestRenderScene(unittest.TestCase):
             self.pixels,
         )
 
+    def test_a_metal_core_tints_its_highlight_with_its_own_color(self) -> None:
+        """
+        Test that a metal core's spark is colored, not the color of the lamp.
+
+        A plastic highlight is the lamp seen in the surface: added on
+        top of every channel alike, whatever the ball is painted. A
+        metal one is colored by the ball instead, so the channel the
+        ball is dimmest in - the red of the teal core, here - gains the
+        least of it. The other two channels also carry the fake
+        environment's reflection once metalness is up, which a plastic
+        core never shows at all, so the comparison is kept to the one
+        channel the reflection cannot flatter as much as the tint
+        alone would. ``FLAT_LOOK`` has no groove, no diffuse floor
+        above ambient and a flat gamma, so the summit reads the
+        highlight alone.
+        """
+        plastic = replace(
+            FLAT_LOOK,
+            core_specular_strength=0.6,
+            core_specular_power=18.0,
+        )
+        metal = replace(plastic, core_metalness=1.0)
+
+        light = Vec3(*FLAT_LOOK.light_direction).normalized()
+        view = CAMERA.position.normalized()
+        summit = CAMERA.view_projection().transform_point(
+            (light + view).normalized().scaled(core_radius(3)),
+        )
+
+        ball = build_scene(VCube(), mode='hidden')
+
+        matte = pixel_at(
+            render_scene(ball, CAMERA, FLAT, context=self.context),
+            IMAGE_SIZE,
+            summit,
+        )
+        lit_plastic = pixel_at(
+            render_scene(
+                ball, CAMERA, replace(FLAT, look=plastic),
+                context=self.context,
+            ),
+            IMAGE_SIZE,
+            summit,
+        )
+        lit_metal = pixel_at(
+            render_scene(
+                ball, CAMERA, replace(FLAT, look=metal), context=self.context,
+            ),
+            IMAGE_SIZE,
+            summit,
+        )
+
+        self.assertLess(
+            lit_metal[0] - matte[0],
+            lit_plastic[0] - matte[0],
+        )
+        self.assertNotEqual(lit_metal, lit_plastic)
+
     def test_a_scrambled_cube_differs(self) -> None:
         """Test that the state of the cube reaches the pixels."""
         cube = VCube()
