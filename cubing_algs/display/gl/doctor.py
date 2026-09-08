@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 
 from cubing_algs.display.gl.constants import OPENGL_EXTRA
 from cubing_algs.display.gl.constants import RENDER_SIZE
+from cubing_algs.display.gl.constants import output
 from cubing_algs.display.gl.context import GLContextError
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.context import create_window
@@ -58,11 +59,6 @@ void main() {
     f_color = vec4(v_uv.x, v_uv.y, 1.0 - v_uv.x * v_uv.y, 1.0);
 }
 """
-
-
-def output(text: str = '') -> None:
-    """Write a line to standard output."""
-    sys.stdout.write(text + '\n')
 
 
 def report(label: str, context: 'moderngl.Context') -> None:

@@ -8,6 +8,7 @@ other one of the backend already imports, so a helper standing on a
 constant alone is defined once here rather than twice above it.
 """
 import math
+import sys
 from dataclasses import dataclass
 from dataclasses import fields
 from dataclasses import replace
@@ -139,6 +140,12 @@ ANIMATION_LOOP = 0
 HOLD_START = 1.0
 HOLD_END = 1.0
 
+# Channels of a pixel the backend reads and writes: RGBA, the alpha
+# channel being what keeps the background of a render transparent. The
+# framebuffer it is read from and the PNG it is written to count them
+# the same way.
+COLOR_CHANNELS = 4
+
 # Color the framebuffer is cleared with, the alpha channel included:
 # fully transparent, as the SVG backend leaves its background empty.
 BACKGROUND_COLOR: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
@@ -195,6 +202,23 @@ CORE_COLOR: tuple[float, float, float] = (0.18, 0.62, 0.62)
 # touch a second constant to keep the reflection matching it.
 CORE_ENV_LOW_GAIN = 0.12
 CORE_ENV_HIGH_GAIN = 2.2
+
+
+def output(text: str = '') -> None:
+    """
+    Write a line to standard output.
+
+    The one channel this backend answers on besides the picture itself:
+    the shortcuts of a window, a performance report, the path of a
+    screenshot, the diagnostic of the doctor. Written here rather than
+    beside each of them, three copies of one line being three places to
+    look the day it is a logger.
+
+    Args:
+        text: What to write, an empty line by default.
+
+    """
+    sys.stdout.write(text + '\n')
 
 
 def clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:

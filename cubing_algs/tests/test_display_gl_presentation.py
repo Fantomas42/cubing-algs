@@ -96,15 +96,6 @@ class TestPresentationCamera(unittest.TestCase):
             presentation.camera(1.0).fov,
         )
 
-    def test_a_narrow_viewport_widens_the_angle(self) -> None:
-        """Test that the aspect ratio reaches the camera."""
-        presentation = Presentation()
-
-        self.assertGreater(
-            presentation.camera(BOUNDING_RADIUS, aspect=0.5).fov,
-            presentation.camera(BOUNDING_RADIUS).fov,
-        )
-
 
 class TestPlayback(unittest.TestCase):
     """Tests for how an animation is paced."""

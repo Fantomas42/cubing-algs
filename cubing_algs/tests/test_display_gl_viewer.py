@@ -19,6 +19,7 @@ from typing import ClassVar
 from unittest import mock
 
 from cubing_algs.display.constants import DISTANCE
+from cubing_algs.display.gl.constants import COLOR_CHANNELS
 from cubing_algs.display.gl.constants import EXPLODE_SPREAD
 from cubing_algs.display.gl.constants import SCREENSHOT_NAME
 from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
@@ -26,7 +27,6 @@ from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.context import GLContextError
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
-from cubing_algs.display.gl.renderer import COLOR_CHANNELS
 from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import Renderer
 from cubing_algs.display.gl.scene import INSTANCE_SIZE

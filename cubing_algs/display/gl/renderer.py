@@ -23,6 +23,7 @@ from typing import cast
 
 from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.constants import BACKGROUND_COLOR
+from cubing_algs.display.gl.constants import COLOR_CHANNELS
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import RENDER_SAMPLES
 from cubing_algs.display.gl.constants import Look
@@ -60,12 +61,27 @@ if TYPE_CHECKING:  # pragma: no cover
 # Bytes of an index of the triangle buffer, packed as a 32 bit integer.
 INDEX_SIZE = 4
 
-# Number of channels read back from a framebuffer: RGBA, the alpha
-# channel keeping the background transparent.
-COLOR_CHANNELS = 4
-
 # What a timer query counts in, and what a second holds of them.
 NANOSECONDS = 1_000_000_000
+
+# The terms of a look every program of a cube reads, and the ones the
+# ball core reads on top of its own color. Named here rather than in
+# each ``draw()``: what a shader declares and what is handed to it is
+# one list, and it is written once.
+LOOK_UNIFORMS = (
+    'ambient', 'gamma',
+    'groove_occlusion', 'groove_falloff',
+    'rim_strength', 'rim_power',
+    'specular_strength', 'specular_power',
+    'sticker_grain',
+)
+
+CORE_UNIFORMS = (
+    'ambient', 'gamma',
+    'core_specular_strength', 'core_specular_power',
+    'core_rim_strength', 'core_rim_power',
+    'core_metalness',
+)
 
 
 def uniform(program: 'moderngl.Program', name: str) -> 'moderngl.Uniform':
@@ -81,6 +97,73 @@ def uniform(program: 'moderngl.Program', name: str) -> 'moderngl.Uniform':
 
     """
     return cast('moderngl.Uniform', program[name])
+
+
+def write_uniforms(
+        program: 'moderngl.Program',
+        look: Look,
+        names: 'Iterable[str]',
+) -> None:
+    """
+    Hand the terms of a look a program reads over to it.
+
+    Args:
+        program: The program to write to.
+        look: How the light falls on the cube.
+        names: The terms that program declares, each one a field of the
+            look under the very name the shader gives it.
+
+    """
+    for name in names:
+        uniform(program, name).value = getattr(look, name)
+
+
+@dataclass(frozen=True, slots=True)
+class Framing:
+    """
+    Where the cube is looked at from, packed once for every program.
+
+    The cube, its core and its axes are three programs drawing the same
+    picture: they read the very same camera and the very same hold of
+    the cube, and building those two matrices in pure Python is the
+    heaviest thing a frame of a still cube does - fourteen microseconds,
+    where the whole draw call is twenty. Each program used to build them
+    for itself.
+    """
+
+    view_projection: bytes
+    world: bytes
+    position: Vec3
+
+    @classmethod
+    def of(cls, camera: OrbitCamera, orientation: Quat = IDENTITY) -> Self:
+        """
+        Read the framing of one frame.
+
+        Args:
+            camera: The camera looking at the cube.
+            orientation: How the whole cube is held.
+
+        Returns:
+            The matrices every program of that frame is given.
+
+        """
+        return cls(
+            view_projection=camera.view_projection().pack(),
+            world=orientation.to_matrix().pack(),
+            position=camera.position,
+        )
+
+    def write(self, program: 'moderngl.Program') -> None:
+        """
+        Hand the framing over to a program.
+
+        Args:
+            program: The program to write to.
+
+        """
+        uniform(program, 'view_projection').write(self.view_projection)
+        uniform(program, 'world').write(self.world)
 
 
 @dataclass(slots=True)
@@ -102,6 +185,8 @@ class CoreRenderer:
     vertex_buffer: 'moderngl.Buffer'
     index_buffer: 'moderngl.Buffer'
     vertex_array: 'moderngl.VertexArray'
+
+    lit: Look | None = field(init=False, default=None)
 
     @classmethod
     def create(cls, context: 'moderngl.Context', radius: float) -> Self:
@@ -145,47 +230,59 @@ class CoreRenderer:
             ),
         )
 
-    def draw(
-            self,
-            camera: OrbitCamera,
-            look: Look = DEFAULT_LOOK,
-            orientation: Quat = IDENTITY,
-    ) -> None:
+    def draw(self, framing: Framing, look: Look = DEFAULT_LOOK) -> None:
         """
         Draw the core into the framebuffer currently in use.
 
+        The framing comes from the ``Renderer`` owning the core, which
+        has just built it for the cube: the inside and the outside of a
+        cube are looked at from the same place, and computing that place
+        twice was pure waste.
+
         Args:
-            camera: The camera looking at the cube.
+            framing: Where the cube is looked at from, and how it is
+                held, which the core follows as the piece of it that it
+                is.
             look: How the light falls on it, the core taking its ambient,
                 its gamma and its light from the very same one, plus the
                 color, the highlight and the rim written for it alone.
-            orientation: How the whole cube is held, which the core
-                follows as the piece of it that it is.
 
         """
         import moderngl
 
-        uniform(self.program, 'view_projection').write(
-            camera.view_projection().pack(),
-        )
-        uniform(self.program, 'world').write(orientation.to_matrix().pack())
-        uniform(self.program, 'core_color').value = look.core_color
-        uniform(self.program, 'camera_position').value = camera.position
-        uniform(self.program, 'light_direction').value = Vec3(
-            *look.light_direction,
-        ).normalized()
+        framing.write(self.program)
+        uniform(self.program, 'camera_position').value = framing.position
 
-        for name in (
-                'ambient', 'gamma',
-                'core_specular_strength', 'core_specular_power',
-                'core_rim_strength', 'core_rim_power',
-                'core_metalness',
-        ):
-            uniform(self.program, name).value = getattr(look, name)
+        self.write_look(look)
 
         self.context.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
 
         self.vertex_array.render()
+
+    def write_look(self, look: Look) -> None:
+        """
+        Hand the look of the core over, unless it is already there.
+
+        The very same cache as the instances of a scene, and for the
+        very same reason: a ``Look`` is frozen, so the one that was not
+        replaced cannot have changed, and a window holds the same one
+        for the whole of a session.
+
+        Args:
+            look: How the light falls on the core.
+
+        """
+        if look is self.lit:
+            return
+
+        uniform(self.program, 'core_color').value = look.core_color
+        uniform(self.program, 'light_direction').value = Vec3(
+            *look.light_direction,
+        ).normalized()
+
+        write_uniforms(self.program, look, CORE_UNIFORMS)
+
+        self.lit = look
 
     def release(self) -> None:
         """Give every GPU resource of the core back."""
@@ -214,6 +311,7 @@ class Renderer:
     core: CoreRenderer
 
     uploaded: Scene | None = field(init=False, default=None)
+    lit: Look | None = field(init=False, default=None)
 
     @classmethod
     def create(
@@ -268,24 +366,28 @@ class Renderer:
 
     def write_look(self, look: Look) -> None:
         """
-        Hand the look of the cube over to the fragment shader.
+        Hand the look of the cube over, unless it is already there.
+
+        Compared by identity, exactly as a scene is: a ``Look`` is
+        frozen, so the one that was not replaced cannot have changed,
+        and a window keeps the same one from the first frame to the
+        last. An effect handing a look of its own over is a new object,
+        and is written as it must be.
 
         Args:
             look: How the light falls on the cube.
 
         """
+        if look is self.lit:
+            return
+
         uniform(self.program, 'light_direction').value = Vec3(
             *look.light_direction,
         ).normalized()
 
-        for name in (
-                'ambient', 'gamma',
-                'groove_occlusion', 'groove_falloff',
-                'rim_strength', 'rim_power',
-                'specular_strength', 'specular_power',
-                'sticker_grain',
-        ):
-            uniform(self.program, name).value = getattr(look, name)
+        write_uniforms(self.program, look, LOOK_UNIFORMS)
+
+        self.lit = look
 
     def write_instances(self, scene: Scene) -> None:
         """
@@ -303,6 +405,11 @@ class Renderer:
         describing a picture of its own through ``replace()`` hands over
         a new one, which is uploaded as it must be.
 
+        The two uniforms a scene settles travel with it: the color of
+        the plastic and the half extent of a cubie are what the scene
+        was built on, so the scene already on the GPU is drawn with the
+        ones already there.
+
         Args:
             scene: The cube to draw.
 
@@ -311,6 +418,10 @@ class Renderer:
             return
 
         self.instance_buffer.write(scene.pack_instances())
+
+        uniform(self.program, 'plastic_color').value = scene.plastic
+        uniform(self.program, 'cubie_half').value = scene.geometry.half
+
         self.uploaded = scene
 
     def draw(
@@ -338,17 +449,14 @@ class Renderer:
         """
         import moderngl
 
-        self.core.draw(camera, look, orientation)
+        framing = Framing.of(camera, orientation)
+
+        self.core.draw(framing, look)
 
         self.write_instances(scene)
 
-        uniform(self.program, 'view_projection').write(
-            camera.view_projection().pack(),
-        )
-        uniform(self.program, 'world').write(orientation.to_matrix().pack())
-        uniform(self.program, 'camera_position').value = camera.position
-        uniform(self.program, 'plastic_color').value = scene.plastic
-        uniform(self.program, 'cubie_half').value = scene.geometry.half
+        framing.write(self.program)
+        uniform(self.program, 'camera_position').value = framing.position
 
         self.write_look(look)
 
@@ -439,10 +547,7 @@ class AxesRenderer:
         """
         import moderngl
 
-        uniform(self.program, 'view_projection').write(
-            camera.view_projection().pack(),
-        )
-        uniform(self.program, 'world').write(orientation.to_matrix().pack())
+        Framing.of(camera, orientation).write(self.program)
 
         self.context.enable_only(moderngl.DEPTH_TEST)
 

@@ -157,41 +157,13 @@ class TestEncodePng(unittest.TestCase):
 
         self.assertIn(b'IEND', read_chunks(data))
 
-    def test_roundtrip_without_flip(self) -> None:
-        """Test that pixels are preserved when rows are kept in order."""
-        pixels = bytes(range(2 * 2 * 4))
-        data = encode_png(pixels, (2, 2), flip=False)
-
-        self.assertEqual(read_pixels(data, 2, 4), pixels)
-
-    def test_roundtrip_with_flip(self) -> None:
-        """Test that flipping reverses the row order."""
+    def test_the_rows_are_turned_the_right_way_up(self) -> None:
+        """Test that a framebuffer read comes out top row first."""
         top = b'\x01' * 8
         bottom = b'\x02' * 8
-        data = encode_png(bottom + top, (2, 2), flip=True)
+        data = encode_png(bottom + top, (2, 2))
 
         self.assertEqual(read_pixels(data, 2, 4), top + bottom)
-
-    def test_three_channels(self) -> None:
-        """Test that RGB pixels use the truecolor type."""
-        data = encode_png(b'\xff' * 12, (2, 2), channels=3)
-        header = read_chunks(data)[b'IHDR']
-
-        self.assertEqual(header[9], 2)
-
-    def test_single_channel(self) -> None:
-        """Test that greyscale pixels use the greyscale type."""
-        data = encode_png(b'\x80' * 4, (2, 2), channels=1)
-        header = read_chunks(data)[b'IHDR']
-
-        self.assertEqual(header[9], 0)
-
-    def test_unsupported_channels(self) -> None:
-        """Test that an unknown channel count is rejected."""
-        with self.assertRaises(ValueError) as context:
-            encode_png(b'\x00' * 8, (2, 2), channels=2)
-
-        self.assertIn('channel count', str(context.exception))
 
     def test_pixel_count_mismatch(self) -> None:
         """Test that a truncated pixel buffer is rejected."""
@@ -347,19 +319,16 @@ class TestEncodeGif(unittest.TestCase):
         self.assertLessEqual(frame.info['transparency'], GIF_TRANSPARENT_INDEX)
         self.assertEqual(pixel_of(frame, 'RGBA', (1, 0))[3], 0)
 
-    def test_rows_are_flipped_by_default(self) -> None:
+    def test_the_rows_are_turned_the_right_way_up(self) -> None:
         """Test that a framebuffer read comes out the right way up."""
         pixels = b'\x00\x00\xff\xff' * 2 + b'\xff\x00\x00\xff' * 2
 
-        flipped = frames_of(
+        frame = frames_of(
             encode_gif([pixels], FRAME_SIZE, playback=PLAIN),
         )[0]
-        kept = frames_of(
-            encode_gif([pixels], FRAME_SIZE, playback=PLAIN, flip=False),
-        )[0]
 
-        self.assertEqual(pixel_of(flipped, 'RGB', (0, 0)), (255, 0, 0))
-        self.assertEqual(pixel_of(kept, 'RGB', (0, 0)), (0, 0, 255))
+        # The last row read is the top one of the picture.
+        self.assertEqual(pixel_of(frame, 'RGB', (0, 0)), (255, 0, 0))
 
     def test_no_frame_is_rejected(self) -> None:
         """Test that an empty animation cannot be encoded."""

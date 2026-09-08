@@ -111,14 +111,6 @@ class TestMeter(unittest.TestCase):
         self.assertAlmostEqual(meter.mean, 0.0394)
         self.assertEqual(meter.percentile(), 0.5)
 
-    def test_a_window_can_be_emptied(self) -> None:
-        """Test that a cleared meter has measured nothing."""
-        meter = filled(Meter(), 0.01, 0.02)
-
-        meter.clear()
-
-        self.assertEqual(meter.count, 0)
-
 
 class TestMonitor(unittest.TestCase):
     """Tests for what a monitor counts across the meters it holds."""

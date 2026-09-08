@@ -23,6 +23,7 @@ import struct
 from collections.abc import Iterable
 from collections.abc import Sequence
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import NamedTuple
 
 from cubing_algs.display.gl.constants import AXES_COLORS
@@ -37,6 +38,7 @@ from cubing_algs.display.gl.transforms import AXIS_X
 from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import AXIS_Z
 from cubing_algs.display.gl.transforms import ORIGIN
+from cubing_algs.display.gl.transforms import ROTATION_AXES
 from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.exceptions import InvalidCubeSizeError
 
@@ -47,8 +49,10 @@ CUBE_EXTENT = 1.0
 AXIS_NUMBER = 3
 SIGNS = (-1.0, 1.0)
 
-# The three axes of the grid, in the order their colors are given in.
-AXES = (AXIS_X, AXIS_Y, AXIS_Z)
+# How many cube sizes keep a geometry of their own. A handful covers
+# every cube a session draws, and the mesh of one is a few thousand
+# floats: this is a memo, not a store.
+GEOMETRY_CACHE = 16
 
 # Corners of a quad, in the tangent frame of its plane, wound counter
 # clockwise when seen from outside.
@@ -517,31 +521,26 @@ def build_mesh(polygons: Sequence[Polygon]) -> Mesh:
     return Mesh(tuple(vertices), tuple(indices))
 
 
-def build_cubie_mesh(
-        half: float = 1.0,
-        *,
-        bevel: float = CUBIE_BEVEL,
-        margin: float = STICKER_MARGIN,
-        lift: float = STICKER_LIFT,
-) -> Mesh:
+def build_cubie_mesh(half: float = 1.0) -> Mesh:
     """
     Build the mesh of a single beveled cubie, centered on the origin.
 
+    Its shape is read off the constants of the look, as fractions of the
+    half extent it is given: a cube keeps the same proportions whatever
+    its size, and there is no second shape to build.
+
     Args:
         half: Half extent of the cubie.
-        bevel: Width of the chamfer, as a fraction of ``half``.
-        margin: Inset of a sticker from the border of its face square,
-            as a fraction of that square.
-        lift: How far a sticker floats above the plastic, as a fraction
-            of ``half``.
 
     Returns:
         The mesh of the cubie: plastic first, then the six stickers.
 
     """
+    bevel = half * CUBIE_BEVEL
+
     return build_mesh(
-        body_polygons(half, half * bevel)
-        + sticker_polygons(half, half * bevel, margin, half * lift),
+        body_polygons(half, bevel)
+        + sticker_polygons(half, bevel, STICKER_MARGIN, half * STICKER_LIFT),
     )
 
 
@@ -648,9 +647,18 @@ def build_cubies(size: int) -> tuple[Cubie, ...]:
     )
 
 
+@lru_cache(maxsize=GEOMETRY_CACHE)
 def build_cube_geometry(size: int) -> CubeGeometry:
     """
     Build everything needed to draw a cube of a given size.
+
+    Kept once per size rather than rebuilt: a ``CubeGeometry`` holds
+    nothing but tuples and is frozen, so the one answer to a size can
+    safely be handed to everyone asking for it. It costs 0.3 ms on a
+    3x3 and 0.6 ms on a 7x7, which a still image pays at every call and
+    a viewer paid twice over - once for its own framing, once for the
+    animation drawing into it, on two objects that were equal and not
+    the same.
 
     Args:
         size: Size of the cube.
@@ -803,6 +811,11 @@ def build_core_mesh(
     sphere centered on the origin the smooth normal is the direction of
     the vertex itself.
 
+    The cut is an argument and not a constant read here, so that a test
+    can look at a sphere small enough to be read by hand: three
+    meridians is where a pole degenerates into a triangle, and that is
+    exactly what has to be checked.
+
     Args:
         radius: Radius of the sphere.
         rings: How many parallels the sphere is cut in.
@@ -859,6 +872,6 @@ def pack_axes(length: float) -> bytes:
     """
     return b''.join(
         struct.pack(AXES_VERTEX_PACKING, *point, *color)
-        for axis, color in zip(AXES, AXES_COLORS, strict=True)
+        for axis, color in zip(ROTATION_AXES, AXES_COLORS, strict=True)
         for point in (ORIGIN, axis.scaled(length))
     )

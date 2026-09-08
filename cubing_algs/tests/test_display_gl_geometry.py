@@ -431,6 +431,37 @@ class TestCubieMesh(unittest.TestCase):
                     reach,
                 )
 
+    def test_the_shape_comes_from_the_look(self) -> None:
+        """Test that the bevel and the margin are the ones declared."""
+        inner = 1.0 - CUBIE_BEVEL
+        extent = inner * (1 - STICKER_MARGIN)
+
+        square = [
+            vertex for vertex in self.mesh.vertices
+            if vertex.face == BODY_FACE
+            and math.isclose(vertex.position.y, 1.0)
+        ]
+        sticker = [
+            vertex for vertex in self.mesh.vertices
+            if vertex.face == FACE_INDEXES['U']
+        ]
+
+        # The flat square of a face stops where the chamfer starts.
+        self.assertAlmostEqual(
+            max(abs(vertex.position.x) for vertex in square), inner, PLACES,
+        )
+
+        # A sticker is inset from that square by the margin, and floats
+        # above the plastic by the lift.
+        self.assertAlmostEqual(
+            max(abs(vertex.position.x) for vertex in sticker), extent, PLACES,
+        )
+        self.assertAlmostEqual(
+            max(vertex.position.y for vertex in sticker),
+            1.0 + STICKER_LIFT,
+            PLACES,
+        )
+
     def test_scales_with_its_half_extent(self) -> None:
         """Test that a smaller cubie is the same shape, scaled down."""
         small = build_cubie_mesh(0.25)
@@ -445,38 +476,6 @@ class TestCubieMesh(unittest.TestCase):
                     vertex.normal,
                     self.mesh.vertices[index].normal,
                 )
-
-    def test_bevel_can_be_tuned(self) -> None:
-        """Test that a wider bevel eats into the face squares."""
-        beveled = build_cubie_mesh(bevel=CUBIE_BEVEL * 2)
-
-        self.assertLess(
-            max(abs(vertex.position.x) for vertex in beveled.vertices
-                if vertex.face == FACE_INDEXES['U']),
-            max(abs(vertex.position.x) for vertex in self.mesh.vertices
-                if vertex.face == FACE_INDEXES['U']),
-        )
-
-    def test_margin_can_be_tuned(self) -> None:
-        """Test that a wider margin shrinks the stickers."""
-        inset = build_cubie_mesh(margin=STICKER_MARGIN * 2)
-
-        self.assertLess(
-            max(abs(vertex.position.x) for vertex in inset.vertices
-                if vertex.face == FACE_INDEXES['U']),
-            max(abs(vertex.position.x) for vertex in self.mesh.vertices
-                if vertex.face == FACE_INDEXES['U']),
-        )
-
-    def test_lift_can_be_tuned(self) -> None:
-        """Test that a higher lift raises the stickers."""
-        raised = build_cubie_mesh(lift=STICKER_LIFT * 2)
-
-        self.assertAlmostEqual(
-            max(vertex.position.y for vertex in raised.vertices),
-            1.0 + STICKER_LIFT * 2,
-            PLACES,
-        )
 
 
 class TestMeshPacking(unittest.TestCase):
@@ -1000,10 +999,16 @@ class TestInvalidSize(unittest.TestCase):
 
     def test_rejects_a_null_or_negative_size(self) -> None:
         """Test that a cube needs at least one cubie per axis."""
+        builders = (
+            ('cubie_half', cubie_half),
+            ('build_cubies', build_cubies),
+            ('build_cube_geometry', build_cube_geometry),
+        )
+
         for size in (0, -1):
-            for build in (cubie_half, build_cubies, build_cube_geometry):
+            for name, build in builders:
                 with (
-                        self.subTest(size=size, build=build.__name__),
+                        self.subTest(size=size, build=name),
                         self.assertRaises(InvalidCubeSizeError),
                 ):
                     build(size)

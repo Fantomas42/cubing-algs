@@ -1,9 +1,9 @@
 """
 Linear algebra of the GPU rendering backend.
 
-Pure Python, no dependency: vectors, quaternions, Euler angles and 4x4
-matrices. The renderer is not CPU bound, it only pushes a handful of
-matrices per frame, so numpy would buy nothing here.
+Pure Python, no dependency: vectors, quaternions and 4x4 matrices. The
+renderer is not CPU bound, it only pushes a handful of matrices per
+frame, so numpy would buy nothing here.
 
 Conventions, chosen to match OpenGL so that no transposition ever
 happens on the way to a shader:
@@ -31,10 +31,6 @@ from cubing_algs.parsing import parse_moves
 # Below this length a vector is considered null and cannot be
 # normalized, and a quaternion falls back to the identity.
 EPSILON = 1e-10
-
-# Where the pitch of an Euler extraction is considered locked: the yaw
-# and the roll then act on the same axis and cannot be told apart.
-GIMBAL_LOCK_THRESHOLD = 1.0 - 1e-9
 
 # Above this closeness a great circle arc is too short to divide by its
 # own sine without the division blowing up, and a slerp falls back to a
@@ -181,58 +177,10 @@ AXIS_Z = Vec3(0.0, 0.0, 1.0)
 
 # The three axes, indexed the way ``MOVE_TURNS`` indexes them: 0 runs
 # from L to R, 1 from D to U, 2 from B to F. The quaternion counterpart
-# of the ``ROTATION_BUILDERS`` of animation.py.
+# of the ``ROTATION_BUILDERS`` of animation.py, and the very triple the
+# axes markers of geometry.py are drawn along - the order a move turns
+# in and the order a color names are the same order, once.
 ROTATION_AXES = (AXIS_X, AXIS_Y, AXIS_Z)
-
-
-class Euler(NamedTuple):
-    """
-    A rotation as three angles, in radians.
-
-    The convention is intrinsic ``Y`` then ``X`` then ``Z``, that is
-    ``rotation_y(yaw) @ rotation_x(pitch) @ rotation_z(roll)``. It is
-    the natural one for a camera and for a cube seen by a user: the yaw
-    turns the object around the vertical axis, the pitch tilts it toward
-    the viewer, the roll spins it around the line of sight.
-    """
-
-    yaw: float
-    pitch: float
-    roll: float
-
-    @classmethod
-    def from_degrees(cls, yaw: float, pitch: float, roll: float) -> Self:
-        """
-        Build an Euler triplet from angles given in degrees.
-
-        Args:
-            yaw: Rotation around the Y axis, in degrees.
-            pitch: Rotation around the X axis, in degrees.
-            roll: Rotation around the Z axis, in degrees.
-
-        Returns:
-            The matching Euler angles, in radians.
-
-        """
-        return cls(
-            math.radians(yaw),
-            math.radians(pitch),
-            math.radians(roll),
-        )
-
-    def degrees(self) -> tuple[float, float, float]:
-        """
-        Convert the three angles to degrees.
-
-        Returns:
-            The (yaw, pitch, roll) triplet, in degrees.
-
-        """
-        return (
-            math.degrees(self.yaw),
-            math.degrees(self.pitch),
-            math.degrees(self.roll),
-        )
 
 
 class Quat(NamedTuple):
@@ -288,24 +236,6 @@ class Quat(NamedTuple):
             unit.y * sin_half,
             unit.z * sin_half,
         )
-
-    @classmethod
-    def from_euler(cls, euler: Euler) -> 'Quat':
-        """
-        Build the quaternion of an Euler triplet.
-
-        Args:
-            euler: The angles to compose, see ``Euler`` for the order.
-
-        Returns:
-            The matching unit quaternion.
-
-        """
-        yaw = cls.from_axis_angle(AXIS_Y, euler.yaw)
-        pitch = cls.from_axis_angle(AXIS_X, euler.pitch)
-        roll = cls.from_axis_angle(AXIS_Z, euler.roll)
-
-        return yaw * pitch * roll
 
     def __mul__(self, other: 'Quat') -> 'Quat':  # type: ignore[override]
         """
@@ -479,46 +409,6 @@ class Quat(NamedTuple):
             (0.0, 0.0, 0.0, 1.0),
         ))
 
-    def to_euler(self) -> Euler:
-        """
-        Extract the Euler angles of the rotation.
-
-        At the gimbal lock, where the cube points straight up or down,
-        the yaw and the roll act on the same axis: the whole rotation is
-        then reported as yaw, with a null roll.
-
-        Returns:
-            The (yaw, pitch, roll) triplet, in radians, such that
-            ``Quat.from_euler()`` rebuilds the same rotation.
-
-        """
-        w, x, y, z = self
-
-        # Terms of the rotation matrix needed by the extraction.
-        m12 = 2 * (y * z - w * x)
-        sin_pitch = -m12
-
-        if abs(sin_pitch) >= GIMBAL_LOCK_THRESHOLD:
-            m00 = 1 - 2 * (y * y + z * z)
-            m20 = 2 * (x * z - w * y)
-
-            return Euler(
-                math.atan2(-m20, m00),
-                math.copysign(math.pi / 2, sin_pitch),
-                0.0,
-            )
-
-        m02 = 2 * (x * z + w * y)
-        m22 = 1 - 2 * (x * x + y * y)
-        m10 = 2 * (x * y + w * z)
-        m11 = 1 - 2 * (x * x + z * z)
-
-        return Euler(
-            math.atan2(m02, m22),
-            math.asin(sin_pitch),
-            math.atan2(m10, m11),
-        )
-
 
 # The rotation that does nothing, kept as the default orientation of
 # anything a caller may leave alone.
@@ -599,6 +489,11 @@ class Mat4:
         """
         Build a translation matrix.
 
+        Written column after column rather than through ``from_rows()``,
+        which is the one place that shortcut is worth taking: a scene
+        builds one of these per piece, so a 7x7 pays it two hundred and
+        eighteen times before a single frame is drawn.
+
         Args:
             offset: The translation to apply.
 
@@ -606,11 +501,11 @@ class Mat4:
             The translation matrix.
 
         """
-        return cls.from_rows((
-            (1.0, 0.0, 0.0, offset.x),
-            (0.0, 1.0, 0.0, offset.y),
-            (0.0, 0.0, 1.0, offset.z),
-            (0.0, 0.0, 0.0, 1.0),
+        return cls((
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            offset.x, offset.y, offset.z, 1.0,
         ))
 
     @classmethod
@@ -776,6 +671,15 @@ class Mat4:
         """
         Multiply two matrices, the other one applying first.
 
+        Column after column, each of the four written out: this is the
+        hottest arithmetic of the pure layer - one product per turning
+        piece per frame, plus the camera - and the indexed form it
+        replaces spent more time computing where a coefficient lived
+        than multiplying it. Measured four times faster, the four terms
+        of a coefficient being summed in the order they are written
+        rather than through ``sum()``, which starts from a zero and
+        lands a last bit away.
+
         Args:
             other: The transformation applied before this one.
 
@@ -784,27 +688,20 @@ class Mat4:
 
         """
         left, right = self.values, other.values
+        values: list[float] = []
 
-        return Mat4(tuple(
-            sum(
-                left[step * 4 + index % 4] * right[index // 4 * 4 + step]
-                for step in range(4)
-            )
-            for index in range(MATRIX_LENGTH)
-        ))
+        for column in range(0, MATRIX_LENGTH, 4):
+            first, second, third, fourth = right[column:column + 4]
 
-    def transposed(self) -> 'Mat4':
-        """
-        Swap the rows and the columns of the matrix.
+            values += [
+                left[row] * first
+                + left[row + 4] * second
+                + left[row + 8] * third
+                + left[row + 12] * fourth
+                for row in range(4)
+            ]
 
-        Returns:
-            The transposed matrix.
-
-        """
-        return Mat4(tuple(
-            self.values[index % 4 * 4 + index // 4]
-            for index in range(MATRIX_LENGTH)
-        ))
+        return Mat4(tuple(values))
 
     def transform_direction(self, direction: Vec3) -> Vec3:
         """

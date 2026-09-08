@@ -66,19 +66,22 @@ def has_glfw() -> bool:
     return find_spec('glfw') is not None
 
 
-def try_standalone_backend(
-        backend: str | None,
-        require: int,
+def try_context(
+        option: str,
+        choice: str | None,
+        options: 'dict[str, Any]',
 ) -> "tuple['moderngl.Context | None', str]":
     """
-    Create a standalone context on one given backend.
+    Create a context with one given value of the option that varies.
 
     Failures are returned rather than raised, so that the caller can try
-    the next backend and report every attempt at once.
+    the next value and report every attempt at once.
 
     Args:
-        backend: Name of the backend, None letting moderngl choose.
-        require: Minimum OpenGL version code, such as 330.
+        option: Name of the moderngl option being chosen, ``backend``
+            for a headless context and ``libgl`` for a windowed one.
+        choice: The value to try, None letting moderngl choose its own.
+        options: What is asked for whatever the choice.
 
     Returns:
         The context and an empty reason, or None and the failure reason.
@@ -86,14 +89,59 @@ def try_standalone_backend(
     """
     import moderngl
 
-    options: dict[str, Any] = {'standalone': True, 'require': require}
-    if backend is not None:
-        options['backend'] = backend
+    asked = dict(options)
+    if choice is not None:
+        asked[option] = choice
 
     try:
-        return moderngl.create_context(**options), ''
+        return moderngl.create_context(**asked), ''
     except (moderngl.Error, ValueError, OSError) as error:
-        return None, f'{ backend or "default" }: { error }'
+        return None, f'{ choice or "default" }: { error }'
+
+
+def create_context(
+        kind: str,
+        option: str,
+        choices: tuple[str | None, ...],
+        options: 'dict[str, Any]',
+) -> 'moderngl.Context':
+    """
+    Create a context, trying every choice until one answers.
+
+    The one shape both kinds of context are created in: a headless one
+    picks a backend, a windowed one picks the OpenGL library to attach
+    through, and everything else - the order, the gathering of the
+    failures, the single message they are reported in - is the same
+    story told twice.
+
+    Args:
+        kind: What sort of context is being asked for, as the error
+            message names it.
+        option: Name of the moderngl option being chosen.
+        choices: The values to try, in order.
+        options: What is asked for whatever the choice.
+
+    Returns:
+        The first context a choice answered with.
+
+    Raises:
+        GLContextError: If moderngl is missing or no choice answers.
+
+    """
+    if not has_moderngl():
+        raise GLContextError(MODERNGL_MISSING)
+
+    failures: list[str] = []
+
+    for choice in choices:
+        context, failure = try_context(option, choice, options)
+        if context is not None:
+            return context
+        failures.append(failure)
+
+    details = '\n'.join(f'  - { failure }' for failure in failures)
+    message = f'No { kind } OpenGL context available:\n{ details }'
+    raise GLContextError(message)
 
 
 def create_standalone_context(
@@ -103,8 +151,8 @@ def create_standalone_context(
     Create a headless context, usable without any display server.
 
     The backends of STANDALONE_BACKENDS are tried in order, the first one
-    answering wins. Failures are gathered into a single error message, as
-    an unavailable EGL is by far the most common cause of them all.
+    answering wins. Failures are gathered into a single ``GLContextError``,
+    as an unavailable EGL is by far the most common cause of them all.
 
     Args:
         require: Minimum OpenGL version code, such as 330.
@@ -112,24 +160,13 @@ def create_standalone_context(
     Returns:
         A context rendering to an offscreen framebuffer.
 
-    Raises:
-        GLContextError: If moderngl is missing or no backend answers.
-
     """
-    if not has_moderngl():
-        raise GLContextError(MODERNGL_MISSING)
-
-    failures: list[str] = []
-
-    for backend in STANDALONE_BACKENDS:
-        context, failure = try_standalone_backend(backend, require)
-        if context is not None:
-            return context
-        failures.append(failure)
-
-    details = '\n'.join(f'  - { failure }' for failure in failures)
-    message = f'No standalone OpenGL context available:\n{ details }'
-    raise GLContextError(message)
+    return create_context(
+        'standalone',
+        'backend',
+        STANDALONE_BACKENDS,
+        {'standalone': True, 'require': require},
+    )
 
 
 def select_glfw_variant() -> None:
@@ -301,36 +338,6 @@ def destroy_window(window: GLFWWindow) -> None:
     glfw.terminate()
 
 
-def try_window_library(
-        library: str | None,
-        require: int,
-) -> "tuple['moderngl.Context | None', str]":
-    """
-    Attach a moderngl context using one given OpenGL library name.
-
-    Failures are returned rather than raised, so that the caller can try
-    the next library and report every attempt at once.
-
-    Args:
-        library: File name of the library, None letting moderngl choose.
-        require: Minimum OpenGL version code, such as 330.
-
-    Returns:
-        The context and an empty reason, or None and the failure reason.
-
-    """
-    import moderngl
-
-    options: dict[str, Any] = {'require': require}
-    if library is not None:
-        options['libgl'] = library
-
-    try:
-        return moderngl.create_context(**options), ''
-    except (moderngl.Error, ValueError, OSError) as error:
-        return None, f'{ library or "default" }: { error }'
-
-
 def create_window_context(
         require: int = GL_VERSION_REQUIRED,
 ) -> 'moderngl.Context':
@@ -339,7 +346,8 @@ def create_window_context(
 
     A window context must have been made current beforehand, typically by
     create_window(). The libraries of WINDOW_LIBRARIES are tried in
-    order, the first one answering wins.
+    order, the first one answering wins, and none of them answering
+    raises a ``GLContextError`` naming every attempt.
 
     Args:
         require: Minimum OpenGL version code, such as 330.
@@ -347,24 +355,13 @@ def create_window_context(
     Returns:
         A context rendering to the window framebuffer.
 
-    Raises:
-        GLContextError: If moderngl is missing or no library answers.
-
     """
-    if not has_moderngl():
-        raise GLContextError(MODERNGL_MISSING)
-
-    failures: list[str] = []
-
-    for library in WINDOW_LIBRARIES:
-        context, failure = try_window_library(library, require)
-        if context is not None:
-            return context
-        failures.append(failure)
-
-    details = '\n'.join(f'  - { failure }' for failure in failures)
-    message = f'No windowed OpenGL context available:\n{ details }'
-    raise GLContextError(message)
+    return create_context(
+        'windowed',
+        'libgl',
+        WINDOW_LIBRARIES,
+        {'require': require},
+    )
 
 
 def describe(context: 'moderngl.Context') -> dict[str, str]:

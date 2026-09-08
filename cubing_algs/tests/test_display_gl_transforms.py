@@ -10,7 +10,6 @@ from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import AXIS_Z
 from cubing_algs.display.gl.transforms import IDENTITY
 from cubing_algs.display.gl.transforms import ORIGIN
-from cubing_algs.display.gl.transforms import Euler
 from cubing_algs.display.gl.transforms import Mat4
 from cubing_algs.display.gl.transforms import OrientationTracker
 from cubing_algs.display.gl.transforms import Quat
@@ -96,8 +95,8 @@ class TestVec3(VectorTestCase):
         start = Vec3(1.0, -2.0, 3.0)
         end = Vec3(4.0, 2.0, -1.0)
 
-        self.assert_vec3(start.lerp(end, 0.0), tuple(start))
-        self.assert_vec3(start.lerp(end, 1.0), tuple(end))
+        self.assert_vec3(start.lerp(end, 0.0), (start.x, start.y, start.z))
+        self.assert_vec3(start.lerp(end, 1.0), (end.x, end.y, end.z))
 
     def test_lerp_walks_the_straight_line(self) -> None:
         """Test that a point mixes component wise, as a color does."""
@@ -327,84 +326,6 @@ class TestQuatSlerp(VectorTestCase):
         self.assertLess(1.0 - abs(midpoint.dot(start)), 1e-8)
 
 
-class TestEuler(VectorTestCase):
-    """Tests for the Euler class and its extraction."""
-
-    def test_from_degrees(self) -> None:
-        """Test that degrees are converted to radians."""
-        euler = Euler.from_degrees(90.0, -45.0, 180.0)
-
-        self.assertAlmostEqual(euler.yaw, math.pi / 2, places=PLACES)
-        self.assertAlmostEqual(euler.pitch, -math.pi / 4, places=PLACES)
-        self.assertAlmostEqual(euler.roll, math.pi, places=PLACES)
-
-    def test_degrees(self) -> None:
-        """Test that angles are converted back to degrees."""
-        yaw, pitch, roll = Euler.from_degrees(90.0, -45.0, 180.0).degrees()
-
-        self.assertAlmostEqual(yaw, 90.0, places=PLACES)
-        self.assertAlmostEqual(pitch, -45.0, places=PLACES)
-        self.assertAlmostEqual(roll, 180.0, places=PLACES)
-
-    def test_from_euler_composition_order(self) -> None:
-        """Test that the angles compose as yaw, then pitch, then roll."""
-        euler = Euler(0.3, -0.7, 1.1)
-
-        self.assert_quat(
-            Quat.from_euler(euler),
-            Quat.from_axis_angle(AXIS_Y, euler.yaw)
-            * Quat.from_axis_angle(AXIS_X, euler.pitch)
-            * Quat.from_axis_angle(AXIS_Z, euler.roll),
-        )
-
-    def test_round_trip(self) -> None:
-        """Test that extracting the angles of a rotation rebuilds it."""
-        for euler in (
-                Euler(0.0, 0.0, 0.0),
-                Euler(0.3, -0.7, 1.1),
-                Euler(-2.5, 0.2, -0.4),
-                Euler(math.pi / 4, -math.pi / 3, math.pi / 6),
-        ):
-            with self.subTest(euler=euler):
-                extracted = Quat.from_euler(euler).to_euler()
-
-                self.assert_quat(
-                    Quat.from_euler(extracted),
-                    Quat.from_euler(euler),
-                )
-
-    def test_round_trip_keeps_the_angles(self) -> None:
-        """Test that the extracted angles are the ones asked for."""
-        euler = Euler(0.3, -0.7, 1.1)
-        extracted = Quat.from_euler(euler).to_euler()
-
-        self.assertAlmostEqual(extracted.yaw, euler.yaw, places=PLACES)
-        self.assertAlmostEqual(extracted.pitch, euler.pitch, places=PLACES)
-        self.assertAlmostEqual(extracted.roll, euler.roll, places=PLACES)
-
-    def test_gimbal_lock_up(self) -> None:
-        """Test that looking straight up reports no roll."""
-        extracted = Quat.from_axis_angle(AXIS_X, math.pi / 2).to_euler()
-
-        self.assertAlmostEqual(extracted.pitch, math.pi / 2, places=PLACES)
-        self.assertEqual(extracted.roll, 0.0)
-
-    def test_gimbal_lock_down(self) -> None:
-        """Test that looking straight down reports no roll."""
-        extracted = Quat.from_axis_angle(AXIS_X, -math.pi / 2).to_euler()
-
-        self.assertAlmostEqual(extracted.pitch, -math.pi / 2, places=PLACES)
-        self.assertEqual(extracted.roll, 0.0)
-
-    def test_gimbal_lock_merges_yaw_and_roll(self) -> None:
-        """Test that a locked rotation is still rebuilt exactly."""
-        euler = Euler(0.4, math.pi / 2, 0.9)
-        extracted = Quat.from_euler(euler).to_euler()
-
-        self.assertEqual(extracted.roll, 0.0)
-        self.assert_quat(Quat.from_euler(extracted), Quat.from_euler(euler))
-
-
 class TestMat4(VectorTestCase):
     """Tests for the Mat4 class."""
 
@@ -515,27 +436,6 @@ class TestMat4(VectorTestCase):
 
         self.assert_mat4(matrix @ Mat4.identity(), matrix)
         self.assert_mat4(Mat4.identity() @ matrix, matrix)
-
-    def test_transposed(self) -> None:
-        """Test that transposing swaps rows and columns."""
-        matrix = Mat4.translation(Vec3(1.0, 2.0, 3.0))
-
-        self.assertEqual(
-            matrix.transposed().rows()[3],
-            (1.0, 2.0, 3.0, 1.0),
-        )
-
-    def test_transposed_twice(self) -> None:
-        """Test that transposing twice gives the matrix back."""
-        matrix = Mat4.rotation_x(0.3) @ Mat4.translation(Vec3(1.0, 2.0, 3.0))
-
-        self.assert_mat4(matrix.transposed().transposed(), matrix)
-
-    def test_transposed_rotation_is_its_inverse(self) -> None:
-        """Test that a rotation matrix is orthogonal."""
-        rotation = Mat4.rotation_y(0.7) @ Mat4.rotation_x(-0.2)
-
-        self.assert_mat4(rotation @ rotation.transposed(), Mat4.identity())
 
 
 class TestMat4Camera(VectorTestCase):

@@ -20,6 +20,7 @@ from cubing_algs.display.gl.animation import Animation
 from cubing_algs.display.gl.camera import OrbitCamera
 from cubing_algs.display.gl.constants import AXES_COLORS
 from cubing_algs.display.gl.constants import AXES_REACH
+from cubing_algs.display.gl.constants import COLOR_CHANNELS
 from cubing_algs.display.gl.constants import CORE_COLOR
 from cubing_algs.display.gl.constants import DEFAULT_LOOK
 from cubing_algs.display.gl.constants import Look
@@ -30,14 +31,12 @@ from cubing_algs.display.gl.doctor import main as doctor_main
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
 from cubing_algs.display.gl.encode import encode_png
 from cubing_algs.display.gl.encode import has_pillow
-from cubing_algs.display.gl.geometry import AXES
 from cubing_algs.display.gl.geometry import CUBE_EXTENT
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import build_cube_geometry
 from cubing_algs.display.gl.geometry import core_radius
 from cubing_algs.display.gl.presentation import Playback
 from cubing_algs.display.gl.presentation import Presentation
-from cubing_algs.display.gl.renderer import COLOR_CHANNELS
 from cubing_algs.display.gl.renderer import AxesRenderer
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.renderer import Renderer
@@ -48,6 +47,7 @@ from cubing_algs.display.gl.scene import build_scene
 from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import IDENTITY
 from cubing_algs.display.gl.transforms import ORIGIN
+from cubing_algs.display.gl.transforms import ROTATION_AXES
 from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.image import ImageDisplay
@@ -909,7 +909,7 @@ class TestAxesRender(unittest.TestCase):
 
     def test_every_axis_carries_its_own_color(self) -> None:
         """Test that an axis is drawn where the camera projects it."""
-        for index, axis in enumerate(AXES):
+        for index, axis in enumerate(ROTATION_AXES):
             with self.subTest(axis=index):
                 color = tuple(
                     round(channel * 255) for channel in AXES_COLORS[index]
@@ -928,7 +928,7 @@ class TestAxesRender(unittest.TestCase):
         top of everything, the three of them would cross the cube and
         say nothing about the side they come out of.
         """
-        for index, axis in enumerate(AXES):
+        for index, axis in enumerate(ROTATION_AXES):
             with self.subTest(axis=index):
                 color = tuple(
                     round(channel * 255) for channel in AXES_COLORS[index]

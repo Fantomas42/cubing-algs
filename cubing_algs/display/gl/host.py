@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING
 from cubing_algs.display.gl.constants import TRANSPARENCY_REFUSED
 from cubing_algs.display.gl.constants import VIEWER_TRANSPARENT
 from cubing_algs.display.gl.constants import WINDOW_TITLE
+from cubing_algs.display.gl.constants import output
 from cubing_algs.display.gl.constants import viewer_help
 from cubing_algs.display.gl.context import GLFWMonitor
 from cubing_algs.display.gl.context import GLFWWindow
@@ -37,7 +38,6 @@ from cubing_algs.display.gl.metrics import debug_title
 from cubing_algs.display.gl.renderer import OffscreenTarget
 from cubing_algs.display.gl.viewer import Stage
 from cubing_algs.display.gl.viewer import Viewer
-from cubing_algs.display.gl.viewer import output
 
 if TYPE_CHECKING:  # pragma: no cover
     import moderngl

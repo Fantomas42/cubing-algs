@@ -60,7 +60,10 @@ class TestBlended(unittest.TestCase):
 
     def test_a_number_is_mixed(self) -> None:
         """Test that a quantity of light travels."""
-        self.assertAlmostEqual(blended(0.0, 1.0, 0.25), 0.25, places=PLACES)
+        mixed = blended(0.0, 1.0, 0.25)
+
+        self.assertIsInstance(mixed, float)
+        self.assertEqual(mixed, 0.25)
 
     def test_a_color_is_mixed_channel_by_channel(self) -> None:
         """Test that three channels are a place walked towards."""

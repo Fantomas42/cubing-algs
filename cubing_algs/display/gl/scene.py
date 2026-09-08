@@ -21,14 +21,12 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import replace
+from functools import lru_cache
 from typing import TYPE_CHECKING
 from typing import NamedTuple
 
 from cubing_algs.annotations import CubeDisplayMask
 from cubing_algs.annotations import CubeFacelets
-from cubing_algs.display.constants import DIM_LUMINANCE_FACTOR
-from cubing_algs.display.effects import hls_to_rgb
-from cubing_algs.display.effects import rgb_to_hls
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Cubie
@@ -48,17 +46,18 @@ type Color = tuple[float, float, float]
 # Number of sides of a cubie, one color each.
 SIDE_NUMBER = len(FACE_BASES)
 
-# Keys of the colors a mask asks for, in the palette of the SVG backend.
+# Key of the color of the plastic in the palette of the SVG backend.
+# The one entry this module reads by name: the colors a mask asks for
+# are resolved by ``get_sticker_fill()``, which knows the keys of the
+# codes it answers.
 PLASTIC_KEY = 'cube_color'
-MASKED_KEY = 'masked'
-ORIENTED_KEY = 'oriented'
 
-# Codes of a display mask, as ``display/masks.py`` writes them. The
-# visible code needs no name: it is what a facelet gets by default.
-MASK_DIMMED = '0'
-MASK_MASKED = '2'
+# The one code of a display mask this backend reads for itself, as
+# ``display/masks.py`` writes it: a piece hidden on every side is
+# dropped rather than painted, which is where the two backends part
+# ways. The other four say a color, and only the SVG backend resolves
+# them.
 MASK_HIDDEN = '3'
-MASK_ORIENTED = '4'
 
 # Layout of an instance in the buffer, as moderngl reads it: model
 # matrix, then the six colors as two mat3, three colors per matrix.
@@ -72,6 +71,12 @@ INSTANCE_PACKING = f'<{ SIDE_NUMBER * 3 }f'
 INSTANCE_SIZE = struct.calcsize('<16f') + struct.calcsize(INSTANCE_PACKING)
 
 CHANNEL_MAXIMUM = 255.0
+
+# How many color combinations keep their packed bytes. A cube of any
+# size holds a couple of dozen of them, and a session changing palette,
+# mask or mode brings a couple of dozen more: this is a memo of what a
+# frame is packing right now, not a store of everything ever drawn.
+COLOR_PACKING_CACHE = 512
 
 
 class FaceLayout(NamedTuple):
@@ -224,93 +229,87 @@ def build_color(hex_color: str) -> Color:
     return scale_channels(hex_to_rgba(hex_color)[:3])
 
 
-def dim_color(color: Color) -> Color:
+def plastic_color(display: ImageDisplay) -> Color:
     """
-    Darken a color, the way the SVG backend dims a facelet.
+    Give the color of the plastic, which is the cube itself.
 
-    The very same computation as ``ImageDisplay.get_sticker_fill``, down
-    to the rounding to a byte: a dimmed sticker must come out of both
-    backends with the same color.
+    The one color of a scene no mask ever asks for: it paints the body
+    of a piece and the sides of it buried inside the cube, where there
+    is no facelet to read a code of.
 
     Args:
-        color: The color to darken.
+        display: The SVG backend resolving the palette.
 
     Returns:
-        The darkened color.
+        The color of the plastic.
 
     """
-    red, green, blue = color
-
-    hue, lit, sat = rgb_to_hls((
-        round(red * CHANNEL_MAXIMUM),
-        round(green * CHANNEL_MAXIMUM),
-        round(blue * CHANNEL_MAXIMUM),
-    ))
-
-    return scale_channels(
-        hls_to_rgb(hue, lit * DIM_LUMINANCE_FACTOR, sat),
-    )
+    return build_color(display.palette[PLASTIC_KEY])
 
 
-def build_colors(palette: Mapping[str, str]) -> dict[str, Color]:
+def build_colors(
+        display: ImageDisplay,
+        state: CubeFacelets,
+        mask: CubeDisplayMask,
+) -> dict[tuple[str, str], Color]:
     """
-    Convert a whole palette into colors of the scene.
+    Resolve the color of every facelet the cube shows, once each.
+
+    Read through ``ImageDisplay.get_sticker_fill()``, which is the very
+    function the SVG backend paints with: the five codes of
+    ``display/masks.py`` are therefore read in one place for both
+    backends, the dimming included, and a code can no longer come to
+    mean one thing here and another thing there. It answers in
+    hexadecimal for every code, so nothing is left to convert but the
+    color itself.
+
+    Only the pairs the cube truly holds are resolved - at most six face
+    letters by five codes, whatever the size of the cube - so a 7x7
+    resolves a couple of dozen colors instead of the fifteen hundred
+    facelets it draws.
 
     Args:
-        palette: Face letters and named colors of a palette, as hex
-            strings.
+        display: The SVG backend resolving the palette and the codes.
+        state: Facelet string of the cube.
+        mask: Display mask of the cube, one code per facelet.
 
     Returns:
-        The same mapping, as colors of the scene.
+        The color of each (face letter, mask code) pair the cube shows.
 
     """
     return {
-        key: build_color(value)
-        for key, value in palette.items()
+        pair: build_color(display.get_sticker_fill(*pair))
+        for pair in set(zip(state, mask, strict=True))
     }
 
 
-def sticker_color(
-        facelet: str,
-        code: str,
-        colors: Mapping[str, Color],
-) -> Color:
+def cubie_facelets(cubie: Cubie, size: int) -> tuple[int | None, ...]:
     """
-    Resolve the color of a sticker, given the code of its mask.
+    Locate the six facelets a cubie shows, one per side.
 
-    The five codes of ``display/masks.py``, read exactly as
-    ``ImageDisplay.get_sticker_fill`` reads them. The hidden code lands
-    here only for a cubie some other side of which is still shown:
-    a wholly hidden one never reaches the scene.
+    Read once and handed to whoever asks: which sides are buried
+    decides both whether the piece is drawn at all and what colors it
+    takes, and locating them twice is half the cost of building a
+    scene on a big cube.
 
     Args:
-        facelet: Face letter of the facelet, naming its color.
-        code: Mask code of the facelet.
-        colors: Colors of the palette, by key.
+        cubie: The cubie to look at.
+        size: Size of the cube.
 
     Returns:
-        The color the sticker is drawn with.
+        The position of each side in the state string, in the order of
+        ``FACE_ORDER``, None for a side buried inside the cube.
 
     """
-    if code == MASK_MASKED:
-        return colors[MASKED_KEY]
-
-    if code == MASK_HIDDEN:
-        return colors[PLASTIC_KEY]
-
-    if code == MASK_ORIENTED:
-        return colors[ORIENTED_KEY]
-
-    if code == MASK_DIMMED:
-        return dim_color(colors[facelet])
-
-    return colors[facelet]
+    return tuple(
+        facelet_index(face, cubie, size)
+        for face in range(SIDE_NUMBER)
+    )
 
 
 def cubie_hidden(
-        cubie: Cubie,
+        facelets: tuple[int | None, ...],
         mask: CubeDisplayMask,
-        size: int,
 ) -> bool:
     """
     Tell whether a cubie is to be left out of the scene altogether.
@@ -321,9 +320,9 @@ def cubie_hidden(
     side only keeps its place, that side taking the plastic color.
 
     Args:
-        cubie: The cubie to look at.
+        facelets: The six facelets of the cubie, as
+            ``cubie_facelets()`` locates them.
         mask: Display mask of the cube, one code per facelet.
-        size: Size of the cube.
 
     Returns:
         True when the cubie must not be drawn.
@@ -331,19 +330,19 @@ def cubie_hidden(
     """
     codes = [
         mask[index]
-        for face in range(SIDE_NUMBER)
-        if (index := facelet_index(face, cubie, size)) is not None
+        for index in facelets
+        if index is not None
     ]
 
     return bool(codes) and all(code == MASK_HIDDEN for code in codes)
 
 
 def cubie_colors(
-        cubie: Cubie,
+        facelets: tuple[int | None, ...],
         state: CubeFacelets,
         mask: CubeDisplayMask,
-        colors: Mapping[str, Color],
-        size: int,
+        colors: Mapping[tuple[str, str], Color],
+        plastic: Color,
 ) -> tuple[Color, ...]:
     """
     Pick the colors of the six sides of a cubie.
@@ -353,28 +352,51 @@ def cubie_colors(
     makes the ones nobody can see disappear.
 
     Args:
-        cubie: The cubie to color.
+        facelets: The six facelets of the cubie, as
+            ``cubie_facelets()`` locates them.
         state: Facelet string of the cube.
         mask: Display mask of the cube, one code per facelet.
-        colors: Colors of the palette, by key.
-        size: Size of the cube.
+        colors: The color of each (face letter, mask code) pair, as
+            ``build_colors()`` resolves them.
+        plastic: The color of the cube itself.
 
     Returns:
         The six colors, in the order of ``FACE_ORDER``.
 
     """
-    sides: list[Color] = []
+    return tuple(
+        plastic
+        if index is None
+        else colors[state[index], mask[index]]
+        for index in facelets
+    )
 
-    for face in range(SIDE_NUMBER):
-        index = facelet_index(face, cubie, size)
 
-        sides.append(
-            colors[PLASTIC_KEY]
-            if index is None
-            else sticker_color(state[index], mask[index], colors),
-        )
+@lru_cache(maxsize=COLOR_PACKING_CACHE)
+def pack_colors(colors: tuple[Color, ...]) -> bytes:
+    """
+    Serialize the six colors of a cubie, once per combination.
 
-    return tuple(sides)
+    A turning layer hands over a new instance on every frame, of the
+    same piece, hence of the same colors: what moves is the model
+    matrix, and packing eighteen floats behind it again was half of
+    what an animated frame spent on the processor. Keyed by the colors
+    themselves rather than by the instance carrying them, so nothing
+    can go stale - two instances of the same colors are one entry, and
+    a cube holds a couple of dozen of them whatever its size.
+
+    Args:
+        colors: The six colors of a cubie, in the order of
+            ``FACE_ORDER``.
+
+    Returns:
+        The colors, laid out as ``INSTANCE_PACKING`` describes them.
+
+    """
+    return struct.pack(
+        INSTANCE_PACKING,
+        *(channel for color in colors for channel in color),
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -393,10 +415,7 @@ class CubieInstance:
             The instance, laid out as ``INSTANCE_FORMAT`` describes it.
 
         """
-        return self.model.pack() + struct.pack(
-            INSTANCE_PACKING,
-            *(channel for color in self.colors for channel in color),
-        )
+        return self.model.pack() + pack_colors(self.colors)
 
 
 @dataclass(frozen=True, slots=True)
@@ -418,10 +437,14 @@ class Scene:
     # it recognizes **by identity**, so anything a caller draws frame
     # after frame has to be the same object every time: a cube nobody
     # is connected to is exactly that, and this is the one place able
-    # to promise it. Kept out of the comparison, a memo saying nothing
-    # about what the scene is.
-    memo: 'Scene | None' = field(
-        init=False, repr=False, compare=False, default=None,
+    # to promise it.
+    #
+    # Held in a list rather than in the field itself: a frozen dataclass
+    # refuses the write, and what a mutable field contains is the one
+    # place it does not reach. Kept out of the comparison, a memo saying
+    # nothing about what the scene is.
+    memo: list['Scene'] = field(
+        init=False, repr=False, compare=False, default_factory=list,
     )
 
     @property
@@ -484,19 +507,10 @@ class Scene:
             The cube of the same geometry, holding no instance.
 
         """
-        memo = self.memo
+        if not self.memo:
+            self.memo.append(replace(self, instances=()))
 
-        if memo is None:
-            memo = replace(self, instances=())
-            # The one write a frozen scene allows itself, and it says
-            # nothing about the cube: what is stored is the answer to a
-            # question already settled by the fields, kept only so that
-            # the answer is the same object twice.
-            object.__setattr__(  # ruff: ignore[unnecessary-dunder-call]
-                self, 'memo', memo,
-            )
-
-        return memo
+        return self.memo[0]
 
     def exploded(self, spread: float) -> 'Scene':
         """
@@ -630,8 +644,14 @@ def build_scene(
     codes = display.map_mask(cube, resolved)
 
     built = geometry or build_cube_geometry(cube.size)
-    colors = build_colors(display.palette)
     state = cube.state
+    colors = build_colors(display, state, codes)
+    plastic = plastic_color(display)
+
+    placed = (
+        (cubie, cubie_facelets(cubie, built.size))
+        for cubie in built.cubies
+    )
 
     return Scene(
         geometry=built,
@@ -639,10 +659,10 @@ def build_scene(
             CubieInstance(
                 cubie=cubie,
                 model=Mat4.translation(cubie.center),
-                colors=cubie_colors(cubie, state, codes, colors, built.size),
+                colors=cubie_colors(facelets, state, codes, colors, plastic),
             )
-            for cubie in built.cubies
-            if not cubie_hidden(cubie, codes, built.size)
+            for cubie, facelets in placed
+            if not cubie_hidden(facelets, codes)
         ),
-        plastic=colors[PLASTIC_KEY],
+        plastic=plastic,
     )

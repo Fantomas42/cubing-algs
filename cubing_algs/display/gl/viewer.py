@@ -17,7 +17,6 @@ an event loop of its own.
 here reaching for the glfw host.
 """
 import math
-import sys
 import tempfile
 import time
 from collections import deque
@@ -46,6 +45,7 @@ from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
 from cubing_algs.display.gl.constants import VIEWER_SIZE
 from cubing_algs.display.gl.constants import ZOOM_STEP
 from cubing_algs.display.gl.constants import Look
+from cubing_algs.display.gl.constants import output
 from cubing_algs.display.gl.context import GLContextError
 from cubing_algs.display.gl.context import describe
 from cubing_algs.display.gl.encode import write_png
@@ -189,11 +189,6 @@ def screenshot_path() -> Path:
 
     """
     return Path(tempfile.gettempdir()) / time.strftime(SCREENSHOT_NAME)
-
-
-def output(text: str) -> None:
-    """Write a line to standard output."""
-    sys.stdout.write(text + '\n')
 
 
 @dataclass(slots=True)
@@ -693,21 +688,18 @@ class Viewer:
         start = time.perf_counter()
 
         stage = self.require_stage()
-        orientation = resolve_orientation(self.orientation)
-
-        scene = self.scene if scene is None else scene
-        look = self.look if look is None else look
-        camera = self.camera if camera is None else camera
 
         stage.use()
 
         timer = stage.timer if self.debug else None
 
         with timer.timing() if timer else nullcontext():
-            stage.renderer.draw(scene, camera, look, orientation)
-
-            if self.show_axes:
-                stage.axes.draw(camera, orientation)
+            self.paint(
+                stage,
+                self.scene if scene is None else scene,
+                self.look if look is None else look,
+                self.camera if camera is None else camera,
+            )
 
         # A timer answers for the frame before this one, which is what
         # keeps the reading from waiting on the GPU. Nothing is recorded
@@ -716,6 +708,38 @@ class Viewer:
             self.monitor.gpu.add(timer.elapsed)
 
         self.monitor.draw.add(time.perf_counter() - start)
+
+    def paint(
+            self,
+            stage: Stage,
+            scene: Scene,
+            look: Look,
+            camera: OrbitCamera,
+    ) -> None:
+        """
+        Draw the cube, and the axes when they are shown.
+
+        What a picture of this viewer is made of, wherever it lands: the
+        window a frame is drawn into and the offscreen target a
+        screenshot is taken through show the very same thing, and that
+        is a promise only one piece of code can keep.
+
+        The framebuffer is neither bound nor cleared here, whoever owns
+        it having done so already.
+
+        Args:
+            stage: The renderers to draw with.
+            scene: The cube to draw.
+            look: How the light falls on it.
+            camera: Where it is looked at from.
+
+        """
+        orientation = resolve_orientation(self.orientation)
+
+        stage.renderer.draw(scene, camera, look, orientation)
+
+        if self.show_axes:
+            stage.axes.draw(camera, orientation)
 
     def frame(self, delta: float) -> None:
         """
@@ -781,19 +805,13 @@ class Viewer:
 
         """
         stage = self.require_stage()
-        orientation = resolve_orientation(self.orientation)
         target = OffscreenTarget.create(
             stage.context, stage.size, self.look.samples,
         )
 
         try:
             target.use()
-            stage.renderer.draw(
-                self.scene, self.camera, self.look, orientation,
-            )
-
-            if self.show_axes:
-                stage.axes.draw(self.camera, orientation)
+            self.paint(stage, self.scene, self.look, self.camera)
 
             written = write_png(
                 path or screenshot_path(), target.read(), stage.size,

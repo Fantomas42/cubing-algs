@@ -18,6 +18,7 @@ from cubing_algs.display.gl.constants import CAMERA_MAX_DISTANCE
 from cubing_algs.display.gl.constants import CAMERA_MIN_DISTANCE
 from cubing_algs.display.gl.constants import CAMERA_NEAR
 from cubing_algs.display.gl.constants import PITCH_LIMIT
+from cubing_algs.display.gl.constants import clamp
 from cubing_algs.display.gl.transforms import ORIGIN
 from cubing_algs.display.gl.transforms import Mat4
 from cubing_algs.display.gl.transforms import Vec3
@@ -259,9 +260,8 @@ class OrbitCamera:
 
         """
         self.yaw += delta_yaw
-        self.pitch = max(
-            -PITCH_LIMIT,
-            min(PITCH_LIMIT, self.pitch + delta_pitch),
+        self.pitch = clamp(
+            self.pitch + delta_pitch, -PITCH_LIMIT, PITCH_LIMIT,
         )
 
     def zoom(self, factor: float) -> None:
@@ -272,7 +272,8 @@ class OrbitCamera:
             factor: Multiplier of the distance, below 1 to come closer.
 
         """
-        self.distance = max(
+        self.distance = clamp(
+            self.distance * factor,
             CAMERA_MIN_DISTANCE,
-            min(CAMERA_MAX_DISTANCE, self.distance * factor),
+            CAMERA_MAX_DISTANCE,
         )

@@ -19,7 +19,7 @@ from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import has_moderngl
 from cubing_algs.display.gl.context import select_glfw_variant
 from cubing_algs.display.gl.context import transparency_granted
-from cubing_algs.display.gl.context import try_standalone_backend
+from cubing_algs.display.gl.context import try_context
 
 requires_moderngl = unittest.skipUnless(
     has_moderngl(),
@@ -101,7 +101,7 @@ class TestStandaloneFailures(unittest.TestCase):
                 'cubing_algs.display.gl.context.has_moderngl',
                 return_value=True,
         ), mock.patch(
-                'cubing_algs.display.gl.context.try_standalone_backend',
+                'cubing_algs.display.gl.context.try_context',
                 side_effect=[
                     (None, 'default: no such backend'),
                     (None, 'egl: no such backend'),
@@ -122,7 +122,7 @@ class TestStandaloneFailures(unittest.TestCase):
                 'cubing_algs.display.gl.context.has_moderngl',
                 return_value=True,
         ), mock.patch(
-                'cubing_algs.display.gl.context.try_standalone_backend',
+                'cubing_algs.display.gl.context.try_context',
                 return_value=(expected, ''),
         ):
             self.assertIs(create_standalone_context(), expected)
@@ -133,7 +133,7 @@ class TestStandaloneFailures(unittest.TestCase):
                 'cubing_algs.display.gl.context.has_moderngl',
                 return_value=True,
         ), mock.patch(
-                'cubing_algs.display.gl.context.try_window_library',
+                'cubing_algs.display.gl.context.try_context',
                 side_effect=[
                     (None, 'default: cannot open shared object file'),
                     (None, 'libGL.so.1: cannot open shared object file'),
@@ -153,7 +153,9 @@ class TestUnknownBackend(unittest.TestCase):
 
     def test_failure_is_returned_not_raised(self) -> None:
         """Test that an unusable backend reports its own name."""
-        context, failure = try_standalone_backend('nowhere', 330)
+        context, failure = try_context(
+            'backend', 'nowhere', {'standalone': True, 'require': 330},
+        )
 
         self.assertIsNone(context)
         self.assertIn('nowhere', failure)

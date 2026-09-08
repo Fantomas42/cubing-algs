@@ -17,6 +17,8 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from cubing_algs.display.gl.constants import COLOR_CHANNELS
+from cubing_algs.display.gl.constants import MILLISECONDS
 from cubing_algs.display.gl.constants import PILLOW_MISSING
 from cubing_algs.display.gl.presentation import DEFAULT_PLAYBACK
 from cubing_algs.display.gl.presentation import Playback
@@ -24,19 +26,14 @@ from cubing_algs.display.gl.presentation import Playback
 if TYPE_CHECKING:  # pragma: no cover
     from PIL import Image
 
-# PNG color types indexed by the number of channels per pixel.
-PNG_COLOR_TYPES = {
-    1: 0,  # greyscale
-    3: 2,  # truecolor
-    4: 6,  # truecolor with alpha
-}
+# PNG color type of a truecolor image carrying an alpha channel, which
+# is the only kind this backend writes: a render keeps its background
+# transparent, and there is no second sort of picture to encode.
+PNG_COLOR_TYPE = 6
 
 PNG_SIGNATURE = b'\x89PNG\r\n\x1a\n'
 
 PNG_BIT_DEPTH = 8
-
-# Milliseconds a frame of a GIF is shown, as its format counts them.
-MILLISECONDS = 1000
 
 # A GIF holds 256 colors at most: the last index is kept for the
 # transparent one, the quantization gets the other 255.
@@ -78,58 +75,47 @@ def png_chunk(kind: bytes, data: bytes) -> bytes:
     )
 
 
-def encode_png(
-        pixels: bytes,
-        size: tuple[int, int],
-        *,
-        channels: int = 4,
-        flip: bool = True,
-) -> bytes:
+def encode_png(pixels: bytes, size: tuple[int, int]) -> bytes:
     """
     Encode raw pixels into a PNG image.
 
+    The rows are reversed on the way: what is encoded comes from an
+    OpenGL framebuffer, whose origin is the bottom left corner, and a
+    file is read from the top down.
+
     Args:
-        pixels: Rows of pixels, of ``channels`` bytes each.
+        pixels: Rows of RGBA pixels.
         size: Width and height of the image, in pixels.
-        channels: Number of bytes per pixel, one of PNG_COLOR_TYPES.
-        flip: Reverse the row order, which is what a read of an OpenGL
-            framebuffer needs, its origin being the bottom left corner.
 
     Returns:
         The bytes of the PNG file.
 
     Raises:
-        ValueError: If the channel count is unsupported, or if the pixel
-            buffer does not match the announced size.
+        ValueError: If the pixel buffer does not match the announced
+            size.
 
     """
-    if channels not in PNG_COLOR_TYPES:
-        msg = f'Unsupported channel count: { channels }'
-        raise ValueError(msg)
-
     width, height = size
-    stride = width * channels
+    stride = width * COLOR_CHANNELS
     expected = stride * height
 
     if len(pixels) != expected:
         msg = (
             f'Expected { expected } bytes of pixels for '
-            f'{ width }x{ height }x{ channels }, got { len(pixels) }'
+            f'{ width }x{ height }x{ COLOR_CHANNELS }, got { len(pixels) }'
         )
         raise ValueError(msg)
-
-    rows = range(height - 1, -1, -1) if flip else range(height)
 
     # Every scanline is prefixed by its filter type, 0 meaning none.
     raw = b''.join(
         b'\x00' + pixels[row * stride:(row + 1) * stride]
-        for row in rows
+        for row in range(height - 1, -1, -1)
     )
 
     header = struct.pack(
         '>IIBBBBB',
         width, height,
-        PNG_BIT_DEPTH, PNG_COLOR_TYPES[channels],
+        PNG_BIT_DEPTH, PNG_COLOR_TYPE,
         0, 0, 0,
     )
 
@@ -141,32 +127,21 @@ def encode_png(
     )
 
 
-def write_png(
-        path: str | Path,
-        pixels: bytes,
-        size: tuple[int, int],
-        *,
-        channels: int = 4,
-        flip: bool = True,
-) -> Path:
+def write_png(path: str | Path, pixels: bytes, size: tuple[int, int]) -> Path:
     """
     Encode raw pixels and write them to a PNG file.
 
     Args:
         path: Destination of the file.
-        pixels: Rows of pixels, of ``channels`` bytes each.
+        pixels: Rows of RGBA pixels.
         size: Width and height of the image, in pixels.
-        channels: Number of bytes per pixel, one of PNG_COLOR_TYPES.
-        flip: Reverse the row order.
 
     Returns:
         The path the image was written to.
 
     """
     destination = Path(path)
-    destination.write_bytes(
-        encode_png(pixels, size, channels=channels, flip=flip),
-    )
+    destination.write_bytes(encode_png(pixels, size))
 
     return destination
 
@@ -182,20 +157,16 @@ def has_pillow() -> bool:
     return find_spec('PIL') is not None
 
 
-def gif_image(
-        pixels: bytes,
-        size: tuple[int, int],
-        *,
-        flip: bool = True,
-) -> 'Image.Image':
+def gif_image(pixels: bytes, size: tuple[int, int]) -> 'Image.Image':
     """
     Read raw pixels into an image Pillow can work on.
+
+    The rows are reversed on the way, as they are for a PNG: a read of
+    an OpenGL framebuffer starts at the bottom left corner.
 
     Args:
         pixels: Rows of RGBA pixels.
         size: Width and height of the image, in pixels.
-        flip: Reverse the row order, which is what a read of an OpenGL
-            framebuffer needs, its origin being the bottom left corner.
 
     Returns:
         The frame, still with its alpha channel.
@@ -203,12 +174,9 @@ def gif_image(
     """
     from PIL import Image
 
-    image = Image.frombytes('RGBA', size, pixels)
-
-    if flip:
-        return image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-
-    return image
+    return Image.frombytes('RGBA', size, pixels).transpose(
+        Image.Transpose.FLIP_TOP_BOTTOM,
+    )
 
 
 def gif_palette(images: Sequence['Image.Image']) -> 'Image.Image':
@@ -288,7 +256,6 @@ def encode_gif(
         size: tuple[int, int],
         *,
         playback: Playback = DEFAULT_PLAYBACK,
-        flip: bool = True,
 ) -> bytes:
     """
     Encode a series of raw frames into an animated GIF.
@@ -302,7 +269,6 @@ def encode_gif(
         size: Width and height of the images, in pixels.
         playback: How the animation runs: frame rate, how long the first
             and the last frame are held, and how many times it plays.
-        flip: Reverse the row order of every frame.
 
     Returns:
         The bytes of the GIF file.
@@ -319,7 +285,7 @@ def encode_gif(
         msg = 'An animation needs at least one frame'
         raise ValueError(msg)
 
-    read = [gif_image(frame, size, flip=flip) for frame in frames]
+    read = [gif_image(frame, size) for frame in frames]
     palette = gif_palette(read)
     images = [gif_frame(image, palette) for image in read]
 

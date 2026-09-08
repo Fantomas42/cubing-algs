@@ -18,6 +18,7 @@ from dataclasses import field
 
 from cubing_algs.display.gl.constants import DEFAULT_BUDGET
 from cubing_algs.display.gl.constants import DROP_FACTOR
+from cubing_algs.display.gl.constants import MILLISECONDS
 from cubing_algs.display.gl.constants import MONITOR_INTERVAL
 from cubing_algs.display.gl.constants import MONITOR_WINDOW
 from cubing_algs.display.gl.constants import WINDOW_TITLE
@@ -31,9 +32,11 @@ PERCENTILE = 0.95
 # refresh being enough to drag a mean off the pace it is measuring.
 MEDIAN = 0.5
 
-# What a second holds, and what a kibibyte does.
-MILLISECONDS = 1000.0
+# What a kibibyte holds.
 KIBIBYTE = 1024.0
+
+# Where the name of a line of the report stops and its numbers start.
+REPORT_COLUMN = 9
 
 
 def milliseconds(seconds: float) -> str:
@@ -77,10 +80,6 @@ class Meter:
 
         """
         self.samples.append(value)
-
-    def clear(self) -> None:
-        """Forget every sample of the window."""
-        self.samples.clear()
 
     @property
     def count(self) -> int:
@@ -354,10 +353,10 @@ def meter_line(name: str, meter: Meter, note: str = '') -> str:
 
     """
     if not meter.count:
-        return f'  {name:<9} not measured{ note }'
+        return f'  {name:<{ REPORT_COLUMN }} not measured{ note }'
 
     return (
-        f'  {name:<9} {milliseconds(meter.mean):>6} ms'
+        f'  {name:<{ REPORT_COLUMN }} {milliseconds(meter.mean):>6} ms'
         f'   min {milliseconds(meter.minimum):>6}'
         f'   p95 {milliseconds(meter.percentile()):>6}'
         f'   max {milliseconds(meter.maximum):>6}{ note }'
@@ -380,7 +379,7 @@ def budget_line(monitor: Monitor, profile: RenderProfile) -> str:
     screen = f' ({ profile.refresh:.0f} Hz screen)' if profile.refresh else ''
 
     return (
-        f'  {"headroom":<9} {monitor.headroom:.0%}'
+        f'  {"headroom":<{ REPORT_COLUMN }} {monitor.headroom:.0%}'
         f'   budget { milliseconds(monitor.budget) } ms{ screen }'
     )
 
@@ -402,7 +401,7 @@ def scene_line(profile: RenderProfile) -> str:
     kibibytes = profile.instance_bytes / KIBIBYTE
 
     return (
-        f'  {"scene":<9} { profile.instances } instances, '
+        f'  {"scene":<{ REPORT_COLUMN }} { profile.instances } instances, '
         f'{ profile.triangles } triangles, {kibibytes:.1f} KiB'
     )
 
@@ -421,7 +420,7 @@ def target_line(profile: RenderProfile) -> str:
     width, height = profile.size
 
     return (
-        f'  {"target":<9} { width }x{ height }, '
+        f'  {"target":<{ REPORT_COLUMN }} { width }x{ height }, '
         f'{ profile.samples } samples, { profile.draw_calls } draw calls'
     )
 
@@ -505,5 +504,5 @@ def debug_report(
         budget_line(monitor, profile),
         scene_line(profile),
         target_line(profile),
-        f'  {"context":<9} { profile.context }',
+        f'  {"context":<{ REPORT_COLUMN }} { profile.context }',
     ))

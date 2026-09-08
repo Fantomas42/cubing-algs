@@ -64,7 +64,7 @@ class Presentation:
         """
         return (self.image_size, self.image_size)
 
-    def camera(self, radius: float, aspect: float = 1.0) -> OrbitCamera:
+    def camera(self, radius: float) -> OrbitCamera:
         """
         Build the camera framing a cube of a given size.
 
@@ -72,16 +72,19 @@ class Presentation:
         one of the box it is laid out in: the gap and the chamfer make a
         cube smaller than its box, by a share depending on its size.
 
+        A picture is square, so nothing is said of the aspect here: a
+        window is not a picture, and the viewer fits its own through
+        ``OrbitCamera.from_rotation()``.
+
         Args:
             radius: Radius of the bounding sphere of the scene.
-            aspect: Width over height ratio of the viewport.
 
         Returns:
             A camera looking at the origin, framing the sphere exactly.
 
         """
         return OrbitCamera.from_rotation(
-            self.rotation, self.distance, radius, aspect,
+            self.rotation, self.distance, radius,
         )
 
 
