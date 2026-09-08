@@ -4,7 +4,7 @@
   <picture>
     <source srcset="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner.svg" type="image/svg+xml">
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-dark.png">
-    <img src="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-light.png" alt="cubing-algs — Rubik's cube algorithm manipulation, analysis &amp; simulation" width="600">
+    <img src="https://raw.githubusercontent.com/Fantomas42/cubing-algs/develop/.github/assets/banner-light.png" alt="cubing-algs - Rubik's cube algorithm manipulation, analysis &amp; simulation" width="600">
   </picture>
 </p>
 
@@ -14,6 +14,9 @@ Python module providing comprehensive tools for Rubik's cube algorithm manipulat
 
 ```bash
 pip install cubing-algs
+
+# With the GPU rendering backend: PNG, GIF and interactive window
+pip install cubing-algs[opengl]
 ```
 
 ## Features
@@ -23,6 +26,7 @@ pip install cubing-algs
 - **Powerful Transformations**: Invert, rotate, compress, and compose algorithms with a clean pipeline API
 - **Virtual Cube Simulation**: Full 3x3x3 cube state tracking with orientation support
 - **Advanced Notation**: Commutators `[A, B]`, conjugates `[A: B]`, wide moves, slice moves, rotations
+- **Rendering**: ASCII/ANSI nets in the terminal, SVG images, and optional GPU rendering to PNG, GIF or an interactive window
 - **Pattern Library**: 70+ classic cube patterns (Superflip, Checkerboard, etc.)
 - **Scramble Generation**: Smart scrambles for 2x2x2 through 7x7x7+ cubes
 - **Big Cube Support**: Multi-layer notation for larger cubes
@@ -671,6 +675,181 @@ html = f'<html><body>{cube.image()}</body></html>'
 with open('cube.html', 'w') as f:
     f.write(html)
 ```
+
+## GPU Rendering
+
+Beside the SVG backend, cubes can be drawn in 3D on the GPU: a PNG without any
+screen, an animated GIF of an algorithm, or an interactive window. It ships in
+the `opengl` extra, and nothing of it is imported until it is used:
+
+```bash
+pip install cubing-algs[opengl]
+```
+
+The framing, the palettes, the display modes and the masks are the ones of
+`.image()`: the same cube comes out the same way in both backends, lit as a
+solid rather than drawn flat. Cubes of any size are supported, from 2x2x2 up.
+
+```python
+from cubing_algs import VCube
+from cubing_algs.parsing import parse_moves
+
+cube = VCube()
+cube.rotate("R U R' U'")
+
+# A PNG, headless: no display server, no window
+png = cube.render(image_size=512, mode='oll')
+with open('cube.png', 'wb') as f:
+    f.write(png)
+
+# An animated GIF of an algorithm being played
+cube.animate("R U R' U'", 'sexy.gif')
+
+# An interactive window
+cube.view()
+```
+
+`Algorithm` offers the same three, applying itself to a cube first, exactly as
+`.image()` and `.show()` do:
+
+```python
+algo = parse_moves("R U R2 U' R' U' R U R'")
+
+algo.render()                 # PNG of the state it leads to
+algo.animate('pll.gif')       # GIF of it playing on a solved cube
+algo.view(5)                  # window, on a 5x5x5 this time
+```
+
+A GIF needs Pillow; without it, the animation comes out as numbered PNG frames
+the encoder of your choice can assemble.
+
+A **timed algorithm plays at the speed it was made**: each move lasts until the
+next timestamp is due, and the cube stands still through the gaps, so a recorded
+solve keeps its recognition pauses.
+
+```python
+# The animation lasts 1.5 s, the last move waiting its turn
+parse_moves('R@0 U@120 F@240 R@1500').animate('solve.gif')
+```
+
+A written pause `.` holds the cube still for a second, so a hesitation is seen
+rather than skipped. A timestamp saying a longer rest wins over it.
+
+### Viewer Shortcuts
+
+```
+cubing-algs viewer
+  Drag             Orbit the cube
+  Ctrl Drag        Carry the window across the screen
+  Wheel            Zoom in and out
+  R U F L D B      Turn a face
+  M E S            Turn a slice
+  X Y Z            Turn the whole cube
+  Shift            Primes a face turn as in R'
+  Ctrl             Doubles a face turn as in R2
+  Alt              Widen a face turn, as in Rw
+  Space            Frame the cube again
+  Backspace        Put the cube back as it was
+  Tab              Open the cube up, and put it back together
+  F2               Show the X/Y/Z axes, red green blue
+  F3               Monitor the rendering performance
+  F4               Print a performance report
+  F5               Turn the vsync on and off
+  F12              Write a screenshot
+  Esc, Q           Close the window
+```
+
+`F3` writes what the rendering costs in the title of the window - frame rate,
+processor time, GPU time - and `F4` prints the whole of it to the terminal:
+where a frame goes, what is left of the budget the screen leaves, and what that
+frame had to draw. A frame rate held by the vsync is the refresh rate of the
+screen and nothing else, so `F5` frees the frames from it when the question is
+what the machine truly holds.
+
+```
+cubing-algs debug - 240 frames over 2.4 s, 0 dropped
+  frame      10.02 ms   min   9.81   p95  10.42   max  22.40
+  advance     0.41 ms   min   0.30   p95   0.62   max   1.90
+  draw        1.32 ms   min   1.10   p95   1.71   max   3.40
+  swap        8.21 ms   min   7.60   p95   8.80   max   9.10   vsync on
+  gpu         0.72 ms   min   0.61   p95   0.94   max   1.60
+  headroom  83%   budget 10.00 ms (100 Hz screen)
+  scene     26 instances, 1456 triangles, 2.5 KiB
+  target    720x720, 8 samples, 2 draw calls
+  context   Mesa Intel(R) Iris(R) Xe Graphics - 4.6
+```
+
+For what `.view()` does not expose - a lighting of its own, the duration of a
+move, or an orientation pushed from outside - build the viewer directly. It is
+a dataclass, and its state can be reached while it runs:
+
+```python
+from cubing_algs.display.gl import OrientationTracker, Quat, Viewer
+
+# This sensor's own axis convention - the driver decoding its raw
+# bytes is the one that knows this value.
+basis = Quat(w=0.7071067811865476, x=-0.7071067811865476, y=0.0, z=0.0)
+tracker = OrientationTracker(basis=basis)
+viewer = Viewer(cube, mode='f2l', debug=True, orientation=tracker)
+
+tracker.update(w, x, y, z)    # raw quaternion of a bluetooth cube
+viewer.push("R U R'")         # queue moves to be played
+viewer.run()
+```
+
+`push()` is safe to call from a producer thread, and dates what it is handed:
+the cube then turns at the cadence of whoever is pushing, a single move behind
+it, rather than at a beat of its own. A producer stamping its moves - `R@100` -
+is honored as well, so a solve is replayed at its true speed whether it is
+pushed live or handed over whole.
+
+The window itself belongs to `GlfwHost`, which `run()` builds behind the
+scenes. Reaching for it directly is how a cube is laid on the desktop - no
+background, no decoration, floating above everything:
+
+```python
+from cubing_algs.display.gl.host import GlfwHost
+
+GlfwHost(viewer, transparent=True).run()
+```
+
+A compositor is free to refuse, and says so in a logged line rather than by
+drawing something unexpected. A transparent visual and a multisampled window
+being mutually exclusive on some drivers, the cube is then antialiased offscreen
+and copied to the window; `msaa=False` draws straight into it instead. A window
+with no decoration has no bar to grab, so `Ctrl` and the left button carry it
+across the screen - a gesture a decorated window answers too.
+
+`examples/gl_transparent_window.py` plays an algorithm in such a window, and is
+written as a subclass overriding `frame()` alone.
+
+### Command Line
+
+```bash
+# Write a PNG of a cube, or of a case, on any cube size
+python -m cubing_algs apply "R U R' U'" --mode=oll --render cube.png --image-size 512
+python -m cubing_algs apply "Rw U Rw' U'" --size 5 --render nxn.png
+python -m cubing_algs case OLL 27 --render oll27.png --palette pastel
+
+# Animate an algorithm, on any cube size
+python -m cubing_algs animate "R U R' U'" --out sexy.gif
+python -m cubing_algs animate "Rw U 3Rw' M2 x" --size 5 --out nxn.gif
+python -m cubing_algs case OLL 27 --animate oll27.gif   # the case being solved
+
+# Open an interactive window
+python -m cubing_algs apply "R U R' U'" --mode=oll --view
+```
+
+`--image-size` counts pixels, where `--size` counts the cubies of an edge.
+
+### Diagnosing the Backend
+
+```bash
+python -m cubing_algs.display.gl.doctor
+```
+
+Reports the contexts that can be created on this machine, what they support,
+and writes a gradient PNG proving the pipeline works end to end.
 
 ## Move Object
 

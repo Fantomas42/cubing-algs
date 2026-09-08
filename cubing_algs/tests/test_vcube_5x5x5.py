@@ -761,7 +761,7 @@ class Test5x5x5MoveConsistency(unittest.TestCase):
     """
     Test that 180° and CCW move codes match applying the CW move repeatedly.
 
-    Uses unique facelets so every position has a distinct value — the solved
+    Uses unique facelets so every position has a distinct value - the solved
     state's symmetry can hide index-pair swaps across face positions.
     """
 

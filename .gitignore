@@ -1,2 +1,6 @@
 poc
+bin/
+build/
+lib/
+include/
 cubing_algs/extensions/*.so

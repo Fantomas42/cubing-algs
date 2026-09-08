@@ -38,6 +38,9 @@ from cubing_algs.display.masks import LS_OCLL_MASK
 from cubing_algs.display.masks import LS_OLL_MASK
 from cubing_algs.display.masks import LSE_MASK
 from cubing_algs.display.masks import MASKED_MASK
+from cubing_algs.display.masks import NO_CENTER_MASK
+from cubing_algs.display.masks import NO_CORNER_MASK
+from cubing_algs.display.masks import NO_EDGE_MASK
 from cubing_algs.display.masks import OCLL_MASK
 from cubing_algs.display.masks import OLL_MASK
 from cubing_algs.display.masks import ORIENTED_MASK
@@ -91,8 +94,11 @@ MODE_CONFIGS: dict[str, tuple[POVDisplayMask, str, str]] = {
     'visible':      (VISIBLE_MASK,      '',    ''),                          # noqa: E241
     'dimmed':       (DIMMED_MASK,       '',    ''),                          # noqa: E241
     'masked':       (MASKED_MASK,       '',    ''),                          # noqa: E241
-    'hidden':       (HIDDEN_MASK,       '',    ''),                          # noqa: E241
     'oriented':     (ORIENTED_MASK,     '',    ''),                          # noqa: E241
+    'hidden':       (HIDDEN_MASK,       '',    ''),                          # noqa: E241
+    'no-center':    (NO_CENTER_MASK,    '',    ''),                          # noqa: E241
+    'no-corner':    (NO_CORNER_MASK,    '',    ''),                          # noqa: E241
+    'no-edge':      (NO_EDGE_MASK,      '',    ''),                          # noqa: E241
 }
 
 
@@ -286,7 +292,7 @@ class ModeDisplay:
 
         Masks are authored from the user's point of view (e.g. '1' at U
         positions means "the top face as I see it"). But internally the
-        cube may be oriented differently — if the user holds D on top
+        cube may be oriented differently - if the user holds D on top
         (a z2 from solved), the physical top is the D face, not U.
 
         This method applies the inverse of the cube's orientation to the

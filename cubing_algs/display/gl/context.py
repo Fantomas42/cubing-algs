@@ -1,0 +1,387 @@
+"""
+Creation of the OpenGL context, headless or attached to a window.
+
+The whole point of using moderngl is that the *same* rendering code runs
+against both kinds of context. This module is the only place where the
+difference between the two exists.
+
+All imports of the optional dependencies are lazy: importing this module
+never pulls moderngl nor glfw in.
+"""
+import os
+from importlib.util import find_spec
+from typing import TYPE_CHECKING
+from typing import Any
+
+from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
+from cubing_algs.display.gl.constants import GLFW_MISSING
+from cubing_algs.display.gl.constants import GLFW_VARIANT_ENVIRONMENT
+from cubing_algs.display.gl.constants import GLFW_VARIANT_FALLBACK
+from cubing_algs.display.gl.constants import GLFW_WAYLAND_LOCKED
+from cubing_algs.display.gl.constants import MODERNGL_MISSING
+from cubing_algs.display.gl.constants import STANDALONE_BACKENDS
+from cubing_algs.display.gl.constants import WINDOW_LIBRARIES
+from cubing_algs.display.gl.constants import WINDOW_TITLE
+from cubing_algs.exceptions import CubingAlgsError
+
+if TYPE_CHECKING:  # pragma: no cover
+    import moderngl
+
+# A glfw window handle, an opaque pointer we only ever pass around.
+type GLFWWindow = Any
+
+# A glfw monitor handle, opaque in the very same way.
+type GLFWMonitor = Any
+
+
+class GLContextError(CubingAlgsError):
+    """
+    Raised when no usable OpenGL context can be created.
+
+    A library error like any other, so that a caller catching
+    ``CubingAlgsError`` - the CLI among them - reports a missing extra
+    or a locked Wayland session as plainly as an invalid move.
+    """
+
+
+def has_moderngl() -> bool:
+    """
+    Tell whether moderngl is importable.
+
+    Returns:
+        True when offscreen rendering is available.
+
+    """
+    return find_spec('moderngl') is not None
+
+
+def has_glfw() -> bool:
+    """
+    Tell whether glfw is importable.
+
+    Returns:
+        True when the interactive window is available.
+
+    """
+    return find_spec('glfw') is not None
+
+
+def try_context(
+        option: str,
+        choice: str | None,
+        options: 'dict[str, Any]',
+) -> "tuple['moderngl.Context | None', str]":
+    """
+    Create a context with one given value of the option that varies.
+
+    Failures are returned rather than raised, so that the caller can try
+    the next value and report every attempt at once.
+
+    Args:
+        option: Name of the moderngl option being chosen, ``backend``
+            for a headless context and ``libgl`` for a windowed one.
+        choice: The value to try, None letting moderngl choose its own.
+        options: What is asked for whatever the choice.
+
+    Returns:
+        The context and an empty reason, or None and the failure reason.
+
+    """
+    import moderngl
+
+    asked = dict(options)
+    if choice is not None:
+        asked[option] = choice
+
+    try:
+        return moderngl.create_context(**asked), ''
+    except (moderngl.Error, ValueError, OSError) as error:
+        return None, f'{ choice or "default" }: { error }'
+
+
+def create_context(
+        kind: str,
+        option: str,
+        choices: tuple[str | None, ...],
+        options: 'dict[str, Any]',
+) -> 'moderngl.Context':
+    """
+    Create a context, trying every choice until one answers.
+
+    The one shape both kinds of context are created in: a headless one
+    picks a backend, a windowed one picks the OpenGL library to attach
+    through, and everything else - the order, the gathering of the
+    failures, the single message they are reported in - is the same
+    story told twice.
+
+    Args:
+        kind: What sort of context is being asked for, as the error
+            message names it.
+        option: Name of the moderngl option being chosen.
+        choices: The values to try, in order.
+        options: What is asked for whatever the choice.
+
+    Returns:
+        The first context a choice answered with.
+
+    Raises:
+        GLContextError: If moderngl is missing or no choice answers.
+
+    """
+    if not has_moderngl():
+        raise GLContextError(MODERNGL_MISSING)
+
+    failures: list[str] = []
+
+    for choice in choices:
+        context, failure = try_context(option, choice, options)
+        if context is not None:
+            return context
+        failures.append(failure)
+
+    details = '\n'.join(f'  - { failure }' for failure in failures)
+    message = f'No { kind } OpenGL context available:\n{ details }'
+    raise GLContextError(message)
+
+
+def create_standalone_context(
+        require: int = GL_VERSION_REQUIRED,
+) -> 'moderngl.Context':
+    """
+    Create a headless context, usable without any display server.
+
+    The backends of STANDALONE_BACKENDS are tried in order, the first one
+    answering wins. Failures are gathered into a single ``GLContextError``,
+    as an unavailable EGL is by far the most common cause of them all.
+
+    Args:
+        require: Minimum OpenGL version code, such as 330.
+
+    Returns:
+        A context rendering to an offscreen framebuffer.
+
+    """
+    return create_context(
+        'standalone',
+        'backend',
+        STANDALONE_BACKENDS,
+        {'standalone': True, 'require': require},
+    )
+
+
+def select_glfw_variant() -> None:
+    """
+    Ask pyGLFW for the X11 variant of its library on a Wayland session.
+
+    pyGLFW picks its variant at import time, from the session type, and
+    moderngl cannot attach to a Wayland context. Doing nothing here would
+    mean a working window holding a context nobody can talk to.
+    """
+    if os.environ.get('WAYLAND_DISPLAY'):
+        os.environ.setdefault(
+            GLFW_VARIANT_ENVIRONMENT,
+            GLFW_VARIANT_FALLBACK,
+        )
+
+
+# Chosen as this module is imported, and not only when a window is
+# asked for: every module of the backend imports this one, so the
+# variant is settled before any of them can reach an ``import glfw``,
+# whichever one runs first. Leaving it to create_window() alone made a
+# viewer importing glfw one line too early hold an unusable context.
+select_glfw_variant()
+
+
+def check_glfw_platform() -> None:
+    """
+    Refuse a glfw whose platform no context could ever be read from.
+
+    glfw must have been initialized beforehand. moderngl only knows how
+    to attach to a context through GLX or WGL, so a Wayland platform
+    would give a perfectly working window holding a context nobody can
+    talk to, and a puzzling error a few lines further down.
+
+    Raises:
+        GLContextError: On a Wayland platform, glfw being shut down
+            again first.
+
+    """
+    import glfw
+
+    if glfw.get_platform() != glfw.PLATFORM_WAYLAND:
+        return
+
+    glfw.terminate()
+
+    raise GLContextError(GLFW_WAYLAND_LOCKED)
+
+
+def create_window(  # noqa: PLR0913
+        size: tuple[int, int],
+        title: str = WINDOW_TITLE,
+        *,
+        visible: bool = True,
+        samples: int = 0,
+        transparent: bool = False,
+        require: int = GL_VERSION_REQUIRED,
+) -> GLFWWindow:
+    """
+    Create a glfw window holding a current OpenGL core profile context.
+
+    The window is returned as is: the caller owns its event loop and its
+    destruction. Call create_window_context() right after to get the
+    moderngl context bound to it.
+
+    ``transparent`` lays the cube on the desktop, and it is one mode
+    rather than three hints because the three hold together: a window
+    letting the desktop through while keeping its bar would show it
+    through a frame, and one free to drop behind another would be lost
+    the moment it did. What a compositor makes of the request is another
+    matter - it is free to refuse, and ``transparency_granted()`` is
+    what reads its answer back.
+
+    Args:
+        size: Width and height of the window, in pixels.
+        title: Title of the window.
+        visible: Whether the window is shown on screen.
+        samples: Samples of the multisampled window framebuffer. Zero
+            draws without any antialiasing. **A transparent visual and a
+            multisampled window are mutually exclusive on some drivers**,
+            which answer such a request by refusing the transparency: a
+            caller wanting both draws into an ``OffscreenTarget``.
+        transparent: Whether the desktop is asked to show through, the
+            window then losing its decoration and floating on top.
+        require: Minimum OpenGL version code, such as 330.
+
+    Returns:
+        The glfw window handle, made current.
+
+    Raises:
+        GLContextError: If glfw is missing, cannot start, runs on a
+            platform moderngl cannot attach to, or cannot provide the
+            requested OpenGL version.
+
+    """
+    if not has_glfw():
+        raise GLContextError(GLFW_MISSING)
+
+    select_glfw_variant()
+
+    import glfw
+
+    if not glfw.init():
+        msg = 'glfw could not be initialized: no display server?'
+        raise GLContextError(msg)
+
+    check_glfw_platform()
+
+    width, height = size
+
+    glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, require // 100)
+    glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, require % 100 // 10)
+    glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+    glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
+    glfw.window_hint(glfw.VISIBLE, glfw.TRUE if visible else glfw.FALSE)
+    glfw.window_hint(glfw.SAMPLES, samples)
+
+    if transparent:
+        glfw.window_hint(glfw.TRANSPARENT_FRAMEBUFFER, glfw.TRUE)
+        glfw.window_hint(glfw.DECORATED, glfw.FALSE)
+        glfw.window_hint(glfw.FLOATING, glfw.TRUE)
+
+    window = glfw.create_window(width, height, title, None, None)
+    if not window:
+        glfw.terminate()
+        msg = f'glfw could not create an OpenGL { require } window'
+        raise GLContextError(msg)
+
+    glfw.make_context_current(window)
+
+    return window
+
+
+def transparency_granted(window: GLFWWindow) -> bool:
+    """
+    Read whether the compositor let the desktop through.
+
+    A hint is a request and never a promise: a compositor with no
+    compositing on, or one that simply says no, hands back an ordinary
+    opaque window. Asking it afterwards is the only way to know, and a
+    caller that clears its background to nothing on an opaque window
+    shows whatever the driver happened to leave there.
+
+    Args:
+        window: The handle returned by create_window().
+
+    Returns:
+        True when the framebuffer of the window is truly transparent.
+
+    """
+    import glfw
+
+    return bool(
+        glfw.get_window_attrib(window, glfw.TRANSPARENT_FRAMEBUFFER),
+    )
+
+
+def destroy_window(window: GLFWWindow) -> None:
+    """
+    Destroy a window and shut glfw down.
+
+    Args:
+        window: The handle returned by create_window().
+
+    """
+    import glfw
+
+    glfw.destroy_window(window)
+    glfw.terminate()
+
+
+def create_window_context(
+        require: int = GL_VERSION_REQUIRED,
+) -> 'moderngl.Context':
+    """
+    Create a moderngl context bound to the current window context.
+
+    A window context must have been made current beforehand, typically by
+    create_window(). The libraries of WINDOW_LIBRARIES are tried in
+    order, the first one answering wins, and none of them answering
+    raises a ``GLContextError`` naming every attempt.
+
+    Args:
+        require: Minimum OpenGL version code, such as 330.
+
+    Returns:
+        A context rendering to the window framebuffer.
+
+    """
+    return create_context(
+        'windowed',
+        'libgl',
+        WINDOW_LIBRARIES,
+        {'require': require},
+    )
+
+
+def describe(context: 'moderngl.Context') -> dict[str, str]:
+    """
+    Summarize the capabilities of a context, for diagnostic purposes.
+
+    Args:
+        context: The context to interrogate.
+
+    Returns:
+        Mapping of capability names to their values, as strings.
+
+    """
+    info = context.info
+
+    return {
+        'vendor': str(info.get('GL_VENDOR', 'unknown')),
+        'renderer': str(info.get('GL_RENDERER', 'unknown')),
+        'version': str(info.get('GL_VERSION', 'unknown')),
+        'version_code': str(context.version_code),
+        'max_samples': str(info.get('GL_MAX_SAMPLES', 0)),
+        'max_texture_size': str(info.get('GL_MAX_TEXTURE_SIZE', 0)),
+    }

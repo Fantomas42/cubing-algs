@@ -16,6 +16,7 @@ from cubing_algs.display.palettes import hex_to_rgb
 from cubing_algs.display.palettes import hex_to_rgba
 from cubing_algs.display.palettes import load_palette
 from cubing_algs.display.palettes import register_palette
+from cubing_algs.display.palettes import rgb_to_hex
 from cubing_algs.exceptions import PaletteAlreadyExistsError
 
 
@@ -46,6 +47,22 @@ class TestHexToAnsi(unittest.TestCase):
         """Test compressed hex to rgb invalid value."""
         with self.assertRaises(ValueError):
             hex_to_rgb('#G00')
+
+    def test_rgb_to_hex(self) -> None:
+        """Test basic rgb to hex conversion."""
+        result = rgb_to_hex((255, 0, 0))
+        self.assertEqual(result, '#ff0000')
+
+    def test_rgb_to_hex_pads_every_channel(self) -> None:
+        """Test that a channel under sixteen keeps its two digits."""
+        result = rgb_to_hex((0, 8, 128))
+        self.assertEqual(result, '#000880')
+
+    def test_rgb_to_hex_round_trips(self) -> None:
+        """Test that a color survives a trip through both conversions."""
+        for hex_color in ('#000000', '#ffffff', '#3b82f6', '#c0ffee'):
+            with self.subTest(hex_color=hex_color):
+                self.assertEqual(rgb_to_hex(hex_to_rgb(hex_color)), hex_color)
 
     def test_background_hex_to_ansi(self) -> None:
         """Test hex to background ANSI conversion."""

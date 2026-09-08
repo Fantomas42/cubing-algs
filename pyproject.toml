@@ -40,9 +40,14 @@ dev = [
     "pytest",
     "pytest-cov",
     "nbval",
+    "pillow",
 ]
 notebooks = [
     "jupyterlab",
+]
+opengl = [
+    "moderngl>=5.12",
+    "glfw>=2.10",
 ]
 
 [tool.setuptools.packages.find]
@@ -85,6 +90,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "*.ipynb" = ["T201"]
 "examples/*.py" = ["T201"]
+"cubing_algs/display/gl/*.py" = ["PLC0415"]
+"cubing_algs/tests/test_display_gl_*.py" = ["PLC0415"]
 
 [tool.ruff.format]
 quote-style = "single"

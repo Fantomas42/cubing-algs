@@ -759,7 +759,7 @@ def analyze_piece_type_impact(
 
     Counts moved facelets for every piece type in the type hierarchy.
 
-    Each facelet contributes to all its types — specific and family.
+    Each facelet contributes to all its types - specific and family.
     For example, a 3x3x3 edge facelet (type list: ['midge', 'edge']) increments
     both 'midge' and 'edge', so family totals remain available alongside
     specific breakdowns.
@@ -852,7 +852,7 @@ def classify_parity_signature(
         implications.extend([
             (
                 f'Corners have {corner_label} permutation parity,'
-                f' edges have {edge_label} — they must always match'
+                f' edges have {edge_label} - they must always match'
             ),
             (
                 'Every quarter turn flips both corner and edge parity'
@@ -871,7 +871,7 @@ def classify_parity_signature(
             ),
             (
                 "Can be built entirely from commutators [A, B] = A B A' B'"
-                " and conjugates [A: B] = A B A' — no bare swaps needed"
+                " and conjugates [A: B] = A B A' - no bare swaps needed"
             ),
             (
                 'Decomposes into 3-cycles, which is why pure commutator algs'
@@ -893,7 +893,7 @@ def classify_parity_signature(
                 ' permutation, so one unmatched quarter turn drives this'
             ),
             (
-                'Cannot be built from commutators alone — at minimum one'
+                'Cannot be built from commutators alone - at minimum one'
                 ' bare swap or unpaired quarter turn is required'
             ),
             (

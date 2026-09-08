@@ -5,6 +5,7 @@ import unittest
 from cubing_algs.display.constants import DISTANCE
 from cubing_algs.display.constants import MIRROR_FIT_TOLERANCE
 from cubing_algs.display.image import ImageDisplay
+from cubing_algs.display.rotation import parse_rotation
 from cubing_algs.vcube import VCube
 
 
@@ -32,7 +33,7 @@ class ComputeMirrorFacesTestCase(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test fixtures."""
         self.display = ImageDisplay(VCube())
-        self.rotations = ImageDisplay.parse_rotation('y45x-34')
+        self.rotations = parse_rotation('y45x-34')
 
     def test_returns_three_hidden_faces(self) -> None:
         """At default rotation, exactly 3 faces are hidden."""

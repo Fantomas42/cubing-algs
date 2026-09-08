@@ -2623,7 +2623,7 @@ class TestComputeImpactsEdgeCases(unittest.TestCase):
 
         corners_twisted and edges_flipped count only pieces in their home
         position but mis-oriented. Any single face move cycles pieces out of
-        place — it never leaves a piece at home but mis-oriented — so both
+        place - it never leaves a piece at home but mis-oriented - so both
         counts are 0 for every face move regardless of which face is turned.
         """
         for move in ('R', "R'", 'R2', 'U', 'F', 'B', 'L', 'D'):
@@ -3025,7 +3025,7 @@ class TestAnalyzePieceTypeImpact(unittest.TestCase):
         self.assertNotIn('corner', result)
 
     def test_only_edges_moved(self) -> None:
-        """Test when only edge pieces move — specific and family counted."""
+        """Test when only edge pieces move - specific and family counted."""
         permutations = {1: 3, 3: 1, 5: 7, 7: 5}
         result = analyze_piece_type_impact(permutations, self.cube)
         self.assertEqual(result['midge'], 4)
@@ -3042,7 +3042,7 @@ class TestAnalyzePieceTypeImpact(unittest.TestCase):
         self.assertNotIn('edge', result)
 
     def test_mixed_piece_type_movement(self) -> None:
-        """Test when different piece types move — hierarchy fully expanded."""
+        """Test when different piece types move - hierarchy fully expanded."""
         permutations = {
             0: 1,   # corner
             1: 2,   # midge (also counts as edge)

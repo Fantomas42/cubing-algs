@@ -322,3 +322,30 @@ L10P_MASK: POVDisplayMask = (
     '111000000'  # LL corners + UL edge visible
     '111010010'  # LL corners + UB / DB edges + center visible
 )
+
+NO_CENTER_MASK: POVDisplayMask = (
+    '111131111'
+    '111131111'
+    '111131111'
+    '111131111'
+    '111131111'
+    '111131111'
+)
+
+NO_CORNER_MASK: POVDisplayMask = (
+    '313111313'
+    '313111313'
+    '313111313'
+    '313111313'
+    '313111313'
+    '313111313'
+)
+
+NO_EDGE_MASK: POVDisplayMask = (
+    '131313131'
+    '131313131'
+    '131313131'
+    '131313131'
+    '131313131'
+    '131313131'
+)

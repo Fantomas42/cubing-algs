@@ -1,0 +1,921 @@
+"""
+Linear algebra of the GPU rendering backend.
+
+Pure Python, no dependency: vectors, quaternions and 4x4 matrices. The
+renderer is not CPU bound, it only pushes a handful of matrices per
+frame, so numpy would buy nothing here.
+
+Conventions, chosen to match OpenGL so that no transposition ever
+happens on the way to a shader:
+
+- right handed coordinates, the camera looks down its own ``-Z``
+- column vectors: ``matrix @ vector`` transforms ``vector``
+- ``a @ b`` applies ``b`` first, then ``a``
+- matrices are stored **column major**, as GLSL expects them
+- every angle is in radians
+"""
+import math
+import struct
+from dataclasses import dataclass
+from typing import NamedTuple
+from typing import Self
+
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
+from cubing_algs.display.gl.constants import MOVE_TURNS
+from cubing_algs.display.gl.constants import ORIENTATION_SETTLE_SPEED
+from cubing_algs.display.gl.constants import ORIENTATION_SETTLED
+from cubing_algs.display.gl.constants import QUARTER_TURN
+from cubing_algs.display.gl.constants import lerp
+from cubing_algs.parsing import parse_moves
+
+# Below this length a vector is considered null and cannot be
+# normalized, and a quaternion falls back to the identity.
+EPSILON = 1e-10
+
+# Above this closeness a great circle arc is too short to divide by its
+# own sine without the division blowing up, and a slerp falls back to a
+# plain lerp: the two agree at that distance to well past float
+# precision.
+SLERP_LINEAR_THRESHOLD = 1.0 - 1e-6
+
+MATRIX_LENGTH = 16
+
+
+class Vec3(NamedTuple):
+    """A vector, or a point, of the 3D space."""
+
+    x: float
+    y: float
+    z: float
+
+    def __add__(self, other: 'Vec3') -> 'Vec3':  # type: ignore[override]
+        """
+        Add two vectors component wise.
+
+        Returns:
+            The sum of the two vectors.
+
+        """
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other: 'Vec3') -> 'Vec3':
+        """
+        Subtract a vector component wise.
+
+        Returns:
+            The difference of the two vectors.
+
+        """
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __neg__(self) -> 'Vec3':
+        """
+        Reverse the direction of the vector.
+
+        Returns:
+            The opposite vector.
+
+        """
+        return Vec3(-self.x, -self.y, -self.z)
+
+    def scaled(self, factor: float) -> 'Vec3':
+        """
+        Multiply the vector by a scalar.
+
+        Args:
+            factor: The scalar to multiply by.
+
+        Returns:
+            The scaled vector.
+
+        """
+        return Vec3(self.x * factor, self.y * factor, self.z * factor)
+
+    def lerp(self, other: 'Vec3', share: float) -> 'Vec3':
+        """
+        Read the point part of the way towards another one.
+
+        A straight line and not a slerp: what travels this way is a
+        color as much as a place - three channels are a point of the
+        unit cube, and mixing two of them is exactly walking between
+        them - and neither has a great circle to follow.
+
+        Args:
+            other: The point at all of the way.
+            share: How far along, from zero to one.
+
+        Returns:
+            The point that far along.
+
+        """
+        return Vec3(
+            lerp(self.x, other.x, share),
+            lerp(self.y, other.y, share),
+            lerp(self.z, other.z, share),
+        )
+
+    def dot(self, other: 'Vec3') -> float:
+        """
+        Compute the dot product with another vector.
+
+        Args:
+            other: The other vector.
+
+        Returns:
+            The dot product of the two vectors.
+
+        """
+        return self.x * other.x + self.y * other.y + self.z * other.z
+
+    def cross(self, other: 'Vec3') -> 'Vec3':
+        """
+        Compute the cross product with another vector.
+
+        Args:
+            other: The other vector.
+
+        Returns:
+            A vector orthogonal to both, following the right hand rule.
+
+        """
+        return Vec3(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
+
+    def length(self) -> float:
+        """
+        Compute the euclidean length of the vector.
+
+        Returns:
+            The length of the vector.
+
+        """
+        return math.sqrt(self.dot(self))
+
+    def normalized(self) -> 'Vec3':
+        """
+        Scale the vector to a unit length.
+
+        Returns:
+            The unit vector of the same direction, or the null vector
+            when the vector is too short to have a direction.
+
+        """
+        length = self.length()
+        if length < EPSILON:
+            return Vec3(0.0, 0.0, 0.0)
+
+        return self.scaled(1.0 / length)
+
+
+ORIGIN = Vec3(0.0, 0.0, 0.0)
+AXIS_X = Vec3(1.0, 0.0, 0.0)
+AXIS_Y = Vec3(0.0, 1.0, 0.0)
+AXIS_Z = Vec3(0.0, 0.0, 1.0)
+
+# The three axes, indexed the way ``MOVE_TURNS`` indexes them: 0 runs
+# from L to R, 1 from D to U, 2 from B to F. The quaternion counterpart
+# of the ``ROTATION_BUILDERS`` of animation.py, and the very triple the
+# axes markers of geometry.py are drawn along - the order a move turns
+# in and the order a color names are the same order, once.
+ROTATION_AXES = (AXIS_X, AXIS_Y, AXIS_Z)
+
+
+class Quat(NamedTuple):
+    """
+    A unit quaternion, representing a rotation of the 3D space.
+
+    Most operations assume a unit quaternion, which is what every
+    constructor returns. Only ``__mul__`` on hand built values, or a
+    sensor feed, can drift: call ``normalized()`` then.
+    """
+
+    w: float
+    x: float
+    y: float
+    z: float
+
+    @classmethod
+    def identity(cls) -> Self:
+        """
+        Build the quaternion of the null rotation.
+
+        Returns:
+            The identity quaternion.
+
+        """
+        return cls(1.0, 0.0, 0.0, 0.0)
+
+    @classmethod
+    def from_axis_angle(cls, axis: Vec3, angle: float) -> Self:
+        """
+        Build the quaternion rotating around an axis.
+
+        Args:
+            axis: The axis of the rotation, of any length.
+            angle: The angle of the rotation, in radians, counter
+                clockwise when the axis points toward the viewer.
+
+        Returns:
+            The matching unit quaternion, or the identity when the axis
+            is null.
+
+        """
+        unit = axis.normalized()
+        if unit == ORIGIN:
+            return cls.identity()
+
+        half = angle / 2
+        sin_half = math.sin(half)
+
+        return cls(
+            math.cos(half),
+            unit.x * sin_half,
+            unit.y * sin_half,
+            unit.z * sin_half,
+        )
+
+    def __mul__(self, other: 'Quat') -> 'Quat':  # type: ignore[override]
+        """
+        Compose two rotations, the other one applying first.
+
+        Args:
+            other: The rotation applied before this one.
+
+        Returns:
+            The quaternion of the combined rotation.
+
+        """
+        return Quat(
+            self.w * other.w
+            - self.x * other.x - self.y * other.y - self.z * other.z,
+            self.w * other.x + self.x * other.w
+            + self.y * other.z - self.z * other.y,
+            self.w * other.y - self.x * other.z
+            + self.y * other.w + self.z * other.x,
+            self.w * other.z + self.x * other.y
+            - self.y * other.x + self.z * other.w,
+        )
+
+    def norm(self) -> float:
+        """
+        Compute the euclidean norm of the quaternion.
+
+        Returns:
+            The norm, 1.0 for a rotation.
+
+        """
+        return math.sqrt(
+            self.w * self.w + self.x * self.x
+            + self.y * self.y + self.z * self.z,
+        )
+
+    def normalized(self) -> 'Quat':
+        """
+        Scale the quaternion to a unit norm.
+
+        Returns:
+            The unit quaternion of the same rotation, or the identity
+            when the norm is too small to mean anything.
+
+        """
+        norm = self.norm()
+        if norm < EPSILON:
+            return Quat.identity()
+
+        return Quat(
+            self.w / norm,
+            self.x / norm,
+            self.y / norm,
+            self.z / norm,
+        )
+
+    def conjugate(self) -> 'Quat':
+        """
+        Negate the vector part of the quaternion.
+
+        For a unit quaternion, the conjugate is the inverse rotation.
+
+        Returns:
+            The conjugate quaternion.
+
+        """
+        return Quat(self.w, -self.x, -self.y, -self.z)
+
+    def dot(self, other: 'Quat') -> float:
+        """
+        Compute the dot product of two quaternions.
+
+        Args:
+            other: The quaternion to dot this one with.
+
+        Returns:
+            1.0 for two identical rotations, -1.0 for the same rotation
+            written on the other side of the double cover.
+
+        """
+        return (
+            self.w * other.w + self.x * other.x
+            + self.y * other.y + self.z * other.z
+        )
+
+    def slerp(self, other: 'Quat', t: float) -> 'Quat':
+        """
+        Interpolate along the great circle arc joining two rotations.
+
+        A unit quaternion is a point on a four dimensional sphere, and
+        only an arc traced on that sphere turns at a constant angular
+        speed - averaging the four components directly would cut across
+        the sphere instead, slowing the rotation down towards the
+        middle of the arc. A rotation and its negation are the same
+        rotation (the double cover), so the arc taken is whichever of
+        the two is the shorter one.
+
+        Args:
+            other: The rotation reached at ``t = 1``.
+            t: How far along the arc to land, ``0`` at this rotation.
+
+        Returns:
+            The rotation at ``t``, along the shorter of the two arcs.
+
+        """
+        cos_half = self.dot(other)
+
+        if cos_half < 0.0:
+            other = Quat(-other.w, -other.x, -other.y, -other.z)
+            cos_half = -cos_half
+
+        if cos_half > SLERP_LINEAR_THRESHOLD:
+            return Quat(
+                self.w + (other.w - self.w) * t,
+                self.x + (other.x - self.x) * t,
+                self.y + (other.y - self.y) * t,
+                self.z + (other.z - self.z) * t,
+            ).normalized()
+
+        angle = math.acos(min(1.0, cos_half))
+        sin_angle = math.sin(angle)
+
+        weight_self = math.sin((1.0 - t) * angle) / sin_angle
+        weight_other = math.sin(t * angle) / sin_angle
+
+        return Quat(
+            self.w * weight_self + other.w * weight_other,
+            self.x * weight_self + other.x * weight_other,
+            self.y * weight_self + other.y * weight_other,
+            self.z * weight_self + other.z * weight_other,
+        )
+
+    def rotate(self, vector: Vec3) -> Vec3:
+        """
+        Apply the rotation to a vector.
+
+        Args:
+            vector: The vector to rotate.
+
+        Returns:
+            The rotated vector.
+
+        """
+        axis = Vec3(self.x, self.y, self.z)
+        cross = axis.cross(vector)
+
+        return (
+            vector
+            + cross.scaled(2 * self.w)
+            + axis.cross(cross).scaled(2)
+        )
+
+    def to_matrix(self) -> 'Mat4':
+        """
+        Convert the rotation to a matrix.
+
+        Returns:
+            The rotation matrix of the quaternion.
+
+        """
+        w, x, y, z = self
+
+        xx, yy, zz = x * x, y * y, z * z
+        xy, xz, yz = x * y, x * z, y * z
+        wx, wy, wz = w * x, w * y, w * z
+
+        return Mat4.from_rows((
+            (1 - 2 * (yy + zz), 2 * (xy - wz), 2 * (xz + wy), 0.0),
+            (2 * (xy + wz), 1 - 2 * (xx + zz), 2 * (yz - wx), 0.0),
+            (2 * (xz - wy), 2 * (yz + wx), 1 - 2 * (xx + yy), 0.0),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+
+# The rotation that does nothing, kept as the default orientation of
+# anything a caller may leave alone.
+IDENTITY = Quat.identity()
+
+
+@dataclass(frozen=True, slots=True)
+class Mat4:
+    """
+    A 4x4 matrix, stored column major as OpenGL expects it.
+
+    ``values`` holds the sixteen coefficients, column after column:
+    ``values[column * 4 + row]``. Build one with ``from_rows()`` to keep
+    the source readable, and read one back with ``rows()``.
+    """
+
+    values: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        """
+        Reject any tuple that is not a 4x4 matrix.
+
+        Raises:
+            ValueError: When the tuple does not hold sixteen values.
+
+        """
+        if len(self.values) != MATRIX_LENGTH:
+            msg = (
+                f'A Mat4 holds { MATRIX_LENGTH } coefficients, '
+                f'got { len(self.values) }'
+            )
+            raise ValueError(msg)
+
+    @classmethod
+    def from_rows(
+            cls,
+            rows: tuple[
+                tuple[float, float, float, float],
+                tuple[float, float, float, float],
+                tuple[float, float, float, float],
+                tuple[float, float, float, float],
+            ],
+    ) -> Self:
+        """
+        Build a matrix from its four rows.
+
+        Args:
+            rows: The rows of the matrix, as written on paper.
+
+        Returns:
+            The matrix, stored column major.
+
+        """
+        return cls(tuple(
+            rows[row][column]
+            for column in range(4)
+            for row in range(4)
+        ))
+
+    @classmethod
+    def identity(cls) -> Self:
+        """
+        Build the identity matrix.
+
+        Returns:
+            The identity matrix.
+
+        """
+        return cls.from_rows((
+            (1.0, 0.0, 0.0, 0.0),
+            (0.0, 1.0, 0.0, 0.0),
+            (0.0, 0.0, 1.0, 0.0),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+    @classmethod
+    def translation(cls, offset: Vec3) -> Self:
+        """
+        Build a translation matrix.
+
+        Written column after column rather than through ``from_rows()``,
+        which is the one place that shortcut is worth taking: a scene
+        builds one of these per piece, so a 7x7 pays it two hundred and
+        eighteen times before a single frame is drawn.
+
+        Args:
+            offset: The translation to apply.
+
+        Returns:
+            The translation matrix.
+
+        """
+        return cls((
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            offset.x, offset.y, offset.z, 1.0,
+        ))
+
+    @classmethod
+    def scaling(cls, factor: float) -> Self:
+        """
+        Build a matrix drawing a mesh at a share of its own size.
+
+        Around the origin of the model, which is the center of a piece:
+        composed **into** a model matrix it shrinks the piece where it
+        stands, where composed on top of it it would drag the piece
+        towards the middle of the cube as it shrank.
+
+        Args:
+            factor: How much of itself the mesh is drawn at.
+
+        Returns:
+            The scaling matrix.
+
+        """
+        return cls.from_rows((
+            (factor, 0.0, 0.0, 0.0),
+            (0.0, factor, 0.0, 0.0),
+            (0.0, 0.0, factor, 0.0),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+    @classmethod
+    def rotation_x(cls, angle: float) -> Self:
+        """
+        Build a rotation matrix around the X axis.
+
+        Args:
+            angle: The angle of the rotation, in radians.
+
+        Returns:
+            The rotation matrix.
+
+        """
+        cos, sin = math.cos(angle), math.sin(angle)
+
+        return cls.from_rows((
+            (1.0, 0.0, 0.0, 0.0),
+            (0.0, cos, -sin, 0.0),
+            (0.0, sin, cos, 0.0),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+    @classmethod
+    def rotation_y(cls, angle: float) -> Self:
+        """
+        Build a rotation matrix around the Y axis.
+
+        Args:
+            angle: The angle of the rotation, in radians.
+
+        Returns:
+            The rotation matrix.
+
+        """
+        cos, sin = math.cos(angle), math.sin(angle)
+
+        return cls.from_rows((
+            (cos, 0.0, sin, 0.0),
+            (0.0, 1.0, 0.0, 0.0),
+            (-sin, 0.0, cos, 0.0),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+    @classmethod
+    def rotation_z(cls, angle: float) -> Self:
+        """
+        Build a rotation matrix around the Z axis.
+
+        Args:
+            angle: The angle of the rotation, in radians.
+
+        Returns:
+            The rotation matrix.
+
+        """
+        cos, sin = math.cos(angle), math.sin(angle)
+
+        return cls.from_rows((
+            (cos, -sin, 0.0, 0.0),
+            (sin, cos, 0.0, 0.0),
+            (0.0, 0.0, 1.0, 0.0),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+    @classmethod
+    def look_at(cls, eye: Vec3, target: Vec3, up: Vec3) -> Self:
+        """
+        Build the view matrix of a camera looking at a point.
+
+        Args:
+            eye: Where the camera stands.
+            target: What the camera looks at.
+            up: Which way is up, only its component orthogonal to the
+                line of sight matters.
+
+        Returns:
+            The matrix taking world coordinates to camera coordinates,
+            where the camera sits at the origin and looks down ``-Z``.
+
+        """
+        forward = (target - eye).normalized()
+        right = forward.cross(up).normalized()
+        upward = right.cross(forward)
+
+        return cls.from_rows((
+            (right.x, right.y, right.z, -right.dot(eye)),
+            (upward.x, upward.y, upward.z, -upward.dot(eye)),
+            (-forward.x, -forward.y, -forward.z, forward.dot(eye)),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+    @classmethod
+    def perspective(
+            cls,
+            fov: float,
+            aspect: float,
+            near: float,
+            far: float,
+    ) -> Self:
+        """
+        Build a perspective projection matrix.
+
+        Args:
+            fov: The vertical field of view, in radians.
+            aspect: The width over height ratio of the viewport.
+            near: Distance to the near clipping plane, strictly positive.
+            far: Distance to the far clipping plane.
+
+        Returns:
+            The projection matrix, mapping the frustum to the OpenGL
+            clip space where depth runs from -1 to 1.
+
+        """
+        focal = 1.0 / math.tan(fov / 2)
+        depth = near - far
+
+        return cls.from_rows((
+            (focal / aspect, 0.0, 0.0, 0.0),
+            (0.0, focal, 0.0, 0.0),
+            (0.0, 0.0, (far + near) / depth, 2 * far * near / depth),
+            (0.0, 0.0, -1.0, 0.0),
+        ))
+
+    def rows(self) -> tuple[tuple[float, ...], ...]:
+        """
+        Read the matrix back as four rows.
+
+        Returns:
+            The rows of the matrix, as written on paper.
+
+        """
+        return tuple(
+            tuple(self.values[column * 4 + row] for column in range(4))
+            for row in range(4)
+        )
+
+    def __matmul__(self, other: 'Mat4') -> 'Mat4':
+        """
+        Multiply two matrices, the other one applying first.
+
+        Column after column, each of the four written out: this is the
+        hottest arithmetic of the pure layer - one product per turning
+        piece per frame, plus the camera - and the indexed form it
+        replaces spent more time computing where a coefficient lived
+        than multiplying it. Measured four times faster, the four terms
+        of a coefficient being summed in the order they are written
+        rather than through ``sum()``, which starts from a zero and
+        lands a last bit away.
+
+        Args:
+            other: The transformation applied before this one.
+
+        Returns:
+            The matrix of the combined transformation.
+
+        """
+        left, right = self.values, other.values
+        values: list[float] = []
+
+        for column in range(0, MATRIX_LENGTH, 4):
+            first, second, third, fourth = right[column:column + 4]
+
+            values += [
+                left[row] * first
+                + left[row + 4] * second
+                + left[row + 8] * third
+                + left[row + 12] * fourth
+                for row in range(4)
+            ]
+
+        return Mat4(tuple(values))
+
+    def transform_direction(self, direction: Vec3) -> Vec3:
+        """
+        Apply the matrix to a direction, ignoring its translation.
+
+        Args:
+            direction: The direction to transform.
+
+        Returns:
+            The transformed direction.
+
+        """
+        values = self.values
+
+        return Vec3(
+            values[0] * direction.x
+            + values[4] * direction.y + values[8] * direction.z,
+            values[1] * direction.x
+            + values[5] * direction.y + values[9] * direction.z,
+            values[2] * direction.x
+            + values[6] * direction.y + values[10] * direction.z,
+        )
+
+    def transform_point(self, point: Vec3) -> Vec3:
+        """
+        Apply the matrix to a point, dividing by the homogeneous weight.
+
+        The division is what turns a projection matrix into an actual
+        perspective: with an affine matrix the weight stays 1 and
+        nothing happens.
+
+        Args:
+            point: The point to transform.
+
+        Returns:
+            The transformed point.
+
+        """
+        values = self.values
+        transformed = self.transform_direction(point) + Vec3(
+            values[12], values[13], values[14],
+        )
+
+        weight = (
+            values[3] * point.x + values[7] * point.y
+            + values[11] * point.z + values[15]
+        )
+
+        if abs(weight) < EPSILON:
+            return transformed
+
+        return transformed.scaled(1.0 / weight)
+
+    def pack(self) -> bytes:
+        """
+        Serialize the matrix for an OpenGL uniform.
+
+        Returns:
+            The sixteen coefficients as column major floats, ready to be
+            written to a buffer or a uniform.
+
+        """
+        return struct.pack('<16f', *self.values)
+
+
+def orientation_basis(orientation: str) -> Quat:
+    """
+    Build the rotation an orientation holds the cube in.
+
+    ``ORIENTATION_FACE_MOVES`` names the whole cube rotations bringing a
+    cube to the two faces an orientation is called after, and this is
+    those rotations as a quaternion. The state and the moves of a solve
+    are reoriented by the transforms of the library; a quaternion read
+    off a sensor is not, and this is the rotation that is missing there.
+
+    It is **not** the basis of a sensor, which belongs to whoever
+    decodes its raw bytes: this one says how a cube is *shown*, that one
+    how a sensor is *built*. A driver holding both composes them, and
+    hands the product to a tracker.
+
+    Args:
+        orientation: The two faces the cube is shown by, such as ``DF``.
+            Empty for the frame the hardware reports in.
+
+    Returns:
+        The identity for an empty orientation, or the composition of the
+        quarter and half turns the orientation names, the first move
+        applying first.
+
+    """
+    quat = Quat.identity()
+
+    moves = ORIENTATION_FACE_MOVES[orientation] if orientation else ''
+
+    for move in parse_moves(moves):
+        axis, direction = MOVE_TURNS[move.base_move]
+        angle = direction * move.quarter_turns * QUARTER_TURN
+
+        quat = Quat.from_axis_angle(ROTATION_AXES[axis], angle) * quat
+
+    return quat
+
+
+class OrientationTracker:
+    """
+    Turn the raw quaternions of a sensor into a display rotation.
+
+    A bluetooth cube reports its absolute orientation in its own frame,
+    with an arbitrary zero: the first quaternion received is therefore
+    kept as the reference, and every later one is expressed relatively
+    to it. The ``basis`` then absorbs the axis convention of the sensor,
+    which rarely matches the one of the renderer.
+
+    A sensor speaks far less often than a window draws - tens of times
+    a second at best, against a vsynced frame rate typically several
+    times that - so ``update()`` and the picture drawn are kept apart:
+    it only ever moves ``target``, the raw pose last reported, and
+    ``orientation``, the one a renderer actually reads, is what
+    ``advance()`` slides towards it a little more on every frame. Fed
+    straight through, an arrival would read as a snap the eye catches
+    as jitter; a target it chases smoothly does not.
+
+    Nothing here is specific to a brand of cube: a tracker is just the
+    reference quaternion, the basis, the pose last reported and the one
+    on its way there.
+    """
+
+    def __init__(self, basis: Quat | None = None) -> None:
+        """
+        Initialize the tracker, waiting for its first quaternion.
+
+        Args:
+            basis: Rotation from the sensor frame to the display frame.
+                Defaults to the identity, for a sensor already aligned
+                with the renderer axes.
+
+        """
+        self.basis = basis or Quat.identity()
+        self.reference: Quat | None = None
+        self.target = Quat.identity()
+        self.orientation = Quat.identity()
+
+    def update(self, w: float, x: float, y: float, z: float) -> Quat:
+        """
+        Feed a raw quaternion from the sensor.
+
+        The first call only records the reference orientation and
+        leaves the cube where it is. A later one moves ``target``
+        alone: the picture itself only catches up with it in
+        ``advance()``, called at the cadence of the render loop rather
+        than at the one of the sensor.
+
+        Args:
+            w: Scalar component of the raw quaternion.
+            x: X component of the raw quaternion.
+            y: Y component of the raw quaternion.
+            z: Z component of the raw quaternion.
+
+        Returns:
+            The pose the sensor just reported, in the renderer frame.
+
+        """
+        raw = Quat(w, x, y, z).normalized()
+
+        if self.reference is None:
+            self.reference = raw
+            return self.target
+
+        relative = (self.reference.conjugate() * raw).normalized()
+
+        self.target = (
+            self.basis * relative * self.basis.conjugate()
+        ).normalized()
+
+        return self.target
+
+    def advance(self, delta: float) -> Quat:
+        """
+        Let the displayed orientation catch up with the last one seen.
+
+        An exponential approach, the very shape ``settle_spread()``
+        gives the opening of the cube: the same second of elapsed time
+        closes the same share of the arc to ``target``, whatever the
+        frame rate, and it is what keeps a sensor reporting far below
+        the frame rate from reading as a staircase of snaps instead of
+        a turn. It never quite lands, so what is within
+        ``ORIENTATION_SETTLED`` of the target is snapped onto it - a
+        cube still sliding by a fraction of a degree would rebuild its
+        scene on every frame forever.
+
+        Args:
+            delta: Seconds gone by since the last call.
+
+        Returns:
+            The orientation to display right now.
+
+        """
+        fraction = 1.0 - math.exp(-ORIENTATION_SETTLE_SPEED * delta)
+        moved = self.orientation.slerp(self.target, fraction)
+
+        if 1.0 - abs(moved.dot(self.target)) < ORIENTATION_SETTLED:
+            moved = self.target
+
+        self.orientation = moved
+
+        return self.orientation
+
+    def reset(self) -> None:
+        """
+        Forget the reference orientation and the current one.
+
+        The next quaternion received becomes the new reference, which is
+        how a user re-centers a cube that has drifted.
+        """
+        self.reference = None
+        self.target = Quat.identity()
+        self.orientation = Quat.identity()

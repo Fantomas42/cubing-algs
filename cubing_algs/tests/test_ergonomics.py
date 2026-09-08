@@ -448,7 +448,7 @@ class TestGetTransitionPenalty(unittest.TestCase):
 
     def test_hand_switch_penalty(self) -> None:
         """Test that hand switches get moderate penalty."""
-        # F (right) → B (left) — but F and B are opposite faces
+        # F (right) → B (left) - but F and B are opposite faces
         # so this gives opposite penalty, not hand_switch
         penalty = get_transition_penalty(Move('F'), Move('B'))
         self.assertEqual(penalty, TRANSITION_PENALTIES['opposite'])
@@ -2037,7 +2037,7 @@ class TestComputeErgonomics(unittest.TestCase):
 
     def test_awkward_moves_counting(self) -> None:
         """Test that awkward moves are correctly identified and counted."""
-        # E=0.45, S2=0.35, M=0.55 — all below threshold 0.6
+        # E=0.45, S2=0.35, M=0.55 - all below threshold 0.6
         alg = Algorithm.parse_moves('E S2 M')
         result = compute_ergonomics(alg)
         self.assertEqual(result.awkward_moves, 3)  # E, S2, and M

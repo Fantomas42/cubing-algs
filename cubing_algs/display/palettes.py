@@ -77,6 +77,25 @@ def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     return (r, g, b)
 
 
+def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
+    """
+    Convert an RGB tuple back to a hexadecimal color string.
+
+    The inverse of :func:`hex_to_rgb`, so that a color computed from a
+    palette entry comes back written the way the palette writes it.
+
+    Args:
+        rgb: Tuple of (red, green, blue) values (0-255).
+
+    Returns:
+        Hexadecimal color string, lowercase (e.g., '#ff0000').
+
+    """
+    red, green, blue = rgb
+
+    return f'#{ red:02x}{ green:02x}{ blue:02x}'
+
+
 def hex_to_rgba(hex_color: str) -> tuple[int, int, int, float]:
     """
     Convert hex color to RGBA tuple.
