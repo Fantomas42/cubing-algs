@@ -24,7 +24,6 @@ information a replay of a solve carries. The dates come from the ``@``
 of a timed algorithm, anchored on the first, or from whoever pushes a
 move into the queue as it arrives.
 """
-import math
 from collections import deque
 from collections.abc import Iterable
 from collections.abc import Iterator
@@ -37,7 +36,9 @@ from cubing_algs.display.gl.constants import FRAME_RATE
 from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
 from cubing_algs.display.gl.constants import MINIMUM_MOVE_DURATION
 from cubing_algs.display.gl.constants import MOVE_DURATION
+from cubing_algs.display.gl.constants import MOVE_TURNS
 from cubing_algs.display.gl.constants import PAUSE_DURATION
+from cubing_algs.display.gl.constants import QUARTER_TURN
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Cubie
 from cubing_algs.display.gl.geometry import build_cube_geometry
@@ -52,24 +53,6 @@ from cubing_algs.parsing import parse_moves
 
 if TYPE_CHECKING:  # pragma: no cover
     from cubing_algs.vcube import VCube
-
-# Angle of a single quarter turn, in radians.
-QUARTER_TURN = math.pi / 2
-
-# Axis every base move turns around, and the sign of a clockwise
-# quarter turn around it. The axes are the ones of the grid of
-# geometry.py: 0 runs from L to R, 1 from D to U, 2 from B to F.
-#
-# A move is called clockwise as seen from its own face, so a face
-# sitting at the positive end of its axis turns the negative way of the
-# right hand rule, and the one facing it turns the other way. The
-# slices follow the face they are named after: M follows L, E follows
-# D, S follows F, and the three rotations follow R, U and F.
-MOVE_TURNS: dict[str, tuple[int, int]] = {
-    'R': (0, -1), 'L': (0, 1), 'M': (0, 1), 'x': (0, -1),
-    'U': (1, -1), 'D': (1, 1), 'E': (1, 1), 'y': (1, -1),
-    'F': (2, -1), 'B': (2, 1), 'S': (2, -1), 'z': (2, -1),
-}
 
 # The three rotation matrices, indexed by the axis they turn around.
 ROTATION_BUILDERS = (Mat4.rotation_x, Mat4.rotation_y, Mat4.rotation_z)

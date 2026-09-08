@@ -3,8 +3,6 @@ import math
 import unittest
 
 from cubing_algs.display.gl.animation import MILLISECONDS
-from cubing_algs.display.gl.animation import MOVE_TURNS
-from cubing_algs.display.gl.animation import QUARTER_TURN
 from cubing_algs.display.gl.animation import Animation
 from cubing_algs.display.gl.animation import Turn
 from cubing_algs.display.gl.animation import build_turn
@@ -15,7 +13,9 @@ from cubing_algs.display.gl.constants import FRAME_RATE
 from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
 from cubing_algs.display.gl.constants import MINIMUM_MOVE_DURATION
 from cubing_algs.display.gl.constants import MOVE_DURATION
+from cubing_algs.display.gl.constants import MOVE_TURNS
 from cubing_algs.display.gl.constants import PAUSE_DURATION
+from cubing_algs.display.gl.constants import QUARTER_TURN
 from cubing_algs.display.gl.geometry import FACE_BASES
 from cubing_algs.display.gl.geometry import Cubie
 from cubing_algs.display.gl.presentation import Presentation

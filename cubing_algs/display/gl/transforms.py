@@ -20,8 +20,12 @@ from dataclasses import dataclass
 from typing import NamedTuple
 from typing import Self
 
+from cubing_algs.constants import ORIENTATION_FACE_MOVES
+from cubing_algs.display.gl.constants import MOVE_TURNS
 from cubing_algs.display.gl.constants import ORIENTATION_SETTLE_SPEED
 from cubing_algs.display.gl.constants import ORIENTATION_SETTLED
+from cubing_algs.display.gl.constants import QUARTER_TURN
+from cubing_algs.parsing import parse_moves
 
 # Below this length a vector is considered null and cannot be
 # normalized, and a quaternion falls back to the identity.
@@ -150,6 +154,11 @@ ORIGIN = Vec3(0.0, 0.0, 0.0)
 AXIS_X = Vec3(1.0, 0.0, 0.0)
 AXIS_Y = Vec3(0.0, 1.0, 0.0)
 AXIS_Z = Vec3(0.0, 0.0, 1.0)
+
+# The three axes, indexed the way ``MOVE_TURNS`` indexes them: 0 runs
+# from L to R, 1 from D to U, 2 from B to F. The quaternion counterpart
+# of the ``ROTATION_BUILDERS`` of animation.py.
+ROTATION_AXES = (AXIS_X, AXIS_Y, AXIS_Z)
 
 
 class Euler(NamedTuple):
@@ -811,6 +820,44 @@ class Mat4:
 
         """
         return struct.pack('<16f', *self.values)
+
+
+def orientation_basis(orientation: str) -> Quat:
+    """
+    Build the rotation an orientation holds the cube in.
+
+    ``ORIENTATION_FACE_MOVES`` names the whole cube rotations bringing a
+    cube to the two faces an orientation is called after, and this is
+    those rotations as a quaternion. The state and the moves of a solve
+    are reoriented by the transforms of the library; a quaternion read
+    off a sensor is not, and this is the rotation that is missing there.
+
+    It is **not** the basis of a sensor, which belongs to whoever
+    decodes its raw bytes: this one says how a cube is *shown*, that one
+    how a sensor is *built*. A driver holding both composes them, and
+    hands the product to a tracker.
+
+    Args:
+        orientation: The two faces the cube is shown by, such as ``DF``.
+            Empty for the frame the hardware reports in.
+
+    Returns:
+        The identity for an empty orientation, or the composition of the
+        quarter and half turns the orientation names, the first move
+        applying first.
+
+    """
+    quat = Quat.identity()
+
+    moves = ORIENTATION_FACE_MOVES[orientation] if orientation else ''
+
+    for move in parse_moves(moves):
+        axis, direction = MOVE_TURNS[move.base_move]
+        angle = direction * move.quarter_turns * QUARTER_TURN
+
+        quat = Quat.from_axis_angle(ROTATION_AXES[axis], angle) * quat
+
+    return quat
 
 
 class OrientationTracker:

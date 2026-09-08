@@ -12,7 +12,6 @@ from dataclasses import field
 from typing import Self
 
 from cubing_algs.display.constants import DISTANCE
-from cubing_algs.display.constants import ROTATION
 from cubing_algs.display.gl.constants import BOUNDING_RADIUS
 from cubing_algs.display.gl.constants import CAMERA_FAR
 from cubing_algs.display.gl.constants import CAMERA_MAX_DISTANCE
@@ -22,7 +21,7 @@ from cubing_algs.display.gl.constants import PITCH_LIMIT
 from cubing_algs.display.gl.transforms import ORIGIN
 from cubing_algs.display.gl.transforms import Mat4
 from cubing_algs.display.gl.transforms import Vec3
-from cubing_algs.display.image import ImageDisplay
+from cubing_algs.display.rotation import fold_rotation
 
 
 def fit_fov(radius: float, distance: float) -> float:
@@ -101,10 +100,7 @@ def parse_rotation(rotation: str) -> tuple[float, float, float]:
         The (yaw, pitch, roll) angles, in radians.
 
     """
-    angles = {'y': 0.0, 'x': 0.0, 'z': 0.0}
-
-    for axis, degrees in ImageDisplay.parse_rotation(rotation or ROTATION):
-        angles[axis] += degrees
+    angles = fold_rotation(rotation)
 
     return (
         math.radians(angles['y']),

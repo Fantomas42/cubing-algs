@@ -9,52 +9,6 @@ from cubing_algs.display.palettes import PALETTES
 from cubing_algs.vcube import VCube
 
 
-class ParseRotationTestCase(unittest.TestCase):
-    """Tests for rotation string parsing."""
-
-    def test_single_axis(self) -> None:
-        """Test parsing a single axis rotation."""
-        result = ImageDisplay.parse_rotation('y45')
-        self.assertEqual(result, [('y', 45)])
-
-    def test_two_axes(self) -> None:
-        """Test parsing two axis rotations."""
-        result = ImageDisplay.parse_rotation('y45x-25')
-        self.assertEqual(result, [('y', 45), ('x', -25)])
-
-    def test_three_axes(self) -> None:
-        """Test parsing three axis rotations."""
-        result = ImageDisplay.parse_rotation('x20y45z10')
-        self.assertEqual(
-            result, [('x', 20), ('y', 45), ('z', 10)],
-        )
-
-    def test_negative_angle(self) -> None:
-        """Test parsing negative angle."""
-        result = ImageDisplay.parse_rotation('y-30')
-        self.assertEqual(result, [('y', -30)])
-
-    def test_zero_angle(self) -> None:
-        """Test parsing zero angle."""
-        result = ImageDisplay.parse_rotation('x0')
-        self.assertEqual(result, [('x', 0)])
-
-    def test_large_angle(self) -> None:
-        """Test parsing angle above 360."""
-        result = ImageDisplay.parse_rotation('y999')
-        self.assertEqual(result, [('y', 999)])
-
-    def test_empty_string(self) -> None:
-        """Test that empty string returns default value."""
-        result = ImageDisplay.parse_rotation('')
-        self.assertEqual(result, [('y', 45), ('x', -34)])
-
-    def test_partial_match_raises(self) -> None:
-        """Test that partially valid string returns default value."""
-        result = ImageDisplay.parse_rotation('y45garbage')
-        self.assertEqual(result, [('y', 45), ('x', -34)])
-
-
 class RotatePointTestCase(unittest.TestCase):
     """Tests for 3D point rotation."""
 

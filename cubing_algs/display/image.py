@@ -39,6 +39,7 @@ from cubing_algs.display.palettes import PALETTES
 from cubing_algs.display.palettes import hex_to_rgb
 from cubing_algs.display.palettes import hex_to_rgba
 from cubing_algs.display.palettes import rgb_to_hex
+from cubing_algs.display.rotation import parse_rotation
 
 if TYPE_CHECKING:
     from cubing_algs.vcube import VCube
@@ -47,8 +48,6 @@ Point3D = tuple[float, float, float]
 Point2D = tuple[float, float]
 FaceData = tuple[Facelet, list[Point2D], int]
 
-ROTATION_PATTERN: RegexPattern = re.compile(r'^([xyz]-?[0-9]+)+$')
-ROTATION_PARTS: RegexPattern = re.compile(r'([xyz])(-?[0-9]+)')
 ARROW_PATTERN: RegexPattern = re.compile(
     r'^([URFDLB])(\d+)([URFDLB])(\d+)'
     r'(?:-(#[0-9a-fA-F]+|[a-zA-Z]+))?$',
@@ -279,7 +278,7 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         """
         distance = max(distance, MIN_DISTANCE + 0.01)
 
-        rotations = self.parse_rotation(rotation)
+        rotations = parse_rotation(rotation)
         visible, mirrored = self.compute_faces(
             rotations, distance, hidden=mirror,
         )
@@ -1327,26 +1326,6 @@ class ImageDisplay(ModeDisplay):  # noqa: PLR0904
         """
         scale = distance / (distance - point[2])
         return (point[0] * scale, point[1] * scale)
-
-    @staticmethod
-    def parse_rotation(rotation: str) -> list[tuple[str, int]]:
-        """
-        Parse a rotation string into axis-angle pairs.
-
-        Args:
-            rotation: Rotation string like "y45x-34".
-
-        Returns:
-            List of (axis, degrees) tuples.
-
-        """
-        if not ROTATION_PATTERN.match(rotation):
-            rotation = ROTATION
-
-        return [
-            (m.group(1), int(m.group(2)))
-            for m in ROTATION_PARTS.finditer(rotation)
-        ]
 
     def parse_arrows(
             self,

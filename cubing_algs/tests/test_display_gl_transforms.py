@@ -3,6 +3,8 @@ import math
 import struct
 import unittest
 
+from cubing_algs.constants import ORIENTATIONS
+from cubing_algs.display.gl.constants import QUARTER_TURN
 from cubing_algs.display.gl.transforms import AXIS_X
 from cubing_algs.display.gl.transforms import AXIS_Y
 from cubing_algs.display.gl.transforms import AXIS_Z
@@ -13,8 +15,23 @@ from cubing_algs.display.gl.transforms import Mat4
 from cubing_algs.display.gl.transforms import OrientationTracker
 from cubing_algs.display.gl.transforms import Quat
 from cubing_algs.display.gl.transforms import Vec3
+from cubing_algs.display.gl.transforms import orientation_basis
 
 PLACES = 9
+
+
+# The six face normals of a solved cube, written out rather than read
+# off ``AXIS_X``/``AXIS_Y``/``AXIS_Z``: what has to be proved here is
+# the geometry an orientation composes, not that it agrees with
+# whichever constants happen to back it.
+FACE_NORMALS: dict[str, Vec3] = {
+    'U': Vec3(0.0, 1.0, 0.0),
+    'D': Vec3(0.0, -1.0, 0.0),
+    'R': Vec3(1.0, 0.0, 0.0),
+    'L': Vec3(-1.0, 0.0, 0.0),
+    'F': Vec3(0.0, 0.0, 1.0),
+    'B': Vec3(0.0, 0.0, -1.0),
+}
 
 
 class VectorTestCase(unittest.TestCase):
@@ -742,3 +759,54 @@ class TestIdentity(VectorTestCase):
         orientation = tracker.update(*Quat.from_axis_angle(AXIS_Y, 2.0))
 
         self.assert_quat(orientation, Quat.identity())
+
+
+class TestOrientationBasis(VectorTestCase):
+    """Tests for the rotation an orientation holds the cube in."""
+
+    def test_every_orientation_frames_its_named_faces(self) -> None:
+        """Test that a name's top face lands on +Y, its front face on +Z."""
+        for name in ORIENTATIONS:
+            with self.subTest(orientation=name):
+                basis = orientation_basis(name)
+                top, front = name[0], name[1]
+
+                self.assert_vec3(
+                    basis.rotate(FACE_NORMALS[top]), (0.0, 1.0, 0.0),
+                )
+                self.assert_vec3(
+                    basis.rotate(FACE_NORMALS[front]), (0.0, 0.0, 1.0),
+                )
+
+    def test_empty_orientation_is_the_identity(self) -> None:
+        """Test that a cube shown as it is held gets no rotation at all."""
+        self.assertEqual(orientation_basis(''), Quat.identity())
+
+    def test_the_moves_apply_in_the_order_they_are_written(self) -> None:
+        """Test that a chain is composed with its first move applying first."""
+        basis = orientation_basis('DR')
+
+        expected = Quat.from_axis_angle(
+            AXIS_Y, -QUARTER_TURN,
+        ) * Quat.from_axis_angle(AXIS_X, -2 * QUARTER_TURN)
+
+        self.assert_quat(basis, expected)
+
+    def test_it_is_the_basis_a_tracker_conjugates_by(self) -> None:
+        """Test that a tracked rotation renders as basis * R * basis-1."""
+        basis = orientation_basis('DF')
+
+        plain = OrientationTracker()
+        oriented = OrientationTracker(basis=basis)
+
+        for raw in (
+                Quat.identity(),
+                Quat.from_axis_angle(AXIS_X, QUARTER_TURN / 2),
+        ):
+            plain.update(*raw)
+            oriented.update(*raw)
+
+        self.assert_quat(
+            oriented.target,
+            (basis * plain.target * basis.conjugate()).normalized(),
+        )

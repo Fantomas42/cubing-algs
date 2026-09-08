@@ -15,6 +15,7 @@ from cubing_algs.display.gl.transforms import Vec3
 from cubing_algs.display.image import CUBE_VERTICES
 from cubing_algs.display.image import FACE_DEFS
 from cubing_algs.display.image import ImageDisplay
+from cubing_algs.display.rotation import parse_rotation as display_rotation
 from cubing_algs.vcube import VCube
 
 PLACES = 9
@@ -337,7 +338,7 @@ class TestSvgAgreement(unittest.TestCase):
             The eight corners, in pixels of the SVG image.
 
         """
-        rotations = self.display.parse_rotation(rotation)
+        rotations = display_rotation(rotation)
         extent = math.sqrt(3 * distance ** 2 / (distance ** 2 - 3))
         scale = IMAGE_SIZE / (2 * extent)
         center = IMAGE_SIZE / 2
@@ -399,7 +400,7 @@ class TestSvgAgreement(unittest.TestCase):
         visible = {
             face
             for face, _, _ in self.display.compute_visible_faces(
-                self.display.parse_rotation('y45x-34'),
+                display_rotation('y45x-34'),
                 DISTANCE,
             )
         }

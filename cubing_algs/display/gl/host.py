@@ -284,6 +284,56 @@ class GlfwHost:
             vsync=self.vsync,
         )
 
+    def write_title(self, text: str) -> None:
+        """
+        Write a text in the bar of the window, whatever the title says.
+
+        What the debug counter shows is not the name of the window: it
+        is the title with the numbers of the moment appended, replaced
+        several times a second and gone the moment F3 is pressed again.
+        So it is written here, and ``title`` is left where it stands.
+
+        A window that is not open yet is written to all the same, and
+        costs the call alone: ``open()`` hands the title over to glfw
+        itself.
+
+        Args:
+            text: What to show in the bar of the window.
+
+        """
+        if self.window is None:
+            return
+
+        import glfw
+
+        glfw.set_window_title(self.window, text)
+
+    def set_title(self, title: str) -> None:
+        """
+        Rename the window, now and for the debug numbers to come.
+
+        The name of a window is not always known when it opens: a
+        consumer showing what it is connected to learns it from
+        whatever it listens to, and says so afterwards. It is written
+        into ``title`` rather than into the bar alone, so that the
+        debug counter appends its numbers to the new name rather than
+        putting the old one back on its next period.
+
+        Nothing is written when the name has not changed, a title being
+        pushed at the cadence of the frames by a consumer that has no
+        cheaper way to tell.
+
+        Args:
+            title: The name of the window.
+
+        """
+        if title == self.title:
+            return
+
+        self.title = title
+
+        self.write_title(title)
+
     def update_title(self, now: float) -> None:
         """
         Show what the frames cost, once a period has gone by.
@@ -301,15 +351,12 @@ class GlfwHost:
             now: The moment the frame was drawn, in seconds.
 
         """
-        import glfw
-
         monitor = self.viewer.monitor
 
         if not monitor.due(now):
             return
 
-        glfw.set_window_title(
-            self.window,
+        self.write_title(
             debug_title(monitor, now, self.title, vsync=self.vsync),
         )
 
@@ -327,9 +374,7 @@ class GlfwHost:
             now: The moment the new period starts, in seconds.
 
         """
-        import glfw
-
-        glfw.set_window_title(self.window, self.title)
+        self.write_title(self.title)
 
         self.viewer.monitor.restart(now)
 

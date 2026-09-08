@@ -425,6 +425,59 @@ class TestHostExtension(HiddenHostTestCase):
         self.assertEqual(self.consumer.drawn, 1)
 
 
+class TestHostTitle(HiddenHostTestCase):
+    """Tests for renaming a window after it has opened."""
+
+    def test_a_window_is_renamed(self) -> None:
+        """Test that a new name reaches the bar of the window."""
+        self.host.open()
+
+        with mock.patch('glfw.set_window_title') as written:
+            self.host.set_title('Cubecast')
+
+        self.assertEqual(self.host.title, 'Cubecast')
+        written.assert_called_once_with(self.host.window, 'Cubecast')
+
+    def test_the_same_name_is_not_written_again(self) -> None:
+        """Test that a title pushed on every frame costs one call."""
+        self.host.open()
+        self.host.set_title('Cubecast')
+
+        with mock.patch('glfw.set_window_title') as written:
+            self.host.set_title('Cubecast')
+
+        written.assert_not_called()
+
+    def test_the_debug_numbers_follow_the_new_name(self) -> None:
+        """Test that what is renamed is the base the counter appends to."""
+        self.host.open()
+        self.host.set_title('Cubecast')
+
+        monitor = self.viewer.monitor
+        monitor.restart(0.0)
+        monitor.count_frame(0.01)
+
+        with mock.patch('glfw.set_window_title') as written:
+            self.host.update_title(MONITOR_INTERVAL)
+
+        self.assertIn('Cubecast', written.call_args.args[1])
+
+    def test_a_window_that_is_not_open_is_only_named(self) -> None:
+        """Test that a host renamed before it opens costs no glfw call."""
+        with mock.patch('glfw.set_window_title') as written:
+            self.host.set_title('Cubecast')
+
+        self.assertEqual(self.host.title, 'Cubecast')
+        written.assert_not_called()
+
+    def test_the_name_is_the_one_the_window_opens_with(self) -> None:
+        """Test that a title set beforehand is what create_window is given."""
+        self.host.set_title('Cubecast')
+        self.host.open()
+
+        self.assertEqual(self.host.title, 'Cubecast')
+
+
 class TestHostMonitoring(HiddenHostTestCase):
     """Tests for the performance a host measures and writes in its title."""
 
