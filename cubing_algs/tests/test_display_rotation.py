@@ -1,10 +1,12 @@
 """Tests for the rotation strings every backend frames a cube with."""
 import unittest
+from argparse import ArgumentTypeError
 
 from cubing_algs.display.constants import ROTATION
 from cubing_algs.display.rotation import fold_rotation
 from cubing_algs.display.rotation import format_rotation
 from cubing_algs.display.rotation import parse_rotation
+from cubing_algs.display.rotation import rotation_argument
 from cubing_algs.display.rotation import turned_rotation
 from cubing_algs.display.rotation import valid_rotation
 
@@ -150,3 +152,34 @@ class TurnedRotationTestCase(unittest.TestCase):
     def test_empty_is_the_library_framing(self) -> None:
         """Test that a framing nobody typed is the one of the library."""
         self.assertEqual(turned_rotation(''), ROTATION)
+
+
+class RotationArgumentTestCase(unittest.TestCase):
+    """Tests for the framing a command line is allowed to name."""
+
+    def test_a_framing_is_handed_back_as_it_was_typed(self) -> None:
+        """Test that a rotation an option names reaches the renderer."""
+        self.assertEqual(rotation_argument('y45x-34'), 'y45x-34')
+
+    def test_an_empty_argument_is_the_library_framing(self) -> None:
+        """Test that an option left empty means the option left out."""
+        self.assertEqual(rotation_argument(''), '')
+
+    def test_a_typo_is_refused_rather_than_drawn(self) -> None:
+        """Test that a command line never opens the picture it was to change."""
+        with self.assertRaises(ArgumentTypeError):
+            rotation_argument('y45x-3O')
+
+    def test_the_refusal_says_what_was_expected(self) -> None:
+        """Test that what is shown names the grammar and an example."""
+        with self.assertRaises(ArgumentTypeError) as raised:
+            rotation_argument('sideways')
+
+        self.assertIn(ROTATION, str(raised.exception))
+
+    def test_what_the_parser_would_have_swallowed_is_stopped(self) -> None:
+        """Test that the two readings of a typo are told apart."""
+        self.assertEqual(parse_rotation('nonsense'), parse_rotation(ROTATION))
+
+        with self.assertRaises(ArgumentTypeError):
+            rotation_argument('nonsense')

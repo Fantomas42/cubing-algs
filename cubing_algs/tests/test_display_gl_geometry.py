@@ -664,6 +664,45 @@ class TestCubeGeometry(unittest.TestCase):
                 )
 
 
+class TestCubeGeometryReach(unittest.TestCase):
+    """Tests for how far from the middle the outermost piece stands."""
+
+    def test_is_the_longest_ray_through_a_place(self) -> None:
+        """Test that the reach is measured on the center of a cubie."""
+        for size in SIZES:
+            with self.subTest(size=size):
+                geometry = build_cube_geometry(size)
+
+                self.assertAlmostEqual(
+                    geometry.reach,
+                    max(
+                        cubie.center.length() for cubie in geometry.cubies
+                    ),
+                )
+
+    def test_is_the_first_term_of_the_bounding_sphere(self) -> None:
+        """Test that the radius is that reach plus the mesh around it."""
+        for size in SIZES:
+            with self.subTest(size=size):
+                geometry = build_cube_geometry(size)
+
+                self.assertAlmostEqual(
+                    geometry.radius - geometry.reach,
+                    max(
+                        vertex.position.length()
+                        for vertex in geometry.mesh.vertices
+                    ),
+                )
+
+    def test_stays_inside_the_bounding_sphere(self) -> None:
+        """Test that a place is never farther out than the whole cube."""
+        for size in SIZES:
+            with self.subTest(size=size):
+                geometry = build_cube_geometry(size)
+
+                self.assertLess(geometry.reach, geometry.radius)
+
+
 class TestCubeGeometryRadius(unittest.TestCase):
     """Tests for the sphere a whole cube fits in."""
 

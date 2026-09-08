@@ -9,6 +9,7 @@ Nothing here is imported when ``cubing_algs`` is loaded.
 """
 from cubing_algs.display.gl.api import animate
 from cubing_algs.display.gl.api import render
+from cubing_algs.display.gl.clock import MoveClock
 from cubing_algs.display.gl.constants import Look
 from cubing_algs.display.gl.presentation import Playback
 from cubing_algs.display.gl.presentation import Presentation
@@ -20,6 +21,7 @@ from cubing_algs.display.gl.viewer import Viewer
 
 __all__ = [
     'Look',
+    'MoveClock',
     'OrientationTracker',
     'Playback',
     'Presentation',

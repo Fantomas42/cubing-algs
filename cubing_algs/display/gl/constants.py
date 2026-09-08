@@ -1,6 +1,22 @@
-"""Constants of the GPU rendering backend."""
+"""
+Constants of the GPU rendering backend.
+
+The few readings written against them live here too, next to what they
+read: the two scalar mixes a ``Look`` is blended with, and the list of
+shortcuts a window is described by. This module is the floor every
+other one of the backend already imports, so a helper standing on a
+constant alone is defined once here rather than twice above it.
+"""
 import math
 from dataclasses import dataclass
+from dataclasses import fields
+from dataclasses import replace
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import NamedTuple
+
+if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import Iterable
 
 # Minimum OpenGL version required by the shaders, as a version code
 # (3.3 core). Chosen because it is the lowest version supporting
@@ -79,6 +95,26 @@ MINIMUM_MOVE_DURATION = 0.06
 # that beat and its own date, so a rest a stream already carries in its
 # timestamps is never shortened by it.
 PAUSE_DURATION = 1.0
+
+# A timestamp of the notation, and of any producer stamping what it
+# sends, is written in milliseconds where a clock of the backend counts
+# in seconds.
+MILLISECONDS = 1000.0
+
+# What a move arriving from a producer is aged by before anything is
+# measured, in seconds. It is the one part of a delay no arithmetic can
+# recover - the minimum cost of a link hides inside the offset of two
+# clocks that share no origin - so it is stated rather than computed,
+# and a consumer knowing its own link is what argues with it.
+MOVE_LEAD = 0.05
+
+# How many arrivals the offset of two clocks is read on. The smallest
+# delay observed over them is the best reading there is, and the window
+# is what lets it be forgotten: a lucky packet would otherwise hold the
+# offset down for the whole session and report every later move as late.
+# Sixty four moves is several seconds of solving, far under the drift of
+# a quartz over that span.
+CLOCK_SPAN = 64
 
 # What a half turn multiplies that duration by. Given the same beat as a
 # quarter turn it covers twice the angle, hence goes twice as fast, which
@@ -159,6 +195,85 @@ CORE_COLOR: tuple[float, float, float] = (0.18, 0.62, 0.62)
 # touch a second constant to keep the reflection matching it.
 CORE_ENV_LOW_GAIN = 0.12
 CORE_ENV_HIGH_GAIN = 2.2
+
+
+def clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
+    """
+    Hold a value between two bounds.
+
+    Written here rather than inlined where it is needed: an easing, an
+    age and an effect all have to bound what they read, and three
+    copies of the same two calls are three places to look the day one
+    of them is written the other way round.
+
+    Args:
+        value: The value to bound.
+        low: The smallest it may be.
+        high: The largest it may be.
+
+    Returns:
+        The value, brought back between the two bounds.
+
+    """
+    return min(high, max(low, value))
+
+
+def lerp(start: float, end: float, share: float) -> float:
+    """
+    Read a value part of the way from one to another.
+
+    The share is taken as it comes, unbounded: what mixes two looks or
+    two colors already knows how far along it stands, and clamping here
+    would hide a caller reading its own progress wrong.
+
+    Weighed rather than stepped - ``(1 - t) * a + t * b`` and not
+    ``a + (b - a) * t`` - because the two agree everywhere except at
+    the ends, and the ends are what is read: the stepped form multiplies
+    a difference by one and adds it back, which lands a hair off the
+    value it was travelling to, so a term at all of the way would be a
+    ball painted very nearly the color it is described by.
+
+    Args:
+        start: The value at none of the way.
+        end: The value at all of it.
+        share: How far along, from zero to one.
+
+    Returns:
+        The value that far along, exactly either end at either end.
+
+    """
+    return (1.0 - share) * start + share * end
+
+
+def blended(start: object, end: object, share: float) -> object:
+    """
+    Read one term of a look part of the way towards another.
+
+    A number and a color are mixed the same way, channel by channel:
+    both are places, and going from one to the other is walking the
+    straight line between them. What is neither - the sample count of a
+    framebuffer, an integer and not a quantity of light - is not a term
+    to be mixed at all, and the one being left is kept.
+
+    Args:
+        start: The term at none of the way.
+        end: The term at all of it.
+        share: How far along, from zero to one.
+
+    Returns:
+        The term that far along.
+
+    """
+    if isinstance(start, float) and isinstance(end, float):
+        return lerp(start, end, share)
+
+    if isinstance(start, tuple) and isinstance(end, tuple):
+        return tuple(
+            lerp(first, second, share)
+            for first, second in zip(start, end, strict=True)
+        )
+
+    return start
 
 
 @dataclass(frozen=True, slots=True)
@@ -256,6 +371,40 @@ class Look:
     # Samples of the multisampled framebuffer a render draws to, clamped
     # to what the context supports. Zero renders without antialiasing.
     samples: int = RENDER_SAMPLES
+
+    def blended(self, other: 'Look', share: float) -> 'Look':
+        """
+        Read the look part of the way towards another one.
+
+        Every term at once, rather than one call per knob: a consumer
+        painting a cube for a moment of its own - a core that goes dull
+        when nothing is driving the cube any more, an ambiance leaving
+        as another arrives - has two looks and one progress, and naming
+        the fields it mixes is naming them again the day one is added.
+
+        Only the terms that are quantities of light travel: a sample
+        count is an integer and stays the one of the look being left.
+
+        Args:
+            other: The look at all of the way.
+            share: How far along, from the look itself at none of it to
+                the other one at all of it.
+
+        Returns:
+            The look that far along, itself when it has not moved.
+
+        """
+        if not share:
+            return self
+
+        terms: dict[str, Any] = {
+            field.name: blended(
+                getattr(self, field.name), getattr(other, field.name), share,
+            )
+            for field in fields(self)
+        }
+
+        return replace(self, **terms)
 
 
 # The look every rendering uses unless told otherwise.
@@ -403,28 +552,127 @@ ORIENTATION_SETTLED = 1e-5
 # two of them never overwrite one another.
 SCREENSHOT_NAME = 'cubing-algs-%Y%m%d-%H%M%S.png'
 
+# What a shortcut belongs to: the gestures of the mouse, the keys
+# turning a cube, and what a window answers about itself. The groups
+# exist so that a consumer showing a cube it is not the one turning can
+# name the half it keeps, rather than reprinting the list to correct a
+# line of it - and so that the day a key is added, it is added once.
+HELP_MOUSE = 'mouse'
+HELP_MOVE = 'move'
+HELP_WINDOW = 'window'
+
+# Where the description of a shortcut starts, counted from the key.
+HELP_COLUMN = 17
+
+# How far the whole list is indented under its heading.
+HELP_INDENT = '  '
+
+
+class HelpEntry(NamedTuple):
+    """One line of the list a window prints when it opens."""
+
+    keys: str
+    action: str
+    group: str = HELP_WINDOW
+
+
+# Every shortcut the viewer answers, in the order they are shown. One
+# tuple and not one per group: the order is part of what is read, and
+# splitting it would be deciding it twice.
+VIEWER_SHORTCUTS: tuple[HelpEntry, ...] = (
+    HelpEntry('Drag', 'Orbit the cube', HELP_MOUSE),
+    HelpEntry('Ctrl Drag', 'Carry the window across the screen', HELP_MOUSE),
+    HelpEntry('Wheel', 'Zoom in and out', HELP_MOUSE),
+    HelpEntry('R U F L D B', 'Turn a face', HELP_MOVE),
+    HelpEntry('M E S', 'Turn a slice', HELP_MOVE),
+    HelpEntry('X Y Z', 'Turn the whole cube', HELP_MOVE),
+    HelpEntry('Shift', "Primes a face turn as in R'", HELP_MOVE),
+    HelpEntry('Ctrl', 'Doubles a face turn as in R2', HELP_MOVE),
+    HelpEntry('Alt', 'Widen a face turn, as in Rw', HELP_MOVE),
+    HelpEntry('Space', 'Frame the cube again'),
+    HelpEntry('Backspace', 'Put the cube back as it was', HELP_MOVE),
+    HelpEntry('Tab', 'Open the cube up, and put it back together'),
+    HelpEntry('F2', 'Show the X/Y/Z axes, red green blue'),
+    HelpEntry('F3', 'Monitor the rendering performance'),
+    HelpEntry('F4', 'Print a performance report'),
+    HelpEntry('F5', 'Turn the vsync on and off'),
+    HelpEntry('F12', 'Write a screenshot'),
+    HelpEntry('Esc, Q', 'Close the window'),
+)
+
+
+def viewer_entries(*groups: str) -> tuple[HelpEntry, ...]:
+    """
+    Pick the shortcuts of one or more groups, in the order they are shown.
+
+    Args:
+        groups: The groups to keep, none of them for all of them.
+
+    Returns:
+        The entries of those groups, in the order they are declared.
+
+    """
+    if not groups:
+        return VIEWER_SHORTCUTS
+
+    kept = frozenset(groups)
+
+    return tuple(
+        entry for entry in VIEWER_SHORTCUTS if entry.group in kept
+    )
+
+
+def help_block(heading: str, entries: 'Iterable[HelpEntry]') -> str:
+    """
+    Write a list of shortcuts out, under the name of what answers them.
+
+    Args:
+        heading: What the window calls itself.
+        entries: The shortcuts it answers, in the order to show them.
+
+    Returns:
+        The block a window prints when it opens.
+
+    """
+    return '\n'.join([
+        heading,
+        *(
+            f'{ HELP_INDENT }{ entry.keys.ljust(HELP_COLUMN) }{ entry.action }'
+            for entry in entries
+        ),
+    ])
+
+
+def viewer_help(
+        heading: str = f'{ WINDOW_TITLE } viewer',
+        *,
+        moves: bool = True,
+) -> str:
+    """
+    Write the list of a window answering the viewer, or half of it.
+
+    A host showing a cube it is not the one turning - a window fed by a
+    stream, a replay - answers none of the keys that turn a face, and
+    offering them would be describing a window that is not the one open.
+
+    Args:
+        heading: What the window calls itself.
+        moves: Whether the keys turning the cube are answered at all.
+
+    Returns:
+        The block that window prints when it opens.
+
+    """
+    return help_block(
+        heading,
+        VIEWER_SHORTCUTS
+        if moves
+        else viewer_entries(HELP_MOUSE, HELP_WINDOW),
+    )
+
+
 # The shortcuts of the viewer, shown when its window opens.
-VIEWER_HELP = """\
-cubing-algs viewer
-  Drag             Orbit the cube
-  Ctrl Drag        Carry the window across the screen
-  Wheel            Zoom in and out
-  R U F L D B      Turn a face
-  M E S            Turn a slice
-  X Y Z            Turn the whole cube
-  Shift            Primes a face turn as in R'
-  Ctrl             Doubles a face turn as in R2
-  Alt              Widen a face turn, as in Rw
-  Space            Frame the cube again
-  Backspace        Put the cube back as it was
-  Tab              Open the cube up, and put it back together
-  F2               Show the X/Y/Z axes, red green blue
-  F3               Monitor the rendering performance
-  F4               Print a performance report
-  F5               Turn the vsync on and off
-  F12              Write a screenshot
-  Esc, Q           Close the window\
-"""
+VIEWER_HELP = viewer_help()
 
 # Name of the extra shipping moderngl and glfw together, and the error
 # messages shown when either is missing: one extra, so the same cure.

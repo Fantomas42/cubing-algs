@@ -16,8 +16,10 @@ them once, for both backends. Only the hidden code parts ways, a cubie
 nobody may see being dropped from the scene rather than painted over.
 """
 import struct
+from collections.abc import Callable
 from collections.abc import Mapping
 from dataclasses import dataclass
+from dataclasses import field
 from dataclasses import replace
 from typing import TYPE_CHECKING
 from typing import NamedTuple
@@ -411,6 +413,17 @@ class Scene:
     instances: tuple[CubieInstance, ...]
     plastic: Color
 
+    # The very same cube with no piece in it, built once and handed
+    # back as itself afterwards. A renderer skips the upload of a scene
+    # it recognizes **by identity**, so anything a caller draws frame
+    # after frame has to be the same object every time: a cube nobody
+    # is connected to is exactly that, and this is the one place able
+    # to promise it. Kept out of the comparison, a memo saying nothing
+    # about what the scene is.
+    memo: 'Scene | None' = field(
+        init=False, repr=False, compare=False, default=None,
+    )
+
     @property
     def size(self) -> int:
         """
@@ -421,6 +434,69 @@ class Scene:
 
         """
         return self.geometry.size
+
+    def mapped(
+            self,
+            place: 'Callable[[CubieInstance], CubieInstance]',
+    ) -> 'Scene':
+        """
+        Build the scene one function moving every piece leads to.
+
+        The shape every effect on a cube is written in - a turn, an
+        opening, a blast - and it is here so that the identity a
+        renderer caches on is decided once: a function handing every
+        piece back untouched hands the very same scene back, and costs
+        no upload at all.
+
+        Args:
+            place: What each piece is passed through, giving back where
+                it now stands.
+
+        Returns:
+            The cube, its pieces moved, or itself when none of them
+            were.
+
+        """
+        placed = tuple(place(instance) for instance in self.instances)
+
+        if all(
+                moved is instance
+                for moved, instance in zip(placed, self.instances, strict=True)
+        ):
+            return self
+
+        return replace(self, instances=placed)
+
+    def emptied(self) -> 'Scene':
+        """
+        Hand the very same cube over with no piece at all in it.
+
+        Nothing is drawn away from the window and hoped to be out of
+        it: the pieces are simply not handed to the renderer, and what
+        is drawn before them and on its own - the ball core - is left
+        alone in the picture.
+
+        The same object every time, which is what makes it free: a
+        window showing no cube draws this scene at every frame, and a
+        renderer uploads it once.
+
+        Returns:
+            The cube of the same geometry, holding no instance.
+
+        """
+        memo = self.memo
+
+        if memo is None:
+            memo = replace(self, instances=())
+            # The one write a frozen scene allows itself, and it says
+            # nothing about the cube: what is stored is the answer to a
+            # question already settled by the fields, kept only so that
+            # the answer is the same object twice.
+            object.__setattr__(  # ruff: ignore[unnecessary-dunder-call]
+                self, 'memo', memo,
+            )
+
+        return memo
 
     def exploded(self, spread: float) -> 'Scene':
         """
@@ -452,16 +528,12 @@ class Scene:
         if not spread:
             return self
 
-        return replace(
-            self,
-            instances=tuple(
-                replace(
-                    instance,
-                    model=instance.model @ Mat4.translation(
-                        instance.cubie.center.scaled(spread),
-                    ),
-                )
-                for instance in self.instances
+        return self.mapped(
+            lambda instance: replace(
+                instance,
+                model=instance.model @ Mat4.translation(
+                    instance.cubie.center.scaled(spread),
+                ),
             ),
         )
 

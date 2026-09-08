@@ -12,6 +12,7 @@ three need it, and because reading a rotation used to mean reaching into
 method that touches nothing of an image.
 """
 import re
+from argparse import ArgumentTypeError
 
 from cubing_algs.annotations import RegexPattern
 from cubing_algs.display.constants import ROTATION
@@ -48,6 +49,41 @@ def valid_rotation(rotation: str) -> bool:
 
     """
     return bool(ROTATION_PATTERN.match(rotation))
+
+
+def rotation_argument(rotation: str) -> str:
+    """
+    Read the framing a command line option names, or refuse it.
+
+    The other half of ``valid_rotation()``, and the reason it exists:
+    a renderer handed a typo falls back on the library framing and
+    draws a cube, which is what it must do; a command line doing the
+    same opens the very picture the option was meant to change, and
+    says nothing at all about it. So an option is given this rather
+    than the parser.
+
+    An empty string is the framing of the library asked for by name,
+    and it is let through: an option left out and an option left empty
+    mean the same thing.
+
+    Args:
+        rotation: The argument, as it was typed.
+
+    Returns:
+        The rotation string, empty for the framing of the library.
+
+    Raises:
+        ArgumentTypeError: When the argument names no rotation.
+
+    """
+    if rotation and not valid_rotation(rotation):
+        msg = (
+            f'"{ rotation }" is not a rotation, '
+            f'expected AXISDEGREES parts, e.g. { ROTATION }'
+        )
+        raise ArgumentTypeError(msg)
+
+    return rotation
 
 
 def parse_rotation(rotation: str) -> list[tuple[str, int]]:

@@ -91,6 +91,21 @@ class TestVec3(VectorTestCase):
         """Test that scaling multiplies every component."""
         self.assert_vec3(Vec3(1.0, -2.0, 3.0).scaled(2.0), (2.0, -4.0, 6.0))
 
+    def test_lerp_reaches_both_ends(self) -> None:
+        """Test that no rounding stands between a share and its end."""
+        start = Vec3(1.0, -2.0, 3.0)
+        end = Vec3(4.0, 2.0, -1.0)
+
+        self.assert_vec3(start.lerp(end, 0.0), tuple(start))
+        self.assert_vec3(start.lerp(end, 1.0), tuple(end))
+
+    def test_lerp_walks_the_straight_line(self) -> None:
+        """Test that a point mixes component wise, as a color does."""
+        self.assert_vec3(
+            Vec3(0.0, 0.0, 0.0).lerp(Vec3(1.0, 2.0, 4.0), 0.25),
+            (0.25, 0.5, 1.0),
+        )
+
     def test_dot(self) -> None:
         """Test the dot product of two vectors."""
         self.assertAlmostEqual(
@@ -414,6 +429,26 @@ class TestMat4(VectorTestCase):
         )
 
         self.assertEqual(Mat4.from_rows(rows).rows(), rows)
+
+    def test_scaling_draws_a_point_at_a_share_of_its_place(self) -> None:
+        """Test that a scaling multiplies every coordinate alike."""
+        self.assert_vec3(
+            Mat4.scaling(0.5).transform_point(Vec3(2.0, -4.0, 6.0)),
+            (1.0, -2.0, 3.0),
+        )
+
+    def test_scaling_by_one_changes_nothing(self) -> None:
+        """Test that a mesh drawn whole is drawn where it stands."""
+        self.assertEqual(Mat4.scaling(1.0).rows(), Mat4.identity().rows())
+
+    def test_scaling_composes_into_a_model_without_moving_it(self) -> None:
+        """Test that a piece shrinks around its own center, not the cube."""
+        model = Mat4.translation(Vec3(4.0, 0.0, 0.0))
+
+        self.assert_vec3(
+            (model @ Mat4.scaling(0.5)).transform_point(Vec3(2.0, 0.0, 0.0)),
+            (5.0, 0.0, 0.0),
+        )
 
     def test_identity(self) -> None:
         """Test that the identity leaves a point alone."""

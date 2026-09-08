@@ -25,6 +25,7 @@ from cubing_algs.display.gl.constants import MOVE_TURNS
 from cubing_algs.display.gl.constants import ORIENTATION_SETTLE_SPEED
 from cubing_algs.display.gl.constants import ORIENTATION_SETTLED
 from cubing_algs.display.gl.constants import QUARTER_TURN
+from cubing_algs.display.gl.constants import lerp
 from cubing_algs.parsing import parse_moves
 
 # Below this length a vector is considered null and cannot be
@@ -93,6 +94,29 @@ class Vec3(NamedTuple):
 
         """
         return Vec3(self.x * factor, self.y * factor, self.z * factor)
+
+    def lerp(self, other: 'Vec3', share: float) -> 'Vec3':
+        """
+        Read the point part of the way towards another one.
+
+        A straight line and not a slerp: what travels this way is a
+        color as much as a place - three channels are a point of the
+        unit cube, and mixing two of them is exactly walking between
+        them - and neither has a great circle to follow.
+
+        Args:
+            other: The point at all of the way.
+            share: How far along, from zero to one.
+
+        Returns:
+            The point that far along.
+
+        """
+        return Vec3(
+            lerp(self.x, other.x, share),
+            lerp(self.y, other.y, share),
+            lerp(self.z, other.z, share),
+        )
 
     def dot(self, other: 'Vec3') -> float:
         """
@@ -586,6 +610,30 @@ class Mat4:
             (1.0, 0.0, 0.0, offset.x),
             (0.0, 1.0, 0.0, offset.y),
             (0.0, 0.0, 1.0, offset.z),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+
+    @classmethod
+    def scaling(cls, factor: float) -> Self:
+        """
+        Build a matrix drawing a mesh at a share of its own size.
+
+        Around the origin of the model, which is the center of a piece:
+        composed **into** a model matrix it shrinks the piece where it
+        stands, where composed on top of it it would drag the piece
+        towards the middle of the cube as it shrank.
+
+        Args:
+            factor: How much of itself the mesh is drawn at.
+
+        Returns:
+            The scaling matrix.
+
+        """
+        return cls.from_rows((
+            (factor, 0.0, 0.0, 0.0),
+            (0.0, factor, 0.0, 0.0),
+            (0.0, 0.0, factor, 0.0),
             (0.0, 0.0, 0.0, 1.0),
         ))
 

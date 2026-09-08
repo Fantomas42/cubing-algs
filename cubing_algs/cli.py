@@ -33,6 +33,7 @@ from cubing_algs.cases import get_collection
 from cubing_algs.cases import list_collections
 from cubing_algs.constants import DEFAULT_CUBE_SIZE
 from cubing_algs.constants import ORIENTATION_FACE_MOVES
+from cubing_algs.display.rotation import rotation_argument
 from cubing_algs.exceptions import CubingAlgsError
 from cubing_algs.exceptions import InvalidOrientationError
 from cubing_algs.parsing import parse_moves
@@ -566,6 +567,7 @@ def add_framing_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         '--rotation',
+        type=rotation_argument,
         default='',
         help="Camera rotation string, e.g. 'y45x-34'",
     )

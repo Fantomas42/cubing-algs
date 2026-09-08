@@ -645,6 +645,76 @@ class TestResolveDisplay(unittest.TestCase):
         )
 
 
+class TestSceneMapped(unittest.TestCase):
+    """Tests for Scene.mapped method."""
+
+    def setUp(self) -> None:
+        """Build the scene of a solved cube."""
+        self.scene = build_scene(cube_of())
+
+    def test_a_function_moving_nothing_hands_the_scene_itself_back(
+            self,
+    ) -> None:
+        """Test that an effect at rest costs no upload at all."""
+        self.assertIs(self.scene.mapped(lambda instance: instance), self.scene)
+
+    def test_one_piece_moved_is_a_new_scene(self) -> None:
+        """Test that a picture that changed is a picture to be uploaded."""
+        first = self.scene.instances[0]
+
+        moved = self.scene.mapped(
+            lambda instance: replace(
+                instance, model=Mat4.identity(),
+            ) if instance is first else instance,
+        )
+
+        self.assertIsNot(moved, self.scene)
+        self.assertEqual(len(moved.instances), len(self.scene.instances))
+
+    def test_every_piece_goes_through_the_function(self) -> None:
+        """Test that nothing is left where the caller wanted it moved."""
+        seen: list[Cubie] = []
+
+        def watch(instance: CubieInstance) -> CubieInstance:
+            seen.append(instance.cubie)
+            return instance
+
+        self.scene.mapped(watch)
+
+        self.assertEqual(
+            seen, [instance.cubie for instance in self.scene.instances],
+        )
+
+
+class TestSceneEmptied(unittest.TestCase):
+    """Tests for Scene.emptied method."""
+
+    def setUp(self) -> None:
+        """Build the scene of a solved cube."""
+        self.scene = build_scene(cube_of())
+
+    def test_the_cube_is_handed_over_with_no_piece_at_all(self) -> None:
+        """Test that the pieces are held back rather than moved away."""
+        self.assertEqual(self.scene.emptied().instances, ())
+
+    def test_the_geometry_and_the_plastic_are_kept(self) -> None:
+        """Test that what is emptied is the cube and not the scene."""
+        empty = self.scene.emptied()
+
+        self.assertIs(empty.geometry, self.scene.geometry)
+        self.assertEqual(empty.plastic, self.scene.plastic)
+
+    def test_the_same_object_is_handed_over_every_time(self) -> None:
+        """Test that a renderer caching on identity uploads it once."""
+        self.assertIs(self.scene.emptied(), self.scene.emptied())
+
+    def test_a_cube_with_pieces_is_left_alone(self) -> None:
+        """Test that emptying a scene never empties the one it came from."""
+        self.scene.emptied()
+
+        self.assertNotEqual(self.scene.instances, ())
+
+
 class TestSceneExploded(unittest.TestCase):
     """Tests for Scene.exploded method."""
 

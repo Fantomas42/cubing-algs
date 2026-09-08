@@ -34,11 +34,13 @@ from typing import TYPE_CHECKING
 from cubing_algs.constants import INNER_MOVES
 from cubing_algs.display.gl.constants import FRAME_RATE
 from cubing_algs.display.gl.constants import HALF_TURN_FACTOR
+from cubing_algs.display.gl.constants import MILLISECONDS
 from cubing_algs.display.gl.constants import MINIMUM_MOVE_DURATION
 from cubing_algs.display.gl.constants import MOVE_DURATION
 from cubing_algs.display.gl.constants import MOVE_TURNS
 from cubing_algs.display.gl.constants import PAUSE_DURATION
 from cubing_algs.display.gl.constants import QUARTER_TURN
+from cubing_algs.display.gl.constants import clamp
 from cubing_algs.display.gl.geometry import CubeGeometry
 from cubing_algs.display.gl.geometry import Cubie
 from cubing_algs.display.gl.geometry import build_cube_geometry
@@ -69,10 +71,6 @@ SLICE_MOVES = frozenset(INNER_MOVES)
 # Coefficients of the smoothstep easing a turn in and out.
 EASE_SLOPE = 3.0
 EASE_CURVE = 2.0
-
-# A timestamp of the notation is written in milliseconds, a clock of the
-# backend counts in seconds.
-MILLISECONDS = 1000.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -203,7 +201,7 @@ def ease(progress: float) -> float:
         The eased progress, from 0 to 1.
 
     """
-    clamped = min(max(progress, 0.0), 1.0)
+    clamped = clamp(progress)
 
     return clamped * clamped * (EASE_SLOPE - EASE_CURVE * clamped)
 
@@ -227,14 +225,10 @@ def turned_scene(scene: Scene, turn: Turn, progress: float) -> Scene:
     """
     rotation = turn.matrix(progress)
 
-    return replace(
-        scene,
-        instances=tuple(
-            replace(instance, model=rotation @ instance.model)
-            if turn.carries(instance.cubie)
-            else instance
-            for instance in scene.instances
-        ),
+    return scene.mapped(
+        lambda instance: replace(instance, model=rotation @ instance.model)
+        if turn.carries(instance.cubie)
+        else instance,
     )
 
 

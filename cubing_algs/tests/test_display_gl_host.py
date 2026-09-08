@@ -954,6 +954,65 @@ class TestHostInput(unittest.TestCase):
         self.assertGreater(self.viewer.camera.distance, distance)
 
 
+class TestHostWithoutMoves(unittest.TestCase):
+    """Tests for a window showing a cube it is not the one turning."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Choose the glfw variant before anything imports the library."""
+        select_glfw_variant()
+
+    def setUp(self) -> None:
+        """Build a host refusing the keyboard the cube."""
+        self.viewer = Viewer(VCube(), window_size=WINDOW_SIZE)
+        self.host = GlfwHost(self.viewer, moves=False)
+
+    def test_a_face_key_plays_nothing(self) -> None:
+        """Test that the stream is the only thing entitled to turn it."""
+        import glfw
+
+        self.host.on_key(None, ord('R'), 0, glfw.PRESS, 0)
+
+        self.assertEqual(len(self.viewer.pending), 0)
+
+    def test_backspace_puts_nothing_back(self) -> None:
+        """Test that a state the source never published is never shown."""
+        import glfw
+
+        self.viewer.push('R')
+        self.viewer.advance(self.viewer.duration)
+        turned = self.viewer.cube.state
+
+        self.host.on_key(None, glfw.KEY_BACKSPACE, 0, glfw.PRESS, 0)
+
+        self.assertEqual(self.viewer.cube.state, turned)
+
+    def test_what_only_looks_at_the_cube_is_still_answered(self) -> None:
+        """Test that holding the moves back holds nothing else back."""
+        import glfw
+
+        self.host.on_key(None, glfw.KEY_TAB, 0, glfw.PRESS, 0)
+
+        self.assertTrue(self.viewer.exploded)
+
+    def test_the_list_it_prints_offers_no_move(self) -> None:
+        """Test that a window describes the keys it truly answers."""
+        for keys in ('R U F L D B', 'Backspace'):
+            with self.subTest(keys=keys):
+                self.assertIn(keys, VIEWER_HELP)
+                self.assertNotIn(keys, self.host.help)
+
+    def test_a_window_turning_the_cube_prints_the_whole_list(self) -> None:
+        """Test that nothing changes for a host that plays its own moves."""
+        self.assertEqual(GlfwHost(self.viewer).help, VIEWER_HELP)
+
+    def test_a_list_of_its_own_is_what_is_printed(self) -> None:
+        """Test that a host adding shortcuts says so and is believed."""
+        host = GlfwHost(self.viewer, shortcuts='a window\n  K  do a thing')
+
+        self.assertEqual(host.help, 'a window\n  K  do a thing')
+
+
 class TestHostCarry(HiddenHostTestCase):
     """Tests for carrying the window a Ctrl drag takes hold of."""
 

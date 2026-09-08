@@ -22,9 +22,9 @@ from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from cubing_algs.display.gl.constants import TRANSPARENCY_REFUSED
-from cubing_algs.display.gl.constants import VIEWER_HELP
 from cubing_algs.display.gl.constants import VIEWER_TRANSPARENT
 from cubing_algs.display.gl.constants import WINDOW_TITLE
+from cubing_algs.display.gl.constants import viewer_help
 from cubing_algs.display.gl.context import GLFWMonitor
 from cubing_algs.display.gl.context import GLFWWindow
 from cubing_algs.display.gl.context import create_window
@@ -190,11 +190,22 @@ class GlfwHost:
     # between.
     msaa: bool = True
 
-    # What ``run()`` writes when the window opens. A host answering
-    # fewer keys than the viewer does - one showing a cube it is not
-    # the one turning, among others - hands its own list here rather
-    # than reprinting a loop to correct a line of it.
-    shortcuts: str = VIEWER_HELP
+    # Whether the keyboard is allowed to turn the cube at all. A host
+    # showing a cube turned somewhere else - a window fed by a stream,
+    # a replay - is not the one entitled to move it: a face played here
+    # would drift the window away from what it is watching, with
+    # nothing ever bringing the two back together. So the moves are
+    # refused at the door rather than intercepted key by key, and
+    # ``Backspace`` goes with them, a cube put back together being a
+    # state its source never published either.
+    moves: bool = True
+
+    # What ``run()`` writes when the window opens, empty for the list
+    # of the keys this host truly answers. A host adding shortcuts of
+    # its own - a view to stand in, a mode to toggle - writes its own
+    # block here, ``viewer_entries()`` being what it composes it from
+    # rather than a copy of the lines it inherits.
+    shortcuts: str = ''
 
     window: GLFWWindow = field(init=False, default=None)
     context: 'moderngl.Context | None' = field(init=False, default=None)
@@ -569,7 +580,7 @@ class GlfwHost:
             output(debug_report(viewer.monitor, self.profile(), self.title))
         elif key == glfw.KEY_F5:
             self.set_vsync(enabled=not self.vsync)
-        elif not self.on_viewer_key(key):
+        elif not self.on_viewer_key(key) and self.moves:
             viewer.press(
                 key_letter(key),
                 prime=bool(mods & glfw.MOD_SHIFT),
@@ -600,6 +611,9 @@ class GlfwHost:
         if key == glfw.KEY_SPACE:
             viewer.reset_camera()
         elif key == glfw.KEY_BACKSPACE:
+            if not self.moves:
+                return False
+
             viewer.reset_cube()
         elif key == glfw.KEY_TAB:
             viewer.exploded = not viewer.exploded
@@ -809,13 +823,30 @@ class GlfwHost:
         if self.viewer.debug:
             self.update_title(swapped)
 
+    @property
+    def help(self) -> str:
+        """
+        Tell the list of shortcuts this window answers.
+
+        Written out from what the host actually does rather than
+        printed from a constant: a window refusing the moves offers
+        none of the keys that play them, and it says so without anybody
+        having to keep a second list in step with the first.
+
+        Returns:
+            The block the window prints when it opens, the one
+            ``shortcuts`` names when it names one.
+
+        """
+        return self.shortcuts or viewer_help(moves=self.moves)
+
     def run(self) -> None:
         """
         Open the window and draw the cube until it is closed.
 
         The shortcuts written here are the ones the host answers, and
         not the ones the viewer knows: a host is free to hold back some
-        of them, and ``shortcuts`` is where it says so.
+        of them, and ``moves`` and ``shortcuts`` are where it says so.
 
         The window is given back however the loop ends, an interruption
         from the keyboard included.
@@ -824,7 +855,7 @@ class GlfwHost:
 
         import glfw
 
-        output(self.shortcuts)
+        output(self.help)
 
         try:
             while not glfw.window_should_close(self.window):

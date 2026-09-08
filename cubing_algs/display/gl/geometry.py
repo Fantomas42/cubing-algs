@@ -195,6 +195,24 @@ class CubeGeometry:
     cubies: tuple[Cubie, ...]
 
     @property
+    def reach(self) -> float:
+        """
+        Measure how far from the middle the outermost piece stands.
+
+        The center of a corner and not its far corner: it is the length
+        of the longest ray leaving the middle of the cube through the
+        place of a piece, which is what an effect throwing the pieces
+        along those rays ranks them by, and the first term of the
+        bounding sphere.
+
+        Returns:
+            The distance from the center of the cube to the center of
+            its farthest cubie, in world units.
+
+        """
+        return max(cubie.center.length() for cubie in self.cubies)
+
+    @property
     def radius(self) -> float:
         """
         Measure the sphere the whole cube fits in.
@@ -215,9 +233,8 @@ class CubeGeometry:
             units.
 
         """
-        return (
-            max(cubie.center.length() for cubie in self.cubies)
-            + max(vertex.position.length() for vertex in self.mesh.vertices)
+        return self.reach + max(
+            vertex.position.length() for vertex in self.mesh.vertices
         )
 
 
