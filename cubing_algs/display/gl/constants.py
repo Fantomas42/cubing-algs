@@ -490,6 +490,17 @@ TRANSPARENCY_REFUSED = (
     'the cube is drawn on the ground of the viewer'
 )
 
+# How long a window nobody is shown waits between two turns of its
+# loop, in seconds. A window that draws nothing has nothing left to
+# pace it: the swap is what a shown window waits on, and a hidden one
+# swaps no buffer at all - so a loop left as it is would spin as fast
+# as the machine reads its events. What the wait buys is the cadence
+# the cube is kept up to date at while nobody looks at it, which is
+# what a window hidden and shown again is hidden for: short enough
+# that no move is heard of late, long enough that the wait costs
+# nothing measurable.
+IDLE_INTERVAL = 0.05
+
 # How long the performance of the rendering is averaged over before
 # being shown, in seconds: short enough to follow a slowdown, long enough
 # not to flicker. It is shown in the title of the window rather than in
@@ -585,6 +596,13 @@ HELP_MOUSE = 'mouse'
 HELP_MOVE = 'move'
 HELP_WINDOW = 'window'
 
+# The keys a window is closed by, named rather than typed into the
+# list: a host driven from outside answers them otherwise - a window
+# opened by another process is put away rather than ended - and the
+# line saying so is found by the keys it names instead of by the words
+# it happened to be written with.
+HELP_CLOSE = 'Esc, Q'
+
 # Where the description of a shortcut starts, counted from the key.
 HELP_COLUMN = 17
 
@@ -621,7 +639,7 @@ VIEWER_SHORTCUTS: tuple[HelpEntry, ...] = (
     HelpEntry('F4', 'Print a performance report'),
     HelpEntry('F5', 'Turn the vsync on and off'),
     HelpEntry('F12', 'Write a screenshot'),
-    HelpEntry('Esc, Q', 'Close the window'),
+    HelpEntry(HELP_CLOSE, 'Close the window'),
 )
 
 

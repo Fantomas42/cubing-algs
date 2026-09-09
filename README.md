@@ -823,6 +823,16 @@ across the screen - a gesture a decorated window answers too.
 `examples/gl_transparent_window.py` plays an algorithm in such a window, and is
 written as a subclass overriding `frame()` alone.
 
+A window can also be taken off the screen without being given back. `hide()`
+and `show()` are what a process opening a window for somebody else needs - a
+tray, a launcher, a window glanced at between two other things - and
+`visible=False` opens one already hidden. Nothing is released, and the loop
+goes on turning behind it: the moves that arrive are played, a tracker
+following a sensor catches up, and what is shown again is the cube as it now
+stands rather than a hiding replayed in front of whoever asked for it back. The
+keys closing a window go through the `on_close()` seam, so a host driven from
+outside is free to put its window away where the loop would have ended.
+
 ### Command Line
 
 ```bash

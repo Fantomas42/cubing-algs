@@ -23,6 +23,7 @@ from unittest import mock
 from cubing_algs.display.gl.constants import DEFAULT_BUDGET
 from cubing_algs.display.gl.constants import GL_VERSION_REQUIRED
 from cubing_algs.display.gl.constants import GLFW_MISSING
+from cubing_algs.display.gl.constants import IDLE_INTERVAL
 from cubing_algs.display.gl.constants import MONITOR_INTERVAL
 from cubing_algs.display.gl.constants import TRANSPARENCY_REFUSED
 from cubing_algs.display.gl.constants import VIEWER_BACKGROUND
@@ -111,10 +112,11 @@ def screens(position: tuple[int, int]) -> Iterator[None]:
         yield
 
 
-def hidden_window(
+def hidden_window(  # noqa: PLR0913
         size: tuple[int, int],
         title: str = WINDOW_TITLE,
         *,
+        visible: bool = True,
         samples: int = 0,
         transparent: bool = False,
         require: int = GL_VERSION_REQUIRED,
@@ -122,9 +124,16 @@ def hidden_window(
     """
     Create the window of a host, without showing it.
 
+    What the host asked for is dropped rather than honored: a suite is
+    run where nothing is looked at, and a window shown by it is a
+    window landing over whatever the machine was doing. What a host
+    means to show is asserted on ``visible`` and on the glfw calls it
+    makes, never on a window truly on a screen.
+
     Args:
         size: Width and height of the window, in pixels.
         title: Title of the window.
+        visible: What the host asked for, unused.
         samples: Samples of its multisampled framebuffer.
         transparent: Whether the desktop is asked to show through.
         require: Minimum OpenGL version code.
@@ -133,6 +142,8 @@ def hidden_window(
         The glfw window handle, made current and left hidden.
 
     """
+    del visible
+
     return create_window(
         size,
         title,
@@ -434,6 +445,152 @@ class TestHostExtension(HiddenHostTestCase):
             self.consumer.run()
 
         self.assertEqual(self.consumer.drawn, 1)
+
+
+class TestHostHidden(HiddenHostTestCase):
+    """Tests for a window taken off the screen without being closed."""
+
+    def test_a_window_opens_where_it_was_asked_to(self) -> None:
+        """Test that a host opened hidden asks glfw for a hidden window."""
+        self.host.visible = False
+
+        with mock.patch(
+                'cubing_algs.display.gl.host.create_window',
+                side_effect=hidden_window,
+        ) as opening:
+            self.host.open()
+
+        self.assertFalse(opening.call_args.kwargs['visible'])
+
+    def test_hiding_takes_the_window_off_the_screen(self) -> None:
+        """Test that a window hidden is a window nobody is shown."""
+        self.host.open()
+
+        with mock.patch('glfw.hide_window') as hiding:
+            self.host.hide()
+
+        hiding.assert_called_once_with(self.host.window)
+        self.assertFalse(self.host.visible)
+
+    def test_showing_puts_the_window_back(self) -> None:
+        """Test that a window shown again is the very same window."""
+        self.host.open()
+        window = self.host.window
+        self.host.hide()
+
+        with mock.patch('glfw.show_window') as showing:
+            self.host.show()
+
+        showing.assert_called_once_with(window)
+        self.assertTrue(self.host.visible)
+        self.assertIs(self.host.window, window)
+
+    def test_hiding_a_host_that_opened_nothing(self) -> None:
+        """Test that a host hidden before it opens opens hidden."""
+        self.host.hide()
+
+        self.assertFalse(self.host.visible)
+        self.assertIsNone(self.host.window)
+
+    def test_the_loop_draws_nothing_behind_a_hidden_window(self) -> None:
+        """Test that a hidden window costs no frame and no swap."""
+        self.host.visible = False
+
+        with (
+                mock.patch(
+                    'glfw.window_should_close', side_effect=[False, True],
+                ),
+                mock.patch('cubing_algs.display.gl.host.time.sleep') as wait,
+                mock.patch('glfw.swap_buffers') as swap,
+                mock.patch.object(self.host, 'frame') as framed,
+        ):
+            self.host.run()
+
+        swap.assert_not_called()
+        framed.assert_not_called()
+        wait.assert_called_once_with(IDLE_INTERVAL)
+
+    def test_the_loop_draws_again_the_moment_it_is_shown(self) -> None:
+        """Test that showing a window is what puts the frames back."""
+        self.host.open()
+
+        with (
+                mock.patch('cubing_algs.display.gl.host.time.sleep'),
+                mock.patch.object(self.host, 'frame') as framed,
+        ):
+            self.host.hide()
+            self.host.idle()
+
+            self.host.show()
+            self.host.tick()
+
+        framed.assert_called_once()
+
+    def test_a_hidden_window_keeps_the_cube_up_to_date(self) -> None:
+        """
+        Test that the moves of a hidden window are played all the same.
+
+        The whole point of hiding a window rather than closing it: the
+        cube is fed while nobody looks at it, so what is shown again is
+        where the cube truly stands.
+        """
+        self.host.open()
+        self.host.hide()
+        self.viewer.push('R')
+
+        with mock.patch('cubing_algs.display.gl.host.time.sleep'):
+            # A move starts when it arrives, so a first turn sets it
+            # turning and the next one lands it.
+            for _turn in range(2):
+                self.host.clock -= self.viewer.duration
+                self.host.idle()
+
+        self.assertTrue(self.viewer.animation.finished)
+
+    def test_a_window_shown_again_is_one_turn_old(self) -> None:
+        """Test that a hiding is not replayed in front of whoever ends it."""
+        import glfw
+
+        self.host.open()
+        self.host.hide()
+
+        with mock.patch('cubing_algs.display.gl.host.time.sleep'):
+            self.host.clock -= 60.0
+            self.host.idle()
+
+            self.host.show()
+            elapsed = glfw.get_time() - self.host.clock
+
+        self.assertLess(elapsed, 1.0)
+
+    def test_settling_lets_the_time_pass_and_draws_nothing(self) -> None:
+        """Test that the cheap half of a frame is the half that is played."""
+        self.host.open()
+
+        # Patched on the class and not on the instance: a viewer is a
+        # slotted dataclass, and there is nowhere on one to hang a
+        # method that is not its own.
+        with (
+                mock.patch.object(Viewer, 'advance') as advanced,
+                mock.patch.object(Viewer, 'draw') as drawn,
+        ):
+            self.host.settle(0.016)
+
+        advanced.assert_called_once_with(0.016)
+        drawn.assert_not_called()
+
+    def test_the_closing_keys_go_through_the_seam(self) -> None:
+        """Test that a host is free to answer them otherwise."""
+        import glfw
+
+        self.host.open()
+
+        with mock.patch.object(self.host, 'on_close') as closing:
+            self.host.on_key(
+                self.host.window, glfw.KEY_Q, 0, glfw.PRESS, 0,
+            )
+
+        closing.assert_called_once_with()
 
 
 class TestHostTitle(HiddenHostTestCase):

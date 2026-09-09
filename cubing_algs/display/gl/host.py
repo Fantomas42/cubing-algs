@@ -16,11 +16,13 @@ glfw is imported lazily, and never before ``create_window()``, the one
 place naming the extra a missing glfw asks for.
 """
 import logging
+import time
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
+from cubing_algs.display.gl.constants import IDLE_INTERVAL
 from cubing_algs.display.gl.constants import TRANSPARENCY_REFUSED
 from cubing_algs.display.gl.constants import VIEWER_TRANSPARENT
 from cubing_algs.display.gl.constants import WINDOW_TITLE
@@ -170,6 +172,15 @@ class GlfwHost:
 
     A consumer layering effects on the cube overrides ``frame()``, and
     inherits the loop, the timing and the counter untouched.
+
+    A window can also be **hidden without being closed**, and the loop
+    goes on turning behind it at the pace of ``idle()``: nothing is
+    drawn and nothing is released, the cube is kept up to date by
+    ``settle()``, and ``show()`` puts back on the screen a cube that
+    stands where it truly stands. It is what a window opened by
+    another process is for - a tray, a launcher - and closing it is
+    then a matter for that process, which is why the keys asking for
+    it go through the ``on_close()`` seam.
     """
 
     viewer: Viewer
@@ -189,6 +200,14 @@ class GlfwHost:
     # then drawn into the window itself, aliased but with nothing in
     # between.
     msaa: bool = True
+
+    # Whether the window is on screen at all. A window opened hidden
+    # is one somebody else decides to show - a tray, a launcher, a
+    # window kept aside between two glances - and it is a state rather
+    # than a mode: a hidden window holds its context, its cube and its
+    # place, and goes on being fed by whatever feeds it, which is the
+    # whole reason to hide one instead of closing it.
+    visible: bool = True
 
     # Whether the keyboard is allowed to turn the cube at all. A host
     # showing a cube turned somewhere else - a window fed by a stream,
@@ -278,6 +297,7 @@ class GlfwHost:
         self.window = create_window(
             viewer.window_size,
             self.title,
+            visible=self.visible,
             samples=self.samples,
             transparent=self.transparent,
         )
@@ -412,6 +432,39 @@ class GlfwHost:
         destroy_window(self.window)
         self.window = None
 
+    def show(self) -> None:
+        """
+        Put the window back on the screen, and draw into it again.
+
+        A window is shown where it was hidden: it kept its context, its
+        cube and its size, and the loop kept the animation up to date
+        while nobody was looking - so what comes back is the cube as it
+        stands and not the cube as it was left. Where a compositor puts
+        it again is its own business, as it is when the window opens.
+        """
+        import glfw
+
+        self.visible = True
+
+        if self.window is not None:
+            glfw.show_window(self.window)
+
+    def hide(self) -> None:
+        """
+        Take the window off the screen, without giving anything back.
+
+        The one gesture that is not closing: nothing is released, the
+        loop goes on turning at the pace of ``idle()``, and whatever
+        feeds the cube goes on feeding it. A window is hidden by
+        somebody meaning to show it again.
+        """
+        import glfw
+
+        self.visible = False
+
+        if self.window is not None:
+            glfw.hide_window(self.window)
+
     def set_vsync(self, *, enabled: bool) -> None:
         """
         Wait for the screen between two frames, or stop waiting for it.
@@ -543,7 +596,7 @@ class GlfwHost:
 
     def on_key(
             self,
-            window: GLFWWindow,
+            _window: GLFWWindow,
             key: int,
             _scancode: int,
             action: int,
@@ -557,7 +610,8 @@ class GlfwHost:
         everything else is handed to the viewer in its own vocabulary.
 
         Args:
-            window: The window the key was pressed in.
+            _window: The window the key was pressed in, unused: a host
+                owns the one window it opened.
             key: The glfw code of the key.
             _scancode: Platform specific code of the key, unused.
             action: Whether the key was pressed, released or repeated.
@@ -572,7 +626,7 @@ class GlfwHost:
         viewer = self.viewer
 
         if key in {glfw.KEY_ESCAPE, glfw.KEY_Q}:
-            glfw.set_window_should_close(window, glfw.TRUE)
+            self.on_close()
         elif key == glfw.KEY_F3:
             viewer.debug = not viewer.debug
             self.reset_title(self.clock)
@@ -587,6 +641,21 @@ class GlfwHost:
                 double=bool(mods & glfw.MOD_CONTROL),
                 wide=bool(mods & glfw.MOD_ALT),
             )
+
+    def on_close(self) -> None:
+        """
+        End the loop, as the keys asking for the window to go do.
+
+        A seam of its own, and the reason is a window that is not the
+        one deciding its own closing: one opened hidden and shown by
+        somebody else is closed by that somebody, so a host is free to
+        answer these keys otherwise - or not at all. What closing means
+        is then settled in one place rather than intercepted key by key
+        by whoever holds the window.
+        """
+        import glfw
+
+        glfw.set_window_should_close(self.window, glfw.TRUE)
 
     def on_viewer_key(self, key: int) -> bool:
         """
@@ -823,6 +892,52 @@ class GlfwHost:
         if self.viewer.debug:
             self.update_title(swapped)
 
+    def settle(self, delta: float) -> None:
+        """
+        Let time pass over the cube, with nothing drawn of it.
+
+        The cheap half of a frame, and the half a hidden window still
+        owes whatever feeds it: the moves that arrived are handed to
+        the animation, the animation is played, and a tracker
+        following a sensor catches up - all of it on the processor,
+        with the GPU untouched. It is what a window hidden for a
+        minute is shown from: the cube stands where it truly stands,
+        instead of replaying the minute in front of whoever asked for
+        it back.
+
+        Drawing is what is left out, and it is left out rather than
+        thrown away afterwards: a hidden window has nowhere to put a
+        frame, and a swap that no screen waits for paces nothing.
+
+        Args:
+            delta: Seconds gone by since the last turn of the loop.
+
+        """
+        self.viewer.advance(delta)
+
+    def idle(self) -> None:
+        """
+        Play one turn of the loop for a window nobody is shown.
+
+        The clock is read and moved on exactly as ``tick()`` does it,
+        so a window shown again is shown one turn old rather than a
+        whole hiding old. The events are read all the same - a window
+        answers a compositor whether or not it is on screen - and the
+        wait is what stands in for the swap: it is the vsync that
+        paces a shown window, and there is none left to pace this one.
+        """
+        import glfw
+
+        now = glfw.get_time()
+
+        self.settle(now - self.clock)
+
+        self.clock = now
+
+        glfw.poll_events()
+
+        time.sleep(IDLE_INTERVAL)
+
     @property
     def help(self) -> str:
         """
@@ -848,6 +963,11 @@ class GlfwHost:
         not the ones the viewer knows: a host is free to hold back some
         of them, and ``moves`` and ``shortcuts`` are where it says so.
 
+        A hidden window turns the loop all the same, at the pace of
+        ``idle()`` rather than at the pace of the screen: what ends the
+        loop is the window being closed, and hiding one is precisely
+        not closing it.
+
         The window is given back however the loop ends, an interruption
         from the keyboard included.
         """
@@ -859,6 +979,9 @@ class GlfwHost:
 
         try:
             while not glfw.window_should_close(self.window):
-                self.tick()
+                if self.visible:
+                    self.tick()
+                else:
+                    self.idle()
         finally:
             self.close()
