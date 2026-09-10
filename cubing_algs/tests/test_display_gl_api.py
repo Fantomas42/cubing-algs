@@ -22,6 +22,7 @@ from cubing_algs.display.gl.constants import VIEWER_SIZE
 from cubing_algs.display.gl.context import GLContextError
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.encode import PNG_SIGNATURE
+from cubing_algs.display.gl.encode import has_pillow
 from cubing_algs.display.gl.viewer import Viewer
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.parsing import parse_moves
@@ -86,6 +87,14 @@ GPU_AVAILABLE = probe_gpu()
 requires_gpu = unittest.skipUnless(
     GPU_AVAILABLE,
     'no OpenGL context available on this machine',
+)
+
+# An animation is a GIF only where Pillow is there to write one:
+# without it the frames are left as the PNG files they were rendered
+# as, which is an animation all the same and none of these assertions.
+requires_pillow = unittest.skipUnless(
+    has_pillow(),
+    'pillow is not installed',
 )
 
 
@@ -194,6 +203,7 @@ class VCubeRenderTestCase(unittest.TestCase):
 class VCubeAnimateTestCase(unittest.TestCase):
     """Tests for VCube.animate()."""
 
+    @requires_pillow
     def test_an_animation_is_written(self) -> None:
         """An animation lands where it was asked to."""
         with TemporaryDirectory() as directory:
@@ -217,6 +227,7 @@ class VCubeAnimateTestCase(unittest.TestCase):
 
         self.assertEqual(cube.state, state)
 
+    @requires_pillow
     def test_a_timed_algorithm_plays_at_its_own_speed(self) -> None:
         """A timed algorithm is a solve, pauses of the cuber included."""
         with TemporaryDirectory() as directory:
@@ -233,6 +244,7 @@ class VCubeAnimateTestCase(unittest.TestCase):
                 gif_duration(timed) - gif_duration(tight), 800,
             )
 
+    @requires_pillow
     def test_the_starting_state_reaches_the_animation(self) -> None:
         """The animation starts from the cube it is given."""
         scrambled = VCube()
@@ -347,6 +359,7 @@ class AlgorithmRenderTestCase(unittest.TestCase):
 class AlgorithmAnimateTestCase(unittest.TestCase):
     """Tests for Algorithm.animate()."""
 
+    @requires_pillow
     def test_an_animation_is_written(self) -> None:
         """An algorithm writes the animation of itself being played."""
         with TemporaryDirectory() as directory:
@@ -356,6 +369,7 @@ class AlgorithmAnimateTestCase(unittest.TestCase):
             self.assertEqual(written, [path])
             self.assertTrue(path.stat().st_size)
 
+    @requires_pillow
     def test_the_algorithm_plays_from_a_solved_cube(self) -> None:
         """The cube starts solved, the algorithm being played on it."""
         with TemporaryDirectory() as directory:
@@ -367,6 +381,7 @@ class AlgorithmAnimateTestCase(unittest.TestCase):
 
             self.assertEqual(algorithm.read_bytes(), cube.read_bytes())
 
+    @requires_pillow
     def test_the_impact_mask_is_off_by_default(self) -> None:
         """Nothing is dimmed unless the impact mask is asked for."""
         with TemporaryDirectory() as directory:

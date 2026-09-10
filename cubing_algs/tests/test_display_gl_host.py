@@ -119,6 +119,7 @@ def hidden_window(  # noqa: PLR0913
         visible: bool = True,
         samples: int = 0,
         transparent: bool = False,
+        focus_on_show: bool = True,
         require: int = GL_VERSION_REQUIRED,
 ) -> GLFWWindow:
     """
@@ -136,6 +137,7 @@ def hidden_window(  # noqa: PLR0913
         visible: What the host asked for, unused.
         samples: Samples of its multisampled framebuffer.
         transparent: Whether the desktop is asked to show through.
+        focus_on_show: Whether showing the window takes the keyboard.
         require: Minimum OpenGL version code.
 
     Returns:
@@ -150,6 +152,7 @@ def hidden_window(  # noqa: PLR0913
         visible=False,
         samples=samples,
         transparent=transparent,
+        focus_on_show=focus_on_show,
         require=require,
     )
 
@@ -461,6 +464,20 @@ class TestHostHidden(HiddenHostTestCase):
             self.host.open()
 
         self.assertFalse(opening.call_args.kwargs['visible'])
+
+    def test_a_window_shown_by_somebody_else_asks_for_no_focus(
+            self,
+    ) -> None:
+        """Test that a host showing itself hands the wish to the window."""
+        self.host.focus_on_show = False
+
+        with mock.patch(
+                'cubing_algs.display.gl.host.create_window',
+                side_effect=hidden_window,
+        ) as opening:
+            self.host.open()
+
+        self.assertFalse(opening.call_args.kwargs['focus_on_show'])
 
     def test_hiding_takes_the_window_off_the_screen(self) -> None:
         """Test that a window hidden is a window nobody is shown."""
