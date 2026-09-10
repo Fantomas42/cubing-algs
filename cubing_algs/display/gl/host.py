@@ -209,6 +209,15 @@ class GlfwHost:
     # whole reason to hide one instead of closing it.
     visible: bool = True
 
+    # Whether ``show()`` pulls the input focus onto this window. A
+    # window opened for its own sake is opened because it was just
+    # asked for, so the focus following it is the answer to that ask -
+    # but a window somebody else shows and hides on their own cadence
+    # is showing itself back on top of whatever the desk was doing
+    # without it, and stealing the keyboard the moment it does is a
+    # window answering a question nobody asked it.
+    focus_on_show: bool = True
+
     # Whether the keyboard is allowed to turn the cube at all. A host
     # showing a cube turned somewhere else - a window fed by a stream,
     # a replay - is not the one entitled to move it: a face played here
@@ -300,6 +309,7 @@ class GlfwHost:
             visible=self.visible,
             samples=self.samples,
             transparent=self.transparent,
+            focus_on_show=self.focus_on_show,
         )
         context = create_window_context()
         self.context = context

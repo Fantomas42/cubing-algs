@@ -223,6 +223,7 @@ def create_window(  # noqa: PLR0913
         visible: bool = True,
         samples: int = 0,
         transparent: bool = False,
+        focus_on_show: bool = True,
         require: int = GL_VERSION_REQUIRED,
 ) -> GLFWWindow:
     """
@@ -251,6 +252,11 @@ def create_window(  # noqa: PLR0913
             caller wanting both draws into an ``OffscreenTarget``.
         transparent: Whether the desktop is asked to show through, the
             window then losing its decoration and floating on top.
+        focus_on_show: Whether ``glfwShowWindow`` steals the input focus
+            away from whatever was in front. The hint is read every time
+            the window is shown again, not only at creation, which is
+            what lets a window put back on screen after being hidden
+            stay behind what the desk was doing without it.
         require: Minimum OpenGL version code, such as 330.
 
     Returns:
@@ -283,6 +289,10 @@ def create_window(  # noqa: PLR0913
     glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
     glfw.window_hint(glfw.VISIBLE, glfw.TRUE if visible else glfw.FALSE)
     glfw.window_hint(glfw.SAMPLES, samples)
+    glfw.window_hint(
+        glfw.FOCUS_ON_SHOW,
+        glfw.TRUE if focus_on_show else glfw.FALSE,
+    )
 
     if transparent:
         glfw.window_hint(glfw.TRANSPARENT_FRAMEBUFFER, glfw.TRUE)
