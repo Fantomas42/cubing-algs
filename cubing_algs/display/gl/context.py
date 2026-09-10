@@ -8,6 +8,7 @@ difference between the two exists.
 All imports of the optional dependencies are lazy: importing this module
 never pulls moderngl nor glfw in.
 """
+import ctypes
 import os
 from importlib.util import find_spec
 from typing import TYPE_CHECKING
@@ -22,6 +23,11 @@ from cubing_algs.display.gl.constants import MODERNGL_MISSING
 from cubing_algs.display.gl.constants import STANDALONE_BACKENDS
 from cubing_algs.display.gl.constants import WINDOW_LIBRARIES
 from cubing_algs.display.gl.constants import WINDOW_TITLE
+from cubing_algs.display.gl.constants import X11_CARDINAL
+from cubing_algs.display.gl.constants import X11_FORMAT_32
+from cubing_algs.display.gl.constants import X11_LIBRARY
+from cubing_algs.display.gl.constants import X11_PROPERTY_REPLACE
+from cubing_algs.display.gl.constants import X11_USER_TIME_ATOM
 from cubing_algs.exceptions import CubingAlgsError
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -256,7 +262,10 @@ def create_window(  # noqa: PLR0913
             away from whatever was in front. The hint is read every time
             the window is shown again, not only at creation, which is
             what lets a window put back on screen after being hidden
-            stay behind what the desk was doing without it.
+            stay behind what the desk was doing without it. It is only
+            half the answer on X11, where the window manager focuses a
+            window it sees mapped whether or not glfw asked it to, and
+            ``deny_focus_on_map()`` is the other half.
         require: Minimum OpenGL version code, such as 330.
 
     Returns:
@@ -305,9 +314,77 @@ def create_window(  # noqa: PLR0913
         msg = f'glfw could not create an OpenGL { require } window'
         raise GLContextError(msg)
 
+    if not focus_on_show:
+        deny_focus_on_map(window)
+
     glfw.make_context_current(window)
 
     return window
+
+
+def deny_focus_on_map(window: GLFWWindow) -> None:
+    """
+    Tell the window manager not to take the keyboard when this maps.
+
+    The other half of ``focus_on_show``, and it is owed to X11 alone:
+    the hint keeps glfw from asking for the focus, but showing a window
+    there is an ``XMapWindow`` and a window manager focuses a window it
+    has just seen mapped whether or not anybody asked. So the wish is
+    written where a window manager reads it, ``_NET_WM_USER_TIME`` held
+    at zero, which EWMH defines as a window that is not to be activated
+    on map. Nothing is asked of the window afterwards: the property
+    stays on it, and a window hidden and shown all day long is mapped
+    again under the same wish.
+
+    A window still takes the focus when it is clicked - what is refused
+    is the map, and never the hand.
+
+    Args:
+        window: The handle returned by create_window().
+
+    """
+    import glfw
+
+    if glfw.get_platform() != glfw.PLATFORM_X11:
+        return
+
+    try:
+        xlib = ctypes.CDLL(X11_LIBRARY)
+    except OSError:
+        # A window is worth having with the focus wrong; it is not
+        # worth losing over an Xlib that could not be loaded.
+        return
+
+    xlib.XInternAtom.restype = ctypes.c_ulong
+    xlib.XInternAtom.argtypes = [
+        ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int,
+    ]
+    xlib.XChangeProperty.argtypes = [
+        ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong,
+        ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_int,
+    ]
+    xlib.XFlush.argtypes = [ctypes.c_void_p]
+
+    display = ctypes.c_void_p(
+        glfw.get_x11_display(),  # type: ignore[no-untyped-call]
+    )
+    handle = glfw.get_x11_window(window)
+
+    atom = xlib.XInternAtom(display, X11_USER_TIME_ATOM, 0)
+    never = ctypes.c_ulong(0)
+
+    xlib.XChangeProperty(
+        display,
+        handle,
+        atom,
+        X11_CARDINAL,
+        X11_FORMAT_32,
+        X11_PROPERTY_REPLACE,
+        ctypes.byref(never),
+        1,
+    )
+
+    xlib.XFlush(display)
 
 
 def transparency_granted(window: GLFWWindow) -> bool:

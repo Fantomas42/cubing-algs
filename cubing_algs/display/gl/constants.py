@@ -53,6 +53,25 @@ GLFW_WAYLAND_LOCKED = (
     'environment, or import cubing_algs.display.gl before glfw.'
 )
 
+# What a window manager is told when a window asks not to take the
+# keyboard as it is mapped. The glfw hint stops glfw from *asking* for
+# the focus, and that is all it can do: on X11 the show is an
+# ``XMapWindow`` and the window manager focuses a freshly mapped window
+# by itself. EWMH says a _NET_WM_USER_TIME of zero means the window is
+# not to be activated on map, and that is the other half of the hint -
+# without it, a window shown again lands in front of the keyboard
+# whatever the hint says.
+X11_LIBRARY = 'libX11.so.6'
+X11_USER_TIME_ATOM = b'_NET_WM_USER_TIME'
+
+# The three constants of Xlib the property is written with: the type it
+# is declared as, the width of one of its values in bits, and the mode
+# that replaces whatever was there. They are spelled out rather than
+# read from a binding, ctypes being the whole of what is used here.
+X11_CARDINAL = 6
+X11_FORMAT_32 = 32
+X11_PROPERTY_REPLACE = 0
+
 # Angle of a single quarter turn, in radians.
 QUARTER_TURN = math.pi / 2
 

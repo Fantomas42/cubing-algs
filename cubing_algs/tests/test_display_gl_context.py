@@ -9,11 +9,16 @@ from unittest import mock
 from cubing_algs.display.gl import context
 from cubing_algs.display.gl.constants import GLFW_VARIANT_ENVIRONMENT
 from cubing_algs.display.gl.constants import GLFW_VARIANT_FALLBACK
+from cubing_algs.display.gl.constants import X11_CARDINAL
+from cubing_algs.display.gl.constants import X11_FORMAT_32
+from cubing_algs.display.gl.constants import X11_PROPERTY_REPLACE
+from cubing_algs.display.gl.constants import X11_USER_TIME_ATOM
 from cubing_algs.display.gl.context import GLContextError
 from cubing_algs.display.gl.context import check_glfw_platform
 from cubing_algs.display.gl.context import create_standalone_context
 from cubing_algs.display.gl.context import create_window
 from cubing_algs.display.gl.context import create_window_context
+from cubing_algs.display.gl.context import deny_focus_on_map
 from cubing_algs.display.gl.context import describe
 from cubing_algs.display.gl.context import has_glfw
 from cubing_algs.display.gl.context import has_moderngl
@@ -350,3 +355,103 @@ class TestTransparencyGranted(unittest.TestCase):
             modules['glfw'].get_window_attrib.return_value = 0
 
             self.assertFalse(transparency_granted(object()))
+
+
+class TestDenyFocusOnMap(unittest.TestCase):
+    """Tests for the window manager side of ``focus_on_show``."""
+
+    def test_a_window_asking_for_the_focus_is_left_alone(self) -> None:
+        """Test that a window shown for its own sake writes nothing."""
+        with mock.patch('glfw.init', return_value=True), \
+                mock.patch('glfw.window_hint'), \
+                mock.patch('glfw.create_window', return_value=object()), \
+                mock.patch('glfw.make_context_current'), \
+                mock.patch(
+                    'cubing_algs.display.gl.context.check_glfw_platform',
+                ), \
+                mock.patch(
+                    'cubing_algs.display.gl.context.deny_focus_on_map',
+                ) as deny:
+            create_window((64, 64))
+
+        self.assertEqual(deny.call_count, 0)
+
+    def test_a_window_refusing_the_focus_says_so_to_the_manager(
+            self,
+    ) -> None:
+        """Test that the hint alone is never the whole of the answer."""
+        window = object()
+
+        with mock.patch('glfw.init', return_value=True), \
+                mock.patch('glfw.window_hint'), \
+                mock.patch('glfw.create_window', return_value=window), \
+                mock.patch('glfw.make_context_current'), \
+                mock.patch(
+                    'cubing_algs.display.gl.context.check_glfw_platform',
+                ), \
+                mock.patch(
+                    'cubing_algs.display.gl.context.deny_focus_on_map',
+                ) as deny:
+            create_window((64, 64), focus_on_show=False)
+
+        self.assertEqual(deny.call_count, 1)
+        self.assertIs(deny.call_args[0][0], window)
+
+    def test_nothing_is_written_off_x11(self) -> None:
+        """Test that a platform with no Xlib to reach is left alone."""
+        with mock.patch.dict(
+                'sys.modules', {'glfw': mock.MagicMock()},
+        ) as modules, \
+                mock.patch('ctypes.CDLL') as library:
+            modules['glfw'].get_platform.return_value = 'cocoa'
+            modules['glfw'].PLATFORM_X11 = 'x11'
+
+            deny_focus_on_map(object())
+
+        self.assertEqual(library.call_count, 0)
+
+    def test_a_missing_xlib_costs_the_focus_and_not_the_window(self) -> None:
+        """Test that an Xlib nothing can load is not an error."""
+        with mock.patch.dict(
+                'sys.modules', {'glfw': mock.MagicMock()},
+        ) as modules, \
+                mock.patch(
+                    'ctypes.CDLL', side_effect=OSError,
+                ) as library:
+            modules['glfw'].get_platform.return_value = 'x11'
+            modules['glfw'].PLATFORM_X11 = 'x11'
+
+            # Returning at all is the whole answer: the window opens
+            # with the focus wrong rather than not opening.
+            deny_focus_on_map(object())
+
+        self.assertEqual(library.call_count, 1)
+
+    def test_the_property_a_manager_reads(self) -> None:
+        """Test that the user time is held at zero on the window."""
+        xlib = mock.MagicMock()
+        xlib.XInternAtom.return_value = 287
+
+        with mock.patch.dict(
+                'sys.modules', {'glfw': mock.MagicMock()},
+        ) as modules, \
+                mock.patch('ctypes.CDLL', return_value=xlib):
+            modules['glfw'].get_platform.return_value = 'x11'
+            modules['glfw'].PLATFORM_X11 = 'x11'
+            modules['glfw'].get_x11_display.return_value = 42
+            modules['glfw'].get_x11_window.return_value = 1024
+
+            deny_focus_on_map(object())
+
+        name = xlib.XInternAtom.call_args[0][1]
+        self.assertEqual(name, X11_USER_TIME_ATOM)
+
+        arguments = xlib.XChangeProperty.call_args[0]
+
+        self.assertEqual(arguments[1], 1024)
+        self.assertEqual(arguments[2], 287)
+        self.assertEqual(arguments[3], X11_CARDINAL)
+        self.assertEqual(arguments[4], X11_FORMAT_32)
+        self.assertEqual(arguments[5], X11_PROPERTY_REPLACE)
+
+        self.assertEqual(xlib.XFlush.call_count, 1)
