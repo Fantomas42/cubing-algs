@@ -502,6 +502,38 @@ class TestHostHidden(HiddenHostTestCase):
         self.assertTrue(self.host.visible)
         self.assertIs(self.host.window, window)
 
+    def test_a_transparent_window_shown_again_floats_again(self) -> None:
+        """Test that the state a hidden window lost is asked for again."""
+        import glfw
+
+        self.host.transparent = True
+        self.host.open()
+        window = self.host.window
+        self.host.hide()
+
+        with (
+                mock.patch('glfw.show_window'),
+                mock.patch('glfw.set_window_attrib') as floating,
+        ):
+            self.host.show()
+
+        floating.assert_called_once_with(
+            window, glfw.FLOATING, glfw.TRUE,
+        )
+
+    def test_an_opaque_window_shown_again_does_not_float(self) -> None:
+        """Test that a plain window is left in the layer it was put in."""
+        self.host.open()
+        self.host.hide()
+
+        with (
+                mock.patch('glfw.show_window'),
+                mock.patch('glfw.set_window_attrib') as floating,
+        ):
+            self.host.show()
+
+        floating.assert_not_called()
+
     def test_hiding_a_host_that_opened_nothing(self) -> None:
         """Test that a host hidden before it opens opens hidden."""
         self.host.hide()

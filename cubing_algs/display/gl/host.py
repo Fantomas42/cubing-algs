@@ -451,12 +451,19 @@ class GlfwHost:
         while nobody was looking - so what comes back is the cube as it
         stands and not the cube as it was left. Where a compositor puts
         it again is its own business, as it is when the window opens.
+
+        A transparent window floats, and a window manager forgets it
+        does the moment the window is hidden: a withdrawn window has its
+        state wiped, and mapping it again restores nothing. So the wish
+        is written again before the window is mapped, where it is read.
         """
         import glfw
 
         self.visible = True
 
         if self.window is not None:
+            if self.transparent:
+                glfw.set_window_attrib(self.window, glfw.FLOATING, glfw.TRUE)
             glfw.show_window(self.window)
 
     def hide(self) -> None:
