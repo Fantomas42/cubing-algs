@@ -2,7 +2,7 @@
 import unittest
 
 from cubing_algs.exceptions import InvalidMoveError
-from cubing_algs.extensions.rotate_2x2x2 import rotate_move
+from cubing_algs.extensions.rotate import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.vcube import VCube

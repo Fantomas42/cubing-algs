@@ -203,9 +203,18 @@ class ComputeCyclesTestCase(unittest.TestCase):  # noqa: PLR0904
 
     def test_big_cubes_algorithm_order(self) -> None:
         """Test returned value for algorithm dedicated to big cubes."""
-        algorithm = Algorithm.parse_moves("R2 u' l' 2F'")
+        algorithm = Algorithm.parse_moves("R2 u' l' 4F'")
         result = compute_cycles(algorithm)
         self.assertEqual(result, -1)
+
+    def test_inner_layer_algorithm_order(self) -> None:
+        """Test an inner layer number, 2F being the S slice on 3x3x3."""
+        algorithm = Algorithm.parse_moves("R2 u' l' 2F'")
+        result = compute_cycles(algorithm)
+        self.assertEqual(result, 420)
+        self.assertEqual(
+            result, compute_cycles(Algorithm.parse_moves("R2 u' l' S'")),
+        )
 
     def test_input_with_pauses_and_time(self) -> None:
         """Test that compute_cycles accepts Algorithm objects."""

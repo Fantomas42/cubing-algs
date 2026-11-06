@@ -34,7 +34,7 @@ from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
 from cubing_algs.constants import SOLVED_EP
 from cubing_algs.constants import SOLVED_SO
-from cubing_algs.extensions import rotate_3x3x3
+from cubing_algs.extensions import rotate
 
 
 def build_corner_lookup_table() -> dict[tuple[int, int], int]:
@@ -255,7 +255,7 @@ def cubies_to_facelets(  # noqa: PLR0913, PLR0917
     if so != SOLVED_SO and scheme:
         rotations = OFFSET_ORIENTATION_MAP[str(so[0]) + str(so[2])]
         for rotation in rotations.split(' '):
-            scheme = rotate_3x3x3.rotate_move(scheme, rotation)
+            scheme = rotate.rotate_move(scheme, rotation)
 
     cache_key = (tuple(cp), tuple(co), tuple(ep), tuple(eo), tuple(so), scheme)
     cached_result = CACHE.get_facelets(cache_key)

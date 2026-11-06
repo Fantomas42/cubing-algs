@@ -3,7 +3,7 @@ import unittest
 
 from cubing_algs.constants import FACE_ORDER
 from cubing_algs.exceptions import NotSupportedCubeSizeError
-from cubing_algs.extensions.rotate_dynamic import rotate_move
+from cubing_algs.extensions.rotate import rotate_move
 from cubing_algs.solved_state import get_solved_facelets
 from cubing_algs.solved_state import get_unique_facelets
 from cubing_algs.vcube import VCube

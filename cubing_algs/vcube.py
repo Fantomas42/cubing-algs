@@ -27,9 +27,7 @@ from cubing_algs.exceptions import InvalidFaceIndexError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.exceptions import InvalidOrientationError
 from cubing_algs.exceptions import NotSupportedCubeSizeError
-from cubing_algs.extensions import rotate_2x2x2
-from cubing_algs.extensions import rotate_3x3x3
-from cubing_algs.extensions import rotate_dynamic
+from cubing_algs.extensions import rotate
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.facelets import facelets_to_cubies
 from cubing_algs.integrity import VCubeIntegrityChecker
@@ -342,14 +340,9 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             return self._state
 
         try:
-            if self.size == 2:
-                self._state = rotate_2x2x2.rotate_moves(self._state, moves_str)
-            elif self.size == 3:
-                self._state = rotate_3x3x3.rotate_moves(self._state, moves_str)
-            else:
-                self._state = rotate_dynamic.rotate_moves(
-                    self._state, moves_str, size=self.size,
-                )
+            self._state = rotate.rotate_moves(
+                self._state, moves_str, self.size,
+            )
         except ValueError as e:
             raise InvalidMoveError(str(e)) from e
         else:
