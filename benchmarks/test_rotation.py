@@ -10,6 +10,7 @@ across any rewrite of the native rotation kernel. Run them with:
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
+from cubing_algs.algorithm import Algorithm
 from cubing_algs.facelets import cubies_to_facelets
 from cubing_algs.parsing import parse_moves
 from cubing_algs.vcube import VCube
@@ -71,6 +72,16 @@ def test_rotate_algorithm(benchmark: BenchmarkFixture) -> None:
 def test_parse_moves(benchmark: BenchmarkFixture) -> None:
     """Parsing, the usual step before any execution."""
     benchmark(parse_moves, T_PERM)
+
+
+def test_parse_moves_validated(benchmark: BenchmarkFixture) -> None:
+    """Parsing through the public default, which cleans and validates."""
+    benchmark(Algorithm.parse_moves, T_PERM)
+
+
+def test_parse_and_rotate(benchmark: BenchmarkFixture) -> None:
+    """The real user path: parse a string, then execute it."""
+    benchmark(lambda: VCube().rotate(Algorithm.parse_moves(T_PERM)))
 
 
 def test_cubies_to_facelets_scheme(benchmark: BenchmarkFixture) -> None:

@@ -9,11 +9,13 @@ from unittest.mock import patch
 from cubing_algs.algorithm import Algorithm
 from cubing_algs.ergonomics import ErgonomicsData
 from cubing_algs.ergonomics import HandDominance
+from cubing_algs.ergonomics import compute_ergonomics
 from cubing_algs.exceptions import InvalidCubeSizeError
 from cubing_algs.exceptions import InvalidMoveError
 from cubing_algs.impacts import ImpactData
 from cubing_algs.move import Move
 from cubing_algs.parsing import parse_moves
+from cubing_algs.structure import compute_structure
 from cubing_algs.transform.invert import invert_moves
 from cubing_algs.transform.optimize import optimize_do_undo_moves
 from cubing_algs.transform.optimize import optimize_double_moves
@@ -1876,3 +1878,24 @@ class AlgorithmToDictTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("R U R' U'")
         result = algo.to_dict(size=4)
         self.assertEqual(len(result['impacts']['cube']), 6 * 4 * 4)
+
+    def test_analyses_computed_once(self) -> None:
+        """Structure and ergonomics are computed once, memory included."""
+        algo = Algorithm.parse_moves("R U R' U' R' F R2 U' R' U' R U R' F'")
+        with (
+            patch(
+                'cubing_algs.algorithm.compute_structure',
+                wraps=compute_structure,
+            ) as structure,
+            patch(
+                'cubing_algs.algorithm.compute_ergonomics',
+                wraps=compute_ergonomics,
+            ) as ergonomics,
+        ):
+            result = algo.to_dict()
+
+        self.assertEqual(structure.call_count, 1)
+        self.assertEqual(ergonomics.call_count, 1)
+        self.assertEqual(
+            result['memory']['memory_score'], algo.memory.memory_score,
+        )

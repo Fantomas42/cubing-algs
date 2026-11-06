@@ -18,9 +18,7 @@ Classification System:
 The module follows speedcubing conventions and the Beyer-Hardwick (BH)
 classification system for systematic algorithm analysis.
 """
-import typing
-from collections import OrderedDict
-from collections.abc import MutableMapping
+from bisect import bisect_left
 from typing import TYPE_CHECKING
 from typing import Literal
 from typing import NamedTuple
@@ -63,80 +61,6 @@ EFFICIENCY_FAIR_AVG_MOVES = 12  # Avg moves for "Fair"
 DEFAULT_MAX_NESTING_DEPTH = 10  # Maximum recursion depth for nested structures
 # Very permissive score for classification checks
 CLASSIFICATION_MIN_SCORE = 0.1
-
-# Cache size limits (LRU behavior)
-MAX_INVERSE_CACHE_SIZE = 1000  # Maximum entries in inverse cache
-
-
-class BoundedCache[K, V](MutableMapping[K, V]):
-    """
-    Bounded cache with LRU eviction using OrderedDict.
-
-    This is a lightweight wrapper around OrderedDict that automatically
-    evicts the least recently used item when capacity is reached.
-    """
-
-    def __init__(self, maxsize: int) -> None:
-        """Initialize bounded cache with maximum size."""
-        self._cache: OrderedDict[K, V] = OrderedDict()
-        self._maxsize = maxsize
-
-    def __getitem__(self, key: K) -> V:
-        """
-        Get item from cache and mark as recently used.
-
-        Args:
-            key: Cache key to retrieve.
-
-        Returns:
-            Cached value for the given key.
-
-        """
-        value = self._cache[key]
-        self._cache.move_to_end(key)
-        return value
-
-    def __setitem__(self, key: K, value: V) -> None:
-        """Set item in cache, evicting least recently used if at capacity."""
-        if key in self._cache:
-            self._cache.move_to_end(key)
-        elif len(self._cache) >= self._maxsize:
-            self._cache.popitem(last=False)  # Remove oldest (LRU)
-        self._cache[key] = value
-
-    def __contains__(self, key: object) -> bool:
-        """
-        Check membership without promoting the key as recently used.
-
-        Returns:
-            True if the key is in the cache, False otherwise.
-
-        """
-        return key in self._cache
-
-    def __delitem__(self, key: K) -> None:
-        """Remove item from cache."""
-        del self._cache[key]
-
-    def __iter__(self) -> typing.Iterator[K]:
-        """
-        Iterate over cache keys.
-
-        Returns:
-            Iterator over cache keys.
-
-        """
-        return iter(self._cache)
-
-    def __len__(self) -> int:
-        """
-        Return number of items in cache.
-
-        Returns:
-            Number of cached items.
-
-        """
-        return len(self._cache)
 
 
 type StructureType = Literal['conjugate', 'commutator']
@@ -334,10 +258,104 @@ def detect_move_cancellations(
     return last_move.raw_base_move == first_move.raw_base_move
 
 
+class Candidate(NamedTuple):
+    """
+    A structure found by the search, before it is built and classified.
+
+    The search works on positions and lengths only: the setup and action
+    algorithms and the classification are built for the retained
+    candidates alone.
+    """
+
+    type: StructureType
+    start: int  # Start index in the searched algorithm
+    end: int  # End index in the searched algorithm
+    setup_len: int  # Length of the A part
+    action_len: int  # Length of the B part
+    score: float  # Quality score (higher is better)
+    is_pure: bool  # Pure commutator (8 moves)
+
+
+class MoveIndex(NamedTuple):
+    """
+    An algorithm prepared for the search of inverse sub-sequences.
+
+    Moves are compared as strings, so the search builds no intermediate
+    Algorithm. The positions of each move let the search jump straight to
+    the places where an inverse sub-sequence can start.
+    """
+
+    moves: list[str]  # Move strings, in order
+    inverses: list[str]  # Inverse of the move at the same position
+    positions: dict[str, list[int]]  # Ascending positions of each move
+
+
+def build_move_index(algo: 'Algorithm') -> MoveIndex:
+    """
+    Prepare an untimed algorithm for the structure search.
+
+    Args:
+        algo: The algorithm to index, without timing.
+
+    Returns:
+        The move strings, their inverses and the positions of each move.
+
+    """
+    moves = [move.data for move in algo]
+    inverses = [move.inverted.data for move in algo]
+    positions: dict[str, list[int]] = {}
+    for position, move in enumerate(moves):
+        positions.setdefault(move, []).append(position)
+
+    return MoveIndex(moves, inverses, positions)
+
+
+def inverse_at(index: MoveIndex, start: int, length: int) -> list[str]:
+    """
+    Return the inverse of a sub-sequence of the indexed algorithm.
+
+    Args:
+        index: The indexed algorithm.
+        start: Start of the sub-sequence.
+        length: Length of the sub-sequence.
+
+    Returns:
+        The move strings of the inverse sub-sequence.
+
+    """
+    return index.inverses[start:start + length][::-1]
+
+
+def has_commutator_cancellations(
+    setup: 'Algorithm',
+    action: 'Algorithm',
+) -> bool:
+    """
+    Detect if moves can cancel at a boundary of the commutator [A, B].
+
+    The three boundaries of A B A' B' are checked: A|B, B|A' and A'|B'.
+
+    Args:
+        setup: The A part of the commutator.
+        action: The B part of the commutator.
+
+    Returns:
+        True if moves can cancel at one of the boundaries.
+
+    """
+    setup_inv = inverse_sequence(setup)
+    action_inv = inverse_sequence(action)
+
+    return (
+        detect_move_cancellations(setup, action) or
+        detect_move_cancellations(action, setup_inv) or
+        detect_move_cancellations(setup_inv, action_inv)
+    )
+
+
 def classify_commutator(
     setup: 'Algorithm',
     action: 'Algorithm',
-    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
 ) -> StructureClassification:
     """
     Classify a commutator based on speedcubing taxonomy.
@@ -351,7 +369,6 @@ def classify_commutator(
     Args:
         setup: The A part of the commutator
         action: The B part of the commutator
-        inverse_cache: Cache for inverse sequences (key: str(pattern))
 
     Returns:
         Classification string (pure, A9, orthogonal, extended, or other).
@@ -366,22 +383,7 @@ def classify_commutator(
             action_len == PURE_COMMUTATOR_ACTION_LEN):
         return 'pure'
 
-    # Check for potential cancellations (use cached inverse)
-    setup_key = str(setup)
-    if setup_key not in inverse_cache:
-        inverse_cache[setup_key] = inverse_sequence(setup)
-    setup_inv = inverse_cache[setup_key]
-
-    action_key = str(action)
-    if action_key not in inverse_cache:
-        inverse_cache[action_key] = inverse_sequence(action)
-    action_inv = inverse_cache[action_key]
-
-    has_cancel = (
-        detect_move_cancellations(setup, action) or
-        detect_move_cancellations(action, setup_inv) or
-        detect_move_cancellations(setup_inv, action_inv)
-    )
+    has_cancel = has_commutator_cancellations(setup, action)
 
     # A9: Would be 10 moves but has one cancellation
     if total_moves == COMMUTATOR_A9_TOTAL_MOVES and has_cancel:
@@ -396,6 +398,33 @@ def classify_commutator(
         return 'extended'
 
     return 'other'
+
+
+def contains_commutator(algo: 'Algorithm') -> bool:
+    """
+    Check if a commutator is detected in an algorithm.
+
+    The detection uses the permissive thresholds of the classification:
+    the setup length adapted to the algorithm length and the
+    CLASSIFICATION_MIN_SCORE.
+
+    Args:
+        algo: The algorithm to search.
+
+    Returns:
+        True if at least one detected structure is a commutator.
+
+    """
+    if algo.has_times:
+        algo = untime_algorithm(algo)
+
+    candidates = select_candidates(
+        build_move_index(algo),
+        calculate_max_setup_length(len(algo)),
+        CLASSIFICATION_MIN_SCORE,
+    )
+
+    return any(c.type == 'commutator' for c in candidates)
 
 
 def classify_conjugate(
@@ -414,72 +443,26 @@ def classify_conjugate(
     Args:
         setup: The setup (A) part of the conjugate.
         action: The action (B) part of the conjugate.
-        nesting_depth: The nesting depth
+        nesting_depth: The nesting depth; at DEFAULT_MAX_NESTING_DEPTH
+            and beyond, the action is no longer searched.
 
     Returns:
         Classification string (simple, nested or multi-setup).
 
     """
-    setup_len = len(setup)
-
-    # Check if action contains nested structures (skip at max depth to
-    # guard against unbounded recursion: classify_conjugate →
-    # detect_structures → detect_conjugate → classify_conjugate)
-    has_nested = False
-    if nesting_depth < DEFAULT_MAX_NESTING_DEPTH:
-        max_setup = calculate_max_setup_length(len(action))
-        action_structures = detect_structures(
-            action,
-            max_setup_len=max_setup,
-            min_score=CLASSIFICATION_MIN_SCORE,
-            nesting_depth=nesting_depth + 1,
-        )
-        has_nested = any(s.type == 'commutator' for s in action_structures)
-
-    if has_nested:
+    if (nesting_depth < DEFAULT_MAX_NESTING_DEPTH and
+            contains_commutator(action)):
         return 'nested'
 
-    if setup_len >= MULTI_SETUP_MIN_LENGTH:
+    if len(setup) >= MULTI_SETUP_MIN_LENGTH:
         return 'multi-setup'
 
     return 'simple'
 
 
-def is_inverse_at(
-    algo: 'Algorithm',
-    start: int,
-    pattern: 'Algorithm',
-    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
-) -> bool:
-    """
-    Check if the inverse of pattern appears at the given position.
-
-    Args:
-        algo: The algorithm to check
-        start: Position to check
-        pattern: The pattern to invert and match
-        inverse_cache: Cache for inverse sequences (key: str(pattern))
-
-    Returns:
-        True if the inverse appears at the position, False otherwise.
-
-    """
-    if start + len(pattern) > len(algo):
-        return False
-
-    # Use cache (cache by string representation)
-    pattern_key = str(pattern)
-    if pattern_key not in inverse_cache:
-        inverse_cache[pattern_key] = inverse_sequence(pattern)
-    inverse = inverse_cache[pattern_key]
-
-    # Vectorized comparison: slice comparison is faster than element-by-element
-    return algo[start:start + len(inverse)] == inverse
-
-
 def score_structure(
-    setup: 'Algorithm',
-    action: 'Algorithm',
+    setup_len: int,
+    action_len: int,
     *,
     is_commutator: bool = False,
     is_pure: bool = False,
@@ -494,8 +477,8 @@ def score_structure(
     - Pure commutators (8-move optimal 3-cycles) over longer alternatives
 
     Args:
-        setup: The setup (A) part of the structure.
-        action: The action (B) part of the structure.
+        setup_len: Length of the setup (A) part of the structure.
+        action_len: Length of the action (B) part of the structure.
         is_commutator: True for commutator [A, B] = A B A' B',
             False for conjugate [A: B] = A B A'.
         is_pure: True for pure 8-move commutators (setup=2, action=2).
@@ -506,26 +489,26 @@ def score_structure(
         Quality score (higher is better, 0-100+ range).
 
     """
-    if len(setup) == 0 or len(action) == 0:
+    if setup_len == 0 or action_len == 0:
         return 0.0
 
     # Compression ratio: how much we save by using bracket notation
     # Conjugate [A: B] = A B A' → original = 2|A| + |B|
     # Commutator [A, B] = A B A' B' → original = 2|A| + 2|B|
     if is_commutator:
-        original_length = len(setup) * 2 + len(action) * 2
+        original_length = setup_len * 2 + action_len * 2
     else:
-        original_length = len(setup) * 2 + len(action)
-    compressed_length = len(setup) + len(action)
+        original_length = setup_len * 2 + action_len
+    compressed_length = setup_len + action_len
     compression_ratio = (original_length - compressed_length) / original_length
 
     # Favor longer actions (more meaningful)
-    action_weight = min(len(action) / ACTION_WEIGHT_DIVISOR, 1.0)
+    action_weight = min(action_len / ACTION_WEIGHT_DIVISOR, 1.0)
 
     # Penalize very long setups relative to action
     setup_penalty = 1.0
-    if len(setup) > len(action):
-        setup_penalty = len(action) / len(setup)
+    if setup_len > action_len:
+        setup_penalty = action_len / setup_len
 
     base = compression_ratio * action_weight * setup_penalty * SCORE_MULTIPLIER
     if is_pure and is_commutator:
@@ -533,168 +516,222 @@ def score_structure(
     return base
 
 
-def detect_conjugate(
-    algo: 'Algorithm',
+def find_conjugate(
+    index: MoveIndex,
     start: int,
     max_setup_len: int,
-    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
-    nesting_depth: int = 0,
-) -> Structure | None:
+) -> Candidate | None:
     """
-    Detect a conjugate pattern [A: B] = A B A' starting at the given position.
+    Find the best conjugate [A: B] = A B A' starting at the given position.
+
+    For each setup length, only the positions holding the first move of
+    A' are tried as the end of B. On equal scores the shortest setup,
+    then the shortest action, wins.
 
     Args:
-        algo: The algorithm to search
+        index: The indexed algorithm to search
         start: Starting position
         max_setup_len: Maximum setup length
-        inverse_cache: Cache for inverse sequences (key: str(algo))
-        nesting_depth: The nesting depth
 
     Returns:
-        Best conjugate structure found, or None if no valid structure exists.
+        Best conjugate candidate found, or None if no valid structure exists.
 
     """
-    from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
+    moves = index.moves
+    algo_len = len(moves)
+    best: Candidate | None = None
 
-    best_structure: Structure | None = None
-
-    # Cache algorithm length to avoid repeated calls
-    algo_len = len(algo)
-
-    # Try different setup lengths
     for setup_len in range(1, max_setup_len + 1):
         if start + setup_len * 2 > algo_len:
             break
 
-        setup = Algo(algo[start:start + setup_len])
+        setup_inv = inverse_at(index, start, setup_len)
+        occurrences = index.positions.get(setup_inv[0], [])
+        first = bisect_left(occurrences, start + setup_len + 1)
 
-        # Look for A' after some action B
-        for action_len in range(1, algo_len - start - setup_len * 2 + 1):
-            action_end = start + setup_len + action_len
-            action = Algo(algo[start + setup_len:action_end])
+        # A' starts right after B, and must fit in the algorithm
+        for action_end in occurrences[first:]:
+            if action_end + setup_len > algo_len:
+                break
+            if moves[action_end:action_end + setup_len] != setup_inv:
+                continue
 
-            # Check if A' appears after B (uses cached inverse)
-            if is_inverse_at(
-                algo, action_end, setup, inverse_cache,
-            ):
-                score = score_structure(
-                    setup, action, is_commutator=False,
+            action_len = action_end - start - setup_len
+            score = score_structure(setup_len, action_len)
+            if best is None or score > best.score:
+                best = Candidate(
+                    type='conjugate',
+                    start=start,
+                    end=action_end + setup_len,
+                    setup_len=setup_len,
+                    action_len=action_len,
+                    score=score,
+                    is_pure=False,
                 )
 
-                if best_structure is None or score > best_structure.score:
-                    # Classify and analyze the conjugate
-                    classification = classify_conjugate(
-                        setup, action,
-                        nesting_depth,
-                    )
-                    has_cancel = detect_move_cancellations(setup, action)
-                    move_count = setup_len * 2 + action_len
-
-                    best_structure = Structure(
-                        type='conjugate',
-                        setup=setup,
-                        action=action,
-                        start=start,
-                        end=action_end + setup_len,
-                        score=score,
-                        classification=classification,
-                        has_cancellations=has_cancel,
-                        move_count=move_count,
-                        is_pure=False,
-                    )
-
-    return best_structure
+    return best
 
 
-def detect_commutator(
-    algo: 'Algorithm',
+def find_commutator(
+    index: MoveIndex,
     start: int,
     max_part_len: int,
-    inverse_cache: dict[str, 'Algorithm'] | BoundedCache[str, 'Algorithm'],
-) -> Structure | None:
+) -> Candidate | None:
     """
-    Detect a commutator pattern [A, B] = A B A' B'.
+    Find the best commutator [A, B] = A B A' B' at the given position.
+
+    For each A length, only the positions holding the first move of A'
+    are tried as the end of B. On equal scores the shortest A, then the
+    shortest B, wins.
 
     Args:
-        algo: The algorithm to search
+        index: The indexed algorithm to search
         start: Starting position
         max_part_len: Maximum length for A and B parts
-        inverse_cache: Cache for inverse sequences (key: str(algo))
 
     Returns:
-        Best commutator structure found, or None if no valid structure exists.
+        Best commutator candidate found, or None if no valid structure exists.
 
     """
-    from cubing_algs.algorithm import Algorithm as Algo  # noqa: PLC0415
+    moves = index.moves
+    algo_len = len(moves)
+    best: Candidate | None = None
 
-    best_structure: Structure | None = None
-
-    # Cache algorithm length to avoid repeated calls
-    algo_len = len(algo)
-
-    # Try different A lengths
     for a_len in range(1, max_part_len + 1):
         if start + a_len * 2 > algo_len:
             break
 
-        a_part = Algo(algo[start:start + a_len])
+        a_inv = inverse_at(index, start, a_len)
+        occurrences = index.positions.get(a_inv[0], [])
+        first = bisect_left(occurrences, start + a_len + 1)
 
-        # Try different B lengths
-        for b_len in range(1, algo_len - start - a_len * 2 + 1):
-            b_end = start + a_len + b_len
+        # A B A' B' must fit in the algorithm: the longest B is bounded
+        last_b_end = start + a_len + (algo_len - start - a_len * 2) // 2
 
-            if b_end + a_len + b_len > algo_len:
+        for b_end in occurrences[first:]:
+            if b_end > last_b_end:
                 break
 
-            b_part = Algo(algo[start + a_len:b_end])
-
-            # Check if A' B' appears after A B (uses cached inverses)
+            b_len = b_end - start - a_len
             if (
-                is_inverse_at(
-                    algo, b_end, a_part, inverse_cache,
-                )
-                and is_inverse_at(
-                    algo, b_end + a_len, b_part, inverse_cache,
+                moves[b_end:b_end + a_len] != a_inv or
+                moves[b_end + a_len:b_end + a_len + b_len] != inverse_at(
+                    index, start + a_len, b_len,
                 )
             ):
-                is_pure_comm = (
-                    a_len == PURE_COMMUTATOR_SETUP_LEN
-                    and b_len == PURE_COMMUTATOR_ACTION_LEN
-                )
-                score = score_structure(
-                    a_part, b_part, is_commutator=True, is_pure=is_pure_comm,
+                continue
+
+            is_pure = (
+                a_len == PURE_COMMUTATOR_SETUP_LEN
+                and b_len == PURE_COMMUTATOR_ACTION_LEN
+            )
+            score = score_structure(
+                a_len, b_len, is_commutator=True, is_pure=is_pure,
+            )
+            if best is None or score > best.score:
+                best = Candidate(
+                    type='commutator',
+                    start=start,
+                    end=b_end + a_len + b_len,
+                    setup_len=a_len,
+                    action_len=b_len,
+                    score=score,
+                    is_pure=is_pure,
                 )
 
-                # Get cached inverses (already populated by is_inverse_at)
-                a_part_inv = inverse_cache[str(a_part)]
-                b_part_inv = inverse_cache[str(b_part)]
+    return best
 
-                # Classify and analyze the commutator
-                classification = classify_commutator(
-                    a_part, b_part, inverse_cache,
-                )
-                has_cancel = (
-                    detect_move_cancellations(a_part, b_part) or
-                    detect_move_cancellations(b_part, a_part_inv) or
-                    detect_move_cancellations(a_part_inv, b_part_inv)
-                )
-                move_count = a_len * 2 + b_len * 2
 
-                if best_structure is None or score > best_structure.score:
-                    best_structure = Structure(
-                        type='commutator',
-                        setup=a_part,
-                        action=b_part,
-                        start=start,
-                        end=b_end + a_len + b_len,
-                        score=score,
-                        classification=classification,
-                        has_cancellations=has_cancel,
-                        move_count=move_count,
-                        is_pure=is_pure_comm,
-                    )
+def select_candidates(
+    index: MoveIndex,
+    max_setup_len: int,
+    min_score: float,
+) -> list[Candidate]:
+    """
+    Select the structures of an algorithm, greedily from left to right.
 
-    return best_structure
+    At each position the best commutator and the best conjugate compete,
+    the commutator winning ties. A structure scoring at least min_score
+    is kept and the search resumes after it.
+
+    Args:
+        index: The indexed algorithm to search
+        max_setup_len: Maximum setup sequence length
+        min_score: Minimum structure score
+
+    Returns:
+        Selected candidates, sorted by position.
+
+    """
+    candidates: list[Candidate] = []
+    i = 0
+
+    while i < len(index.moves):
+        commutator = find_commutator(index, i, max_setup_len)
+        conjugate = find_conjugate(index, i, max_setup_len)
+
+        # Every commutator A B A' B' contains conjugate A B A',
+        # so conjugate is always found when commutator is
+        best = None
+        if commutator and conjugate:
+            best = (
+                commutator if commutator.score >= conjugate.score
+                else conjugate
+            )
+        elif conjugate:
+            best = conjugate
+        elif commutator:
+            best = commutator
+
+        if best and best.score >= min_score:
+            candidates.append(best)
+            i = best.end
+        else:
+            i += 1
+
+    return candidates
+
+
+def build_structure(
+    algo: 'Algorithm',
+    candidate: Candidate,
+    nesting_depth: int = 0,
+) -> Structure:
+    """
+    Build and classify the structure of a selected candidate.
+
+    Args:
+        algo: The algorithm the candidate was found in
+        candidate: The selected candidate
+        nesting_depth: The nesting depth
+
+    Returns:
+        The structure, with its setup and action algorithms.
+
+    """
+    action_start = candidate.start + candidate.setup_len
+    setup = algo[candidate.start:action_start]
+    action = algo[action_start:action_start + candidate.action_len]
+
+    if candidate.type == 'conjugate':
+        classification = classify_conjugate(setup, action, nesting_depth)
+        has_cancel = detect_move_cancellations(setup, action)
+    else:
+        classification = classify_commutator(setup, action)
+        has_cancel = has_commutator_cancellations(setup, action)
+
+    return Structure(
+        type=candidate.type,
+        setup=setup,
+        action=action,
+        start=candidate.start,
+        end=candidate.end,
+        score=candidate.score,
+        classification=classification,
+        has_cancellations=has_cancel,
+        move_count=candidate.end - candidate.start,
+        is_pure=candidate.is_pure,
+    )
 
 
 def detect_structures(
@@ -720,8 +757,7 @@ def detect_structures(
 
     """
     # Move equality includes timestamps, which would keep the inverse
-    # lookups from ever matching. The guard keeps the recursive calls,
-    # which are already untimed, allocation-free.
+    # lookups from ever matching
     if algo.has_times:
         algo = untime_algorithm(algo)
 
@@ -732,46 +768,14 @@ def detect_structures(
     if min_score is None:
         min_score = calculate_min_score(algo_len)
 
-    # Create single shared cache for both commutator and conjugate detection
-    inverse_cache: BoundedCache[str, Algorithm] = BoundedCache(
-        MAX_INVERSE_CACHE_SIZE,
+    candidates = select_candidates(
+        build_move_index(algo), max_setup_len, min_score,
     )
 
-    structures: list[Structure] = []
-    i = 0
-
-    while i < len(algo):
-        # Try to detect commutator first (more specific)
-        commutator = detect_commutator(
-            algo, i, max_setup_len, inverse_cache,
-        )
-
-        # Try to detect conjugate (shares same cache)
-        conjugate = detect_conjugate(
-            algo, i, max_setup_len, inverse_cache,
-            nesting_depth,
-        )
-
-        # Pick the best one (every commutator A B A' B' contains
-        # conjugate A B A', so conjugate is always found when commutator is)
-        best = None
-        if commutator and conjugate:
-            best = (
-                commutator if commutator.score >= conjugate.score
-                else conjugate
-            )
-        elif conjugate:
-            best = conjugate
-        elif commutator:
-            best = commutator
-
-        if best and best.score >= min_score:
-            structures.append(best)
-            i = best.end
-        else:
-            i += 1
-
-    return structures
+    return [
+        build_structure(algo, candidate, nesting_depth)
+        for candidate in candidates
+    ]
 
 
 def compress_recursive(  # noqa: C901, PLR0912

@@ -907,8 +907,9 @@ The library is optimized for performance:
 - **Lightweight State**: Virtual cube state is a simple 54-character string with minimal overhead
 
 **Performance characteristics** (14 moves algorithm, Intel i9-13900HK):
-- Algorithm parsing: ~10 microseconds with `parse_moves()`
-- Algorithm execution: ~0.7 microseconds on 3x3x3, ~1.5 on 7x7x7 with `VCube.rotate()` on a string, ~4 microseconds on an `Algorithm` (serialized first)
+- Algorithm parsing: ~8 microseconds with `parse_moves()`, ~11 with `Algorithm.parse_moves()` (cleaned and validated)
+- Algorithm execution: ~0.7 microseconds on 3x3x3, ~1.5 on 7x7x7 with `VCube.rotate()` on a string, ~1.7 microseconds on an `Algorithm` (serialized first)
+- Algorithm analysis: ~0.1 milliseconds for `.structure`, ~1 millisecond for the complete `to_dict()`; on an 80 moves solve, ~0.8 and ~4 milliseconds
 - Facelet/cubie conversion: ~10-20 microseconds uncached, ~0.1 microseconds cached
 - Reproduce with `pytest benchmarks --no-cov`
 

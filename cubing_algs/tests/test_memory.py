@@ -365,6 +365,26 @@ class ComputeMemoryIntegrationTestCase(unittest.TestCase):
 
         self.assertGreater(compute_memory(timed).repeated_patterns, 0)
 
+    def test_injected_analyses_match_computed(self) -> None:
+        """Test that passing the analyses gives the same result."""
+        for moves in [
+            "R U R' U' R' F R F'",
+            'M2 U M2 U2 M2 U M2',
+            "R U R' U' R' F R2 U' R' U' R U R' F'",
+            "[R U: [R', F]] x y'",
+        ]:
+            with self.subTest(moves=moves):
+                algo = Algorithm.parse_moves(moves)
+
+                self.assertEqual(
+                    compute_memory(
+                        algo,
+                        structure=algo.structure,
+                        ergonomics=algo.ergonomics,
+                    ),
+                    compute_memory(algo),
+                )
+
     def test_t_perm(self) -> None:
         """T-Perm → Moderate."""
         algo = Algorithm.parse_moves("R U R' U' R' F R2 U' R' U' R U R' F'")

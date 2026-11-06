@@ -22,6 +22,22 @@ class CleanMovesTestCase(unittest.TestCase):
         expect = "R2 L2 y F B2 E U R' U'"
         self.assertEqual(clean_moves(moves), expect)
 
+    def test_clean_moves_exact_output(self) -> None:
+        """Test the exact output, spaces left by brackets included."""
+        cases = {
+            '[R, U]': ' R U ',
+            '[R U: F] U': ' R U F U',
+            '(R U)2': ' R U 2',
+            'm s e X Y Z': 'M S E x y z',
+            'R2\u2019 U2`': 'R2 U2',
+            'R\u00a0U\u2003F\tB\nD': 'R U F B D',
+            '   ': '',
+            '': '',
+        }
+        for moves, expect in cases.items():
+            with self.subTest(moves=moves):
+                self.assertEqual(clean_moves(moves), expect)
+
 
 class SplitMovesTestCase(unittest.TestCase):
     """Tests for the split_moves function."""

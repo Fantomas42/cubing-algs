@@ -192,7 +192,7 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             A space-separated string of all moves in the algorithm.
 
         """
-        return ' '.join(str(m) for m in self)
+        return ' '.join(m.data for m in self.data)
 
     def __repr__(self) -> str:
         """
@@ -847,6 +847,12 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
                 return [flatten(v) for v in obj]
             return obj
 
+        ergonomics = self.ergonomics
+        structure = self.structure
+        memory = compute_memory(
+            self, structure=structure, ergonomics=ergonomics,
+        )
+
         return {
             'moves': str(self),
             'cycles': self.cycles,
@@ -858,8 +864,8 @@ class Algorithm(UserList[Move]):  # noqa: PLR0904
             'has_pauses': self.has_pauses,
             'has_times': self.has_times,
             'metrics': flatten(self.metrics),
-            'ergonomics': flatten(self.ergonomics),
-            'structure': flatten(self.structure),
-            'memory': flatten(self.memory),
+            'ergonomics': flatten(ergonomics),
+            'structure': flatten(structure),
+            'memory': flatten(memory),
             'impacts': flatten(self.impacts(size)),
         }

@@ -10,7 +10,6 @@ import re
 from collections.abc import Iterable
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.annotations import RegexPattern
 from cubing_algs.commutator_conjugate import expand_commutators_and_conjugates
 from cubing_algs.constants import AUF_CHAR
 from cubing_algs.constants import MOVE_SPLIT
@@ -23,14 +22,13 @@ from cubing_algs.transform.trim import trim_moves
 
 logger = logging.getLogger(__name__)
 
-CLEAN_PATTERNS: list[tuple[RegexPattern, str]] = [
-    (re.compile(r'[`’]'), "'"),  # noqa: RUF001
-    (re.compile(r'[():,\[\]]'), ' '),
-    (re.compile(r'\s+'), ' '),
-    (re.compile(r"2'"), '2'),
-]
+CLEAN_CHARS = str.maketrans({
+    '`': "'", '\u2019': "'",
+    '(': ' ', ')': ' ', ':': ' ', ',': ' ', '[': ' ', ']': ' ',
+    'm': 'M', 's': 'S', 'e': 'E', 'X': 'x', 'Y': 'y', 'Z': 'z',
+})
 
-CASE_FIXES = str.maketrans('mseXYZ', 'MSExyz')
+SPACES = re.compile(r'\s+')
 
 
 def clean_multiline_and_comments(text: str) -> str:
@@ -77,12 +75,9 @@ def clean_moves(moves: str) -> str:
         The cleaned and normalized move string.
 
     """
-    moves = moves.strip()
+    moves = moves.strip().translate(CLEAN_CHARS)
 
-    for pattern, replacement in CLEAN_PATTERNS:
-        moves = pattern.sub(replacement, moves)
-
-    return moves.translate(CASE_FIXES)
+    return SPACES.sub(' ', moves).replace("2'", '2')
 
 
 def split_moves(moves: str) -> list[Move]:

@@ -15,7 +15,9 @@ from typing import NamedTuple
 
 if TYPE_CHECKING:
     from cubing_algs.algorithm import Algorithm  # pragma: no cover
+    from cubing_algs.ergonomics import ErgonomicsData  # pragma: no cover
     from cubing_algs.move import Move  # pragma: no cover
+    from cubing_algs.structure import StructureData  # pragma: no cover
 
 
 # Sub-score weights (must sum to 1.0)
@@ -433,7 +435,12 @@ def get_memory_rating(score: float) -> str:
     return 'Very Hard'
 
 
-def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
+def compute_memory(  # noqa: PLR0914
+        algorithm: 'Algorithm',
+        *,
+        structure: 'StructureData | None' = None,
+        ergonomics: 'ErgonomicsData | None' = None,
+) -> MemoryData:
     """
     Compute comprehensive memorability metrics for an algorithm.
 
@@ -444,6 +451,11 @@ def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
 
     Args:
         algorithm: The algorithm to analyze.
+        structure: The structure of this same algorithm, when already
+            computed. Computed here when omitted.
+        ergonomics: The ergonomics of this same algorithm, with the
+            default hand dominance, when already computed. Computed
+            here when omitted.
 
     Returns:
         MemoryData containing all calculated memorability metrics.
@@ -477,8 +489,8 @@ def compute_memory(algorithm: 'Algorithm') -> MemoryData:  # noqa: PLR0914
 
     # --- Reuse existing analysis ---
     stm = algorithm.metrics.stm
-    ergo = algorithm.ergonomics
-    struct = algorithm.structure
+    ergo = ergonomics if ergonomics is not None else algorithm.ergonomics
+    struct = structure if structure is not None else algorithm.structure
 
     # --- Length score ---
     length_score = compute_length_score(stm)

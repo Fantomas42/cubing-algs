@@ -1,10 +1,19 @@
-"""Tests for algorithm structure analysis."""
+"""
+Tests for algorithm structure analysis.
+
+The golden fixture was generated from the structure search it was
+rewritten from: the main algorithm of every case, random scrambles and
+random nested structures, analyzed by cubing_algs/structure.py at 3be3e6f.
+"""
+import json
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
-from cubing_algs.structure import BoundedCache
 from cubing_algs.structure import Structure
+from cubing_algs.structure import build_move_index
+from cubing_algs.structure import build_structure
 from cubing_algs.structure import calculate_efficiency_rating
 from cubing_algs.structure import calculate_max_setup_length
 from cubing_algs.structure import calculate_min_score
@@ -15,13 +24,21 @@ from cubing_algs.structure import compress
 from cubing_algs.structure import compress_recursive
 from cubing_algs.structure import compute_structure
 from cubing_algs.structure import count_all_structures
-from cubing_algs.structure import detect_commutator
 from cubing_algs.structure import detect_move_cancellations
 from cubing_algs.structure import detect_structures
+from cubing_algs.structure import find_commutator
+from cubing_algs.structure import inverse_at
 from cubing_algs.structure import inverse_sequence
-from cubing_algs.structure import is_inverse_at
 from cubing_algs.structure import score_structure
 from cubing_algs.transform.timing import time_moves
+
+FIXTURES = Path(__file__).parent / 'fixtures' / 'structure_golden.json'
+GOLDEN = json.loads(FIXTURES.read_text())['algorithms']
+
+COUNTS = (
+    'total_structures', 'conjugate_count', 'commutator_count',
+    'max_nesting_depth', 'nested_structure_count',
+)
 
 
 class SimpleConjugatesTestCase(unittest.TestCase):
@@ -789,123 +806,6 @@ class NestedStructureCountingTestCase(unittest.TestCase):
                 )
 
 
-class BoundedCacheTestCase(unittest.TestCase):
-    """Test BoundedCache LRU behavior and edge cases."""
-
-    def test_bounded_cache_basic_operations(self) -> None:
-        """Test basic cache operations."""
-        cache: BoundedCache[str, int] = BoundedCache(3)
-
-        cache['a'] = 1
-        cache['b'] = 2
-        cache['c'] = 3
-
-        self.assertEqual(cache['a'], 1)
-        self.assertEqual(cache['b'], 2)
-        self.assertEqual(cache['c'], 3)
-        self.assertEqual(len(cache), 3)
-
-    def test_bounded_cache_lru_eviction(self) -> None:
-        """Test LRU eviction when capacity is reached."""
-        cache: BoundedCache[str, int] = BoundedCache(3)
-
-        cache['a'] = 1
-        cache['b'] = 2
-        cache['c'] = 3
-
-        # Adding a 4th item should evict 'a' (least recently used)
-        cache['d'] = 4
-
-        self.assertEqual(len(cache), 3)
-        self.assertNotIn('a', cache)
-        self.assertIn('b', cache)
-        self.assertIn('c', cache)
-        self.assertIn('d', cache)
-
-    def test_bounded_cache_access_updates_lru(self) -> None:
-        """Test that accessing an item moves it to end (most recently used)."""
-        cache: BoundedCache[str, int] = BoundedCache(3)
-
-        cache['a'] = 1
-        cache['b'] = 2
-        cache['c'] = 3
-
-        # Access 'a' to make it most recently used
-        _ = cache['a']
-
-        # Add new item, should evict 'b' (now least recently used)
-        cache['d'] = 4
-
-        self.assertIn('a', cache)
-        self.assertNotIn('b', cache)
-        self.assertIn('c', cache)
-        self.assertIn('d', cache)
-
-    def test_bounded_cache_update_existing_key(self) -> None:
-        """Test updating an existing key moves it to end."""
-        cache: BoundedCache[str, int] = BoundedCache(3)
-
-        cache['a'] = 1
-        cache['b'] = 2
-        cache['c'] = 3
-
-        # Update 'a' to make it most recently used
-        cache['a'] = 10
-
-        # Add new item, should evict 'b' (now least recently used)
-        cache['d'] = 4
-
-        self.assertEqual(cache['a'], 10)
-        self.assertNotIn('b', cache)
-        self.assertIn('c', cache)
-        self.assertIn('d', cache)
-
-    def test_bounded_cache_delete(self) -> None:
-        """Test deleting items from cache."""
-        cache: BoundedCache[str, int] = BoundedCache(3)
-
-        cache['a'] = 1
-        cache['b'] = 2
-
-        del cache['a']
-
-        self.assertEqual(len(cache), 1)
-        self.assertNotIn('a', cache)
-        self.assertIn('b', cache)
-
-    def test_bounded_cache_iteration(self) -> None:
-        """Test iterating over cache keys."""
-        cache: BoundedCache[str, int] = BoundedCache(3)
-
-        cache['a'] = 1
-        cache['b'] = 2
-        cache['c'] = 3
-
-        keys = list(cache)
-        self.assertEqual(len(keys), 3)
-        self.assertIn('a', keys)
-        self.assertIn('b', keys)
-        self.assertIn('c', keys)
-
-    def test_bounded_cache_size_one(self) -> None:
-        """Test cache with size 1."""
-        cache: BoundedCache[str, int] = BoundedCache(1)
-
-        cache['a'] = 1
-        self.assertEqual(cache['a'], 1)
-
-        cache['b'] = 2
-        self.assertNotIn('a', cache)
-        self.assertEqual(cache['b'], 2)
-
-    def test_bounded_cache_key_error(self) -> None:
-        """Test accessing non-existent key raises KeyError."""
-        cache: BoundedCache[str, int] = BoundedCache(3)
-
-        with self.assertRaises(KeyError):
-            _ = cache['nonexistent']
-
-
 class HelperFunctionTestCase(unittest.TestCase):
     """Test helper functions for structure detection."""
 
@@ -1041,9 +941,8 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         """Test classification of pure 8-move commutator (2+2+2+2)."""
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action, cache)
+        classification = classify_commutator(setup, action)
         self.assertEqual(classification, 'pure')
 
     def test_classify_a9_commutator_with_cancellation(self) -> None:
@@ -1052,9 +951,8 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # Setup ends with R, action starts with R -> cancellation
         setup = Algorithm.parse_moves('U R')
         action = Algorithm.parse_moves('R F D')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action, cache)
+        classification = classify_commutator(setup, action)
         # Total moves = 2*2 + 3*2 = 10, has cancellation at R/R
         self.assertEqual(classification, 'A9')
 
@@ -1063,18 +961,16 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # 10 moves total (2+3+2+3), no cancellation
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D L')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action, cache)
+        classification = classify_commutator(setup, action)
         self.assertEqual(classification, 'orthogonal')
 
     def test_classify_extended_commutator(self) -> None:
         """Test classification of extended commutator (>10 moves)."""
         setup = Algorithm.parse_moves('R U F')
         action = Algorithm.parse_moves('D L B')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action, cache)
+        classification = classify_commutator(setup, action)
         # Total moves = 3*2 + 3*2 = 12 moves
         self.assertEqual(classification, 'extended')
 
@@ -1083,25 +979,10 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         # Less than 8 moves
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action, cache)
+        classification = classify_commutator(setup, action)
         # Total moves = 1*2 + 1*2 = 4 moves (not pure, not 10)
         self.assertEqual(classification, 'other')
-
-    def test_classify_commutator_with_cache(self) -> None:
-        """Test commutator classification with cache."""
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
-        # Use a non-pure commutator to trigger cancellation check
-        # and cache usage
-        setup = Algorithm.parse_moves('U R')
-        action = Algorithm.parse_moves('R F D')
-
-        classification = classify_commutator(setup, action, cache)
-        self.assertEqual(classification, 'A9')
-
-        # Cache should now contain the inverse
-        self.assertGreater(len(cache), 0)
 
     def test_classify_commutator_a_prime_b_prime_cancellation(self) -> None:
         """
@@ -1116,25 +997,23 @@ class ClassifyCommutatorTestCase(unittest.TestCase):
         """
         setup = Algorithm.parse_moves('U F')
         action = Algorithm.parse_moves("R L U'")
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
 
-        classification = classify_commutator(setup, action, cache)
+        classification = classify_commutator(setup, action)
         self.assertEqual(classification, 'A9')
 
-    def test_detect_commutator_has_cancellations_a_prime_b_prime(self) -> None:
+    def test_build_commutator_has_cancellations_a_prime_b_prime(self) -> None:
         """
-        Test that detect_commutator sets has_cancellations for A'|B' boundary.
+        Test that a commutator structure has cancellations at A'|B'.
 
         Same commutator as above: the Structure.has_cancellations field must
         be True even when the only cancellation is at A'|B'.
         """
         algo = Algorithm.parse_moves("U F R L U' F' U' U L' R'")
-        cache: BoundedCache[str, Algorithm] = BoundedCache(100)
-        result = detect_commutator(algo, 0, max_part_len=4, inverse_cache=cache)
+        candidate = find_commutator(build_move_index(algo), 0, max_part_len=4)
 
-        self.assertIsNotNone(result)
-        assert result is not None  # noqa: S101
-        self.assertTrue(result.has_cancellations)
+        self.assertIsNotNone(candidate)
+        assert candidate is not None  # noqa: S101
+        self.assertTrue(build_structure(algo, candidate).has_cancellations)
 
 
 class ClassifyConjugateTestCase(unittest.TestCase):
@@ -1194,7 +1073,7 @@ class ScoreStructureTestCase(unittest.TestCase):
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
 
-        score = score_structure(setup, action)
+        score = score_structure(len(setup), len(action))
         self.assertGreater(score, 0.0)
 
     def test_score_structure_zero_setup(self) -> None:
@@ -1202,7 +1081,7 @@ class ScoreStructureTestCase(unittest.TestCase):
         setup = Algorithm([])
         action = Algorithm.parse_moves('U')
 
-        score = score_structure(setup, action)
+        score = score_structure(len(setup), len(action))
         self.assertEqual(score, 0.0)
 
     def test_score_structure_zero_action(self) -> None:
@@ -1210,7 +1089,7 @@ class ScoreStructureTestCase(unittest.TestCase):
         setup = Algorithm.parse_moves('R')
         action = Algorithm([])
 
-        score = score_structure(setup, action)
+        score = score_structure(len(setup), len(action))
         self.assertEqual(score, 0.0)
 
     def test_score_structure_both_zero(self) -> None:
@@ -1218,7 +1097,7 @@ class ScoreStructureTestCase(unittest.TestCase):
         setup = Algorithm([])
         action = Algorithm([])
 
-        score = score_structure(setup, action)
+        score = score_structure(len(setup), len(action))
         self.assertEqual(score, 0.0)
 
     def test_score_structure_longer_action_better(self) -> None:
@@ -1227,8 +1106,8 @@ class ScoreStructureTestCase(unittest.TestCase):
         action1 = Algorithm.parse_moves('U')
         action2 = Algorithm.parse_moves('U F D')
 
-        score1 = score_structure(setup, action1)
-        score2 = score_structure(setup, action2)
+        score1 = score_structure(len(setup), len(action1))
+        score2 = score_structure(len(setup), len(action2))
 
         self.assertGreater(score2, score1)
 
@@ -1242,8 +1121,8 @@ class ScoreStructureTestCase(unittest.TestCase):
         setup2 = Algorithm.parse_moves('R U F D')
         action2 = Algorithm.parse_moves('L')
 
-        score1 = score_structure(setup1, action1)
-        score2 = score_structure(setup2, action2)
+        score1 = score_structure(len(setup1), len(action1))
+        score2 = score_structure(len(setup2), len(action2))
 
         # Shorter setup with longer action should score better
         self.assertGreater(score1, score2)
@@ -1259,8 +1138,10 @@ class ScoreStructureTestCase(unittest.TestCase):
         setup = Algorithm.parse_moves('R')
         action = Algorithm.parse_moves('U')
 
-        conj_score = score_structure(setup, action)
-        comm_score = score_structure(setup, action, is_commutator=True)
+        conj_score = score_structure(len(setup), len(action))
+        comm_score = score_structure(
+            len(setup), len(action), is_commutator=True,
+        )
 
         self.assertGreater(comm_score, conj_score)
 
@@ -1277,7 +1158,7 @@ class ScoreStructureTestCase(unittest.TestCase):
         # Manually compute expected score
         # compression_ratio = 0.5 (always for commutators)
         expected = 0.5 * 0.2 * 1.0 * 100
-        score = score_structure(setup, action, is_commutator=True)
+        score = score_structure(len(setup), len(action), is_commutator=True)
 
         self.assertAlmostEqual(score, expected)
 
@@ -1291,11 +1172,11 @@ class ScoreStructureTestCase(unittest.TestCase):
         longer_action = Algorithm.parse_moves('F D B L')  # [2,4]
 
         pure_score = score_structure(
-            setup, pure_action,
+            len(setup), len(pure_action),
             is_commutator=True, is_pure=True,
         )
         longer_score = score_structure(
-            setup, longer_action,
+            len(setup), len(longer_action),
             is_commutator=True,
         )
 
@@ -1306,72 +1187,55 @@ class ScoreStructureTestCase(unittest.TestCase):
         setup = Algorithm.parse_moves('R U')
         action = Algorithm.parse_moves('F D')
 
-        base = score_structure(setup, action)
-        with_pure = score_structure(setup, action, is_pure=True)
+        base = score_structure(len(setup), len(action))
+        with_pure = score_structure(len(setup), len(action), is_pure=True)
 
         self.assertAlmostEqual(base, with_pure)
 
 
-class IsInverseAtTestCase(unittest.TestCase):
-    """Test inverse checking at position."""
+class MoveIndexTestCase(unittest.TestCase):
+    """Test the move index used by the structure search."""
 
-    def test_is_inverse_at_basic(self) -> None:
-        """Test basic inverse detection."""
-        algo = Algorithm.parse_moves("R U U' R'")
-        pattern = Algorithm.parse_moves('R')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
+    def test_build_move_index(self) -> None:
+        """Test moves, inverses and positions of the index."""
+        index = build_move_index(Algorithm.parse_moves("R U2 R' U'"))
 
-        # R' should appear at position 3
-        self.assertTrue(is_inverse_at(algo, 3, pattern, cache))
+        self.assertEqual(index.moves, ['R', 'U2', "R'", "U'"])
+        self.assertEqual(index.inverses, ["R'", 'U2', 'R', 'U'])
+        self.assertEqual(
+            index.positions, {'R': [0], 'U2': [1], "R'": [2], "U'": [3]},
+        )
 
-    def test_is_inverse_at_not_inverse(self) -> None:
-        """Test when pattern is not inverse at position."""
-        algo = Algorithm.parse_moves('R U F D')
-        pattern = Algorithm.parse_moves('R')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
+    def test_build_move_index_repeated_moves(self) -> None:
+        """Test that positions list every occurrence in order."""
+        index = build_move_index(Algorithm.parse_moves("R U R U R'"))
 
-        # U is not R' at position 1
-        self.assertFalse(is_inverse_at(algo, 1, pattern, cache))
+        self.assertEqual(index.positions['R'], [0, 2])
+        self.assertEqual(index.positions['U'], [1, 3])
 
-    def test_is_inverse_at_out_of_bounds(self) -> None:
-        """Test inverse detection when position is out of bounds."""
-        algo = Algorithm.parse_moves('R U')
-        pattern = Algorithm.parse_moves('R U F')
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
+    def test_build_move_index_empty(self) -> None:
+        """Test the index of an empty algorithm."""
+        index = build_move_index(Algorithm())
 
-        # Not enough space for 3-move inverse
-        self.assertFalse(is_inverse_at(algo, 0, pattern, cache))
+        self.assertEqual(index.moves, [])
+        self.assertEqual(index.positions, {})
 
-    def test_is_inverse_at_with_cache(self) -> None:
-        """Test inverse detection with caching."""
-        # Create an algorithm where we can find the inverse
-        # Pattern: R U, Inverse: U' R'
-        # Algorithm: R U U' R' (pattern followed by its inverse)
-        algo = Algorithm.parse_moves("R U U' R'")
-        pattern = Algorithm.parse_moves('R U')
+    def test_inverse_at(self) -> None:
+        """Test the inverse of a sub-sequence."""
+        index = build_move_index(Algorithm.parse_moves('R U F D'))
 
-        inverse_cache: BoundedCache[str, Algorithm] = BoundedCache(10)
+        self.assertEqual(inverse_at(index, 0, 2), ["U'", "R'"])
+        self.assertEqual(inverse_at(index, 1, 3), ["D'", "F'", "U'"])
 
-        # First call should populate cache
-        # Inverse of "R U" is "U' R'" at position 2
-        result = is_inverse_at(algo, 2, pattern, inverse_cache)
-        self.assertTrue(result)
+    def test_inverse_at_matches_inverse_sequence(self) -> None:
+        """Test that inverse_at agrees with inverse_sequence."""
+        algo = Algorithm.parse_moves("R U2 M' x Rw' . F")
+        index = build_move_index(algo)
 
-        # Cache should be populated
-        self.assertGreater(len(inverse_cache), 0)
-
-        # Second call should use cache
-        result2 = is_inverse_at(algo, 2, pattern, inverse_cache)
-        self.assertTrue(result2)
-
-    def test_is_inverse_at_empty_pattern(self) -> None:
-        """Test inverse detection with empty pattern."""
-        algo = Algorithm.parse_moves('R U')
-        pattern = Algorithm([])
-        cache: BoundedCache[str, Algorithm] = BoundedCache(10)
-
-        # Empty pattern has zero length, should match at position 0
-        self.assertTrue(is_inverse_at(algo, 0, pattern, cache))
+        self.assertEqual(
+            inverse_at(index, 0, len(algo)),
+            [move.data for move in inverse_sequence(algo)],
+        )
 
 
 class EfficiencyRatingTestCase(unittest.TestCase):
@@ -1718,8 +1582,16 @@ class NestingDepthGuardTestCase(unittest.TestCase):
         capped = classify_conjugate(setup, action, nesting_depth=10)
         self.assertEqual(capped, 'simple')
 
+    def test_classify_conjugate_timed_action(self) -> None:
+        """A timed action is untimed before the nested search."""
+        setup = Algorithm.parse_moves('F')
+        action = Algorithm.parse_moves("R U R' U'").transform(time_moves(150))
+
+        self.assertTrue(action.has_times)
+        self.assertEqual(classify_conjugate(setup, action), 'nested')
+
     def test_classify_conjugate_depth_propagates(self) -> None:
-        """Depth propagates through detect_structures → detect_conjugate."""
+        """Detection at the default depth finds the nested structure."""
         # F [R [U, D] R'] F' - nested conjugate containing a commutator
         algo = Algorithm.parse_moves("F R U D U' D' R' F'")
         # Should detect structures at default depth without error
@@ -1941,7 +1813,7 @@ class CompressRecursiveCacheHitTestCase(unittest.TestCase):
 
 
 class CommutatorScoreBranchTestCase(unittest.TestCase):
-    """Test the score comparison branch in detect_commutator."""
+    """Test the score comparison branch in find_commutator."""
 
     def test_commutator_score_comparison(self) -> None:
         """Test that lower-scoring commutators don't replace higher ones."""
@@ -1955,9 +1827,9 @@ class CommutatorScoreBranchTestCase(unittest.TestCase):
         self.assertEqual(len(structures), 1)
         self.assertEqual(structures[0].type, 'commutator')
 
-    def test_detect_commutator_returns_best_score_not_last(self) -> None:
+    def test_find_commutator_returns_best_score_not_last(self) -> None:
         """
-        Test that detect_commutator keeps the highest-scoring match,
+        Test that find_commutator keeps the highest-scoring match,
         not the last one found.
 
         R U R U R U U' R' U' R' U' R' has two valid commutators at position 0:
@@ -1970,12 +1842,11 @@ class CommutatorScoreBranchTestCase(unittest.TestCase):
         returning score=5.
         """
         algo = Algorithm.parse_moves("R U R U R U U' R' U' R' U' R'")
-        cache: BoundedCache[str, Algorithm] = BoundedCache(100)
-        result = detect_commutator(algo, 0, max_part_len=4, inverse_cache=cache)
+        result = find_commutator(build_move_index(algo), 0, max_part_len=4)
 
         self.assertIsNotNone(result)
         assert result is not None  # noqa: S101
-        self.assertEqual(len(result.setup), 2)
+        self.assertEqual(result.setup_len, 2)
         self.assertGreater(result.score, 15.0)
 
 
@@ -1983,11 +1854,36 @@ class CommutatorOnlyBranchTestCase(unittest.TestCase):
     """Tests for the commutator-only branch in detect_structures."""
 
     def test_commutator_only_when_conjugate_absent(self) -> None:
-        """When detect_conjugate returns None, commutator is used as best."""
+        """When find_conjugate returns None, commutator is used as best."""
         algo = Algorithm.parse_moves("R U R' U'")
 
-        with patch('cubing_algs.structure.detect_conjugate', return_value=None):
+        with patch('cubing_algs.structure.find_conjugate', return_value=None):
             structures = detect_structures(algo, min_score=0)
 
         self.assertEqual(len(structures), 1)
         self.assertEqual(structures[0].type, 'commutator')
+
+
+class GoldenStructureTestCase(unittest.TestCase):
+    """Every analysis matches the search the module was rewritten from."""
+
+    def test_golden_structures(self) -> None:
+        """Compressed notation, counts and structures are unchanged."""
+        for moves, expected in GOLDEN.items():
+            with self.subTest(moves=moves):
+                data = compute_structure(Algorithm.parse_moves(moves))
+
+                self.assertEqual(data.compressed, expected['compressed'])
+                for count in COUNTS:
+                    self.assertEqual(getattr(data, count), expected[count])
+                self.assertEqual(
+                    [
+                        [
+                            s.type, s.start, s.end, str(s.setup),
+                            str(s.action), s.score, s.classification,
+                            s.has_cancellations, s.is_pure,
+                        ]
+                        for s in data.structures
+                    ],
+                    expected['structures'],
+                )

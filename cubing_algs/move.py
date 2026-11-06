@@ -46,12 +46,14 @@ class Move(UserString):  # noqa: PLR0904
 
     def __new__(cls, seq: str | UserString = '') -> Self:
         """Return a cached instance for the given move string."""
-        key = seq.data if isinstance(seq, UserString) else str(seq)
-        if key in cls._cache:
-            return cast('Self', cls._cache[key])
-        instance = super().__new__(cls)
-        cls._cache[key] = instance
-        return instance
+        key = seq if type(seq) is str else (
+            seq.data if isinstance(seq, UserString) else str(seq)
+        )
+        instance = cls._cache.get(key)
+        if instance is None:
+            instance = super().__new__(cls)
+            cls._cache[key] = instance
+        return cast('Self', instance)
 
     def __init__(self, seq: str | UserString = '') -> None:
         """Initialize the move, skipping if already cached."""
