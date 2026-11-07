@@ -6,6 +6,7 @@ on cube facelets, including which facelets are moved, how they move,
 and statistical analysis of the algorithm's effect on the cube.
 """
 from collections.abc import Callable
+from functools import cache
 from typing import TYPE_CHECKING
 from typing import NamedTuple
 
@@ -222,11 +223,31 @@ def parse_facelet_position(position: int, cube: 'VCube') -> FaceletPosition:
         FaceletPosition with parsed components.
 
     """
-    face_index = position // cube.face_size
+    return facelet_position(position, cube.size)
+
+
+@cache
+def facelet_position(position: int, size: int) -> FaceletPosition:
+    """
+    Parse a facelet position of a cube of the given size.
+
+    The result depends on the position and the size only, and is
+    immutable: it is computed once per pair.
+
+    Args:
+        position: The facelet position index.
+        size: The cube size.
+
+    Returns:
+        FaceletPosition with parsed components.
+
+    """
+    face_size = size * size
+    face_index = position // face_size
     face_name = FACE_ORDER[face_index]
-    position_in_face = position % cube.face_size
-    row = position_in_face // cube.size
-    col = position_in_face % cube.size
+    position_in_face = position % face_size
+    row = position_in_face // size
+    col = position_in_face % size
 
     return FaceletPosition(
         face_index=face_index,

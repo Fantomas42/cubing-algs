@@ -27,6 +27,7 @@ from cubing_algs.impacts import compute_manhattan_distance
 from cubing_algs.impacts import compute_opposite_face_manhattan_distance
 from cubing_algs.impacts import compute_qtm_distance
 from cubing_algs.impacts import detect_symmetry
+from cubing_algs.impacts import facelet_position
 from cubing_algs.impacts import parse_facelet_position
 from cubing_algs.impacts import positions_on_adjacent_corners
 from cubing_algs.parsing import parse_moves
@@ -265,6 +266,38 @@ class TestImpactData(unittest.TestCase):
         self.assertEqual(impact_data.facelets_face_mobility['U'], 1)
         self.assertEqual(impact_data.cubies_corners_moved, 2)
         self.assertEqual(impact_data.cubies_complexity_score, 7)
+
+
+class TestFaceletPosition(unittest.TestCase):
+    """Test the parsing of facelet positions."""
+
+    def test_position_on_3x3x3(self) -> None:
+        """Last facelet of the R face, which comes second."""
+        position = facelet_position(17, 3)
+
+        self.assertEqual(position.face_index, 1)
+        self.assertEqual(position.face_name, 'R')
+        self.assertEqual(position.face_position, 8)
+        self.assertEqual((position.row, position.col), (2, 2))
+        self.assertEqual(position.original, 17)
+
+    def test_position_on_4x4x4(self) -> None:
+        """Rows and columns follow the cube size."""
+        position = facelet_position(16 + 6, 4)
+
+        self.assertEqual(position.face_name, 'R')
+        self.assertEqual((position.row, position.col), (1, 2))
+
+    def test_parse_facelet_position_uses_cube_size(self) -> None:
+        """parse_facelet_position reads the size from the cube."""
+        for size in (2, 3, 5):
+            cube = VCube(size=size)
+            with self.subTest(size=size):
+                for index in range(6 * size * size):
+                    self.assertEqual(
+                        parse_facelet_position(index, cube),
+                        facelet_position(index, size),
+                    )
 
 
 class TestComputeFaceImpact(unittest.TestCase):

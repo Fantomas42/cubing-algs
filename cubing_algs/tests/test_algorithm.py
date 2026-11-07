@@ -4,6 +4,7 @@ import re
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
+from typing import NamedTuple
 from unittest.mock import patch
 
 from cubing_algs.algorithm import Algorithm
@@ -1878,6 +1879,22 @@ class AlgorithmToDictTestCase(unittest.TestCase):
         algo = Algorithm.parse_moves("R U R' U'")
         result = algo.to_dict(size=4)
         self.assertEqual(len(result['impacts']['cube']), 6 * 4 * 4)
+
+    def test_other_leaves_kept_as_they_are(self) -> None:
+        """Leaves that are neither scalars nor containers pass through."""
+
+        class Leaf(NamedTuple):
+            hand: HandDominance
+            turns: int
+
+        algo = Algorithm.parse_moves("R U R' U'")
+        leaf = Leaf(hand=HandDominance.LEFT, turns=2)
+        with patch.object(Algorithm, 'impacts', return_value=leaf):
+            result = algo.to_dict()
+
+        self.assertEqual(
+            result['impacts'], {'hand': HandDominance.LEFT, 'turns': 2},
+        )
 
     def test_analyses_computed_once(self) -> None:
         """Structure and ergonomics are computed once, memory included."""

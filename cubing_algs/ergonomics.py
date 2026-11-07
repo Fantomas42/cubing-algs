@@ -487,32 +487,33 @@ def normalize_moves_string(moves: str) -> str:
     return normalize_algorithm_string(parse_moves(moves))
 
 
-def find_trigger_patterns(
-    algorithm: 'Algorithm',
-    hand_dominance: HandDominance = HandDominance.RIGHT,
-) -> list[TriggerMatch]:
+class TriggerForm(NamedTuple):
+    """One searchable form of a trigger: canonical or a variation."""
+
+    pattern: TriggerPattern
+    variation: TriggerVariation | None  # None = canonical form
+    moves: tuple[str, ...]  # Normalized moves of this form
+
+
+@cache
+def trigger_search_order(
+    hand_dominance: HandDominance,
+) -> tuple[TriggerForm, ...]:
     """
-    Detect common speedcubing triggers and patterns in an algorithm.
+    List the trigger forms in the order the search tries them.
+
+    Patterns are sorted longer first, then by ergonomic bonus; left-handed
+    users get a slight bonus for patterns with a lefty form. Each pattern
+    gives its canonical form first, then its variations. The catalogue is
+    static, so the order is computed once per hand dominance.
 
     Args:
-        algorithm: The algorithm to analyze.
         hand_dominance: Hand dominance preference for pattern prioritization.
 
     Returns:
-        List of TriggerMatch objects for detected patterns.
+        The trigger forms, in search order.
 
     """
-    if len(algorithm) == 0:
-        return []
-
-    algorithm_str = normalize_algorithm_string(algorithm)
-    algorithm_moves = algorithm_str.split()
-
-    matches: list[TriggerMatch] = []
-    used_indices: set[int] = set()
-
-    # Sort patterns: longer first, then by ergonomic bonus
-    # Left-handed users get a slight bonus for patterns with a lefty form
     left_bonus = 0.01 if hand_dominance == HandDominance.LEFT else 0.0
 
     def has_lefty_variation(pattern: TriggerPattern) -> bool:
@@ -530,36 +531,80 @@ def find_trigger_patterns(
         reverse=True,
     )
 
+    forms: list[TriggerForm] = []
     for pattern in sorted_patterns:
-        # Check main pattern first, then variations.
         candidates: list[tuple[str, TriggerVariation | None]] = [
             (pattern.moves, None),
             *((variation.moves, variation) for variation in pattern.variations),
         ]
+        forms.extend(
+            TriggerForm(
+                pattern=pattern,
+                variation=variation,
+                moves=tuple(normalize_moves_string(moves).split()),
+            )
+            for moves, variation in candidates
+        )
 
-        for pattern_moves, variation in candidates:
-            pattern_list = normalize_moves_string(pattern_moves).split()
-            pattern_length = len(pattern_list)
+    return tuple(forms)
 
-            # Sliding window search
-            for i in range(len(algorithm_moves) - pattern_length + 1):
-                if any(
-                    idx in used_indices for idx in range(i, i + pattern_length)
-                ):
-                    continue
 
-                window = algorithm_moves[i : i + pattern_length]
-                if window == pattern_list:
-                    match = TriggerMatch(
-                        pattern=pattern,
-                        start_index=i,
-                        end_index=i + pattern_length - 1,
-                        matched_moves=' '.join(window),
-                        variation=variation,
-                    )
-                    matches.append(match)
+def find_trigger_patterns(
+    algorithm: 'Algorithm',
+    hand_dominance: HandDominance = HandDominance.RIGHT,
+) -> list[TriggerMatch]:
+    """
+    Detect common speedcubing triggers and patterns in an algorithm.
 
-                    used_indices.update(range(i, i + pattern_length))
+    Each trigger form is tried, in search order, at the positions holding
+    its first move; a match overlapping an earlier one is skipped.
+
+    Args:
+        algorithm: The algorithm to analyze.
+        hand_dominance: Hand dominance preference for pattern prioritization.
+
+    Returns:
+        List of TriggerMatch objects for detected patterns.
+
+    """
+    if len(algorithm) == 0:
+        return []
+
+    algorithm_moves = normalize_algorithm_string(algorithm).split()
+
+    positions: dict[str, list[int]] = {}
+    for index, move in enumerate(algorithm_moves):
+        positions.setdefault(move, []).append(index)
+
+    matches: list[TriggerMatch] = []
+    used_indices: set[int] = set()
+
+    for form in trigger_search_order(hand_dominance):
+        pattern_length = len(form.moves)
+        last_start = len(algorithm_moves) - pattern_length
+
+        for i in positions.get(form.moves[0], []):
+            if i > last_start:
+                break
+
+            if tuple(algorithm_moves[i:i + pattern_length]) != form.moves:
+                continue
+
+            if any(
+                idx in used_indices for idx in range(i, i + pattern_length)
+            ):
+                continue
+
+            matches.append(
+                TriggerMatch(
+                    pattern=form.pattern,
+                    start_index=i,
+                    end_index=i + pattern_length - 1,
+                    matched_moves=' '.join(form.moves),
+                    variation=form.variation,
+                ),
+            )
+            used_indices.update(range(i, i + pattern_length))
 
     return matches
 

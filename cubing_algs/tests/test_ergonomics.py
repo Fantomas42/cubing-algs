@@ -36,6 +36,7 @@ from cubing_algs.ergonomics import get_transition_penalty
 from cubing_algs.ergonomics import mirror_move_key
 from cubing_algs.ergonomics import normalize_algorithm_string
 from cubing_algs.ergonomics import suggest_ergonomic_improvements
+from cubing_algs.ergonomics import trigger_search_order
 from cubing_algs.ergonomics import trigger_speed_factor
 from cubing_algs.move import Move
 from cubing_algs.transform.timing import time_moves
@@ -674,6 +675,56 @@ class TestFindTriggerPatterns(unittest.TestCase):
         matches = find_trigger_patterns(alg)
         sexy_matches = [m for m in matches if m.pattern.name == 'Sexy Move']
         self.assertEqual(len(sexy_matches), 2)
+
+
+class TestTriggerSearchOrder(unittest.TestCase):
+    """Test the order in which trigger forms are searched."""
+
+    def test_every_form_listed_once(self) -> None:
+        """Each pattern gives its canonical form and every variation."""
+        for hand in HandDominance:
+            with self.subTest(hand=hand):
+                forms = trigger_search_order(hand)
+                self.assertEqual(
+                    len(forms),
+                    sum(1 + len(p.variations) for p in TRIGGER_PATTERNS),
+                )
+
+    def test_canonical_form_first(self) -> None:
+        """The canonical form of a pattern precedes its variations."""
+        forms = trigger_search_order(HandDominance.RIGHT)
+        seen: set[str] = set()
+        for form in forms:
+            if form.pattern.name not in seen:
+                self.assertIsNone(form.variation, msg=form.pattern.name)
+                seen.add(form.pattern.name)
+
+    def test_longer_patterns_first(self) -> None:
+        """Patterns are tried from the longest canonical form down."""
+        forms = trigger_search_order(HandDominance.RIGHT)
+        lengths = [
+            len(form.pattern.moves.split())
+            for form in forms if form.variation is None
+        ]
+        self.assertEqual(lengths, sorted(lengths, reverse=True))
+
+    def test_moves_are_normalized(self) -> None:
+        """Form moves are in the normalized notation the search uses."""
+        for form in trigger_search_order(HandDominance.LEFT):
+            with self.subTest(moves=form.moves):
+                self.assertEqual(
+                    ' '.join(form.moves),
+                    normalize_algorithm_string(
+                        Algorithm.parse_moves(' '.join(form.moves)),
+                    ),
+                )
+
+    def test_order_computed_once(self) -> None:
+        """The order is cached per hand dominance."""
+        self.assertIs(
+            trigger_search_order(HandDominance.RIGHT),
+            trigger_search_order(HandDominance.RIGHT),
+        )
 
 
 class TestCalculateTriggerScore(unittest.TestCase):
