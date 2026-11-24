@@ -8,10 +8,12 @@ from cubing_algs.algorithm import Algorithm
 from cubing_algs.constants import SOLVED_CO
 from cubing_algs.constants import SOLVED_CP
 from cubing_algs.constants import SOLVED_EO
+from cubing_algs.constants import SOLVED_EP
 from cubing_algs.exceptions import InvalidSlotSpecError
 from cubing_algs.exceptions import InvalidStepError
 from cubing_algs.integrity import compute_parity
 from cubing_algs.scrambler.steps import SUPPORTED_STEPS
+from cubing_algs.scrambler.steps import apply_moves
 from cubing_algs.scrambler.steps import generate_step_state
 from cubing_algs.scrambler.steps import scramble_easy_cross
 from cubing_algs.scrambler.steps import scramble_edges_oriented
@@ -161,6 +163,30 @@ class TestGenerateStepState(unittest.TestCase):
                     sum(co) % 3, 0,
                     f'{step}: Orientation constraint failed (seed {seed})',
                 )
+
+    def test_last_slot_insertion_solves_f2l(self) -> None:
+        """
+        Test that each last slot step is solved by its own insertion.
+
+        Winter Variation and Valk Last Slot insert the pair with
+        ``R U R'``, Summer Variation with ``R U' R'``.
+        """
+        insertions = {'WV': "R U R'", 'SV': "R U' R'", 'VLS': "R U R'"}
+        for step, insertion in insertions.items():
+            for seed in range(50):
+                cubies = generate_step_state(step, Random(seed))
+                cp, co, ep, eo = apply_moves(cubies, insertion)
+
+                self.assertEqual(
+                    (cp[4:], co[4:], ep[4:]),
+                    (SOLVED_CP[4:], SOLVED_CO[4:], SOLVED_EP[4:]),
+                    f'{step}: F2L not solved by {insertion} (seed {seed})',
+                )
+                if step != 'VLS':
+                    self.assertEqual(
+                        eo, SOLVED_EO,
+                        f'{step}: edges not oriented (seed {seed})',
+                    )
 
 
 class TestScrambleStep(unittest.TestCase):

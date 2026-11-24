@@ -243,17 +243,17 @@ def generate_step_state(  # noqa: C901, PLR0912, PLR0914, PLR0915
         ttll_corners = parse_piece_spec('U DFR', 'corner')
         cp, co, ep, eo = random_permutation(ttll_corners, U_EDGES, rng)
 
-    # WV - Winter Variation
+    # WV - Winter Variation, pair inserted with R U R'
     elif step == 'WV':
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        cp, co, ep, eo = apply_moves((cp, co, ep, eo), "R U R'")
+        cp, co, ep, eo = apply_moves((cp, co, ep, eo), "R U' R'")
 
-    # SV - Summer Variation
+    # SV - Summer Variation, pair inserted with R U' R'
     elif step == 'SV':
         cp, co, ep, eo = random_permutation(U_CORNERS, U_EDGES, rng)
         co = random_corner_orientation(U_CORNERS, rng)
-        cp, co, ep, eo = apply_moves((cp, co, ep, eo), "R U' R'")
+        cp, co, ep, eo = apply_moves((cp, co, ep, eo), "R U R'")
 
     # VLS, VHLS - Valk Last Slot
     elif step in {'VLS', 'VHLS'}:
