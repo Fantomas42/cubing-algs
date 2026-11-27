@@ -152,7 +152,7 @@ def parse_moves(
     This function handles different input types and performs
     cleaning and validation:
     - If raw_moves is already an Algorithm, it's returned as-is
-    - If raw_moves is a list, it's joined into a string
+    - If raw_moves is a list, its items are joined by spaces into a string
     - Strings are cleaned, split into moves, validated, and converted
       to an Algorithm
     - Supports multiline input and removes comments starting with //
@@ -195,10 +195,10 @@ def parse_moves(
     if isinstance(raw_moves, Move) and raw_moves.is_valid:
         return Algorithm([raw_moves])
 
-    if isinstance(raw_moves, str):
-        raw_moves_str = raw_moves
+    if isinstance(raw_moves, str | Move):
+        raw_moves_str = str(raw_moves)
     else:
-        raw_moves_str = ''.join(str(m) for m in raw_moves)
+        raw_moves_str = ' '.join(str(m) for m in raw_moves)
 
     raw_moves_str = clean_multiline_and_comments(raw_moves_str)
 

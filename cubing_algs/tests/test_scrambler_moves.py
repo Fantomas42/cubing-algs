@@ -706,6 +706,18 @@ class TestRandomMoves(unittest.TestCase):
             len(moves), 5,
         )
 
+    def test_random_moves_numbered_layers(self) -> None:
+        """Test random moves keep numbered layer moves as drawn."""
+        move_set = ['L', '2B']
+        moves = random_moves(4, move_set, 6)
+
+        self.assertEqual(
+            len(moves), 6,
+        )
+
+        for move in moves:
+            self.assertIn(str(move), move_set)
+
     def test_random_moves_50x50x50(self) -> None:
         """Test random moves 50x50x50."""
         moves = random_moves(50, ['F', 'R', 'U'])

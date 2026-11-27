@@ -168,6 +168,22 @@ class ParseMovesTestCase(unittest.TestCase):  # noqa: PLR0904
             expect,
         )
 
+    def test_parse_list_numbered_layers(self) -> None:
+        """Test parse list keeps a move apart from a numbered layer."""
+        expect = ['L', '2B']
+        self.assertEqual(
+            parse_moves(['L', '2B']),
+            expect,
+        )
+        self.assertEqual(
+            parse_moves((Move('L'), Move('2B'))),
+            expect,
+        )
+        self.assertEqual(
+            parse_moves(['L', '2B'], trust_input=False),
+            expect,
+        )
+
     def test_parse_tuple(self) -> None:
         """Test parse tuple of moves."""
         moves = (Move('R2'), Move('L2'))

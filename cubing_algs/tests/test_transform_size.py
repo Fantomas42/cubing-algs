@@ -51,6 +51,15 @@ class TransformCompressTestCase(unittest.TestCase):
         for m in result:
             self.assertTrue(isinstance(m, Move))
 
+    def test_compress_keeps_numbered_layer_apart(self) -> None:
+        """Test compress keeps a numbered layer move apart from the last."""
+        provide = parse_moves('L 3Dw2 3Dw2 2B')
+
+        self.assertEqual(
+            str(compress_moves(provide)),
+            'L 2B',
+        )
+
     def test_compress_moves_timed(self) -> None:
         """Test compress moves timed."""
         provide = parse_moves(
