@@ -347,7 +347,7 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
             raise InvalidMoveError(str(e)) from e
         else:
             if history:
-                self.history.extend(moves_str.split(' '))
+                self.history.extend(moves_str.split())
             return self._state
 
     def undo(self, move_number: int = 1) -> CubeFacelets:
@@ -359,8 +359,12 @@ class VCube(VCubeIntegrityChecker):  # noqa: PLR0904
 
         Returns:
             The new state of the cube after undoing the moves.
+            Zero or a negative number undoes nothing.
 
         """
+        if move_number <= 0:
+            return self._state
+
         moves = Algorithm(Move(m) for m in self.history[-move_number:])
         del self.history[-move_number:]
 
