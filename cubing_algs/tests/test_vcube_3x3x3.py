@@ -152,6 +152,39 @@ class VCubeTestCase(unittest.TestCase):  # noqa: PLR0904
         self.assertEqual(cube.state, state)
         self.assertEqual(cube.history, [])
 
+    def test_undo_zero_is_noop(self) -> None:
+        """Test that undoing zero moves leaves state and history intact."""
+        cube = VCube()
+        cube.rotate('R U F')
+        state = cube.state
+        cube.undo(0)
+
+        self.assertEqual(cube.state, state)
+        self.assertEqual(cube.history, ['R', 'U', 'F'])
+
+    def test_undo_negative_is_noop(self) -> None:
+        """Test that undoing a negative number of moves does nothing."""
+        cube = VCube()
+        cube.rotate('R U F')
+        state = cube.state
+        cube.undo(-1)
+
+        self.assertEqual(cube.state, state)
+        self.assertEqual(cube.history, ['R', 'U', 'F'])
+
+    def test_rotate_history_ignores_extra_spaces(self) -> None:
+        """Test that extra spaces in the moves add no empty move to history."""
+        cube = VCube()
+        cube.rotate(' R  U ')
+
+        self.assertEqual(cube.history, ['R', 'U'])
+
+        cube.undo()
+        cube.undo()
+
+        self.assertTrue(cube.is_solved)
+        self.assertEqual(cube.history, [])
+
     def test_rotate_history(self) -> None:
         """Test history tracking with rotate method."""
         cube = VCube()
